@@ -1413,8 +1413,18 @@
 <li><code>bans</code> : <code>ban_read</code>, <code>ban_update</code>, <code>ban_delete</code>, <code>ban_created</code></li>
 <li><code>jobs</code> : <code>job_read</code>, <code>job_run</code></li>
 <li><code>resource_id</code> est généralement le deuxième composant de chemin (ex. <code>/services/{id}</code>) ; "*" donne un accès global.</li>
-<li>Bootstrap des utilisateurs non admin et des permissions via <code>API_ACL_BOOTSTRAP_FILE</code> ou un <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> monté. Mots de passe en clair ou en hash bcrypt.</li>
+<li>Bootstrap des utilisateurs non admin et des permissions via <code>API_ACL_BOOTSTRAP_FILE</code> ou un <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> monté. Chaque utilisateur prend un <code>password</code> en clair ou un <code>password_hash</code>/<code>password_bcrypt</code> pré-haché (voir l'astuce ci-dessous).</li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Mots de passe de bootstrap pré-hachés</p>
+<p>Remplacez le <code>password</code> en clair d'un utilisateur par un <strong>hash bcrypt</strong> via <code>password_hash</code> (ou <code>password_bcrypt</code>) afin que les identifiants ne figurent jamais en clair dans le fichier. Le hash doit être un hash bcrypt valide (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) dont le coût est d'au moins <code>10</code> (<code>12</code>+ recommandé). Un hash mal formé ou trop faible est <strong>ignoré</strong> : le chargeur se rabat sur le <code>password</code> en clair de l'utilisateur s'il est présent ; sinon, un nouvel utilisateur reçoit un mot de passe aléatoire sécurisé que vous ne connaîtrez pas, et un utilisateur existant conserve le sien. Un <code>password</code> en clair fait l'objet d'un contrôle de robustesse (8 caractères ou plus avec majuscule/minuscule/chiffre/caractère spécial). La variable d'environnement <code>API_PASSWORD</code> de l'admin accepte uniquement du texte en clair — le pré-hachage s'applique à ces utilisateurs de l'ACL.</p>
+<p>Générer un hash :</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
+</code></pre></div>
+<p>Utilisez-le ensuite dans le fichier de bootstrap à la place de <code>password</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;password_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$2b$13$replace-with-the-hash-printed-above&quot;</span>
+</code></pre></div>
+</div>
 <details class="example">
 <summary>Bootstrap ACL minimal</summary>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>

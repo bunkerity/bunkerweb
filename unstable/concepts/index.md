@@ -139,12 +139,12 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 ### Database compatibility matrix
 
-| Integration        | PostgreSQL                                   | MariaDB             | MySQL              | SQLite      |
-| :----------------- | :------------------------------------------- | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`)   | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Linux packages** | See notes below                              | See notes below     | See notes below    | ✅ Supported |
+| Integration        | PostgreSQL                                | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :---------------------------------------- | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below                           | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
     - **PostgreSQL**: Alpine packages now ship with the `v18` client, so `v18` and earlier are supported out of the box; the all-in-one image still embeds `v17`, so `v18` is unsupported there.

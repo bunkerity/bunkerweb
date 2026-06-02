@@ -501,16 +501,16 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
 
     2. **Select Manager** at the installation-type prompt (use ↑/↓ then Enter), then follow the prompts:
 
-        | Prompt                     | Action                                                                                                  |
-        | :------------------------- | :------------------------------------------------------------------------------------------------------ |
-        | **BunkerWeb instances**    | Optionally enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`), or leave empty and add workers later. |
-        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow internal API access.        |
-        | **DNS resolvers**          | Choose **No** to keep the defaults, or provide custom ones.                                              |
-        | **HTTPS for internal API** | **Recommended:** choose **Yes** to auto-generate certificates for secure manager-worker communication. |
-        | **Web UI service**         | Choose **Yes** to enable the web interface (highly recommended).                                        |
+        | Prompt                     | Action                                                                                                                                                           |
+        | :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+        | **BunkerWeb instances**    | Optionally enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`), or leave empty and add workers later.                           |
+        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow internal API access.                                                                 |
+        | **DNS resolvers**          | Choose **No** to keep the defaults, or provide custom ones.                                                                                                      |
+        | **HTTPS for internal API** | **Recommended:** choose **Yes** to auto-generate certificates for secure manager-worker communication.                                                           |
+        | **Web UI service**         | Choose **Yes** to enable the web interface (highly recommended).                                                                                                 |
         | **Web UI admin user**      | Create an initial admin user when the wizard is disabled. Manager mode disables the wizard, so this is recommended unless you configure credentials another way. |
-        | **Web UI HTTPS**           | Optionally generate a self-signed certificate for the Manager UI listener.                              |
-        | **API service**            | Choose **No** unless you need the public REST API for external tools.                                   |
+        | **Web UI HTTPS**           | Optionally generate a self-signed certificate for the Manager UI listener.                                                                                       |
+        | **API service**            | Choose **No** unless you need the public REST API for external tools.                                                                                            |
 
         !!! note "Prompt UI"
             The installer uses the [gum](https://github.com/charmbracelet/gum) TUI. On first interactive run it downloads the official `gum` binary from the GitHub release (SHA256-pinned), runs it from a tempdir, and removes the tempdir on exit — no system package is installed. If gum cannot be fetched, it uses an existing `whiptail`; if neither is available, it falls back to plain text prompts. Use arrow keys + Enter to answer prompts. Pass `--no-tui` if you prefer plain text prompts.
@@ -1448,6 +1448,22 @@ If you encounter errors like this, especially on the scheduler:
 ```
 
 You will need to increase the `max_allowed_packet` on your database server.
+
+The recommended value is `67108864` bytes (64 MiB). When the database runs in a container, set it through the `command:` directive:
+
+```yaml
+bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    ...
+```
+
+For a locally installed or external database, add the setting to the server configuration instead (for example, a dedicated file under `/etc/mysql/mariadb.conf.d/` or `/etc/my.cnf.d/`):
+
+```ini
+[mysqld]
+max_allowed_packet = 64M
+```
 
 ## Persistence of bans and reports {#persistence-of-bans-and-reports}
 
@@ -3251,7 +3267,7 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3260,7 +3276,7 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3502,7 +3518,7 @@ This command will create a backup of your database and store it in the backup di
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3511,7 +3527,7 @@ This command will create a backup of your database and store it in the backup di
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 

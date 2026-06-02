@@ -176,6 +176,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 ## Authentication and sessions
 
 - Admin account: create via setup wizard or `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwords must include lowercase, uppercase, digit, and special chars. `OVERRIDE_ADMIN_CREDS=yes` forces reseeding even if an account exists.
+- Password length limit: bcrypt only uses the first **72 bytes** of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, `ADMIN_PASSWORD` / `API_PASSWORD`). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).
 - Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database.
 - Secrets: `FLASK_SECRET` is stored at `/var/lib/bunkerweb/.flask_secret`; Biscuit keys live next to it and can be provided via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 
@@ -186,6 +187,18 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
+
+!!! tip "Pre-hashed admin password"
+    `ADMIN_PASSWORD` accepts a **bcrypt hash** (`$2a$`/`$2b$`/`$2y$`) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password), but a cost factor below `10` is **rejected**; `10`–`11` logs a warning (`12`+ recommended). Env create and `OVERRIDE_ADMIN_CREDS` only; the wizard and profile page still need plaintext.
+
+    Generate a hash:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+!!! warning "A wrong hash locks you out"
+    Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different `ADMIN_PASSWORD` plus `OVERRIDE_ADMIN_CREDS=yes`.
 
 ## Configuration sources and precedence
 
@@ -217,19 +230,19 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 ### Auth, sessions, and cookies
 
-| Setting                                     | Description                                                              | Accepted values          | Default                   |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------ | ------------------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced)                            | Strings                  | unset                     |
-| `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                | `yes` or `no`            | `no`                      |
-| `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`) | Hex/base64/opaque string | auto-generated            |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)           | Strings / JSON           | auto-generated if missing |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Optional Biscuit keys (hex) used to mint UI tokens                       | Hex strings              | auto-generated & stored   |
-| `SESSION_LIFETIME_HOURS`                    | Idling session lifetime (sliding TTL, refreshed on every request)        | Number (hours)           | `12`                      |
-| `SESSION_ABSOLUTE_HOURS`                    | Absolute session cap regardless of activity (logout after this many hours since login) | Number (hours)  | `168`                     |
-| `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                     | Number (hours)           | `0`                       |
-| `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                      | `yes` or `no`            | `no`                      |
-| `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)        | `yes` or `no`            | `yes`                     |
-| `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                        | Integer                  | `1`                       |
+| Setting                                     | Description                                                                                              | Accepted values          | Default                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced; `ADMIN_PASSWORD` also accepts a bcrypt hash, stored as-is) | Strings / bcrypt hash    | unset                     |
+| `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                                                | `yes` or `no`            | `no`                      |
+| `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`)                                 | Hex/base64/opaque string | auto-generated            |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)                                           | Strings / JSON           | auto-generated if missing |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Optional Biscuit keys (hex) used to mint UI tokens                                                       | Hex strings              | auto-generated & stored   |
+| `SESSION_LIFETIME_HOURS`                    | Idling session lifetime (sliding TTL, refreshed on every request)                                        | Number (hours)           | `12`                      |
+| `SESSION_ABSOLUTE_HOURS`                    | Absolute session cap regardless of activity (logout after this many hours since login)                   | Number (hours)           | `168`                     |
+| `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                                                     | Number (hours)           | `0`                       |
+| `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                                                      | `yes` or `no`            | `no`                      |
+| `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
+| `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
 
 ### Logging
 

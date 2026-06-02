@@ -272,12 +272,12 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 ### Database compatibility matrix
 
-| Integration        | PostgreSQL                                   | MariaDB             | MySQL              | SQLite      |
-| :----------------- | :------------------------------------------- | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`)   | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Linux packages** | See notes below                              | See notes below     | See notes below    | ✅ Supported |
+| Integration        | PostgreSQL                                | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :---------------------------------------- | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below                           | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
     - **PostgreSQL**: Alpine packages now ship with the `v18` client, so `v18` and earlier are supported out of the box; the all-in-one image still embeds `v17`, so `v18` is unsupported there.
@@ -3006,14 +3006,15 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 
 ##### Runtime & safety
 
-| Setting                         | Description                                                           | Accepted values                                | Default                                |
-| ------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
-| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                               | Integer seconds                                | `30`                                   |
-| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                            | Integer seconds                                | `5`                                    |
-| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                     | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config               | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)             | `yes` or `no`                                  | `no`                                   |
-| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
+| Setting                         | Description                                                                                                                                                                                                                                                       | Accepted values                                | Default                                |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                           | Integer seconds                                | `30`                                   |
+| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                        | Integer seconds                                | `5`                                    |
+| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
+| `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
+| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps                                                                                                                                                                                             | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database
 
@@ -3197,8 +3198,9 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 42, 43 and 44
-- Red Hat Enterprise Linux (RHEL) 8, 9 and 10
+- Ubuntu 26.04 "Resolute Raccoon"
+- Fedora 43 and 44
+- Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
 ### Easy installation script
 
@@ -3289,24 +3291,24 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 **General Options:**
 
-| Option                  | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `testing`).      |
-| `-w, --enable-wizard`   | Enables the setup wizard.                                             |
-| `-n, --no-wizard`       | Disables the setup wizard.                                            |
-| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
-| `--tui`                 | Require a TUI (downloaded gum or existing whiptail) and abort if no TUI tier can render. |
-| `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`. |
-| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
+| Option                  | Description                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `testing`).                                           |
+| `-w, --enable-wizard`   | Enables the setup wizard.                                                                              |
+| `-n, --no-wizard`       | Disables the setup wizard.                                                                             |
+| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.                                    |
+| `--tui`                 | Require a TUI (downloaded gum or existing whiptail) and abort if no TUI tier can render.               |
+| `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`.        |
+| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version.                                  |
 | `--force-type-change`   | Allow `--<type>` to differ from the detected install type on upgrade (intentional HA migrations only). |
-| `-q, --quiet`           | Silent installation (suppress output; implies `--yes`).               |
-| `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).      |
-| `--no-api`              | Explicitly disables the API service.                                  |
-| `--server-ip IP`        | IP printed in post-install URLs. Overrides auto-detection and can also be set with `SERVER_IP_INPUT`. |
-| `--epel`                | Install `epel-release` on RHEL-family distributions if it is missing. |
-| `--no-epel`             | Do not install `epel-release` on RHEL-family distributions.           |
-| `-h, --help`            | Displays the help message with all available options.                 |
-| `--dry-run`             | Show what would be installed without doing it.                        |
+| `-q, --quiet`           | Silent installation (suppress output; implies `--yes`).                                                |
+| `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).                                       |
+| `--no-api`              | Explicitly disables the API service.                                                                   |
+| `--server-ip IP`        | IP printed in post-install URLs. Overrides auto-detection and can also be set with `SERVER_IP_INPUT`.  |
+| `--epel`                | Install `epel-release` on RHEL-family distributions if it is missing.                                  |
+| `--no-epel`             | Do not install `epel-release` on RHEL-family distributions.                                            |
+| `-h, --help`            | Displays the help message with all available options.                                                  |
+| `--dry-run`             | Show what would be installed without doing it.                                                         |
 
 **Installation Types:**
 
@@ -3321,67 +3323,67 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 **Security Integrations:**
 
-| Option              | Description                                                         |
-| ------------------- | ------------------------------------------------------------------- |
-| `--crowdsec`        | Install and configure CrowdSec security engine.                     |
-| `--no-crowdsec`     | Skip CrowdSec installation.                                         |
-| `--crowdsec-appsec` | Install CrowdSec with AppSec component (includes WAF capabilities). |
-| `--redis`           | Install and configure Redis locally.                                |
-| `--no-redis`        | Skip Redis integration.                                             |
-| `--redis-flavor FLAVOR` | Local install flavor: `redis` (default) or `valkey`.             |
+| Option                  | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| `--crowdsec`            | Install and configure CrowdSec security engine.                     |
+| `--no-crowdsec`         | Skip CrowdSec installation.                                         |
+| `--crowdsec-appsec`     | Install CrowdSec with AppSec component (includes WAF capabilities). |
+| `--redis`               | Install and configure Redis locally.                                |
+| `--no-redis`            | Skip Redis integration.                                             |
+| `--redis-flavor FLAVOR` | Local install flavor: `redis` (default) or `valkey`.                |
 
 **Advanced Options:**
 
-| Option                      | Description                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | Space-separated list of BunkerWeb instances (optional for manager/scheduler modes; you can add workers later). |
-| `--manager-ip IPs`          | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).   |
-| `--dns-resolvers "IP1 IP2"` | Custom DNS resolver IPs (for full, manager, or worker installations).               |
-| `--api-https`               | Enable HTTPS for internal API communication (default: HTTP only).                   |
-| `--backup-dir PATH`         | Directory to store automatic backup before upgrade.                                 |
-| `--no-auto-backup`          | Skip automatic backup (you MUST have done it manually).                             |
-| `--redis-host HOST`         | Redis host for an existing Redis/Valkey server.                                     |
-| `--redis-port PORT`         | Redis port for an existing Redis/Valkey server.                                     |
-| `--redis-database DB`       | Redis database number.                                                              |
-| `--redis-username USER`     | Redis username (Redis 6+).                                                          |
-| `--redis-password PASS`     | Redis password.                                                                     |
-| `--redis-bind IP`           | Redis/Valkey bind address for a local Manager install (default prompt: `0.0.0.0`).  |
-| `--redis-no-password`       | Skip the auto-generated `requirepass` when binding Redis/Valkey beyond loopback.    |
-| `--redis-maxmemory MB`      | Memory cap in MB; `0` or `unlimited` keeps the distribution default.                |
-| `--redis-maxmemory-policy POLICY` | Eviction policy for local Redis/Valkey (default: `volatile-lru`).             |
-| `--redis-ssl`               | Enable SSL/TLS for Redis connection.                                                |
-| `--redis-no-ssl`            | Disable SSL/TLS for Redis connection.                                               |
-| `--redis-ssl-verify`        | Verify Redis SSL certificate.                                                       |
-| `--redis-no-ssl-verify`     | Do not verify Redis SSL certificate.                                                |
+| Option                            | Description                                                                                                    |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"`           | Space-separated list of BunkerWeb instances (optional for manager/scheduler modes; you can add workers later). |
+| `--manager-ip IPs`                | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).                              |
+| `--dns-resolvers "IP1 IP2"`       | Custom DNS resolver IPs (for full, manager, or worker installations).                                          |
+| `--api-https`                     | Enable HTTPS for internal API communication (default: HTTP only).                                              |
+| `--backup-dir PATH`               | Directory to store automatic backup before upgrade.                                                            |
+| `--no-auto-backup`                | Skip automatic backup (you MUST have done it manually).                                                        |
+| `--redis-host HOST`               | Redis host for an existing Redis/Valkey server.                                                                |
+| `--redis-port PORT`               | Redis port for an existing Redis/Valkey server.                                                                |
+| `--redis-database DB`             | Redis database number.                                                                                         |
+| `--redis-username USER`           | Redis username (Redis 6+).                                                                                     |
+| `--redis-password PASS`           | Redis password.                                                                                                |
+| `--redis-bind IP`                 | Redis/Valkey bind address for a local Manager install (default prompt: `0.0.0.0`).                             |
+| `--redis-no-password`             | Skip the auto-generated `requirepass` when binding Redis/Valkey beyond loopback.                               |
+| `--redis-maxmemory MB`            | Memory cap in MB; `0` or `unlimited` keeps the distribution default.                                           |
+| `--redis-maxmemory-policy POLICY` | Eviction policy for local Redis/Valkey (default: `volatile-lru`).                                              |
+| `--redis-ssl`                     | Enable SSL/TLS for Redis connection.                                                                           |
+| `--redis-no-ssl`                  | Disable SSL/TLS for Redis connection.                                                                          |
+| `--redis-ssl-verify`              | Verify Redis SSL certificate.                                                                                  |
+| `--redis-no-ssl-verify`           | Do not verify Redis SSL certificate.                                                                           |
 
 **Database Options (`--full` / `--manager` only):**
 
-| Option                  | Description                                                                                                       |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `--database ENGINE`     | Strategy: `mariadb` or `postgresql` (auto-install locally), `external` (use an existing remote DB), `none` (SQLite). |
-| `--db-engine ENGINE`    | External-DB engine: `mariadb`, `mysql`, or `postgresql`. Implies `--database external` when set on its own.       |
-| `--db-host HOST`        | External DB host (FQDN or IP).                                                                                    |
-| `--db-port PORT`        | External DB TCP port (defaults: 3306 for `mariadb`/`mysql`, 5432 for `postgresql`).                               |
-| `--db-name NAME`        | Database name (default: `bw_db`).                                                                                 |
-| `--db-user USER`        | Database user (default: `bunkerweb`).                                                                             |
-| `--db-password PASS`    | Database password — required for `--database external`. Rules: 8+ chars, no quotes/backslash/backtick.            |
-| `--db-ssl`              | Use SSL/TLS for the external DB connection.                                                                       |
-| `--db-no-ssl`           | Do not use SSL/TLS for the external DB connection.                                                                |
-| `--db-ssl-verify`       | Verify the external DB server certificate.                                                                        |
-| `--db-no-ssl-verify`    | Use SSL but skip certificate verification.                                                                        |
-| `--db-skip-probe`       | Do not probe external DB connectivity from this host. Useful when the engine client is not installed locally, or when the DB is only reachable from the scheduler's network segment. |
+| Option               | Description                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--database ENGINE`  | Strategy: `mariadb` or `postgresql` (auto-install locally), `external` (use an existing remote DB), `none` (SQLite).                                                                 |
+| `--db-engine ENGINE` | External-DB engine: `mariadb`, `mysql`, or `postgresql`. Implies `--database external` when set on its own.                                                                          |
+| `--db-host HOST`     | External DB host (FQDN or IP).                                                                                                                                                       |
+| `--db-port PORT`     | External DB TCP port (defaults: 3306 for `mariadb`/`mysql`, 5432 for `postgresql`).                                                                                                  |
+| `--db-name NAME`     | Database name (default: `bw_db`).                                                                                                                                                    |
+| `--db-user USER`     | Database user (default: `bunkerweb`).                                                                                                                                                |
+| `--db-password PASS` | Database password — required for `--database external`. Rules: 8+ chars, no quotes/backslash/backtick.                                                                               |
+| `--db-ssl`           | Use SSL/TLS for the external DB connection.                                                                                                                                          |
+| `--db-no-ssl`        | Do not use SSL/TLS for the external DB connection.                                                                                                                                   |
+| `--db-ssl-verify`    | Verify the external DB server certificate.                                                                                                                                           |
+| `--db-no-ssl-verify` | Use SSL but skip certificate verification.                                                                                                                                           |
+| `--db-skip-probe`    | Do not probe external DB connectivity from this host. Useful when the engine client is not installed locally, or when the DB is only reachable from the scheduler's network segment. |
 
 **Web UI Admin User (`--full` / `--manager` / `--ui-only` only):**
 
 When no UI admin flag is provided, the interactive installer offers a Web UI admin-user prompt for UI-bearing install types. The default answer flips based on wizard state: **Yes** when the wizard is disabled (manager mode always; other modes when `--no-wizard` is passed) because otherwise the UI has no initial login. **No** when the wizard is enabled because the wizard collects the admin user on first boot. Operators can still opt in to pre-create the admin even with the wizard enabled, which skips the wizard's admin step.
 
-| Option                      | Description                                                                                              |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `--ui-admin-user NAME`      | Pre-create the first Web UI admin user with this name (skips the setup wizard for the admin step).       |
-| `--ui-admin-password PASS`  | Password for the admin user. Implies admin creation; the username defaults to `admin` if omitted. Auto-generated when omitted. Rules: 8+ chars, lower/upper/digit/special. |
-| `--no-ui-admin`             | Skip the admin-user creation prompt entirely. If the wizard is disabled, the UI remains without an initial login until credentials are configured another way. |
-| `--ui-https-selfsigned`     | (`--manager` only) Generate a self-signed cert and enable HTTPS on the Web UI listener.                  |
-| `--no-ui-https-selfsigned`  | (`--manager` only) Disable manager UI self-signed HTTPS.                                                 |
+| Option                     | Description                                                                                                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--ui-admin-user NAME`     | Pre-create the first Web UI admin user with this name (skips the setup wizard for the admin step).                                                                         |
+| `--ui-admin-password PASS` | Password for the admin user. Implies admin creation; the username defaults to `admin` if omitted. Auto-generated when omitted. Rules: 8+ chars, lower/upper/digit/special. |
+| `--no-ui-admin`            | Skip the admin-user creation prompt entirely. If the wizard is disabled, the UI remains without an initial login until credentials are configured another way.             |
+| `--ui-https-selfsigned`    | (`--manager` only) Generate a self-signed cert and enable HTTPS on the Web UI listener.                                                                                    |
+| `--no-ui-https-selfsigned` | (`--manager` only) Disable manager UI self-signed HTTPS.                                                                                                                   |
 
 !!! warning "External database notes"
 
@@ -3670,10 +3672,10 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora already provides NGINX 1.30.1 that we support
+    Fedora already provides NGINX 1.30.2 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.1
+    sudo dnf install -y --allowerasing nginx-1.30.2
     ```
 
     !!! example "Disable the setup wizard"
@@ -6723,6 +6725,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
         - Use HTTPS for `ANTIBOT_CAPJS_FRONTEND_URL` in production. The browser worker requires `crypto.subtle` in a secure context, and HTTPS prevents MITM changes to the widget.
         - Configure CORS on the Cap.js sitekey to allow the protected origin.
         - Set both `ANTIBOT_CAPJS_FRONTEND_URL` and `ANTIBOT_CAPJS_BACKEND_URL` to origins only: scheme, host, and optional port, with no path.
+        - Use the Cap.js widget **0.1.48 or later**. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed `srcdoc` iframe's inline script does not propagate the nonce. If you self-host `tiago2/cap`, pin a recent tag (e.g. `tiago2/cap:3.1.2` or newer) or set `WIDGET_VERSION` to `0.1.48` or later.
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
@@ -9377,7 +9380,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
-| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                             | [Documentation](https://github.com/TheophileDiot/certbot-plugin-gandi)                                |
+| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                             | [Documentation](https://github.com/bunkerity/certbot-plugin-gandi)                                |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (default: `600`)                                                                                                                                                                                                                                                   | [Documentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -9628,6 +9631,38 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
     LIMIT_CONN_MAX_HTTP3: "100"
     LIMIT_CONN_MAX_STREAM: "20"
     ```
+
+## Load Balancer  (PRO)
+
+<p align='center'></p>
+
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/latest/advanced/#load-balancer-pro) documentation.
+
+STREAM support :x:
+
+Provides load balancing feature to group of upstreams with optional healthchecks.
+
+| Setting                                   | Default       | Context | Multiple | Description                                                        |
+| ----------------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------ |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`         | global  | no       | Shared dict size (datastore for all healthchecks).                 |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | yes      | List of servers/IPs in the server group.                           |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | yes      | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | yes      | Sticky session method (ip or cookie).                              |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | yes      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | yes      | Number of keepalive connections to cache per worker.               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | yes      | Keepalive timeout for upstream connections.                        |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | yes      | Keepalive time for upstream connections.                           |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | yes      | The healthcheck URL.                                               |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`        | global  | yes      | Healthcheck interval in milliseconds.                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`        | global  | yes      | Healthcheck timeout in milliseconds.                               |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`           | global  | yes      | Number of failed healthchecks before marking the server as down.   |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`           | global  | yes      | Number of successful healthchecks before marking the server as up. |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`         | global  | yes      | HTTP status considered valid in healthchecks.                      |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`          | global  | yes      | Maximum number of concurrent healthchecks.                         |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global  | yes      | Type of healthcheck (http or https).                               |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | yes      | Verify SSL certificate in healthchecks.                            |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | yes      | Host header for healthchecks (useful for HTTPS).                   |
 
 ## Metrics
 
@@ -12768,16 +12803,16 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
 
     2. **Select Manager** at the installation-type prompt (use ↑/↓ then Enter), then follow the prompts:
 
-        | Prompt                     | Action                                                                                                  |
-        | :------------------------- | :------------------------------------------------------------------------------------------------------ |
-        | **BunkerWeb instances**    | Optionally enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`), or leave empty and add workers later. |
-        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow internal API access.        |
-        | **DNS resolvers**          | Choose **No** to keep the defaults, or provide custom ones.                                              |
-        | **HTTPS for internal API** | **Recommended:** choose **Yes** to auto-generate certificates for secure manager-worker communication. |
-        | **Web UI service**         | Choose **Yes** to enable the web interface (highly recommended).                                        |
+        | Prompt                     | Action                                                                                                                                                           |
+        | :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+        | **BunkerWeb instances**    | Optionally enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`), or leave empty and add workers later.                           |
+        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow internal API access.                                                                 |
+        | **DNS resolvers**          | Choose **No** to keep the defaults, or provide custom ones.                                                                                                      |
+        | **HTTPS for internal API** | **Recommended:** choose **Yes** to auto-generate certificates for secure manager-worker communication.                                                           |
+        | **Web UI service**         | Choose **Yes** to enable the web interface (highly recommended).                                                                                                 |
         | **Web UI admin user**      | Create an initial admin user when the wizard is disabled. Manager mode disables the wizard, so this is recommended unless you configure credentials another way. |
-        | **Web UI HTTPS**           | Optionally generate a self-signed certificate for the Manager UI listener.                              |
-        | **API service**            | Choose **No** unless you need the public REST API for external tools.                                   |
+        | **Web UI HTTPS**           | Optionally generate a self-signed certificate for the Manager UI listener.                                                                                       |
+        | **API service**            | Choose **No** unless you need the public REST API for external tools.                                                                                            |
 
         !!! note "Prompt UI"
             The installer uses the [gum](https://github.com/charmbracelet/gum) TUI. On first interactive run it downloads the official `gum` binary from the GitHub release (SHA256-pinned), runs it from a tempdir, and removes the tempdir on exit — no system package is installed. If gum cannot be fetched, it uses an existing `whiptail`; if neither is available, it falls back to plain text prompts. Use arrow keys + Enter to answer prompts. Pass `--no-tui` if you prefer plain text prompts.
@@ -13715,6 +13750,22 @@ If you encounter errors like this, especially on the scheduler:
 ```
 
 You will need to increase the `max_allowed_packet` on your database server.
+
+The recommended value is `67108864` bytes (64 MiB). When the database runs in a container, set it through the `command:` directive:
+
+```yaml
+bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    ...
+```
+
+For a locally installed or external database, add the setting to the server configuration instead (for example, a dedicated file under `/etc/mysql/mariadb.conf.d/` or `/etc/my.cnf.d/`):
+
+```ini
+[mysqld]
+max_allowed_packet = 64M
+```
 
 ## Persistence of bans and reports {#persistence-of-bans-and-reports}
 
@@ -15518,7 +15569,7 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -15527,7 +15578,7 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -15769,7 +15820,7 @@ This command will create a backup of your database and store it in the backup di
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -15778,7 +15829,7 @@ This command will create a backup of your database and store it in the backup di
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -17567,6 +17618,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 ## Authentication and sessions
 
 - Admin account: create via setup wizard or `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwords must include lowercase, uppercase, digit, and special chars. `OVERRIDE_ADMIN_CREDS=yes` forces reseeding even if an account exists.
+- Password length limit: bcrypt only uses the first **72 bytes** of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, `ADMIN_PASSWORD` / `API_PASSWORD`). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).
 - Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database.
 - Secrets: `FLASK_SECRET` is stored at `/var/lib/bunkerweb/.flask_secret`; Biscuit keys live next to it and can be provided via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 
@@ -17577,6 +17629,18 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
+
+!!! tip "Pre-hashed admin password"
+    `ADMIN_PASSWORD` accepts a **bcrypt hash** (`$2a$`/`$2b$`/`$2y$`) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password), but a cost factor below `10` is **rejected**; `10`–`11` logs a warning (`12`+ recommended). Env create and `OVERRIDE_ADMIN_CREDS` only; the wizard and profile page still need plaintext.
+
+    Generate a hash:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+!!! warning "A wrong hash locks you out"
+    Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different `ADMIN_PASSWORD` plus `OVERRIDE_ADMIN_CREDS=yes`.
 
 ## Configuration sources and precedence
 
@@ -17608,19 +17672,19 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 ### Auth, sessions, and cookies
 
-| Setting                                     | Description                                                              | Accepted values          | Default                   |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------ | ------------------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced)                            | Strings                  | unset                     |
-| `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                | `yes` or `no`            | `no`                      |
-| `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`) | Hex/base64/opaque string | auto-generated            |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)           | Strings / JSON           | auto-generated if missing |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Optional Biscuit keys (hex) used to mint UI tokens                       | Hex strings              | auto-generated & stored   |
-| `SESSION_LIFETIME_HOURS`                    | Idling session lifetime (sliding TTL, refreshed on every request)        | Number (hours)           | `12`                      |
-| `SESSION_ABSOLUTE_HOURS`                    | Absolute session cap regardless of activity (logout after this many hours since login) | Number (hours)  | `168`                     |
-| `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                     | Number (hours)           | `0`                       |
-| `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                      | `yes` or `no`            | `no`                      |
-| `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)        | `yes` or `no`            | `yes`                     |
-| `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                        | Integer                  | `1`                       |
+| Setting                                     | Description                                                                                              | Accepted values          | Default                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced; `ADMIN_PASSWORD` also accepts a bcrypt hash, stored as-is) | Strings / bcrypt hash    | unset                     |
+| `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                                                | `yes` or `no`            | `no`                      |
+| `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`)                                 | Hex/base64/opaque string | auto-generated            |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)                                           | Strings / JSON           | auto-generated if missing |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Optional Biscuit keys (hex) used to mint UI tokens                                                       | Hex strings              | auto-generated & stored   |
+| `SESSION_LIFETIME_HOURS`                    | Idling session lifetime (sliding TTL, refreshed on every request)                                        | Number (hours)           | `12`                      |
+| `SESSION_ABSOLUTE_HOURS`                    | Absolute session cap regardless of activity (logout after this many hours since login)                   | Number (hours)           | `168`                     |
+| `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                                                     | Number (hours)           | `0`                       |
+| `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                                                      | `yes` or `no`            | `no`                      |
+| `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
+| `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
 
 ### Logging
 
@@ -17952,7 +18016,22 @@ Choose the flavor that matches your environment.
   - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
   - `jobs`: `job_read`, `job_run`
 - `resource_id` is usually the second path component (e.g. `/services/{id}`); `"*"` grants global access.
-- Bootstrap non-admin users and grants with `API_ACL_BOOTSTRAP_FILE` or a mounted `/var/lib/bunkerweb/api_acl_bootstrap.json`. Passwords may be plaintext or bcrypt hashes.
+- Bootstrap non-admin users and grants with `API_ACL_BOOTSTRAP_FILE` or a mounted `/var/lib/bunkerweb/api_acl_bootstrap.json`. Each user takes a plaintext `password` or a pre-hashed `password_hash`/`password_bcrypt` (see tip below).
+
+!!! tip "Pre-hashed bootstrap passwords"
+    Replace a user's plaintext `password` with a **bcrypt hash** via `password_hash` (or `password_bcrypt`) so credentials never sit in the file as plaintext. The hash must be a valid bcrypt hash (`$2a$`/`$2b$`/`$2y$`) whose cost factor is at least `10` (`12`+ recommended). A malformed or too-weak hash is **ignored**: the loader falls back to the user's plaintext `password` if present; otherwise a new user gets a secure random password you won't know, and an existing user keeps its current one. A plaintext `password` is strength-checked (8+ chars with upper/lower/digit/special). The admin `API_PASSWORD` env var accepts plaintext only — pre-hashing applies to these ACL users.
+
+    Generate a hash:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+    Then use it in the bootstrap file instead of `password`:
+
+    ```json
+    "password_hash": "$2b$13$replace-with-the-hash-printed-above"
+    ```
 
 ??? example "Minimal ACL bootstrap"
     ```json
@@ -18169,12 +18248,12 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-|   **ClamAV**   |   1.10  | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-|   **Coraza**   |   1.10  | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                              |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **Discord**   |   1.10  | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Slack**    |   1.10  | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal** |   1.10  | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |   1.10  | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
+|   **ClamAV**   |  1.10   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+|   **Coraza**   |  1.10   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                              |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
+|  **Discord**   |  1.10   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|   **Slack**    |  1.10   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
+| **VirusTotal** |  1.10   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+|  **WebHook**   |  1.10   | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
 ## How to use a plugin
 
@@ -19037,297 +19116,384 @@ In this structure, `user_auth.py` contains the `user_auth` blueprint, and `user_
 
 ### Procedure
 
-#### Docker
-
-1. **Backup the database**:
-
-    - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
-    - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
-
-    ```bash
-    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
-    ```
-
-    ```bash
-    docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
-    ```
-
-2. **Upgrade BunkerWeb**:
-    - Upgrade BunkerWeb to the latest version.
-        1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
-            ```yaml
-            services:
-                bunkerweb:
-                    image: bunkerity/bunkerweb:testing
-                    ...
-                bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:testing
-                    ...
-                bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:testing
-                    ...
-                bw-ui:
-                    image: bunkerity/bunkerweb-ui:testing
-                    ...
-            ```
-
-        2. **Restart the containers**: Restart the containers to apply the changes.
-            ```bash
-            docker compose down
-            docker compose up -d
-            ```
-
-3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
-
-    ```bash
-    docker compose logs <scheduler_container>
-    ```
-
-4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
-
-#### Linux
-
-=== "Easy upgrade using the install script"
-
-    * **Quick start**:
-
-        To get started, download the installation script and its checksum, then verify the script's integrity before running it.
-
-        ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
-        # Download the script and its checksum
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
-
-        # Verify the checksum
-        sha256sum -c install-bunkerweb.sh.sha256
-
-        # If the check is successful, run the script
-        chmod +x install-bunkerweb.sh
-        sudo ./install-bunkerweb.sh
-        ```
-
-        !!! danger "Security Notice"
-            **Always verify the integrity of the installation script before running it.**
-
-            Download the checksum file and use a tool like `sha256sum` to confirm the script has not been altered or tampered with.
-
-            If the checksum verification fails, **do not execute the script**—it may be unsafe.
-
-    !!! tip "Interactive upgrade UI"
-        The upgrade flow uses the same TUI as fresh installs: arrow-key inline prompts via [gum](https://github.com/charmbracelet/gum), with `whiptail` boxed-dialog and plain-text fallbacks if gum cannot be obtained. The `gum` binary is fetched from the official [GitHub release](https://github.com/charmbracelet/gum/releases) (SHA256-pinned, cosign-verified when cosign is installed) and runs from a tempdir that is removed on exit — no system package is installed and no apt/dnf source is added. Pass `--no-tui` (or set `BW_INSTALL_TUI=no`) to skip every TUI tier, or `--tui` to require a working TUI. For fully unattended upgrades pass `-y` / `--yes` with the relevant flags — piped invocations (`curl … | bash`) exit with a clear error instead of silently accepting every default. **Air-gapped upgrades**: combine `--no-tui --yes` so no network call is made for the TUI layer.
-
-    * **How it works**:
-
-        The same multi‑purpose install script used for fresh installs can also perform an in‑place upgrade. When it detects an existing installation and a different target version, it switches to upgrade mode and applies the following workflow:
-
-        1. Detection & validation
-            * Detects OS / version and confirms support matrix.
-            * Reads currently installed BunkerWeb version from `/usr/share/bunkerweb/VERSION`.
-        2. Upgrade scenario decision
-            * If the requested version equals the installed one it aborts (unless you explicitly re-run for status).
-            * If versions differ it flags an upgrade.
-        3. (Optional) Automatic pre‑upgrade backup
-            * If `bwcli` and the scheduler are available and auto‑backup is enabled, it creates a backup via the built‑in backup plugin.
-            * Destination: either the directory you supplied with `--backup-dir` or a generated path like `/var/tmp/bunkerweb-backup-YYYYmmdd-HHMMSS`.
-            * You can disable this with `--no-auto-backup` (manual backup then becomes your responsibility).
-        4. Service quiescing
-            * Stops `bunkerweb`, `bunkerweb-ui`, and `bunkerweb-scheduler` to ensure a consistent upgrade (matches the manual procedure recommendations).
-        5. Package locks removal
-            * Temporarily removes `apt-mark hold` / `dnf versionlock` on `bunkerweb` and `nginx` so the targeted version can be installed.
-        6. Upgrade execution
-            * Installs only the new BunkerWeb package version (NGINX is not reinstalled in upgrade mode unless missing—this avoids touching a correctly pinned NGINX).
-            * Re‑applies holds/versionlocks to freeze the upgraded versions.
-        7. Finalization & status
-            * Displays systemd status for core services and next steps.
-            * Leaves your configuration and database intact—only the application code and managed files are updated.
-
-        Key behaviors / notes:
-
-        * The script does NOT modify your `/etc/bunkerweb/variables.env` or database content.
-        * If automatic backup failed (or was disabled) you can still do a manual restore using the Rollback section below.
-        * Upgrade mode intentionally avoids reinstalling or downgrading NGINX outside the supported pinned version already present.
-        * Logs for troubleshooting remain in `/var/log/bunkerweb/`.
-
-    * **Mode-aware behavior**:
-
-        - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the internal API listener to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
-        - Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via `--api` / `--no-api`.
-        - CrowdSec is prompted interactively for Full Stack upgrades. The CLI flags remain valid for Full Stack and Manager upgrades, and the script continues to reject CrowdSec for Worker, Scheduler-only, UI-only, and API-only modes.
-
-        Rollback summary:
-
-        * Use the generated backup directory (or your manual backup) + the steps in the Rollback section to restore DB, then reinstall the previous image / package version and re‑lock packages.
-
-    *  **Command-Line Options**:
-
-        You can drive unattended upgrades with the same flags used for installation. The most relevant for upgrades:
-
-        | Option                  | Purpose                                                                                           |
-        | ----------------------- | ------------------------------------------------------------------------------------------------- |
-        | `-v, --version <X.Y.Z>` | Target BunkerWeb version to upgrade to.                                                           |
-        | `-y, --yes`             | Non‑interactive (assumes upgrade confirmation and enables auto backup unless `--no-auto-backup`). |
-        | `--tui`                 | Force a TUI (downloaded gum or existing whiptail). Aborts if no TUI tier can render.              |
-        | `--no-tui`              | Skip every TUI tier and use plain text prompts. Equivalent to `BW_INSTALL_TUI=no`.                |
-        | `--backup-dir <PATH>`   | Destination for the automatic pre‑upgrade backup. Created if missing.                             |
-        | `--no-auto-backup`      | Skip automatic backup (NOT recommended). You must have a manual backup.                           |
-        | `-q, --quiet`           | Suppress output (combine with logging / monitoring).                                              |
-        | `-f, --force`           | Proceed on an otherwise unsupported OS version.                                                   |
-        | `--dry-run`             | Show detected environment, intended actions, then exit without changing anything.                 |
-
-        Examples:
-
-        ```bash
-        # Upgrade to testing interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version testing
-
-        # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v testing --backup-dir /var/backups/bw-2025-01 -y
-
-        # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v testing -y -q
-
-        # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v testing --dry-run
-
-        # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v testing --no-auto-backup -y
-        ```
-
-        !!! warning "Skipping backups"
-            Using `--no-auto-backup` without having a verified manual backup may result in irreversible data loss if the upgrade encounters issues. Always keep at least one recent, tested backup.
-
-=== "Manual"
+=== "Docker"
 
     1. **Backup the database**:
 
         - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
         - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
 
-        ??? warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
-            If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
-
-            === "MySQL/MariaDB"
-
-                1. **Install the MySQL repository configuration package**
-
-                    ```bash
-                    sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
-                    ```
-
-                2. **Enable the MySQL repository**
-
-                    ```bash
-                    sudo dnf config-manager --enable mysql80-community
-                    ```
-
-                3. **Install the MySQL client**
-
-                    ```bash
-                    sudo dnf install mysql-community-client
-                    ```
-
-            === "PostgreSQL"
-
-                4. **Install the PostgreSQL repository configuration package**
-
-                    ```bash
-                    dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
-                    ```
-
-                5. **Install the PostgreSQL client**
-
-                    ```bash
-                    dnf install postgresql<version>
-                    ```
-
         ```bash
-        BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
+        docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
         ```
 
-    1. **Upgrade BunkerWeb**:
-        - Upgrade BunkerWeb to the latest version.
+        ```bash
+        docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
+        ```
 
-            1. **Stop the services**:
-                ```bash
-                sudo systemctl stop bunkerweb
-                sudo systemctl stop bunkerweb-ui
-                sudo systemctl stop bunkerweb-scheduler
+    2. **Upgrade BunkerWeb**:
+        - Upgrade BunkerWeb to the latest version.
+            1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
+                ```yaml
+                services:
+                    bunkerweb:
+                        image: bunkerity/bunkerweb:testing
+                        ...
+                    bw-scheduler:
+                        image: bunkerity/bunkerweb-scheduler:testing
+                        ...
+                    bw-autoconf:
+                        image: bunkerity/bunkerweb-autoconf:testing
+                        ...
+                    bw-ui:
+                        image: bunkerity/bunkerweb-ui:testing
+                        ...
                 ```
 
-            2. **Update BunkerWeb**:
-
-                === "Debian/Ubuntu"
-
-                    First, if you have previously held the BunkerWeb package, unhold it :
-
-                    You can print a list of packages on hold with `apt-mark showhold`
-
-                    ```shell
-                    sudo apt-mark unhold bunkerweb nginx
-                    ```
-
-                    Then, you can update the BunkerWeb package :
-
-                    ```shell
-                    sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=testing
-                    ```
-
-                    To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
-
-                    ```shell
-                    sudo apt-mark hold bunkerweb nginx
-                    ```
-
-                    More details in the [integration Linux page](https://docs.bunkerweb.io/latest/integrations/#__tabbed_1_1).
-
-                === "Fedora/RedHat"
-
-                    First, if you have previously held the BunkerWeb package, unhold it :
-
-                    You can print a list of packages on hold with `dnf versionlock list`
-
-                    ```shell
-                    sudo dnf versionlock delete package bunkerweb && \
-                    sudo dnf versionlock delete package nginx
-                    ```
-
-                    Then, you can update the BunkerWeb package :
-
-                    ```shell
-                    sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-testing
-                    ```
-
-                    To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
-
-                    ```shell
-                    sudo dnf versionlock add bunkerweb && \
-                    sudo dnf versionlock add nginx
-                    ```
-
-                    More details in the [integration Linux page](https://docs.bunkerweb.io/latest/integrations/#__tabbed_1_3).
-
-            3. **Start the services**:
-                    ```bash
-                    sudo systemctl start bunkerweb
-                    sudo systemctl start bunkerweb-ui
-                    sudo systemctl start bunkerweb-scheduler
-                    ```
-                    Or reboot the system:
-                    ```bash
-                    sudo reboot
-                    ```
+            2. **Restart the containers**: Restart the containers to apply the changes.
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
 
     3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
 
         ```bash
-        journalctl -u bunkerweb --no-pager
+        docker compose logs <scheduler_container>
         ```
 
     4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
+
+=== "All-In-One (AIO)"
+
+    The [All-In-One image](https://docs.bunkerweb.io/latest/integrations/#all-in-one-aio-image) bundles BunkerWeb, the Scheduler, the Web UI and (optionally) the API, Redis and CrowdSec in a **single container** named `bunkerweb-aio` by default. All persistent state — the SQLite database, cache, custom configs, plugins, backups, and the Redis/CrowdSec data — lives in the `/data` volume, so upgrading is a matter of replacing the container while keeping that volume.
+
+    1. **Prerequisites**:
+
+        - Note the image tag you are currently running and the name of the `/data` volume (or bind mount) so you reuse the exact same one after the upgrade.
+
+        !!! warning "Preserve the `/data` volume"
+            **Never remove the `/data` volume during an upgrade.** It holds the database, the embedded Redis and CrowdSec state, your custom configs and your backups. Replacing the container is safe; deleting the volume is not.
+
+        !!! tip "External database backends"
+            If you run the AIO with an external database (`DATABASE_URI` pointing at MySQL/MariaDB/PostgreSQL), the SQLite file under `/data` is not used — make sure you back up that external database with your usual tooling as well.
+
+    2. **Backup the database**:
+
+        - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database. The Scheduler runs inside the `bunkerweb-aio` container, so the backup command is executed there directly.
+
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory bunkerweb-aio bwcli plugin backup save
+        ```
+
+        ```bash
+        docker cp bunkerweb-aio:/path/to/backup/directory /path/to/backup/directory
+        ```
+
+    3. **Upgrade BunkerWeb**:
+
+        === "docker run"
+
+            3. **Stop and remove the current container** (the `/data` volume is kept):
+                ```bash
+                docker stop bunkerweb-aio
+                docker rm bunkerweb-aio
+                ```
+
+            4. **Pull the new image**:
+                ```bash
+                docker pull bunkerity/bunkerweb-all-in-one:testing
+                ```
+
+            5. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
+                ```bash
+                docker run -d \
+                --name bunkerweb-aio \
+                -v bw-storage:/data \
+                -p 80:8080/tcp \
+                -p 443:8443/tcp \
+                -p 443:8443/udp \
+                bunkerity/bunkerweb-all-in-one:testing
+                ```
+
+        === "Docker Compose"
+
+            6. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the All-In-One image.
+                ```yaml
+                services:
+                    bunkerweb-aio:
+                        image: bunkerity/bunkerweb-all-in-one:testing
+                        ...
+                ```
+
+            7. **Restart the container**: Restart the container to apply the changes. The `/data` volume is reattached automatically.
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
+
+    4. **Check the logs**: Check the container logs to ensure that the migration performed by the embedded Scheduler was successful.
+
+        ```bash
+        docker logs bunkerweb-aio
+        ```
+
+    5. **Verify the upgrade**:
+        - Confirm the container is running and healthy:
+            ```bash
+            docker ps --filter name=bunkerweb-aio
+            ```
+            The `STATUS` column should report `(healthy)` once the start-up checks pass.
+        - Confirm the running version:
+            ```bash
+            docker exec bunkerweb-aio cat /usr/share/bunkerweb/VERSION
+            ```
+            The version can also be checked from the Web UI under *Support*.
+        - Verify that your services, settings and custom configurations are intact in the Web UI, and that your sites are still served over HTTP/HTTPS.
+
+=== "Linux"
+
+    === "Easy upgrade using the install script"
+
+        * **Quick start**:
+
+            To get started, download the installation script and its checksum, then verify the script's integrity before running it.
+
+            ```bash
+            LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+
+            # Download the script and its checksum
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+
+            # Verify the checksum
+            sha256sum -c install-bunkerweb.sh.sha256
+
+            # If the check is successful, run the script
+            chmod +x install-bunkerweb.sh
+            sudo ./install-bunkerweb.sh
+            ```
+
+            !!! danger "Security Notice"
+                **Always verify the integrity of the installation script before running it.**
+
+                Download the checksum file and use a tool like `sha256sum` to confirm the script has not been altered or tampered with.
+
+                If the checksum verification fails, **do not execute the script**—it may be unsafe.
+
+        !!! tip "Interactive upgrade UI"
+            The upgrade flow uses the same TUI as fresh installs: arrow-key inline prompts via [gum](https://github.com/charmbracelet/gum), with `whiptail` boxed-dialog and plain-text fallbacks if gum cannot be obtained. The `gum` binary is fetched from the official [GitHub release](https://github.com/charmbracelet/gum/releases) (SHA256-pinned, cosign-verified when cosign is installed) and runs from a tempdir that is removed on exit — no system package is installed and no apt/dnf source is added. Pass `--no-tui` (or set `BW_INSTALL_TUI=no`) to skip every TUI tier, or `--tui` to require a working TUI. For fully unattended upgrades pass `-y` / `--yes` with the relevant flags — piped invocations (`curl … | bash`) exit with a clear error instead of silently accepting every default. **Air-gapped upgrades**: combine `--no-tui --yes` so no network call is made for the TUI layer.
+
+        * **How it works**:
+
+            The same multi‑purpose install script used for fresh installs can also perform an in‑place upgrade. When it detects an existing installation and a different target version, it switches to upgrade mode and applies the following workflow:
+
+            1. Detection & validation
+                * Detects OS / version and confirms support matrix.
+                * Reads currently installed BunkerWeb version from `/usr/share/bunkerweb/VERSION`.
+            2. Upgrade scenario decision
+                * If the requested version equals the installed one it aborts (unless you explicitly re-run for status).
+                * If versions differ it flags an upgrade.
+            3. (Optional) Automatic pre‑upgrade backup
+                * If `bwcli` and the scheduler are available and auto‑backup is enabled, it creates a backup via the built‑in backup plugin.
+                * Destination: either the directory you supplied with `--backup-dir` or a generated path like `/var/tmp/bunkerweb-backup-YYYYmmdd-HHMMSS`.
+                * You can disable this with `--no-auto-backup` (manual backup then becomes your responsibility).
+            4. Service quiescing
+                * Stops `bunkerweb`, `bunkerweb-ui`, and `bunkerweb-scheduler` to ensure a consistent upgrade (matches the manual procedure recommendations).
+            5. Package locks removal
+                * Temporarily removes `apt-mark hold` / `dnf versionlock` on `bunkerweb` and `nginx` so the targeted version can be installed.
+            6. Upgrade execution
+                * Installs only the new BunkerWeb package version (NGINX is not reinstalled in upgrade mode unless missing—this avoids touching a correctly pinned NGINX).
+                * Re‑applies holds/versionlocks to freeze the upgraded versions.
+            7. Finalization & status
+                * Displays systemd status for core services and next steps.
+                * Leaves your configuration and database intact—only the application code and managed files are updated.
+
+            Key behaviors / notes:
+
+            * The script does NOT modify your `/etc/bunkerweb/variables.env` or database content.
+            * If automatic backup failed (or was disabled) you can still do a manual restore using the Rollback section below.
+            * Upgrade mode intentionally avoids reinstalling or downgrading NGINX outside the supported pinned version already present.
+            * Logs for troubleshooting remain in `/var/log/bunkerweb/`.
+
+        * **Mode-aware behavior**:
+
+            - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the internal API listener to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
+            - Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via `--api` / `--no-api`.
+            - CrowdSec is prompted interactively for Full Stack upgrades. The CLI flags remain valid for Full Stack and Manager upgrades, and the script continues to reject CrowdSec for Worker, Scheduler-only, UI-only, and API-only modes.
+
+            Rollback summary:
+
+            * Use the generated backup directory (or your manual backup) + the steps in the Rollback section to restore DB, then reinstall the previous image / package version and re‑lock packages.
+
+        *  **Command-Line Options**:
+
+            You can drive unattended upgrades with the same flags used for installation. The most relevant for upgrades:
+
+            | Option                  | Purpose                                                                                           |
+            | ----------------------- | ------------------------------------------------------------------------------------------------- |
+            | `-v, --version <X.Y.Z>` | Target BunkerWeb version to upgrade to.                                                           |
+            | `-y, --yes`             | Non‑interactive (assumes upgrade confirmation and enables auto backup unless `--no-auto-backup`). |
+            | `--tui`                 | Force a TUI (downloaded gum or existing whiptail). Aborts if no TUI tier can render.              |
+            | `--no-tui`              | Skip every TUI tier and use plain text prompts. Equivalent to `BW_INSTALL_TUI=no`.                |
+            | `--backup-dir <PATH>`   | Destination for the automatic pre‑upgrade backup. Created if missing.                             |
+            | `--no-auto-backup`      | Skip automatic backup (NOT recommended). You must have a manual backup.                           |
+            | `-q, --quiet`           | Suppress output (combine with logging / monitoring).                                              |
+            | `-f, --force`           | Proceed on an otherwise unsupported OS version.                                                   |
+            | `--dry-run`             | Show detected environment, intended actions, then exit without changing anything.                 |
+
+            Examples:
+
+            ```bash
+            # Upgrade to testing interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version testing
+
+            # Non-interactive upgrade with automatic backup to custom directory
+            sudo ./install-bunkerweb.sh -v testing --backup-dir /var/backups/bw-2025-01 -y
+
+            # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
+            sudo ./install-bunkerweb.sh -v testing -y -q
+
+            # Perform a dry run (plan) without applying changes
+            sudo ./install-bunkerweb.sh -v testing --dry-run
+
+            # Upgrade skipping automatic backup (NOT recommended)
+            sudo ./install-bunkerweb.sh -v testing --no-auto-backup -y
+            ```
+
+            !!! warning "Skipping backups"
+                Using `--no-auto-backup` without having a verified manual backup may result in irreversible data loss if the upgrade encounters issues. Always keep at least one recent, tested backup.
+
+    === "Manual"
+
+        1. **Backup the database**:
+
+            - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
+            - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
+
+            ??? warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+                If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+
+                === "MySQL/MariaDB"
+
+                    1. **Install the MySQL repository configuration package**
+
+                        ```bash
+                        sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
+                        ```
+
+                    2. **Enable the MySQL repository**
+
+                        ```bash
+                        sudo dnf config-manager --enable mysql80-community
+                        ```
+
+                    3. **Install the MySQL client**
+
+                        ```bash
+                        sudo dnf install mysql-community-client
+                        ```
+
+                === "PostgreSQL"
+
+                    4. **Install the PostgreSQL repository configuration package**
+
+                        ```bash
+                        dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
+                        ```
+
+                    5. **Install the PostgreSQL client**
+
+                        ```bash
+                        dnf install postgresql<version>
+                        ```
+
+            ```bash
+            BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
+            ```
+
+        1. **Upgrade BunkerWeb**:
+            - Upgrade BunkerWeb to the latest version.
+
+                1. **Stop the services**:
+                    ```bash
+                    sudo systemctl stop bunkerweb
+                    sudo systemctl stop bunkerweb-ui
+                    sudo systemctl stop bunkerweb-scheduler
+                    ```
+
+                2. **Update BunkerWeb**:
+
+                    === "Debian/Ubuntu"
+
+                        First, if you have previously held the BunkerWeb package, unhold it :
+
+                        You can print a list of packages on hold with `apt-mark showhold`
+
+                        ```shell
+                        sudo apt-mark unhold bunkerweb nginx
+                        ```
+
+                        Then, you can update the BunkerWeb package :
+
+                        ```shell
+                        sudo apt update && \
+                        sudo apt install -y --allow-downgrades bunkerweb=testing
+                        ```
+
+                        To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
+
+                        ```shell
+                        sudo apt-mark hold bunkerweb nginx
+                        ```
+
+                        More details in the [integration Linux page](https://docs.bunkerweb.io/latest/integrations/#__tabbed_1_1).
+
+                    === "Fedora/RedHat"
+
+                        First, if you have previously held the BunkerWeb package, unhold it :
+
+                        You can print a list of packages on hold with `dnf versionlock list`
+
+                        ```shell
+                        sudo dnf versionlock delete package bunkerweb && \
+                        sudo dnf versionlock delete package nginx
+                        ```
+
+                        Then, you can update the BunkerWeb package :
+
+                        ```shell
+                        sudo dnf makecache && \
+                        sudo dnf install -y --allowerasing bunkerweb-testing
+                        ```
+
+                        To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
+
+                        ```shell
+                        sudo dnf versionlock add bunkerweb && \
+                        sudo dnf versionlock add nginx
+                        ```
+
+                        More details in the [integration Linux page](https://docs.bunkerweb.io/latest/integrations/#__tabbed_1_3).
+
+                3. **Start the services**:
+                        ```bash
+                        sudo systemctl start bunkerweb
+                        sudo systemctl start bunkerweb-ui
+                        sudo systemctl start bunkerweb-scheduler
+                        ```
+                        Or reboot the system:
+                        ```bash
+                        sudo reboot
+                        ```
+
+        3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
+
+            ```bash
+            journalctl -u bunkerweb --no-pager
+            ```
+
+        4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
 
 ### Rollback
 
@@ -19443,6 +19609,82 @@ In this structure, `user_auth.py` contains the `user_auth` blueprint, and `user_
         ```bash
         docker compose up -d
         ```
+
+=== "All-In-One (AIO)"
+
+    The Scheduler runs inside the `bunkerweb-aio` container, so the restore commands are executed there directly. The `/data` volume (database, configs, plugins, backups) is preserved throughout — only the container image is rolled back.
+
+    !!! tip "External database backends"
+        If you run the AIO with an external database (`DATABASE_URI` pointing at MySQL/MariaDB/PostgreSQL), the SQLite file under `/data` is not used. Restore that external database with your usual tooling — or the MySQL/MariaDB/PostgreSQL commands shown in the **Docker** tab, targeting your database host — and skip the SQLite steps below.
+
+    1. **Extract the backup if zipped**.
+
+        ```bash
+        unzip /path/to/backup/directory/backup.zip -d /path/to/backup/directory/
+        ```
+
+    2. **Restore the backup** (embedded SQLite):
+
+        1. **Remove the existing database file.**
+
+            ```bash
+            docker exec -u 0 -i bunkerweb-aio rm -f /var/lib/bunkerweb/db.sqlite3
+            ```
+
+        2. **Restore the backup.**
+
+            ```bash
+            docker exec -i bunkerweb-aio sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+            ```
+
+        3. **Fix permissions.**
+
+            ```bash
+            docker exec -u 0 -i bunkerweb-aio chown root:nginx /var/lib/bunkerweb/db.sqlite3
+            docker exec -u 0 -i bunkerweb-aio chmod 770 /var/lib/bunkerweb/db.sqlite3
+            ```
+
+    3. **Roll back the image**, reusing the same `/data` volume:
+
+        === "docker run"
+
+            3. **Stop and remove the current container** (the `/data` volume is kept):
+                ```bash
+                docker stop bunkerweb-aio
+                docker rm bunkerweb-aio
+                ```
+
+            4. **Pull the previous image**:
+                ```bash
+                docker pull bunkerity/bunkerweb-all-in-one:<old_version>
+                ```
+
+            5. **Re-create the container** with the same options, ports and the same `/data` volume as before:
+                ```bash
+                docker run -d \
+                --name bunkerweb-aio \
+                -v bw-storage:/data \
+                -p 80:8080/tcp \
+                -p 443:8443/tcp \
+                -p 443:8443/udp \
+                bunkerity/bunkerweb-all-in-one:<old_version>
+                ```
+
+        === "Docker Compose"
+
+            6. **Update the Docker Compose file** to use the previous All-In-One image:
+                ```yaml
+                services:
+                    bunkerweb-aio:
+                        image: bunkerity/bunkerweb-all-in-one:<old_version>
+                        ...
+                ```
+
+            7. **Restart the container**. The `/data` volume is reattached automatically:
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
 
 === "Linux"
 

@@ -1770,14 +1770,15 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 
 ##### Runtime & safety
 
-| Setting                         | Description                                                           | Accepted values                                | Default                                |
-| ------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
-| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                               | Integer seconds                                | `30`                                   |
-| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                            | Integer seconds                                | `5`                                    |
-| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                     | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config               | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)             | `yes` or `no`                                  | `no`                                   |
-| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
+| Setting                         | Description                                                                                                                                                                                                                                                       | Accepted values                                | Default                                |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                           | Integer seconds                                | `30`                                   |
+| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                        | Integer seconds                                | `5`                                    |
+| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
+| `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
+| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps                                                                                                                                                                                             | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database
 
@@ -1961,8 +1962,9 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 42, 43 and 44
-- Red Hat Enterprise Linux (RHEL) 8, 9 and 10
+- Ubuntu 26.04 "Resolute Raccoon"
+- Fedora 43 and 44
+- Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
 ### Easy installation script
 
@@ -2053,24 +2055,24 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 **General Options:**
 
-| Option                  | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `testing`).      |
-| `-w, --enable-wizard`   | Enables the setup wizard.                                             |
-| `-n, --no-wizard`       | Disables the setup wizard.                                            |
-| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
-| `--tui`                 | Require a TUI (downloaded gum or existing whiptail) and abort if no TUI tier can render. |
-| `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`. |
-| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
+| Option                  | Description                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `testing`).                                           |
+| `-w, --enable-wizard`   | Enables the setup wizard.                                                                              |
+| `-n, --no-wizard`       | Disables the setup wizard.                                                                             |
+| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.                                    |
+| `--tui`                 | Require a TUI (downloaded gum or existing whiptail) and abort if no TUI tier can render.               |
+| `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`.        |
+| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version.                                  |
 | `--force-type-change`   | Allow `--<type>` to differ from the detected install type on upgrade (intentional HA migrations only). |
-| `-q, --quiet`           | Silent installation (suppress output; implies `--yes`).               |
-| `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).      |
-| `--no-api`              | Explicitly disables the API service.                                  |
-| `--server-ip IP`        | IP printed in post-install URLs. Overrides auto-detection and can also be set with `SERVER_IP_INPUT`. |
-| `--epel`                | Install `epel-release` on RHEL-family distributions if it is missing. |
-| `--no-epel`             | Do not install `epel-release` on RHEL-family distributions.           |
-| `-h, --help`            | Displays the help message with all available options.                 |
-| `--dry-run`             | Show what would be installed without doing it.                        |
+| `-q, --quiet`           | Silent installation (suppress output; implies `--yes`).                                                |
+| `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).                                       |
+| `--no-api`              | Explicitly disables the API service.                                                                   |
+| `--server-ip IP`        | IP printed in post-install URLs. Overrides auto-detection and can also be set with `SERVER_IP_INPUT`.  |
+| `--epel`                | Install `epel-release` on RHEL-family distributions if it is missing.                                  |
+| `--no-epel`             | Do not install `epel-release` on RHEL-family distributions.                                            |
+| `-h, --help`            | Displays the help message with all available options.                                                  |
+| `--dry-run`             | Show what would be installed without doing it.                                                         |
 
 **Installation Types:**
 
@@ -2085,67 +2087,67 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 **Security Integrations:**
 
-| Option              | Description                                                         |
-| ------------------- | ------------------------------------------------------------------- |
-| `--crowdsec`        | Install and configure CrowdSec security engine.                     |
-| `--no-crowdsec`     | Skip CrowdSec installation.                                         |
-| `--crowdsec-appsec` | Install CrowdSec with AppSec component (includes WAF capabilities). |
-| `--redis`           | Install and configure Redis locally.                                |
-| `--no-redis`        | Skip Redis integration.                                             |
-| `--redis-flavor FLAVOR` | Local install flavor: `redis` (default) or `valkey`.             |
+| Option                  | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| `--crowdsec`            | Install and configure CrowdSec security engine.                     |
+| `--no-crowdsec`         | Skip CrowdSec installation.                                         |
+| `--crowdsec-appsec`     | Install CrowdSec with AppSec component (includes WAF capabilities). |
+| `--redis`               | Install and configure Redis locally.                                |
+| `--no-redis`            | Skip Redis integration.                                             |
+| `--redis-flavor FLAVOR` | Local install flavor: `redis` (default) or `valkey`.                |
 
 **Advanced Options:**
 
-| Option                      | Description                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | Space-separated list of BunkerWeb instances (optional for manager/scheduler modes; you can add workers later). |
-| `--manager-ip IPs`          | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).   |
-| `--dns-resolvers "IP1 IP2"` | Custom DNS resolver IPs (for full, manager, or worker installations).               |
-| `--api-https`               | Enable HTTPS for internal API communication (default: HTTP only).                   |
-| `--backup-dir PATH`         | Directory to store automatic backup before upgrade.                                 |
-| `--no-auto-backup`          | Skip automatic backup (you MUST have done it manually).                             |
-| `--redis-host HOST`         | Redis host for an existing Redis/Valkey server.                                     |
-| `--redis-port PORT`         | Redis port for an existing Redis/Valkey server.                                     |
-| `--redis-database DB`       | Redis database number.                                                              |
-| `--redis-username USER`     | Redis username (Redis 6+).                                                          |
-| `--redis-password PASS`     | Redis password.                                                                     |
-| `--redis-bind IP`           | Redis/Valkey bind address for a local Manager install (default prompt: `0.0.0.0`).  |
-| `--redis-no-password`       | Skip the auto-generated `requirepass` when binding Redis/Valkey beyond loopback.    |
-| `--redis-maxmemory MB`      | Memory cap in MB; `0` or `unlimited` keeps the distribution default.                |
-| `--redis-maxmemory-policy POLICY` | Eviction policy for local Redis/Valkey (default: `volatile-lru`).             |
-| `--redis-ssl`               | Enable SSL/TLS for Redis connection.                                                |
-| `--redis-no-ssl`            | Disable SSL/TLS for Redis connection.                                               |
-| `--redis-ssl-verify`        | Verify Redis SSL certificate.                                                       |
-| `--redis-no-ssl-verify`     | Do not verify Redis SSL certificate.                                                |
+| Option                            | Description                                                                                                    |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"`           | Space-separated list of BunkerWeb instances (optional for manager/scheduler modes; you can add workers later). |
+| `--manager-ip IPs`                | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).                              |
+| `--dns-resolvers "IP1 IP2"`       | Custom DNS resolver IPs (for full, manager, or worker installations).                                          |
+| `--api-https`                     | Enable HTTPS for internal API communication (default: HTTP only).                                              |
+| `--backup-dir PATH`               | Directory to store automatic backup before upgrade.                                                            |
+| `--no-auto-backup`                | Skip automatic backup (you MUST have done it manually).                                                        |
+| `--redis-host HOST`               | Redis host for an existing Redis/Valkey server.                                                                |
+| `--redis-port PORT`               | Redis port for an existing Redis/Valkey server.                                                                |
+| `--redis-database DB`             | Redis database number.                                                                                         |
+| `--redis-username USER`           | Redis username (Redis 6+).                                                                                     |
+| `--redis-password PASS`           | Redis password.                                                                                                |
+| `--redis-bind IP`                 | Redis/Valkey bind address for a local Manager install (default prompt: `0.0.0.0`).                             |
+| `--redis-no-password`             | Skip the auto-generated `requirepass` when binding Redis/Valkey beyond loopback.                               |
+| `--redis-maxmemory MB`            | Memory cap in MB; `0` or `unlimited` keeps the distribution default.                                           |
+| `--redis-maxmemory-policy POLICY` | Eviction policy for local Redis/Valkey (default: `volatile-lru`).                                              |
+| `--redis-ssl`                     | Enable SSL/TLS for Redis connection.                                                                           |
+| `--redis-no-ssl`                  | Disable SSL/TLS for Redis connection.                                                                          |
+| `--redis-ssl-verify`              | Verify Redis SSL certificate.                                                                                  |
+| `--redis-no-ssl-verify`           | Do not verify Redis SSL certificate.                                                                           |
 
 **Database Options (`--full` / `--manager` only):**
 
-| Option                  | Description                                                                                                       |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `--database ENGINE`     | Strategy: `mariadb` or `postgresql` (auto-install locally), `external` (use an existing remote DB), `none` (SQLite). |
-| `--db-engine ENGINE`    | External-DB engine: `mariadb`, `mysql`, or `postgresql`. Implies `--database external` when set on its own.       |
-| `--db-host HOST`        | External DB host (FQDN or IP).                                                                                    |
-| `--db-port PORT`        | External DB TCP port (defaults: 3306 for `mariadb`/`mysql`, 5432 for `postgresql`).                               |
-| `--db-name NAME`        | Database name (default: `bw_db`).                                                                                 |
-| `--db-user USER`        | Database user (default: `bunkerweb`).                                                                             |
-| `--db-password PASS`    | Database password — required for `--database external`. Rules: 8+ chars, no quotes/backslash/backtick.            |
-| `--db-ssl`              | Use SSL/TLS for the external DB connection.                                                                       |
-| `--db-no-ssl`           | Do not use SSL/TLS for the external DB connection.                                                                |
-| `--db-ssl-verify`       | Verify the external DB server certificate.                                                                        |
-| `--db-no-ssl-verify`    | Use SSL but skip certificate verification.                                                                        |
-| `--db-skip-probe`       | Do not probe external DB connectivity from this host. Useful when the engine client is not installed locally, or when the DB is only reachable from the scheduler's network segment. |
+| Option               | Description                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--database ENGINE`  | Strategy: `mariadb` or `postgresql` (auto-install locally), `external` (use an existing remote DB), `none` (SQLite).                                                                 |
+| `--db-engine ENGINE` | External-DB engine: `mariadb`, `mysql`, or `postgresql`. Implies `--database external` when set on its own.                                                                          |
+| `--db-host HOST`     | External DB host (FQDN or IP).                                                                                                                                                       |
+| `--db-port PORT`     | External DB TCP port (defaults: 3306 for `mariadb`/`mysql`, 5432 for `postgresql`).                                                                                                  |
+| `--db-name NAME`     | Database name (default: `bw_db`).                                                                                                                                                    |
+| `--db-user USER`     | Database user (default: `bunkerweb`).                                                                                                                                                |
+| `--db-password PASS` | Database password — required for `--database external`. Rules: 8+ chars, no quotes/backslash/backtick.                                                                               |
+| `--db-ssl`           | Use SSL/TLS for the external DB connection.                                                                                                                                          |
+| `--db-no-ssl`        | Do not use SSL/TLS for the external DB connection.                                                                                                                                   |
+| `--db-ssl-verify`    | Verify the external DB server certificate.                                                                                                                                           |
+| `--db-no-ssl-verify` | Use SSL but skip certificate verification.                                                                                                                                           |
+| `--db-skip-probe`    | Do not probe external DB connectivity from this host. Useful when the engine client is not installed locally, or when the DB is only reachable from the scheduler's network segment. |
 
 **Web UI Admin User (`--full` / `--manager` / `--ui-only` only):**
 
 When no UI admin flag is provided, the interactive installer offers a Web UI admin-user prompt for UI-bearing install types. The default answer flips based on wizard state: **Yes** when the wizard is disabled (manager mode always; other modes when `--no-wizard` is passed) because otherwise the UI has no initial login. **No** when the wizard is enabled because the wizard collects the admin user on first boot. Operators can still opt in to pre-create the admin even with the wizard enabled, which skips the wizard's admin step.
 
-| Option                      | Description                                                                                              |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `--ui-admin-user NAME`      | Pre-create the first Web UI admin user with this name (skips the setup wizard for the admin step).       |
-| `--ui-admin-password PASS`  | Password for the admin user. Implies admin creation; the username defaults to `admin` if omitted. Auto-generated when omitted. Rules: 8+ chars, lower/upper/digit/special. |
-| `--no-ui-admin`             | Skip the admin-user creation prompt entirely. If the wizard is disabled, the UI remains without an initial login until credentials are configured another way. |
-| `--ui-https-selfsigned`     | (`--manager` only) Generate a self-signed cert and enable HTTPS on the Web UI listener.                  |
-| `--no-ui-https-selfsigned`  | (`--manager` only) Disable manager UI self-signed HTTPS.                                                 |
+| Option                     | Description                                                                                                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--ui-admin-user NAME`     | Pre-create the first Web UI admin user with this name (skips the setup wizard for the admin step).                                                                         |
+| `--ui-admin-password PASS` | Password for the admin user. Implies admin creation; the username defaults to `admin` if omitted. Auto-generated when omitted. Rules: 8+ chars, lower/upper/digit/special. |
+| `--no-ui-admin`            | Skip the admin-user creation prompt entirely. If the wizard is disabled, the UI remains without an initial login until credentials are configured another way.             |
+| `--ui-https-selfsigned`    | (`--manager` only) Generate a self-signed cert and enable HTTPS on the Web UI listener.                                                                                    |
+| `--no-ui-https-selfsigned` | (`--manager` only) Disable manager UI self-signed HTTPS.                                                                                                                   |
 
 !!! warning "External database notes"
 
@@ -2434,10 +2436,10 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora already provides NGINX 1.30.1 that we support
+    Fedora already provides NGINX 1.30.2 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.1
+    sudo dnf install -y --allowerasing nginx-1.30.2
     ```
 
     !!! example "Disable the setup wizard"

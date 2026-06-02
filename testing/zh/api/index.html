@@ -1413,8 +1413,18 @@
 <li><code>bans</code>: <code>ban_read</code>, <code>ban_update</code>, <code>ban_delete</code>, <code>ban_created</code></li>
 <li><code>jobs</code>: <code>job_read</code>, <code>job_run</code></li>
 <li><code>resource_id</code> 通常是第二个路径段（如 <code>/services/{id}</code>）；"*" 表示全局访问。</li>
-<li>通过 <code>API_ACL_BOOTSTRAP_FILE</code> 或挂载的 <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> 启动非管理员用户和权限。密码可为明文或 bcrypt hash。</li>
+<li>通过 <code>API_ACL_BOOTSTRAP_FILE</code> 或挂载的 <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> 启动非管理员用户和权限。每个用户可使用明文 <code>password</code> 或预先哈希的 <code>password_hash</code>/<code>password_bcrypt</code>（参见下面的提示）。</li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">预先哈希的启动密码</p>
+<p>通过 <code>password_hash</code>（或 <code>password_bcrypt</code>）将用户的明文 <code>password</code> 替换为 <strong>bcrypt 哈希</strong>，这样凭据就不会以明文形式留在文件中。该哈希必须是有效的 bcrypt 哈希（<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>），且其成本因子至少为 <code>10</code>（建议 <code>12</code>+）。格式错误或强度过弱的哈希将<strong>被忽略</strong>：加载器会回退到该用户的明文 <code>password</code>（若存在）；否则，新用户会获得一个你无法得知的安全随机密码，而已存在的用户则保留其当前密码。明文 <code>password</code> 会进行强度校验（至少 8 个字符，包含大写、小写、数字和特殊字符）。管理员的 <code>API_PASSWORD</code> 环境变量仅接受明文——预先哈希仅适用于这些 ACL 用户。</p>
+<p>生成哈希：</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
+</code></pre></div>
+<p>然后在启动文件中用它代替 <code>password</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;password_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$2b$13$replace-with-the-hash-printed-above&quot;</span>
+</code></pre></div>
+</div>
 <details class="example">
 <summary>最小 ACL 启动</summary>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>

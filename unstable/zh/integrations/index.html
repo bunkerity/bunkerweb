@@ -3434,6 +3434,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td><code>no</code></td>
 </tr>
 <tr>
+<td><code>SCHEDULER_MAX_WORKERS</code></td>
+<td>调度器作业执行器的最大工作线程数。每个运行线程可占用一个数据库连接，从而限制调度器侧的连接池压力。若解析值超过 <code>DATABASE_POOL_SIZE</code> + <code>DATABASE_POOL_MAX_OVERFLOW</code>，启动时会输出警告。</td>
+<td>正整数</td>
+<td><code>min(8, max(2, cpu_count*2))</code></td>
+</tr>
+<tr>
 <td><code>TZ</code></td>
 <td>调度器日志、类 cron 任务、备份和时间戳使用的时区</td>
 <td>TZ 数据库名（如 <code>UTC</code>、<code>Europe/Paris</code>）</td>
@@ -3719,8 +3725,9 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 13 "Trixie"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 42、43 和 44</li>
-<li>Red Hat Enterprise Linux (RHEL) 8, 9 和 10</li>
+<li>Ubuntu 26.04 "Resolute Raccoon"</li>
+<li>Fedora 43 和 44</li>
+<li>Red Hat Enterprise Linux (RHEL)、CentOS、Rocky Linux 和 AlmaLinux 8, 9 和 10</li>
 </ul>
 <h3 id="_48">简易安装脚本</h3>
 <p>为了简化安装体验，BunkerWeb 提供了一个简易安装脚本，可以自动处理整个设置过程，包括 NGINX 安装、仓库配置和服务设置。</p>
@@ -4178,8 +4185,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora 已经提供了我们支持的 NGINX 1.30.1</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.1
+<p>Fedora 已经提供了我们支持的 NGINX 1.30.2</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.2
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">禁用设置向导</p>

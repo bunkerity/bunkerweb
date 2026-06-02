@@ -3450,6 +3450,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td><code>no</code></td>
 </tr>
 <tr>
+<td><code>SCHEDULER_MAX_WORKERS</code></td>
+<td>Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds <code>DATABASE_POOL_SIZE</code> + <code>DATABASE_POOL_MAX_OVERFLOW</code>.</td>
+<td>Positive integer</td>
+<td><code>min(8, max(2, cpu_count*2))</code></td>
+</tr>
+<tr>
 <td><code>TZ</code></td>
 <td>Time zone for scheduler logs, cron-like jobs, backups, and timestamps</td>
 <td>TZ database name (e.g., <code>UTC</code>, <code>Europe/Paris</code>)</td>
@@ -3735,8 +3741,9 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 13 "Trixie"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 42, 43 and 44</li>
-<li>Red Hat Enterprise Linux (RHEL) 8, 9 and 10</li>
+<li>Ubuntu 26.04 "Resolute Raccoon"</li>
+<li>Fedora 43 and 44</li>
+<li>Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux and AlmaLinux 8, 9 and 10</li>
 </ul>
 <h3 id="easy-installation-script">Easy installation script</h3>
 <p>For a simplified installation experience, BunkerWeb provides an easy install script that automatically handles the entire setup process, including NGINX installation, repository configuration, and service setup.</p>
@@ -4425,8 +4432,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora already provides NGINX 1.30.1 that we support</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.1
+<p>Fedora already provides NGINX 1.30.2 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.2
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>

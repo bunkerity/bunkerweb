@@ -2245,6 +2245,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#load-balancer-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Balancer (PRO)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5080,6 +5091,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>在生产环境中为 <code>ANTIBOT_CAPJS_FRONTEND_URL</code> 使用 HTTPS。浏览器 worker 需要在安全上下文中使用 <code>crypto.subtle</code>，HTTPS 也能防止小组件加载过程中的 MITM 篡改。</li>
 <li>在 Cap.js 站点密钥上配置 CORS，以允许受保护的来源。</li>
 <li>将 <code>ANTIBOT_CAPJS_FRONTEND_URL</code> 和 <code>ANTIBOT_CAPJS_BACKEND_URL</code> 都设置为仅 origin：scheme、host 和可选端口，不包含路径。</li>
+<li>请使用 Cap.js 小组件 <strong>0.1.48 或更高版本</strong>。BunkerWeb 下发严格的基于 nonce 的 CSP；较旧的小组件会破坏 instrumentation 挑战，因为隔离 <code>srcdoc</code> iframe 内注入的内联 <code>&lt;script&gt;</code> 不会传递 nonce。如果您自托管 <code>tiago2/cap</code>，请固定到较新的标签（如 <code>tiago2/cap:3.1.2</code> 或更高），或将 <code>WIDGET_VERSION</code> 设置为 <code>0.1.48</code> 或更高。</li>
 </ul>
 </div>
 <p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
@@ -9410,7 +9422,7 @@ TrustedMonitor/\d+\.\d+
 <td>Gandi</td>
 <td><code>token</code></td>
 <td><code>sharing_id</code></td>
-<td><a href="https://github.com/TheophileDiot/certbot-plugin-gandi">文档</a></td>
+<td><a href="https://github.com/bunkerity/certbot-plugin-gandi">文档</a></td>
 </tr>
 <tr>
 <td><code>gehirn</code></td>
@@ -9815,6 +9827,158 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+<p>如需更详细的指南，请参阅<a href="../advanced/#load-balancer-pro">高级用法</a>文档。</p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认值</th>
+<th>上下文</th>
+<th>可重复</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>否</td>
+<td>Shared dict size (datastore for all healthchecks).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>Name of the upstream (used in REVERSE_PROXY_HOST).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>List of servers/IPs in the server group.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
+<td><code>round-robin</code></td>
+<td>global</td>
+<td>是</td>
+<td>Load balancing mode (round-robin or sticky).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>是</td>
+<td>Sticky session method (ip or cookie).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>是</td>
+<td>Dynamically resolve upstream hostnames.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>Number of keepalive connections to cache per worker.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>是</td>
+<td>Keepalive timeout for upstream connections.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>是</td>
+<td>Keepalive time for upstream connections.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
+<td><code>/status</code></td>
+<td>global</td>
+<td>是</td>
+<td>The healthcheck URL.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
+<td><code>2000</code></td>
+<td>global</td>
+<td>是</td>
+<td>Healthcheck interval in milliseconds.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>是</td>
+<td>Healthcheck timeout in milliseconds.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
+<td><code>3</code></td>
+<td>global</td>
+<td>是</td>
+<td>Number of failed healthchecks before marking the server as down.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>是</td>
+<td>Number of successful healthchecks before marking the server as up.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
+<td><code>200</code></td>
+<td>global</td>
+<td>是</td>
+<td>HTTP status considered valid in healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>是</td>
+<td>Maximum number of concurrent healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>是</td>
+<td>Type of healthcheck (http or https).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>是</td>
+<td>Verify SSL certificate in healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>Host header for healthchecks (useful for HTTPS).</td>
+</tr>
+</tbody>
+</table>
 <h2 id="metrics">Metrics</h2>
 <p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>指标插件为您的 BunkerWeb 实例提供全面的监控和数据收集功能。此功能使您能够跟踪各种性能指标、安全事件和系统统计信息，从而为您提供有关受保护网站和服务行为及健康状况的宝贵见解。</p>

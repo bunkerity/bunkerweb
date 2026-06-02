@@ -1188,7 +1188,9 @@
 <h1 id="mise-a-niveau">Mise à niveau</h1>
 <h2 id="mise-a-niveau-a-partir-de-la-version-16x">Mise à niveau à partir de la version 1.6.X</h2>
 <h3 id="procedure">Procédure</h3>
-<h4 id="docker">Docker</h4>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-In-One (AIO)</label><label for="__tabbed_1_3">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <ol>
 <li>
 <p><strong>Sauvegardez la base de données</strong> :</p>
@@ -1205,10 +1207,8 @@
 <p><strong>Mettre à niveau BunkerWeb</strong> :</p>
 <ul>
 <li>
-<p>Mettez à niveau BunkerWeb vers la dernière version.</p>
 <ol>
-<li>
-<p><strong>Mettre à jour le fichier Docker Compose </strong>: Mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image BunkerWeb.
+<li><strong>Mettre à jour le fichier Docker Compose </strong>: Mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image BunkerWeb.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
@@ -1222,14 +1222,14 @@
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Redémarrer les conteneurs </strong>: redémarrez les conteneurs pour appliquer les modifications.
+</code></pre></div></li>
+</ol>
+<p>Mettez à niveau BunkerWeb vers la dernière version.</p>
+<ol>
+<li><strong>Redémarrer les conteneurs </strong>: redémarrez les conteneurs pour appliquer les modifications.
     <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</code></pre></div></p>
-</li>
+</code></pre></div></li>
 </ol>
 </li>
 </ul>
@@ -1243,8 +1243,108 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <p><strong>Vérifier la base de données </strong>: vérifiez que la mise à niveau de la base de données a réussi en vérifiant les données et les configurations dans le nouveau conteneur de base de données.</p>
 </li>
 </ol>
-<h4 id="linux">Linux</h4>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Mise à niveau facile à l'aide du script d'installation</label><label for="__tabbed_1_2">Manuel</label></div>
+</div>
+<div class="tabbed-block">
+<p>L'<a href="../integrations/#all-in-one-aio-image">image All-In-One</a> regroupe BunkerWeb, le Scheduler, l'interface Web et, facultativement, l'API, Redis et CrowdSec dans un <strong>seul conteneur</strong> nommé <code>bunkerweb-aio</code> par défaut. Tout l'état persistant — base SQLite, cache, configurations personnalisées, plugins, sauvegardes et données Redis/CrowdSec — réside dans le volume <code>/data</code>; la mise à niveau consiste donc à remplacer le conteneur en conservant ce volume.</p>
+<ol>
+<li>
+<p><strong>Prérequis</strong> :</p>
+<ul>
+<li>Notez le tag d'image actuellement utilisé et le nom du volume <code>/data</code> (ou du bind mount) afin de réutiliser exactement le même après la mise à niveau.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Préservez le volume <code>/data</code></p>
+<p><strong>Ne supprimez jamais le volume <code>/data</code> pendant une mise à niveau.</strong> Il contient la base de données, l'état Redis et CrowdSec intégré, vos configurations personnalisées et vos sauvegardes. Remplacer le conteneur est sûr ; supprimer le volume ne l'est pas.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Bases de données externes</p>
+<p>Si vous exécutez l'AIO avec une base de données externe (<code>DATABASE_URI</code> pointant vers MySQL/MariaDB/PostgreSQL), le fichier SQLite sous <code>/data</code> n'est pas utilisé — assurez-vous de sauvegarder également cette base externe avec vos outils habituels.</p>
+</div>
+</li>
+<li>
+<p><strong>Sauvegardez la base de données</strong> :</p>
+<ul>
+<li>Avant de procéder à la mise à niveau de la base de données, assurez-vous d'effectuer une sauvegarde complète de son état actuel. Le Scheduler s'exécute dans le conteneur <code>bunkerweb-aio</code>, la commande de sauvegarde y est donc exécutée directement.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>bunkerweb-aio<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>bunkerweb-aio:/path/to/backup/directory<span class="w"> </span>/path/to/backup/directory
+</code></pre></div>
+</li>
+<li>
+<p><strong>Mettre à niveau BunkerWeb</strong> :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">docker run</label><label for="__tabbed_2_2">Docker Compose</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Arrêtez et supprimez le conteneur actuel</strong> (le volume <code>/data</code> est conservé) :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>stop<span class="w"> </span>bunkerweb-aio
+docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Téléchargez la nouvelle image</strong> :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Recréez le conteneur</strong> avec les mêmes options, en réutilisant le même volume <code>/data</code>, les mêmes ports et les mêmes variables d'environnement qu'avant :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Mettez à jour le fichier Docker Compose</strong> : mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image All-In-One.
+    <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:testing</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Redémarrez le conteneur</strong> : redémarrez le conteneur pour appliquer les changements. Le volume <code>/data</code> est rattaché automatiquement.
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Vérifiez les journaux</strong> : vérifiez les journaux du conteneur pour vous assurer que la migration effectuée par le Scheduler intégré a réussi.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>bunkerweb-aio
+</code></pre></div>
+</li>
+<li>
+<p><strong>Vérifiez la mise à niveau</strong> :</p>
+<ul>
+<li>Confirmez que le conteneur est lancé et sain :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w"> </span><span class="nv">name</span><span class="o">=</span>bunkerweb-aio
+</code></pre></div>
+    La colonne <code>STATUS</code> doit indiquer <code>(healthy)</code> une fois les vérifications de démarrage terminées.</li>
+<li>Confirmez la version en cours d'exécution :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>bunkerweb-aio<span class="w"> </span>cat<span class="w"> </span>/usr/share/bunkerweb/VERSION
+</code></pre></div>
+    La version peut également être consultée depuis l'interface Web dans <em>Support</em>.</li>
+<li>Vérifiez dans l'interface Web que vos services, paramètres et configurations personnalisées sont intacts, et que vos sites sont toujours servis en HTTP/HTTPS.</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Mise à niveau facile à l'aide du script d'installation</label><label for="__tabbed_3_2">Manuel</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ul>
@@ -1419,7 +1519,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<spa
 <details class="warning">
 <summary>Informations pour les utilisateurs de Red Hat Enterprise Linux (RHEL) 8.10</summary>
 <p>Si vous utilisez <strong>RHEL 8.10</strong> et prévoyez d'utiliser une <strong>base de données externe</strong>, vous devrez installer le paquet <code>mysql-community-client</code> pour vous assurer que la commande <code>mysqldump</code> est disponible. Vous pouvez installer le paquet en exécutant les commandes suivantes :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">MySQL/MariaDB</label><label for="__tabbed_2_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">MySQL/MariaDB</label><label for="__tabbed_4_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -1475,7 +1575,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </li>
 <li>
 <p><strong>Mettre à jour BunkerWeb</strong> :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Debian/Ubuntu</label><label for="__tabbed_3_2">Fedora/RedHat</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Debian/Ubuntu</label><label for="__tabbed_5_2">Fedora/RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Tout d'abord, si vous avez précédemment marqué le paquet BunkerWeb comme mis en attente, annulez cette mise en attente :</p>
@@ -1536,6 +1636,9 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </div>
 </div>
 </div>
+</div>
+</div>
+</div>
 <h3 id="rollback">Rollback</h3>
 <div class="admonition failure">
 <p class="admonition-title">En cas de problèmes</p>
@@ -1547,7 +1650,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 <li><a href="https://discord.bunkerity.com">Rejoignez le serveur Discord de BunkerWeb</a></li>
 </ul>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Docker</label><label for="__tabbed_4_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Docker</label><label for="__tabbed_6_2">All-In-One (AIO)</label><label for="__tabbed_6_3">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -1559,7 +1662,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </li>
 <li>
 <p><strong>Restaurez la sauvegarde</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite</label><label for="__tabbed_5_2">MySQL/MariaDB</label><label for="__tabbed_5_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MySQL/MariaDB</label><label for="__tabbed_7_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -1652,6 +1755,92 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </ol>
 </div>
 <div class="tabbed-block">
+<p>Le Scheduler s'exécute dans le conteneur <code>bunkerweb-aio</code>, les commandes de restauration y sont donc exécutées directement. Le volume <code>/data</code> (base de données, configurations, plugins, sauvegardes) est conservé pendant toute l'opération — seule l'image du conteneur est restaurée à la version précédente.</p>
+<div class="admonition tip">
+<p class="admonition-title">Bases de données externes</p>
+<p>Si vous exécutez l'AIO avec une base de données externe (<code>DATABASE_URI</code> pointant vers MySQL/MariaDB/PostgreSQL), le fichier SQLite sous <code>/data</code> n'est pas utilisé. Restaurez cette base externe avec vos outils habituels — ou avec les commandes MySQL/MariaDB/PostgreSQL de l'onglet <strong>Docker</strong>, en ciblant votre hôte de base de données — puis ignorez les étapes SQLite ci-dessous.</p>
+</div>
+<ol>
+<li>
+<p><strong>Extrayez la sauvegarde si elle est compressée</strong>.</p>
+<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>/path/to/backup/directory/backup.zip<span class="w"> </span>-d<span class="w"> </span>/path/to/backup/directory/
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restaurez la sauvegarde</strong> (SQLite intégré) :</p>
+<ol>
+<li>
+<p><strong>Supprimez le fichier de base de données existant.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>bunkerweb-aio<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restaurez la sauvegarde.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>bunkerweb-aio<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+<li>
+<p><strong>Corrigez les permissions.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>bunkerweb-aio<span class="w"> </span>chown<span class="w"> </span>root:nginx<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>bunkerweb-aio<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>Restaurez l'image précédente</strong>, en réutilisant le même volume <code>/data</code> :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">docker run</label><label for="__tabbed_8_2">Docker Compose</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Arrêtez et supprimez le conteneur actuel</strong> (le volume <code>/data</code> est conservé) :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>stop<span class="w"> </span>bunkerweb-aio
+docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Téléchargez l'image précédente</strong> :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:&lt;old_version&gt;
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Recréez le conteneur</strong> avec les mêmes options, les mêmes ports et le même volume <code>/data</code> qu'avant :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+bunkerity/bunkerweb-all-in-one:&lt;old_version&gt;
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Mettez à jour le fichier Docker Compose</strong> pour utiliser l'image All-In-One précédente :
+    <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Redémarrez le conteneur</strong>. Le volume <code>/data</code> est rattaché automatiquement :
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
 <ol>
 <li>
 <p><strong>Extrayez la sauvegarde si elle est compressée</strong>.</p>
@@ -1666,7 +1855,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </li>
 <li>
 <p><strong>Restaurez la sauvegarde</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">MySQL/MariaDB</label><label for="__tabbed_6_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">SQLite</label><label for="__tabbed_9_2">MySQL/MariaDB</label><label for="__tabbed_9_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
@@ -1762,10 +1951,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <li>Avant de procéder à la mise à niveau de la base de données, assurez-vous d'effectuer une sauvegarde complète de l'état actuel de la base de données.</li>
 <li>Utilisez les outils appropriés pour sauvegarder l'intégralité de la base de données, y compris les données, les schémas et les configurations.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">1.5.7 et après</label><label for="__tabbed_7_2">1.5.6 et avant</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">1.5.7 et après</label><label for="__tabbed_10_2">1.5.6 et avant</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Docker</label><label for="__tabbed_8_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Docker</label><label for="__tabbed_11_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
@@ -1777,7 +1966,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <details class="warning">
 <summary>Informations pour les utilisateurs de Red Hat Enterprise Linux (RHEL) 8.10</summary>
 <p>Si vous utilisez <strong>RHEL 8.10</strong> et prévoyez d'utiliser une <strong>base de données externe</strong>, vous devrez installer le paquet <code>mysql-community-client</code> afin que la commande <code>mysqldump</code> soit disponible. Vous pouvez installer le paquet en exécutant les commandes suivantes :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">MySQL/MariaDB</label><label for="__tabbed_9_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">MySQL/MariaDB</label><label for="__tabbed_12_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -1822,10 +2011,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">SQLite</label><label for="__tabbed_10_2">MariaDB</label><label for="__tabbed_10_3">MySQL</label><label for="__tabbed_10_4">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:4"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><input id="__tabbed_13_4" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">SQLite</label><label for="__tabbed_13_2">MariaDB</label><label for="__tabbed_13_3">MySQL</label><label for="__tabbed_13_4">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Docker</label><label for="__tabbed_11_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Docker</label><label for="__tabbed_14_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Nous devons d'abord installer le paquet <code>sqlite</code> dans le conteneur.</p>
@@ -1843,7 +2032,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Docker</label><label for="__tabbed_12_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mariadb-dump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
@@ -1857,7 +2046,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Docker</label><label for="__tabbed_13_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Docker</label><label for="__tabbed_16_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mysqldump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
@@ -1871,7 +2060,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Docker</label><label for="__tabbed_14_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Docker</label><label for="__tabbed_17_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">PGPASSWORD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>pg_dump<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
@@ -1895,7 +2084,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <ul>
 <li>
 <p>Mettez à niveau BunkerWeb vers la dernière version.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Docker</label><label for="__tabbed_18_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -1935,7 +2124,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </li>
 <li>
 <p><strong>Mettre à jour BunkerWeb</strong> :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Debian/Ubuntu</label><label for="__tabbed_16_2">Fedora/RedHat</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Debian/Ubuntu</label><label for="__tabbed_19_2">Fedora/RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Tout d'abord, si vous avez précédemment marqué le paquet BunkerWeb comme mis en attente, annulez cette mise en attente :</p>
@@ -1989,7 +2178,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </li>
 <li>
 <p><strong>Vérifier les journaux </strong>: vérifiez les journaux du service de planification pour vous assurer que la migration a réussi.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Docker</label><label for="__tabbed_17_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Docker</label><label for="__tabbed_20_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>&lt;scheduler_container&gt;
@@ -2017,7 +2206,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 <li><a href="https://discord.bunkerity.com">Rejoignez le serveur Discord de BunkerWeb</a></li>
 </ul>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Docker</label><label for="__tabbed_18_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Docker</label><label for="__tabbed_21_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -2029,7 +2218,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </li>
 <li>
 <p><strong>Restaurez la sauvegarde</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">SQLite</label><label for="__tabbed_19_2">MySQL/MariaDB</label><label for="__tabbed_19_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">SQLite</label><label for="__tabbed_22_2">MySQL/MariaDB</label><label for="__tabbed_22_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -2136,7 +2325,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </li>
 <li>
 <p><strong>Restaurez la sauvegarde</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">SQLite</label><label for="__tabbed_20_2">MySQL/MariaDB</label><label for="__tabbed_20_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:3"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">SQLite</label><label for="__tabbed_23_2">MySQL/MariaDB</label><label for="__tabbed_23_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
