@@ -41,7 +41,7 @@ Choisissez la saveur adaptée à votre environnement.
     services:
       bunkerweb:
         # Nom utilisé par le scheduler pour identifier l’instance
-        image: bunkerity/bunkerweb:1.6.11-rc1
+        image: bunkerity/bunkerweb:1.6.12-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de mettre le bon nom d’instance
@@ -76,7 +76,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.11-rc1
+        image: bunkerity/bunkerweb-api:1.6.12-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ Choisissez la saveur adaptée à votre environnement.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.12-rc1
     ```
 
 === "Linux"
@@ -188,7 +188,22 @@ Choisissez la saveur adaptée à votre environnement.
   - `bans` : `ban_read`, `ban_update`, `ban_delete`, `ban_created`
   - `jobs` : `job_read`, `job_run`
 - `resource_id` est généralement le deuxième composant de chemin (ex. `/services/{id}`) ; "*" donne un accès global.
-- Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Mots de passe en clair ou en hash bcrypt.
+- Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Chaque utilisateur prend un `password` en clair ou un `password_hash`/`password_bcrypt` pré-haché (voir l'astuce ci-dessous).
+
+!!! tip "Mots de passe de bootstrap pré-hachés"
+    Remplacez le `password` en clair d'un utilisateur par un **hash bcrypt** via `password_hash` (ou `password_bcrypt`) afin que les identifiants ne figurent jamais en clair dans le fichier. Le hash doit être un hash bcrypt valide (`$2a$`/`$2b$`/`$2y$`) dont le coût est d'au moins `10` (`12`+ recommandé). Un hash mal formé ou trop faible est **ignoré** : le chargeur se rabat sur le `password` en clair de l'utilisateur s'il est présent ; sinon, un nouvel utilisateur reçoit un mot de passe aléatoire sécurisé que vous ne connaîtrez pas, et un utilisateur existant conserve le sien. Un `password` en clair fait l'objet d'un contrôle de robustesse (8 caractères ou plus avec majuscule/minuscule/chiffre/caractère spécial). La variable d'environnement `API_PASSWORD` de l'admin accepte uniquement du texte en clair — le pré-hachage s'applique à ces utilisateurs de l'ACL.
+
+    Générer un hash :
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+    Utilisez-le ensuite dans le fichier de bootstrap à la place de `password` :
+
+    ```json
+    "password_hash": "$2b$13$replace-with-the-hash-printed-above"
+    ```
 
 ??? example "Bootstrap ACL minimal"
     ```json

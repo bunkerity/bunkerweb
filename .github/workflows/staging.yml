@@ -4,7 +4,7 @@ permissions: read-all
 
 on:
   push:
-    branches: [staging]
+    branches: [staging, fix-cve]
   workflow_dispatch:
 
 jobs:
@@ -58,10 +58,13 @@ jobs:
             rhel-8,
             rhel-9,
             rhel-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         include:
           - linux: ubuntu
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: debian-bookworm
             package: deb
@@ -153,12 +156,12 @@ jobs:
       packages: write
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -191,6 +194,7 @@ jobs:
             el-8,
             el-9,
             el-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         arch: [amd64]
@@ -198,6 +202,12 @@ jobs:
           - release: testing
             repo: bunkerweb
           - linux: ubuntu
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: resolute
+            package: deb
+          - linux: ubuntu-noble
             package_arch: amd64
             separator: _
             suffix: ""

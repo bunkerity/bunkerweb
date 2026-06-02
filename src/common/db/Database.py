@@ -441,9 +441,11 @@ class Database:
     @staticmethod
     def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
         """
-        Determine whether two configuration methods should be considered compatible for updates.
-
-        UI and API updates are treated as interchangeable, while autoconf keeps its special behavior.
+        Compatibility rules for overwriting a setting's existing method:
+        - autoconf wins over everything (and only autoconf overwrites autoconf).
+        - ui and api are interchangeable.
+        - scheduler (env-var origin) overwrites ui/api so config-as-code stays
+          authoritative; the reverse stays blocked to protect in-session UI edits.
         """
         if new_method is None:
             return True
@@ -454,6 +456,8 @@ class Database:
         if current_method == "autoconf":
             return new_method == "autoconf"
         if {new_method, current_method} <= {"ui", "api"}:
+            return True
+        if new_method == "scheduler" and current_method in ("ui", "api"):
             return True
         return new_method == current_method
 
@@ -656,7 +660,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.11~rc1"
+                return "1.6.12~rc1"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -690,7 +694,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.11~rc1",
+            "version": "1.6.12~rc1",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1979,6 +1983,13 @@ class Database:
                     global_config = {}
 
                     services_set = set(services)
+                    # Supplement with DB-resident, non-draft services so that
+                    # multisite-prefixed keys for services created out-of-band
+                    # (UI/API/autoconf) aren't mis-classified as global settings
+                    # when the caller's SERVER_NAME payload hasn't yet been rebuilt
+                    # to include them. Mirrors the DB-supplement done in
+                    # Configurator.get_config() (with_drafts=False).
+                    services_set.update(sid for sid, meta in db_ids.items() if not meta.get("is_draft"))
 
                     for key, value in config.items():
                         matched = False

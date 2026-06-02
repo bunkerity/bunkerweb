@@ -146,6 +146,9 @@ DB_CHECK_STALE_INTERVAL_SECONDS = 30.0
 DB_CHECK_LAST_RUN_KEY = "DB_STATE_CHECK_LAST_RUN"
 DB_CHECK_RUNNING_KEY = "DB_STATE_CHECK_RUNNING"
 
+# Flask serves app/static/* at the URL root (static_url_path="/"); before_request short-circuits these.
+STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
+
 # Shared thread pool executors for background tasks to prevent thread spawning on every request
 _db_check_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-db-check")
 _periodic_tasks_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="bw-ui-periodic")
@@ -1086,6 +1089,11 @@ def _enforce_session_lifetime() -> bool:
 
 @app.before_request
 def before_request():
+    # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
+    # returning None lets the static view still serve the file (after_request supplies the nonce).
+    if request.path.startswith(STATIC_PATH_PREFIXES):
+        return
+
     DATA.load_from_file()
     if DATA.get("SERVER_STOPPING", False):
         response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
@@ -1115,7 +1123,7 @@ def before_request():
                     app.config["REMEMBER_COOKIE_DOMAIN"] = None
                 _cookie_config_detected = True
 
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
+    if not request.path.startswith(STATIC_PATH_PREFIXES):
         metadata = DB.get_metadata()
 
         # Plugin reload trigger
@@ -1359,11 +1367,7 @@ def set_security_headers(response):
 @app.teardown_request
 def teardown_request(teardown):
     with suppress(AssertionError, RuntimeError):
-        if (
-            not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
-            and current_user.is_authenticated
-            and "session_id" in session
-        ):
+        if not request.path.startswith(STATIC_PATH_PREFIXES) and current_user.is_authenticated and "session_id" in session:
             _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:

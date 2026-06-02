@@ -34,6 +34,7 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 | `USE_MTLS`                    | `no`          | multisite | nein     | **Mutual TLS verwenden:** Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.                                                                   |
 | `MTLS_CA_CERTIFICATE`         |               | multisite | nein     | **Client-CA-Bundle:** Absoluter Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM). Erforderlich, wenn `MTLS_VERIFY_CLIENT` `on` oder `optional` ist; muss lesbar sein. |
 | `MTLS_VERIFY_CLIENT`          | `on`          | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).   |
+| `MTLS_URL`                    |               | multisite | ja       | **mTLS-URL:** Regex, der gegen die Anfrage-URI geprüft wird, um nur auf passenden Pfaden ein gültiges Client-Zertifikat zu verlangen (nur HTTP). Erfordert `MTLS_VERIFY_CLIENT` auf `optional` oder `optional_no_ca`. Leer lassen, um mTLS für die gesamte Site zu erzwingen. |
 | `MTLS_VERIFY_DEPTH`           | `2`           | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                        |
 | `MTLS_FORWARD_CLIENT_HEADERS` | `yes`         | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter. |
 | `MTLS_CRL`                    |               | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde.                          |
@@ -46,6 +47,12 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 
 !!! info "Vertrauensquelle und Verifizierung"
     BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.
+
+!!! warning "Pfadbezogenes mTLS erfordert den optionalen Modus"
+    Die NGINX-Direktive `ssl_verify_client` ist nur im `server`-Kontext gültig – sie kann nicht in einem `location`-Block stehen. Um ein Zertifikat nur auf bestimmten Pfaden zu verlangen, setzen Sie `MTLS_VERIFY_CLIENT` auf `optional` (oder `optional_no_ca`), damit der Handshake für jeden Pfad abgeschlossen wird, und listen Sie die geschützten Pfade in `MTLS_URL_n` auf. BunkerWeb erzwingt das Zertifikat dann pro Anfrage in Lua auf den passenden URLs. Belassen Sie `MTLS_VERIFY_CLIENT` auf `on`, während Sie `MTLS_URL_n` setzen, weist NGINX Clients ohne Zertifikat bereits beim Handshake ab, bevor die pfadbezogene Logik greift – die Erzwingung bleibt dann site-weit.
+
+!!! info "Browser-Zertifikatsabfragen im optionalen Modus"
+    Der TLS-Handshake erfolgt, bevor NGINX die angeforderte URL kennt; im Modus `optional` sendet NGINX daher weiterhin bei jeder Verbindung einen `CertificateRequest`. Die Erzwingung wird pfadbezogen, die Einladung auf Handshake-Ebene jedoch nicht – Browser fragen unter Umständen auch auf ungeschützten Pfaden nach einem Zertifikat (Verhalten je nach Browser unterschiedlich). Auf diesen Pfaden lässt BunkerWeb die Anfrage zu, ob ein Zertifikat vorgelegt wird oder nicht.
 
 ### Konfigurationsbeispiele
 
@@ -81,3 +88,23 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
     MTLS_VERIFY_CLIENT: "optional_no_ca"
     MTLS_FORWARD_CLIENT_HEADERS: "no"
     ```
+
+=== "Pfadbezogenes mTLS (z. B. nur `/login`)"
+
+    Verlangen Sie Client-Zertifikate nur auf ausgewählten Pfaden und lassen Sie den Rest der Site offen. Die Verifizierung läuft im Modus `optional`, damit der Handshake auf nicht authentifizierten Pfaden abgeschlossen wird; BunkerWeb erzwingt das Zertifikat anschließend pro Anfrage auf URLs, die zu `MTLS_URL_n` passen (eine Regex pro Eintrag):
+
+    ```yaml
+    USE_MTLS: "yes"
+    MTLS_CA_CERTIFICATE: "/etc/bunkerweb/mtls/partner-ca.pem"
+    MTLS_VERIFY_CLIENT: "optional"
+    MTLS_URL_1: "^/login"
+    MTLS_URL_2: "^/admin"
+    MTLS_FORWARD_CLIENT_HEADERS: "yes"
+    ```
+
+    | Anfrage          | Zertifikat            | Ergebnis                                 |
+    | ---------------- | --------------------- | ---------------------------------------- |
+    | `GET /`          | keines                | Erlaubt (Pfad ohne mTLS)                 |
+    | `GET /login`     | keines                | Abgelehnt (`403`)                        |
+    | `GET /login`     | gültig                | Erlaubt, `X-SSL-Client-*` weitergeleitet |
+    | `GET /login`     | ungültig / abgelaufen | Abgelehnt (`403`)                        |

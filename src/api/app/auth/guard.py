@@ -8,7 +8,6 @@ from .biscuit import guard as biscuit_guard
 from ..utils import check_password, get_api_db
 from .common import get_auth_header, parse_bearer_token
 
-
 security = HTTPBasic(auto_error=False)
 
 

@@ -1040,6 +1040,16 @@ $(document).ready(() => {
       );
     };
 
+    // Skip default-method values the user didn't touch; submitting them would
+    // create a method="ui" DB row that shadows the template/default overlay.
+    const shouldSkipUnchangedDefault = ($input, currentValue) => {
+      const method = $input.attr("data-method");
+      if (method !== "default") return false;
+      const original = $input.attr("data-original");
+      if (original === undefined) return false;
+      return String(currentValue) === String(original);
+    };
+
     const addChildrenToForm = (form, elem, isEasy = false) => {
       elem.find("input, select").each(function () {
         const $this = $(this);
@@ -1064,11 +1074,26 @@ $(document).ready(() => {
         }
 
         if (isFileTextSetting) {
+          if (shouldSkipUnchangedDefault($this, settingValue)) {
+            const lastFileName = String(
+              $this.data("lastFileName") || $this.attr("data-file-name") || "",
+            ).trim();
+            const originalFileName = String(
+              $this.attr("data-original-file-name") || "",
+            ).trim();
+            if (lastFileName === originalFileName) {
+              return;
+            }
+          }
           const settingFileName = String(
             $this.data("lastFileName") || $this.attr("data-file-name") || "",
           ).trim();
           appendHiddenInput(form, settingName, settingValue, true);
           appendHiddenInput(form, `${settingName}__FILE_NAME`, settingFileName);
+          return;
+        }
+
+        if (shouldSkipUnchangedDefault($this, settingValue)) {
           return;
         }
 
@@ -1088,6 +1113,9 @@ $(document).ready(() => {
           if ($hiddenInput.length && $hiddenInput.attr("name")) {
             const settingName = $hiddenInput.attr("name");
             const settingValue = $hiddenInput.val() || "";
+            if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+              return;
+            }
             appendHiddenInput(form, settingName, settingValue);
           }
         });
@@ -1100,6 +1128,9 @@ $(document).ready(() => {
         if ($hiddenInput.length && $hiddenInput.attr("name")) {
           const settingName = $hiddenInput.attr("name");
           const settingValue = $hiddenInput.val() || "";
+          if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+            return;
+          }
           appendHiddenInput(form, settingName, settingValue);
         }
       });

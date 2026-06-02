@@ -33,6 +33,38 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="BunkerWeb user interface" />
         <meta name="author" content="Bunkerity" />
+        <!-- Anti-FOUC: resolve theme before first paint on anonymous pages.
+             Logged-in pages already render the authoritative DB theme inline. -->
+        {% if not current_user.is_authenticated %}
+            <script nonce="{{ script_nonce }}">
+          (function () {
+            try {
+              var serverTheme = {{ theme | tojson }};
+              var stored = null;
+              try { stored = localStorage.getItem("theme"); } catch (e) {}
+              var desired = stored;
+              if (desired !== "light" && desired !== "dark") {
+                desired = (window.matchMedia &&
+                  window.matchMedia("(prefers-color-scheme: dark)").matches)
+                  ? "dark" : "light";
+              }
+              window.__bwResolvedTheme = desired;
+              if (desired !== serverTheme) {
+                var html = document.documentElement;
+                if (desired === "dark") {
+                  html.classList.remove("light-style");
+                  html.classList.add("dark-style", "dark");
+                  html.setAttribute("data-bs-theme", "dark");
+                } else {
+                  html.classList.remove("dark-style", "dark");
+                  html.classList.add("light-style");
+                  html.removeAttribute("data-bs-theme");
+                }
+              }
+            } catch (e) {}
+          })();
+            </script>
+        {% endif %}
         {% set page_title_fallback = (current_endpoint or "") | replace('-', ' ') | replace('_', ' ') | title %}
         <title>
             {% if page_title_fallback %}{{ page_title_fallback }} -&nbsp;{% endif %}

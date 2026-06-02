@@ -56,18 +56,21 @@ function misc:ssl_client_hello_default()
 	end
 
 	local ssl_clt = require "ngx.ssl.clienthello"
-	local host, err = ssl_clt.get_client_hello_server_name()
+	local host
+	host, err = ssl_clt.get_client_hello_server_name()
 	if not host then
 		return self:ret(true, "can't get SNI host, denying access : " .. (err or "no SNI"), HTTP_CLOSE)
 	end
 
-	local multisite, err = get_variable("MULTISITE", false)
+	local multisite
+	multisite, err = get_variable("MULTISITE", false)
 	if multisite == nil then
 		return self:ret(false, "can't get MULTISITE variable : " .. err)
 	end
 
 	if multisite == "no" then
-		local domains, err = get_variable("SERVER_NAME", false)
+		local domains
+		domains, err = get_variable("SERVER_NAME", false)
 		if domains == nil then
 			return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 		end
@@ -77,7 +80,8 @@ function misc:ssl_client_hello_default()
 			end
 		end
 	else
-		local variables, err = self.internalstore:get("variables", true)
+		local variables
+		variables, err = self.internalstore:get("variables", true)
 		if not variables then
 			return self:ret(false, "can't get variables : " .. err)
 		end

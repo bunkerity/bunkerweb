@@ -377,12 +377,11 @@ $(document).ready(function () {
 
       if (!bans.length) return;
 
-      // Submit form to /bans/ban in new tab
+      // Submit form to /bans/ban in the same tab
       const form = $("<form>", {
         method: "POST",
         action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
         class: "visually-hidden",
-        target: "_blank",
       });
       form.append(
         $("<input>", {
@@ -1880,7 +1879,6 @@ $(document).ready(function () {
       method: "POST",
       action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
       class: "visually-hidden",
-      target: "_blank",
     });
     form.append(
       $("<input>", {

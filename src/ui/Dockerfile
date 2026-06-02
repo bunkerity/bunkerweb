@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc AS builder
+FROM python:3.14-alpine@sha256:5a824eb82cc75361f98611f3cfc5091ea33f10a6ccea4d4ebdabbc523b9a1614 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -66,7 +66,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.13-alpine@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc
+FROM python:3.14-alpine@sha256:5a824eb82cc75361f98611f3cfc5091ea33f10a6ccea4d4ebdabbc523b9a1614
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -84,6 +84,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite post
 
 # Fix CVEs
 RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
+RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -105,7 +106,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.11~rc1"
+LABEL version="1.6.12~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

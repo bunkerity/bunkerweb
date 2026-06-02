@@ -1,7 +1,5 @@
-import fcntl
-import os
 from collections import defaultdict
-from contextlib import contextmanager, suppress
+from contextlib import suppress
 from datetime import datetime
 from html import escape
 from os import getenv
@@ -25,6 +23,7 @@ from common_utils import safe_tar_extractall  # type: ignore
 from letsencrypt_consistency import (  # type: ignore
     detect_orphan_renewals as _detect_orphan_renewals,
     is_safe_cert_name as _is_safe_cert_name,
+    le_cache_write_lock as _le_cache_write_lock,
     letsencrypt_cache_consistent as _le_cache_consistent,
     path_is_inside as _path_is_inside,
 )
@@ -99,34 +98,6 @@ def _ui_scratch_dir() -> TemporaryDirectory:
     """
     Path(SCRATCH_ROOT).mkdir(parents=True, exist_ok=True)
     return TemporaryDirectory(prefix="le-ui-", dir=SCRATCH_ROOT)
-
-
-@contextmanager
-def _le_cache_write_lock():
-    """Serialize the read-modify-write of the canonical LE DB cache row.
-
-    Per-request scratch dirs isolated the filesystem race, but the DB
-    upsert is still a read-modify-write: heal A reads tar(X+Y), removes X,
-    writes tar(Y); concurrent heal B reads tar(X+Y), removes Y, writes
-    tar(X). Last writer wins → one heal silently undone, the other might
-    surface only via the secondary `checked_changes` collision.
-
-    flock on a per-host sentinel under SCRATCH_ROOT closes that window
-    across every gunicorn worker on the same host (workers share the same
-    filesystem). For multi-host UI deployments — not a current production
-    pattern in BunkerWeb — DB-side optimistic concurrency would be required
-    (tracked as a follow-up).
-    """
-    Path(SCRATCH_ROOT).mkdir(parents=True, exist_ok=True)
-    lock_path = Path(SCRATCH_ROOT).joinpath(".cache-write.lock")
-    fd = os.open(lock_path.as_posix(), os.O_CREAT | os.O_RDWR, 0o600)
-    try:
-        fcntl.flock(fd, fcntl.LOCK_EX)
-        yield
-    finally:
-        with suppress(OSError):
-            fcntl.flock(fd, fcntl.LOCK_UN)
-        os.close(fd)
 
 
 def download_certificates(target: Path) -> None:

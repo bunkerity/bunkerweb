@@ -125,12 +125,15 @@ jobs:
             rhel-8,
             rhel-9,
             rhel-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: latest
           - linux: ubuntu
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: debian-bookworm
             package: deb
@@ -244,6 +247,7 @@ jobs:
             el-8,
             el-9,
             el-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         arch: [amd64, arm64]
@@ -251,6 +255,11 @@ jobs:
           - release: latest
             repo: bunkerweb
           - linux: ubuntu
+            separator: _
+            suffix: ""
+            version: resolute
+            package: deb
+          - linux: ubuntu-noble
             separator: _
             suffix: ""
             version: noble
@@ -298,6 +307,9 @@ jobs:
           - linux: ubuntu
             arch: amd64
             package_arch: amd64
+          - linux: ubuntu-noble
+            arch: amd64
+            package_arch: amd64
           - linux: debian-bookworm
             arch: amd64
             package_arch: amd64
@@ -323,6 +335,9 @@ jobs:
             arch: amd64
             package_arch: amd64
           - linux: ubuntu
+            arch: arm64
+            package_arch: arm64
+          - linux: ubuntu-noble
             arch: arm64
             package_arch: arm64
           - linux: debian-bookworm

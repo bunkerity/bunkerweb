@@ -105,7 +105,7 @@ Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzerober
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.11-rc1/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.12-rc1/examples)-Verzeichnis des Repositorys.
 
 ## Benutzerdefinierte Konfigurationen {#custom-configurations}
 
@@ -126,7 +126,7 @@ Die Verwaltung benutzerdefinierter Konfigurationen über die Web-Benutzeroberfl�
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.11-rc1/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.12-rc1/examples)-Verzeichnis des Repositorys.
 
 ## Datenbank
 
@@ -168,7 +168,7 @@ Durch Angabe des entsprechenden Datenbank-URI in der Konfiguration können Sie B
 | **Docker**       | ✅ `v18` und früher (all-in-one: ✅ `v17`) | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
 | **Kubernetes**   | ✅ `v18` und früher                       | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
 | **Autoconf**     | ✅ `v18` und früher                       | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
-| **Linux-Pakete** | Siehe Hinweise unten                      | Siehe Hinweise unten | Siehe Hinweise unten | ✅ Unterstützt |
+| **Linux-Pakete** | Siehe Hinweise unten                     | Siehe Hinweise unten | Siehe Hinweise unten | ✅ Unterstützt |
 
 !!! info "Hinweise"
     - **PostgreSQL**: Alpine-basierte Pakete enthalten jetzt den `v18`-Client, daher werden `v18` und frühere Versionen standardmäßig unterstützt; das all-in-one-Image enthält weiterhin den `v17`-Client, daher wird `v18` dort nicht unterstützt.

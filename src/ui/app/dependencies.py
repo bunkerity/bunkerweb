@@ -30,6 +30,12 @@ PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 # This prevents spawning new threads for each config operation
 CONFIG_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-route-tasks")
 
+# Dedicated pool for read-heavy page fan-outs (e.g. /home runs its Redis
+# aggregations and DB queries concurrently). Kept separate from
+# CONFIG_TASKS_EXECUTOR so a long-running config mutation (import, plugin
+# update) can never starve a user-facing page load via head-of-line blocking.
+PAGE_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-page-tasks")
+
 
 def reload_plugins():
     plugins = DB.get_plugins(_type="all", with_data=True)

@@ -14,7 +14,6 @@ from ..utils import BISCUIT_PRIVATE_KEY_FILE, check_password, get_api_db
 from ..config import api_config
 from ..auth.common import get_auth_header
 
-
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBasic(auto_error=False)
 # Use shared logger instance from utils
@@ -118,15 +117,13 @@ async def login(request: Request, credentials: HTTPBasicCredentials | None = Dep
 
     client_ip = request.client.host if request.client else "0.0.0.0"
     host = request.headers.get("host", "bwapi")
-    builder = BiscuitBuilder(
-        f"""
+    builder = BiscuitBuilder(f"""
         user("{(user.get('username') if isinstance(user, dict) else username) or 'user'}");
         time({datetime.now(timezone.utc).isoformat()});
         client_ip("{client_ip}");
         domain("{host}");
         version("{get_version()}");
-        """
-    )
+        """)
 
     # API has no role logic; encode read/write under a fixed role name.
     role_name = "api_user"
