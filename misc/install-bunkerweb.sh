@@ -5,7 +5,7 @@
 
 set -e
 
-# Skip debconf prompts; fatal under --quiet/CI. Ignored on dnf/pkg/rc.d.
+# Skip debconf prompts; fatal under --quiet/CI. Ignored on dnf-based systems.
 export DEBIAN_FRONTEND=noninteractive
 
 # Registry of 0600 secret tempfiles wiped on every exit path (DB option files, PGPASSFILE, etc.).
@@ -13,13 +13,24 @@ declare -a _BW_SECRET_TMPFILES=()
 _bw_register_secret_tmpfile() {
     _BW_SECRET_TMPFILES+=("$1")
 }
+# Securely delete one path (shred, falling back to rm). Never fails the caller.
+_bw_shred() {
+    shred -u "$1" 2>/dev/null || rm -f "$1" 2>/dev/null || true
+}
+# Create a registered 0600 tempfile and echo its path; returns 1 if mktemp fails.
+# Centralizes the 0600 guarantee for every credential-bearing tempfile.
+_bw_mk_secret_tmpfile() {
+    local _t
+    _t=$(mktemp "${1:-/tmp/bw-secret.XXXXXX}") || return 1
+    chmod 600 "$_t" 2>/dev/null || true
+    _bw_register_secret_tmpfile "$_t"
+    printf '%s' "$_t"
+}
 _bw_wipe_secret_tmpfiles() {
     local _f
     for _f in "${_BW_SECRET_TMPFILES[@]:-}"; do
         [ -n "$_f" ] || continue
-        if [ -e "$_f" ]; then
-            shred -u "$_f" 2>/dev/null || rm -f "$_f"
-        fi
+        [ -e "$_f" ] && _bw_shred "$_f"
     done
     _BW_SECRET_TMPFILES=()
 }
@@ -158,6 +169,7 @@ UPGRADE_SCENARIO="no"
 BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
 SYSTEM_ARCH=""
+DISTRO_FAMILY=""             # set by detect_os: "debian" | "rhel" (apt vs dnf)
 INSTALL_EPEL="auto"
 # TUI mode: auto (gum→whiptail→read) | yes (hard error if none) | no (read only).
 USE_TUI="${BW_INSTALL_TUI:-auto}"
@@ -256,15 +268,13 @@ TUI_BACKTITLE="BunkerWeb — Powerful Protection, Simplified."
 # ---------------------------------------------------------------------------
 # gum bootstrap — pinned for supply-chain safety. When bumping GUM_VERSION:
 #   1. fetch https://github.com/charmbracelet/gum/releases/download/v$VER/checksums.txt
-#   2. update each Linux_/Freebsd_ SHA256 below
+#   2. update each Linux_ SHA256 below
 # ---------------------------------------------------------------------------
 readonly GUM_VERSION="0.17.0"
 readonly GUM_GH_RELEASE="https://github.com/charmbracelet/gum/releases/download/v${GUM_VERSION}"
 # Pinned against Charm's `checksums.txt`. cosign-verified at runtime when available; pins are the local trust anchor.
 readonly GUM_SHA256_LINUX_X86_64="69ee169bd6387331928864e94d47ed01ef649fbfe875baed1bbf27b5377a6fdb"
 readonly GUM_SHA256_LINUX_ARM64="b0b9ed95cbf7c8b7073f17b9591811f5c001e33c7cfd066ca83ce8a07c576f9c"
-readonly GUM_SHA256_FREEBSD_X86_64="9b155543613a3293558ad01f21b9593d38401613a7398bd14fc115810859f39c"
-readonly GUM_SHA256_FREEBSD_ARM64="722c2933c7f91a947463c4d3601f00957ca5313963248ffc133632996bd1e65d"
 
 # Colored output. Under --quiet, status/step go to /dev/null but warning/error
 # still surface via saved stderr fd ($_BW_ERR_FD=4) — operator must see fatals.
@@ -272,20 +282,22 @@ print_status() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
 
-print_warning() {
+# Emit a colored tagged line to stderr — or to the saved stderr fd ($_BW_ERR_FD=4)
+# under --quiet so fatals/warnings still reach the operator. $1=color $2=tag $3=message.
+_bw_emit() {
     if [ "${QUIET_MODE:-no}" = "yes" ] && [ -n "${_BW_ERR_FD:-}" ]; then
-        echo -e "${YELLOW}[WARNING]${NC} $1" >&"$_BW_ERR_FD"
+        echo -e "${1}${2}${NC} $3" >&"$_BW_ERR_FD"
     else
-        echo -e "${YELLOW}[WARNING]${NC} $1" >&2
+        echo -e "${1}${2}${NC} $3" >&2
     fi
 }
 
+print_warning() {
+    _bw_emit "$YELLOW" "[WARNING]" "$1"
+}
+
 print_error() {
-    if [ "${QUIET_MODE:-no}" = "yes" ] && [ -n "${_BW_ERR_FD:-}" ]; then
-        echo -e "${RED}[ERROR]${NC} $1" >&"$_BW_ERR_FD"
-    else
-        echo -e "${RED}[ERROR]${NC} $1" >&2
-    fi
+    _bw_emit "$RED" "[ERROR]" "$1"
 }
 
 print_step() {
@@ -537,6 +549,19 @@ start_optional_service() {
     return 1
 }
 
+# Enable a unit, then restart it if already active else start it (hard-fail via
+# run_cmd). `enable --now` is a no-op on an already-active unit, so this is the
+# only way post-postinst config changes (MULTISITE, DNS_RESOLVERS) actually apply.
+svc_restart_or_start() {
+    local unit="$1"
+    run_cmd systemctl enable "$unit"
+    if systemctl is-active --quiet "$unit"; then
+        run_cmd systemctl restart "$unit"
+    else
+        run_cmd systemctl start "$unit"
+    fi
+}
+
 # ---------------------------------------------------------------------------
 # TUI helper layer — all prompts dispatch gum → whiptail → plain-read.
 # tui_init() picks the order once per run.
@@ -560,8 +585,6 @@ _detect_gum_arch() {
     case "$_os/$_machine" in
         Linux/x86_64|Linux/amd64)      echo "Linux_x86_64"   ;;
         Linux/aarch64|Linux/arm64)     echo "Linux_arm64"    ;;
-        FreeBSD/x86_64|FreeBSD/amd64)  echo "Freebsd_x86_64" ;;
-        FreeBSD/aarch64|FreeBSD/arm64) echo "Freebsd_arm64"  ;;
         *) return 1 ;;
     esac
 }
@@ -589,8 +612,6 @@ install_gum_silent() {
     case "$_arch" in
         Linux_x86_64)   _hash_pin="$GUM_SHA256_LINUX_X86_64"   ;;
         Linux_arm64)    _hash_pin="$GUM_SHA256_LINUX_ARM64"    ;;
-        Freebsd_x86_64) _hash_pin="$GUM_SHA256_FREEBSD_X86_64" ;;
-        Freebsd_arm64)  _hash_pin="$GUM_SHA256_FREEBSD_ARM64"  ;;
         *) return 1 ;;
     esac
 
@@ -862,6 +883,16 @@ _tui_log_choice() {
         "${BOLD}" "${GREEN}" "${answer}" "${NC}" >&2
 }
 
+# Dialog box width clamped to the terminal: capped at 78, 6-col margin on narrow
+# terms, floor of 40. Single source for the gum/whiptail box sizing.
+_tui_box_width() {
+    local _w
+    _w=$(tput cols 2>/dev/null || echo 80)
+    _w=$(( _w > 84 ? 78 : _w - 6 ))
+    [ "$_w" -lt 40 ] && _w=40
+    printf '%s' "$_w"
+}
+
 # Render multi-line explanatory text before a tui_yesno/tui_menu. gum confirm crops on narrow terms,
 # so we wrap via `fold -s` (gum style doesn't word-wrap on its own).
 _tui_explain() {
@@ -869,11 +900,8 @@ _tui_explain() {
     body=$(_tui_expand_newlines "$1")
     # Skip empty body — would render an empty rounded box under gum.
     [ -n "$body" ] || return 0
-    local _term_w _box_w _wrap_w
-    _term_w=$(tput cols 2>/dev/null || echo 80)
-    # Box capped at 78; 6-col safety margin on narrow terms.
-    _box_w=$(( _term_w > 84 ? 78 : _term_w - 6 ))
-    [ "$_box_w" -lt 40 ] && _box_w=40
+    local _box_w _wrap_w
+    _box_w=$(_tui_box_width)
     # Wrap = box - 4 (2 border + 2 pad).
     _wrap_w=$(( _box_w - 4 ))
     [ "$_wrap_w" -lt 36 ] && _wrap_w=36
@@ -1136,10 +1164,8 @@ tui_msgbox() {
     text=$(_tui_expand_newlines "$text")
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         # Rounded box + 1-keystroke wait. Body inherits terminal default — navy collapses on dark themes.
-        local _term_w _box_w
-        _term_w=$(tput cols 2>/dev/null || echo 80)
-        _box_w=$(( _term_w > 84 ? 78 : _term_w - 6 ))
-        [ "$_box_w" -lt 40 ] && _box_w=40
+        local _box_w
+        _box_w=$(_tui_box_width)
         local _bordered_title
         _bordered_title=$(gum style --bold --foreground "#2eac68" "$title")
         gum style \
@@ -2216,13 +2242,19 @@ default_db_port() {
 # patches the resulting template in place.
 # ---------------------------------------------------------------------------
 
-write_default_variables_env_template() {
+# Write a default env template to $1 only when it is empty/absent; the template
+# body is read from stdin. Applies the canonical root:nginx 0660 config perms.
+_write_env_template_if_empty() {
     local config_file="$1"
-    if [ -s "$config_file" ]; then
-        return 0
-    fi
+    [ -s "$config_file" ] && return 0
     ensure_config_file "$config_file"
-    cat > "$config_file" <<'EOF'
+    cat > "$config_file"
+    chown root:nginx "$config_file" 2>/dev/null || true
+    chmod 660 "$config_file" 2>/dev/null || true
+}
+
+write_default_variables_env_template() {
+    _write_env_template_if_empty "$1" <<'EOF'
 # BunkerWeb runtime configuration (shared across scheduler, UI and API).
 # The IS_LOADING flag is managed automatically by the deb/rpm postinstall
 # and the wizard; do not pre-seed it here.
@@ -2242,17 +2274,10 @@ KEEP_CONFIG_ON_RESTART=no
 # DATABASE_LOG_LEVEL=warning
 # DATABASE_RETRY_TIMEOUT=60
 EOF
-    chown root:nginx "$config_file" 2>/dev/null || true
-    chmod 660 "$config_file" 2>/dev/null || true
 }
 
 write_default_ui_env_template() {
-    local config_file="$1"
-    if [ -s "$config_file" ]; then
-        return 0
-    fi
-    ensure_config_file "$config_file"
-    cat > "$config_file" <<'EOF'
+    _write_env_template_if_empty "$1" <<'EOF'
 # OVERRIDE_ADMIN_CREDS=no
 ADMIN_USERNAME=
 ADMIN_PASSWORD=
@@ -2268,17 +2293,10 @@ LOG_LEVEL=info
 LOG_TYPES=file
 # LOG_FILE_PATH=/var/log/bunkerweb/ui.log
 EOF
-    chown root:nginx "$config_file" 2>/dev/null || true
-    chmod 660 "$config_file" 2>/dev/null || true
 }
 
 write_default_scheduler_env_template() {
-    local config_file="$1"
-    if [ -s "$config_file" ]; then
-        return 0
-    fi
-    ensure_config_file "$config_file"
-    cat > "$config_file" <<'EOF'
+    _write_env_template_if_empty "$1" <<'EOF'
 LOG_LEVEL=info
 LOG_TYPES=file
 # LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log
@@ -2288,17 +2306,10 @@ HEALTHCHECK_INTERVAL=30
 # in seconds (the minimum is calculated by the formula and whichever is greater: RELOAD_MIN_TIMEOUT or count(SERVERS) * 2))
 RELOAD_MIN_TIMEOUT=5
 EOF
-    chown root:nginx "$config_file" 2>/dev/null || true
-    chmod 660 "$config_file" 2>/dev/null || true
 }
 
 write_default_api_env_template() {
-    local config_file="$1"
-    if [ -s "$config_file" ]; then
-        return 0
-    fi
-    ensure_config_file "$config_file"
-    cat > "$config_file" <<'EOF'
+    _write_env_template_if_empty "$1" <<'EOF'
 # ==============================
 # BunkerWeb API Configuration
 # This file lists all supported API environment variables with their defaults.
@@ -2401,8 +2412,6 @@ WHITELIST_IPS=127.0.0.1
 #   REDIS_TIMEOUT, REDIS_KEEPALIVE_POOL, REDIS_SENTINEL_HOSTS,
 #   REDIS_SENTINEL_MASTER, REDIS_SENTINEL_USERNAME, REDIS_SENTINEL_PASSWORD
 EOF
-    chown root:nginx "$config_file" 2>/dev/null || true
-    chmod 660 "$config_file" 2>/dev/null || true
 }
 
 # Function to check if running as root
@@ -2416,8 +2425,7 @@ check_root() {
 # Function to detect operating system
 # Map a lowercase distro ID to its canonical display name. Used only by
 # detect_os() so the "Detected OS:" line is consistent across distros
-# (otherwise /etc/os-release gives lowercase IDs like "debian" / "ubuntu"
-# while FreeBSD has its own branch that prints "FreeBSD").
+# (otherwise /etc/os-release gives lowercase IDs like "debian" / "ubuntu").
 distro_display_name() {
     case "$1" in
         debian)      echo "Debian" ;;
@@ -2428,7 +2436,6 @@ distro_display_name() {
         almalinux)   echo "AlmaLinux" ;;
         centos)      echo "CentOS" ;;
         opensuse|opensuse-leap|opensuse-tumbleweed) echo "openSUSE" ;;
-        freebsd)     echo "FreeBSD" ;;
         "")          echo "unknown" ;;
         *)
             # Fallback: capitalize first letter only.
@@ -2441,15 +2448,6 @@ detect_os() {
     DISTRO_ID=""
     DISTRO_VERSION=""
     DISTRO_CODENAME=""
-
-    # Check for FreeBSD first
-    if [ "$(uname)" = "FreeBSD" ]; then
-        DISTRO_ID="freebsd"
-        DISTRO_VERSION=$(freebsd-version -u 2>/dev/null | cut -d'-' -f1 || uname -r | cut -d'-' -f1)
-        DISTRO_CODENAME=""
-        print_status "Detected OS: $(distro_display_name "$DISTRO_ID") $DISTRO_VERSION"
-        return
-    fi
 
     if [ -f /etc/os-release ]; then
         # shellcheck disable=SC1091
@@ -2478,7 +2476,23 @@ detect_os() {
         redhat) DISTRO_ID="rhel" ;;
     esac
 
+    # Package-manager family (single source for apt-vs-dnf decisions). Set once
+    # here so the rest of the script never re-derives it from DISTRO_ID.
+    case "$DISTRO_ID" in
+        debian|ubuntu)                      DISTRO_FAMILY="debian" ;;
+        fedora|rhel|rocky|almalinux|centos) DISTRO_FAMILY="rhel" ;;
+        *)                                  DISTRO_FAMILY="" ;;
+    esac
+
     print_status "Detected OS: $(distro_display_name "$DISTRO_ID") $DISTRO_VERSION"
+}
+
+# RHEL-family clone (excludes Fedora) — EPEL / RHEL-specific repo decisions.
+is_rhel_family() {
+    case "$DISTRO_ID" in
+        rhel|rocky|almalinux|centos) return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
 # Function to detect system architecture and warn for unsupported combinations
@@ -2508,6 +2522,8 @@ detect_architecture() {
             fi
             ;;
     esac
+    # Exported for downstream consumers (e.g. arch-specific package/tag selection).
+    # Intentionally kept even though nothing reads it yet — do not remove blindly.
     export NORMALIZED_ARCH
 }
 
@@ -2914,6 +2930,23 @@ ask_deployment_platform() {
     if [ "$_platform" = "docker" ]; then DOCKER_MODE="yes"; fi
 }
 
+# Prompt for the install type unless already set via a CLI flag. Shared by the
+# Docker and Linux questionnaire paths (kept identical — a drift here would offer
+# different topologies per platform).
+_ask_install_type() {
+    [ -n "$INSTALL_TYPE" ] && return 0
+    tui_section "📦 Installation Type" "Choose the type of installation based on your needs."
+    INSTALL_TYPE=$(tui_menu "Installation Type" \
+        "Choose the type of installation based on your needs:" \
+        "full" \
+        "full"      "Full Stack (default) — BunkerWeb + Scheduler + UI" \
+        "manager"   "Manager — Scheduler and UI to manage remote workers" \
+        "worker"    "Worker — only the BunkerWeb instance, managed remotely" \
+        "scheduler" "Scheduler only" \
+        "ui"        "Web UI only" \
+        "api"       "API service only") || { print_error "Installation cancelled."; exit 1; }
+}
+
 ask_user_preferences() {
     # Docker mode — same step sequence as the Linux path: installation type,
     # per-type configuration, then the shared configuration recap. The stack is
@@ -2924,18 +2957,7 @@ ask_user_preferences() {
             echo
             print_step "Configuration Options"
             echo
-            if [ -z "$INSTALL_TYPE" ]; then
-                tui_section "📦 Installation Type" "Choose the type of installation based on your needs."
-                INSTALL_TYPE=$(tui_menu "Installation Type" \
-                    "Choose the type of installation based on your needs:" \
-                    "full" \
-                    "full"      "Full Stack (default) — BunkerWeb + Scheduler + UI" \
-                    "manager"   "Manager — Scheduler and UI to manage remote workers" \
-                    "worker"    "Worker — only the BunkerWeb instance, managed remotely" \
-                    "scheduler" "Scheduler only" \
-                    "ui"        "Web UI only" \
-                    "api"       "API service only") || { print_error "Installation cancelled."; exit 1; }
-            fi
+            _ask_install_type
         fi
         ask_docker_preferences
         [ "$INTERACTIVE_MODE" = "yes" ] && present_configuration_summary
@@ -2948,18 +2970,7 @@ ask_user_preferences() {
         echo
 
         # Ask about installation type (Linux platform).
-        if [ -z "$INSTALL_TYPE" ]; then
-            tui_section "📦 Installation Type" "Choose the type of installation based on your needs."
-            INSTALL_TYPE=$(tui_menu "Installation Type" \
-                "Choose the type of installation based on your needs:" \
-                "full" \
-                "full"      "Full Stack (default) — BunkerWeb + Scheduler + UI" \
-                "manager"   "Manager — Scheduler and UI to manage remote workers" \
-                "worker"    "Worker — only the BunkerWeb instance, managed remotely" \
-                "scheduler" "Scheduler only" \
-                "ui"        "Web UI only" \
-                "api"       "API service only") || { print_error "Installation cancelled."; exit 1; }
-        fi
+        _ask_install_type
 
         if [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]]; then
             if [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
@@ -3597,18 +3608,6 @@ Pick \"external\" to plug BunkerWeb into a remote database you already operate."
             fi
 
             if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ]; then
-                if [ "$DB_INSTALL" = "mariadb" ] && [ "$DISTRO_ID" = "freebsd" ]; then
-                    print_warning "MariaDB auto-install is not supported on FreeBSD by this installer."
-                    print_warning "Falling back to SQLite — install MariaDB manually and set DATABASE_URI yourself."
-                    DB_INSTALL="none"
-                elif [ "$DB_INSTALL" = "postgresql" ] && [ "$DISTRO_ID" = "freebsd" ]; then
-                    print_warning "PostgreSQL auto-install is not supported on FreeBSD by this installer."
-                    print_warning "Falling back to SQLite — install PostgreSQL manually and set DATABASE_URI yourself."
-                    DB_INSTALL="none"
-                fi
-            fi
-
-            if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ]; then
                 local _db_answer
                 tui_section "✍️  Database Configuration"
                 while true; do
@@ -3823,10 +3822,8 @@ present_configuration_summary() {
 # never reaches bubbletea it hangs, and it reads as "stuck" even when it works.
 _present_summary_gum() {
     local _summary="$1"
-    local _term_w _box_w
-    _term_w=$(tput cols  2>/dev/null || echo 80)
-    _box_w=$(( _term_w > 84 ? 78 : _term_w - 6 ))
-    [ "$_box_w" -lt 40 ] && _box_w=40
+    local _box_w
+    _box_w=$(_tui_box_width)
 
     local _title
     _title=$(gum style --bold --foreground "#2eac68" "Configuration Summary")
@@ -4086,7 +4083,7 @@ _build_configuration_summary() {
 
 # RHEL database-client warning. Gated on INTERACTIVE_MODE — previously blocked unattended installs via `read`.
 show_rhel_database_warning() {
-    if [[ "$DISTRO_ID" =~ ^(rhel|centos|fedora|rocky|almalinux|redhat)$ ]]; then
+    if [ "$DISTRO_FAMILY" = "rhel" ]; then
         local msg="If you plan to use an external database (recommended for production), \
 install the appropriate database client first:
 
@@ -4108,20 +4105,8 @@ This is required for the BunkerWeb Scheduler to connect to your database."
 }
 
 check_supported_os() {
+    local major_version
     case "$DISTRO_ID" in
-        "freebsd")
-            major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
-            if [[ "$major_version" != "13" && "$major_version" != "14" ]]; then
-                print_warning "Only FreeBSD 13 and 14 are officially supported"
-                if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                    if ! tui_yesno "Unsupported OS" \
-                        "Only FreeBSD 13 and 14 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
-                        exit 1
-                    fi
-                fi
-            fi
-            NGINX_VERSION="1.28.0"
-            ;;
         "debian")
             if [[ "$DISTRO_VERSION" != "12" && "$DISTRO_VERSION" != "13" ]]; then
                 print_warning "Only Debian 12 (Bookworm) and 13 (Trixie) are officially supported"
@@ -4173,7 +4158,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10"
             exit 1
             ;;
     esac
@@ -4330,6 +4315,12 @@ _docker_ensure_runtime() {
     fi
 }
 
+# Loose 4-octet IPv4 shape check (does NOT range-check 0-255 — matches the prior
+# inline `=~` guards exactly). Used to filter parsed `ip`/`hostname` output.
+_looks_like_ipv4() {
+    [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]
+}
+
 # Private (RFC1918) IPv4 check.
 is_private_ipv4() {
     local ip="$1"
@@ -4450,7 +4441,7 @@ get_primary_ipv4() {
             for token in $route_output; do
                 if [ "$prev" = "src" ]; then
                     candidate="$token"
-                    if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$candidate"; then
+                    if _looks_like_ipv4 "$candidate" && ! is_loopback_or_link_local_ipv4 "$candidate"; then
                         echo "$candidate"
                         return 0
                     fi
@@ -4484,7 +4475,7 @@ get_primary_ipv4() {
         host_output=$(hostname -I 2>/dev/null || true)
         if [ -n "$host_output" ]; then
             for token in $host_output; do
-                if [[ $token =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && is_private_ipv4 "$token"; then
+                if _looks_like_ipv4 "$token" && is_private_ipv4 "$token"; then
                     primary_ip="$token"
                     break
                 fi
@@ -4500,7 +4491,7 @@ get_primary_ipv4() {
                     *inet\ *)
                         line=${line#*inet }
                         candidate=${line%%/*}
-                        if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && is_private_ipv4 "$candidate"; then
+                        if _looks_like_ipv4 "$candidate" && is_private_ipv4 "$candidate"; then
                             primary_ip="$candidate"
                             break
                         fi
@@ -4521,7 +4512,7 @@ get_primary_ipv4() {
             for token in $route_output; do
                 if [ "$prev" = "src" ]; then
                     candidate="$token"
-                    if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$candidate"; then
+                    if _looks_like_ipv4 "$candidate" && ! is_loopback_or_link_local_ipv4 "$candidate"; then
                         primary_ip="$candidate"
                         break
                     fi
@@ -4538,7 +4529,7 @@ get_primary_ipv4() {
                         *inet\ *)
                             line=${line#*inet }
                             candidate=${line%%/*}
-                            if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$candidate"; then
+                            if _looks_like_ipv4 "$candidate" && ! is_loopback_or_link_local_ipv4 "$candidate"; then
                                 primary_ip="$candidate"
                                 break
                             fi
@@ -4553,44 +4544,11 @@ get_primary_ipv4() {
         host_output=$(hostname -I 2>/dev/null || true)
         if [ -n "$host_output" ]; then
             for token in $host_output; do
-                if [[ $token =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$token"; then
+                if _looks_like_ipv4 "$token" && ! is_loopback_or_link_local_ipv4 "$token"; then
                     primary_ip="$token"
                     break
                 fi
             done
-        fi
-    fi
-
-    # FreeBSD: parse ifconfig (ip(8)/hostname -I are Linux-only). Pass 1 private, pass 2 any non-loopback.
-    if [ -z "$primary_ip" ] && command -v ifconfig >/dev/null 2>&1; then
-        addr_output=$(ifconfig 2>/dev/null || true)
-        # Pass 1: private candidate.
-        while IFS= read -r line; do
-            case "$line" in
-                *inet\ *)
-                    line=${line#*inet }
-                    candidate=${line%% *}
-                    if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && is_private_ipv4 "$candidate"; then
-                        primary_ip="$candidate"
-                        break
-                    fi
-                    ;;
-            esac
-        done <<< "$addr_output"
-        # Pass 2: any non-loopback / non-link-local (cloud VM with only public IP).
-        if [ -z "$primary_ip" ]; then
-            while IFS= read -r line; do
-                case "$line" in
-                    *inet\ *)
-                        line=${line#*inet }
-                        candidate=${line%% *}
-                        if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$candidate"; then
-                            primary_ip="$candidate"
-                            break
-                        fi
-                        ;;
-                esac
-            done <<< "$addr_output"
         fi
     fi
 
@@ -4603,20 +4561,6 @@ enumerate_global_ipv4_candidates() {
 
     if command -v ip >/dev/null 2>&1; then
         addr_output=$(ip -4 addr show scope global 2>/dev/null || true)
-    elif command -v ifconfig >/dev/null 2>&1; then
-        # FreeBSD: reshape ifconfig into `inet IP/PFX … iface` for the parser below.
-        addr_output=$(ifconfig 2>/dev/null | awk '
-            /^[^[:space:]]/ {
-                iface = $1
-                sub(/:$/, "", iface)
-                next
-            }
-            /^[[:space:]]*inet / {
-                if ($2 ~ /^127\./) next
-                # Reshape to `ip addr` format; /32 stub — parser only reads IP before slash.
-                printf "    inet %s/32 brd 0.0.0.0 scope global %s\n", $2, iface
-            }
-        ' || true)
     fi
     if [ -z "$addr_output" ]; then
         return 0
@@ -4646,7 +4590,7 @@ enumerate_global_ipv4_candidates() {
                 ip=${line#*inet }
                 ip=${ip%%/*}
                 iface=${line##* }
-                if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+                if _looks_like_ipv4 "$ip" \
                    && ! is_loopback_or_link_local_ipv4 "$ip" \
                    && [ "$ip" != "$kernel_choice" ]; then
                     printf '%s %s\n' "$ip" "$iface"
@@ -4881,16 +4825,9 @@ configure_manager_api_defaults() {
     apply_optional_integrations "$config_file"
 
     print_status "Enabling and starting BunkerWeb Scheduler with configured settings..."
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        sysrc bunkerweb_scheduler_enable=YES >/dev/null 2>&1
-        service bunkerweb_scheduler start
-        sleep 2
-        service bunkerweb_scheduler status || print_warning "BunkerWeb Scheduler may not be running"
-    else
-        run_cmd systemctl enable --now bunkerweb-scheduler
-        sleep 2
-        systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
-    fi
+    run_cmd systemctl enable --now bunkerweb-scheduler
+    sleep 2
+    systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
 }
 
 # Worker installations: whitelist manager/scheduler IPs.
@@ -4924,16 +4861,9 @@ configure_worker_api_whitelist() {
     fi
 
     print_status "Enabling and starting BunkerWeb with configured settings..."
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        sysrc bunkerweb_enable=YES >/dev/null 2>&1
-        service bunkerweb start
-        sleep 2
-        service bunkerweb status || print_warning "BunkerWeb may not be running"
-    else
-        run_cmd systemctl enable --now bunkerweb
-        sleep 2
-        systemctl status bunkerweb --no-pager -l || print_warning "BunkerWeb may not be running"
-    fi
+    run_cmd systemctl enable --now bunkerweb
+    sleep 2
+    systemctl status bunkerweb --no-pager -l || print_warning "BunkerWeb may not be running"
 }
 
 # Full install: DNS resolvers, API HTTPS, multisite.
@@ -4975,36 +4905,11 @@ configure_full_config() {
     # Order: scheduler before bunkerweb (scheduler renders templates first).
     if [ "$needs_reload" = true ]; then
         print_status "Enabling and (re)starting services with configured settings..."
-        if [ "$DISTRO_ID" = "freebsd" ]; then
-            sysrc bunkerweb_scheduler_enable=YES >/dev/null 2>&1
-            service bunkerweb_scheduler restart || service bunkerweb_scheduler start || true
-            sysrc bunkerweb_enable=YES >/dev/null 2>&1
-            service bunkerweb restart || service bunkerweb start || true
-            if [ "$FULL_API_DEFERRED" = "yes" ]; then
-                sysrc bunkerweb_api_enable=YES >/dev/null 2>&1
-                service bunkerweb_api restart || service bunkerweb_api start || true
-            fi
-        else
-            run_cmd systemctl enable bunkerweb-scheduler
-            if systemctl is-active --quiet bunkerweb-scheduler; then
-                run_cmd systemctl restart bunkerweb-scheduler
-            else
-                run_cmd systemctl start bunkerweb-scheduler
-            fi
-            run_cmd systemctl enable bunkerweb
-            if systemctl is-active --quiet bunkerweb; then
-                run_cmd systemctl restart bunkerweb
-            else
-                run_cmd systemctl start bunkerweb
-            fi
-            if [ "$FULL_API_DEFERRED" = "yes" ]; then
-                run_cmd systemctl enable bunkerweb-api
-                if systemctl is-active --quiet bunkerweb-api; then
-                    run_cmd systemctl restart bunkerweb-api
-                else
-                    run_cmd systemctl start bunkerweb-api
-                fi
-            fi
+        # Order: scheduler before bunkerweb (scheduler renders templates first).
+        svc_restart_or_start bunkerweb-scheduler
+        svc_restart_or_start bunkerweb
+        if [ "$FULL_API_DEFERRED" = "yes" ]; then
+            svc_restart_or_start bunkerweb-api
         fi
     fi
 }
@@ -5105,27 +5010,23 @@ EOF
     print_status "NGINX $NGINX_VERSION installed successfully"
 }
 
-install_nginx_freebsd() {
-    print_step "Installing NGINX on FreeBSD"
-
-    run_cmd pkg update -f
-    run_cmd pkg install -y nginx
-    run_cmd pkg lock -y nginx
-
-    print_status "NGINX installed successfully"
+# testing/dev channels carry non-standard version strings that dpkg flags as a
+# "bad version number"; allow them so the install/upgrade is not rejected. Both
+# the fresh-install AND the upgrade path call this (an upgrade stable -> testing/dev
+# fails otherwise). Idempotent: append the directive only when absent so re-runs
+# never duplicate the line.
+_dpkg_allow_testing_dev_version() {
+    [[ "$BUNKERWEB_VERSION" =~ (testing|dev) ]] || return 0
+    if ! grep -qxF "force-bad-version" /etc/dpkg/dpkg.cfg 2>/dev/null; then
+        print_status "Adding force-bad-version directive for testing/dev version"
+        echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
+    fi
 }
 
 install_bunkerweb_debian() {
     print_step "Installing BunkerWeb on Debian/Ubuntu"
 
-    if [[ "$BUNKERWEB_VERSION" =~ (testing|dev) ]]; then
-        # Idempotent: only append if the exact directive is not already present,
-        # so re-running the installer never duplicates the line.
-        if ! grep -qxF "force-bad-version" /etc/dpkg/dpkg.cfg 2>/dev/null; then
-            print_status "Adding force-bad-version directive for testing/dev version"
-            echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
-        fi
-    fi
+    _dpkg_allow_testing_dev_version
 
     if [ "$ENABLE_WIZARD" = "no" ]; then
         export UI_WIZARD=no
@@ -5150,7 +5051,7 @@ install_bunkerweb_rpm() {
     print_step "Installing BunkerWeb on $DISTRO_ID"
 
     # Offer EPEL on RHEL-family distros before installing BunkerWeb.
-    if [[ "$DISTRO_ID" =~ ^(rhel|centos|rocky|almalinux|redhat)$ ]] && ! rpm -q epel-release >/dev/null 2>&1; then
+    if is_rhel_family && ! rpm -q epel-release >/dev/null 2>&1; then
         if [ "$INSTALL_EPEL" = "yes" ]; then
             print_step "Installing EPEL repository (epel-release)"
             run_cmd dnf install -y epel-release
@@ -5190,102 +5091,6 @@ install_bunkerweb_rpm() {
     print_status "BunkerWeb $BUNKERWEB_VERSION installed successfully"
 }
 
-install_bunkerweb_freebsd() {
-    print_step "Installing BunkerWeb on FreeBSD"
-
-    run_cmd pkg install -y bash python311 py311-pip curl libxml2 yajl gd sudo \
-        lsof libmaxminddb postgresql16-client mariadb1011-client sqlite3 \
-        openssl pcre2 lmdb ssdeep unzip gtar
-
-    if ! pw groupshow nginx >/dev/null 2>&1; then
-        print_status "Creating nginx group..."
-        pw groupadd nginx
-    fi
-
-    if ! pw usershow nginx >/dev/null 2>&1; then
-        print_status "Creating nginx user..."
-        pw useradd nginx -g nginx -d /nonexistent -s /usr/sbin/nologin -c "nginx user"
-    fi
-
-    # Set environment variables
-    if [ "$ENABLE_WIZARD" = "no" ]; then
-        export UI_WIZARD=no
-    fi
-
-    # Download and install BunkerWeb source. FreeBSD packages aren't published
-    # yet (the project ships pkg-built artifacts on Linux only); on FreeBSD we
-    # extract a release tarball.
-    BUNKERWEB_INSTALL_DIR="/usr/share/bunkerweb"
-
-    if [ -z "${BUNKERWEB_TARBALL_URL:-}" ]; then
-        print_error "Automatic FreeBSD installation requires BUNKERWEB_TARBALL_URL to be set."
-        print_error "FreeBSD packages are not published yet — manual install is required:"
-        print_error "  1. Pick a release from https://github.com/bunkerity/bunkerweb/releases"
-        print_error "  2. export BUNKERWEB_TARBALL_URL=https://github.com/bunkerity/bunkerweb/archive/refs/tags/v${BUNKERWEB_VERSION}.tar.gz"
-        print_error "  3. Re-run this installer."
-        exit 1
-    fi
-
-    print_status "Installing BunkerWeb from source tarball..."
-
-    mkdir -p "$BUNKERWEB_INSTALL_DIR"
-    mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins
-    mkdir -p /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb
-    mkdir -p /var/log/bunkerweb /var/lib/bunkerweb /var/www/html
-
-    run_cmd curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
-                 --connect-timeout 10 --max-time 300 -L \
-                 "$BUNKERWEB_TARBALL_URL" -o /tmp/bunkerweb.tar.gz
-    run_cmd tar -xzf /tmp/bunkerweb.tar.gz -C "$BUNKERWEB_INSTALL_DIR" --strip-components=1
-    rm -f /tmp/bunkerweb.tar.gz
-
-    if [ -d "$BUNKERWEB_INSTALL_DIR/deps" ]; then
-        print_status "Python dependencies already bundled"
-    elif [ -f "$BUNKERWEB_INSTALL_DIR/requirements.txt" ]; then
-        print_status "Installing Python dependencies..."
-        mkdir -p "$BUNKERWEB_INSTALL_DIR/deps/python"
-        # Surface pip errors — `|| true` would mask them and BunkerWeb would fail at runtime with cryptic ImportErrors.
-        if ! python3.11 -m pip install --target "$BUNKERWEB_INSTALL_DIR/deps/python" \
-                -r "$BUNKERWEB_INSTALL_DIR/requirements.txt"; then
-            print_error "pip install failed — BunkerWeb cannot run without its Python dependencies."
-            print_error "Inspect ${BUNKERWEB_INSTALL_DIR}/requirements.txt, fix the environment, and re-run."
-            exit 1
-        fi
-    else
-        print_error "Neither ${BUNKERWEB_INSTALL_DIR}/deps nor ${BUNKERWEB_INSTALL_DIR}/requirements.txt found."
-        print_error "The tarball at \$BUNKERWEB_TARBALL_URL does not contain Python dependency information."
-        print_error "Use a release tarball that bundles deps/ or includes requirements.txt at the top level."
-        exit 1
-    fi
-
-    print_status "Installing rc.d service scripts..."
-    if [ -d "$BUNKERWEB_INSTALL_DIR/rc.d" ]; then
-        for script in bunkerweb bunkerweb_scheduler bunkerweb_ui bunkerweb_api; do
-            if [ -f "$BUNKERWEB_INSTALL_DIR/rc.d/${script}" ]; then
-                cp "$BUNKERWEB_INSTALL_DIR/rc.d/${script}" "/usr/local/etc/rc.d/${script}"
-                chmod 555 "/usr/local/etc/rc.d/${script}"
-            fi
-        done
-    fi
-
-    chown -R root:nginx "$BUNKERWEB_INSTALL_DIR"
-    chown -R nginx:nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb \
-        /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
-    chmod 755 /var/log/bunkerweb
-    chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb
-    chmod 2770 /var/tmp/bunkerweb
-
-    if [ -f "$BUNKERWEB_INSTALL_DIR/helpers/bwcli" ]; then
-        install -m 755 "$BUNKERWEB_INSTALL_DIR/helpers/bwcli" /usr/bin/bwcli
-    fi
-
-    echo "FreeBSD" > "$BUNKERWEB_INSTALL_DIR/INTEGRATION"
-
-    pkg lock -y bunkerweb 2>/dev/null || true
-
-    print_status "BunkerWeb installed successfully on FreeBSD"
-}
-
 install_crowdsec() {
     echo
     echo -e "${BLUE}========================================${NC}"
@@ -5309,10 +5114,6 @@ install_crowdsec() {
                     dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg2"
                     run_cmd dnf install -y "$dep_pkg"
                     ;;
-                "freebsd")
-                    dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg"
-                    run_cmd pkg install -y "$dep_pkg"
-                    ;;
                 *)
                     print_warning "Automatic install not supported on $DISTRO_ID"
                     ;;
@@ -5324,7 +5125,6 @@ install_crowdsec() {
     case "$DISTRO_ID" in
         "debian"|"ubuntu") dpkg -s ca-certificates >/dev/null 2>&1 || { run_cmd apt update; run_cmd apt install -y ca-certificates; } ;;
         "fedora"|"rhel"|"rocky"|"almalinux"|"centos") rpm -q ca-certificates >/dev/null 2>&1 || run_cmd dnf install -y ca-certificates ;;
-        "freebsd") pkg info -e ca_root_nss >/dev/null 2>&1 || run_cmd pkg install -y ca_root_nss ;;
     esac
 
     echo -e "${YELLOW}--- Step 1: Add CrowdSec repository and install engine ---${NC}"
@@ -5351,9 +5151,6 @@ install_crowdsec() {
             ;;
         "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y crowdsec
-            ;;
-        "freebsd")
-            run_cmd pkg install -y crowdsec
             ;;
         *)
             print_error "Unsupported distribution: $DISTRO_ID"
@@ -5414,8 +5211,7 @@ source: appsec
     echo -e "${YELLOW}--- Step 5: Register BunkerWeb bouncer(s) and retrieve API key ---${NC}"
     print_step "Registering BunkerWeb bouncer with CrowdSec"
     local _csc_err
-    # Explicit template — FreeBSD mktemp requires one (bare `mktemp` returns
-    # status 1 on BSD even when /tmp is writable).
+    # Explicit template for portability.
     _csc_err=$(mktemp /tmp/bw-cscli-err.XXXXXX) || {
         print_warning "Could not create tempfile for cscli stderr capture; continuing without it."
         _csc_err=""
@@ -5482,22 +5278,6 @@ _install_redis_package() {
                 fi
             else
                 run_cmd dnf install -y redis
-            fi
-            ;;
-        "freebsd")
-            if [ "$desired" = "valkey" ]; then
-                if pkg search -q '^valkey$' >/dev/null 2>&1 || pkg search -q '^valkey-' >/dev/null 2>&1; then
-                    if pkg install -y valkey; then
-                        installed="valkey"
-                    fi
-                fi
-                if [ -z "$installed" ]; then
-                    print_warning "Valkey not available via pkg — falling back to redis."
-                    REDIS_FLAVOR="redis"
-                    run_cmd pkg install -y redis
-                fi
-            else
-                run_cmd pkg install -y redis
             fi
             ;;
         *)
@@ -5575,9 +5355,8 @@ _redis_conf_set() {
         return 1
     fi
 
-    # Explicit template — bare `mktemp` returns 1 on FreeBSD even when /tmp is writable.
-    tmp=$(mktemp /tmp/bw-redis-conf.XXXXXX) || return 1
-    _bw_register_secret_tmpfile "$tmp"
+    # Register-on-create (0600); explicit template for portability.
+    tmp=$(_bw_mk_secret_tmpfile /tmp/bw-redis-conf.XXXXXX) || return 1
     # Strip every existing matching line (commented or not).
     awk -v d="$directive" 'BEGIN{IGNORECASE=1} {
         line=$0
@@ -5589,7 +5368,7 @@ _redis_conf_set() {
     }' "$conf" > "$tmp"
     printf '%s %s\n' "$directive" "$value" >> "$tmp"
     cat "$tmp" > "$conf"
-    shred -u "$tmp" 2>/dev/null || rm -f "$tmp"
+    _bw_shred "$tmp"
 }
 
 install_redis() {
@@ -5609,38 +5388,21 @@ install_redis() {
 
     label="${REDIS_FLAVOR:-redis}"
 
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        # FreeBSD rc service name (also used in the remediation hints below).
-        if [ "$REDIS_FLAVOR" = "valkey" ]; then
-            service="valkey"
-            sysrc valkey_enable=YES >/dev/null 2>&1
-        else
-            service="redis"
-            sysrc redis_enable=YES >/dev/null 2>&1
-        fi
-        if service "$service" start; then
+    # Refresh systemd's unit view BEFORE locating the unit — the dpkg
+    # postinst may have failed to reach systemd (deb-systemd-invoke
+    # "Could not execute systemctl"), leaving the just-installed unit
+    # unregistered. Must run before _locate_redis_service, not inside
+    # start_optional_service (which is skipped when the locator fails).
+    systemctl daemon-reload 2>/dev/null || true
+    service=$(_locate_redis_service || true)
+    if [ -n "$service" ]; then
+        # Optional daemon — a start failure must not abort the install.
+        if start_optional_service "$service" "${label^}"; then
             redis_started="yes"
-            print_status "${label^} service enabled and started"
-        else
-            print_warning "${label^} service ($service) failed to start."
+            print_status "${label^} service enabled and started ($service)"
         fi
     else
-        # Refresh systemd's unit view BEFORE locating the unit — the dpkg
-        # postinst may have failed to reach systemd (deb-systemd-invoke
-        # "Could not execute systemctl"), leaving the just-installed unit
-        # unregistered. Must run before _locate_redis_service, not inside
-        # start_optional_service (which is skipped when the locator fails).
-        systemctl daemon-reload 2>/dev/null || true
-        service=$(_locate_redis_service || true)
-        if [ -n "$service" ]; then
-            # Optional daemon — a start failure must not abort the install.
-            if start_optional_service "$service" "${label^}"; then
-                redis_started="yes"
-                print_status "${label^} service enabled and started ($service)"
-            fi
-        else
-            print_warning "${label^} service name not found; start it manually if needed."
-        fi
+        print_warning "${label^} service name not found; start it manually if needed."
     fi
 
     # Apply bind / requirepass / protected-mode from user choices.
@@ -5679,23 +5441,14 @@ install_redis() {
         print_status "Configured ${label} bind=${bind_addr}${password_set:+ (REQUIREPASS set)}${memory_summary} in ${conf}"
 
         # Restart to pick up new bind/password.
-        if [ "$DISTRO_ID" = "freebsd" ]; then
-            if service "$service" restart; then
+        if [ -n "$service" ]; then
+            echo -e "${BLUE}[CMD]${NC} systemctl restart $service"
+            if systemctl restart "$service"; then
                 redis_started="yes"
             else
                 redis_started="no"
                 print_warning "${label^} service ($service) failed to restart after configuration."
-            fi
-        else
-            if [ -n "$service" ]; then
-                echo -e "${BLUE}[CMD]${NC} systemctl restart $service"
-                if systemctl restart "$service"; then
-                    redis_started="yes"
-                else
-                    redis_started="no"
-                    print_warning "${label^} service ($service) failed to restart after configuration."
-                    _dump_service_diagnostics "$service"
-                fi
+                _dump_service_diagnostics "$service"
             fi
         fi
     fi
@@ -5729,10 +5482,7 @@ install_redis() {
         print_warning "  - bans and rate-limit counters are NOT shared between workers/instances"
         print_warning "  - that state is lost on every reload/restart (no HA persistence)"
         print_warning "Start it manually to close this gap:"
-        if [ "$DISTRO_ID" = "freebsd" ]; then
-            print_warning "  service $service status    # see why it failed"
-            print_warning "  service $service start     # start once fixed"
-        elif [ -n "$service" ]; then
+        if [ -n "$service" ]; then
             print_warning "  systemctl status $service    # see why it failed"
             print_warning "  journalctl -xeu $service     # full error log"
             print_warning "  systemctl start $service     # start once fixed"
@@ -5883,10 +5633,8 @@ check_external_db() {
                 print_warning "${engine} client not installed locally — skipping connectivity probe."
                 return 0
             fi
-            _tmp=$(mktemp /tmp/bw-db-probe.XXXXXX) || return 1
-            chmod 600 "$_tmp"
-            # Register before write so SIGINT cleanup via EXIT trap still wipes it.
-            _bw_register_secret_tmpfile "$_tmp"
+            # Register-on-create (0600) so SIGINT cleanup via EXIT trap still wipes it.
+            _tmp=$(_bw_mk_secret_tmpfile /tmp/bw-db-probe.XXXXXX) || return 1
             # Unquoted value in [client] — pymysql/mysql parse fine; validate_db_password rejected ' " \ `.
             {
                 printf '[client]\n'
@@ -5897,7 +5645,7 @@ check_external_db() {
                 -h "$host" -P "$port" \
                 --connect-timeout=5 \
                 -e "SELECT 1" "$DB_NAME_INPUT" >/dev/null 2>&1 || _rc=1
-            shred -u "$_tmp" 2>/dev/null || rm -f "$_tmp"
+            _bw_shred "$_tmp"
             ;;
         postgresql)
             if ! command -v psql >/dev/null 2>&1; then
@@ -5918,9 +5666,7 @@ check_external_db() {
             # PGPASSFILE = host:port:database:user:password.
             # libpq strips brackets from IPv6 URIs BEFORE PGPASSFILE match — write unbracketed
             # else psql falls through to an interactive prompt and hangs under --yes.
-            _tmp=$(mktemp /tmp/bw-pgpass.XXXXXX) || return 1
-            chmod 600 "$_tmp"
-            _bw_register_secret_tmpfile "$_tmp"
+            _tmp=$(_bw_mk_secret_tmpfile /tmp/bw-pgpass.XXXXXX) || return 1
             local _pgpass_host="$host"
             if [[ "$_pgpass_host" == \[*\] ]]; then
                 _pgpass_host="${_pgpass_host#[}"
@@ -5929,7 +5675,7 @@ check_external_db() {
             printf '%s:%s:%s:%s:%s\n' "$_pgpass_host" "$port" "$DB_NAME_INPUT" "$DB_USER_INPUT" "$DB_PASSWORD_INPUT" > "$_tmp"
             PGPASSFILE="$_tmp" PGCONNECT_TIMEOUT=5 \
                 psql "$_probe_uri" -tAc "SELECT 1" >/dev/null 2>&1 || _rc=1
-            shred -u "$_tmp" 2>/dev/null || rm -f "$_tmp"
+            _bw_shred "$_tmp"
             ;;
         *)
             return 0
@@ -6048,13 +5794,7 @@ install_postgresql() {
             run_cmd apt update
             run_cmd apt install -y postgresql
             ;;
-        "fedora")
-            run_cmd dnf install -y postgresql-server postgresql-contrib
-            if [ ! -d /var/lib/pgsql/data/base ]; then
-                run_cmd postgresql-setup --initdb
-            fi
-            ;;
-        "rhel"|"rocky"|"almalinux"|"centos")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y postgresql-server postgresql-contrib
             if [ ! -d /var/lib/pgsql/data/base ]; then
                 run_cmd postgresql-setup --initdb
@@ -6128,16 +5868,9 @@ SQL
 # Dispatch to MariaDB/Postgres/external installer and write DSN.
 install_database() {
     case "$DB_INSTALL" in
-        "mariadb")
-            if install_mariadb; then
-                apply_db_config "$DB_DSN_GENERATED"
-            else
-                print_warning "Falling back to SQLite — set DATABASE_URI manually if you need a different DB."
-                DB_INSTALL="none"
-            fi
-            ;;
-        "postgresql")
-            if install_postgresql; then
+        "mariadb"|"postgresql")
+            # install_mariadb / install_postgresql — dispatched by the value itself.
+            if "install_${DB_INSTALL}"; then
                 apply_db_config "$DB_DSN_GENERATED"
             else
                 print_warning "Falling back to SQLite — set DATABASE_URI manually if you need a different DB."
@@ -6254,7 +5987,6 @@ setup_ui_selfsigned_tls() {
         case "$DISTRO_ID" in
             "debian"|"ubuntu") run_cmd apt install -y openssl ;;
             "fedora"|"rhel"|"rocky"|"almalinux"|"centos") run_cmd dnf install -y openssl ;;
-            "freebsd") run_cmd pkg install -y openssl ;;
         esac
     fi
 
@@ -6298,15 +6030,10 @@ start_manager_ui() {
         setup_ui_selfsigned_tls
     fi
 
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        sysrc bunkerweb_ui_enable=YES >/dev/null 2>&1
-        service bunkerweb_ui restart || service bunkerweb_ui start || true
-    else
-        run_cmd systemctl enable --now bunkerweb-ui
-        # Restart if hardening landed after a previous start.
-        if [ "$UI_ADMIN_CREATE" = "yes" ] || [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
-            run_cmd systemctl restart bunkerweb-ui
-        fi
+    run_cmd systemctl enable --now bunkerweb-ui
+    # Restart if hardening landed after a previous start.
+    if [ "$UI_ADMIN_CREATE" = "yes" ] || [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
+        run_cmd systemctl restart bunkerweb-ui
     fi
 }
 
@@ -6342,12 +6069,6 @@ get_installed_nginx_version() {
                 fi
             fi
             ;;
-        "freebsd")
-            if command -v pkg >/dev/null 2>&1; then
-                _version=$(pkg info -q nginx 2>/dev/null || true)
-                _version="${_version#nginx-}"
-            fi
-            ;;
     esac
 
     printf '%s' "${_version:-unknown}"
@@ -6377,24 +6098,13 @@ show_final_info() {
     echo
     echo "Services status:"
 
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        service bunkerweb status 2>/dev/null || true
-        service bunkerweb_scheduler status 2>/dev/null || true
-        if [ -f /usr/local/etc/rc.d/bunkerweb_api ]; then
-            service bunkerweb_api status 2>/dev/null || true
-        fi
-        if [ "$ENABLE_WIZARD" = "yes" ]; then
-            service bunkerweb_ui status 2>/dev/null || true
-        fi
-    else
-        systemctl status bunkerweb --no-pager -l || true
-        systemctl status bunkerweb-scheduler --no-pager -l || true
-        if systemctl cat bunkerweb-api.service >/dev/null 2>&1; then
-            systemctl status bunkerweb-api --no-pager -l || true
-        fi
-        if [ "$ENABLE_WIZARD" = "yes" ]; then
-            systemctl status bunkerweb-ui --no-pager -l || true
-        fi
+    systemctl status bunkerweb --no-pager -l || true
+    systemctl status bunkerweb-scheduler --no-pager -l || true
+    if systemctl cat bunkerweb-api.service >/dev/null 2>&1; then
+        systemctl status bunkerweb-api --no-pager -l || true
+    fi
+    if [ "$ENABLE_WIZARD" = "yes" ]; then
+        systemctl status bunkerweb-ui --no-pager -l || true
     fi
 
     echo
@@ -6407,25 +6117,11 @@ show_final_info() {
 
     echo "  - Scheduler config: /etc/bunkerweb/scheduler.env"
 
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        if [ "${SERVICE_API:-no}" = "yes" ] || [ -f /usr/local/etc/rc.d/bunkerweb_api ]; then
-            echo "  - API config: /etc/bunkerweb/api.env"
-        fi
-    else
-        if [ "${SERVICE_API:-no}" = "yes" ] || systemctl cat bunkerweb-api.service >/dev/null 2>&1; then
-            echo "  - API config: /etc/bunkerweb/api.env"
-        fi
+    if [ "${SERVICE_API:-no}" = "yes" ] || systemctl cat bunkerweb-api.service >/dev/null 2>&1; then
+        echo "  - API config: /etc/bunkerweb/api.env"
     fi
     echo "  - Logs: /var/log/bunkerweb/"
     echo
-
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        echo "FreeBSD Notes:"
-        echo "  - Services are managed via rc.d: service bunkerweb start|stop|restart"
-        echo "  - Enable services in /etc/rc.conf: sysrc bunkerweb_enable=YES"
-        echo "  - View logs: tail -f /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log"
-        echo
-    fi
 
     # Honour --server-ip; otherwise auto-detect (prompts only on multiple global IPv4s).
     resolve_display_server_ip
@@ -6454,11 +6150,7 @@ show_final_info() {
                 echo "  4. Use the UI to manage your BunkerWeb workers"
             else
                 echo "     (UI service start was deferred via --no-ui-service / SERVICE_UI=no.)"
-                if [ "$DISTRO_ID" = "freebsd" ]; then
-                    echo "  3. Start the Web UI: service bunkerweb_ui start"
-                else
-                    echo "  3. Start the Web UI: systemctl start bunkerweb-ui"
-                fi
+                echo "  3. Start the Web UI: systemctl start bunkerweb-ui"
                 echo "  4. Access the UI at: ${_ui_scheme}://${_ui_host}:7000"
             fi
             echo
@@ -6483,22 +6175,14 @@ show_final_info() {
             echo "  • API_WHITELIST_IP is configured to allow: $MANAGER_IP_INPUT"
             echo "  • API listens on: 0.0.0.0:5000 (whitelisting enforces access control)"
             echo "  • Local config changes in /etc/bunkerweb/variables.env may be overwritten"
-            if [ "$DISTRO_ID" = "freebsd" ]; then
-                echo "  • Check logs: tail -f /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log"
-            else
-                echo "  • Check logs: journalctl -u bunkerweb -f"
-            fi
+            echo "  • Check logs: journalctl -u bunkerweb -f"
             ;;
         "scheduler")
             echo "Next steps:"
             echo "  1. Configure database connection in /etc/bunkerweb/variables.env"
             echo "     Set DATABASE_URI (canonical location; sourced by every component)"
             echo "  2. Verify BUNKERWEB_INSTANCES is set to: $BUNKERWEB_INSTANCES_INPUT"
-            if [ "$DISTRO_ID" = "freebsd" ]; then
-                echo "  3. Restart scheduler: service bunkerweb_scheduler restart"
-            else
-                echo "  3. Restart scheduler: systemctl restart bunkerweb-scheduler"
-            fi
+            echo "  3. Restart scheduler: systemctl restart bunkerweb-scheduler"
             echo "  4. Use 'bwcli' commands to manage the cluster"
             echo
             echo "📝 Scheduler-only mode information:"
@@ -6510,11 +6194,7 @@ show_final_info() {
             echo "Next steps:"
             echo "  1. Configure database connection in /etc/bunkerweb/variables.env"
             echo "     Set DATABASE_URI to the same database as your scheduler"
-            if [ "$DISTRO_ID" = "freebsd" ]; then
-                echo "  2. Restart the UI: service bunkerweb_ui restart"
-            else
-                echo "  2. Restart the UI: systemctl restart bunkerweb-ui"
-            fi
+            echo "  2. Restart the UI: systemctl restart bunkerweb-ui"
             echo "  3. Access the Web UI at: http://${_server_ip}:7000"
             echo
             echo "📝 UI-only mode information:"
@@ -6528,11 +6208,7 @@ show_final_info() {
             echo "     LISTEN_ADDR (default 127.0.0.1) and LISTEN_PORT (default 8888)"
             echo "  2. Configure database connection in /etc/bunkerweb/variables.env"
             echo "     Set DATABASE_URI to the same database as your scheduler"
-            if [ "$DISTRO_ID" = "freebsd" ]; then
-                echo "  3. Restart the API: service bunkerweb_api restart"
-            else
-                echo "  3. Restart the API: systemctl restart bunkerweb-api"
-            fi
+            echo "  3. Restart the API: systemctl restart bunkerweb-api"
             echo "  4. The API will be available at: http://${_server_ip}:8888"
             echo "     (Default LISTEN_ADDR is 127.0.0.1 — change to 0.0.0.0 in api.env"
             echo "      to expose externally; configure firewall accordingly.)"
@@ -6558,11 +6234,7 @@ show_final_info() {
                 echo "Next steps:"
                 echo "  1. Edit /etc/bunkerweb/variables.env to configure BunkerWeb"
                 echo "  2. Add your server settings and protected services"
-                if [ "$DISTRO_ID" = "freebsd" ]; then
-                    echo "  3. Restart services: service bunkerweb restart && service bunkerweb_scheduler restart"
-                else
-                    echo "  3. Restart services: systemctl restart bunkerweb bunkerweb-scheduler"
-                fi
+                echo "  3. Restart services: systemctl restart bunkerweb bunkerweb-scheduler"
                 echo
                 echo "📝 Manual configuration:"
                 if [ -n "$DB_DSN_GENERATED" ]; then
@@ -6574,11 +6246,7 @@ show_final_info() {
                     echo "  • Default database: SQLite (upgrade to MariaDB/PostgreSQL for production)"
                 fi
                 echo "  • Use 'bwcli' for command-line management"
-                if [ "$DISTRO_ID" = "freebsd" ]; then
-                    echo "  • Check logs: tail -f /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log"
-                else
-                    echo "  • Check logs: journalctl -u bunkerweb -f"
-                fi
+                echo "  • Check logs: journalctl -u bunkerweb -f"
                 if [ "${UI_REVERSE_PROXY_INPUT:-yes}" = "no" ]; then
                     local _ui_disp="${UI_LISTEN_ADDR_INPUT:-$_server_ip}"
                     if [ "$_ui_disp" = "0.0.0.0" ] || [ -z "$_ui_disp" ]; then _ui_disp="$_server_ip"; fi
@@ -6598,7 +6266,7 @@ show_final_info() {
     echo
 
     # RHEL DB-client hints — only when no DB auto-installed.
-    if [[ "$DISTRO_ID" =~ ^(rhel|centos|fedora|rocky|almalinux|redhat)$ ]] && [ -z "$DB_DSN_GENERATED" ]; then
+    if [ "$DISTRO_FAMILY" = "rhel" ] && [ -z "$DB_DSN_GENERATED" ]; then
         echo "💾 Database clients for external databases:"
         echo "  • MariaDB: dnf install mariadb"
         echo "  • MySQL: dnf install mysql"
@@ -6845,14 +6513,20 @@ usage() {
 }
 
 # Parse command line arguments
+# Guard a value-taking flag: $1=flag, $2=its value, $3=noun for the error message.
+# Rejects an empty value or a following option (so `--db-password --quiet` cannot
+# silently swallow the next flag as its value).
+require_value() {
+    if [ -z "$2" ] || [[ "$2" == -* ]]; then
+        print_error "Missing ${3:-value} after $1"
+        exit 1
+    fi
+}
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--version)
-            # Fix: actually use provided argument for version
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing version after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "version"
             BUNKERWEB_VERSION="$2"
             shift 2
             ;;
@@ -6930,18 +6604,12 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --image-tag)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing tag after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "tag"
             DOCKER_IMAGE_TAG="$2"
             shift 2
             ;;
         --compose-dir)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing path after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "path"
             DOCKER_PROJECT_DIR="$2"
             shift 2
             ;;
@@ -6968,19 +6636,13 @@ while [[ $# -gt 0 ]]; do
         --api-token)
             # Shared API token for distributed docker installs (manager/worker/
             # scheduler) — must be identical on every host of the cluster.
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing token after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "token"
             DOCKER_API_TOKEN_GENERATED="$2"
             shift 2
             ;;
         --database-uri)
             # External DATABASE_URI for docker scheduler/ui/api types.
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing URI after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "URI"
             DOCKER_DATABASE_URI="$2"
             shift 2
             ;;
@@ -7022,20 +6684,14 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --redis-host)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing host value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "host value"
             REDIS_HOST_INPUT="$2"
             REDIS_INSTALL="no"
             shift 2
             ;;
         --redis-port)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing port value after $1"
-                exit 1
-            fi
-            if ! [[ "$2" =~ ^[1-9][0-9]{0,4}$ ]] || [ "$2" -gt 65535 ]; then
+            require_value "$1" "$2" "port value"
+            if ! validate_port "$2"; then
                 print_error "--redis-port must be a TCP port (1-65535)"
                 exit 1
             fi
@@ -7044,28 +6700,19 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --redis-database)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing database number after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "database number"
             REDIS_DATABASE_INPUT="$2"
             REDIS_INSTALL="no"
             shift 2
             ;;
         --redis-username)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing username value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "username value"
             REDIS_USERNAME_INPUT="$2"
             REDIS_INSTALL="no"
             shift 2
             ;;
         --redis-password)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing password value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "password value"
             REDIS_PASSWORD_INPUT="$2"
             REDIS_INSTALL="no"
             shift 2
@@ -7098,10 +6745,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --redis-bind)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing bind address after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "bind address"
             REDIS_BIND_INPUT="$2"
             shift 2
             ;;
@@ -7150,10 +6794,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --db-engine)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing engine value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "engine value"
             case "$2" in
                 mariadb|MariaDB)               DB_EXTERNAL_ENGINE="mariadb" ;;
                 mysql|MySQL)                   DB_EXTERNAL_ENGINE="mysql" ;;
@@ -7167,10 +6808,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --db-host)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing host value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "host value"
             if ! validate_db_host "$2"; then
                 print_error "--db-host '$2' contains characters that would break the DSN. Allowed: letters, digits, dot, hyphen, colon (IPv6), square brackets (IPv6 literal)."
                 exit 1
@@ -7182,11 +6820,8 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --db-port)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing port value after $1"
-                exit 1
-            fi
-            if ! [[ "$2" =~ ^[1-9][0-9]{0,4}$ ]] || [ "$2" -gt 65535 ]; then
+            require_value "$1" "$2" "port value"
+            if ! validate_port "$2"; then
                 print_error "--db-port must be a TCP port (1-65535)"
                 exit 1
             fi
@@ -7219,10 +6854,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --db-name)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing database name after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "database name"
             if ! validate_db_identifier "$2"; then
                 print_error "--db-name '$2' must match ^[A-Za-z_][A-Za-z0-9_]*$ (max 63 chars). SQL identifiers cannot contain spaces, quotes or shell metacharacters."
                 exit 1
@@ -7231,10 +6863,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --db-user)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing database user after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "database user"
             if ! validate_db_identifier "$2"; then
                 print_error "--db-user '$2' must match ^[A-Za-z_][A-Za-z0-9_]*$ (max 63 chars)."
                 exit 1
@@ -7243,10 +6872,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --db-password)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing password value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "password value"
             DB_PASSWORD_INPUT="$2"
             if ! validate_db_password "$DB_PASSWORD_INPUT"; then
                 print_error "--db-password fails validation: 8+ chars, no quotes/backslashes."
@@ -7255,10 +6881,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --ui-admin-user)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing username value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "username value"
             if ! validate_ui_admin_username "$2"; then
                 print_error "--ui-admin-user '$2' must match ^[A-Za-z0-9._-]+$ (max 64 chars)."
                 exit 1
@@ -7268,10 +6891,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --ui-admin-password)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing password value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "password value"
             UI_ADMIN_PASSWORD_INPUT="$2"
             UI_ADMIN_CREATE="yes"
             if ! validate_ui_admin_password "$UI_ADMIN_PASSWORD_INPUT"; then
@@ -7303,10 +6923,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --ui-listen-ip)
             # full + --ui-direct: IPv4 the UI gunicorn listener binds to.
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing IPv4 after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "IPv4"
             if ! validate_ipv4 "$2"; then
                 print_error "$1 requires a valid IPv4 address (e.g. 10.0.0.5, 0.0.0.0)"
                 exit 1
@@ -7316,10 +6933,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --api-listen-ip)
             # IPv4 the bunkerweb-api (FastAPI) listener binds to.
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing IPv4 after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "IPv4"
             if ! validate_ipv4 "$2"; then
                 print_error "$1 requires a valid IPv4 address (e.g. 10.0.0.5, 0.0.0.0)"
                 exit 1
@@ -7328,10 +6942,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --ui-listen-port)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing port after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "port"
             if ! validate_port "$2"; then
                 print_error "$1 requires a TCP port between 1 and 65535"
                 exit 1
@@ -7340,10 +6951,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --api-listen-port)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing port after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "port"
             if ! validate_port "$2"; then
                 print_error "$1 requires a TCP port between 1 and 65535"
                 exit 1
@@ -7352,34 +6960,22 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --instances)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing instances value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "instances value"
             BUNKERWEB_INSTANCES_INPUT="$2"
             shift 2
             ;;
         --manager-ip)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing IP value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "IP value"
             MANAGER_IP_INPUT="$2"
             shift 2
             ;;
         --server-ip)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing IP value after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "IP value"
             SERVER_IP_INPUT="$2"
             shift 2
             ;;
         --dns-resolvers)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing resolver list after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "resolver list"
             DNS_RESOLVERS_INPUT="$2"
             shift 2
             ;;
@@ -7396,10 +6992,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --backup-dir)
-            if [ -z "$2" ] || [[ "$2" == -* ]]; then
-                print_error "Missing directory path after $1"
-                exit 1
-            fi
+            require_value "$1" "$2" "directory path"
             BACKUP_DIRECTORY="$2"; shift 2 ;;
         --no-auto-backup)
             AUTO_BACKUP="no"; shift ;;
@@ -7779,17 +7372,6 @@ detect_install_type_from_state() {
         esac
     fi
 
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        # systemctl unavailable; rely on rc.d enablement (YES = present).
-        local _has_bw _has_sch _has_ui _has_api
-        _has_bw=$(_freebsd_unit_state bunkerweb)
-        _has_sch=$(_freebsd_unit_state bunkerweb_scheduler)
-        _has_ui=$(_freebsd_unit_state bunkerweb_ui)
-        _has_api=$(_freebsd_unit_state bunkerweb_api)
-        _DETECTED_INSTALL_TYPE=$(_classify_install "$_has_bw" "$_has_sch" "$_has_ui" "$_has_api")
-        return 0
-    fi
-
     local _bw _sch _ui _api
     _bw=$(_systemd_unit_state bunkerweb)
     _sch=$(_systemd_unit_state bunkerweb-scheduler)
@@ -7813,21 +7395,6 @@ _systemd_unit_state() {
     case "$_enabled" in
         enabled|enabled-runtime|static|alias)
             echo "enabled"; return ;;
-    esac
-    echo "absent"
-}
-
-# FreeBSD rc.d equivalent: running → "active", sysrc <unit>_enable=YES (not running) →
-# "enabled", else "absent".
-_freebsd_unit_state() {
-    local unit="$1" _enabled _running=1
-    if command -v service >/dev/null 2>&1; then
-        service "$unit" status >/dev/null 2>&1 && _running=0
-    fi
-    if [ "$_running" = 0 ]; then echo "active"; return; fi
-    _enabled=$(sysrc -n "${unit}_enable" 2>/dev/null || echo "")
-    case "$_enabled" in
-        [Yy][Ee][Ss]) echo "enabled"; return ;;
     esac
     echo "absent"
 }
@@ -7980,6 +7547,7 @@ Proceed with topology change?" "no"; then
 }
 
 perform_upgrade_backup() {
+    local TEMP_STARTED="no"
     [ "$UPGRADE_SCENARIO" != "yes" ] && return 0
     if should_skip_upgrade_backup; then
         return 0
@@ -7993,22 +7561,12 @@ perform_upgrade_backup() {
         return 0
     fi
     local scheduler_running="no"
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        if service bunkerweb_scheduler status >/dev/null 2>&1; then
-            scheduler_running="yes"
-        fi
-    else
-        if systemctl is-active --quiet bunkerweb-scheduler 2>/dev/null; then
-            scheduler_running="yes"
-        fi
+    if systemctl is-active --quiet bunkerweb-scheduler 2>/dev/null; then
+        scheduler_running="yes"
     fi
     if [ "$scheduler_running" = "no" ]; then
         print_warning "Scheduler service not active; starting temporarily for the backup, will stop again afterwards."
-        if [ "$DISTRO_ID" = "freebsd" ]; then
-            service bunkerweb_scheduler onestart || print_warning "Failed to start scheduler; backup may fail."
-        else
-            systemctl start bunkerweb-scheduler || print_warning "Failed to start scheduler; backup may fail."
-        fi
+        systemctl start bunkerweb-scheduler || print_warning "Failed to start scheduler; backup may fail."
         TEMP_STARTED="yes"
     fi
     if [ -z "$BACKUP_DIRECTORY" ]; then
@@ -8023,11 +7581,7 @@ perform_upgrade_backup() {
         print_warning "Automatic backup failed. Verify manually before continuing."
     fi
     if [ "$TEMP_STARTED" = "yes" ]; then
-        if [ "$DISTRO_ID" = "freebsd" ]; then
-            service bunkerweb_scheduler onestop || print_warning "Failed to stop bunkerweb_scheduler after temporary start."
-        else
-            systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
-        fi
+        systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
     fi
 }
 
@@ -8045,17 +7599,6 @@ should_skip_upgrade_backup() {
 }
 
 upgrade_only() {
-    # FreeBSD upgrade not implemented yet — packages still scaffolding. Bail before backup prompts.
-    if [ "$DISTRO_ID" = "freebsd" ]; then
-        print_error "Automated FreeBSD upgrade is not supported yet."
-        print_error "Manual upgrade procedure:"
-        print_error "  1. service bunkerweb stop && service bunkerweb_scheduler stop"
-        print_error "  2. pkg unlock -y bunkerweb"
-        print_error "  3. pkg upgrade -y bunkerweb"
-        print_error "  4. pkg lock -y bunkerweb"
-        print_error "  5. service bunkerweb_scheduler start && service bunkerweb start"
-        exit 1
-    fi
     if should_skip_upgrade_backup; then
         print_status "Skipping pre-upgrade backup (scheduler not enabled; worker/ui/api install)."
     else
@@ -8135,6 +7678,9 @@ to /etc/bunkerweb and the database schema."
     print_step "Upgrading BunkerWeb package"
     case "$DISTRO_ID" in
         debian|ubuntu)
+            # Upgrading stable -> testing/dev needs the same dpkg allowance as a
+            # fresh install, else apt rejects the non-standard version string.
+            _dpkg_allow_testing_dev_version
             run_cmd apt update
             run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
             run_cmd apt-mark hold bunkerweb nginx
@@ -8340,9 +7886,6 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
             "rhel"|"rocky"|"almalinux"|"centos")
                 install_nginx_rhel
                 ;;
-            "freebsd")
-                install_nginx_freebsd
-                ;;
         esac
         _bw_phase_done nginx
     fi
@@ -8430,8 +7973,12 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
     fi
 
     # Prevent postinstall from starting services we still need to configure.
-    # ALWAYS runs (fresh + resume): pure SERVICE_* env derivation consumed by the
-    # package phase below; SERVICE_* values are not persisted in the state file.
+    # ALWAYS runs (fresh + resume): SERVICE_SCHEDULER/SERVICE_BUNKERWEB are
+    # unconditionally re-derived here every run, so their state-file values are
+    # never read. SERVICE_API/SERVICE_UI ARE persisted (in _BW_STATE_VARS) and
+    # honoured on resume — e.g. `export SERVICE_API="${SERVICE_API:-no}"` below
+    # preserves a --api full install's intent across an interrupt — so they must
+    # stay in _BW_STATE_VARS.
     if [ "$INSTALL_TYPE" = "manager" ]; then
         export SERVICE_SCHEDULER=no
         # Defer UI start when admin creds / self-signed TLS still to provision.
@@ -8461,14 +8008,8 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
             "debian"|"ubuntu")
                 install_bunkerweb_debian
                 ;;
-            "fedora")
+            "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
                 install_bunkerweb_rpm
-                ;;
-            "rhel"|"rocky"|"almalinux"|"centos")
-                install_bunkerweb_rpm
-                ;;
-            "freebsd")
-                install_bunkerweb_freebsd
                 ;;
         esac
         _bw_phase_done package
@@ -8494,16 +8035,9 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
         fi
 
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-            if [ "$DISTRO_ID" = "freebsd" ]; then
-                sysrc crowdsec_enable=YES >/dev/null 2>&1
-                service crowdsec restart || service crowdsec start || print_warning "Could not start crowdsec"
-                sleep 2
-                service crowdsec status >/dev/null 2>&1 || print_warning "CrowdSec may not be running"
-            else
-                run_cmd systemctl restart crowdsec
-                sleep 2
-                systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
-            fi
+            run_cmd systemctl restart crowdsec
+            sleep 2
+            systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
         fi
         _bw_phase_done configure
     fi
