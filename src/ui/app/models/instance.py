@@ -1207,6 +1207,27 @@ class InstancesUtils:
 
             redis_client = get_redis_client()
 
+        def _safe_numeric_add(current, addend):
+            """Add two values expected to be numeric, tolerating a non-numeric
+            ``current`` (e.g. a stale/partial/OOM-evicted Redis value decoded as
+            a string). Prevents ``TypeError: can only concatenate str (not
+            "int") to str`` from taking down the whole metrics page. ``addend``
+            is assumed numeric (callers guard it). A string-encoded number
+            (``"5"``, ``"10.5"``) is coerced and summed; truly garbage
+            ``current`` (``""``, ``"nil"``, ``None``, list/dict) falls back to
+            ``addend`` alone."""
+            if isinstance(current, (int, float)) and not isinstance(current, bool):
+                return current + addend
+            try:
+                coerced = float(current)
+            except (TypeError, ValueError):
+                return addend
+            # Keep integer typing for plain counters; only widen to float when a
+            # fractional part is actually present.
+            if isinstance(addend, int) and coerced.is_integer():
+                coerced = int(coerced)
+            return coerced + addend
+
         def aggregate_metrics(base_metrics: dict, new_metrics: dict) -> dict[str, Any]:
             """Aggregate metrics from different sources"""
             for key, value in new_metrics.items():
@@ -1220,7 +1241,7 @@ class InstancesUtils:
 
                 # Aggregate based on value type
                 if isinstance(value, (int, float)):
-                    base_metrics[key] += value
+                    base_metrics[key] = _safe_numeric_add(base_metrics[key], value)
                 elif isinstance(value, str):
                     base_metrics[key] = value
                 elif isinstance(value, list):
@@ -1235,7 +1256,7 @@ class InstancesUtils:
                         if k not in base_metrics[key]:
                             base_metrics[key][k] = v
                         elif isinstance(v, (int, float)):
-                            base_metrics[key][k] += v
+                            base_metrics[key][k] = _safe_numeric_add(base_metrics[key][k], v)
                         elif isinstance(v, list):
                             if isinstance(base_metrics[key][k], list):
                                 base_metrics[key][k].extend(v)
