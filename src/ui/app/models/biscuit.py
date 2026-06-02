@@ -33,6 +33,7 @@ OPERATIONS = {
 # Some UI endpoints use POST for datatable/query payloads but are read-only operations.
 READ_ONLY_POST_ENDPOINTS = frozenset(
     {
+        "bans.bans_fetch",
         "reports.reports_fetch",
         "reports.reports_filters",
         "reports.report_data_fetch",
@@ -40,12 +41,14 @@ READ_ONLY_POST_ENDPOINTS = frozenset(
 )
 READ_ONLY_POST_RULES = frozenset(
     {
+        "/bans/fetch",
         "/reports/fetch",
         "/reports/filters",
         "/reports/data",
     }
 )
 READ_ONLY_POST_PATH_SUFFIXES = (
+    "/bans/fetch",
     "/reports/fetch",
     "/reports/filters",
     "/reports/data",
