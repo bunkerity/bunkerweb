@@ -137,6 +137,14 @@ UI_ADMIN_PASSWORD_INPUT=""
 UI_ADMIN_PASSWORD_GENERATED=""
 UI_ADMIN_CREATE=""
 UI_SELFSIGNED_INPUT=""
+# Web UI exposure (full only): "" -> ask/behind, "no" -> direct (own port), "yes" -> behind BunkerWeb.
+UI_REVERSE_PROXY_INPUT=""
+# Listen IPv4 for the UI (direct mode) and the bunkerweb-api service; "" -> sensible default at apply time.
+UI_LISTEN_ADDR_INPUT=""
+API_LISTEN_ADDR_INPUT=""
+# Listen TCP port for the UI (direct) / API; "" -> service default (7000 / 8888).
+UI_LISTEN_PORT_INPUT=""
+API_LISTEN_PORT_INPUT=""
 MANAGER_UI_DEFERRED=""
 FULL_API_DEFERRED=""
 INSTALL_TYPE=""
@@ -231,7 +239,8 @@ _BW_STATE_VARS=(
     DB_EXTERNAL_ENGINE DB_HOST_INPUT DB_PORT_INPUT DB_SSL_INPUT
     DB_SSL_VERIFY_INPUT DB_SKIP_PROBE UI_ADMIN_USERNAME_INPUT
     UI_ADMIN_PASSWORD_INPUT UI_ADMIN_PASSWORD_GENERATED UI_ADMIN_CREATE
-    UI_SELFSIGNED_INPUT MANAGER_UI_DEFERRED FULL_API_DEFERRED
+    UI_SELFSIGNED_INPUT UI_REVERSE_PROXY_INPUT UI_LISTEN_ADDR_INPUT API_LISTEN_ADDR_INPUT
+    UI_LISTEN_PORT_INPUT API_LISTEN_PORT_INPUT MANAGER_UI_DEFERRED FULL_API_DEFERRED
     BUNKERWEB_INSTANCES_INPUT MANAGER_IP_INPUT SERVER_IP_INPUT
     RESOLVED_SERVER_IP DNS_RESOLVERS_INPUT API_LISTEN_HTTPS_INPUT
     BACKUP_DIRECTORY AUTO_BACKUP INSTALL_EPEL SERVICE_API SERVICE_UI
@@ -897,13 +906,13 @@ tui_yesno() {
         gum confirm "$prompt" --default="$_gum_default" \
             --prompt.foreground "#2eac68" \
             --affirmative "Yes" --negative "No" || _rc=$?
-        _tui_normalize_rc "$_rc"; _rc=$?
+        if ! _tui_normalize_rc "$_rc"; then _rc=1; fi
     elif [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
         local defarg=""
         [ "$default" = "no" ] && defarg="--defaultno"
         whiptail --backtitle "$TUI_BACKTITLE" --title "$title" \
                  $defarg --yesno "$prompt" 12 70 || _rc=$?
-        _tui_normalize_rc "$_rc"; _rc=$?
+        if ! _tui_normalize_rc "$_rc"; then _rc=1; fi
     else
         local hint reply
         if [ "$default" = "no" ]; then hint="[y/N]"; else hint="[Y/n]"; fi
@@ -1272,7 +1281,7 @@ ensure_config_file() {
 validate_docker_env_value() {
     local v="$1"
     case "$v" in
-        *'$'*|*"'"*|*\\*) return 1 ;;
+        *'$'*|*"'"*|*'"'*|*\\*) return 1 ;;
         *$'\n'*)          return 1 ;;
     esac
     return 0
@@ -3033,6 +3042,87 @@ ask_user_preferences() {
             fi
         fi
 
+        # Full-mode UI exposure: behind BunkerWeb (default) or direct. Asked BEFORE the wizard
+        # prompt — the wizard configures the UI as a USE_UI reverse-proxy behind BunkerWeb and
+        # needs UI_HOST, so direct mode is incompatible with it and forces it off below.
+        if [ "$INSTALL_TYPE" = "full" ] && [ "${SERVICE_UI:-yes}" != "no" ] && [ -z "$UI_REVERSE_PROXY_INPUT" ]; then
+            tui_section "🌐 Web UI Exposure"
+            _tui_explain "Behind BunkerWeb (recommended): the UI is reverse-proxied through the
+WAF on ports 80/443, inherits its protections + TLS, and the setup wizard
+runs at https://<your-domain>/setup.
+Direct: the UI listens on its own port 7000, bypassing BunkerWeb — the
+wizard is disabled, an admin user is created now, and you reach the UI on
+its own IP:7000. Use only on a trusted/firewalled network, with HTTPS."
+            if tui_yesno "Web UI Exposure" \
+                "🌐 Place the Web UI behind BunkerWeb (reverse-proxied)?" "yes"; then
+                UI_REVERSE_PROXY_INPUT="yes"
+            else
+                UI_REVERSE_PROXY_INPUT="no"
+            fi
+        fi
+
+        # Direct UI is incompatible with the wizard (which puts the UI behind BunkerWeb): force off.
+        if [ "$INSTALL_TYPE" = "full" ] && [ "$UI_REVERSE_PROXY_INPUT" = "no" ]; then
+            if [ "$ENABLE_WIZARD" = "yes" ]; then
+                tui_msgbox "Setup Wizard Disabled" \
+                    "Direct Web UI exposure is incompatible with the setup wizard (the wizard configures the UI behind BunkerWeb). The wizard will be disabled and an admin user created now."
+            fi
+            ENABLE_WIZARD="no"
+        fi
+
+        # Direct full-mode UI → choose the listen IP and self-signed HTTPS.
+        if [ "$INSTALL_TYPE" = "full" ] && [ "$UI_REVERSE_PROXY_INPUT" = "no" ] && [ "${SERVICE_UI:-yes}" != "no" ]; then
+            if [ -z "$UI_LISTEN_ADDR_INPUT" ]; then
+                local _ui_default_ip
+                _ui_default_ip=$(get_primary_ipv4)
+                if [ -z "$_ui_default_ip" ]; then _ui_default_ip="0.0.0.0"; fi
+                tui_section "🌐 Web UI Listen Address"
+                _tui_explain "IPv4 the Web UI binds to for direct access.
+  • <primary IP>  — reachable on your main interface (recommended; firewall it)
+  • 0.0.0.0       — every interface (only if firewalled)
+  • 127.0.0.1     — local only (reach via SSH tunnel)"
+                local _ui_ip_in
+                while true; do
+                    _ui_ip_in=$(tui_input "Web UI Listen Address" \
+                        "IPv4 to bind the Web UI to:" "$_ui_default_ip") || _ui_ip_in="$_ui_default_ip"
+                    _ui_ip_in=${_ui_ip_in:-$_ui_default_ip}
+                    if validate_ipv4 "$_ui_ip_in"; then
+                        UI_LISTEN_ADDR_INPUT="$_ui_ip_in"
+                        break
+                    fi
+                    tui_msgbox "Web UI Listen Address" "Invalid IPv4 address. Try again."
+                done
+            fi
+            if [ -z "$UI_LISTEN_PORT_INPUT" ]; then
+                tui_section "🌐 Web UI Listen Port"
+                local _ui_port_in
+                while true; do
+                    _ui_port_in=$(tui_input "Web UI Listen Port" \
+                        "TCP port for the Web UI:" "7000") || _ui_port_in="7000"
+                    _ui_port_in=${_ui_port_in:-7000}
+                    if validate_port "$_ui_port_in"; then
+                        UI_LISTEN_PORT_INPUT="$_ui_port_in"
+                        break
+                    fi
+                    tui_msgbox "Web UI Listen Port" "Invalid port (1-65535). Try again."
+                done
+            fi
+            if [ -z "$UI_SELFSIGNED_INPUT" ]; then
+                tui_section "🔒 Web UI HTTPS (self-signed)"
+                _tui_explain "The UI is exposed directly (not behind BunkerWeb), so protect it with
+HTTPS on its own listener using a self-signed certificate (gunicorn-native TLS).
+
+  Cert: /var/lib/bunkerweb/ui-tls/cert.pem
+  Key:  /var/lib/bunkerweb/ui-tls/key.pem"
+                if tui_yesno "Web UI Self-signed HTTPS" \
+                    "🔒 Enable self-signed HTTPS on the Web UI listener?" "yes"; then
+                    UI_SELFSIGNED_INPUT="yes"
+                else
+                    UI_SELFSIGNED_INPUT="no"
+                fi
+            fi
+        fi
+
         # Ask about setup wizard
         if [ "$INSTALL_TYPE" = "manager" ]; then
             if [ "$ENABLE_WIZARD" = "yes" ]; then
@@ -3231,6 +3321,42 @@ external systems. Optional, disabled by default on Linux."
             SERVICE_API=no
         fi
 
+        # API listen address/port — when the bunkerweb-api service runs (full + API, or --api-only),
+        # let the operator bind it. Defaults 127.0.0.1:8888 (local; behind BunkerWeb / SSH tunnel).
+        if { [ "$INSTALL_TYPE" = "full" ] && [ "${SERVICE_API:-no}" = "yes" ]; } || [ "$INSTALL_TYPE" = "api" ]; then
+            if [ -z "$API_LISTEN_ADDR_INPUT" ]; then
+                tui_section "🔌 API Listen Address"
+                _tui_explain "IPv4 the bunkerweb-api (FastAPI) service binds to.
+  • 127.0.0.1            — local only (default; reach via SSH tunnel or a BunkerWeb reverse_proxy)
+  • <primary IP> / 0.0.0.0 — expose directly (firewall the port if you do)"
+                local _api_ip_in
+                while true; do
+                    _api_ip_in=$(tui_input "API Listen Address" \
+                        "IPv4 to bind the API to:" "127.0.0.1") || _api_ip_in="127.0.0.1"
+                    _api_ip_in=${_api_ip_in:-127.0.0.1}
+                    if validate_ipv4 "$_api_ip_in"; then
+                        API_LISTEN_ADDR_INPUT="$_api_ip_in"
+                        break
+                    fi
+                    tui_msgbox "API Listen Address" "Invalid IPv4 address. Try again."
+                done
+            fi
+            if [ -z "$API_LISTEN_PORT_INPUT" ]; then
+                tui_section "🔌 API Listen Port"
+                local _api_port_in
+                while true; do
+                    _api_port_in=$(tui_input "API Listen Port" \
+                        "TCP port for the API:" "8888") || _api_port_in="8888"
+                    _api_port_in=${_api_port_in:-8888}
+                    if validate_port "$_api_port_in"; then
+                        API_LISTEN_PORT_INPUT="$_api_port_in"
+                        break
+                    fi
+                    tui_msgbox "API Listen Port" "Invalid port (1-65535). Try again."
+                done
+            fi
+        fi
+
         # AppSec — only if CrowdSec is chosen.
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
             tui_section "🛡️ CrowdSec Application Security (AppSec)"
@@ -3307,7 +3433,7 @@ will warn and fall back to the other one." \
                 # Local Redis password (REQUIREPASS): opt-in gate, then a
                 # DB/UI-style prompt — type a password or leave empty to
                 # auto-generate. Runs for every local install (full + manager).
-                if [ "$REDIS_AUTOPASS" != "no" ] && [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
+                if [ "$REDIS_INSTALL" = "yes" ] && [ "$REDIS_AUTOPASS" != "no" ] && [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
                     tui_section "🔑 Redis Password"
                     local _redis_flavor_label="${REDIS_FLAVOR:-redis}"
                     local _redis_pw_default="yes"
@@ -3929,6 +4055,21 @@ _build_configuration_summary() {
                 ;;
             *) _field "Admin user" "Not configured" ;;
         esac
+        if [ "$INSTALL_TYPE" = "full" ]; then
+            if [ "${UI_REVERSE_PROXY_INPUT:-yes}" = "no" ]; then
+                _field "Exposure" "Direct (not behind BunkerWeb)"
+                _field "UI listen" "${UI_LISTEN_ADDR_INPUT:-auto (primary IP)}:${UI_LISTEN_PORT_INPUT:-7000}"
+                case "$UI_SELFSIGNED_INPUT" in
+                    no) _field "HTTPS" "Plain HTTP listener" ;;
+                    *)  _field "HTTPS" "Self-signed cert (gunicorn TLS)" ;;
+                esac
+            else
+                _field "Exposure" "Behind BunkerWeb (reverse-proxied)"
+            fi
+            if [ -n "$API_LISTEN_ADDR_INPUT" ] || [ -n "$API_LISTEN_PORT_INPUT" ]; then
+                _field "API listen" "${API_LISTEN_ADDR_INPUT:-127.0.0.1}:${API_LISTEN_PORT_INPUT:-8888}"
+            fi
+        fi
         if [ "$INSTALL_TYPE" = "manager" ]; then
             case "$UI_SELFSIGNED_INPUT" in
                 yes) _field "HTTPS" "Self-signed cert (gunicorn TLS)" ;;
@@ -4246,6 +4387,27 @@ extract_first_ipv4() {
     # Always return 0 — caller detects empty stdout. Non-zero would kill the script under `set -e`.
     echo ""
     return 0
+}
+
+# Valid IPv4 dotted-quad with octets 0-255 (accepts 0.0.0.0 and 127.0.0.1). 0 = ok, 1 = invalid.
+validate_ipv4() {
+    local ip="$1" p
+    [[ "$ip" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]] || return 1
+    local IFS=.
+    for p in $ip; do
+        if [ "$((10#$p))" -gt 255 ]; then
+            return 1
+        fi
+    done
+    return 0
+}
+
+# Valid TCP port 1-65535 (base-10, tolerates leading zeros). 0 = ok, 1 = invalid.
+validate_port() {
+    local p="$1"
+    [[ "$p" =~ ^[0-9]+$ ]] || return 1
+    local n=$((10#$p))
+    [ "$n" -ge 1 ] && [ "$n" -le 65535 ]
 }
 
 # Prompt for a local IPv4. 0 = set, 1 = cancel (caller decides if fatal).
@@ -4802,6 +4964,12 @@ configure_full_config() {
 
     apply_optional_integrations "$config_file" "needs_reload"
 
+    # A local/external DB defers bunkerweb + scheduler start in main(); without a reload
+    # trigger here they would never come up (e.g. --yes --no-wizard --full --db mariadb).
+    if [[ "$DB_INSTALL" =~ ^(mariadb|postgresql|external)$ ]]; then
+        needs_reload=true
+    fi
+
     # Restart-or-start: `enable --now` is a no-op when active, so post-postinst changes
     # (MULTISITE, DNS_RESOLVERS) wouldn't apply otherwise.
     # Order: scheduler before bunkerweb (scheduler renders templates first).
@@ -4909,7 +5077,7 @@ install_nginx_rhel() {
     cat > /etc/yum.repos.d/nginx.repo << EOF
 [nginx-stable]
 name=nginx stable repo
-baseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/
+baseurl=https://nginx.org/packages/rhel/\$releasever/\$basearch/
 gpgcheck=1
 enabled=1
 gpgkey=https://nginx.org/keys/nginx_signing.key
@@ -4917,7 +5085,7 @@ module_hotfixes=true
 
 [nginx-mainline]
 name=nginx mainline repo
-baseurl=http://nginx.org/packages/mainline/centos/\$releasever/\$basearch/
+baseurl=https://nginx.org/packages/mainline/rhel/\$releasever/\$basearch/
 gpgcheck=1
 enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
@@ -4982,7 +5150,7 @@ install_bunkerweb_rpm() {
     print_step "Installing BunkerWeb on $DISTRO_ID"
 
     # Offer EPEL on RHEL-family distros before installing BunkerWeb.
-    if [[ "$DISTRO_ID" =~ ^(rhel|centos|fedora|rocky|almalinux|redhat)$ ]] && ! rpm -q epel-release >/dev/null 2>&1; then
+    if [[ "$DISTRO_ID" =~ ^(rhel|centos|rocky|almalinux|redhat)$ ]] && ! rpm -q epel-release >/dev/null 2>&1; then
         if [ "$INSTALL_EPEL" = "yes" ]; then
             print_step "Installing EPEL repository (epel-release)"
             run_cmd dnf install -y epel-release
@@ -5253,9 +5421,9 @@ source: appsec
         _csc_err=""
     }
     if [ -n "$_csc_err" ]; then
-        BOUNCER_KEY=$(cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6 --output raw 2>"$_csc_err")
+        BOUNCER_KEY=$(cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6 --output raw 2>"$_csc_err") || true
     else
-        BOUNCER_KEY=$(cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6 --output raw 2>/dev/null)
+        BOUNCER_KEY=$(cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6 --output raw 2>/dev/null) || true
     fi
     if [ -z "$BOUNCER_KEY" ]; then
         print_warning "Failed to register bouncer with CrowdSec."
@@ -5409,6 +5577,7 @@ _redis_conf_set() {
 
     # Explicit template — bare `mktemp` returns 1 on FreeBSD even when /tmp is writable.
     tmp=$(mktemp /tmp/bw-redis-conf.XXXXXX) || return 1
+    _bw_register_secret_tmpfile "$tmp"
     # Strip every existing matching line (commented or not).
     awk -v d="$directive" 'BEGIN{IGNORECASE=1} {
         line=$0
@@ -5420,7 +5589,7 @@ _redis_conf_set() {
     }' "$conf" > "$tmp"
     printf '%s %s\n' "$directive" "$value" >> "$tmp"
     cat "$tmp" > "$conf"
-    rm -f "$tmp"
+    shred -u "$tmp" 2>/dev/null || rm -f "$tmp"
 }
 
 install_redis() {
@@ -5595,13 +5764,35 @@ apply_db_config() {
 # Scheme: http (gunicorn default); https when UI_SELFSIGNED_INPUT=yes.
 apply_ui_host_config() {
     local target=/etc/bunkerweb/variables.env
-    local scheme="http"
-    if [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
-        scheme="https"
-    fi
     write_default_variables_env_template "$target"
-    set_config_kv "$target" "UI_HOST" "${scheme}://127.0.0.1:7000"
     set_config_kv "$target" "MULTISITE" "yes"
+
+    if [ "${UI_REVERSE_PROXY_INPUT:-yes}" = "no" ]; then
+        # Direct exposure: the UI listens on its own port and is NOT reverse-proxied by
+        # BunkerWeb. Leave UI_HOST empty so default-server-http/ui.conf does not proxy it.
+        local ui_env=/etc/bunkerweb/ui.env
+        write_default_ui_env_template "$ui_env"
+        # Direct listener bind: explicit --ui-listen-ip, else the detected primary IPv4,
+        # else 0.0.0.0 as a last resort. (Behind mode leaves it on loopback for proxying.)
+        local _ui_bind="$UI_LISTEN_ADDR_INPUT"
+        if [ -z "$_ui_bind" ]; then _ui_bind=$(get_primary_ipv4); fi
+        if [ -z "$_ui_bind" ]; then _ui_bind="0.0.0.0"; fi
+        set_config_kv "$ui_env" "LISTEN_ADDR" "$_ui_bind"
+        UI_LISTEN_ADDR_INPUT="$_ui_bind"
+        if [ -n "$UI_LISTEN_PORT_INPUT" ]; then set_config_kv "$ui_env" "LISTEN_PORT" "$UI_LISTEN_PORT_INPUT"; fi
+        # Exposed outside the WAF → default to HTTPS on the listener unless opted out.
+        if [ -z "$UI_SELFSIGNED_INPUT" ]; then UI_SELFSIGNED_INPUT="yes"; fi
+        if [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
+            setup_ui_selfsigned_tls
+        fi
+        print_warning "Web UI is exposed directly on port 7000 (not behind BunkerWeb)."
+        print_warning "Restrict that port with a firewall to trusted networks."
+    else
+        # Behind BunkerWeb (default): reverse-proxied via the WAF listener.
+        local scheme="http"
+        if [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then scheme="https"; fi
+        set_config_kv "$target" "UI_HOST" "${scheme}://127.0.0.1:7000"
+    fi
 }
 
 # SQLAlchemy DSN for the external engine. Output matches DB_STRING_RX at src/common/db/Database.py:111.
@@ -6198,7 +6389,7 @@ show_final_info() {
     else
         systemctl status bunkerweb --no-pager -l || true
         systemctl status bunkerweb-scheduler --no-pager -l || true
-        if systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        if systemctl cat bunkerweb-api.service >/dev/null 2>&1; then
             systemctl status bunkerweb-api --no-pager -l || true
         fi
         if [ "$ENABLE_WIZARD" = "yes" ]; then
@@ -6221,7 +6412,7 @@ show_final_info() {
             echo "  - API config: /etc/bunkerweb/api.env"
         fi
     else
-        if [ "${SERVICE_API:-no}" = "yes" ] || systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        if [ "${SERVICE_API:-no}" = "yes" ] || systemctl cat bunkerweb-api.service >/dev/null 2>&1; then
             echo "  - API config: /etc/bunkerweb/api.env"
         fi
     fi
@@ -6242,7 +6433,8 @@ show_final_info() {
     local _ui_scheme="http" _ui_host="$_server_ip"
     if [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
         _ui_scheme="https"
-        _ui_host="127.0.0.1"
+        # Manager keeps the UI on loopback; a direct full UI is reachable on the server IP.
+        if [ "$INSTALL_TYPE" = "manager" ]; then _ui_host="127.0.0.1"; fi
     fi
     case "$INSTALL_TYPE" in
         "manager")
@@ -6250,7 +6442,7 @@ show_final_info() {
             if [ -n "$DB_DSN_GENERATED" ]; then
                 echo "  1. Database is already configured (see credentials block below)."
             else
-                echo "  1. Configure database connection in /etc/bunkerweb/scheduler.env"
+                echo "  1. Configure database connection in /etc/bunkerweb/variables.env"
                 echo "     Set DATABASE_URI (e.g., sqlite:///var/lib/bunkerweb/db.sqlite3)"
             fi
             echo "  2. Verify BUNKERWEB_INSTANCES is set to: $BUNKERWEB_INSTANCES_INPUT"
@@ -6387,7 +6579,16 @@ show_final_info() {
                 else
                     echo "  • Check logs: journalctl -u bunkerweb -f"
                 fi
-                echo "  • Access Web UI (if enabled): http://${_server_ip}:7000"
+                if [ "${UI_REVERSE_PROXY_INPUT:-yes}" = "no" ]; then
+                    local _ui_disp="${UI_LISTEN_ADDR_INPUT:-$_server_ip}"
+                    if [ "$_ui_disp" = "0.0.0.0" ] || [ -z "$_ui_disp" ]; then _ui_disp="$_server_ip"; fi
+                    echo "  • Web UI exposed directly (not behind BunkerWeb): ${_ui_scheme}://${_ui_disp}:${UI_LISTEN_PORT_INPUT:-7000}"
+                    echo "    ⚠ Restrict port ${UI_LISTEN_PORT_INPUT:-7000} with a firewall to trusted networks."
+                else
+                    echo "  • Access the Web UI through BunkerWeb (recommended): once a server name/domain"
+                    echo "    is configured, browse to https://<your-BunkerWeb-FQDN>/ — the UI is reverse-"
+                    echo "    proxied by BunkerWeb, so there is no need to expose port 7000 directly."
+                fi
                 if [ "$REDIS_INSTALL" = "yes" ]; then
                     echo "  • ${REDIS_FLAVOR:-redis} is configured: metrics and bans persist across restarts and are shared between workers"
                 fi
@@ -6569,9 +6770,26 @@ usage() {
     echo "                           rules: 8+ chars, one lowercase, one uppercase, one digit, one special)"
     echo "  --no-ui-admin            Skip the admin-user creation prompt"
     echo
-    echo "Manager UI hardening (manager only):"
-    echo "  --ui-https-selfsigned    Generate a self-signed cert and enable UI HTTPS"
-    echo "  --no-ui-https-selfsigned Disable manager UI self-signed HTTPS"
+    echo "Secrets via environment (safer than the flags above — not visible in ps/argv or"
+    echo "set -x traces; the matching CLI flag still wins when both are provided):"
+    echo "  BW_DB_PASSWORD           same as --db-password"
+    echo "  BW_UI_ADMIN_PASSWORD     same as --ui-admin-password"
+    echo "  BW_REDIS_PASSWORD        same as --redis-password"
+    echo "  BW_API_TOKEN             same as --api-token"
+    echo "  BW_DATABASE_URI          same as --database-uri"
+    echo
+    echo "Web UI exposure & HTTPS:"
+    echo "  --ui-direct              (full) Expose the Web UI directly on port 7000 instead of"
+    echo "                           reverse-proxying it behind BunkerWeb (default: behind)"
+    echo "  --ui-reverse-proxy       (full) Force the UI behind BunkerWeb (the default)"
+    echo "  --ui-listen-ip IP        (full + --ui-direct) IPv4 the UI binds to (default: primary IP)"
+    echo "  --ui-listen-port N       (full + --ui-direct) TCP port for the UI (default: 7000)"
+    echo "  --ui-https-selfsigned    Self-signed HTTPS on the UI listener: --manager, or --full"
+    echo "                           with --ui-direct (default ON for --full --ui-direct)"
+    echo "  --no-ui-https-selfsigned Disable self-signed HTTPS on the UI listener"
+    echo "  --api-listen-ip IP       IPv4 the bunkerweb-api (FastAPI) binds to (default: 127.0.0.1;"
+    echo "                           set a reachable IP to expose the API outside BunkerWeb)"
+    echo "  --api-listen-port N      TCP port for the bunkerweb-api (FastAPI) (default: 8888)"
     echo
     echo "Advanced options:"
     echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
@@ -7074,6 +7292,65 @@ while [[ $# -gt 0 ]]; do
             UI_SELFSIGNED_INPUT="no"
             shift
             ;;
+        --ui-direct|--no-ui-reverse-proxy)
+            # full only: expose the UI on its own port instead of behind BunkerWeb.
+            UI_REVERSE_PROXY_INPUT="no"
+            shift
+            ;;
+        --ui-reverse-proxy)
+            UI_REVERSE_PROXY_INPUT="yes"
+            shift
+            ;;
+        --ui-listen-ip)
+            # full + --ui-direct: IPv4 the UI gunicorn listener binds to.
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing IPv4 after $1"
+                exit 1
+            fi
+            if ! validate_ipv4 "$2"; then
+                print_error "$1 requires a valid IPv4 address (e.g. 10.0.0.5, 0.0.0.0)"
+                exit 1
+            fi
+            UI_LISTEN_ADDR_INPUT="$2"
+            shift 2
+            ;;
+        --api-listen-ip)
+            # IPv4 the bunkerweb-api (FastAPI) listener binds to.
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing IPv4 after $1"
+                exit 1
+            fi
+            if ! validate_ipv4 "$2"; then
+                print_error "$1 requires a valid IPv4 address (e.g. 10.0.0.5, 0.0.0.0)"
+                exit 1
+            fi
+            API_LISTEN_ADDR_INPUT="$2"
+            shift 2
+            ;;
+        --ui-listen-port)
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing port after $1"
+                exit 1
+            fi
+            if ! validate_port "$2"; then
+                print_error "$1 requires a TCP port between 1 and 65535"
+                exit 1
+            fi
+            UI_LISTEN_PORT_INPUT="$2"
+            shift 2
+            ;;
+        --api-listen-port)
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing port after $1"
+                exit 1
+            fi
+            if ! validate_port "$2"; then
+                print_error "$1 requires a TCP port between 1 and 65535"
+                exit 1
+            fi
+            API_LISTEN_PORT_INPUT="$2"
+            shift 2
+            ;;
         --instances)
             if [ -z "$2" ] || [[ "$2" == -* ]]; then
                 print_error "Missing instances value after $1"
@@ -7180,6 +7457,20 @@ for fd in (3, 4):
     esac
 done
 
+# Secrets may also arrive via environment variables (BW_*) instead of CLI flags.
+# Unlike argv, env vars are not exposed in `ps` / /proc/PID/cmdline or in a parent
+# shell's `set -x` trace. A CLI flag, when given, takes precedence. xtrace is
+# suppressed around the reads so values never leak into a trace log (mirrors tui_password).
+_bw_xtrace_was_on=no
+case $- in *x*) _bw_xtrace_was_on=yes; set +x ;; esac
+DB_PASSWORD_INPUT="${DB_PASSWORD_INPUT:-${BW_DB_PASSWORD:-}}"
+UI_ADMIN_PASSWORD_INPUT="${UI_ADMIN_PASSWORD_INPUT:-${BW_UI_ADMIN_PASSWORD:-}}"
+REDIS_PASSWORD_INPUT="${REDIS_PASSWORD_INPUT:-${BW_REDIS_PASSWORD:-}}"
+DOCKER_API_TOKEN_GENERATED="${DOCKER_API_TOKEN_GENERATED:-${BW_API_TOKEN:-}}"
+DOCKER_DATABASE_URI="${DOCKER_DATABASE_URI:-${BW_DATABASE_URI:-}}"
+if [ "$_bw_xtrace_was_on" = yes ]; then set -x; fi
+unset _bw_xtrace_was_on
+
 # ---------------------------------------------------------------------------
 # Post-argv validation — Linux-package install guards. Docker mode runs its own
 # per-type validation in ask_docker_preferences, so this whole block is skipped
@@ -7201,12 +7492,49 @@ if [ -n "$BUNKERWEB_INSTANCES_INPUT" ] && [[ "$INSTALL_TYPE" != "manager" && "$I
     exit 1
 fi
 
-# --ui-https-selfsigned only generates a cert in manager mode (via start_manager_ui).
-# Other modes would write UI_HOST=https://... with no cert → broken UI. Reject at parse.
-if [ "$UI_SELFSIGNED_INPUT" = "yes" ] && [ -n "$INSTALL_TYPE" ] && [ "$INSTALL_TYPE" != "manager" ]; then
-    print_error "--ui-https-selfsigned is only supported with --manager (it generates the cert in start_manager_ui)."
-    print_error "For --${INSTALL_TYPE} mode, drop the flag and front the UI with your own reverse proxy if HTTPS is needed."
+# --ui-direct (expose the UI outside BunkerWeb) only applies to a full install.
+if [ "$UI_REVERSE_PROXY_INPUT" = "no" ] && [ -n "$INSTALL_TYPE" ] && [ "$INSTALL_TYPE" != "full" ]; then
+    print_error "--ui-direct only applies to --full installations (it exposes the UI directly instead of behind BunkerWeb)."
     exit 1
+fi
+
+# Direct UI exposure is incompatible with the setup wizard (which puts the UI behind BunkerWeb):
+# force the wizard off here so the existing no-wizard path auto-creates the admin user.
+# (INSTALL_TYPE may still be empty here = the 'full' default applied later in ask_deployment_platform.)
+if [ "${INSTALL_TYPE:-full}" = "full" ] && [ "$UI_REVERSE_PROXY_INPUT" = "no" ]; then
+    if [ "$ENABLE_WIZARD" = "yes" ]; then
+        print_warning "--ui-direct is incompatible with the setup wizard; disabling the wizard."
+    fi
+    ENABLE_WIZARD="no"
+fi
+
+# --ui-listen-ip / --ui-listen-port only apply to a direct full UI.
+if [ -n "$UI_LISTEN_ADDR_INPUT" ] || [ -n "$UI_LISTEN_PORT_INPUT" ]; then
+    if { [ -n "$INSTALL_TYPE" ] && [ "$INSTALL_TYPE" != "full" ]; } || [ "$UI_REVERSE_PROXY_INPUT" = "yes" ]; then
+        print_error "--ui-listen-ip / --ui-listen-port only apply to --full with --ui-direct."
+        exit 1
+    fi
+fi
+
+# --api-listen-ip / --api-listen-port apply only where the installer writes api.env (full or --api-only).
+if [ -n "$API_LISTEN_ADDR_INPUT" ] || [ -n "$API_LISTEN_PORT_INPUT" ]; then
+    case "${INSTALL_TYPE:-full}" in
+        full|api) : ;;
+        *) print_error "--api-listen-ip / --api-listen-port apply only to --full or --api installs."; exit 1 ;;
+    esac
+fi
+
+# Self-signed HTTPS on the UI listener is valid for --manager (start_manager_ui generates the
+# cert), or for --full together with --ui-direct (gunicorn-native TLS on the exposed UI port).
+# For --full behind BunkerWeb, the WAF terminates TLS, so the flag is rejected.
+if [ "$UI_SELFSIGNED_INPUT" = "yes" ] && [ -n "$INSTALL_TYPE" ] && [ "$INSTALL_TYPE" != "manager" ]; then
+    if [ "$INSTALL_TYPE" = "full" ] && [ "$UI_REVERSE_PROXY_INPUT" = "no" ]; then
+        : # full + --ui-direct → self-signed HTTPS on the UI listener
+    else
+        print_error "--ui-https-selfsigned requires --manager, or --full together with --ui-direct."
+        print_error "For --${INSTALL_TYPE} behind BunkerWeb, let BunkerWeb terminate TLS (Let's Encrypt / custom cert)."
+        exit 1
+    fi
 fi
 
 # Inform about missing instances for manager/scheduler in non-interactive mode
@@ -7250,11 +7578,6 @@ fi
 if { [ -n "$UI_ADMIN_CREATE" ] || [ -n "$UI_ADMIN_USERNAME_INPUT" ] || [ -n "$UI_ADMIN_PASSWORD_INPUT" ]; } \
     && [[ "$INSTALL_TYPE" != "full" && "$INSTALL_TYPE" != "manager" && "$INSTALL_TYPE" != "ui" && -n "$INSTALL_TYPE" ]]; then
     print_error "UI admin options (--ui-admin-*) only apply to --full, --manager or --ui-only installations"
-    exit 1
-fi
-
-if [ -n "$UI_SELFSIGNED_INPUT" ] && [ "$INSTALL_TYPE" != "manager" ] && [ -n "$INSTALL_TYPE" ]; then
-    print_error "Manager UI self-signed HTTPS (--ui-https-selfsigned) only applies to --manager installations"
     exit 1
 fi
 
@@ -7800,11 +8123,12 @@ to /etc/bunkerweb and the database schema."
     print_step "Stopping services prior to upgrade"
     local _restart_after_upgrade=""
     for svc in bunkerweb bunkerweb-api bunkerweb-ui bunkerweb-scheduler; do
-        if systemctl list-units --type=service --all | grep -q "^${svc}.service"; then
-            if systemctl is-active --quiet "$svc"; then
-                _restart_after_upgrade="${svc} ${_restart_after_upgrade}"
-                run_cmd systemctl stop "$svc"
-            fi
+        # is-active is safe for absent units; the old `list-units | grep "^name"` guard
+        # never matched (list-units indents every line with spaces or a ● bullet), so the
+        # whole drain/restart sequence was dead code.
+        if systemctl is-active --quiet "$svc" 2>/dev/null; then
+            _restart_after_upgrade="${svc} ${_restart_after_upgrade}"
+            run_cmd systemctl stop "$svc"
         fi
     done
     # Install new version only — do NOT reinstall nginx.
@@ -8051,6 +8375,12 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
         case "${INSTALL_TYPE:-full}" in
             full|ui|"")
                 apply_ui_host_config
+                # Custom API listener bind (full + --api): pre-seed api.env so postinstall keeps it.
+                if [ "${SERVICE_API:-no}" = "yes" ] && { [ -n "$API_LISTEN_ADDR_INPUT" ] || [ -n "$API_LISTEN_PORT_INPUT" ]; }; then
+                    write_default_api_env_template /etc/bunkerweb/api.env
+                    if [ -n "$API_LISTEN_ADDR_INPUT" ]; then set_config_kv /etc/bunkerweb/api.env "LISTEN_ADDR" "$API_LISTEN_ADDR_INPUT"; fi
+                    if [ -n "$API_LISTEN_PORT_INPUT" ]; then set_config_kv /etc/bunkerweb/api.env "LISTEN_PORT" "$API_LISTEN_PORT_INPUT"; fi
+                fi
                 ;;
             manager)
                 if [ "${SERVICE_UI:-yes}" != "no" ] || [ "${MANAGER_UI_DEFERRED:-no}" = "yes" ]; then
@@ -8079,6 +8409,12 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
                 # api.env template carries the FastAPI/biscuit/TLS commented docs the postinst's minimal file lacks.
                 write_default_variables_env_template /etc/bunkerweb/variables.env
                 write_default_api_env_template /etc/bunkerweb/api.env
+                if [ -n "$API_LISTEN_ADDR_INPUT" ]; then
+                    set_config_kv /etc/bunkerweb/api.env "LISTEN_ADDR" "$API_LISTEN_ADDR_INPUT"
+                fi
+                if [ -n "$API_LISTEN_PORT_INPUT" ]; then
+                    set_config_kv /etc/bunkerweb/api.env "LISTEN_PORT" "$API_LISTEN_PORT_INPUT"
+                fi
                 # FastAPI rate limiter reads USE_REDIS/REDIS_HOST from variables.env.
                 apply_optional_integrations /etc/bunkerweb/variables.env
                 ;;
