@@ -5,6 +5,12 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.27.0 - 2026-06-01
+
+## What's Changed
+### 🧰 Other Changes
+* fix(920240, 920400): don't rely on content-type header by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4639
+
 ## Version 4.26.0 - 2026-05-03
 
 ## What's Changed
