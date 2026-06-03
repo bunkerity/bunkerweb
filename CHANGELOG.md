@@ -29,6 +29,7 @@
 - [BUGFIX] `ui`/`api`: fix a possible login lockout under bcrypt 5.0.0, which raises a `ValueError` instead of truncating a secret over its 72-byte limit. Password verification now truncates the candidate to 72 bytes (matching how hashes are created), so accounts whose password exceeds 72 bytes — easy with multi-byte characters like accents or emoji — keep working. Setting an over-72-byte password is now rejected up front with a clear message and log across the Setup Wizard, profile page and `ADMIN_PASSWORD`/`API_PASSWORD` env vars (pre-hashed values exempt), and the set-password fields cap input at 72.
 - [BUGFIX] `ui`: fix dark/light theme flicker and wrong-theme-on-load. The client no longer re-applies a stale per-browser `localStorage` value after paint, so the server-rendered profile theme is authoritative — no flash, and consistent across devices/browsers (theme now follows the logged-in profile; last toggle wins everywhere). Anonymous pages (login/setup) resolve their theme before first paint via a nonce'd head script honoring the last choice, then the OS `prefers-color-scheme`.
 - [BUGFIX] `ui`: fix plugin metrics pages (Bad Behavior, Blacklist) crashing with `can only concatenate str (not "int") to str` on Redis-backed setups — `get_metrics` aggregation now coerces a non-numeric Redis value instead of doing `str += int`. (Fixes #3610)
+- [DEPS] Updated lua-resty-string version to v0.18
 
 ## v1.6.11 - 2026/05/23
 
