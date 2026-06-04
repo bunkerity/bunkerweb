@@ -72,6 +72,7 @@ COPY src/autoconf/requirements.txt /tmp/req/requirements-autoconf.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
 COPY src/api/requirements.txt /tmp/req/requirements-api.txt
+COPY src/worker/requirements.txt /tmp/req/requirements-worker.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
@@ -101,6 +102,7 @@ COPY src/autoconf autoconf
 COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/api api
+COPY src/worker worker
 COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
@@ -190,8 +192,8 @@ RUN cp helpers/bwcli /usr/bin/ && \
     chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
     chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
     chmod 2770 /var/tmp/bunkerweb && \
-    find . \( -path './all-in-one' -o -path './api' -o -path './scheduler' -o -path './ui' -o -path './autoconf' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
-    find all-in-one api scheduler ui autoconf cli lua core db gen utils helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    find . \( -path './all-in-one' -o -path './api' -o -path './scheduler' -o -path './ui' -o -path './autoconf' -o -path './worker' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    find all-in-one api scheduler ui autoconf worker cli lua core db gen utils helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
     chmod 770 -R db/alembic && \
     chmod 550 entrypoint.sh && \
     chmod 660 INTEGRATION && \

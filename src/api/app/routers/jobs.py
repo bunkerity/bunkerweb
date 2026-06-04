@@ -56,8 +56,17 @@ def dispatch_jobs(payload: DispatchJobsRequest) -> JSONResponse:
             "run_id": run_id,
             "dispatch_time": datetime.now(timezone.utc).isoformat(),
         }
+        # HEAVY_JOBS mirrors src/worker/app.py — keeps queue routing in sync
+        # without importing worker package on the API side.
+        HEAVY_JOBS = {
+            "backup-data", "bunkernet-data", "bunkernet-register",
+            "certbot-auth", "certbot-cleanup", "certbot-deploy", "certbot-new", "certbot-renew",
+            "coreruleset-nightly", "download-crs-plugins", "download-plugins", "download-pro-plugins",
+            "push-configs",
+        }
+        queue = "heavy" if job.name in HEAVY_JOBS else "default"
         try:
-            celery.send_task("worker.execute_job", args=[job_payload], task_id=run_id)
+            celery.send_task("worker.execute_job", args=[job_payload], task_id=run_id, queue=queue)
         except Exception as exc:
             return JSONResponse(status_code=502, content={"status": "error", "message": f"Failed to dispatch jobs: {exc}"})
         run_ids.append({"name": job.name, "run_id": run_id})

@@ -957,12 +957,12 @@ def before_request():
 
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
-            if DB.readonly:
+            if API_CLIENT.readonly:
                 LOGGER.warning("reload_ui_plugins is set but database is read-only, skipping plugin reload to prevent infinite loop")
             else:
                 safe_reload_plugins()
                 # Reset the flag BEFORE sending SIGHUP so new workers see it cleared
-                err = DB.checked_changes(changes=["ui_plugins"], value=False)
+                err = API_CLIENT.checked_changes(changes=["ui_plugins"], value=False)
                 if err:
                     LOGGER.error(f"Couldn't reset reload_ui_plugins flag: {err}, skipping worker restart to prevent loop")
                 else:

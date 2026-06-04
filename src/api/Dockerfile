@@ -8,6 +8,7 @@ RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo zlib-dev
 # Copy requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/api/requirements.txt /tmp/req/requirements-api.txt
+COPY src/worker/requirements.txt /tmp/req/requirements-worker.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
@@ -19,8 +20,7 @@ WORKDIR /usr/share/bunkerweb
 RUN export MAKEFLAGS="-j$(nproc)" && \
   if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs) && \
-  pip install --no-cache-dir --upgrade --target deps/python "celery[redis]>=5.5.0"
+  pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy shared code and service
 COPY src/common/api api

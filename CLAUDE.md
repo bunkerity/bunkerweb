@@ -118,7 +118,7 @@ refurb                           # Python refactoring suggestions (excludes test
 docker compose -f misc/dev/docker-compose.ui.api.yml up -d
 ```
 
-Key dev compose files in `misc/dev/` (17 total):
+Key dev compose files in `misc/dev/` (18 total):
 
 - `docker-compose.ui.api.yml` — Full stack (UI + API + core + MariaDB) — **recommended**
 - `docker-compose.ui.yml` — UI + API + core + MariaDB (UI requires bw-api)

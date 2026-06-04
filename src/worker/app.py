@@ -5,7 +5,6 @@ from celery import Celery
 from celery.signals import worker_process_init, worker_process_shutdown
 from kombu import Queue
 
-
 app = Celery("bunkerweb", include=["worker.tasks"])
 
 app.conf.update(
@@ -56,6 +55,7 @@ HEAVY_JOBS = {
     "download-crs-plugins",
     "download-plugins",
     "download-pro-plugins",
+    "push-configs",
 }
 
 

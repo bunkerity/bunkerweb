@@ -18,13 +18,13 @@ The Scheduler is BunkerWeb's central orchestrator — the "brain" of the system.
 
 ## File Overview
 
-| File | Purpose |
-|---|---|
-| `main.py` (~1400 lines) | Entry point. Contains the main event loop, signal handlers, config generation orchestration, healthcheck logic, failover backup/restore, and change detection polling |
+| File                           | Purpose                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `main.py` (~1050 lines)        | Entry point. Contains the main event loop, signal handlers, config generation orchestration, healthcheck logic, failover backup/restore, and change detection polling                                                                                                                                                                        |
 | `JobScheduler.py` (~260 lines) | Thin `JobScheduler` class — standalone (does **not** inherit from `ApiCaller`; accepts an `api_client` by injection). Discovers jobs from `plugin.json` files, validates them, manages the `schedule` library, and **dispatches** jobs (and reload requests) to the API, which routes them to Celery workers. Does not execute jobs locally. |
-| `entrypoint.sh` | Docker entrypoint. Runs Alembic database migrations, detects integration mode, then launches `main.py` |
-| `Dockerfile` | Multi-stage build: installs Python deps (including certbot + DNS plugins), copies shared code, sets up data directories with correct permissions |
-| `requirements.in` | Direct dependencies — notably `schedule`, `certbot` + many DNS plugins, `cryptography`, `maxminddb`, `pydantic` |
+| `entrypoint.sh`                | Docker entrypoint. Runs Alembic database migrations, detects integration mode, then launches `main.py`                                                                                                                                                                                                                                       |
+| `Dockerfile`                   | Multi-stage build: installs Python deps (including certbot + DNS plugins), copies shared code, sets up data directories with correct permissions                                                                                                                                                                                             |
+| `requirements.in`              | Direct dependencies — notably `schedule`, `certbot` + many DNS plugins, `cryptography`, `maxminddb`, `pydantic`                                                                                                                                                                                                                              |
 
 ## Architecture Details
 
@@ -79,14 +79,16 @@ Startup → save_config → wait for DB init → restore caches → check custom
 ### Config Generation Pipeline
 
 The scheduler doesn't generate configs directly — it shells out to:
+
 - `gen/save_config.py`: validates and persists settings to DB
 - `gen/main.py`: renders NGINX config files from Jinja2 templates
 
-Both are invoked as subprocesses with a restricted environment (PATH, PYTHONPATH, LOG_LEVEL, DATABASE_URI, TZ, CUSTOM_CONF_* vars only).
+Both are invoked as subprocesses with a restricted environment (PATH, PYTHONPATH, LOG*LEVEL, DATABASE_URI, TZ, CUSTOM_CONF*\* vars only).
 
 ### Change Detection
 
 The inner polling loop checks `db.get_metadata()` every 1s (3s if read-only) for these flags:
+
 - `pro_plugins_changed` / `external_plugins_changed`: regenerate plugins, re-run jobs, regenerate config
 - `custom_configs_changed`: regenerate custom configs files from DB
 - `plugins_config_changed`: regenerate NGINX config, re-run changed plugin jobs
@@ -104,11 +106,12 @@ The scheduler requires the full BunkerWeb filesystem layout (`/usr/share/bunkerw
 docker compose -f misc/dev/docker-compose.ui.api.yml up -d
 ```
 
-This compose file provisions the full job-execution path: `bw-scheduler`, `bw-api`, `bw-db`, `bw-jobs-broker` (Valkey — the Celery broker), and `bw-worker` (Celery worker consuming `default` and `heavy` queues). An optional `bw-flower` dashboard is available under the `dev` profile (`docker compose --profile dev ...`). Compose files in `misc/dev/` that do **not** include the broker and worker cannot run jobs that rely on the Celery path — see the root [CLAUDE.md](../../CLAUDE.md) for the full compose matrix.
+This compose file provisions the full job-execution path: `bw-scheduler`, `bw-api`, `bw-db`, `bw-jobs-broker` (Valkey — the Celery broker), and `bw-worker` (Celery worker consuming `default` and `heavy` queues). Compose files in `misc/dev/` that do **not** include the broker and worker cannot run jobs that rely on the Celery path — see the root [CLAUDE.md](../../CLAUDE.md) for the full compose matrix.
 
 ### Dependencies on Shared Code
 
 The scheduler imports from several shared packages via `sys.path` manipulation (not pip installs):
+
 - `src/common/utils/` → `common_utils`, `logger`, `jobs`, `ApiCaller`
 - `src/common/db/` → `Database`
 - `src/common/api/` → `API`

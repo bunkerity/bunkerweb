@@ -33,6 +33,7 @@ COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
 COPY src/api/requirements.txt /tmp/req/requirements-api.txt
+COPY src/worker/requirements.txt /tmp/req/requirements-worker.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 

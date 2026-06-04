@@ -1,4 +1,5 @@
-from typing import Optional, Tuple, Union
+from base64 import b64decode
+from typing import Tuple, Union
 
 from base_api_client import BaseApiClient, ApiClientError, ApiUnavailableError  # type: ignore  # noqa: F401
 
@@ -84,7 +85,9 @@ class SchedulerApiClient(BaseApiClient):
             return e.message
 
     def checked_changes(self, changes: list, plugins_changes=None, value: bool = True) -> str:
-        """Signal changes to checked. Returns empty string on success."""
+        """Signal changes to checked. value=True marks flags as changed (UI/autoconf
+        legacy contract); value=False clears them (scheduler after processing).
+        Callers MUST pass value= explicitly to avoid drift between roles."""
         payload = {"changes": changes, "value": value}
         if plugins_changes is not None:
             payload["plugins_changes"] = sorted(plugins_changes) if isinstance(plugins_changes, (list, set)) else plugins_changes
@@ -97,9 +100,20 @@ class SchedulerApiClient(BaseApiClient):
     # ── Custom Configs ──────────────────────────────────────────────────
 
     def get_custom_configs(self) -> list:
-        """Get all custom configs."""
-        data = self._get("/configs")
-        return data.get("configs", [])
+        """Get all custom configs (with payload). API renames `service_id` → `service`
+        and omits `data` unless with_data=true is requested — re-normalize back to the
+        scheduler-expected shape (`service_id`, `data`)."""
+        data = self._get("/configs", params={"with_data": "true"})
+        configs = data.get("configs", [])
+        for c in configs:
+            if "service" in c and "service_id" not in c:
+                c["service_id"] = c.pop("service")
+                if c["service_id"] == "global":
+                    c["service_id"] = None
+            d = c.get("data", "")
+            if isinstance(d, str):
+                c["data"] = d.encode("utf-8")
+        return configs
 
     def save_custom_configs(self, configs: list, method: str, changed: bool = False) -> str:
         """Bulk save custom configs. Returns empty string on success."""
@@ -112,9 +126,19 @@ class SchedulerApiClient(BaseApiClient):
     # ── Plugins ─────────────────────────────────────────────────────────
 
     def get_plugins(self, _type: str = "all", with_data: bool = False) -> list:
-        """Get plugins of the specified type."""
+        """Get plugins of the specified type. When with_data=True, API returns base64-encoded
+        bytes — decode them so callers can pass directly to BytesIO/tar_open."""
         data = self._get("/plugins", params={"type": _type, "with_data": str(with_data).lower()})
-        return data.get("plugins", [])
+        plugins = data.get("plugins", [])
+        if with_data:
+            for p in plugins:
+                d = p.get("data")
+                if isinstance(d, str):
+                    try:
+                        p["data"] = b64decode(d)
+                    except Exception:
+                        p["data"] = d.encode("utf-8")
+        return plugins
 
     def update_external_plugins(self, plugins: list, _type: str = "external", delete_missing: bool = True) -> str:
         """Bulk update external/pro plugins. Returns empty string on success."""

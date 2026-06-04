@@ -6,7 +6,7 @@ See also the [root CLAUDE.md](../../CLAUDE.md) for project-wide architecture, bu
 
 ## Component Overview
 
-`src/bw/` is the BunkerWeb core NGINX container — the reverse proxy runtime that processes HTTP/Stream requests through a Lua plugin pipeline. It packages the Lua runtime, entrypoint script, loading page, and static assets (GeoIP databases, root CA) into a Docker image based on `nginx:1.28.2-alpine-slim`.
+`src/bw/` is the BunkerWeb core NGINX container — the reverse proxy runtime that processes HTTP/Stream requests through a Lua plugin pipeline. It packages the Lua runtime, entrypoint script, loading page, and static assets (GeoIP databases, root CA) into a Docker image based on `nginx:1.28.3-alpine-slim`.
 
 This component has no Python code of its own. It depends on `src/common/` (core plugins, confs, gen, helpers, utils, settings.json) and `src/deps/` (compiled NGINX modules, Python deps for config generation).
 
@@ -46,18 +46,18 @@ Config files at repo root: `.luacheckrc` (globals: `ngx`, `delay`, `unpack`; ign
 
 All classes use `middleclass` (third-party OOP in `lua/middleclass.lua` — do not lint or modify).
 
-| Module | Role |
-|--------|------|
-| `plugin.lua` | Base class for all plugins. Instantiated per-request with access to variables, datastores, and metrics. |
-| `helpers.lua` | Init-time utilities: plugin loading/ordering, variable parsing, context filling (`fill_ctx`), context saving for subrequests. |
-| `utils.lua` | Request-time utilities: variable lookup, IP/ban/whitelist management, DNS, GeoIP, sessions, security helpers. |
-| `datastore.lua` | Worker-local LRU (100k entries) + NGINX shared dict abstraction. |
-| `cachestore.lua` | Multi-level cache: L1 worker LRU → L2 shared dict (mlcache) → L3 Redis (optional). Gracefully degrades without Redis. |
-| `clusterstore.lua` | Redis connection pool with Sentinel support. Lazy init — only connects when cosockets are available. |
-| `api.lua` | Internal NGINX API (`/ping`, `/reload`, `/ban`, `/unban`, `/bans`, `/health`, config upload endpoints). Token + IP whitelist auth. |
-| `ctx.lua` | FFI-based context stashing for subrequest preservation. |
-| `logger.lua` | Thin wrapper around `ngx.log` with prefix formatting. |
-| `mmdb.lua` | Module-level singletons loading MaxMind country/ASN databases. |
+| Module             | Role                                                                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `plugin.lua`       | Base class for all plugins. Instantiated per-request with access to variables, datastores, and metrics.                            |
+| `helpers.lua`      | Init-time utilities: plugin loading/ordering, variable parsing, context filling (`fill_ctx`), context saving for subrequests.      |
+| `utils.lua`        | Request-time utilities: variable lookup, IP/ban/whitelist management, DNS, GeoIP, sessions, security helpers.                      |
+| `datastore.lua`    | Worker-local LRU (100k entries) + NGINX shared dict abstraction.                                                                   |
+| `cachestore.lua`   | Multi-level cache: L1 worker LRU → L2 shared dict (mlcache) → L3 Redis (optional). Gracefully degrades without Redis.              |
+| `clusterstore.lua` | Redis connection pool with Sentinel support. Lazy init — only connects when cosockets are available.                               |
+| `api.lua`          | Internal NGINX API (`/ping`, `/reload`, `/ban`, `/unban`, `/bans`, `/health`, config upload endpoints). Token + IP whitelist auth. |
+| `ctx.lua`          | FFI-based context stashing for subrequest preservation.                                                                            |
+| `logger.lua`       | Thin wrapper around `ngx.log` with prefix formatting.                                                                              |
+| `mmdb.lua`         | Module-level singletons loading MaxMind country/ASN databases.                                                                     |
 
 ### Request Processing Flow
 
@@ -76,14 +76,14 @@ Async operations (Redis, DNS) require cosockets, which are only available in cer
 
 ### Shared Memory Dictionaries
 
-| Dict | Purpose |
-|------|---------|
-| `internalstore` | Plugin metadata, compiled variables |
-| `datastore` / `datastore_stream` | General key-value store |
-| `cachestore` / `cachestore_stream` | mlcache L1+L2 |
-| `cachestore_ipc` / `cachestore_ipc_stream` | mlcache IPC |
-| `cachestore_miss` / `cachestore_miss_stream` | Miss tracking (thundering herd prevention) |
-| `cachestore_locks` / `cachestore_locks_stream` | Distributed locks |
+| Dict                                           | Purpose                                    |
+| ---------------------------------------------- | ------------------------------------------ |
+| `internalstore`                                | Plugin metadata, compiled variables        |
+| `datastore` / `datastore_stream`               | General key-value store                    |
+| `cachestore` / `cachestore_stream`             | mlcache L1+L2                              |
+| `cachestore_ipc` / `cachestore_ipc_stream`     | mlcache IPC                                |
+| `cachestore_miss` / `cachestore_miss_stream`   | Miss tracking (thundering herd prevention) |
+| `cachestore_locks` / `cachestore_locks_stream` | Distributed locks                          |
 
 ### Variable Access
 
@@ -110,6 +110,7 @@ value = self.variables["SETTING_NAME"]
 ## Entrypoint Behavior
 
 `entrypoint.sh` runs the following sequence:
+
 1. Source helpers, detect integration mode (Docker/Swarm/Kubernetes/Autoconf)
 2. Generate temporary NGINX config via `python3 gen/main.py` (loading state)
 3. Start NGINX in foreground (`daemon off`)
@@ -120,6 +121,7 @@ value = self.variables["SETTING_NAME"]
 ## Container Runtime Layout
 
 Inside the container, files live under `/usr/share/bunkerweb/`:
+
 - `lua/`, `core/`, `confs/`, `gen/`, `helpers/`, `utils/` — Code
 - `/data/` — Persistent volume mount (cache, lib, www, configs, plugins, pro)
 - `/etc/nginx/` — Generated NGINX configuration

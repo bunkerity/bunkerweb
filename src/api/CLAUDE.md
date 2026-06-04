@@ -115,7 +115,7 @@ Dev credentials: API `admin`/`P@ssw0rd`, DB `bunkerweb`/`secret`.
 pip install -r src/api/requirements.txt  # compiled from requirements.in
 ```
 
-Key packages: `fastapi==0.135.3`, `uvicorn==0.44.0`, `gunicorn==25.1.0`, `biscuit-python==0.4.0`, `bcrypt`, `slowapi==0.1.9`, `pydantic==2.12.5`, `pydantic_settings==2.13.1`
+Key packages: `fastapi==0.136.1`, `uvicorn==0.46.0`, `gunicorn==25.1.0`, `biscuit-python==0.4.0`, `bcrypt`, `slowapi==0.1.9`, `pydantic==2.13.4`, `pydantic-settings==2.14.1`, `celery` (lazy via `app/celery_app.py` — used by the `jobs` router to dispatch to the worker queue)
 
 ### Linting & Formatting
 

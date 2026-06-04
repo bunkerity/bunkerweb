@@ -237,6 +237,26 @@ else
 	log "ENTRYPOINT" "ℹ️" "Scheduler service is disabled, autostart not enabled"
 fi
 
+# Worker service defaults to "yes" whenever the scheduler is enabled (scheduler needs a
+# worker to actually execute jobs via Celery). Forces USE_REDIS=yes so a local broker is
+# guaranteed, and exports CELERY_BROKER_URL pointing at it.
+if [ "${SERVICE_SCHEDULER}" = "yes" ] && [ -z "${SERVICE_WORKER+x}" ]; then
+	export SERVICE_WORKER="yes"
+fi
+
+if [ "${SERVICE_WORKER}" = "yes" ]; then
+	if [ "${USE_REDIS:-no}" != "yes" ]; then
+		export USE_REDIS="yes"
+		log "ENTRYPOINT" "ℹ️" "Auto-enabled USE_REDIS (required by worker)"
+	fi
+	export CELERY_BROKER_URL="${CELERY_BROKER_URL:-redis://${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0}"
+	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/worker.ini
+	log "ENTRYPOINT" "✅" "Enabled autorestart for worker service (CELERY_BROKER_URL=${CELERY_BROKER_URL})"
+else
+	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/worker.ini
+	log "ENTRYPOINT" "ℹ️" "Worker service is disabled, autostart not enabled"
+fi
+
 # Enable autorestart for autoconf service if enabled
 if [ "${AUTOCONF_MODE}" = "yes" ]; then
 	# Autoconf requires the API service — enable it if not already

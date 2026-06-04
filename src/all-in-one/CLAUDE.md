@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-The all-in-one (AIO) image packages every BunkerWeb component into a single Docker container managed by **supervisord**. It bundles: BunkerWeb (NGINX), Scheduler, UI, API, Autoconf, Redis, CrowdSec, and a log streaming service.
+The all-in-one (AIO) image packages every BunkerWeb component into a single Docker container managed by **supervisord**. It bundles: BunkerWeb (NGINX), Scheduler, Worker, UI, API, Autoconf, Redis, CrowdSec, and a log streaming service.
 
 See the root `CLAUDE.md` for the overall BunkerWeb architecture — this file covers AIO-specific details only.
 
@@ -32,18 +32,19 @@ Ports: 80->8080, 443->8443 (TCP/UDP), 7000 (UI). Uses MariaDB. Dev credentials m
 
 ### Service Management
 
-Supervisord manages 8 services with priority-based startup order:
+Supervisord manages 9 services with priority-based startup order:
 
-| Priority | Service     | Toggle Env Var       | Default |
-|----------|-------------|----------------------|---------|
-| 10       | bunkerweb   | (always on)          | yes     |
-| 12       | redis       | `USE_REDIS`          | yes     |
-| 12       | crowdsec    | `USE_CROWDSEC`       | no      |
-| 15       | logstream   | (always on)          | yes     |
-| 20       | ui          | `SERVICE_UI`         | yes     |
-| 25       | api         | `SERVICE_API`        | no      |
-| 30       | scheduler   | `SERVICE_SCHEDULER`  | yes     |
-| 30       | autoconf    | `AUTOCONF_MODE`      | no      |
+| Priority | Service   | Toggle Env Var      | Default                                                              |
+| -------- | --------- | ------------------- | -------------------------------------------------------------------- |
+| 10       | bunkerweb | (always on)         | yes                                                                  |
+| 12       | redis     | `USE_REDIS`         | yes                                                                  |
+| 12       | crowdsec  | `USE_CROWDSEC`      | no                                                                   |
+| 15       | logstream | (always on)         | yes                                                                  |
+| 20       | ui        | `SERVICE_UI`        | yes                                                                  |
+| 25       | api       | `SERVICE_API`       | no                                                                   |
+| 28       | worker    | `SERVICE_WORKER`    | yes (only when `SERVICE_SCHEDULER=yes`; auto-set by `entrypoint.sh`) |
+| 30       | scheduler | `SERVICE_SCHEDULER` | yes                                                                  |
+| 30       | autoconf  | `AUTOCONF_MODE`     | no                                                                   |
 
 Config files: `supervisor.d/*.ini`. Supervisord config: `supervisord.conf`.
 
@@ -88,14 +89,14 @@ Build scripts in `scripts/`: `install-go.sh`, `install-crowdsec.sh`, `install-re
 
 The `/data` volume holds all persistent state. Symlinks map standard paths to `/data`:
 
-| Container Path       | Symlink Target     | Purpose                |
-|----------------------|--------------------|------------------------|
-| `/var/cache/bunkerweb` | `/data/cache`     | Cache files            |
-| `/var/lib/bunkerweb`   | `/data/lib`       | Runtime data           |
-| `/var/www/html`        | `/data/www`       | Web content            |
+| Container Path         | Symlink Target                | Purpose                |
+| ---------------------- | ----------------------------- | ---------------------- |
+| `/var/cache/bunkerweb` | `/data/cache`                 | Cache files            |
+| `/var/lib/bunkerweb`   | `/data/lib`                   | Runtime data           |
+| `/var/www/html`        | `/data/www`                   | Web content            |
 | `/etc/bunkerweb/*`     | `/data/{configs,plugins,pro}` | Custom configs/plugins |
-| `/var/lib/crowdsec`    | `/data/crowdsec`  | CrowdSec data          |
-| `/var/lib/redis`       | `/data/redis`     | Redis persistence      |
+| `/var/lib/crowdsec`    | `/data/crowdsec`              | CrowdSec data          |
+| `/var/lib/redis`       | `/data/redis`                 | Redis persistence      |
 
 ### Exposed Ports
 
@@ -109,6 +110,8 @@ The `/data` volume holds all persistent state. Symlinks map standard paths to `/
 These are unique to the AIO image (not in the root CLAUDE.md):
 
 - `SERVICE_UI`, `SERVICE_SCHEDULER`, `SERVICE_API`: Enable/disable individual services
+- `SERVICE_WORKER`: Enable/disable the Celery worker service. `entrypoint.sh` auto-defaults it to `yes` only when `SERVICE_SCHEDULER=yes`; set it explicitly to override
+- `WORKER_CONCURRENCY` / `WORKER_MAX_MEMORY_KB` / `WORKER_QUEUES` / `WORKER_HOSTNAME`: Worker tuning knobs (concurrency default 2, memory cap default 300000 KB, queues default `default,heavy`)
 - `AUTOCONF_MODE`: Enables the autoconf service
 - `USE_CROWDSEC` / `CROWDSEC_API` / `CROWDSEC_API_KEY` / `CROWDSEC_APPSEC_URL`: CrowdSec configuration
 - `CROWDSEC_EXTRA_COLLECTIONS` / `CROWDSEC_DISABLE_PARSERS`: Space-separated lists for CrowdSec customization

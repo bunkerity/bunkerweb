@@ -147,6 +147,13 @@ fi
 
 cd - > /dev/null || exit 1
 
+# Pre-initialize DB (create tables + mark metadata.is_initialized=True) before
+# main.py starts. API's gunicorn pre-fork hook blocks on is_initialized — without
+# this, scheduler's API-wait and API's DB-wait deadlock each other on a fresh DB.
+log "ENTRYPOINT" "ℹ️" "Pre-initializing database (breaks API/scheduler deadlock)..."
+/usr/share/bunkerweb/gen/save_config.py --init --method scheduler || \
+    log "ENTRYPOINT" "⚠️" "Pre-init step exited non-zero (continuing)"
+
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
 /usr/share/bunkerweb/scheduler/main.py &

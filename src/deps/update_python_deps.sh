@@ -58,6 +58,7 @@ files=(
     "../autoconf/requirements.in"
     "../scheduler/requirements.in"
     "../ui/requirements.in"
+    "../worker/requirements.in"
 )
 
 # Safely find additional requirements files

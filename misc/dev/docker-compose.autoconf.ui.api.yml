@@ -6,6 +6,12 @@ x-env: &env
   CUSTOM_LOG_LEVEL: "debug"
   LOG_TYPES: "stderr syslog"
   LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+  USE_REDIS: "yes"
+  REDIS_HOST: "bw-jobs-broker"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "1"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "devsecrettoken"
 
 services:
   bunkerweb:
@@ -14,12 +20,18 @@ services:
       dockerfile: ./src/bw/Dockerfile
       args:
         SKIP_MINIFY: "yes"
+    depends_on:
+      - bw-jobs-broker
     ports:
       - 80:8080/tcp
       - 443:8443/tcp
       - 443:8443/udp
     environment:
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      USE_REDIS: "yes"
+      REDIS_HOST: "bw-jobs-broker"
+      REDIS_PORT: "6379"
+      REDIS_DATABASE: "1"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -36,8 +48,10 @@ services:
     depends_on:
       - bunkerweb
       - bw-docker
+      - bw-api
     environment:
       <<: *env
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -56,10 +70,12 @@ services:
       dockerfile: ./src/scheduler/Dockerfile
     depends_on:
       - bunkerweb
+      - bw-jobs-broker
     volumes:
       - bw-storage:/data
     environment:
       <<: *env
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
       BUNKERWEB_INSTANCES: ""
       SERVER_NAME: ""
       MULTISITE: "yes"
@@ -127,6 +143,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/api/Dockerfile
+    depends_on:
+      - bw-jobs-broker
     ports:
       - 8888:8888
     volumes:
@@ -134,8 +152,11 @@ services:
       - ../../src/api/utils:/usr/share/bunkerweb/api/utils:ro
     environment:
       <<: *env
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
       API_USERNAME: "admin"
       API_PASSWORD: "P@ssw0rd"
+      OVERRIDE_API_CREDS: "yes"
+      API_RATE_LIMIT_ENABLED: "no"
       FORWARDED_ALLOW_IPS: "*"
       DEBUG: "1"
       MAX_WORKERS: "1"
@@ -155,6 +176,44 @@ services:
       - "bunkerweb.USE_REVERSE_PROXY=yes"
       - "bunkerweb.REVERSE_PROXY_URL=/"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-api:8888"
+
+  bw-worker:
+    build:
+      context: ../..
+      dockerfile: ./src/worker/Dockerfile
+    depends_on:
+      - bw-jobs-broker
+      - bw-db
+    volumes:
+      - bw-worker-storage:/data
+    environment:
+      <<: *env
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      WORKER_CONCURRENCY: "2"
+      WORKER_QUEUES: "default,heavy"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-worker
+      bw-db:
+        aliases:
+          - bw-worker
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-jobs-broker
 
   bw-db:
     image: mariadb:11
@@ -219,6 +278,7 @@ services:
 volumes:
   bw-data:
   bw-storage:
+  bw-worker-storage:
   bw-logs:
 
 networks:

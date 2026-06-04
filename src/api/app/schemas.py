@@ -351,7 +351,7 @@ class InstanceStatusRequest(BaseModel):
 # Job dispatch
 class DispatchJobItem(BaseModel):
     name: str = Field(..., pattern=r"^[\w.-]{1,128}$")
-    plugin_id: str = Field(..., pattern=r"^[\w.-]{4,64}$")
+    plugin_id: str = Field(..., pattern=r"^[\w.-]{2,64}$")
     file: str = Field(..., pattern=r"^[\w.-]{1,128}\.py$")
     path: str
     every: str = Field(..., pattern="^(once|minute|hour|day|week)$")

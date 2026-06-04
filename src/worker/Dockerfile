@@ -16,11 +16,10 @@ WORKDIR /usr/share/bunkerweb
 
 RUN export MAKEFLAGS="-j$(nproc)" && \
   if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
-  awk 'BEGIN {skip=0} skip { if ($0 ~ /^    --hash=/ || $0 ~ /^    #/ || $0 == "") next; skip=0 } /^schedule==/ { skip=1; next } { print }' /tmp/req/requirements-scheduler.txt > /tmp/req/requirements-scheduler-worker.txt && \
+  awk 'BEGIN {skip=0} skip { if ($0 ~ /^    --hash=/ || $0 ~ /^    #/ || $0 == "") next; skip=0 } /^schedule==/ { skip=1; next } { print }' /tmp/req/requirements-scheduler.txt > /tmp/req/requirements-scheduler.txt.new && \
+  mv /tmp/req/requirements-scheduler.txt.new /tmp/req/requirements-scheduler.txt && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python -r /tmp/req/requirements-scheduler-worker.txt -r /tmp/req/requirements-gen.txt -r /tmp/req/requirements-db.txt && \
-  rm -rf deps/python/schedule deps/python/schedule-*.dist-info && \
-  pip install --no-cache-dir --upgrade --target deps/python -r /tmp/req/requirements-worker.txt
+  pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 COPY src/common/api api
 COPY src/common/confs confs
@@ -80,5 +79,6 @@ USER worker:worker
 HEALTHCHECK --interval=30s --timeout=15s --start-period=60s --retries=3 CMD /usr/share/bunkerweb/helpers/healthcheck-worker.sh
 
 ENV PYTHONPATH=/usr/share/bunkerweb:/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db:/usr/share/bunkerweb/utils:/usr/share/bunkerweb/api
+ENV PATH=/usr/share/bunkerweb/deps/python/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
 
 ENTRYPOINT [ "./entrypoint.sh" ]

@@ -66,3 +66,7 @@ For packaging commands and distro-specific build details, use [BUILD.md](BUILD.m
   - [src/scheduler/CLAUDE.md](src/scheduler/CLAUDE.md)
   - [src/autoconf/CLAUDE.md](src/autoconf/CLAUDE.md)
   - [src/bw/CLAUDE.md](src/bw/CLAUDE.md)
+  - [src/worker/CLAUDE.md](src/worker/CLAUDE.md)
+  - [src/common/CLAUDE.md](src/common/CLAUDE.md)
+  - [src/linux/CLAUDE.md](src/linux/CLAUDE.md)
+  - [src/all-in-one/CLAUDE.md](src/all-in-one/CLAUDE.md)

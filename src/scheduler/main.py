@@ -38,6 +38,19 @@ from api_client import SchedulerApiClient
 
 from JobScheduler import JobScheduler
 
+# System vars that may leak into API /global_settings defaults but must not
+# clobber container env when applied via SCHEDULER.env = ...
+_BOOTSTRAP_ENV_KEYS = ("DATABASE_URI", "DATABASE_URI_READONLY", "PYTHONPATH", "PATH")
+
+
+def _strip_bootstrap_env(env: dict) -> dict:
+    """Drop system-only keys returned by /global_settings full=true so the real
+    container env (DATABASE_URI etc.) wins on subprocess invocations."""
+    for k in _BOOTSTRAP_ENV_KEYS:
+        env.pop(k, None)
+    return env
+
+
 APPLYING_CHANGES = Event()
 
 RUN = True
@@ -413,24 +426,39 @@ def healthcheck_job():
         HEALTHCHECK_EVENT.clear()
         return
 
+    recovered = False
     try:
         for db_instance in API_CLIENT.get_instances():
             hostname = db_instance["hostname"]
+            previous_status = db_instance.get("status")
+            reachable = False
             try:
                 reachable = API_CLIENT.ping_instance(hostname)
-
-                if not reachable:
-                    HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is not reachable, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ...")
-                    ret = API_CLIENT.update_instance(hostname, "down")
-                    if ret:
-                        HEALTHCHECK_LOGGER.error(f"Couldn't update instance {hostname} status to down: {ret}")
-                    continue
-
-                ret = API_CLIENT.update_instance(hostname, "up")
-                if ret:
-                    HEALTHCHECK_LOGGER.error(f"Couldn't update instance {hostname} status to up: {ret}")
             except BaseException as e:
-                HEALTHCHECK_LOGGER.error(f"Exception while checking instance {hostname}: {e}")
+                HEALTHCHECK_LOGGER.error(f"Exception while pinging instance {hostname}: {e}")
+
+            if not reachable:
+                HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is not reachable, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ...")
+                ret = API_CLIENT.update_instance(hostname, "down")
+                if ret:
+                    HEALTHCHECK_LOGGER.error(f"Couldn't update instance {hostname} status to down: {ret}")
+                continue
+
+            ret = API_CLIENT.update_instance(hostname, "up")
+            if ret:
+                HEALTHCHECK_LOGGER.error(f"Couldn't update instance {hostname} status to up: {ret}")
+                continue
+
+            if previous_status in ("down", "failover"):
+                HEALTHCHECK_LOGGER.info(f"Instance {hostname} recovered from {previous_status} → up; will trigger push-configs to re-sync it")
+                recovered = True
+
+        if recovered and SCHEDULER is not None:
+            try:
+                if not SCHEDULER.run_single("push-configs"):
+                    HEALTHCHECK_LOGGER.error("Failed to dispatch push-configs after instance recovery")
+            except BaseException as e:
+                HEALTHCHECK_LOGGER.error(f"Exception dispatching push-configs after recovery: {e}")
     finally:
         HEALTHCHECK_EVENT.clear()
 
@@ -541,6 +569,7 @@ if __name__ == "__main__":
             sleep(5)
 
         env = API_CLIENT.get_config()
+        _strip_bootstrap_env(env)
         tz = getenv("TZ")
         if tz:
             env["TZ"] = tz
@@ -724,6 +753,7 @@ if __name__ == "__main__":
             if run_config_saver("Running config saver after restoring plugin files from database ..."):
                 SCHEDULER.update_jobs()
                 env = API_CLIENT.get_config()
+                _strip_bootstrap_env(env)
                 tz = getenv("TZ")
                 if tz:
                     env["TZ"] = tz
@@ -754,6 +784,7 @@ if __name__ == "__main__":
 
             SCHEDULER.update_jobs()
             env = API_CLIENT.get_config()
+            _strip_bootstrap_env(env)
             tz = getenv("TZ")
             if tz:
                 env["TZ"] = tz
@@ -774,16 +805,10 @@ if __name__ == "__main__":
         while True:
             task_futures.clear()
 
-            # On first start, generate config and reload instances BEFORE running
-            # plugin jobs — plugins need their API endpoints loaded on instances
-            if FIRST_START and CONFIG_NEED_GENERATION:
-                LOGGER.info("First start: generating and sending initial configuration before running jobs ...")
-                if generate_configs():
-                    API_CLIENT.reload_instances(test=not DISABLE_CONFIGURATION_TESTING)
-                    CONFIG_NEED_GENERATION = False
-
             if RUN_JOBS_ONCE:
-                # Only run jobs once
+                # Dispatch all `once` jobs to workers (includes the
+                # push-configs job, which renders + ships the NGINX config
+                # tree to every BW instance and triggers a reload).
                 if not SCHEDULER.reload(
                     env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
@@ -795,30 +820,31 @@ if __name__ == "__main__":
                     if API_CLIENT.readonly:
                         generate_caches()
                 healthcheck_job_run = False
-                # Jobs may have created files needed by config templates (e.g. api-server-cert.pem)
-                if FIRST_START:
-                    LOGGER.info("First start: regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
-                    CONFIG_NEED_GENERATION = True
 
-            if CONFIG_NEED_GENERATION:
-                generate_configs()
+            if CONFIG_NEED_GENERATION and not FIRST_START:
+                # Change detected — ask the worker to re-push. push-configs is
+                # idempotent and Redis-locked against concurrent runs, so
+                # bursty changes coalesce naturally. We must dispatch via
+                # run_single (not rely on RUN_JOBS_ONCE) because SCHEDULER.reload
+                # filters run_once to the `changed_plugins` set, which never
+                # includes the "jobs" core plugin where push-configs lives.
+                LOGGER.info("Configuration change detected — dispatching push-configs ...")
+                if not SCHEDULER.run_single("push-configs"):
+                    LOGGER.error("Failed to dispatch push-configs job")
 
             try:
                 success = True
-                # Reload instances via API
-                success = API_CLIENT.reload_instances(test=not DISABLE_CONFIGURATION_TESTING)
-                if not success:
-                    LOGGER.error("Error while reloading bunkerweb instances")
-
-                # Update instance statuses
+                # Update instance statuses (push + reload happen in the worker now)
                 for db_instance in API_CLIENT.get_instances():
                     hostname = db_instance["hostname"]
                     is_up = API_CLIENT.ping_instance(hostname)
                     ret = API_CLIENT.update_instance(hostname, "up" if is_up else "down")
                     if ret:
                         LOGGER.error(f"Couldn't update instance {hostname} status: {ret}")
+                    elif not is_up:
+                        success = False
             except BaseException as e:
-                LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
+                LOGGER.error(f"Exception while updating instance statuses : {e}")
                 success = False
 
             try:
@@ -827,12 +853,12 @@ if __name__ == "__main__":
                 LOGGER.error(f"Error while setting failover metadata: {e}")
 
             if success:
-                LOGGER.info("Successfully reloaded bunkerweb")
+                LOGGER.info("All BunkerWeb instances are up")
             else:
-                LOGGER.error("Error while reloading bunkerweb")
+                LOGGER.error("One or more BunkerWeb instances are unreachable")
 
             try:
-                ret = API_CLIENT.checked_changes(CHANGES, plugins_changes="all")
+                ret = API_CLIENT.checked_changes(CHANGES, plugins_changes="all", value=False)
                 if ret:
                     LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
             except BaseException as e:
@@ -1008,6 +1034,7 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     old_env = env.copy()
                     env = API_CLIENT.get_config()
+                    _strip_bootstrap_env(env)
                     if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(
                         "API_SERVER_NAME", "bwapi"
                     ):

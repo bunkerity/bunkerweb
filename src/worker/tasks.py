@@ -6,16 +6,61 @@ from worker.executor import JobExecutor
 
 SENSITIVE_ENV_KEYS = {"CELERY_BROKER_URL", "JOBS_HMAC_SECRET"}
 
+# Config keys returned by Database.get_config() that must NOT overwrite the
+# worker's own runtime env when overlaying settings for a job. Mirrors
+# scheduler/main.py:_strip_bootstrap_env so the loaded config can't clobber the
+# worker's DATABASE_URI / PATH / PYTHONPATH.
+_BOOTSTRAP_ENV_KEYS = ("DATABASE_URI", "DATABASE_URI_READONLY", "PYTHONPATH", "PATH")
+
 
 def _get_apis():
     from API import API  # type: ignore
     from ApiCaller import ApiCaller  # type: ignore
 
-    instances = [hostname.strip() for hostname in os.getenv("BUNKERWEB_INSTANCES", "").split() if hostname.strip()]
-    if not instances:
-        return None
+    token = os.getenv("API_TOKEN") or None
 
-    return ApiCaller([API(f"http://{hostname}:5000", host=hostname) for hostname in instances])
+    # Primary source: registered instances in the DB (filters out hosts marked
+    # "down"). Falls back to BUNKERWEB_INSTANCES env for the standalone /
+    # diagnostic mode documented in src/worker/CLAUDE.md.
+    db = get_worker_db()
+    if db is not None:
+        try:
+            db_instances = [inst for inst in db.get_instances() if inst.get("status") != "down"]
+        except Exception:
+            db_instances = []
+        if db_instances:
+            return ApiCaller([API.from_instance(inst, token=token) for inst in db_instances])
+
+    env_hostnames = [hostname.strip() for hostname in os.getenv("BUNKERWEB_INSTANCES", "").split() if hostname.strip()]
+    if not env_hostnames:
+        return None
+    return ApiCaller([API(f"http://{hostname}:5000", host=hostname, token=token) for hostname in env_hostnames])
+
+
+def _load_job_config_env(db, logger) -> dict:
+    """Return the resolved BunkerWeb config as a flat env dict for the job.
+
+    Jobs read their settings via ``os.getenv(...)``. Since jobs now run in the
+    worker process (not the scheduler), the worker must materialize the full
+    config — global plus per-service multisite keys (e.g. ``www.example.com_USE_BLACKLIST``),
+    including defaults — from the shared DB, exactly like the scheduler used to
+    overlay into ``os.environ`` before running jobs in-process. Without this,
+    every job sees compiled defaults instead of the user configuration.
+
+    ``global_only=False`` is required so per-service multisite keys are emitted.
+    Bootstrap keys are dropped so the config can't overwrite the worker's own
+    ``DATABASE_URI`` / ``PATH`` / ``PYTHONPATH``.
+    """
+    if db is None:
+        return {}
+    try:
+        config = db.get_config(global_only=False, methods=False, with_drafts=False)
+    except Exception as exc:
+        logger.warning(f"Could not load config from database for job env: {exc}")
+        return {}
+    for key in _BOOTSTRAP_ENV_KEYS:
+        config.pop(key, None)
+    return {key: "" if value is None else str(value) for key, value in config.items()}
 
 
 def job_shadow_name(task, args, kwargs, options) -> str:
@@ -77,6 +122,13 @@ def execute_job(self, job_data: dict) -> dict:
     try:
         os.environ.clear()
         os.environ.update(safe_env)
+
+        # Materialize the BunkerWeb settings from the shared DB so jobs that read
+        # config via os.getenv() honor the user's configuration (USE_BLACKLIST,
+        # AUTO_LETS_ENCRYPT, multisite per-service settings, ...) instead of
+        # compiled defaults. The scheduler no longer runs jobs in-process, so it
+        # can no longer provide this env — the worker must.
+        os.environ.update(_load_job_config_env(db, logger))
 
         job_env = job_data.get("env")
         if isinstance(job_env, dict):
