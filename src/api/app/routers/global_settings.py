@@ -79,7 +79,7 @@ def save_config(req: SaveConfigRequest) -> JSONResponse:
     Returns the list of changed plugin IDs on success.
     """
     db = get_db()
-    ret = db.save_config(req.config, req.method, changed=req.changed)
+    ret = db.save_config(req.config, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup)
     if isinstance(ret, str):
         code = 400 if "read-only" in ret else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
