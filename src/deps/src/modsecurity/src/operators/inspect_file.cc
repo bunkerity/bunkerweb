@@ -31,14 +31,14 @@ namespace modsecurity {
 namespace operators {
 
 bool InspectFile::init(const std::string &param2, std::string *error) {
-    std::istream *iss;
+    std::ifstream *iss;
     std::string err;
     std::string err_lua;
 
     m_file = utils::find_resource(m_param, param2, &err);
     iss = new std::ifstream(m_file, std::ios::in);
 
-    if (((std::ifstream *)iss)->is_open() == false) {
+    if (iss->is_open() == false) {
         error->assign("Failed to open file: " + m_param + ". " + err);
         delete iss;
         return false;

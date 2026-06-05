@@ -27,8 +27,8 @@ if( @ARGV ) {
 
 my $feature_format_file = $data_dir.'/version_features.fmt';
 
-my @sections = ( "System support", "Mbed TLS modules",
-                 "Mbed TLS feature support" );
+my @sections = ( "Platform abstraction layer", "General configuration options",
+                 "TLS feature selection", "X.509 feature selection" );
 
 my $line_separator = $/;
 undef $/;

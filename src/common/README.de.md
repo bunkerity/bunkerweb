@@ -128,6 +128,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | ------------------------------ | -------- | ------- | -------- | ------------------------------------------------------------------------------------ |
     | `WORKERLOCK_MEMORY_SIZE`       | `48k`    | global  | Nein     | **Workerlock-Speichergröße:** Größe des lua_shared_dict für Initialisierungs-Worker. |
     | `DATASTORE_MEMORY_SIZE`        | `64m`    | global  | Nein     | **Datastore-Speichergröße:** Größe des internen Datastores.                          |
+    | `DATASTORE_LRU_SIZE`           | `1k`     | global  | Nein     | **Datastore-LRU-Größe:** Anzahl der Slots im geteilten per-Worker-Datastore-LRU. Akzeptiert eine Ganzzahl oder `k`/`m`-Kurzform (z. B. `1k`, `10k`, `1m`). |
     | `CACHESTORE_MEMORY_SIZE`       | `64m`    | global  | Nein     | **Cachestore-Speichergröße:** Größe des internen Cachestores.                        |
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).              |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).            |

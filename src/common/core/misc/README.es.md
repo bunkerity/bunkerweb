@@ -105,9 +105,10 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
         -   Previene los ataques de carga de archivos
         -   Reduce el riesgo de agotamiento de los recursos del servidor
 
-| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                       |
-| ----------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MAX_CLIENT_SIZE` | `10m`             | multisite | no       | **Tamaño Máximo de Solicitud:** El tamaño máximo permitido para los cuerpos de las solicitudes de los clientes (por ejemplo, cargas de archivos). |
+| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                  |
+| ----------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MAX_CLIENT_SIZE` | `10m`             | multisite | no       | **Tamaño Máximo de Solicitud:** El tamaño máximo permitido para los cuerpos de las solicitudes de los clientes (por ejemplo, cargas de archivos).            |
+| `MAX_HEADERS`     | `100`             | global    | no       | **Cabeceras Máximas:** Número máximo de líneas de cabecera por solicitud. Las solicitudes que superen este límite son rechazadas con `400 Bad Request`.      |
 
     !!! tip "Mejores Prácticas de Configuración del Tamaño de la Solicitud"
         Si necesita permitir un cuerpo de solicitud de tamaño ilimitado, puede establecer el valor de `MAX_CLIENT_SIZE` en `0`. Sin embargo, esto **no se recomienda** debido a los posibles riesgos de seguridad y rendimiento.

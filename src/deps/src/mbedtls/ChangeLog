@@ -1,49 +1,211 @@
 Mbed TLS ChangeLog (Sorted per branch, date)
 
-= Mbed TLS 3.6.5 branch released 2025-10-15
+= Mbed TLS 4.1.0 branch released 2026-03-31
 
 API changes
-   * When building the library as a PSA client (MBEDTLS_PSA_CRYPTO_CLIENT
-     enabled and MBEDTLS_PSA_CRYPTO_C disabled), you need to provide the
-     function psa_can_do_cipher() in addition to psa_can_do_hash(). This
-     changed was made in Mbed TLS 3.6.0 but was not announced then.
+   * MBEDTLS_TIMING_C now requires MBEDTLS_HAVE_TIME to be enabled in the
+     TF-PSA-Crypto configuration, unless MBEDTLS_TIMING_ALT is enabled.
+     As a benefit, platforms where the default implementation is not
+     supported now only need to implement MBEDTLS_PLATFORM_MS_TIME_ALT.
+   * When MBEDTLS_TIMING_ALT is enabled, the function
+     mbedtls_timing_get_timer() now returns unsigned long long instead
+     of unsigned long.
 
 Features
-   * The new function mbedtls_cipher_finish_padded() is similar to
-     mbedtls_cipher_finish(), but makes it easier to process invalid-padding
-     conditions in constant time.
+   * Add the function mbedtls_ssl_get_fatal_alert(), which returns the type of
+     the last received fatal alert. This allows callers to retrieve more
+     detailed information when mbedtls_ssl_handshake(),
+     mbedtls_ssl_handshake_step(), or mbedtls_ssl_read() returns the generic
+     MBEDTLS_ERR_SSL_FATAL_ALERT_MESSAGE error code.
+   * Function mbedtls_ssl_get_supported_group_list() is added to return the list
+     of supported groups IDs (curves and finite fields).
+   * MBEDTLS_SSL_IANA_TLS_GROUPS_INFO is added to allow defining the list of
+     mbedtls_ssl_iana_tls_group_info_t items which represent known TLS groups
+     with corresponding informations.
+     If MBEDTLS_DEBUG_C is also enabled then mbedtls_ssl_iana_tls_group_info is
+     also available as implementation of such list.
 
 Security
-   * Fix a timing side channel in CBC-PKCS7 decryption that could
-     allow an attacker who can submit chosen ciphertexts to recover
-     some plaintexts through a timing-based padding oracle attack.
-     Credits to Beat Heeb from Oberon microsystems AG. CVE-2025-59438
-   * Fix a local timing side-channel in modular inversion and GCD that was
-     exploitable in RSA key generation and other RSA operations (see the full
-     advisory for details), allowing a local attacker to fully recover the
-     private key. This can be exploited on some Arm-v9 CPUs by an unprivileged
-     attacker running code on the same core (SSBleed), or when Trustzone-M is
-     used, by the non-secure side abusing timer interrupts (M-Step), and
-     probably in other similar settings as well. Found and reported
-     independently by: SSBleed: Chang Liu (Tsinghua University) and Trevor E.
-     Carlson (National University of Singapore); M-Step: Cristiano Rodrigues
-     (University of Minho), Marton Bognar (DistriNet, KU Leuven), Sandro Pinto
-     (University of Minho), Jo Van Bulck (DistriNet, KU Leuven). CVE-2025-54764
+   * The documentation of mbedtls_ssl_session_save(),
+     mbedtls_ssl_session_load(), mbedtls_ssl_context_save(), and
+     mbedtls_ssl_context_load() has been updated to clarify the responsibility
+     of the application to preserve the confidentiality and integrity of
+     serialized data, mitigating the risk of misuse of these APIs.
+     Credit to Haruto Kimura (Stella) and Eva Crystal (0xiviel) for
+     highlighting risks associated with tampered serialized data.
+   * Fix a NULL pointer dereference in mbedtls_x509_string_to_names() when
+     mbedtls_calloc() fails to allocate memory. This was caused by failing to
+     check whether mbedtls_calloc() returned NULL. Found and reported by
+     Haruto Kimura (Stella).
+   * Fix a limited buffer underflow in x509_inet_pton_ipv6(). In rare cases
+     (e.g. on platforms with memory protection when the overread crosses page
+     boundary) this could lead to DoS. Found and reported by Haruto Kimura
+     (Stella). CVE-2026-25833
+   * Fix a bug in the TLS 1.2 client's signature algorithm check, which caused
+     the client to accept server key exchange messages signed with a signature
+     algorithm explicitly disallowed by the client. Found and reported by
+     EFR-GmbH and M. Heuft of Security-Research-Consulting GmbH. CVE-2026-25834
+   * Fixed an issue in TLS 1.3 server handling of the second ClientHello, after
+     sending a HelloRetryRequest message. A man-in-the-middle attacker could
+     force a TLS 1.3 session resumption using a ticket to fall back to an
+     unintended TLS 1.2 session resumption with an all-zero master secret.
+     This could result in client authentication being bypassed and allow client
+     impersonation.
+     Found and reported by Jaehun Lee, Pohang University of Science and
+     Technology (POSTECH).
 
 Bugfix
-    * Fix potential CMake parallel build failure when building both the static
-      and shared libraries.
-   * Fix a build error or incorrect TLS session
-     lifetime on platforms where mbedtls_time_t
-     is not time_t. Fixes #10236.
+   * CMake now installs headers to `CMAKE_INSTALL_INCLUDEDIR` instead of the
+     hard-coded `include` directory.
+   * Fix CMake failure on Windows because of a native directory separator.
+     Fixes #10502.
+   * mbedtls_timing_get_delay() now correctly treats a timer as expired
+     after more than 2^32 ms (about 49 days) on platforms where long is
+     a 32-bit type. Fixes #10613.
+   * Support re-assembly of fragmented DTLS 1.2 ClientHello in Mbed TLS server.
+   * Support re-assembly of fragmented TLS 1.2 ClientHello in Mbed TLS server
+     even if TLS 1.3 support is disabled. This removes the main limitation on
+     support for re-assembly of fragmented handshake messages in TLS 1.2.
 
 Changes
-   * The function mbedtls_mpi_gcd() now always gives a non-negative output.
-     Previously the output was negative when B = 0 and A < 0, which was not
-     documented, and inconsistent as all other inputs resulted in a non-negative
-     output.
+   * Add casts to some Enums to remove compiler errors thrown by IAR 6.5.
+     Removes Warning "mixed ENUM with other type".
+   * Tweak the detection of Unix-like platforms, which makes more system
+     interfaces (timing, threading) available on Haiku, QNX and Midipix.
+   * Harden mbedtls_ssl_get_verify_result() against misuse.
+     If the handshake has not yet been attempted, return -1u to indicate
+     that the result is not available. Previously the result of verification
+     was zero-initialized so the function would return 0 (indicating success).
 
-= Mbed TLS 3.6.4 branch released 2025-06-30
+= Mbed TLS 4.0.0 branch released 2025-10-15
+
+API changes
+   * Align the mbedtls_ssl_ticket_setup() function with the PSA Crypto API.
+     Instead of taking a mbedtls_cipher_type_t as an argument, this function
+     now takes 3 new arguments: a PSA algorithm, key type and key size, to
+     specify the AEAD for ticket protection.
+   * The PSA and Mbed TLS error spaces are now unified. mbedtls_xxx()
+     functions can now return PSA_ERROR_xxx values.
+     There is no longer a distinction between "low-level" and "high-level"
+     Mbed TLS error codes.
+     This will not affect most applications since the error values are
+     between -32767 and -1 as before.
+   * All API functions now use the PSA random generator psa_generate_random()
+     internally. As a consequence, functions no longer take RNG parameters.
+     Please refer to the migration guide at :
+     docs/4.0-migration-guide.md.
+   * The list passed to mbedtls_ssl_conf_alpn_protocols() is now declared
+     as having const elements, reflecting the fact that the library will
+     not modify it
+   * Change the serial argument of the mbedtls_x509write_crt_set_serial_raw
+     function to a const to align with the rest of the API.
+   * Change the signature of the runtime version information methods that took
+     a char* as an argument to take zero arguments and return a const char*
+     instead. This aligns us with the interface used in TF PSA Crypto 1.0.
+     If you need to support linking against both Mbed TLS 3.x and 4.x, please
+     use the build-time version macros or mbedtls_version_get_number() to
+     determine the correct signature for mbedtls_version_get_string() and
+     mbedtls_version_get_string_full() before calling them.
+     Fixes issue #10308.
+   * Make the following error codes aliases of their PSA equivalents, where
+     xxx is a module, e.g. X509 or SSL.
+     MBEDTLS_ERR_xxx_BAD_INPUT_DATA    -> PSA_ERROR_INVALID_ARGUMENT
+     MBEDTLS_ERR_xxx_ALLOC_FAILED      -> PSA_ERROR_INSUFFICIENT_MEMORY
+     MBEDTLS_ERR_xxx_BUFFER_TOO_SMALL  -> PSA_ERROR_BUFFER_TOO_SMALL
+     MBEDTLS_ERR_PKCS7_VERIFY_FAIL     -> PSA_ERROR_INVALID_SIGNATURE
+   * Add MBEDTLS_SSL_NULL_CIPHERSUITES configuration option. It enables
+     TLS 1.2 ciphersuites without encryption and is disabled by default.
+     This new option replaces MBEDTLS_CIPHER_NULL_CIPHER.
+
+Default behavior changes
+   * The X.509 and TLS modules now always use the PSA subsystem
+     to perform cryptographic operations, with a few exceptions documented
+     in docs/architecture/psa-migration/psa-limitations.md. This
+     corresponds to the behavior of Mbed TLS 3.x when
+     MBEDTLS_USE_PSA_CRYPTO is enabled. In effect, MBEDTLS_USE_PSA_CRYPTO
+     is now always enabled.
+   * psa_crypto_init() must be called before performing any cryptographic
+     operation, including indirect requests such as parsing a key or
+     certificate or starting a TLS handshake.
+   * In TLS clients, if mbedtls_ssl_set_hostname() has not been called,
+     mbedtls_ssl_handshake() now fails with
+     MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
+     if certificate-based authentication of the server is attempted.
+     This is because authenticating a server without knowing what name
+     to expect is usually insecure.
+
+Removals
+   * Remove support for the RSA-PSK key exchange in TLS 1.2.
+   * Remove deprecated mbedtls_x509write_crt_set_serial(). The function was
+     already deprecated and superseded by
+     mbedtls_x509write_crt_set_serial_raw().
+   * Remove the function mbedtls_ssl_conf_curves() which had been deprecated
+     in favour of mbedtls_ssl_conf_groups() since Mbed TLS 3.1.
+   * Remove support for the DHE-PSK key exchange in TLS 1.2.
+   * Remove support for the DHE-RSA key exchange in TLS 1.2.
+   * Following the removal of DHM module (#9972 and TF-PSA-Crypto#175) the
+     following SSL functions are removed:
+     - mbedtls_ssl_conf_dh_param_bin
+     - mbedtls_ssl_conf_dh_param_ctx
+     - mbedtls_ssl_conf_dhm_min_bitlen
+   * Remove support for the RSA key exchange in TLS 1.2.
+   * Remove mbedtls_low_level_strerr() and mbedtls_high_level_strerr(),
+     since these concepts no longer exists. There is just mbedtls_strerror().
+   * Sample programs for the legacy crypto API have been removed.
+          pkey/rsa_genkey.c
+          pkey/pk_decrypt.c
+          pkey/dh_genprime.c
+          pkey/rsa_verify.c
+          pkey/mpi_demo.c
+          pkey/rsa_decrypt.c
+          pkey/key_app.c
+          pkey/dh_server.c
+          pkey/ecdh_curve25519.c
+          pkey/pk_encrypt.c
+          pkey/rsa_sign.c
+          pkey/key_app_writer.c
+          pkey/dh_client.c
+          pkey/ecdsa.c
+          pkey/rsa_encrypt.c
+          wince_main.c
+          aes/crypt_and_hash.c
+          random/gen_random_ctr_drbg.c
+          random/gen_entropy.c
+          hash/md_hmac_demo.c
+          hash/hello.c
+          hash/generic_sum.c
+          cipher/cipher_aead_demo.c
+   * Remove compat-2-x.h header from mbedtls.
+   * The library no longer offers interfaces to look up values by OID
+     or OID by enum values.
+     The header <mbedtls/oid.h> now only defines functions to convert
+     between binary and dotted string OID representations, and macros
+     for OID strings that are relevant to X.509.
+     The compilation option MBEDTLS_OID_C no longer
+     exists. OID tables are included in the build automatically as needed.
+   * The header <mbedtls/check_config.h> no longer exists. Including it
+     from a custom config file was no longer needed since Mbed TLS 3.0,
+     and could lead to spurious errors. The checks that it performed are
+     now done automatically when building the library.
+   * Support for secp192k1, secp192r1, secp224k1 and secp224r1 EC curves is
+     removed from TLS.
+   * Remove mbedtls_pk_type_t from the public interface and replace it with
+     mbedtls_pk_sigalg_t.
+   * Remove MBEDTLS_SSL_DTLS_CONNECTION_ID_COMPAT. Now only the
+     standard version (defined in RFC 9146) of DTLS connection ID is supported.
+   * Remove mbedtls_ssl_conf_min_version(), mbedtls_ssl_conf_max_version(), and
+     the associated constants MBEDTLS_SSL_MAJOR_VERSION_x and
+     MBEDTLS_SSL_MINOR_VERSION_y. Use mbedtls_ssl_conf_min_tls_version() and
+     mbedtls_ssl_conf_max_tls_version() with MBEDTLS_SSL_VERSION_TLS1_y instead.
+     Note that the new names of the new constants use the TLS protocol versions,
+     unlike the old constants whose names are based on internal encodings.
+   * Remove mbedtls_ssl_conf_sig_hashes(). Use mbedtls_ssl_conf_sig_algs()
+     instead.
+   * Removed all public key sample programs from the programs/pkey
+     directory.
+   * Removed support for TLS 1.2 static ECDH key
+     exchanges (ECDH-ECDSA and ECDH-RSA).
+   * Drop support for the GNU Make and Microsoft Visual Studio build systems.
 
 Features
    * Add the function mbedtls_ssl_export_keying_material() which allows the
@@ -53,24 +215,30 @@ Features
      mbedtls_config.h.
 
 Security
-   * Fix a buffer overread in mbedtls_lms_import_public_key() when the input is
-     less than 3 bytes. Reported by Linh Le and Ngan Nguyen from Calif.
-     CVE-2025-49601
-   * Fix a vulnerability in LMS verification through which an adversary could
-     get an invalid signature accepted if they could cause a hash accelerator
-     to fail. Found and reported by Linh Le and Ngan Nguyen from Calif.
-     CVE-2025-49600
-   * On x86/amd64 platforms, with some compilers, when the library is
-     compiled with support for both AESNI and software AES and AESNI is
-     available in hardware, an adversary with fine control over which
-     threads make progress in a multithreaded program could force software
-     AES to be used for some time when the program starts. This could allow
-     the adversary to conduct timing attacks and potentially recover the
-     key. In particular, this attacker model may be possible against an SGX
-     enclave.
-     The same vulnerability affects GCM acceleration, which could allow
-     a similarly powerful adversary to craft GCM forgeries.
-     CVE-2025-52496
+   * With TLS 1.3, when a server enables optional authentication of the
+     client, if the client-provided certificate does not have appropriate values
+     in keyUsage or extKeyUsage extensions, then the return value of
+     mbedtls_ssl_get_verify_result() would incorrectly have the
+     MBEDTLS_X509_BADCERT_KEY_USAGE and MBEDTLS_X509_BADCERT_EXT_KEY_USAGE bits
+     clear. As a result, an attacker that had a certificate valid for uses other
+     than TLS client authentication could be able to use it for TLS client
+     authentication anyway. Only TLS 1.3 servers were affected, and only with
+     optional authentication (required would abort the handshake with a fatal
+     alert).
+     CVE-2024-45159
+   * Note that TLS clients should generally call mbedtls_ssl_set_hostname()
+     if they use certificate authentication (i.e. not pre-shared keys).
+     Otherwise, in many scenarios, the server could be impersonated.
+     The library will now prevent the handshake and return
+     MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
+     if mbedtls_ssl_set_hostname() has not been called.
+     Reported by Daniel Stenberg.
+     CVE-2025-27809
+   * Fix a vulnerability in the TLS 1.2 handshake. If memory allocation failed
+     or there was a cryptographic hardware failure when calculating the
+     Finished message, it could be calculated incorrectly. This would break
+     the security guarantees of the TLS handshake.
+     CVE-2025-27810
    * Fix possible use-after-free or double-free in code calling
      mbedtls_x509_string_to_names(). This was caused by the function calling
      mbedtls_asn1_free_named_data_list() on its head argument, while the
@@ -83,325 +251,34 @@ Security
      Code that does not call mbedtls_string_to_names() directly is not affected.
      Found by Linh Le and Ngan Nguyen from Calif.
      CVE-2025-47917
-   * Fix a bug in mbedtls_asn1_store_named_data() where it would sometimes leave
-     an item in the output list in an inconsistent state with val.p == NULL but
-     val.len > 0. This impacts applications that call this function directly,
-     or indirectly via mbedtls_x509_string_to_names() or one of the
-     mbedtls_x509write_{crt,csr}_set_{subject,issuer}_name() functions. The
-     inconsistent state of the output could then cause a NULL dereference either
-     inside the same call to mbedtls_x509_string_to_names(), or in subsequent
+   * Fix a bug in mbedtls_x509_string_to_names() and the
+     mbedtls_x509write_{crt,csr}_set_{subject,issuer}_name() functions,
+     where some inputs would cause an inconsistent state to be reached, causing
+     a NULL dereference either in the function itself, or in subsequent
      users of the output structure, such as mbedtls_x509_write_names(). This
      only affects applications that create (as opposed to consume) X.509
-     certificates, CSRs or CRLs, or that call mbedtls_asn1_store_named_data()
-     directly. Found by Linh Le and Ngan Nguyen from Calif.
+     certificates, CSRs or CRLs. Found by Linh Le and Ngan Nguyen from Calif.
      CVE-2025-48965
-   * Fix an integer underflow that could occur when parsing malformed PEM
-     keys, which could be used by an attacker capable of feeding encrypted
-     PEM keys to a user. This could cause a crash or information disclosure.
-     Found and reported by Linh Le and Ngan Nguyen from Calif.
-     CVE-2025-52497
-   * Fix a timing side channel in the implementation of PKCS#7 padding
-     which would allow an attacker who can request decryption of arbitrary
-     ciphertexts to recover the plaintext through a timing oracle attack.
-     Reported by Ka Lok Wu from Stony Brook University and Doria Tang from
-     The Chinese University of Hong Kong.
-     CVE-2025-49087
-
-Bugfix
-   * Fix failures of PSA multipart or interruptible operations when the
-     library or the application is built with a compiler where
-     "union foo x = {0}" does not initialize non-default members of the
-     union, such as GCC 15 and some versions of Clang 18. This affected MAC
-     multipart operations, MAC-based key derivation operations, interruptible
-     signature, interruptible verification, and potentially other operations
-     when using third-party drivers. This also affected one-shot MAC
-     operations using the built-in implementation. Fixes #9814.
-   * On entry to PSA driver entry points that set up a multipart operation
-     ("xxx_setup"), the operation object is supposed to be all-bits-zero.
-     This was sometimes not the case when an operation object is reused,
-     or with compilers where "union foo x = {0}" does not initialize
-     non-default members of the union. The PSA core now ensures that this
-     guarantee is met in all cases. Fixes #9975.
-   * Resolved build issue with C++ projects using Mbed TLS 3.6 when compiling
-     with the MSVC toolset v142 and earlier. Fixes mbedtls issue #7087.
-   * Silence spurious -Wunterminated-string-initialization warnings introduced
-     by GCC 15. Fixes #9944.
-   * Fix a sloppy check in LMS public key import, which could lead to accepting
-     keys with a different LMS or LM-OTS types on some platforms. Specifically,
-     this could happen on platforms where enum types are smaller than 32 bits
-     and compiler optimization is enabled. Found and reported by Linh Le and
-     Ngan Nguyen from Calif.
-   * Fix a race condition on x86/amd64 platforms in AESNI support detection
-     that could lead to using software AES in some threads at the very
-     beginning of a multithreaded program. Reported by Solar Designer.
-     Fixes #9840.
-   * Fix mbedtls_base64_decode() on inputs that did not have the correct
-     number of trailing equal signs, or had 4*k+1 digits. They were accepted
-     as long as they had at most two trailing equal signs. They are now
-     rejected. Furthermore, before, on inputs with too few equal signs, the
-     function reported the correct size in *olen when it returned
-     MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL, but truncated the output to the
-     last multiple of 3 bytes.
-   * When calling mbedtls_asn1_write_raw_buffer() with NULL, 0 as the last two
-     arguments, undefined behaviour would be triggered, in the form of a call to
-     memcpy(..., NULL, 0). This was harmless in practice, but could trigger
-     complains from sanitizers or static analyzers.
-
-Changes
-   * The function mbedtls_x509_string_to_names() now requires its head argument
-     to point to NULL on entry. This makes it likely that existing risky uses of
-     this function (see the entry in the Security section) will be detected and
-     fixed.
-
-= Mbed TLS 3.6.3 branch released 2025-03-24
-
-Default behavior changes
-   * In TLS clients, if mbedtls_ssl_set_hostname() has not been called,
-     mbedtls_ssl_handshake() now fails with
-     MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
-     if certificate-based authentication of the server is attempted.
-     This is because authenticating a server without knowing what name
-     to expect is usually insecure. To restore the old behavior, either
-     call mbedtls_ssl_set_hostname() with NULL as the hostname, or
-     enable the new compile-time option
-     MBEDTLS_SSL_CLI_ALLOW_WEAK_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME.
-
-Features
-   * Added new configuration option MBEDTLS_PSA_STATIC_KEY_SLOTS, which
-     uses static storage for keys, enabling malloc-less use of key slots.
-     The size of each buffer is given by the option
-     MBEDTLS_PSA_STATIC_KEY_SLOT_BUFFER_SIZE. By default it accommodates the
-     largest PSA key enabled in the build.
-   * MD module can now perform PSA dispatching also when
-     `MBEDTLS_PSA_CRYPTO_CLIENT && !MBEDTLS_PSA_CRYPTO_C`, even though this
-     configuration is not officially supported. This requires that a
-     PSA Crypto provider library which:
-     * supports the required `PSA_WANT_ALG_xxx` and
-     * implements `psa_can_do_hash()` on the client interface
-     is linked against Mbed TLS and that `psa_crypto_init()` is called before
-     performing any PSA call.
-
-Security
-   * Note that TLS clients should generally call mbedtls_ssl_set_hostname()
-     if they use certificate authentication (i.e. not pre-shared keys).
-     Otherwise, in many scenarios, the server could be impersonated.
-     The library will now prevent the handshake and return
-     MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
-     if mbedtls_ssl_set_hostname() has not been called.
-     Reported by Daniel Stenberg.
-     CVE-2025-27809
-   * Zeroize a temporary heap buffer used in psa_key_derivation_output_key()
-     when deriving an ECC key pair.
-   * Zeroize temporary heap buffers used in PSA operations.
-   * Fix a vulnerability in the TLS 1.2 handshake. If memory allocation failed
-     or there was a cryptographic hardware failure when calculating the
-     Finished message, it could be calculated incorrectly. This would break
-     the security guarantees of the TLS handshake.
-     CVE-2025-27810
-
-Bugfix
-   * When MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE is disabled, work with
-     peers that have middlebox compatibility enabled, as long as no
-     problematic middlebox is in the way. Fixes #9551.
-   * Fix invalid JSON schemas for driver descriptions used by
-     generate_driver_wrappers.py.
-   * Use 'mbedtls_net_close' instead of 'close' in 'mbedtls_net_bind'
-     and 'mbedtls_net_connect' to prevent possible double close fd
-     problems. Fixes #9711.
-   * Fix undefined behavior in some cases when mbedtls_psa_raw_to_der() or
-     mbedtls_psa_der_to_raw() is called with bits=0.
-   * Fix compilation on MS-DOS DJGPP. Fixes #9813.
-   * Fix missing constraints on the AES-NI inline assembly which is used on
-     GCC-like compilers when building AES for generic x86_64 targets. This
-     may have resulted in incorrect code with some compilers, depending on
-     optimizations. Fixes #9819.
-   * Support re-assembly of fragmented handshake messages in TLS (both
-     1.2 and 1.3). The lack of support was causing handshake failures with
-     some servers, especially with TLS 1.3 in practice. There are a few
-     limitations, notably a fragmented ClientHello is only supported when
-     TLS 1.3 support is enabled. See the documentation of
-     mbedtls_ssl_handshake() for details.
-   * Fix definition of MBEDTLS_PRINTF_SIZET to prevent runtime crashes that
-     occurred whenever SSL debugging was enabled on a copy of Mbed TLS built
-     with Visual Studio 2013 or MinGW.
-     Fixes #10017.
-   * Remove Everest Visual Studio 2010 compatibility headers, which could
-     shadow standard CRT headers inttypes.h and stdbool.h with incomplete
-     implementatios if placed on the include path, eg. when building Mbed TLS
-     with the .sln file shipped with the project.
-   * Fix issue where psa_key_derivation_input_integer() is not detecting
-     bad state after an operation has been aborted.
-
-Changes
-   * Improve performance of PSA key generation with ECC keys: it no longer
-     computes the public key (which was immediately discarded). Fixes #9732.
-
-= Mbed TLS 3.6.2 branch released 2024-10-14
-
-Security
-   * Fix a buffer underrun in mbedtls_pk_write_key_der() when
-     called on an opaque key, MBEDTLS_USE_PSA_CRYPTO is enabled,
-     and the output buffer is smaller than the actual output.
-     Fix a related buffer underrun in mbedtls_pk_write_key_pem()
-     when called on an opaque RSA key, MBEDTLS_USE_PSA_CRYPTO is enabled
-     and MBEDTLS_MPI_MAX_SIZE is smaller than needed for a 4096-bit RSA key.
-     CVE-2024-49195
-
-= Mbed TLS 3.6.1 branch released 2024-08-30
-
-API changes
-   * The experimental functions psa_generate_key_ext() and
-     psa_key_derivation_output_key_ext() are no longer declared when compiling
-     in C++. This resolves a build failure under C++ compilers that do not
-     support flexible array members (a C99 feature not adopted by C++).
-     Fixes #9020.
-
-Default behavior changes
-   * In a PSA-client-only build (i.e. MBEDTLS_PSA_CRYPTO_CLIENT &&
-     !MBEDTLS_PSA_CRYPTO_C), do not automatically enable local crypto when the
-     corresponding PSA mechanism is enabled, since the server provides the
-     crypto. Fixes #9126.
-   * A TLS handshake may now call psa_crypto_init() if TLS 1.3 is enabled.
-     This can happen even if TLS 1.3 is offered but eventually not selected
-     in the protocol version negotiation.
-   * By default, the handling of TLS 1.3 tickets by the Mbed TLS client is now
-     disabled at runtime. Applications that were using TLS 1.3 tickets
-     signalled by MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET return values now
-     need to enable the handling of TLS 1.3 tickets through the new
-     mbedtls_ssl_conf_tls13_enable_signal_new_session_tickets() API.
-
-New deprecations
-   * The experimental functions psa_generate_key_ext() and
-     psa_key_derivation_output_key_ext() are deprecated in favor of
-     psa_generate_key_custom() and psa_key_derivation_output_key_custom().
-     They have almost exactly the same interface, but the variable-length
-     data is passed in a separate parameter instead of a flexible array
-     member.
-   * The following cryptographic mechanisms are planned to be removed
-     in Mbed TLS 4.0:
-     - DES (including 3DES).
-     - PKCS#1v1.5 encryption/decryption (RSAES-PKCS1-v1_5).
-       (OAEP, PSS, and PKCS#1v1.5 signature are staying.)
-     - Finite-field Diffie-Hellman with custom groups.
-       (RFC 7919 groups remain supported.)
-     - Elliptic curves of size 225 bits or less.
-   * The following cipher suites are planned to be removed from (D)TLS 1.2
-     in Mbed TLS 4.0:
-     - TLS_RSA_* (including TLS_RSA_PSK_*), i.e. cipher suites using
-       RSA decryption.
-       (RSA signatures, i.e. TLS_ECDHE_RSA_*, are staying.)
-     - TLS_ECDH_*, i.e. cipher suites using static ECDH.
-       (Ephemeral ECDH, i.e. TLS_ECDHE_*, is staying.)
-     - TLS_DHE_*, i.e. cipher suites using finite-field Diffie-Hellman.
-       (Ephemeral ECDH, i.e. TLS_ECDHE_*, is staying.)
-     - TLS_*CBC*, i.e. all cipher suites using CBC.
-   * The following low-level application interfaces are planned to be removed
-     from the public API in Mbed TLS 4.0:
-     - Hashes: hkdf.h, md5.h, ripemd160.h, sha1.h, sha3.h, sha256.h, sha512.h;
-     - Random generation: ctr_drbg.h, hmac_drbg.h, entropy.h;
-     - Ciphers and modes: aes.h, aria.h, camellia.h, chacha20.h, chachapoly.h,
-       cipher.h, cmac.h, gcm.h, poly1305.h;
-     - Private key encryption mechanisms: pkcs5.h, pkcs12.h.
-     - Asymmetric cryptography: bignum.h, dhm.h, ecdh.h, ecdsa.h, ecjpake.h,
-       ecp.h, rsa.h.
-     The cryptographic mechanisms remain present, but they will only be
-     accessible via the PSA API (psa_xxx functions introduced gradually
-     starting with Mbed TLS 2.17) and, where relevant, `pk.h`.
-     For guidance on migrating application code to the PSA API, please consult
-     the PSA transition guide (docs/psa-transition.md).
-   * The following integration interfaces are planned to be removed
-     in Mbed TLS 4.0:
-     - MBEDTLS_xxx_ALT replacement of cryptographic modules and functions.
-       Use PSA transparent drivers instead.
-     - MBEDTLS_PK_RSA_ALT and MBEDTLS_PSA_CRYPTO_SE_C.
-       Use PSA opaque drivers instead.
-
-Features
-   * When the new compilation option MBEDTLS_PSA_KEY_STORE_DYNAMIC is enabled,
-     the number of volatile PSA keys is virtually unlimited, at the expense
-     of increased code size. This option is off by default, but enabled in
-     the default mbedtls_config.h. Fixes #9216.
-
-Security
-   * Unlike previously documented, enabling MBEDTLS_PSA_HMAC_DRBG_MD_TYPE does
-     not cause the PSA subsystem to use HMAC_DRBG: it uses HMAC_DRBG only when
-     MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG and MBEDTLS_CTR_DRBG_C are disabled.
-     CVE-2024-45157
-   * Fix a stack buffer overflow in mbedtls_ecdsa_der_to_raw() and
-     mbedtls_ecdsa_raw_to_der() when the bits parameter is larger than the
-     largest supported curve. In some configurations with PSA disabled,
-     all values of bits are affected. This never happens in internal library
-     calls, but can affect applications that call these functions directly.
-     CVE-2024-45158
-   * With TLS 1.3, when a server enables optional authentication of the
-     client, if the client-provided certificate does not have appropriate values
-     in keyUsage or extKeyUsage extensions, then the return value of
-     mbedtls_ssl_get_verify_result() would incorrectly have the
-     MBEDTLS_X509_BADCERT_KEY_USAGE and MBEDTLS_X509_BADCERT_EXT_KEY_USAGE bits
-     clear. As a result, an attacker that had a certificate valid for uses other
-     than TLS client authentication could be able to use it for TLS client
-     authentication anyway. Only TLS 1.3 servers were affected, and only with
-     optional authentication (required would abort the handshake with a fatal
-     alert).
-     CVE-2024-45159
+   * Fix a bug in tf-psa-crypto's mbedtls_asn1_store_named_data() where it
+     would sometimes leave an item in the output list in an inconsistent
+     state with val.p == NULL but val.len > 0. Affected functions used in X.509
+     would then dereference a NULL pointer. Applications that do not
+     call this function (directly, or indirectly through X.509 writing) are not
+     affected. Found by Linh Le and Ngan Nguyen from Calif.
+     CVE-2025-48965
 
 Bugfix
    * Fix TLS 1.3 client build and runtime when support for session tickets is
      disabled (MBEDTLS_SSL_SESSION_TICKETS configuration option). Fixes #6395.
    * Fix compilation error when memcpy() is a function-like macros. Fixes #8994.
-   * MBEDTLS_ASN1_PARSE_C and MBEDTLS_ASN1_WRITE_C are now automatically enabled
-     as soon as MBEDTLS_RSA_C is enabled. Fixes #9041.
-   * Fix undefined behaviour (incrementing a NULL pointer by zero length) when
-     passing in zero length additional data to multipart AEAD.
-   * Fix rare concurrent access bug where attempting to operate on a
-     non-existent key while concurrently creating a new key could potentially
-     corrupt the key store.
-   * Fix error handling when creating a key in a dynamic secure element
-     (feature enabled by MBEDTLS_PSA_CRYPTO_SE_C). In a low memory condition,
-     the creation could return PSA_SUCCESS but using or destroying the key
-     would not work. Fixes #8537.
-   * Fix issue of redefinition warning messages for _GNU_SOURCE in
-     entropy_poll.c and sha_256.c. There was a build warning during
-     building for linux platform.
-     Resolves #9026
-   * Fix a compilation warning in pk.c when PSA is enabled and RSA is disabled.
-   * Fix the build when MBEDTLS_PSA_CRYPTO_CONFIG is enabled and the built-in
-     CMAC is enabled, but no built-in unauthenticated cipher is enabled.
-     Fixes #9209.
-   * Fix redefinition warnings when SECP192R1 and/or SECP192K1 are disabled.
-     Fixes #9029.
-   * Fix psa_cipher_decrypt() with CCM* rejecting messages less than 3 bytes
-     long. Credit to Cryptofuzz. Fixes #9314.
-   * Fix interference between PSA volatile keys and built-in keys
-     when MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS is enabled and
-     MBEDTLS_PSA_KEY_SLOT_COUNT is more than 4096.
-   * Document and enforce the limitation of mbedtls_psa_register_se_key()
-     to persistent keys. Resolves #9253.
-   * Fix Clang compilation error when MBEDTLS_USE_PSA_CRYPTO is enabled
-     but MBEDTLS_DHM_C is disabled. Reported by Michael Schuster in #9188.
+   * Fix Clang compilation error when finite-field Diffie-Hellman is disabled.
+     Reported by Michael Schuster in #9188.
    * Fix server mode only build when MBEDTLS_SSL_SRV_C is enabled but
      MBEDTLS_SSL_CLI_C is disabled. Reported by M-Bab on GitHub in #9186.
-   * When MBEDTLS_PSA_CRYPTO_C was disabled and MBEDTLS_ECDSA_C enabled,
-     some code was defining 0-size arrays, resulting in compilation errors.
-     Fixed by disabling the offending code in configurations without PSA
-     Crypto, where it never worked. Fixes #9311.
-   * Fix unintended performance regression when using short RSA public keys.
-     Fixes #9232.
    * Fixes an issue where some TLS 1.2 clients could not connect to an
      Mbed TLS 3.6.0 server, due to incorrect handling of
      legacy_compression_methods in the ClientHello.
-     Fixes #8995, #9243.
-   * Fix TLS connections failing when the handshake selects TLS 1.3
-     in an application that does not call psa_crypto_init().
-     Fixes #9072.
-   * Fix TLS connection failure in applications using an Mbed TLS client in
-     the default configuration connecting to a TLS 1.3 server sending tickets.
-     See the documentation of
-     mbedtls_ssl_conf_tls13_enable_signal_new_session_tickets() for more
-     information.
-     Fixes #8749.
-   * Fix a memory leak that could occur when failing to process an RSA
-     key through some PSA functions due to low memory conditions.
+     fixes #8995, #9243.
    * Fixed a regression introduced in 3.6.0 where the CA callback set with
      mbedtls_ssl_conf_ca_cb() would stop working when connections were
      upgraded to TLS 1.3. Fixed by adding support for the CA callback with TLS
@@ -419,16 +296,43 @@ Bugfix
      mbedtls_ssl_conf_verify(), would stop working when connections were
      upgraded to TLS 1.3. Fixed by adding support for context-specific verify
      callback in TLS 1.3.
+   * When MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE is disabled, work with
+     peers that have middlebox compatibility enabled, as long as no
+     problematic middlebox is in the way. Fixes #9551.
+   * Use 'mbedtls_net_close' instead of 'close' in 'mbedtls_net_bind'
+     and 'mbedtls_net_connect' to prevent possible double close fd
+     problems. Fixes #9711.
+   * Fix compilation on MS-DOS DJGPP. Fixes #9813.
+   * Support re-assembly of fragmented handshake messages in TLS (both
+     1.2 and 1.3). The lack of support was causing handshake failures with
+     some servers, especially with TLS 1.3 in practice. There are a few
+     limitations, notably a fragmented ClientHello is only supported when
+     TLS 1.3 support is enabled. See the documentation of
+     mbedtls_ssl_handshake() for details.
+   * Fix definition of MBEDTLS_PRINTF_SIZET to prevent runtime crashes that
+     occurred whenever SSL debugging was enabled on a copy of Mbed TLS built
+     with Visual Studio 2013 or MinGW.
+     Fixes #10017.
+   * Silence spurious -Wunterminated-string-initialization warnings introduced
+     by GCC 15. Fixes #9944.
+   * Fix potential CMake parallel build failure when building both the static
+     and shared libraries.
+   * Fix a build error or incorrect TLS session
+     lifetime on platforms where mbedtls_time_t
+     is not time_t. Fixes #10236.
 
 Changes
-   * Warn if mbedtls/check_config.h is included manually, as this can
-     lead to spurious errors. Error if a *adjust*.h header is included
-     manually, as this can lead to silently inconsistent configurations,
-     potentially resulting in buffer overflows.
-     When migrating from Mbed TLS 2.x, if you had a custom config.h that
-     included check_config.h, remove this inclusion from the Mbed TLS 3.x
-     configuration file (renamed to mbedtls_config.h). This change was made
-     in Mbed TLS 3.0, but was not announced in a changelog entry at the time.
+   * Functions regarding numeric string conversions for OIDs have been moved
+     from the OID module and now reside in X.509 module. This helps to reduce
+     the code size as these functions are not commonly used outside of X.509.
+   * Move the crypto part of the library (content of tf-psa-crypto directory)
+     from the Mbed TLS to the TF-PSA-Crypto repository. The crypto code and
+     tests development will now occur in TF-PSA-Crypto, which Mbed TLS
+     references as a Git submodule.
+   * The function mbedtls_x509_string_to_names() now requires its head argument
+     to point to NULL on entry. This makes it likely that existing risky uses of
+     this function (see the entry in the Security section) will be detected and
+     fixed.
 
 = Mbed TLS 3.6.0 branch released 2024-03-28
 

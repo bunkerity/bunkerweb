@@ -41,7 +41,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     services:
       bunkerweb:
         # Name, unter dem die Instanz im Scheduler erscheint
-        image: bunkerity/bunkerweb:1.6.10-rc3
+        image: bunkerity/bunkerweb:1.6.12-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.10-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Instanznamen korrekt setzen
@@ -76,7 +76,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.10-rc3
+        image: bunkerity/bunkerweb-api:1.6.12-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -108,7 +108,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -143,7 +143,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.10-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.12-rc1
     ```
 
 === "Linux"
@@ -188,7 +188,22 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
   - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
   - `jobs`: `job_read`, `job_run`
 - `resource_id` ist meist die zweite Pfadkomponente (z. B. `/services/{id}`); "*" gewährt globalen Zugriff.
-- Nicht-Admin-Nutzer und Grants per `API_ACL_BOOTSTRAP_FILE` oder gemounteter `/var/lib/bunkerweb/api_acl_bootstrap.json` bootstrappen. Passwörter dürfen Klartext oder bcrypt-Hashes sein.
+- Nicht-Admin-Nutzer und Grants per `API_ACL_BOOTSTRAP_FILE` oder gemounteter `/var/lib/bunkerweb/api_acl_bootstrap.json` bootstrappen. Jeder Nutzer akzeptiert ein Klartext-`password` oder ein vorab gehashtes `password_hash`/`password_bcrypt` (siehe Tipp unten).
+
+!!! tip "Vorab gehashte Bootstrap-Passwörter"
+    Ersetzen Sie das Klartext-`password` eines Nutzers durch einen **bcrypt-Hash** via `password_hash` (oder `password_bcrypt`), damit Anmeldedaten niemals als Klartext in der Datei stehen. Der Hash muss ein gültiger bcrypt-Hash (`$2a$`/`$2b$`/`$2y$`) sein, dessen Kostenfaktor mindestens `10` beträgt (`12`+ empfohlen). Ein fehlerhafter oder zu schwacher Hash wird **ignoriert**: Der Loader greift auf das Klartext-`password` des Nutzers zurück, falls vorhanden; andernfalls erhält ein neuer Nutzer ein sicheres Zufallspasswort, das Sie nicht kennen, und ein bestehender Nutzer behält sein aktuelles. Ein Klartext-`password` wird auf seine Stärke geprüft (8+ Zeichen mit Groß-/Kleinbuchstaben, Ziffer und Sonderzeichen). Die admin-Umgebungsvariable `API_PASSWORD` akzeptiert nur Klartext — das Vorab-Hashing gilt für diese ACL-Nutzer.
+
+    Einen Hash erzeugen:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+    Dann in der Bootstrap-Datei anstelle von `password` verwenden:
+
+    ```json
+    "password_hash": "$2b$13$replace-with-the-hash-printed-above"
+    ```
 
 ??? example "Minimales ACL-Bootstrap"
     ```json

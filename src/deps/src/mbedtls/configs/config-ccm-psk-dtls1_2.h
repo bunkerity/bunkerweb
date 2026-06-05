@@ -23,24 +23,13 @@
  * See README.txt for usage instructions.
  */
 
-/* System support */
-//#define MBEDTLS_HAVE_TIME /* Optionally used in Hello messages */
-/* Other MBEDTLS_HAVE_XXX flags irrelevant for this configuration */
-
 /* Mbed TLS modules */
-#define MBEDTLS_AES_C
-#define MBEDTLS_CCM_C
-#define MBEDTLS_CIPHER_C
-#define MBEDTLS_CTR_DRBG_C
-#define MBEDTLS_ENTROPY_C
-#define MBEDTLS_MD_C
 #define MBEDTLS_NET_C
-#define MBEDTLS_SHA256_C
 #define MBEDTLS_SSL_CLI_C
 #define MBEDTLS_SSL_COOKIE_C
 #define MBEDTLS_SSL_SRV_C
 #define MBEDTLS_SSL_TLS_C
-#define MBEDTLS_TIMING_C
+#define MBEDTLS_TIMING_C //Only used by test programs
 
 /* TLS protocol feature support */
 #define MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
@@ -68,23 +57,8 @@
 #define MBEDTLS_SSL_IN_CONTENT_LEN              256
 #define MBEDTLS_SSL_OUT_CONTENT_LEN             256
 
-/* Save RAM at the expense of ROM */
-#define MBEDTLS_AES_ROM_TABLES
-
 /* Save some RAM by adjusting to your exact needs */
 #define MBEDTLS_PSK_MAX_LEN    16 /* 128-bits keys are generally enough */
-
-/*
- * You should adjust this to the exact number of sources you're using: default
- * is the "platform_entropy_poll" source, but you may want to add other ones
- * Minimum is 2 for the entropy test suite.
- */
-#define MBEDTLS_ENTROPY_MAX_SOURCES 2
-
-/* These defines are present so that the config modifying scripts can enable
- * them during tests/scripts/test-ref-configs.pl */
-//#define MBEDTLS_USE_PSA_CRYPTO
-//#define MBEDTLS_PSA_CRYPTO_C
 
 /* Error messages and TLS debugging traces
  * (huge code size increase, needed for tests/ssl-opt.sh) */

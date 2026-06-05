@@ -7,6 +7,8 @@ local misc = class("misc", plugin)
 local ngx = ngx
 local HTTP_NOT_ALLOWED = ngx.HTTP_NOT_ALLOWED
 local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
+local HTTP_CLOSE = ngx.HTTP_CLOSE
+local get_variable = utils.get_variable
 local get_security_mode = utils.get_security_mode
 local regex_match = utils.regex_match
 
@@ -42,6 +44,60 @@ function misc:header()
 		return self:ret(true, "edited location header")
 	end
 	return self:ret(true, "no location header needed")
+end
+
+function misc:ssl_client_hello_default()
+	local strict_sni, err = get_variable("DISABLE_DEFAULT_SERVER_STRICT_SNI", false)
+	if strict_sni == nil then
+		return self:ret(false, "can't get DISABLE_DEFAULT_SERVER_STRICT_SNI variable : " .. err)
+	end
+	if strict_sni ~= "yes" then
+		return self:ret(true, "strict SNI disabled")
+	end
+
+	local ssl_clt = require "ngx.ssl.clienthello"
+	local host
+	host, err = ssl_clt.get_client_hello_server_name()
+	if not host then
+		return self:ret(true, "can't get SNI host, denying access : " .. (err or "no SNI"), HTTP_CLOSE)
+	end
+
+	local multisite
+	multisite, err = get_variable("MULTISITE", false)
+	if multisite == nil then
+		return self:ret(false, "can't get MULTISITE variable : " .. err)
+	end
+
+	if multisite == "no" then
+		local domains
+		domains, err = get_variable("SERVER_NAME", false)
+		if domains == nil then
+			return self:ret(false, "can't get SERVER_NAME variable : " .. err)
+		end
+		for domain in domains:gmatch("%S+") do
+			if host == domain then
+				return self:ret(true, "SNI host " .. host .. " is allowed")
+			end
+		end
+	else
+		local variables
+		variables, err = self.internalstore:get("variables", true)
+		if not variables then
+			return self:ret(false, "can't get variables : " .. err)
+		end
+		for _, server_vars in pairs(variables) do
+			local domains = server_vars["SERVER_NAME"]
+			if domains then
+				for domain in domains:gmatch("%S+") do
+					if host == domain then
+						return self:ret(true, "SNI host " .. host .. " is allowed")
+					end
+				end
+			end
+		end
+	end
+
+	return self:ret(true, "unknown SNI host " .. host .. ", denying access", HTTP_CLOSE)
 end
 
 function misc:log_default()

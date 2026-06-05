@@ -144,7 +144,14 @@ int Driver::parse(const std::string &f, const std::string &ref) {
     scan_begin();
     yy::seclang_parser parser(*this);
     parser.set_debug_level(trace_parsing);
-    int res = parser.parse();
+    int res;
+    try {
+        res = parser.parse();
+    } catch (...) {
+        scan_end();
+        m_parserError << "Parser exception caught during rule parsing." << std::endl;
+        return 1;
+    }
     scan_end();
 
     /*

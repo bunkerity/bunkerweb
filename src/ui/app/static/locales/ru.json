@@ -96,10 +96,8 @@
     "enable_totp": "Включить TOTP",
     "entire_config": "Вся конфигурация",
     "export": "Экспорт",
-    "export_csv_all": "CSV (Все)",
-    "export_csv_visible": "CSV (Видимые)",
-    "export_excel_all": "Excel (Все)",
-    "export_excel_visible": "Excel (Видимые)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Получить глобальные настройки",
     "filters_suffix": " Фильтры",
     "follow": "Следить",
@@ -477,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Выбрать все {{count}} совпадающих {{entity}}",
+    "bulk_select_all_done": "Все {{count}} совпадающих {{entity}} выбраны.",
+    "bulk_select_clear": "Очистить выбор",
+    "bulk_select_page": "Все {{count}} {{entity}} на этой странице выбраны.",
     "info_bans": "Показано с {{start}} по {{end}} из {{total}} банов",
     "info_cache": "Показано с {{start}} по {{end}} из {{total}} файлов кэша",
     "info_configs": "Показано с {{start}} по {{end}} из {{total}} кастомных конфигураций",

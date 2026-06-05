@@ -4,294 +4,385 @@
 
 ### Procédure
 
-#### Docker
-
-1. **Sauvegardez la base de données** :
-
-    - Avant de procéder à la mise à niveau de la base de données, assurez-vous d'effectuer une sauvegarde complète de l'état actuel de la base de données.
-    - Utilisez les outils appropriés pour sauvegarder l'intégralité de la base de données, y compris les données, les schémas et les configurations.
-
-    ```bash
-    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
-    ```
-
-    ```bash
-    docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
-    ```
-
-2. **Mettre à niveau BunkerWeb** :
-    - Mettez à niveau BunkerWeb vers la dernière version.
-        1. **Mettre à jour le fichier Docker Compose **: Mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image BunkerWeb.
-            ```yaml
-            services:
-                bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.10-rc3
-                    ...
-                bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.10-rc3
-                    ...
-                bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.10-rc3
-                    ...
-                bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.10-rc3
-                    ...
-            ```
-
-        2. **Redémarrer les conteneurs **: redémarrez les conteneurs pour appliquer les modifications.
-            ```bash
-            docker compose down
-            docker compose up -d
-            ```
-
-3. **Vérifier les journaux **: vérifiez les journaux du service de planification pour vous assurer que la migration a réussi.
-
-    ```bash
-    docker compose logs <scheduler_container>
-    ```
-
-4. **Vérifier la base de données **: vérifiez que la mise à niveau de la base de données a réussi en vérifiant les données et les configurations dans le nouveau conteneur de base de données.
-
-#### Linux
-
-=== "Mise à niveau facile à l'aide du script d'installation"
-
-    * **Démarrage rapide** :
-
-        Pour commencer, téléchargez le script d'installation et sa somme de contrôle, puis vérifiez l'intégrité du script avant de l'exécuter.
-
-        ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
-        # Download the script and its checksum
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
-
-        # Verify the checksum
-        sha256sum -c install-bunkerweb.sh.sha256
-
-        # If the check is successful, run the script
-        chmod +x install-bunkerweb.sh
-        sudo ./install-bunkerweb.sh
-        ```
-
-        !!! danger "Avis de sécurité"
-            **Vérifiez toujours l'intégrité du script d'installation avant de l'exécuter.**
-
-            Téléchargez le fichier de somme de contrôle et utilisez un outil comme `sha256sum` pour confirmer que le script n'a pas été modifié ou altéré.
-
-            Si la vérification de la somme échoue, **n'exécutez pas le script** — il pourrait être dangereux.
-
-      * **Comment ça marche** :
-
-        Le même script d'installation polyvalent utilisé pour les nouvelles installations peut également effectuer une mise à niveau sur place. Lorsqu'il détecte une installation existante et une version cible différente, il passe en mode mise à niveau et applique le flux de travail suivant :
-
-        1. Détection et validation
-            * Détecte le système d'exploitation / la version et confirme la matrice de support.
-            * Lit la version BunkerWeb actuellement installée à partir de `/usr/share/bunkerweb/VERSION`.
-        2. Décision du scénario de mise à niveau
-            * Si la version demandée est égale à celle installée, elle abandonne (sauf si vous la réexécutez explicitement pour l'état).
-            * Si les versions diffèrent, il signale une mise à niveau.
-        3. (Facultatif) Sauvegarde automatique de pré-mise à niveau
-            * Si `bwcli` le planificateur est disponible et que la sauvegarde automatique est activée, il crée une sauvegarde via le plugin de sauvegarde intégré.
-            * Destination : soit le répertoire que vous avez fourni, `--backup-dir` soit un chemin généré tel que `/var/tmp/bunkerweb-backup-YYYYmmdd-HHMMSS`.
-            * Vous pouvez désactiver cela avec `--no-auto-backup` (la sauvegarde manuelle devient alors de votre responsabilité).
-        4. Repos du service
-            * Arrête `bunkerweb`, `bunkerweb-ui`et `bunkerweb-scheduler` pour assurer une mise à niveau cohérente (correspond aux recommandations de la procédure manuelle).
-        5. Suppression des verrous de colis
-            * Supprime temporairement `apt-mark hold` / `dnf versionlock` active `bunkerweb` et `nginx` permet ainsi d'installer la version ciblée.
-        6. Exécution de la mise à niveau
-            * Installe uniquement la nouvelle version du package BunkerWeb (NGINX n'est pas réinstallé en mode de mise à niveau à moins qu'il ne soit manquant - cela évite de toucher à un NGINX correctement épinglé).
-            * Réapplique les blocages/verrous de version pour geler les versions mises à niveau.
-        7. Finalisation et état d'avancement
-            * Affiche l'état de systemd pour les services principaux et les étapes suivantes.
-            * Laisse votre configuration et votre base de données intactes : seuls le code de l'application et les fichiers gérés sont mis à jour.
-
-        Comportements clés / notes :
-
-        * Le script ne modifie PAS le `/etc/bunkerweb/variables.env` contenu de votre base de données.
-        * Si la sauvegarde automatique a échoué (ou a été désactivée), vous pouvez toujours effectuer une restauration manuelle à l'aide de la section Restauration ci-dessous.
-        * Le mode de mise à niveau évite intentionnellement de réinstaller ou de rétrograder NGINX en dehors de la version épinglée prise en charge déjà présente.
-        * Les journaux de dépannage restent dans `/var/log/bunkerweb/`.
-
-    * **Comportement selon le mode** :
-
-        - Le programme d'installation réutilise la même logique de sélection de mode pendant une mise à jour : le mode manager garde l'assistant désactivé, attache l'API à `0.0.0.0` et exige une IP à placer sur liste blanche (à fournir avec `--manager-ip` pour les exécutions non interactives), tandis que le mode worker impose toujours la liste d'IP du manager.
-        - Les mises à jour Manager peuvent décider de démarrer ou non le service Web UI, et le récapitulatif mentionne explicitement l'état du service API afin de pouvoir le contrôler via `--api` / `--no-api`.
-        - Les options CrowdSec restent réservées aux mises à jour full stack et le script continue de valider le système d'exploitation et l'architecture CPU avant de toucher aux paquets, les combinaisons non prises en charge nécessitant toujours `--force`.
-
-        Résumé du retour en arrière :
-
-        * Utilisez le répertoire de sauvegarde généré (ou votre sauvegarde manuelle) + les étapes de la section Rollback pour restaurer la base de données, puis réinstallez la version précédente de l'image/du paquet et verrouillez à nouveau les paquets.
-
-    *  **Options de ligne de commande** :
-
-        Vous pouvez effectuer des mises à niveau sans assistance avec les mêmes indicateurs que ceux utilisés pour l'installation. Les plus pertinents pour les mises à niveau :
-
-        | Option                  | But                                                                                                                           |
-        | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-        | `-v, --version <X.Y.Z>` | Ciblez la version de BunkerWeb à mettre à niveau.                                                                             |
-        | `-y, --yes`             | Non interactif (suppose la confirmation de la mise à niveau et active la sauvegarde automatique, sauf si `--no-auto-backup`). |
-        | `--backup-dir <PATH>`   | Destination de la sauvegarde automatique de pré-mise à niveau. Créé s'il est manquant.                                        |
-        | `--no-auto-backup`      | Ignorez la sauvegarde automatique (NON recommandé). Vous devez disposer d'une sauvegarde manuelle.                            |
-        | `-q, --quiet`           | Suppression de la sortie (combinée avec l'enregistrement/la surveillance).                                                    |
-        | `-f, --force`           | Procédez sur une version du système d'exploitation non prise en charge.                                                       |
-        | `--dry-run`             | Affichez l'environnement détecté, les actions prévues, puis quittez sans rien modifier.                                       |
-
-        Exemples:
-
-        ```bash
-        # Upgrade to 1.6.10~rc3 interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version 1.6.10~rc3
-
-        # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc3 --backup-dir /var/backups/bw-2025-01 -y
-
-        # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc3 -y -q
-
-        # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc3 --dry-run
-
-        # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc3 --no-auto-backup -y
-        ```
-
-        !!! warning "Sauter les sauvegardes"
-            L'utilisation `--no-auto-backup` sans sauvegarde manuelle vérifiée peut entraîner une perte de données irréversible si la mise à niveau rencontre des problèmes. Conservez toujours au moins une sauvegarde récente et testée.
-
-=== "Manuel"
+=== "Docker"
 
     1. **Sauvegardez la base de données** :
 
         - Avant de procéder à la mise à niveau de la base de données, assurez-vous d'effectuer une sauvegarde complète de l'état actuel de la base de données.
         - Utilisez les outils appropriés pour sauvegarder l'intégralité de la base de données, y compris les données, les schémas et les configurations.
 
-        ??? warning "Informations pour les utilisateurs de Red Hat Enterprise Linux (RHEL) 8.10"
-            Si vous utilisez **RHEL 8.10** et prévoyez d'utiliser une **base de données externe**, vous devrez installer le paquet `mysql-community-client` pour vous assurer que la commande `mysqldump` est disponible. Vous pouvez installer le paquet en exécutant les commandes suivantes :
-
-            === "MySQL/MariaDB"
-
-                1. **Installez le paquet de configuration du dépôt MySQL**
-
-                    ```bash
-                    sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
-                    ```
-
-                2. **Activez le dépôt MySQL**
-
-                    ```bash
-                    sudo dnf config-manager --enable mysql80-community
-                    ```
-
-                3. **Installez le client MySQL**
-
-                    ```bash
-                    sudo dnf install mysql-community-client
-                    ```
-
-            === "PostgreSQL"
-
-                1. **Installer le paquet de configuration du dépôt PostgreSQL**
-
-                    ```bash
-                    dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
-                    ```
-
-                2. **Installer le client PostgreSQL**
-
-                    ```bash
-                    dnf install postgresql<version>
-                    ```
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+        ```
 
         ```bash
-        BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
+        docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
         ```
 
     2. **Mettre à niveau BunkerWeb** :
         - Mettez à niveau BunkerWeb vers la dernière version.
-
-            1. **Arrêtez les services** :
-                ```bash
-                sudo systemctl stop bunkerweb
-                sudo systemctl stop bunkerweb-ui
-                sudo systemctl stop bunkerweb-scheduler
+            1. **Mettre à jour le fichier Docker Compose **: Mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image BunkerWeb.
+                ```yaml
+                services:
+                    bunkerweb:
+                        image: bunkerity/bunkerweb:1.6.12-rc1
+                        ...
+                    bw-scheduler:
+                        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
+                        ...
+                    bw-autoconf:
+                        image: bunkerity/bunkerweb-autoconf:1.6.12-rc1
+                        ...
+                    bw-ui:
+                        image: bunkerity/bunkerweb-ui:1.6.12-rc1
+                        ...
                 ```
 
-            2. **Mettre à jour BunkerWeb** :
-
-                === "Debian/Ubuntu"
-
-                    Tout d'abord, si vous avez précédemment marqué le paquet BunkerWeb comme mis en attente, annulez cette mise en attente :
-
-                    Vous pouvez afficher la liste des paquets en attente avec `apt-mark showhold`
-
-                    ```shell
-                    sudo apt-mark unhold bunkerweb nginx
-                    ```
-
-                    Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :
-
-                    ```shell
-                    sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10~rc3
-                    ```
-
-                    Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
-
-                    ```shell
-                    sudo apt-mark hold bunkerweb nginx
-                    ```
-
-                    Plus de détails dans la page [intégration Linux](integrations.md#__tabbed_1_1).
-
-                === "Fedora/RedHat"
-
-                    Tout d'abord, si vous avez précédemment marqué le paquet BunkerWeb comme mis en attente, annulez cette mise en attente :
-
-                    Vous pouvez afficher la liste des paquets en attente avec `dnf versionlock list`
-
-                    ```shell
-                    sudo dnf versionlock delete package bunkerweb && \
-                    sudo dnf versionlock delete package nginx
-                    ```
-
-                    Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :
-
-                    ```shell
-                    sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.10~rc3
-                    ```
-
-                    Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
-
-                    ```shell
-                    sudo dnf versionlock add bunkerweb && \
-                    sudo dnf versionlock add nginx
-                    ```
-
-                    Plus de détails dans la page [intégration Linux](integrations.md#__tabbed_1_3).
-
-            3. **Démarrez les services** :
-                    ```bash
-                    sudo systemctl start bunkerweb
-                    sudo systemctl start bunkerweb-ui
-                    sudo systemctl start bunkerweb-scheduler
-                    ```
-                    Ou redémarrez le système :
-                    ```bash
-                    sudo reboot
-                    ```
-
+            2. **Redémarrer les conteneurs **: redémarrez les conteneurs pour appliquer les modifications.
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
 
     3. **Vérifier les journaux **: vérifiez les journaux du service de planification pour vous assurer que la migration a réussi.
 
         ```bash
-        journalctl -u bunkerweb --no-pager
+        docker compose logs <scheduler_container>
         ```
 
     4. **Vérifier la base de données **: vérifiez que la mise à niveau de la base de données a réussi en vérifiant les données et les configurations dans le nouveau conteneur de base de données.
 
+=== "All-In-One (AIO)"
+
+    L'[image All-In-One](integrations.md#all-in-one-aio-image) regroupe BunkerWeb, le Scheduler, l'interface Web et, facultativement, l'API, Redis et CrowdSec dans un **seul conteneur** nommé `bunkerweb-aio` par défaut. Tout l'état persistant — base SQLite, cache, configurations personnalisées, plugins, sauvegardes et données Redis/CrowdSec — réside dans le volume `/data`; la mise à niveau consiste donc à remplacer le conteneur en conservant ce volume.
+
+    1. **Prérequis** :
+
+        - Notez le tag d'image actuellement utilisé et le nom du volume `/data` (ou du bind mount) afin de réutiliser exactement le même après la mise à niveau.
+
+        !!! warning "Préservez le volume `/data`"
+            **Ne supprimez jamais le volume `/data` pendant une mise à niveau.** Il contient la base de données, l'état Redis et CrowdSec intégré, vos configurations personnalisées et vos sauvegardes. Remplacer le conteneur est sûr ; supprimer le volume ne l'est pas.
+
+        !!! tip "Bases de données externes"
+            Si vous exécutez l'AIO avec une base de données externe (`DATABASE_URI` pointant vers MySQL/MariaDB/PostgreSQL), le fichier SQLite sous `/data` n'est pas utilisé — assurez-vous de sauvegarder également cette base externe avec vos outils habituels.
+
+    2. **Sauvegardez la base de données** :
+
+        - Avant de procéder à la mise à niveau de la base de données, assurez-vous d'effectuer une sauvegarde complète de son état actuel. Le Scheduler s'exécute dans le conteneur `bunkerweb-aio`, la commande de sauvegarde y est donc exécutée directement.
+
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory bunkerweb-aio bwcli plugin backup save
+        ```
+
+        ```bash
+        docker cp bunkerweb-aio:/path/to/backup/directory /path/to/backup/directory
+        ```
+
+    3. **Mettre à niveau BunkerWeb** :
+
+        === "docker run"
+
+            3. **Arrêtez et supprimez le conteneur actuel** (le volume `/data` est conservé) :
+                ```bash
+                docker stop bunkerweb-aio
+                docker rm bunkerweb-aio
+                ```
+
+            4. **Téléchargez la nouvelle image** :
+                ```bash
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.12-rc1
+                ```
+
+            5. **Recréez le conteneur** avec les mêmes options, en réutilisant le même volume `/data`, les mêmes ports et les mêmes variables d'environnement qu'avant :
+                ```bash
+                docker run -d \
+                --name bunkerweb-aio \
+                -v bw-storage:/data \
+                -p 80:8080/tcp \
+                -p 443:8443/tcp \
+                -p 443:8443/udp \
+                bunkerity/bunkerweb-all-in-one:1.6.12-rc1
+                ```
+
+        === "Docker Compose"
+
+            6. **Mettez à jour le fichier Docker Compose** : mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image All-In-One.
+                ```yaml
+                services:
+                    bunkerweb-aio:
+                        image: bunkerity/bunkerweb-all-in-one:1.6.12-rc1
+                        ...
+                ```
+
+            7. **Redémarrez le conteneur** : redémarrez le conteneur pour appliquer les changements. Le volume `/data` est rattaché automatiquement.
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
+
+    4. **Vérifiez les journaux** : vérifiez les journaux du conteneur pour vous assurer que la migration effectuée par le Scheduler intégré a réussi.
+
+        ```bash
+        docker logs bunkerweb-aio
+        ```
+
+    5. **Vérifiez la mise à niveau** :
+        - Confirmez que le conteneur est lancé et sain :
+            ```bash
+            docker ps --filter name=bunkerweb-aio
+            ```
+            La colonne `STATUS` doit indiquer `(healthy)` une fois les vérifications de démarrage terminées.
+        - Confirmez la version en cours d'exécution :
+            ```bash
+            docker exec bunkerweb-aio cat /usr/share/bunkerweb/VERSION
+            ```
+            La version peut également être consultée depuis l'interface Web dans *Support*.
+        - Vérifiez dans l'interface Web que vos services, paramètres et configurations personnalisées sont intacts, et que vos sites sont toujours servis en HTTP/HTTPS.
+
+=== "Linux"
+
+    === "Mise à niveau facile à l'aide du script d'installation"
+
+        * **Démarrage rapide** :
+
+            Pour commencer, téléchargez le script d'installation et sa somme de contrôle, puis vérifiez l'intégrité du script avant de l'exécuter.
+
+            ```bash
+            LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+
+            # Download the script and its checksum
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+
+            # Verify the checksum
+            sha256sum -c install-bunkerweb.sh.sha256
+
+            # If the check is successful, run the script
+            chmod +x install-bunkerweb.sh
+            sudo ./install-bunkerweb.sh
+            ```
+
+            !!! danger "Avis de sécurité"
+                **Vérifiez toujours l'intégrité du script d'installation avant de l'exécuter.**
+
+                Téléchargez le fichier de somme de contrôle et utilisez un outil comme `sha256sum` pour confirmer que le script n'a pas été modifié ou altéré.
+
+                Si la vérification de la somme échoue, **n'exécutez pas le script** — il pourrait être dangereux.
+
+        !!! tip "Interface de mise à niveau interactive"
+            Le flux de mise à niveau utilise la même TUI que les nouvelles installations : invites en ligne avec [gum](https://github.com/charmbracelet/gum), avec un repli sur les boîtes de dialogue `whiptail` puis sur les invites en texte brut si gum ne peut pas être obtenu. Le binaire `gum` est téléchargé depuis la [release GitHub](https://github.com/charmbracelet/gum/releases) officielle (SHA256 épinglé, signature cosign vérifiée si cosign est installé) et exécuté depuis un répertoire temporaire supprimé à la fin du script — aucun paquet système n'est installé et aucune source apt/dnf n'est ajoutée. Passez `--no-tui` (ou définissez `BW_INSTALL_TUI=no`) pour ignorer toutes les couches de TUI, ou `--tui` pour exiger une TUI fonctionnelle. Pour des mises à niveau entièrement automatisées, passez `-y` / `--yes` avec les drapeaux pertinents — les invocations en pipe (`curl … | bash`) s'arrêtent avec une erreur claire au lieu d'accepter silencieusement chaque valeur par défaut. **Mises à niveau hors réseau (air-gapped)** : combinez `--no-tui --yes` pour qu'aucun appel réseau ne soit fait pour la couche TUI.
+
+          * **Comment ça marche** :
+
+            Le même script d'installation polyvalent utilisé pour les nouvelles installations peut également effectuer une mise à niveau sur place. Lorsqu'il détecte une installation existante et une version cible différente, il passe en mode mise à niveau et applique le flux de travail suivant :
+
+            1. Détection et validation
+                * Détecte le système d'exploitation / la version et confirme la matrice de support.
+                * Lit la version BunkerWeb actuellement installée à partir de `/usr/share/bunkerweb/VERSION`.
+            2. Décision du scénario de mise à niveau
+                * Si la version demandée est égale à celle installée, elle abandonne (sauf si vous la réexécutez explicitement pour l'état).
+                * Si les versions diffèrent, il signale une mise à niveau.
+            3. (Facultatif) Sauvegarde automatique de pré-mise à niveau
+                * Si `bwcli` le planificateur est disponible et que la sauvegarde automatique est activée, il crée une sauvegarde via le plugin de sauvegarde intégré.
+                * Destination : soit le répertoire que vous avez fourni, `--backup-dir` soit un chemin généré tel que `/var/tmp/bunkerweb-backup-YYYYmmdd-HHMMSS`.
+                * Vous pouvez désactiver cela avec `--no-auto-backup` (la sauvegarde manuelle devient alors de votre responsabilité).
+            4. Repos du service
+                * Arrête `bunkerweb`, `bunkerweb-ui`et `bunkerweb-scheduler` pour assurer une mise à niveau cohérente (correspond aux recommandations de la procédure manuelle).
+            5. Suppression des verrous de colis
+                * Supprime temporairement `apt-mark hold` / `dnf versionlock` active `bunkerweb` et `nginx` permet ainsi d'installer la version ciblée.
+            6. Exécution de la mise à niveau
+                * Installe uniquement la nouvelle version du package BunkerWeb (NGINX n'est pas réinstallé en mode de mise à niveau à moins qu'il ne soit manquant - cela évite de toucher à un NGINX correctement épinglé).
+                * Réapplique les blocages/verrous de version pour geler les versions mises à niveau.
+            7. Finalisation et état d'avancement
+                * Affiche l'état de systemd pour les services principaux et les étapes suivantes.
+                * Laisse votre configuration et votre base de données intactes : seuls le code de l'application et les fichiers gérés sont mis à jour.
+
+            Comportements clés / notes :
+
+            * Le script ne modifie PAS le `/etc/bunkerweb/variables.env` contenu de votre base de données.
+            * Si la sauvegarde automatique a échoué (ou a été désactivée), vous pouvez toujours effectuer une restauration manuelle à l'aide de la section Restauration ci-dessous.
+            * Le mode de mise à niveau évite intentionnellement de réinstaller ou de rétrograder NGINX en dehors de la version épinglée prise en charge déjà présente.
+            * Les journaux de dépannage restent dans `/var/log/bunkerweb/`.
+
+        * **Comportement selon le mode** :
+
+            - Le programme d'installation réutilise la même logique de sélection de mode pendant une mise à jour : le mode manager garde l'assistant désactivé, attache l'API à `0.0.0.0` et exige une IP à placer sur liste blanche (à fournir avec `--manager-ip` pour les exécutions non interactives), tandis que le mode worker impose toujours la liste d'IP du manager.
+            - Les mises à jour Manager peuvent décider de démarrer ou non le service Web UI, et le récapitulatif mentionne explicitement l'état du service API afin de pouvoir le contrôler via `--api` / `--no-api`.
+            - Les options CrowdSec restent réservées aux mises à jour full stack et le script continue de valider le système d'exploitation et l'architecture CPU avant de toucher aux paquets, les combinaisons non prises en charge nécessitant toujours `--force`.
+
+            Résumé du retour en arrière :
+
+            * Utilisez le répertoire de sauvegarde généré (ou votre sauvegarde manuelle) + les étapes de la section Rollback pour restaurer la base de données, puis réinstallez la version précédente de l'image/du paquet et verrouillez à nouveau les paquets.
+
+        *  **Options de ligne de commande** :
+
+            Vous pouvez effectuer des mises à niveau sans assistance avec les mêmes indicateurs que ceux utilisés pour l'installation. Les plus pertinents pour les mises à niveau :
+
+            | Option                  | But                                                                                                                           |
+            | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+            | `-v, --version <X.Y.Z>` | Ciblez la version de BunkerWeb à mettre à niveau.                                                                             |
+            | `-y, --yes`             | Non interactif (suppose la confirmation de la mise à niveau et active la sauvegarde automatique, sauf si `--no-auto-backup`). |
+            | `--tui`                 | Force une TUI (gum ou whiptail). Abandonne si aucune des deux ne peut être installée.                                         |
+            | `--no-tui`              | Ignore toutes les couches de TUI et utilise les invites en texte brut. Équivaut à `BW_INSTALL_TUI=no`.                        |
+            | `--backup-dir <PATH>`   | Destination de la sauvegarde automatique de pré-mise à niveau. Créé s'il est manquant.                                        |
+            | `--no-auto-backup`      | Ignorez la sauvegarde automatique (NON recommandé). Vous devez disposer d'une sauvegarde manuelle.                            |
+            | `-q, --quiet`           | Suppression de la sortie (combinée avec l'enregistrement/la surveillance).                                                    |
+            | `-f, --force`           | Procédez sur une version du système d'exploitation non prise en charge.                                                       |
+            | `--dry-run`             | Affichez l'environnement détecté, les actions prévues, puis quittez sans rien modifier.                                       |
+
+            Exemples:
+
+            ```bash
+            # Upgrade to 1.6.12~rc1 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.12~rc1
+
+            # Non-interactive upgrade with automatic backup to custom directory
+            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --backup-dir /var/backups/bw-2025-01 -y
+
+            # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
+            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 -y -q
+
+            # Perform a dry run (plan) without applying changes
+            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --dry-run
+
+            # Upgrade skipping automatic backup (NOT recommended)
+            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --no-auto-backup -y
+            ```
+
+            !!! warning "Sauter les sauvegardes"
+                L'utilisation `--no-auto-backup` sans sauvegarde manuelle vérifiée peut entraîner une perte de données irréversible si la mise à niveau rencontre des problèmes. Conservez toujours au moins une sauvegarde récente et testée.
+
+    === "Manuel"
+
+        1. **Sauvegardez la base de données** :
+
+            - Avant de procéder à la mise à niveau de la base de données, assurez-vous d'effectuer une sauvegarde complète de l'état actuel de la base de données.
+            - Utilisez les outils appropriés pour sauvegarder l'intégralité de la base de données, y compris les données, les schémas et les configurations.
+
+            ??? warning "Informations pour les utilisateurs de Red Hat Enterprise Linux (RHEL) 8.10"
+                Si vous utilisez **RHEL 8.10** et prévoyez d'utiliser une **base de données externe**, vous devrez installer le paquet `mysql-community-client` pour vous assurer que la commande `mysqldump` est disponible. Vous pouvez installer le paquet en exécutant les commandes suivantes :
+
+                === "MySQL/MariaDB"
+
+                    1. **Installez le paquet de configuration du dépôt MySQL**
+
+                        ```bash
+                        sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
+                        ```
+
+                    2. **Activez le dépôt MySQL**
+
+                        ```bash
+                        sudo dnf config-manager --enable mysql80-community
+                        ```
+
+                    3. **Installez le client MySQL**
+
+                        ```bash
+                        sudo dnf install mysql-community-client
+                        ```
+
+                === "PostgreSQL"
+
+                    1. **Installer le paquet de configuration du dépôt PostgreSQL**
+
+                        ```bash
+                        dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
+                        ```
+
+                    2. **Installer le client PostgreSQL**
+
+                        ```bash
+                        dnf install postgresql<version>
+                        ```
+
+            ```bash
+            BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
+            ```
+
+        2. **Mettre à niveau BunkerWeb** :
+            - Mettez à niveau BunkerWeb vers la dernière version.
+
+                1. **Arrêtez les services** :
+                    ```bash
+                    sudo systemctl stop bunkerweb
+                    sudo systemctl stop bunkerweb-ui
+                    sudo systemctl stop bunkerweb-scheduler
+                    ```
+
+                2. **Mettre à jour BunkerWeb** :
+
+                    === "Debian/Ubuntu"
+
+                        Tout d'abord, si vous avez précédemment marqué le paquet BunkerWeb comme mis en attente, annulez cette mise en attente :
+
+                        Vous pouvez afficher la liste des paquets en attente avec `apt-mark showhold`
+
+                        ```shell
+                        sudo apt-mark unhold bunkerweb nginx
+                        ```
+
+                        Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :
+
+                        ```shell
+                        sudo apt update && \
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.12~rc1
+                        ```
+
+                        Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
+
+                        ```shell
+                        sudo apt-mark hold bunkerweb nginx
+                        ```
+
+                        Plus de détails dans la page [intégration Linux](integrations.md#__tabbed_1_1).
+
+                    === "Fedora/RedHat"
+
+                        Tout d'abord, si vous avez précédemment marqué le paquet BunkerWeb comme mis en attente, annulez cette mise en attente :
+
+                        Vous pouvez afficher la liste des paquets en attente avec `dnf versionlock list`
+
+                        ```shell
+                        sudo dnf versionlock delete package bunkerweb && \
+                        sudo dnf versionlock delete package nginx
+                        ```
+
+                        Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :
+
+                        ```shell
+                        sudo dnf makecache && \
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.12~rc1
+                        ```
+
+                        Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
+
+                        ```shell
+                        sudo dnf versionlock add bunkerweb && \
+                        sudo dnf versionlock add nginx
+                        ```
+
+                        Plus de détails dans la page [intégration Linux](integrations.md#__tabbed_1_3).
+
+                3. **Démarrez les services** :
+                        ```bash
+                        sudo systemctl start bunkerweb
+                        sudo systemctl start bunkerweb-ui
+                        sudo systemctl start bunkerweb-scheduler
+                        ```
+                        Ou redémarrez le système :
+                        ```bash
+                        sudo reboot
+                        ```
+
+
+        3. **Vérifier les journaux **: vérifiez les journaux du service de planification pour vous assurer que la migration a réussi.
+
+            ```bash
+            journalctl -u bunkerweb --no-pager
+            ```
+
+        4. **Vérifier la base de données **: vérifiez que la mise à niveau de la base de données a réussi en vérifiant les données et les configurations dans le nouveau conteneur de base de données.
 ### Rollback
 
 !!! failure "En cas de problèmes"
@@ -406,6 +497,82 @@
         ```bash
         docker compose up -d
         ```
+
+=== "All-In-One (AIO)"
+
+    Le Scheduler s'exécute dans le conteneur `bunkerweb-aio`, les commandes de restauration y sont donc exécutées directement. Le volume `/data` (base de données, configurations, plugins, sauvegardes) est conservé pendant toute l'opération — seule l'image du conteneur est restaurée à la version précédente.
+
+    !!! tip "Bases de données externes"
+        Si vous exécutez l'AIO avec une base de données externe (`DATABASE_URI` pointant vers MySQL/MariaDB/PostgreSQL), le fichier SQLite sous `/data` n'est pas utilisé. Restaurez cette base externe avec vos outils habituels — ou avec les commandes MySQL/MariaDB/PostgreSQL de l'onglet **Docker**, en ciblant votre hôte de base de données — puis ignorez les étapes SQLite ci-dessous.
+
+    1. **Extrayez la sauvegarde si elle est compressée**.
+
+        ```bash
+        unzip /path/to/backup/directory/backup.zip -d /path/to/backup/directory/
+        ```
+
+    2. **Restaurez la sauvegarde** (SQLite intégré) :
+
+        1. **Supprimez le fichier de base de données existant.**
+
+            ```bash
+            docker exec -u 0 -i bunkerweb-aio rm -f /var/lib/bunkerweb/db.sqlite3
+            ```
+
+        2. **Restaurez la sauvegarde.**
+
+            ```bash
+            docker exec -i bunkerweb-aio sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+            ```
+
+        3. **Corrigez les permissions.**
+
+            ```bash
+            docker exec -u 0 -i bunkerweb-aio chown root:nginx /var/lib/bunkerweb/db.sqlite3
+            docker exec -u 0 -i bunkerweb-aio chmod 770 /var/lib/bunkerweb/db.sqlite3
+            ```
+
+    3. **Restaurez l'image précédente**, en réutilisant le même volume `/data` :
+
+        === "docker run"
+
+            3. **Arrêtez et supprimez le conteneur actuel** (le volume `/data` est conservé) :
+                ```bash
+                docker stop bunkerweb-aio
+                docker rm bunkerweb-aio
+                ```
+
+            4. **Téléchargez l'image précédente** :
+                ```bash
+                docker pull bunkerity/bunkerweb-all-in-one:<old_version>
+                ```
+
+            5. **Recréez le conteneur** avec les mêmes options, les mêmes ports et le même volume `/data` qu'avant :
+                ```bash
+                docker run -d \
+                --name bunkerweb-aio \
+                -v bw-storage:/data \
+                -p 80:8080/tcp \
+                -p 443:8443/tcp \
+                -p 443:8443/udp \
+                bunkerity/bunkerweb-all-in-one:<old_version>
+                ```
+
+        === "Docker Compose"
+
+            6. **Mettez à jour le fichier Docker Compose** pour utiliser l'image All-In-One précédente :
+                ```yaml
+                services:
+                    bunkerweb-aio:
+                        image: bunkerity/bunkerweb-all-in-one:<old_version>
+                        ...
+                ```
+
+            7. **Redémarrez le conteneur**. Le volume `/data` est rattaché automatiquement :
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
 
 === "Linux"
 
@@ -657,16 +824,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.10-rc3
+                        image: bunkerity/bunkerweb:1.6.12-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.10-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.10-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.12-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.10-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.12-rc1
                         ...
                 ```
 
@@ -701,7 +868,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10~rc3
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.12~rc1
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -727,7 +894,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.10~rc3
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.12~rc1
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :

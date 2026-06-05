@@ -25,6 +25,16 @@ class KubernetesController(Controller):
         self._event_summary = {}
         self._event_summary_max = 8
         self._event_loggable_kinds = {"Ingress", "Gateway", "HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "ConfigMap", "Secret"}
+        # Pending-backend retry: when _to_services can't find a referenced backend
+        # Service (often because watch events race ahead of GET consistency on AKS),
+        # the (namespace, service_name) is recorded here. A background worker polls
+        # with exponential backoff and re-triggers an apply once the backend shows
+        # up — otherwise update_needed would silently return False and the
+        # controller would go quiet until an unrelated event happens to arrive.
+        self._pending_backends_lock = Lock()
+        self._pending_backends: Dict[Tuple[str, str], Dict[str, float]] = {}
+        self._pending_backends_max_attempts = 5
+        self._pending_backends_base_delay = 1.0  # seconds; doubles each attempt (1, 2, 4, 8, 16 → max ~31s)
         super().__init__("kubernetes", api_client=api_client)
         config.load_incluster_config()
         self._managed_configmaps = set()
@@ -684,10 +694,127 @@ class KubernetesController(Controller):
         self._logger.info("Listening for Kubernetes events ...")
         watchers = self._get_watchers()
         threads = [Thread(target=self._watch, args=(watch_type, watcher)) for watch_type, watcher in watchers.items()]
+        backend_retry_thread = Thread(target=self._pending_backends_worker, daemon=True)
+        backend_retry_thread.start()
         for thread in threads:
             thread.start()
         for thread in threads:
             thread.join()
+
+    def note_missing_backend(self, namespace: str, service_name: str) -> None:
+        """Record a referenced-but-not-yet-visible backend Service so the retry
+        worker can poll for it and re-trigger an apply once it exists."""
+        if not namespace or not service_name:
+            return
+        key = (namespace, service_name)
+        with self._pending_backends_lock:
+            entry = self._pending_backends.get(key)
+            if entry is None:
+                self._pending_backends[key] = {"attempts": 0.0, "next_retry_at": time() + self._pending_backends_base_delay}
+                self._logger.debug(f"Queued missing backend {namespace}/{service_name} for retry")
+
+    def _pending_backends_worker(self) -> None:
+        """Background worker: retries backend Service lookups with exponential
+        backoff and triggers a fresh apply cycle as soon as a queued backend
+        becomes visible to a GET. Keeps running for the lifetime of the process."""
+        while True:
+            try:
+                now = time()
+                ready_keys: List[Tuple[str, str]] = []
+                give_up_keys: List[Tuple[str, str]] = []
+                with self._pending_backends_lock:
+                    due = [(k, v) for k, v in self._pending_backends.items() if v["next_retry_at"] <= now]
+
+                for key, entry in due:
+                    namespace, service_name = key
+                    try:
+                        items = self._corev1.list_namespaced_service(
+                            namespace,
+                            watch=False,
+                            field_selector=f"metadata.name={service_name}",
+                        ).items
+                    except BaseException as e:
+                        self._logger.debug(f"Error polling for pending backend {namespace}/{service_name}: {e}")
+                        items = []
+
+                    if items:
+                        ready_keys.append(key)
+                        continue
+
+                    with self._pending_backends_lock:
+                        current = self._pending_backends.get(key)
+                        if current is None:
+                            continue
+                        current["attempts"] += 1
+                        if current["attempts"] >= self._pending_backends_max_attempts:
+                            give_up_keys.append(key)
+                            continue
+                        current["next_retry_at"] = now + self._pending_backends_base_delay * (2 ** int(current["attempts"]))
+
+                if ready_keys:
+                    with self._pending_backends_lock:
+                        for key in ready_keys:
+                            self._pending_backends.pop(key, None)
+                    for namespace, service_name in ready_keys:
+                        self._logger.info(f"Pending backend {namespace}/{service_name} is now visible, triggering re-apply")
+                    # Force the watch loop to run a fresh apply cycle.
+                    with self._internal_lock:
+                        self._pending_apply = True
+                        # Put the event in the past so the debounce check already considers it elapsed.
+                        self._last_event_time = time() - self._debounce_delay - 1
+                    self._trigger_apply_if_idle()
+
+                if give_up_keys:
+                    with self._pending_backends_lock:
+                        for key in give_up_keys:
+                            self._pending_backends.pop(key, None)
+                    for namespace, service_name in give_up_keys:
+                        self._logger.warning(f"Giving up on pending backend {namespace}/{service_name} after {self._pending_backends_max_attempts} attempts")
+            except BaseException as e:
+                self._logger.debug(format_exc())
+                self._logger.error(f"Error in pending backends worker: {e}")
+            sleep(0.5)
+
+    def _trigger_apply_if_idle(self) -> None:
+        """Kick off an immediate apply cycle from outside the watch loop.
+
+        The normal apply path lives inside `_watch` and only runs when a watch
+        event wakes a thread. If the backend retry worker unblocks a previously
+        dropped rule and no fresh watch event arrives, we would wait forever —
+        so we run an apply directly here under the internal lock.
+        """
+        try:
+            with self._internal_lock:
+                if not self._pending_apply:
+                    return
+                self._pending_apply = False
+                self._log_event_summary()
+                self._update_settings()
+                self._instances = self.get_instances()
+                self._services = self.get_services()
+                self._extra_config, self._configs = self.get_configs()
+                if not self.update_needed(self._instances, self._services, self._configs, self._extra_config):
+                    self._logger.debug("Backend retry worker: no config change detected, skipping apply")
+                    return
+                if self.have_to_wait():
+                    # Let the normal watch loop retry — don't busy-wait here.
+                    self._pending_apply = True
+                    self._last_event_time = time()
+                    return
+                self._logger.info("Backend retry worker: deploying recovered configuration...")
+                try:
+                    ret = self.apply_config()
+                    if not ret:
+                        self._logger.error("Backend retry worker: error while deploying new configuration")
+                    else:
+                        self._logger.info("Backend retry worker: successfully deployed recovered configuration")
+                        self._set_autoconf_load_db()
+                except BaseException as e:
+                    self._logger.debug(format_exc())
+                    self._logger.error(f"Backend retry worker: exception while deploying new configuration: {e}")
+        except BaseException as e:
+            self._logger.debug(format_exc())
+            self._logger.error(f"Backend retry worker: unexpected error: {e}")
 
     def _get_loadbalancer_ip(self, name: str, namespace: str) -> Optional[List[str]]:
         try:

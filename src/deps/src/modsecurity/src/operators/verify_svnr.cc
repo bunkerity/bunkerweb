@@ -81,13 +81,12 @@ bool VerifySVNR::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, RuleMessage &ruleMessage) {
     std::list<SMatch> matches;
     bool is_svnr = false;
-    int i;
 
     if (m_param.empty()) {
         return is_svnr;
     }
 
-    for (i = 0; i < input.size() - 1 && is_svnr == false; i++) {
+    for (size_t i = 0; i + 1 < input.size() && !is_svnr; i++) {
         matches = m_re->searchAll(input.substr(i, input.size()));
 
         for (const auto & j : matches) {

@@ -5,6 +5,8 @@ from heapq import heappush, heapreplace
 from json import loads
 from operator import itemgetter
 from os import getenv
+from threading import Lock
+from time import monotonic
 from traceback import format_exc
 from typing import Any, List, Literal, Optional, Tuple, Union
 
@@ -14,6 +16,38 @@ from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES
+
+# Short-lived process-local cache for home page aggregates. /home recomputes a
+# full 7-day Redis aggregation on every load; caching it for a few seconds makes
+# repeated/concurrent loads near-instant. Per-process (each gunicorn worker has
+# its own); data can be up to _HOME_AGG_CACHE_TTL seconds stale.
+_HOME_AGG_CACHE: dict[tuple, tuple[float, dict]] = {}
+_HOME_AGG_CACHE_TTL = 30.0
+# Serializes cache misses so concurrent /home loads compute the aggregation once
+# (single-flight) instead of each running the full Redis scan in parallel.
+_HOME_AGG_LOCK = Lock()
+
+
+def _copy_home_aggregates(agg: dict) -> dict:
+    """Structured shallow copy of a home-aggregates dict.
+
+    The cached entry is shared across requests for the TTL window, so callers
+    must never receive the cached object directly — a single in-place mutation
+    would poison every concurrent reader. This copies the known structure (a few
+    hundred small entries) cheaply instead of a recursive deepcopy.
+    """
+    return {
+        "request_countries": {k: dict(v) for k, v in agg.get("request_countries", {}).items()},
+        "top_blocked_ips": {k: dict(v) for k, v in agg.get("top_blocked_ips", {}).items()},
+        "blocked_unique_ips": agg.get("blocked_unique_ips", 0),
+        "time_buckets": dict(agg.get("time_buckets", {})),
+        "request_statuses": dict(agg.get("request_statuses", {})),
+    }
+
+
+# Sentinel distinguishing "no redis_client argument passed" (fetch one) from an
+# explicit ``None`` (Redis disabled/unreachable — use the fallback, don't refetch).
+_REDIS_UNSET = object()
 
 
 class Instance:
@@ -233,6 +267,35 @@ class InstancesUtils:
             return value.decode("utf-8", errors="replace")
         return str(value)
 
+    # Below this many fields, read a facet hash with a single HGETALL instead of
+    # an HSCAN cursor loop. Above it, HGETALL would block the Redis server and
+    # materialize the whole hash, so the cursor loop is kept.
+    _FACET_HGETALL_MAX = 50000
+
+    def _iter_redis_hash(self, redis_client, hash_key: str, *, count: int = 1000):
+        """Yield ``(raw_field, raw_value)`` pairs from a Redis hash.
+
+        Uses HGETALL (1 round-trip) for small hashes, falling back to an HSCAN
+        cursor loop for large ones to keep Redis non-blocking and memory bounded.
+        """
+        try:
+            hlen = int(redis_client.hlen(hash_key) or 0)
+        except Exception:
+            hlen = None
+
+        if hlen is not None and hlen <= self._FACET_HGETALL_MAX:
+            for raw_field, raw_value in redis_client.hgetall(hash_key).items():
+                yield raw_field, raw_value
+            return
+
+        cursor = 0
+        while True:
+            cursor, raw_pairs = redis_client.hscan(hash_key, cursor=cursor, count=count)
+            for raw_field, raw_value in raw_pairs.items():
+                yield raw_field, raw_value
+            if cursor == 0:
+                break
+
     def _get_redis_top_ip_counts_from_facets(self, redis_client, *, limit: int = 10) -> tuple[list[tuple[str, int]], int]:
         """Read top blocked IPs and unique IP count from Redis request facets.
 
@@ -245,32 +308,25 @@ class InstancesUtils:
         unique_ips = 0
 
         try:
-            cursor = 0
-            while True:
-                cursor, raw_pairs = redis_client.hscan("requests:facet:ip", cursor=cursor, count=1000)
+            for raw_ip, raw_count in self._iter_redis_hash(redis_client, "requests:facet:ip"):
+                ip = self._decode_redis_text(raw_ip).strip() or "unknown"
+                try:
+                    count = int(self._decode_redis_text(raw_count))
+                except Exception:
+                    continue
+                if count <= 0:
+                    continue
 
-                for raw_ip, raw_count in raw_pairs.items():
-                    ip = self._decode_redis_text(raw_ip).strip() or "unknown"
-                    try:
-                        count = int(self._decode_redis_text(raw_count))
-                    except Exception:
-                        continue
-                    if count <= 0:
-                        continue
+                unique_ips += 1
 
-                    unique_ips += 1
+                if limit == 0:
+                    continue
 
-                    if limit == 0:
-                        continue
-
-                    item = (count, ip)
-                    if len(top_heap) < limit:
-                        heappush(top_heap, item)
-                    elif item > top_heap[0]:
-                        heapreplace(top_heap, item)
-
-                if cursor == 0:
-                    break
+                item = (count, ip)
+                if len(top_heap) < limit:
+                    heappush(top_heap, item)
+                elif item > top_heap[0]:
+                    heapreplace(top_heap, item)
         except Exception:
             return [], 0
 
@@ -286,33 +342,24 @@ class InstancesUtils:
             top_heap: list[tuple[int, str]] = []
 
             try:
-                cursor = 0
-                while True:
-                    cursor, raw_pairs = redis_client.hscan(f"requests:facet:{field}", cursor=cursor, count=1000)
-                    if not raw_pairs and cursor == 0:
-                        break
+                for raw_value, raw_count in self._iter_redis_hash(redis_client, f"requests:facet:{field}"):
+                    value = self._decode_redis_text(raw_value) or "N/A"
+                    try:
+                        count = int(self._decode_redis_text(raw_count))
+                    except Exception:
+                        continue
+                    if count <= 0:
+                        continue
 
-                    for raw_value, raw_count in raw_pairs.items():
-                        value = self._decode_redis_text(raw_value) or "N/A"
-                        try:
-                            count = int(self._decode_redis_text(raw_count))
-                        except Exception:
-                            continue
-                        if count <= 0:
-                            continue
+                    has_values = True
+                    if max_values == 0:
+                        continue
 
-                        has_values = True
-                        if max_values == 0:
-                            continue
-
-                        item = (count, value)
-                        if len(top_heap) < max_values:
-                            heappush(top_heap, item)
-                        elif item > top_heap[0]:
-                            heapreplace(top_heap, item)
-
-                    if cursor == 0:
-                        break
+                    item = (count, value)
+                    if len(top_heap) < max_values:
+                        heappush(top_heap, item)
+                    elif item > top_heap[0]:
+                        heapreplace(top_heap, item)
             except Exception:
                 continue
 
@@ -872,23 +919,61 @@ class InstancesUtils:
             return sorted(reports, key=lambda x: float(x.get("date", 0)), reverse=reverse)
         return sorted(reports, key=lambda x: x.get(order_column, ""), reverse=reverse)
 
-    def _iter_redis_requests(self, redis_client, chunk_size: int = 2000, start_index: int = 0):
+    def _iter_redis_requests(self, redis_client, chunk_size: int = 2000, start_index: int = 0, pipeline_batch: int = 25):
+        """Lazily yield decoded request reports from the Redis "requests" list.
+
+        LRANGE calls are batched through a non-transactional pipeline
+        (``pipeline_batch`` ranges per round-trip) instead of one round-trip per
+        chunk, collapsing ~50 sequential LRANGE calls into ~2. The generator
+        stays lazy: at most one batch of look-ahead is fetched before yielding,
+        so a caller that breaks early wastes at most ``pipeline_batch`` chunks.
+        """
         start = max(0, start_index)
+
+        # Bound the scan with a single LLEN so we don't pipeline ranges past the
+        # end of the list. On error, fall back to short/empty-chunk termination
+        # (the original contract).
+        try:
+            total = int(redis_client.llen("requests") or 0)
+        except Exception:
+            total = None
+
         while True:
-            end = start + chunk_size - 1
-            chunk = redis_client.lrange("requests", start, end)
-            if not chunk:
+            if total is not None and start >= total:
                 break
-            for report_raw in chunk:
-                try:
-                    report = loads(report_raw)
-                except Exception:
-                    continue
-                if isinstance(report, dict):
-                    yield report
-            if len(chunk) < chunk_size:
+
+            pipe = redis_client.pipeline(transaction=False)
+            issued = 0
+            s = start
+            for _ in range(pipeline_batch):
+                if total is not None and s >= total:
+                    break
+                pipe.lrange("requests", s, s + chunk_size - 1)
+                issued += 1
+                s += chunk_size
+            if issued == 0:
                 break
-            start += chunk_size
+
+            results = pipe.execute()
+
+            stop = False
+            for chunk in results:
+                if not chunk:
+                    stop = True
+                    break
+                for report_raw in chunk:
+                    try:
+                        report = loads(report_raw)
+                    except Exception:
+                        continue
+                    if isinstance(report, dict):
+                        yield report
+                if len(chunk) < chunk_size:
+                    stop = True
+                    break
+            if stop:
+                break
+            start = s
 
     def _iter_instance_api_requests(self):
         """Fetch requests from BunkerWeb instance API (fallback when Redis is unavailable).
@@ -927,7 +1012,7 @@ class InstancesUtils:
                 seen_ids.add(req_id)
                 yield request
 
-    def get_home_aggregates(self, hours: int = 24 * 7, top_ips_limit: int = 10) -> dict[str, Any]:
+    def get_home_aggregates(self, hours: int = 24 * 7, top_ips_limit: int = 10, *, redis_client: Any = _REDIS_UNSET) -> dict[str, Any]:
         """
         Compute home page aggregates (country counts, IP counts, time buckets)
         using streaming/chunked processing to minimize memory usage.
@@ -937,6 +1022,10 @@ class InstancesUtils:
 
         Args:
             hours: Number of hours to look back for requests (default: 24)
+            top_ips_limit: Max number of top blocked IPs to return.
+            redis_client: Optional pre-fetched Redis client. When provided, this
+                method does no request-context-bound work (no get_redis_client,
+                no flash), so it is safe to call from a worker thread.
 
         Returns:
             Dictionary containing:
@@ -946,10 +1035,49 @@ class InstancesUtils:
             - time_buckets: Dict of ISO timestamp -> blocked count
             - request_statuses: Dict of status code -> count
         """
-        from app.routes.utils import get_redis_client
+        cache_key = (hours, top_ips_limit)
 
-        redis_client = get_redis_client()
+        def _fresh():
+            cached = _HOME_AGG_CACHE.get(cache_key)
+            if cached is not None and (monotonic() - cached[0]) < _HOME_AGG_CACHE_TTL:
+                return cached[1]
+            return None
 
+        # Fast path: warm cache hit, no lock. Return a copy so the shared cached
+        # object is never mutated by a caller.
+        hit = _fresh()
+        if hit is not None:
+            return _copy_home_aggregates(hit)
+
+        if redis_client is _REDIS_UNSET:
+            from app.routes.utils import get_redis_client
+
+            redis_client = get_redis_client()
+
+        # Redis-down fallback is uncached, so the single-flight lock only serializes every
+        # /home request per worker during an outage with no benefit. Skip it.
+        if not redis_client:
+            return self._compute_home_aggregates(hours, top_ips_limit, redis_client)
+
+        # Single-flight: only one thread computes a given key at a time; others
+        # wait and reuse its result instead of all running the full Redis scan.
+        with _HOME_AGG_LOCK:
+            hit = _fresh()
+            if hit is not None:
+                return _copy_home_aggregates(hit)
+
+            result = self._compute_home_aggregates(hours, top_ips_limit, redis_client)
+            _HOME_AGG_CACHE[cache_key] = (monotonic(), result)
+            # Hand the caller a copy; the cached object stays private.
+            return _copy_home_aggregates(result)
+
+    def _compute_home_aggregates(self, hours: int, top_ips_limit: int, redis_client: Any) -> dict[str, Any]:
+        """Compute home aggregates from Redis (or the instance-API fallback).
+
+        The returned dict may be stored directly in the cache; the public
+        wrapper hands callers a copy (see ``_copy_home_aggregates``), so this
+        object is never mutated externally.
+        """
         # Initialize aggregates
         request_countries: dict[str, dict[str, int]] = {}
         blocked_ip_counts: dict[str, int] = {}
@@ -1073,11 +1201,38 @@ class InstancesUtils:
 
         return pane_counts
 
-    def get_metrics(self, plugin_id: str, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None):
-        """Get metrics from all instances or a specific instance, with Redis integration"""
-        from app.routes.utils import get_redis_client
+    def get_metrics(self, plugin_id: str, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None, redis_client: Any = _REDIS_UNSET):
+        """Get metrics from all instances or a specific instance, with Redis integration.
 
-        redis_client = get_redis_client()
+        ``redis_client`` may be passed pre-fetched so this method does no
+        request-context-bound work (no get_redis_client, no flash) and is safe
+        to call from a worker thread.
+        """
+        if redis_client is _REDIS_UNSET:
+            from app.routes.utils import get_redis_client
+
+            redis_client = get_redis_client()
+
+        def _safe_numeric_add(current, addend):
+            """Add two values expected to be numeric, tolerating a non-numeric
+            ``current`` (e.g. a stale/partial/OOM-evicted Redis value decoded as
+            a string). Prevents ``TypeError: can only concatenate str (not
+            "int") to str`` from taking down the whole metrics page. ``addend``
+            is assumed numeric (callers guard it). A string-encoded number
+            (``"5"``, ``"10.5"``) is coerced and summed; truly garbage
+            ``current`` (``""``, ``"nil"``, ``None``, list/dict) falls back to
+            ``addend`` alone."""
+            if isinstance(current, (int, float)) and not isinstance(current, bool):
+                return current + addend
+            try:
+                coerced = float(current)
+            except (TypeError, ValueError):
+                return addend
+            # Keep integer typing for plain counters; only widen to float when a
+            # fractional part is actually present.
+            if isinstance(addend, int) and coerced.is_integer():
+                coerced = int(coerced)
+            return coerced + addend
 
         def aggregate_metrics(base_metrics: dict, new_metrics: dict) -> dict[str, Any]:
             """Aggregate metrics from different sources"""
@@ -1092,7 +1247,7 @@ class InstancesUtils:
 
                 # Aggregate based on value type
                 if isinstance(value, (int, float)):
-                    base_metrics[key] += value
+                    base_metrics[key] = _safe_numeric_add(base_metrics[key], value)
                 elif isinstance(value, str):
                     base_metrics[key] = value
                 elif isinstance(value, list):
@@ -1107,7 +1262,7 @@ class InstancesUtils:
                         if k not in base_metrics[key]:
                             base_metrics[key][k] = v
                         elif isinstance(v, (int, float)):
-                            base_metrics[key][k] += v
+                            base_metrics[key][k] = _safe_numeric_add(base_metrics[key][k], v)
                         elif isinstance(v, list):
                             if isinstance(base_metrics[key][k], list):
                                 base_metrics[key][k].extend(v)
@@ -1149,31 +1304,90 @@ class InstancesUtils:
                     return {}
 
                 if plugin_id == "errors":
-                    # For errors, get all counter_* keys and aggregate them
+                    # For errors, get all counter_* keys and aggregate them.
+                    # SCAN_ITER (non-blocking, cursor-based) replaces the
+                    # O(N) blocking KEYS, and a single MGET replaces per-key GET.
+                    # dict.fromkeys dedupes the keys SCAN may return twice under
+                    # rehash (aggregation is additive, so dupes would double-count).
                     pattern = "metrics:errors_counter_*"
-                    keys = redis_client.keys(pattern)
+                    keys = list(dict.fromkeys(redis_client.scan_iter(match=pattern, count=1000)))
                     error_counters = {}
-                    for key in keys:
+                    if not keys:
+                        return error_counters
+                    values = redis_client.mget(keys)
+                    for key, value in zip(keys, values):
                         try:
+                            if value is None:
+                                continue
                             key_str = key.decode("utf-8") if isinstance(key, bytes) else key
                             # Extract the error code from the key
                             error_code = key_str.split("counter_")[1].split(":")[0]
-                            value = redis_client.get(key)
-                            if value is not None:
-                                count = int(value.decode("utf-8"))
-                                counter_key = f"counter_{error_code}"
-                                if counter_key in error_counters:
-                                    error_counters[counter_key] += count
-                                else:
-                                    error_counters[counter_key] = count
+                            count = int(value.decode("utf-8") if isinstance(value, bytes) else value)
+                            counter_key = f"counter_{error_code}"
+                            if counter_key in error_counters:
+                                error_counters[counter_key] += count
+                            else:
+                                error_counters[counter_key] = count
                         except Exception:
                             continue
                     return error_counters
 
                 redis_metrics = {}
-                # Get all metric keys for this plugin from all workers
+                # Get all metric keys for this plugin from all workers. SCAN_ITER
+                # (non-blocking) replaces the O(N) blocking KEYS; dict.fromkeys
+                # dedupes keys SCAN may return twice under rehash.
                 pattern = f"metrics:{plugin_id}_*"
-                keys = redis_client.keys(pattern)
+                keys = list(dict.fromkeys(redis_client.scan_iter(match=pattern, count=1000)))
+                if not keys:
+                    return redis_metrics
+
+                # Phase 1: pipeline TYPE for every key (1 round-trip) instead of
+                # one TYPE call per key.
+                type_pipe = redis_client.pipeline(transaction=False)
+                for key in keys:
+                    type_pipe.type(key)
+                key_types = type_pipe.execute()
+
+                string_keys = []
+                list_keys = []
+                for key, key_type in zip(keys, key_types):
+                    if isinstance(key_type, bytes):
+                        key_type = key_type.decode("utf-8")
+                    if key_type == "string":
+                        string_keys.append(key)
+                    elif key_type == "list":
+                        list_keys.append(key)
+                    elif key_type == "none":
+                        continue
+                    else:
+                        key_str = key.decode("utf-8") if isinstance(key, bytes) else key
+                        self.__db.logger.warning(f"Unsupported Redis data type {key_type} for key {key_str}")
+
+                # Phase 2: pipeline the value reads (GET for strings, LRANGE for
+                # lists). On a WRONGTYPE race (key retyped between phases) the
+                # whole batch aborts, so we fall back to per-key reads to keep
+                # the original resilience.
+                def _pipeline_values(value_keys, issue):
+                    if not value_keys:
+                        return {}
+                    pipe = redis_client.pipeline(transaction=False)
+                    for k in value_keys:
+                        issue(pipe, k)
+                    try:
+                        results = pipe.execute()
+                    except Exception:
+                        results = []
+                        for k in value_keys:
+                            single = redis_client.pipeline(transaction=False)
+                            issue(single, k)
+                            try:
+                                results.append(single.execute()[0])
+                            except Exception:
+                                results.append(None)
+                    return dict(zip(value_keys, results))
+
+                string_values = _pipeline_values(string_keys, lambda pipe, k: pipe.get(k))
+                list_values_map = _pipeline_values(list_keys, lambda pipe, k: pipe.lrange(k, 0, -1))
 
                 for key in keys:
                     try:
@@ -1181,16 +1395,11 @@ class InstancesUtils:
                         # Extract metric name from key (remove prefix and worker suffix)
                         metric_name = key_str.replace(f"metrics:{plugin_id}_", "").split(":")[0]
 
-                        # Determine Redis data type and get value accordingly
-                        key_type = redis_client.type(key)
-                        if isinstance(key_type, bytes):
-                            key_type = key_type.decode("utf-8")
-
                         decoded_value = None
 
-                        if key_type == "string":
+                        if key in string_values:
                             # Handle string values (counters and simple metrics)
-                            value = redis_client.get(key)
+                            value = string_values[key]
                             if value is None:
                                 continue
 
@@ -1207,9 +1416,11 @@ class InstancesUtils:
                                     # Fall back to string
                                     decoded_value = value.decode("utf-8")
 
-                        elif key_type == "list":
+                        elif key in list_values_map:
                             # Handle list values (table metrics)
-                            list_values = redis_client.lrange(key, 0, -1)
+                            list_values = list_values_map[key]
+                            if list_values is None:
+                                continue
                             decoded_value = []
                             for item in list_values:
                                 try:
@@ -1219,12 +1430,8 @@ class InstancesUtils:
                                     # Fall back to string
                                     decoded_value.append(item.decode("utf-8"))
 
-                        elif key_type == "none":
-                            # Key doesn't exist
-                            continue
                         else:
-                            # Unsupported Redis data type, skip
-                            LOGGER.warning(f"Unsupported Redis data type {key_type} for key {key_str}")
+                            # Key doesn't exist or unsupported type (already logged)
                             continue
 
                         if decoded_value is None:
@@ -1316,18 +1523,33 @@ class InstancesUtils:
         return metrics
 
     def get_ping(self, plugin_id: str, *, instances: Optional[List[Instance]] = None):
-        """Get ping from all instances and return the first success"""
-        ping = {"status": "error"}
+        """Get ping from all instances and return the first success.
+
+        Carries the instance ``msg`` (the human-readable reason behind the
+        status) so callers can surface *why* a ping failed instead of a bare
+        "error"/"success".
+        """
+        ping = {"status": "error", "msg": ""}
         for instance in instances or self.get_instances(status="up"):
             try:
-                resp, ping_data = instance.ping(plugin_id)
-            except:
+                _, ping_data = instance.ping(plugin_id)
+            except Exception:
+                # Narrow (not bare) so code errors surface in logs instead of
+                # masquerading as an unreachable instance.
+                LOGGER.debug(f"Error pinging {instance.hostname} for {plugin_id}:\n{format_exc()}")
                 continue
 
-            if not resp:
+            # The per-instance payload (with its "msg") is returned even when the
+            # ping fails (HTTP != 200), so read it directly instead of gating on
+            # the success flag -- otherwise the failure reason is lost.
+            if not isinstance(ping_data, dict):
+                continue
+            instance_ping = ping_data.get(instance.hostname)
+            if not isinstance(instance_ping, dict):
                 continue
 
-            ping["status"] = ping_data[instance.hostname].get("status", "error")
+            ping["status"] = instance_ping.get("status", "error")
+            ping["msg"] = instance_ping.get("msg", "")
 
             if ping["status"] == "success":
                 return ping

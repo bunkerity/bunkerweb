@@ -305,6 +305,7 @@ class SaveConfigRequest(BaseModel):
     config: Dict[str, str] = Field(..., description="Full config environment dict")
     method: str = Field(..., description="Source method (e.g. 'autoconf')")
     changed: bool = Field(False, description="Whether to immediately signal changes")
+    disable_cleanup: bool = Field(False, description="Whether to cleanup or convert to draft any existing services not in the provided config dict")
 
     @field_validator("method")
     @classmethod
@@ -327,6 +328,7 @@ class BulkSaveCustomConfigsRequest(BaseModel):
     custom_configs: List[Dict[str, Any]] = Field(..., description="List of custom config dicts")
     method: str = Field(..., description="Source method (e.g. 'autoconf')")
     changed: bool = Field(False, description="Whether to signal custom config changes")
+    disable_cleanup: bool = Field(False, description="Whether to cleanup or convert to draft any existing configs not in the list")
 
     @field_validator("method")
     @classmethod

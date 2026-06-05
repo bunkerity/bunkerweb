@@ -45,12 +45,17 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
     CRS 团队积极维护着针对 WordPress、Nextcloud、Drupal 和 Cpanel 等流行应用程序的排除项列表，从而更容易在不影响功能的情况下进行集成。其安全优势远远超过了解决误报所需的最低配置工作量。
 
+!!! warning "大文件上传的安全建议"
+    ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果——**并且仅当**——某个反向代理 URL *专门* 用于文件上传（例如专用的 `/upload` 端点），请在该 URL 上设置 `REVERSE_PROXY_MODSECURITY_N: "no"`，以便在其 `location` 块中生成 `modsecurity off;`。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。
+
+    为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
+
 ### 可用的 CRS 版本
 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9)。
-- **`4`**：稳定版 [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**默认**)。
+- **`4`**：稳定版 [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**默认**)。
 
 !!! warning "每日构建版已弃用"
     `MODSECURITY_CRS_VERSION` 的 `nightly` 选项已弃用，因为 OWASP 核心规则集项目已停止每日构建发布。如果您的配置仍使用 `nightly`，将改为使用 CRS v4。请将您的配置更新为 `MODSECURITY_CRS_VERSION=4`。

@@ -19,11 +19,11 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install doc dependencies
-        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt && sudo apt update && sudo apt install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt && sudo apt update && sudo apt install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev pngquant
       - name: Install chromium
         run: sudo apt update && sudo apt install chromium-browser
       - name: Install node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 22
       - name: Install puppeteer
@@ -35,7 +35,8 @@ jobs:
         run: mkdocs serve -f mkdocs_print.yml & sleep 15
       - name: Run pdf script
         run: node docs/misc/pdf.js http://localhost:8000/print_page/ BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf 'BunkerWeb documentation v${{ inputs.VERSION }}'
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+          retention-days: 7
           path: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf

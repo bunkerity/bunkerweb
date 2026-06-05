@@ -1,11 +1,11 @@
-FROM python:3.13-alpine@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc AS builder
+FROM python:3.14-alpine@sha256:5a824eb82cc75361f98611f3cfc5091ea33f10a6ccea4d4ebdabbc523b9a1614 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
 # Install python dependencies
 # TODO(Phase 3): Remove postgresql-dev once gen/ and db/ subprocess calls move to workers
-RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo
+RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo patch
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -14,15 +14,24 @@ COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
-COPY src/common/db/requirements.386.txt /tmp/req/requirements-db.386.txt
 
 WORKDIR /usr/share/bunkerweb
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+
+# Apply BunkerWeb patches to vendored Python deps (DNS alias / CNAME delegation for certbot).
+# -F0 + --dry-run first so any context drift from a future certbot bump fails the build loudly
+# instead of fuzzing onto the wrong code; the post-patch grep is a positive assertion that the
+# expected marker landed in the patched file.
+COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
+RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+  patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+  grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
+  rm -f /tmp/certbot-dns-alias.patch
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -39,7 +48,7 @@ COPY src/common/cli cli
 COPY src/common/db db
 COPY src/common/gen gen
 
-FROM python:3.13-alpine@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc
+FROM python:3.14-alpine@sha256:5a824eb82cc75361f98611f3cfc5091ea33f10a6ccea4d4ebdabbc523b9a1614
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -51,8 +60,8 @@ RUN apk add --no-cache bash curl libgcc libstdc++ libpq openssl libmagic mariadb
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
 # Fix CVEs
-RUN apk add --no-cache "openssl>=3.5.6-r0" # CVE-2026-31790, CVE-2026-2673
-RUN apk add --no-cache "musl>=1.2.5-r23" && apk upgrade --no-cache --available musl # CVE-2026-40200
+RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
+RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -67,7 +76,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
   for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
+  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:scheduler INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod 2770 /var/tmp/bunkerweb && \
@@ -81,7 +90,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc3"
+LABEL version="1.6.12~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

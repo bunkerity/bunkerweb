@@ -4,6 +4,7 @@ from io import StringIO
 from json import loads
 from glob import glob
 from pathlib import Path
+import re
 from pytablewriter import MarkdownTableWriter
 import requests
 import zipfile
@@ -18,6 +19,54 @@ LANG = DOCS_LANG.split("-")[0].lower()
 # Match is done on the plugin "id" field from plugin.json.
 # Keep "alerting" here while it is in alpha testing.
 PRO_PLUGINS_IGNORE = ("alerting",)
+
+PRO_PLUGIN_DOCS = {
+    "migration": {"advanced_anchor": "migration-pro"},
+    "anti-ddos": {"advanced_anchor": "anti-ddos-pro"},
+    "user-manager": {
+        "advanced_anchor": "user-manager-pro",
+        "youtube": {
+            "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
+            "title": "User Manager",
+        },
+    },
+    "ui-single-sign-on": {"advanced_anchor": "ui-single-sign-on-pro"},
+    "easy-resolve": {
+        "advanced_anchor": "easy-resolve-pro",
+        "youtube": {
+            "url": "https://www.youtube-nocookie.com/embed/45vX0WJqjxo",
+            "title": "Easy Resolve",
+        },
+    },
+    "load-balancer": {
+        "advanced_anchor": "load-balancer-pro",
+        "youtube": {
+            "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag",
+            "title": "Load Balancer",
+        },
+    },
+    "custom-pages": {"advanced_anchor": "custom-pages-pro"},
+    "openid-connect": {
+        "advanced_anchor": "openid-connect-pro",
+        "youtube": {
+            "url": "https://www.youtube-nocookie.com/embed/0e4lcXTIIfs",
+            "title": "OpenID Connect",
+        },
+    },
+    "ldap-sso": {"advanced_anchor": "ldap-sso-pro"},
+    "openapi-validator": {
+        "advanced_anchor": "openapi-validator-pro",
+        "youtube": {
+            "url": "https://www.youtube-nocookie.com/embed/3oZOO1XdSlc",
+            "title": "OpenAPI Validator",
+        },
+    },
+    "cache": {"advanced_anchor": "cache-pro"},
+    "acme": {"advanced_anchor": "acme"},
+    "wildcard": {"advanced_anchor": "wildcard-pro"},
+}
+
+PRO_PLUGIN_DOCS["loadbalancer"] = PRO_PLUGIN_DOCS["load-balancer"]
 
 I18N = {
     "en": {
@@ -36,17 +85,7 @@ I18N = {
         "no": "no",
         # Badge
         "pro_badge": " (PRO)",
-        # PRO plugins links
-        "pro_yt_links": {
-            "user_manager": {
-                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
-                "title": "User Manager",
-            },
-            "loadbalancer": {
-                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
-                "title": "Load Balancer",
-            },
-        },
+        "pro_advanced_link": "For a more detailed guide, see the [advanced usages]({href}) documentation.",
     },
     "fr": {
         "features_title": "# Fonctionnalités",
@@ -64,17 +103,7 @@ I18N = {
         "no": "non",
         # Badge
         "pro_badge": " (PRO)",
-        # PRO plugins links
-        "pro_yt_links": {
-            "user_manager": {
-                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
-                "title": "Gestionnaire d'utilisateurs",
-            },
-            "loadbalancer": {
-                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
-                "title": "Équilibreur de charge",
-            },
-        },
+        "pro_advanced_link": "Pour un guide plus détaillé, consultez la documentation des [utilisations avancées]({href}).",
     },
     "de": {
         "features_title": "# Funktionen",
@@ -89,17 +118,7 @@ I18N = {
         "yes": "ja",
         "no": "nein",
         "pro_badge": " (PRO)",
-        # PRO plugins links
-        "pro_yt_links": {
-            "user_manager": {
-                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
-                "title": "Benutzer-Manager",
-            },
-            "loadbalancer": {
-                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
-                "title": "Load Balancer",
-            },
-        },
+        "pro_advanced_link": "Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung]({href}).",
     },
     "es": {
         "features_title": "# Características",
@@ -114,17 +133,7 @@ I18N = {
         "yes": "sí",
         "no": "no",
         "pro_badge": " (PRO)",
-        # PRO plugins links
-        "pro_yt_links": {
-            "user_manager": {
-                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
-                "title": "Página del Administrador de usuarios",
-            },
-            "loadbalancer": {
-                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
-                "title": "Balanceador de carga",
-            },
-        },
+        "pro_advanced_link": "Para una guía más detallada, consulta la documentación de [usos avanzados]({href}).",
     },
     "zh": {
         "features_title": "# 功能",
@@ -139,17 +148,7 @@ I18N = {
         "yes": "是",
         "no": "否",
         "pro_badge": " (PRO)",
-        # PRO plugins links
-        "pro_yt_links": {
-            "user_manager": {
-                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
-                "title": "用户管理器页面",
-            },
-            "loadbalancer": {
-                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
-                "title": "负载均衡器",
-            },
-        },
+        "pro_advanced_link": "如需更详细的指南，请参阅[高级用法]({href})文档。",
     },
 }
 
@@ -157,6 +156,20 @@ I18N = {
 def tr(key: str):
     base = I18N.get("en", {})
     return I18N.get(LANG, base).get(key, base.get(key, key))
+
+
+def normalize_doc_key(value):
+    return re.sub(r"[^a-z0-9]+", "-", value.casefold()).strip("-")
+
+
+def get_pro_plugin_docs(data):
+    for value in (data.get("id", ""), data.get("name", "")):
+        if not value:
+            continue
+        plugin_docs = PRO_PLUGIN_DOCS.get(normalize_doc_key(value))
+        if plugin_docs:
+            return plugin_docs
+    return {}
 
 
 def generate_docs_for_lang(lang: str):
@@ -240,12 +253,17 @@ def generate_docs_for_lang(lang: str):
             )
         print(f"## {data['name']}{pro_crown}\n", file=doc)
 
-        if "is_pro" in data and data["id"] in tr_lang("pro_yt_links"):
-            yt_info = tr_lang("pro_yt_links")[data["id"]]
+        pro_docs = get_pro_plugin_docs(data) if "is_pro" in data else {}
+        yt_info = pro_docs.get("youtube")
+        if yt_info:
             print(
                 f"<p align='center'><iframe style='display: block;' width='560' height='315' data-src='{yt_info['url']}' title='{yt_info['title']}' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>\n",
                 file=doc,
             )
+
+        advanced_anchor = pro_docs.get("advanced_anchor")
+        if advanced_anchor:
+            print(tr_lang("pro_advanced_link").format(href=f"advanced.md#{advanced_anchor}") + "\n", file=doc)
 
         print(f"{stream_support(data['stream'])}\n", file=doc)
 
@@ -264,7 +282,7 @@ def generate_docs_for_lang(lang: str):
     # pipe inside a Markdown table cell instead of splitting it into columns.
     # README files included via get_readme_content() also rely on that escaping.
     doc.seek(0)
-    content = doc.read()
+    content = doc.read().rstrip() + "\n"
 
     # Ensure output directory per language
     out_dir = Path("docs") if lang == "en" else Path("docs", lang)

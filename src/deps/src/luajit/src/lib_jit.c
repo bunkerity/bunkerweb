@@ -601,8 +601,8 @@ LJLIB_CF(jit_opt_start)
 
 /* Not loaded by default, use: local profile = require("jit.profile") */
 
-#define KEY_PROFILE_THREAD	(U64x(80000000,00000000)|'t')
-#define KEY_PROFILE_FUNC	(U64x(80000000,00000000)|'f')
+#define KEY_PROFILE_THREAD	(U64x(81000000,00000000)|'t')
+#define KEY_PROFILE_FUNC	(U64x(81000000,00000000)|'f')
 
 static void jit_profile_callback(lua_State *L2, lua_State *L, int samples,
 				 int vmstate)

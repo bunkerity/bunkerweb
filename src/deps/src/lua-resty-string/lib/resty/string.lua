@@ -10,7 +10,7 @@ local C = ffi.C
 local tonumber = tonumber
 
 
-local _M = { _VERSION = '0.16' }
+local _M = { _VERSION = '0.17' }
 
 
 ffi.cdef[[
@@ -25,8 +25,8 @@ local str_type = ffi.typeof("uint8_t[?]")
 
 local BUF_MAX_LEN = 1024
 local hex_buf = ffi_new(str_type, BUF_MAX_LEN)
-function _M.to_hex(s)
-    local len = #s
+function _M.to_hex(s, len)
+    len = len or #s
     local buf_len = len * 2
     local buf
     if buf_len <= BUF_MAX_LEN then

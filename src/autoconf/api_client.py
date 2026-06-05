@@ -60,20 +60,20 @@ class AutoconfApiClient(BaseApiClient):
 
     # ── Config ──────────────────────────────────────────────────────────
 
-    def save_config(self, config: dict, method: str, changed: bool = False) -> Union[str, List[str]]:
+    def save_config(self, config: dict, method: str, changed: bool = False, disable_cleanup: bool = False) -> Union[str, List[str]]:
         """Save full config dict. Returns error string on failure, or list of changed plugin IDs on success."""
         try:
-            data = self._put("/global_settings/config", json={"config": config, "method": method, "changed": changed})
+            data = self._put("/global_settings/config", json={"config": config, "method": method, "changed": changed, "disable_cleanup": disable_cleanup})
             return data.get("changed_plugins", [])
         except ApiClientError as e:
             return e.message
         except ApiUnavailableError:
             raise
 
-    def save_custom_configs(self, custom_configs: list, method: str, changed: bool = False) -> str:
+    def save_custom_configs(self, custom_configs: list, method: str, changed: bool = False, disable_cleanup: bool = False) -> str:
         """Bulk save custom configs. Returns empty string on success, error otherwise."""
         try:
-            self._put("/configs/bulk", json={"custom_configs": custom_configs, "method": method, "changed": changed})
+            self._put("/configs/bulk", json={"custom_configs": custom_configs, "method": method, "changed": changed, "disable_cleanup": disable_cleanup})
             return ""
         except ApiClientError as e:
             return e.message

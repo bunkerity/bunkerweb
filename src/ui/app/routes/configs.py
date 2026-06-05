@@ -9,6 +9,8 @@ from flask import Blueprint, redirect, render_template, request, send_file, url_
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
+from common_utils import bytes_hash  # type: ignore
+
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.utils import flash, is_editable_method
 
@@ -38,10 +40,6 @@ CONFIG_TYPES = {
     },
     "STREAM": {"context": "global", "description": "Configurations at the Stream level of NGINX."},
     "SERVER_STREAM": {"context": "multisite", "description": "Configurations at the Stream/Server level of NGINX."},
-    "DEFAULT_SERVER_STREAM": {
-        "context": "global",
-        "description": 'Configurations at the Stream/Server level of NGINX, specifically for the "default server" when the supplied client name doesn\'t match any server name in SERVER_NAME.',
-    },
     "CRS_PLUGINS_BEFORE": {"context": "multisite", "description": "Configurations applied before the OWASP Core Rule Set plugins are loaded."},
     "CRS_PLUGINS_AFTER": {"context": "multisite", "description": "Configurations applied after the OWASP Core Rule Set plugins are loaded."},
 }
@@ -146,7 +144,8 @@ def apply_imported_configs(parsed_configs: List[Dict], overwrite: bool, parse_er
         sid = db_config.get("service") or None
         if sid in ("global", ""):
             sid = None
-        existing_configs[(sid, db_config["type"], db_config["name"])] = db_config
+        # Key on the normalized (underscore) type: template-provided configs carry the hyphenated form.
+        existing_configs[(sid, db_config["type"].strip().replace("-", "_").lower(), db_config["name"])] = db_config
 
     for entry in parsed_configs:
         service_id = entry["service_id"]
@@ -162,10 +161,18 @@ def apply_imported_configs(parsed_configs: List[Dict], overwrite: bool, parse_er
         is_new = existing is None
 
         if existing is not None:
-            if existing.get("template") or not is_editable_method(existing.get("method")):
+            if existing.get("template"):
+                # The target serves this config from a template. Honor the change-detection rule:
+                # only materialize a real UI override when the imported data differs from the
+                # template default; identical data stays template-managed (no shadowing row).
+                if bytes_hash(entry["data"], algorithm="sha256") == existing.get("checksum"):
+                    results["skipped"].append(f"{label} (unchanged from template)")
+                    continue
+                is_new = True
+            elif not is_editable_method(existing.get("method")):
                 results["skipped"].append(f"{label} (non-editable method: {existing.get('method')})")
                 continue
-            if not overwrite:
+            elif not overwrite:
                 results["skipped"].append(f"{label} (already exists; enable 'Overwrite existing' to replace)")
                 continue
 
@@ -509,7 +516,6 @@ def configs_new():
                 "MODSEC",
                 "STREAM",
                 "SERVER_STREAM",
-                "DEFAULT_SERVER_STREAM",
                 "CRS_PLUGINS_BEFORE",
                 "CRS_PLUGINS_AFTER",
             ],
@@ -751,9 +757,7 @@ def configs_export():
     for db_config in db_configs:
         if db_config.get("template"):
             continue
-        service_id = db_config.get("service") or None
-        if service_id in ("global", ""):
-            service_id = None
+        service_id = db_config.get("service_id") or None
         config_type = db_config["type"]
         config_name = db_config["name"]
         if selection_set is not None and (service_id, config_type, config_name) not in selection_set:

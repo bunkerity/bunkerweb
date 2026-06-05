@@ -96,10 +96,8 @@
     "enable_totp": "TOTP 활성화",
     "entire_config": "전체 설정",
     "export": "내보내기",
-    "export_csv_all": "CSV (전체)",
-    "export_csv_visible": "CSV (표시된 항목)",
-    "export_excel_all": "Excel (전체)",
-    "export_excel_visible": "Excel (표시된 항목)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "전역 설정 가져오기",
     "filters_suffix": " 필터",
     "follow": "추적",
@@ -477,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "일치하는 {{entity}} {{count}}개 모두 선택",
+    "bulk_select_all_done": "일치하는 {{entity}} {{count}}개가 모두 선택되었습니다.",
+    "bulk_select_clear": "선택 지우기",
+    "bulk_select_page": "이 페이지의 {{entity}} {{count}}개가 모두 선택되었습니다.",
     "info_bans": "{{total}}개의 차단 항목 중 {{start}}~{{end}} 표시 중",
     "info_cache": "{{total}}개의 캐시 파일 중 {{start}}~{{end}} 표시 중",
     "info_configs": "{{total}}개의 사용자 정의 설정 중 {{start}}~{{end}} 표시 중",

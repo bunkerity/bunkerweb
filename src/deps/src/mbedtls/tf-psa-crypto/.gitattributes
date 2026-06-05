@@ -1,0 +1,2 @@
+# Classify all '.function' files as C for syntax highlighting purposes
+*.function linguist-language=C

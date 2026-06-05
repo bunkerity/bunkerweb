@@ -105,9 +105,10 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
         - Empêche les attaques par téléversement de fichiers
         - Réduit le risque d'épuisement des ressources du serveur
 
-    | Paramètre         | Défaut | Contexte  | Multiple | Description                                                                                                               |
-    | ----------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
-    | `MAX_CLIENT_SIZE` | `10m`  | multisite | no       | **Taille maximale des requêtes :** La taille maximale autorisée pour le corps des requêtes client (ex. : téléversements). |
+    | Paramètre         | Défaut | Contexte  | Multiple | Description                                                                                                                                       |
+    | ----------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `MAX_CLIENT_SIZE` | `10m`  | multisite | no       | **Taille maximale des requêtes :** La taille maximale autorisée pour le corps des requêtes client (ex. : téléversements).                         |
+    | `MAX_HEADERS`     | `100`  | global    | no       | **En-têtes maximum :** Nombre maximum de lignes d'en-tête par requête. Les requêtes dépassant cette limite sont rejetées avec `400 Bad Request`.  |
 
     !!! tip "Bonnes pratiques de configuration de la taille des requêtes"
         Si vous devez autoriser un corps de requête de taille illimitée, vous pouvez mettre la valeur `MAX_CLIENT_SIZE` à `0`. Cependant, ce n'est **pas recommandé** en raison des risques potentiels de sécurité et de performance.
@@ -292,3 +293,4 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
     OPEN_FILE_CACHE_ERRORS: "yes"
     OPEN_FILE_CACHE_MIN_USES: "3"
     OPEN_FILE_CACHE_VALID: "60s"
+    ```

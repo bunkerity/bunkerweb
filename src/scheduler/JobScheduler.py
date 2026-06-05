@@ -44,6 +44,49 @@ class JobScheduler:
         self.__compiled_regexes = self.__compile_regexes()
         self.update_jobs()
 
+    def __resolve_max_workers(self) -> int:
+        """Resolve ``SCHEDULER_MAX_WORKERS`` or fall back to :py:meth:`_auto_max_workers`.
+
+        Warns on invalid/non-positive values and on resolved > DB pool capacity
+        (``DATABASE_POOL_SIZE`` + ``DATABASE_POOL_MAX_OVERFLOW``). ``max_overflow<0``
+        is SQLAlchemy's "unlimited" sentinel and skips the cap check.
+        """
+        default = self._auto_max_workers()
+        raw = os.getenv("SCHEDULER_MAX_WORKERS", "").strip()
+        if not raw:
+            resolved = default
+        else:
+            try:
+                value = int(raw)
+            except ValueError:
+                self.__logger.warning(f"Invalid SCHEDULER_MAX_WORKERS value: {raw!r}, using default ({default})")
+                resolved = default
+            else:
+                if value <= 0:
+                    self.__logger.warning(f"SCHEDULER_MAX_WORKERS must be > 0 (got {value}), using default ({default})")
+                    resolved = default
+                else:
+                    resolved = value
+
+        # Advisory cap check vs DB pool. Reuses Database.py defaults so the two stay aligned.
+        with suppress(Exception):
+            pool_size_raw = os.getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE)).strip() or str(DEFAULT_POOL_SIZE)
+            overflow_raw = os.getenv("DATABASE_POOL_MAX_OVERFLOW", str(DEFAULT_POOL_MAX_OVERFLOW)).strip() or str(DEFAULT_POOL_MAX_OVERFLOW)
+            pool_size = int(pool_size_raw) if pool_size_raw.isdigit() else DEFAULT_POOL_SIZE
+            try:
+                overflow = int(overflow_raw)
+            except ValueError:
+                overflow = DEFAULT_POOL_MAX_OVERFLOW
+            # SQLAlchemy QueuePool: any max_overflow < 0 means "unlimited".
+            if overflow >= 0 and resolved > pool_size + overflow:
+                self.__logger.warning(
+                    f"SCHEDULER_MAX_WORKERS={resolved} exceeds the DB pool capacity "
+                    f"(DATABASE_POOL_SIZE={pool_size} + DATABASE_POOL_MAX_OVERFLOW={overflow} = {pool_size + overflow}); "
+                    "scheduler threads may stall on pool checkout under burst."
+                )
+
+        return resolved
+
     def __compile_regexes(self):
         """Precompile regular expressions for job validation."""
         return {

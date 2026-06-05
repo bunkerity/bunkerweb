@@ -6,7 +6,7 @@ TEMP =		tmp
 
 CC =		cl
 OBJS =		objs.msvc8
-OPENSSL =	openssl-3.5.5
+OPENSSL =	openssl-3.5.6
 ZLIB =		zlib-1.3.2
 PCRE =		pcre2-10.47
 
@@ -93,10 +93,7 @@ zip: export
 	sed -i '' -e "s/$$/`printf '\r'`/" $(TEMP)/$(NGINX)/conf/*
 
 	mv $(TEMP)/$(NGINX)/LICENSE $(TEMP)/$(NGINX)/docs.new
-	mv $(TEMP)/$(NGINX)/README.md $(TEMP)/$(NGINX)/docs.new
-	mv $(TEMP)/$(NGINX)/CODE_OF_CONDUCT.md $(TEMP)/$(NGINX)/docs.new
-	mv $(TEMP)/$(NGINX)/CONTRIBUTING.md $(TEMP)/$(NGINX)/docs.new
-	mv $(TEMP)/$(NGINX)/SECURITY.md $(TEMP)/$(NGINX)/docs.new
+	mv $(TEMP)/$(NGINX)/*.md $(TEMP)/$(NGINX)/docs.new
 	mv $(TEMP)/$(NGINX)/docs/html $(TEMP)/$(NGINX)
 
 	rm -r $(TEMP)/$(NGINX)/docs

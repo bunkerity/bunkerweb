@@ -96,10 +96,8 @@
     "enable_totp": "Włącz TOTP",
     "entire_config": "Cała konfiguracja",
     "export": "Eksport",
-    "export_csv_all": "CSV (Wszystkie)",
-    "export_csv_visible": "CSV (Widoczne)",
-    "export_excel_all": "Excel (Wszystkie)",
-    "export_excel_visible": "Excel (Widoczne)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Pobierz ustawienia globalne",
     "filters_suffix": " Filtry",
     "follow": "Śledź",
@@ -477,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Wybierz wszystkie {{count}} pasujące {{entity}}",
+    "bulk_select_all_done": "Wszystkie {{count}} pasujące {{entity}} są zaznaczone.",
+    "bulk_select_clear": "Wyczyść zaznaczenie",
+    "bulk_select_page": "Wszystkie {{count}} {{entity}} na tej stronie są zaznaczone.",
     "info_bans": "Wyświetlanie {{start}} do {{end}} z {{total}} Blokad",
     "info_cache": "Wyświetlanie {{start}} do {{end}} z {{total}} Plików pamięci podręcznej",
     "info_configs": "Pokazywanie {{start}} do {{end}} z {{total}} Konfiguracji niestandardowych",

@@ -96,10 +96,8 @@
     "enable_totp": "啟用 TOTP",
     "entire_config": "完整設定",
     "export": "匯出",
-    "export_csv_all": "CSV（全部）",
-    "export_csv_visible": "CSV（可見）",
-    "export_excel_all": "Excel（全部）",
-    "export_excel_visible": "Excel（可見）",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "取得全域設定",
     "filters_suffix": " 過濾器",
     "follow": "追蹤",
@@ -477,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "選取所有 {{count}} 個符合條件的 {{entity}}",
+    "bulk_select_all_done": "所有 {{count}} 個符合條件的 {{entity}} 均已選取。",
+    "bulk_select_clear": "清除選取",
+    "bulk_select_page": "此頁面上的所有 {{count}} 個 {{entity}} 均已選取。",
     "info_bans": "顯示 {{start}} 到 {{end}} 個封鎖，共 {{total}} 個",
     "info_cache": "顯示 {{start}} 到 {{end}} 個快取檔案，共 {{total}} 個",
     "info_configs": "顯示 {{start}} 到 {{end}} 個自訂設定，共 {{total}} 個",

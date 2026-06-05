@@ -146,10 +146,10 @@ def detect_arch() -> str:
         sys.exit(1)
 
 TFM_MEDIUM_CONFIG_H = 'configs/ext/tfm_mbedcrypto_config_profile_medium.h'
-TFM_MEDIUM_CRYPTO_CONFIG_H = 'configs/ext/crypto_config_profile_medium.h'
+TFM_MEDIUM_CRYPTO_CONFIG_H = 'tf-psa-crypto/configs/ext/crypto_config_profile_medium.h'
 
 CONFIG_H = 'include/mbedtls/mbedtls_config.h'
-CRYPTO_CONFIG_H = 'include/psa/crypto_config.h'
+CRYPTO_CONFIG_H = 'tf-psa-crypto/include/psa/crypto_config.h'
 BACKUP_SUFFIX = '.code_size.bak'
 
 class CodeSizeBuildInfo: # pylint: disable=too-few-public-methods
@@ -190,7 +190,7 @@ class CodeSizeBuildInfo: # pylint: disable=too-few-public-methods
         self.compiler = size_dist_info.compiler
         self.opt_level = size_dist_info.opt_level
 
-        self.make_cmd = ['make', '-j', 'lib']
+        self.make_cmd = ['make', '-f', './scripts/legacy.make', '-j', 'lib']
 
         self.host_arch = host_arch
         self.logger = logger
@@ -287,7 +287,7 @@ class CodeSizeCalculator:
         """
         self.repo_path = "."
         self.git_command = "git"
-        self.make_clean = 'make clean'
+        self.make_clean = 'make -f ./scripts/legacy.make clean'
 
         self.git_rev = git_rev
         self.pre_make_cmd = pre_make_cmd
@@ -318,6 +318,10 @@ class CodeSizeCalculator:
                 [self.git_command, "worktree", "add", "--detach",
                  git_worktree_path, self.git_rev], cwd=self.repo_path,
                 stderr=subprocess.STDOUT
+            )
+            subprocess.check_output(
+                [self.git_command, "submodule", "update", "--init", "--recursive"],
+                cwd=git_worktree_path, stderr=subprocess.STDOUT
             )
 
         return git_worktree_path

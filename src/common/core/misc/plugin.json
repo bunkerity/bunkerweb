@@ -42,6 +42,15 @@
       "regex": "^[0-9]+[kKmMgG]?$",
       "type": "text"
     },
+    "MAX_HEADERS": {
+      "context": "global",
+      "default": "100",
+      "help": "Maximum number of header lines per request. Requests exceeding this limit are rejected with 400 Bad Request.",
+      "id": "max-headers",
+      "label": "Maximum headers",
+      "regex": "^[1-9][0-9]*$",
+      "type": "number"
+    },
     "SERVE_FILES": {
       "context": "multisite",
       "default": "yes",

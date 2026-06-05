@@ -111,14 +111,28 @@ class DockerController(Controller):
         return self._get_controller_containers(label_key="bunkerweb.SERVER_NAME")
 
     def _to_instances(self, controller_instance) -> List[dict]:
+        # docker-py's .status / .health helpers tolerate a missing State or
+        # Health object, so prefer them over digging into raw attrs.
+        running = controller_instance.status == "running"
+        health_status = controller_instance.health  # healthy | unhealthy | starting | unknown
+        if health_status in ("healthy", "unhealthy", "starting"):
+            # Tier 1: trust Docker's native HEALTHCHECK status when present.
+            instance_health = running and health_status == "healthy"
+        else:
+            # Tier 2: no HEALTHCHECK data (image without one, or Podman compat
+            # API omits State.Health) -> fall back to the container run state.
+            instance_health = running
+
         instance = {
             "name": controller_instance.name,
             "hostname": controller_instance.name,
             "type": "container",
-            "health": controller_instance.status == "running" and controller_instance.attrs["State"]["Health"]["Status"] == "healthy",
+            "health": instance_health,
             "env": {},
         }
-        for env in controller_instance.attrs["Config"]["Env"]:
+        for env in (controller_instance.attrs.get("Config", {}) or {}).get("Env") or []:
+            if "=" not in env:
+                continue
             variable, value = env.split("=", 1)
             instance["env"][variable] = value
         return [instance]
@@ -182,10 +196,7 @@ class DockerController(Controller):
     def apply_config(self) -> bool:
         return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
 
-    # Container event actions that indicate a meaningful state change
-    # (container lifecycle). Excludes exec events (from healthchecks),
-    # attach/detach, and other non-config-relevant actions that would
-    # otherwise cause a feedback loop of constant re-deploys.
+    # Container lifecycle actions that may require a re-deploy.
     __RELEVANT_EVENT_ACTIONS = frozenset(
         {
             "create",
@@ -203,17 +214,30 @@ class DockerController(Controller):
         }
     )
 
+    # Healthcheck/exec actions Docker emits constantly — dropped silently.
+    __NOISY_EVENT_ACTIONS = frozenset(
+        {
+            "exec_create",
+            "exec_start",
+            "exec_detach",
+            "exec_die",
+            "attach",
+            "detach",
+            "top",
+            "resize",
+        }
+    )
+
     def __process_event(self, event):
         if self._first_start:
             return True
 
-        # Only process container lifecycle events, not exec/attach/etc.
-        # Docker health_status actions include a suffix like "health_status: healthy",
-        # so we extract the base action before the colon.
+        # Strip the ": <status>" suffix Docker adds to e.g. "health_status: healthy".
         action = event.get("Action", "")
         base_action = action.split(":")[0].strip()
         if base_action not in self.__RELEVANT_EVENT_ACTIONS:
-            self._logger.debug(f"Ignoring Docker event with action '{action}' (not in relevant actions)")
+            if base_action not in self.__NOISY_EVENT_ACTIONS:
+                self._logger.debug(f"Ignoring Docker event with action '{action}' (not in relevant actions)")
             return False
 
         attributes = event.get("Actor", {}).get("Attributes")

@@ -35,6 +35,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifndef __cplusplus
 typedef struct ModSecurity_t ModSecurity;
@@ -80,14 +81,13 @@ typedef struct Rules_t RulesSet;
 
 #define LOGFY_ADD(a, b) \
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>(a), strlen(a)); \
-    if (b == NULL) { \
+    if (b.data() == NULL) { \
       yajl_gen_string(g, reinterpret_cast<const unsigned char*>(""), \
           strlen("")); \
     } else { \
-      yajl_gen_string(g, reinterpret_cast<const unsigned char*>(b), \
-          strlen(b)); \
+      yajl_gen_string(g, reinterpret_cast<const unsigned char*>(b.data()), \
+          b.length()); \
     }
-
 
 #define LOGFY_ADD_INT(a, b) \
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>(a), strlen(a)); \
@@ -412,7 +412,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     int getRuleEngineState() const;
 
     std::string toJSON(int parts);
-    std::string toOldAuditLogFormat(int parts, const std::string &trailer);
+    std::string toOldAuditLogFormat(int parts, const std::string &trailer, const std::string &header);
     std::string toOldAuditLogFormatIndex(const std::string &filename,
         double size, const std::string &md5);
 
@@ -595,6 +595,14 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     ModSecurityIntervention m_it;
 
     /**
+     * Sticky flag: set to true the first time the connector consumes a
+     * disruptive intervention via Transaction::intervention(). Unlike
+     * m_it.disruptive, this is NOT cleared by intervention::reset(), so
+     * it remains a reliable signal at audit-log time.
+     */
+    bool m_isInterrupted = false;
+
+    /**
      * Holds the creation time stamp, using std::time.
      *
      * TODO: m_timeStamp and m_creationTimeStamp may be merged into a single
@@ -619,6 +627,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     RequestBodyProcessor::JSON *m_json;
 
     int m_secRuleEngine;
+    int m_secXMLParseXmlIntoArgs;
 
     std::string m_variableDuration;
     std::map<std::string, std::string> m_variableEnvs;
@@ -740,7 +749,14 @@ int msc_update_status_code(Transaction *transaction, int status);
 int msc_set_request_hostname(Transaction *transaction, const unsigned char *hostname);
 
 /** @ingroup ModSecurity_C_API */
-const char *msc_get_transaction_variable(Transaction *transaction, const char *var_name);
+size_t msc_get_rules_messages_size(const Transaction *transaction);
+
+/** @ingroup ModSecurity_C_API */
+size_t msc_get_rules_messages_rule_ids(const Transaction *transaction,
+    int64_t *ids, size_t ids_len);
+
+/** @ingroup ModSecurity_C_API */
+int msc_get_transaction_variable(Transaction *transaction, const char *var_name, char *buf, size_t *buf_len);
 
 #ifdef __cplusplus
 }

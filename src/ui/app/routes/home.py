@@ -15,9 +15,21 @@ home = Blueprint("home", __name__)
 @login_required
 def home_page():
     home_stats_days = 7
+
+    # Warm the per-request Redis client once (in this request thread, so flash /
+    # flask.g work correctly), then run the two heavy Redis aggregations and the
+    # two DB queries concurrently. The Redis sub-calls receive the pre-fetched
+    # client so they do no request-context-bound work inside worker threads.
+    redis_client = get_redis_client()
+
     # Use streaming aggregation to avoid loading all requests into memory
     # This significantly reduces memory usage for large Redis datasets
-    home_aggregates = BW_INSTANCES_UTILS.get_home_aggregates(hours=24 * home_stats_days)
+    f_aggregates = PAGE_TASKS_EXECUTOR.submit(BW_INSTANCES_UTILS.get_home_aggregates, hours=24 * home_stats_days, redis_client=redis_client)
+    f_errors = PAGE_TASKS_EXECUTOR.submit(BW_INSTANCES_UTILS.get_metrics, "errors", redis_client=redis_client)
+    f_instances = PAGE_TASKS_EXECUTOR.submit(BW_INSTANCES_UTILS.get_instances)
+    f_services = PAGE_TASKS_EXECUTOR.submit(DB.get_services, with_drafts=True)
+
+    home_aggregates = f_aggregates.result()
 
     request_countries = home_aggregates.get("request_countries", {})
     top_blocked_ips = home_aggregates.get("top_blocked_ips", {})
@@ -27,7 +39,7 @@ def home_page():
     # Use errors metrics for status distribution (includes 2xx/3xx/4xx/5xx),
     # fallback to request-window statuses when errors metrics are unavailable.
     request_statuses = {}
-    errors_metrics = BW_INSTANCES_UTILS.get_metrics("errors")
+    errors_metrics = f_errors.result()
     if isinstance(errors_metrics, dict):
         for metric_key, count in errors_metrics.items():
             try:

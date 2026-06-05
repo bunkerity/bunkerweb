@@ -115,7 +115,10 @@ class SwarmController(Controller):
         self.__swarm_instances.append(controller_instance.id)
         instances = []
         instance_env = {}
-        for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
+        container_spec = controller_instance.attrs.get("Spec", {}).get("TaskTemplate", {}).get("ContainerSpec", {}) or {}
+        for env in container_spec.get("Env") or []:
+            if "=" not in env:
+                continue
             variable, value = env.split("=", 1)
             instance_env[variable] = value
 

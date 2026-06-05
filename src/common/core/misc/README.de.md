@@ -105,9 +105,10 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
         - Verhindert Angriffe durch Datei-Uploads
         - Reduziert das Risiko der Erschöpfung von Serverressourcen
 
-    | Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
-    | ----------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-    | `MAX_CLIENT_SIZE` | `10m`    | multisite | nein     | **Maximale Anforderungsgröße:** Die maximal zulässige Größe für Client-Anforderungskörper (z. B. Datei-Uploads). |
+    | Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                          |
+    | ----------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `MAX_CLIENT_SIZE` | `10m`    | multisite | nein     | **Maximale Anforderungsgröße:** Die maximal zulässige Größe für Client-Anforderungskörper (z. B. Datei-Uploads).                                      |
+    | `MAX_HEADERS`     | `100`    | global    | nein     | **Maximale Header:** Maximale Anzahl an Header-Zeilen pro Anfrage. Anfragen, die dieses Limit überschreiten, werden mit `400 Bad Request` abgewiesen. |
 
     !!! tip "Best Practices für die Konfiguration der Anforderungsgröße"
         Wenn Sie einen Anforderungskörper von unbegrenzter Größe zulassen müssen, können Sie den Wert `MAX_CLIENT_SIZE` auf `0` setzen. Dies wird jedoch aufgrund potenzieller Sicherheits- und Leistungsrisiken **nicht empfohlen**.

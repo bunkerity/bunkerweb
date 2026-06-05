@@ -11,7 +11,6 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
 revision: str = "1e1fc017a424"
 down_revision: Union[str, None] = "75a5d34f9a7d"
@@ -192,12 +191,10 @@ def upgrade():
     )
 
     # Copy data from the old table to the new table
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_custom_configs_new (id, service_id, type, name, data, checksum, method)
         SELECT id, service_id, type, name, data, checksum, method FROM bw_custom_configs
-        """
-    )
+        """)
 
     # Drop the old table
     op.drop_table("bw_custom_configs")
@@ -222,13 +219,11 @@ def upgrade():
     )
 
     # Copy data from the old table to the new table
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_settings_new (id, name, plugin_id, context, "default", help, label, regex, type, multiple, "order")
         SELECT id, name, plugin_id, context, "default", help, label, regex, type, multiple, "order"
         FROM bw_settings
-        """
-    )
+        """)
 
     # Drop the old table
     op.drop_table("bw_settings")
@@ -289,13 +284,11 @@ def upgrade():
     )
 
     # Migrate data from old bw_ui_users
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_ui_users_new (username, password, method, admin, theme, creation_date, update_date)
         SELECT username, password, method, 1, 'light', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         FROM bw_ui_users
-        """
-    )
+        """)
 
     # Drop old table and rename new table
     op.drop_table("bw_ui_users")
@@ -313,12 +306,10 @@ def upgrade():
         sa.ForeignKeyConstraint(["plugin_id"], ["bw_plugins.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_plugin_pages_new (id, plugin_id, data, checksum)
         SELECT id, plugin_id, template_file, '' FROM bw_plugin_pages
-        """
-    )
+        """)
 
     op.drop_table("bw_plugin_pages")
     op.rename_table("bw_plugin_pages_new", "bw_plugin_pages")
@@ -436,14 +427,12 @@ def downgrade():
         sa.UniqueConstraint("service_id", "type", "name"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_custom_configs_old (id, service_id, type, name, data, checksum, method)
         SELECT id, service_id, type, name, data, checksum, method
         FROM bw_custom_configs
         WHERE type IN ('http', 'default_server_http', 'server_http', 'modsec', 'modsec_crs', 'stream', 'server_stream')
-        """
-    )
+        """)
 
     op.drop_table("bw_custom_configs")
     op.rename_table("bw_custom_configs_old", "bw_custom_configs")
@@ -466,13 +455,11 @@ def downgrade():
         sa.UniqueConstraint("id"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_settings_old (id, name, plugin_id, context, "default", help, label, regex, type, multiple, "order")
         SELECT id, name, plugin_id, context, "default", help, label, regex, type, multiple, "order"
         FROM bw_settings
-        """
-    )
+        """)
 
     op.drop_table("bw_settings")
     op.rename_table("bw_settings_old", "bw_settings")
@@ -488,12 +475,10 @@ def downgrade():
         sa.Column("method", sa.Enum("ui", "scheduler", "autoconf", "manual", name="methods_enum"), nullable=False, default="manual"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_ui_users_old (username, password, method)
         SELECT username, password, method FROM bw_ui_users
-        """
-    )
+        """)
 
     op.drop_table("bw_ui_users")
     op.rename_table("bw_ui_users_old", "bw_ui_users")

@@ -15,7 +15,7 @@ from app.api_client import ApiClientError, ApiUnavailableError
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
 from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
-from app.utils import LOGGER, flash, get_blacklisted_settings, is_editable_method, is_ui_api_method
+from app.utils import LOGGER, flash, can_delete_service, get_blacklisted_settings, is_editable_method, is_ui_api_method
 
 services = Blueprint("services", __name__)
 
@@ -220,24 +220,42 @@ def services_delete():
         db_services = API_CLIENT.get_services(with_drafts=True)
         all_drafts = True
         services_to_delete = set()
+        # Drafted autoconf services are deleted directly against the DB — save_config(method="ui")
+        # would otherwise ignore them (method mismatch) and leave the rows untouched.
+        autoconf_drafts_to_delete = set()
         non_deletable_services = set()
 
+        non_deletable_reasons: Dict[str, str] = {}
         for db_service in db_services:
             if db_service["id"] in services:
-                if not is_ui_api_method(db_service["method"]):
+                if not can_delete_service(db_service):
                     non_deletable_services.add(db_service["id"])
+                    if db_service["method"] == "autoconf":
+                        non_deletable_reasons[db_service["id"]] = "online autoconf service (convert it to draft first)"
+                    else:
+                        non_deletable_reasons[db_service["id"]] = "not a UI/API service"
                     continue
                 if not db_service["is_draft"]:
                     all_drafts = False
                 services_to_delete.add(db_service["id"])
+                if db_service["method"] == "autoconf" and db_service["is_draft"]:
+                    autoconf_drafts_to_delete.add(db_service["id"])
 
         for non_deletable_service in non_deletable_services:
-            DATA["TO_FLASH"].append({"content": f"Service {non_deletable_service} is not a UI/API service and will not be deleted.", "type": "error"})
+            reason = non_deletable_reasons.get(non_deletable_service, "not a UI/API service")
+            DATA["TO_FLASH"].append({"content": f"Service {non_deletable_service} is {reason} and will not be deleted.", "type": "error"})
 
         if not services_to_delete:
             DATA["TO_FLASH"].append({"content": "All selected services could not be found or are not UI/API services.", "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
+
+        if autoconf_drafts_to_delete:
+            err = DB.delete_services(list(autoconf_drafts_to_delete))
+            if err:
+                DATA["TO_FLASH"].append({"content": f"Failed to delete drafted autoconf services: {err}", "type": "error"})
+                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                return
 
         db_config["SERVER_NAME"] = " ".join([service["id"] for service in db_services if service["id"] not in services_to_delete])
         new_env = db_config.copy()
@@ -413,20 +431,27 @@ def services_service_page(service: str):
                 if data.get("method") == "default" and data.get("template"):
                     removed_custom_configs.add(db_custom_config)
 
-            # Force-refresh template-derived settings to prevent stale form values
-            # from being stored as explicit overrides (applies to all UI modes).
-            # Skip when the user is switching templates — the old template's values
-            # must not overwrite the new template's defaults.
-            # Only restore the template default if the user did not change it
-            # (i.e., the submitted value still matches the template default).
-            if service != "new":
+            # Defense-in-depth: in advanced/raw modes the form may omit keys (multi-value
+            # rebuild dropping a suffix, conditional Jinja branch, plugin tab not in DOM,
+            # JS race). Without this restoration the cleanup pass in Database.save_config
+            # would delete the corresponding DB rows. Only restore values whose method is
+            # NOT editable from the UI — legitimate user clears of a ui-method setting
+            # still go through (the form rebuild posts an empty value, not absence).
+            # Skip transient/form-managed keys plus the existing blacklist.
+            restore_skip = get_blacklisted_settings() | {"SERVER_NAME", "OLD_SERVER_NAME", "USE_TEMPLATE", "USE_UI"}
+            if service != "new" and mode != "easy":
                 old_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
                 new_template = variables.get("USE_TEMPLATE", "")
-                if old_template == new_template:
-                    for setting, value in db_config.items():
-                        if value.get("template") and value["method"] == "default":
-                            if variables.get(setting) == value["value"]:
-                                variables[setting] = value["value"]
+                template_unchanged = old_template == new_template
+                for setting, value in db_config.items():
+                    if setting in variables or setting in restore_skip:
+                        continue
+                    setting_method = value.get("method")
+                    if not is_editable_method(setting_method, allow_default=False):
+                        # Don't carry old-template defaults forward when switching templates.
+                        if setting_method == "default" and value.get("template") and not template_unchanged:
+                            continue
+                        variables[setting] = value["value"]
 
             variables_to_check = variables.copy()
             has_file_name_changes = False
@@ -733,8 +758,6 @@ def services_service_export():
         return handle_error("Could not fetch custom configurations from the API.", "services", True)
     configs_payload: List[Dict] = []
     for db_config_row in db_configs:
-        if db_config_row.get("template"):
-            continue
         service_id = db_config_row.get("service") or None
         if service_id in ("global", ""):
             service_id = None
@@ -751,7 +774,7 @@ def services_service_export():
         configs_payload.append(
             {
                 "service_id": service_id,
-                "type": db_config_row["type"],
+                "type": db_config_row["type"].strip().replace("-", "_").lower(),
                 "name": db_config_row["name"],
                 "data": data_str,
                 "is_draft": bool(db_config_row.get("is_draft", False)),

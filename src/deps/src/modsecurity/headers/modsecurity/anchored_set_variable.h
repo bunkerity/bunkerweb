@@ -84,6 +84,11 @@ class AnchoredSetVariable : public std::unordered_multimap<std::string,
 
     void setCopy(std::string key, std::string value, size_t offset);
 
+    void resolve(std::vector<const VariableValue *> *l) const;
+    void resolve(std::vector<const VariableValue *> *l,
+        const variables::KeyExclusions &ke) const;
+
+    // keep the old signatures for ABI compatibility
     void resolve(std::vector<const VariableValue *> *l);
     void resolve(std::vector<const VariableValue *> *l,
         variables::KeyExclusions &ke);
@@ -91,6 +96,14 @@ class AnchoredSetVariable : public std::unordered_multimap<std::string,
     void resolve(const std::string &key,
         std::vector<const VariableValue *> *l);
 
+    void resolveRegularExpression(Utils::Regex *r,
+        std::vector<const VariableValue *> *l) const;
+
+    void resolveRegularExpression(Utils::Regex *r,
+        std::vector<const VariableValue *> *l,
+        const variables::KeyExclusions &ke) const;
+
+    // keep the old signatures for ABI compatibility
     void resolveRegularExpression(Utils::Regex *r,
         std::vector<const VariableValue *> *l);
 

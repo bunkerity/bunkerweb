@@ -36,6 +36,10 @@ fimap
 # https://github.com/ffuf/ffuf
 fuzz faster
 
+# WhatWaf, fingerprint and bypass WAFs
+# https://github.com/Ekultek/WhatWaf
+whatwaf
+
 # Scanner that looks for existing or hidden web objects
 # https://github.com/OJ/gobuster
 gobuster
@@ -176,4 +180,62 @@ droopescan
 # https://zmap.io
 zgrab
 
+# Ghauri SQL Injection
+Ghauri
+
 zmeu
+
+# https://github.com/Chocapikk/wpprobe
+WPProbe
+
+# SSTIMap
+# https://github.com/vladko312/SSTImap
+SSTIMap
+
+# Hydra
+Mozilla/4.0 (Hydra)
+
+# (deprecated) https://github.com/epinna/tplmap
+tplmap
+
+# https://github.com/wireghoul/dotdotpwn
+DotDotPwn
+
+# https://github.com/bitquark/shortscan
+shortscan
+
+# (deprecated) https://github.com/P0cL4bs/Kadimus
+Kadimus
+
+# https://github.com/D35m0nd142/LFISuite
+LFISuite
+
+# https://github.com/lightos/Panoptic
+Mozilla/5.0 (compatible; Panoptic
+
+# https://github.com/hansmach1ne/LFImap
+LFImap
+
+# https://github.com/dolevf/graphw00f
+graphw00f
+
+# https://github.com/dolevf/graphql-cop
+graphql-cop
+
+# https://github.com/ron190/jsql-injection
+jSQL
+
+# https://github.com/praetorian-inc/noseyparker
+noseyparker
+
+# TruffleHog
+TruffleHog
+
+# https://www.yeswehack.com/
+YesWeHack-Hunter
+
+# https://github.com/Hackmanit/TInjA
+TInjA
+
+# IBM Security AppScan
+Mozilla/5.0 (compatible; AppScan;

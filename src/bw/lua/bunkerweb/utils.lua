@@ -82,6 +82,9 @@ utils.get_variable = function(variable, site_search, ctx)
 			value = variables[server_name][variable]
 		end
 	end
+	if value == nil then
+		return nil, "not found"
+	end
 	return value, "success"
 end
 
@@ -1149,6 +1152,7 @@ utils.get_phases = function()
 		"rewrite",
 		"access",
 		"content",
+		"ssl_client_hello_default",
 		"ssl_certificate",
 		"header",
 		"log",

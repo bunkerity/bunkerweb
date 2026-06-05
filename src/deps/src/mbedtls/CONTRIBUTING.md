@@ -57,7 +57,7 @@ Tests
 -----
 As mentioned, tests that show the correctness of the feature or bug fix should be added to the pull request, if no such tests exist.
 
-Mbed TLS includes a comprehensive set of test suites in the `tests/` directory that are dynamically generated to produce the actual test source files (e.g. `test_suite_rsa.c`). These files are generated from a `function file` (e.g. `suites/test_suite_rsa.function`) and a `data file` (e.g. `suites/test_suite_rsa.data`). The function file contains the test functions. The data file contains the test cases, specified as parameters that will be passed to the test function.
+Mbed TLS includes a comprehensive set of test suites in the `tests/` directory that are dynamically generated to produce the actual test source files (e.g. `test_suite_ssl.c`). These files are generated from a `function file` (e.g. `suites/test_suite_ssl.function`) and a `data file` (e.g. `suites/test_suite_ssl.data`). The function file contains the test functions. The data file contains the test cases, specified as parameters that will be passed to the test function.
 
 [A Knowledge Base article describing how to add additional tests is available on the Mbed TLS website](https://mbed-tls.readthedocs.io/en/latest/kb/development/test_suites/).
 

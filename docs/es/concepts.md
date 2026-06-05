@@ -105,7 +105,7 @@ Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.10-rc3/examples) del repositorio.
+    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.12-rc1/examples) del repositorio.
 
 ## Configuraciones personalizadas {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestión de configuraciones personalizadas desde la interfaz de usuario web s
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.10-rc3/examples) del repositorio.
+    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.12-rc1/examples) del repositorio.
 
 ## Base de datos
 
@@ -163,12 +163,12 @@ Al especificar el URI de la base de datos apropiado en la configuración, puedes
 
 ### Matriz de compatibilidad de bases de datos
 
-| Integración        | PostgreSQL                                   | MariaDB                  | MySQL                    | SQLite       |
-| :----------------- | :------------------------------------------- | :----------------------- | :----------------------- | :----------- |
-| **Docker**         | ✅ `v18` y anteriores (all-in-one: ✅ `v17`)  | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Kubernetes**     | ✅ `v18` y anteriores                         | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Autoconf**       | ✅ `v18` y anteriores                         | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Paquetes Linux** | Ver notas a continuación                      | Ver notas a continuación | Ver notas a continuación | ✅ Compatible |
+| Integración        | PostgreSQL                                 | MariaDB                  | MySQL                    | SQLite       |
+| :----------------- | :----------------------------------------- | :----------------------- | :----------------------- | :----------- |
+| **Docker**         | ✅ `v18` y anteriores (all-in-one: ✅ `v17`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Kubernetes**     | ✅ `v18` y anteriores                       | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Autoconf**       | ✅ `v18` y anteriores                       | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Paquetes Linux** | Ver notas a continuación                   | Ver notas a continuación | Ver notas a continuación | ✅ Compatible |
 
 !!! info "Notas"
     - **PostgreSQL**: Los paquetes basados en Alpine ahora incluyen el cliente `v18`, por lo que `v18` y versiones anteriores son compatibles de forma predeterminada; la imagen all-in-one sigue usando el cliente `v17`, por lo que `v18` no es compatible allí.

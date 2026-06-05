@@ -13,7 +13,6 @@ from ..config import api_config
 from ..utils import BISCUIT_PUBLIC_KEY_FILE
 from .common import get_auth_header, parse_bearer_token
 
-
 OPERATION_BY_METHOD = {
     "GET": "read",
     "OPTIONS": "read",

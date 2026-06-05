@@ -415,6 +415,59 @@ if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] 
 		fi
 	fi
 	export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+
+	# Build the runtime Redis config: /etc/redis.conf (bundled or mounted) wins;
+	# env-driven directives only fill the gaps for tunables the operator did not
+	# specify themselves. This keeps a mounted custom redis.conf authoritative.
+	# Target lives under /var/lib/bunkerweb (nginx-writable, persisted per container).
+	RUNTIME_REDIS_CONF="/var/lib/bunkerweb/redis-runtime.conf"
+	cp /etc/redis.conf "${RUNTIME_REDIS_CONF}"
+
+	_redis_conf_has() {
+		grep -Eq "^[[:space:]]*${1}([[:space:]]|$)" /etc/redis.conf
+	}
+
+	_redis_conf_has maxmemory || printf 'maxmemory %s\n' "${REDIS_MAXMEMORY:-256mb}" >> "${RUNTIME_REDIS_CONF}"
+	_redis_conf_has maxmemory-policy || printf 'maxmemory-policy %s\n' "${REDIS_MAXMEMORY_POLICY:-volatile-lru}" >> "${RUNTIME_REDIS_CONF}"
+	_redis_conf_has appendonly || printf 'appendonly %s\n' "${REDIS_APPENDONLY:-yes}" >> "${RUNTIME_REDIS_CONF}"
+
+	if ! _redis_conf_has save; then
+		_save_emitted=0
+		# Base REDIS_SAVE (no suffix). Treat empty as explicit "disable RDB".
+		if [ -n "${REDIS_SAVE+x}" ]; then
+			if [ -z "${REDIS_SAVE}" ]; then
+				printf 'save ""\n' >> "${RUNTIME_REDIS_CONF}"
+			else
+				printf 'save %s\n' "${REDIS_SAVE}" >> "${RUNTIME_REDIS_CONF}"
+			fi
+			_save_emitted=1
+		fi
+		# Numeric-suffixed siblings REDIS_SAVE_0, REDIS_SAVE_1, ... applied in order.
+		while IFS= read -r _save_var; do
+			_save_val="${!_save_var}"
+			if [ -z "${_save_val}" ]; then
+				printf 'save ""\n' >> "${RUNTIME_REDIS_CONF}"
+			else
+				printf 'save %s\n' "${_save_val}" >> "${RUNTIME_REDIS_CONF}"
+			fi
+			_save_emitted=1
+		done < <(compgen -v | grep -E '^REDIS_SAVE_[0-9]+$' | sort -t_ -k3 -n)
+		if [ "${_save_emitted}" -eq 0 ]; then
+			printf 'save 900 1\nsave 300 10\nsave 60 10000\n' >> "${RUNTIME_REDIS_CONF}"
+		fi
+		unset _save_emitted _save_var _save_val
+	fi
+
+	if [ -n "${REDIS_PASSWORD}" ] && ! _redis_conf_has requirepass; then
+		printf 'requirepass %s\n' "${REDIS_PASSWORD}" >> "${RUNTIME_REDIS_CONF}"
+		log "ENTRYPOINT" "🔒" "Embedded Redis: requirepass enabled via REDIS_PASSWORD"
+	fi
+
+	chmod 600 "${RUNTIME_REDIS_CONF}"
+	log "ENTRYPOINT" "ℹ️" "Built ${RUNTIME_REDIS_CONF} (env overrides applied only where /etc/redis.conf was silent)"
+	unset RUNTIME_REDIS_CONF
+	unset -f _redis_conf_has
+
 	# Enable autorestart for Redis service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/redis.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for Redis service"

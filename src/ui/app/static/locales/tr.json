@@ -96,10 +96,8 @@
     "enable_totp": "TOTP'yi Etkinleştir",
     "entire_config": "Tüm Yapılandırma",
     "export": "Dışa Aktar",
-    "export_csv_all": "CSV (Tümü)",
-    "export_csv_visible": "CSV (Görünür)",
-    "export_excel_all": "Excel (Tümü)",
-    "export_excel_visible": "Excel (Görünür)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Genel ayarları getir",
     "filters_suffix": " Filtreler",
     "follow": "Takip Et",
@@ -477,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Eşleşen {{count}} {{entity}} öğesinin tümünü seç",
+    "bulk_select_all_done": "Eşleşen {{count}} {{entity}} öğesinin tümü seçildi.",
+    "bulk_select_clear": "Seçimi temizle",
+    "bulk_select_page": "Bu sayfadaki {{count}} {{entity}} öğesinin tümü seçildi.",
     "info_bans": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Yasaklama",
     "info_cache": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Önbellek Dosyası",
     "info_configs": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Özel Yapılandırma",

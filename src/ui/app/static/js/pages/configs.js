@@ -227,12 +227,9 @@ $(document).ready(function () {
   };
 
   if (configNumber > 10) {
-    const menu = [10];
-    if (configNumber > 25) menu.push(25);
-    if (configNumber > 50) menu.push(50);
-    if (configNumber > 100) menu.push(100);
-    if (configNumber > 500) menu.push(500);
-    if (configNumber > 1000) menu.push(1000);
+    const menu = [10, 25, 50, 100];
+    if (configNumber > 100) menu.push(500);
+    if (configNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: { menu: menu },
       info: true,
@@ -381,27 +378,33 @@ $(document).ready(function () {
 
   const getSelectedConfigs = () => {
     const configs = [];
-    $("tr.selected").each(function () {
-      const $row = $(this);
-      const name = $row.find("td:eq(2)").find("a").text().trim();
-      const type = $row.find("td:eq(3)").text().trim();
-      let service;
-      const $serviceCell = $row.find("td:eq(5)");
-      const $serviceLink = $serviceCell.find("a");
-      if ($serviceLink.length > 0) {
-        service = $serviceLink.text().trim();
-      } else {
-        const $serviceSpan = $serviceCell.find("span[data-i18n]");
-        service = $serviceSpan.length
-          ? $serviceSpan.text().trim()
-          : $serviceCell.text().trim();
-      }
+    if (!$.fn.dataTable.isDataTable("#configs")) return configs;
+    $("#configs")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const $row = $(this);
+        const name = $row.find("td:eq(2)").find("a").text().trim();
+        const type = $row.find("td:eq(3)").text().trim();
+        let service;
+        const $serviceCell = $row.find("td:eq(5)");
+        const $serviceLink = $serviceCell.find("a");
+        if ($serviceLink.length > 0) {
+          service = $serviceLink.text().trim();
+        } else {
+          const $serviceSpan = $serviceCell.find("span[data-i18n]");
+          service = $serviceSpan.length
+            ? $serviceSpan.text().trim()
+            : $serviceCell.text().trim();
+        }
 
-      const normalizedService =
-        service === t("scope.global", "global") ? "global" : service;
+        const normalizedService =
+          service === t("scope.global", "global") ? "global" : service;
 
-      configs.push({ name: name, type: type, service: normalizedService });
-    });
+        configs.push({ name: name, type: type, service: normalizedService });
+      });
     return configs;
   };
 
@@ -694,7 +697,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {

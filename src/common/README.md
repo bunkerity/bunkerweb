@@ -128,6 +128,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | ------------------------------ | ------- | ------- | -------- | ------------------------------------------------------------------------------- |
     | `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`). |
     | `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                      |
+    | `DATASTORE_LRU_SIZE`           | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
     | `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                    |
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).         |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).       |

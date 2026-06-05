@@ -12,6 +12,7 @@
            value="{{ setting_value }}"
            data-original="{{ setting_config.get('value', setting_default) if setting_config else setting_default }}"
            data-default="{{ setting_default }}"
+           data-method="{{ setting_method }}"
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}
            {% if setting_data.get('regex') %}pattern="{{ setting_data['regex'] }}"{% endif %}>

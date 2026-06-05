@@ -133,14 +133,15 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Memory Settings"
 
-    | Setting                        | Default | Context | Multiple | Description                                                                                                        |
-    | ------------------------------ | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`). |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                      |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                    |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).          |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).        |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).      |
+    | Setting                        | Default | Context | Multiple | Description                                                                                                                                               |
+    | ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`).                                        |
+    | `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                                                             |
+    | `DATASTORE_LRU_SIZE`           | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
+    | `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                                                           |
+    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).                                                 |
+    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).                                               |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).                                             |
 
 === "Logging Settings"
 
@@ -249,51 +250,56 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 ## ACME <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+For a more detailed guide, see the [advanced usages](advanced.md#acme) documentation.
+
 STREAM support :white_check_mark:
 
 Advanced ACME certificate management with custom CA support, certificate monitoring dashboard, expiry alerting, CT log monitoring, and enhanced OCSP stapling. Complements the built-in Let's Encrypt plugin.
 
-| Setting                             | Default     | Context   | Multiple | Description                                                                                                                                                              |
-| ----------------------------------- | ----------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_ACME`                          | `no`        | multisite | no       | Enable ACME certificate management for this service using a custom ACME-compatible Certificate Authority.                                                                |
-| `ACME_PASSTHROUGH`                  | `no`        | multisite | no       | Pass through ACME HTTP-01 challenge requests to the upstream server.                                                                                                     |
-| `ACME_DIRECTORY_URL`                |             | multisite | no       | ACME directory URL of the Certificate Authority (e.g. https://ca.example.com/acme/directory for Step CA, https://vault.example.com/v1/pki/acme/directory for Vault PKI). |
-| `ACME_EMAIL`                        |             | multisite | no       | Email address for ACME account registration and notifications.                                                                                                           |
-| `ACME_EAB_KID`                      |             | multisite | no       | External Account Binding Key ID (required by some CAs like Sectigo, Google Trust Services).                                                                              |
-| `ACME_EAB_HMAC_KEY`                 |             | multisite | no       | External Account Binding HMAC key (base64-encoded, required when EAB Key ID is set).                                                                                     |
-| `ACME_CA_CERT_PATH`                 |             | multisite | no       | File path to the root CA certificate for private ACME servers (Step CA, Vault PKI). Required when the CA root is not in the system trust store.                          |
-| `ACME_CHALLENGE`                    | `http`      | multisite | no       | ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable.                                   |
-| `ACME_DNS_PROVIDER`                 |             | multisite | no       | DNS provider for DNS-01 challenges.                                                                                                                                      |
-| `ACME_DNS_CREDENTIAL_ITEM`          |             | multisite | yes      | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                  |
-| `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`       | multisite | yes      | Automatically decode base64 encoded DNS provider credentials.                                                                                                            |
-| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Time to wait for DNS propagation in seconds for DNS challenges.                                                                                                          |
-| `ACME_KEY_TYPE`                     | `ecdsa`     | multisite | no       | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                |
-| `ACME_KEY_SIZE`                     | `256`       | multisite | no       | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                          |
-| `ACME_PREFERRED_CHAIN`              |             | multisite | no       | Preferred certificate chain issuer CN. Selects the preferred chain when the CA provides multiple.                                                                        |
-| `ACME_RENEWAL_DAYS`                 | `30`        | multisite | no       | Renew the certificate when it has fewer than this many days until expiry.                                                                                                |
-| `ACME_SSL_VERIFY`                   | `yes`       | multisite | no       | Verify SSL certificates when communicating with the ACME server. Disable only for testing with self-signed CA certs.                                                     |
-| `ACME_WILDCARD`                     | `no`        | multisite | no       | Request wildcard certificate (requires DNS-01 challenge).                                                                                                                |
-| `ACME_MUST_STAPLE`                  | `no`        | multisite | no       | Request the OCSP Must-Staple extension in the certificate.                                                                                                               |
-| `ACME_MAX_RETRIES`                  | `3`         | multisite | no       | Number of times to retry certificate generation on failure (0 disables retries).                                                                                         |
-| `USE_ACME_MONITORING`               | `yes`       | global    | no       | Enable certificate expiry monitoring and status tracking for all managed certificates (including OSS Let's Encrypt certificates).                                        |
-| `ACME_ALERT_DAYS`                   | `30 14 7 1` | global    | no       | Space-separated list of day thresholds that trigger expiry alerts.                                                                                                       |
-| `USE_ACME_ALERT_WEBHOOK`            | `no`        | global    | no       | Send certificate alerts via webhook.                                                                                                                                     |
-| `ACME_ALERT_WEBHOOK_URLS`           |             | global    | no       | Space-separated list of webhook URLs for certificate alerts.                                                                                                             |
-| `USE_ACME_ALERT_EMAIL`              | `no`        | global    | no       | Send certificate alerts via email.                                                                                                                                       |
-| `ACME_ALERT_SMTP_EMAILS`            |             | global    | no       | Space-separated list of email recipients for certificate alerts.                                                                                                         |
-| `ACME_ALERT_SMTP_HOST`              |             | global    | no       | SMTP host for certificate alert emails.                                                                                                                                  |
-| `ACME_ALERT_SMTP_PORT`              | `465`       | global    | no       | SMTP port for certificate alert emails (SSL=465, TLS=587).                                                                                                               |
-| `ACME_ALERT_SMTP_FROM_EMAIL`        |             | global    | no       | Sender email address for certificate alerts.                                                                                                                             |
-| `ACME_ALERT_SMTP_FROM_USER`         |             | global    | no       | SMTP authentication user for certificate alert emails.                                                                                                                   |
-| `ACME_ALERT_SMTP_FROM_PASSWORD`     |             | global    | no       | SMTP authentication password for certificate alert emails.                                                                                                               |
-| `ACME_ALERT_SMTP_SSL`               | `SSL`       | global    | no       | Connection type for certificate alert SMTP.                                                                                                                              |
-| `USE_ACME_CT_MONITORING`            | `no`        | global    | no       | Enable Certificate Transparency log monitoring. Queries crt.sh to detect unauthorized certificate issuance for your domains.                                             |
-| `ACME_CT_MONITORED_DOMAINS`         |             | global    | no       | Space-separated list of domains to monitor in CT logs. Leave empty to auto-detect from configured services.                                                              |
-| `USE_ACME_OCSP_STAPLING`            | `no`        | multisite | no       | Enable enhanced OCSP stapling with proactive response fetching and caching.                                                                                              |
-| `ACME_OCSP_CACHE_SIZE`              | `1m`        | global    | no       | Size of the shared dictionary for OCSP response caching.                                                                                                                 |
+| Setting                             | Default     | Context   | Multiple | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | ----------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_ACME`                          | `no`        | multisite | no       | Enable ACME certificate management for this service using a custom ACME-compatible Certificate Authority.                                                                                                                                                                                                                                                                                                                                                                   |
+| `ACME_PASSTHROUGH`                  | `no`        | multisite | no       | Pass through ACME HTTP-01 challenge requests to the upstream server.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_DIRECTORY_URL`                |             | multisite | no       | ACME directory URL of the Certificate Authority (e.g. https://ca.example.com/acme/directory for Step CA, https://vault.example.com/v1/pki/acme/directory for Vault PKI).                                                                                                                                                                                                                                                                                                    |
+| `ACME_EMAIL`                        |             | multisite | no       | Email address for ACME account registration and notifications.                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `ACME_EAB_KID`                      |             | multisite | no       | External Account Binding Key ID (required by some CAs like Sectigo, Google Trust Services).                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ACME_EAB_HMAC_KEY`                 |             | multisite | no       | External Account Binding HMAC key (base64-encoded, required when EAB Key ID is set).                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_CA_CERT_PATH`                 |             | multisite | no       | File path to the root CA certificate for private ACME servers (Step CA, Vault PKI). Required when the CA root is not in the system trust store.                                                                                                                                                                                                                                                                                                                             |
+| `ACME_CHALLENGE`                    | `http`      | multisite | no       | ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable.                                                                                                                                                                                                                                                                                                                                      |
+| `ACME_DNS_PROVIDER`                 |             | multisite | no       | DNS provider for DNS-01 challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `ACME_DNS_CREDENTIAL_ITEM`          |             | multisite | yes      | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                     |
+| `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`       | multisite | yes      | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Time to wait for DNS propagation in seconds for DNS challenges.                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `ACME_DNS_ALIAS`                    |             | multisite | no       | Target zone for DNS-01 CNAME delegation. Passed as --dns-<provider>-domain-alias to certbot and applied to every challenge for the cert, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME `_acme-challenge.<domain>` -> `_acme-challenge.<target>` (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53). |
+| `ACME_KEY_TYPE`                     | `ecdsa`     | multisite | no       | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                                                                                                                                                                                                                                                                                                                   |
+| `ACME_KEY_SIZE`                     | `256`       | multisite | no       | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `ACME_PREFERRED_CHAIN`              |             | multisite | no       | Preferred certificate chain issuer CN. Selects the preferred chain when the CA provides multiple.                                                                                                                                                                                                                                                                                                                                                                           |
+| `ACME_RENEWAL_DAYS`                 | `30`        | multisite | no       | Renew the certificate when it has fewer than this many days until expiry.                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `ACME_SSL_VERIFY`                   | `yes`       | multisite | no       | Verify SSL certificates when communicating with the ACME server. Disable only for testing with self-signed CA certs.                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_WILDCARD`                     | `no`        | multisite | no       | Request wildcard certificate (requires DNS-01 challenge).                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `ACME_MUST_STAPLE`                  | `no`        | multisite | no       | Request the OCSP Must-Staple extension in the certificate.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_MAX_RETRIES`                  | `3`         | multisite | no       | Number of times to retry certificate generation on failure (0 disables retries).                                                                                                                                                                                                                                                                                                                                                                                            |
+| `USE_ACME_MONITORING`               | `yes`       | global    | no       | Enable certificate expiry monitoring and status tracking for all managed certificates (including OSS Let's Encrypt certificates).                                                                                                                                                                                                                                                                                                                                           |
+| `ACME_ALERT_DAYS`                   | `30 14 7 1` | global    | no       | Space-separated list of day thresholds that trigger expiry alerts.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `USE_ACME_ALERT_WEBHOOK`            | `no`        | global    | no       | Send certificate alerts via webhook.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_ALERT_WEBHOOK_URLS`           |             | global    | no       | Space-separated list of webhook URLs for certificate alerts.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `USE_ACME_ALERT_EMAIL`              | `no`        | global    | no       | Send certificate alerts via email.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `ACME_ALERT_SMTP_EMAILS`            |             | global    | no       | Space-separated list of email recipients for certificate alerts.                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `ACME_ALERT_SMTP_HOST`              |             | global    | no       | SMTP host for certificate alert emails.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ACME_ALERT_SMTP_PORT`              | `465`       | global    | no       | SMTP port for certificate alert emails (SSL=465, TLS=587).                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_ALERT_SMTP_FROM_EMAIL`        |             | global    | no       | Sender email address for certificate alerts.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `ACME_ALERT_SMTP_FROM_USER`         |             | global    | no       | SMTP authentication user for certificate alert emails.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `ACME_ALERT_SMTP_FROM_PASSWORD`     |             | global    | no       | SMTP authentication password for certificate alert emails.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_ALERT_SMTP_SSL`               | `SSL`       | global    | no       | Connection type for certificate alert SMTP.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `USE_ACME_CT_MONITORING`            | `no`        | global    | no       | Enable Certificate Transparency log monitoring. Queries crt.sh to detect unauthorized certificate issuance for your domains.                                                                                                                                                                                                                                                                                                                                                |
+| `ACME_CT_MONITORED_DOMAINS`         |             | global    | no       | Space-separated list of domains to monitor in CT logs. Leave empty to auto-detect from configured services.                                                                                                                                                                                                                                                                                                                                                                 |
+| `USE_ACME_OCSP_STAPLING`            | `no`        | multisite | no       | Enable enhanced OCSP stapling with proactive response fetching and caching.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ACME_OCSP_CACHE_SIZE`              | `1m`        | global    | no       | Size of the shared dictionary for OCSP response caching.                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+For a more detailed guide, see the [advanced usages](advanced.md#anti-ddos-pro) documentation.
 
 STREAM support :x:
 
@@ -325,9 +331,9 @@ Attackers often use automated tools (bots) to try and exploit your website. To p
 
 Follow these steps to enable and configure the Antibot feature:
 
-1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [javascript](#__tabbed_3_2)).
+1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [capjs](#__tabbed_3_8), [javascript](#__tabbed_3_2)).
 2. **Enable the feature:** Set the `USE_ANTIBOT` setting to your chosen challenge type in your BunkerWeb configuration.
-3. **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, Turnstile, and mCaptcha, you must create an account with the respective service and obtain API keys.
+3. **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, and Turnstile, create an account with the respective service and obtain API keys. For mCaptcha and Cap.js, you can either self-host the provider or use a hosted service, then configure the required sitekey and secret.
 4. **Important:** Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
 
 !!! important "About the `ANTIBOT_URI` Setting"
@@ -547,6 +553,30 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
+=== "Cap.js"
+
+    [Cap.js](https://capjs.js.org/) is a self-hosted, open-source, privacy-friendly proof-of-work CAPTCHA. Instead of delegating verification to a third-party service, you run the Cap.js server yourself and BunkerWeb verifies tokens against that server.
+
+    Use the frontend URL for the browser-facing endpoint that serves the widget. If BunkerWeb can reach the Cap.js server through an internal address, set the backend URL to that internal endpoint; otherwise leave it empty and BunkerWeb will use the frontend URL for `/siteverify`.
+
+    **Configuration Settings:**
+
+    | Setting                      | Default | Context   | Multiple | Description                                                                                                              |
+    | ---------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`                | `no`    | multisite | no       | **Enable Antibot:** Set to `capjs` to enable the Cap.js challenge.                                                       |
+    | `ANTIBOT_CAPJS_FRONTEND_URL` |         | multisite | no       | **Cap.js Frontend URL:** Browser-facing URL of the Cap.js server that serves the widget.                                 |
+    | `ANTIBOT_CAPJS_BACKEND_URL`  |         | multisite | no       | **Cap.js Backend URL:** Optional internal URL BunkerWeb uses for `/siteverify`; falls back to the frontend URL if empty. |
+    | `ANTIBOT_CAPJS_SITEKEY`      |         | multisite | no       | **Cap.js Sitekey:** The sitekey for the Cap.js challenge.                                                                |
+    | `ANTIBOT_CAPJS_SECRET`       |         | multisite | no       | **Cap.js Secret:** The secret key BunkerWeb uses to verify Cap.js tokens.                                                |
+
+    !!! note "Operator requirements"
+        - Use HTTPS for `ANTIBOT_CAPJS_FRONTEND_URL` in production. The browser worker requires `crypto.subtle` in a secure context, and HTTPS prevents MITM changes to the widget.
+        - Configure CORS on the Cap.js sitekey to allow the protected origin.
+        - Set both `ANTIBOT_CAPJS_FRONTEND_URL` and `ANTIBOT_CAPJS_BACKEND_URL` to origins only: scheme, host, and optional port, with no path.
+        - Use the Cap.js widget **0.1.48 or later**. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed `srcdoc` iframe's inline script does not propagate the nonce. If you self-host `tiago2/cap`, pin a recent tag (e.g. `tiago2/cap:3.1.2` or newer) or set `WIDGET_VERSION` to `0.1.48` or later.
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
+
 ### Example Configurations
 
 === "Cookie Challenge"
@@ -654,6 +684,21 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
     ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
     ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
     ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Cap.js Challenge"
+
+    Example configuration for enabling the Cap.js challenge:
+
+    ```yaml
+    USE_ANTIBOT: "capjs"
+    ANTIBOT_CAPJS_FRONTEND_URL: "https://cap.example.com"
+    ANTIBOT_CAPJS_BACKEND_URL: "http://cap-server:3000"
+    ANTIBOT_CAPJS_SITEKEY: "your-site-key"
+    ANTIBOT_CAPJS_SECRET: "your-secret-key"
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
     ANTIBOT_TIME_VALID: "86400"
@@ -1384,6 +1429,8 @@ Pro tip: When viewing your alerts, click the "columns" option and check the "con
 ## Cache <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+For a more detailed guide, see the [advanced usages](advanced.md#cache-pro) documentation.
+
 STREAM support :x:
 
 Provides caching functionality at the reverse proxy level.
@@ -1820,7 +1867,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.10-rc3
+        image: bunkerity/bunkerweb:1.6.12-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1837,7 +1884,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.10-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1871,7 +1918,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.7 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.7.8 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
@@ -2079,6 +2126,8 @@ Apply the following environment variables (or values via the scheduler UI/API) s
 ## Custom Pages <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+For a more detailed guide, see the [advanced usages](advanced.md#custom-pages-pro) documentation.
+
 STREAM support :x:
 
 Tweak BunkerWeb error/antibot/default pages with custom HTML.
@@ -2093,6 +2142,7 @@ Tweak BunkerWeb error/antibot/default pages with custom HTML.
 | `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |         | multisite | no       | Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
 | `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |         | multisite | no       | Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).        |
 | `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |         | multisite | no       | Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+| `CUSTOM_ANTIBOT_CAPJS_PAGE`      |         | multisite | no       | Full path of the custom antibot Cap.js page (must be readable by the scheduler) (Can be a lua template).           |
 
 ## Custom SSL certificate
 
@@ -2379,6 +2429,10 @@ Follow these steps to configure and use the DNSBL feature:
 
 ## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+For a more detailed guide, see the [advanced usages](advanced.md#easy-resolve-pro) documentation.
 
 STREAM support :x:
 
@@ -3053,6 +3107,8 @@ Follow these steps to configure and use the HTML Injection feature:
 ## LDAP SSO <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+For a more detailed guide, see the [advanced usages](advanced.md#ldap-sso-pro) documentation.
+
 STREAM support :x:
 
 LDAP-based single sign-on plugin with session-backed authentication.
@@ -3204,7 +3260,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
-| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                             | [Documentation](https://github.com/TheophileDiot/certbot-plugin-gandi)                                |
+| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                             | [Documentation](https://github.com/bunkerity/certbot-plugin-gandi)                                |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (default: `600`)                                                                                                                                                                                                                                                   | [Documentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -3459,7 +3515,9 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 ## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
-<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+For a more detailed guide, see the [advanced usages](advanced.md#load-balancer-pro) documentation.
 
 STREAM support :x:
 
@@ -3580,13 +3638,14 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ### Configuration Settings
 
-| Setting                              | Default  | Context   | Multiple | Description                                                                                                          |
-| ------------------------------------ | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`    | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                      |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                              |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker.                                    |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis.                                |
-| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation. |
+| Setting                              | Default | Context   | Multiple | Description                                                                                                                                      |
+| ------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_METRICS`                        | `yes`   | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                                                  |
+| `METRICS_MEMORY_SIZE`                | `16m`   | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                                                          |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`    | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.                                     |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`   | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.                                 |
+| `MAX_LRU_HISTORY`                    | `1k`    | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand. |
+| `METRICS_SAVE_TO_REDIS`              | `yes`   | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation.                             |
 
 !!! tip "Sizing Memory Allocation"
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. Raw byte values and `k`/`m` suffixes are supported. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
@@ -3609,8 +3668,9 @@ For example, `/metrics/requests` returns information about blocked requests.
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -3623,6 +3683,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -3635,6 +3696,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -3648,6 +3710,8 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ## Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+For a more detailed guide, see the [advanced usages](advanced.md#migration-pro) documentation.
 
 STREAM support :white_check_mark:
 
@@ -3764,9 +3828,10 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         - Prevents file upload attacks
         - Reduces the risk of server resource exhaustion
 
-    | Setting           | Default | Context   | Multiple | Description                                                                                        |
-    | ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-    | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads). |
+    | Setting           | Default | Context   | Multiple | Description                                                                                                                         |
+    | ----------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+    | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads).                                  |
+    | `MAX_HEADERS`     | `100`   | global    | no       | **Maximum Headers:** Maximum number of header lines per request. Requests exceeding this limit are rejected with `400 Bad Request`. |
 
     !!! tip "Request Size Configuration Best Practices"
         If you need to allow a request body of unlimited size, you can set the `MAX_CLIENT_SIZE` value to `0`. However, this is **not recommended** due to potential security and performance risks.
@@ -3951,6 +4016,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     OPEN_FILE_CACHE_ERRORS: "yes"
     OPEN_FILE_CACHE_MIN_USES: "3"
     OPEN_FILE_CACHE_VALID: "60s"
+    ```
 
 ## ModSecurity
 
@@ -4003,12 +4069,17 @@ Follow these steps to configure and use ModSecurity:
 
     The CRS team actively maintains a list of exclusions for popular applications such as WordPress, Nextcloud, Drupal, and Cpanel, making it easier to integrate without impacting functionality. The security benefits far outweigh the minimal configuration effort required to address false positives.
 
+!!! warning "Safety recommendation for large uploads"
+    ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — **and only if** — a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL to emit `modsecurity off;` in its `location` block. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
+
+    To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
+
 ### Available CRS Versions
 
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
-- **`4`**: Stable [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**default**).
+- **`4`**: Stable [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**default**).
 
 !!! warning "Nightly Build Deprecated"
     The `nightly` option for `MODSECURITY_CRS_VERSION` has been deprecated as the OWASP Core Rule Set project has discontinued nightly releases. If your configuration still uses `nightly`, CRS v4 will be used instead. Please update your configuration to use `MODSECURITY_CRS_VERSION=4`.
@@ -4177,11 +4248,13 @@ STREAM support :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-| Setting                        | Default | Context | Multiple | Description                                                                 |
-| ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------- |
-| `USE_MONITORING`               | `yes`   | global  | no       | Enable monitoring of BunkerWeb.                                             |
-| `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics.                               |
-| `MONITORING_IGNORE_URLS`       |         | global  | no       | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
+| Setting                        | Default | Context | Multiple | Description                                                                                                                                                      |
+| ------------------------------ | ------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`   | global  | no       | Enable monitoring of BunkerWeb.                                                                                                                                  |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics.                                                                                                                    |
+| `MONITORING_IGNORE_URLS`       |         | global  | no       | List of URLs to ignore when monitoring separated with spaces (e.g. /health)                                                                                      |
+| `MONITORING_TOP_N_DECAY_HOURS` | `6`     | global  | no       | How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer. |
+| `MONITORING_TOP_N_TRACK_MAX`   | `5000`  | global  | no       | Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.                   |
 
 ## Mutual TLS
 
@@ -4274,6 +4347,10 @@ Follow these steps to deploy mutual TLS with confidence:
 ## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+For a more detailed guide, see the [advanced usages](advanced.md#openapi-validator-pro) documentation.
+
 STREAM support :x:
 
 Validates incoming HTTP requests against an OpenAPI / Swagger specification.
@@ -4291,6 +4368,10 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 
 ## OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+For a more detailed guide, see the [advanced usages](advanced.md#openid-connect-pro) documentation.
 
 STREAM support :x:
 
@@ -4474,15 +4555,15 @@ Follow these steps to configure and use the Pro features:
 
 **Q: What happens if my Pro license expires?**
 
-A: If your Pro license expires, access to premium features and plugins will be disabled. However, your BunkerWeb installation will continue to operate with all community edition features intact. To regain access to Pro features, simply renew your license.
+**A:** If your Pro license expires, access to premium features and plugins will be disabled. However, your BunkerWeb installation will continue to operate with all community edition features intact. To regain access to Pro features, simply renew your license.
 
 **Q: Will Pro features disrupt my existing configuration?**
 
-A: No, Pro features are designed to integrate seamlessly with your current BunkerWeb setup. They enhance functionality without altering or interfering with your existing configuration, ensuring a smooth and reliable experience.
+**A:** No, Pro features are designed to integrate seamlessly with your current BunkerWeb setup. They enhance functionality without altering or interfering with your existing configuration, ensuring a smooth and reliable experience.
 
 **Q: Can I try Pro features before committing to a purchase?**
 
-A: Absolutely! BunkerWeb offers two Pro plans to suit your needs:
+**A:** Absolutely! BunkerWeb offers two Pro plans to suit your needs:
 
 - **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
 - **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.
@@ -4874,7 +4955,8 @@ When using Redis or Valkey with BunkerWeb, consider these best practices to ensu
 
 #### Memory Management
 - **Monitor memory usage:** Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
-- **Set an eviction policy:** Use `maxmemory-policy` (e.g., `volatile-lru` or `allkeys-lru`) appropriate for your use case
+- **Set an eviction policy:** Use `maxmemory-policy` (e.g., `volatile-lru` for general use or `allkeys-lru` for cache-heavy workloads) appropriate for your use case
+- **All-in-one defaults:** The AIO Docker image ships Redis with `maxmemory=256mb` and `maxmemory-policy=volatile-lru`; override via the `REDIS_MAXMEMORY` and `REDIS_MAXMEMORY_POLICY` environment variables. With `volatile-lru`, transient counters (rate-limit, bad-behavior) are evicted before keys with TTLs that matter for sessions and timed bans, and keys without an expiry (permanent bans) are immune. The same policy is recommended for external Redis or Valkey servers used by BunkerWeb.
 - **Avoid large keys:** Ensure individual Redis keys are kept to a reasonable size to prevent performance degradation
 
 #### Data Persistence
@@ -4902,20 +4984,21 @@ STREAM support :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-| Setting                        | Default            | Context | Multiple | Description                                                                                                                        |
-| ------------------------------ | ------------------ | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | global  | no       | Enable sending the report via email.                                                                                               |
-| `USE_REPORTING_WEBHOOK`        | `no`               | global  | no       | Enable sending the report via webhook.                                                                                             |
-| `REPORTING_SCHEDULE`           | `weekly`           | global  | no       | The frequency at which reports are sent.                                                                                           |
-| `REPORTING_WEBHOOK_URLS`       |                    | global  | no       | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
-| `REPORTING_SMTP_EMAILS`        |                    | global  | no       | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
-| `REPORTING_SMTP_HOST`          |                    | global  | no       | The host server used for SMTP sending.                                                                                             |
-| `REPORTING_SMTP_PORT`          | `465`              | global  | no       | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | no       | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
-| `REPORTING_SMTP_FROM_USER`     |                    | global  | no       | The user authentication value for sending via the from email address.                                                              |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | no       | The password authentication value for sending via the from email address.                                                          |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global  | no       | Determine whether or not to use a secure connection for SMTP.                                                                      |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | no       | The subject line of the email.                                                                                                     |
+| Setting                        | Default            | Context | Multiple | Description                                                                                                                                                                            |
+| ------------------------------ | ------------------ | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global  | no       | Enable sending the report via email.                                                                                                                                                   |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global  | no       | Enable sending the report via webhook.                                                                                                                                                 |
+| `REPORTING_SCHEDULE`           | `weekly`           | global  | no       | The frequency at which reports are sent.                                                                                                                                               |
+| `REPORTING_TOP_N`              | `3`                | global  | no       | Number of entries shown in 'Top' tables (IPs, AS, reasons, countries, URIs and offenders). Range: 1-50. Values are clamped at runtime; the upstream metric caps at rank 50 per server. |
+| `REPORTING_WEBHOOK_URLS`       |                    | global  | no       | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                                                                          |
+| `REPORTING_SMTP_EMAILS`        |                    | global  | no       | List of email addresses to receive the report in HTML format (separated by spaces).                                                                                                    |
+| `REPORTING_SMTP_HOST`          |                    | global  | no       | The host server used for SMTP sending.                                                                                                                                                 |
+| `REPORTING_SMTP_PORT`          | `465`              | global  | no       | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).                                                     |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | no       | The email address used as the sender. Note that 2FA must be disabled for this email address.                                                                                           |
+| `REPORTING_SMTP_FROM_USER`     |                    | global  | no       | The user authentication value for sending via the from email address.                                                                                                                  |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | no       | The password authentication value for sending via the from email address.                                                                                                              |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global  | no       | Determine whether or not to use a secure connection for SMTP.                                                                                                                          |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | no       | The subject line of the email.                                                                                                                                                         |
 
 ## Reverse proxy
 
@@ -4955,16 +5038,17 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Protocol Handling:** Support for HTTP, HTTPS, WebSockets, and other protocols
         - **Error Interception:** Customize error pages for a consistent user experience
 
-    | Setting                           | Default | Context   | Multiple | Description                                                                              |
-    | --------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.            |
-    | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                         |
-    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                       |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.  |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.       |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                                                 |
+    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                               |
+    | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                            |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                                                                                                                          |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                     |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                     |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                                                                                                          |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`   | multisite | yes      | **HTTP Version:** Protocol version used to talk to the upstream (`1.0`, `1.1`, or `2`). Set to `2` for HTTP/2 multiplexing on the upstream leg. WebSocket locations stay on 1.1 regardless. |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                                                                                                                              |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend.                                                                                                    |
 
     !!! tip "Best Practices"
         - Always specify the full URL in `REVERSE_PROXY_HOST` including the protocol (http:// or https://)
@@ -5107,13 +5191,19 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Performance Optimization:** Fine-tune request handling for specific use cases
         - **Flexibility:** Adapt to unique application requirements with specialized configurations
 
-    | Setting                           | Default | Context   | Multiple | Description                                                                  |
-    | --------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block. |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.           |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                         |
+    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                        |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                  |
+    | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location — bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
 
     !!! warning "Security Considerations"
         Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.
+
+    !!! warning "Safety recommendation for large uploads"
+        ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — **and only if** — a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
+
+        To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
 
 === "Caching Configuration"
 
@@ -5854,6 +5944,8 @@ Integrate easily the BunkerWeb UI.
 ## UI Single Sign-On <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+For a more detailed guide, see the [advanced usages](advanced.md#ui-single-sign-on-pro) documentation.
+
 STREAM support :x:
 
 Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
@@ -5883,6 +5975,8 @@ Enable SSO authentication for the BunkerWeb web interface by reading headers set
 
 
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+For a more detailed guide, see the [advanced usages](advanced.md#user-manager-pro) documentation.
 
 STREAM support :x:
 
@@ -6084,6 +6178,8 @@ TrustedMonitor/\d+\.\d+
 
 ## Wildcard <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+For a more detailed guide, see the [advanced usages](advanced.md#wildcard-pro) documentation.
 
 STREAM support :x:
 

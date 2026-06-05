@@ -32,16 +32,17 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Protocol Handling:** Support for HTTP, HTTPS, WebSockets, and other protocols
         - **Error Interception:** Customize error pages for a consistent user experience
 
-    | Setting                          | Default | Context   | Multiple | Description                                                                              |
-    | -------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`              | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.            |
-    | `REVERSE_PROXY_HOST`             |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                         |
-    | `REVERSE_PROXY_URL`              | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                       |
-    | `REVERSE_PROXY_BUFFERING`        | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING`| `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.  |
-    | `REVERSE_PROXY_KEEPALIVE`        | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.       |
-    | `REVERSE_PROXY_CUSTOM_HOST`      |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                                                 |
+    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                               |
+    | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                            |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                                                                                                                          |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                     |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                     |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                                                                                                          |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`   | multisite | yes      | **HTTP Version:** Protocol version used to talk to the upstream (`1.0`, `1.1`, or `2`). Set to `2` for HTTP/2 multiplexing on the upstream leg. WebSocket locations stay on 1.1 regardless. |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                                                                                                                              |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend.                                                                                                    |
 
     !!! tip "Best Practices"
         - Always specify the full URL in `REVERSE_PROXY_HOST` including the protocol (http:// or https://)
@@ -184,13 +185,19 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Performance Optimization:** Fine-tune request handling for specific use cases
         - **Flexibility:** Adapt to unique application requirements with specialized configurations
 
-    | Setting                           | Default | Context   | Multiple | Description                                                                  |
-    | --------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block. |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.           |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                         |
+    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                        |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                  |
+    | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location — bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
 
     !!! warning "Security Considerations"
         Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.
+
+    !!! warning "Safety recommendation for large uploads"
+        ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — **and only if** — a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
+
+        To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
 
 === "Caching Configuration"
 

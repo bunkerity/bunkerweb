@@ -96,10 +96,8 @@
     "enable_totp": "TOTP সক্ষম করুন",
     "entire_config": "সম্পূর্ণ কনফিগারেশন",
     "export": "রপ্তানি করুন",
-    "export_csv_all": "CSV (সব)",
-    "export_csv_visible": "CSV (দৃশ্যমান)",
-    "export_excel_all": "Excel (সব)",
-    "export_excel_visible": "Excel (দৃশ্যমান)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "গ্লোবাল সেটিংস আনুন",
     "filters_suffix": " ফিল্টার",
     "follow": "অনুসরণ করুন",
@@ -477,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "মিল থাকা সব {{count}}টি {{entity}} নির্বাচন করুন",
+    "bulk_select_all_done": "মিল থাকা সব {{count}}টি {{entity}} নির্বাচিত হয়েছে।",
+    "bulk_select_clear": "নির্বাচন পরিষ্কার করুন",
+    "bulk_select_page": "এই পৃষ্ঠার সব {{count}}টি {{entity}} নির্বাচিত হয়েছে।",
     "info_bans": "মোট {{total}} নিষেধাজ্ঞার মধ্যে {{start}} থেকে {{end}} দেখানো হচ্ছে",
     "info_cache": "মোট {{total}} ক্যাশ ফাইলের মধ্যে {{start}} থেকে {{end}} দেখানো হচ্ছে",
     "info_configs": "মোট {{total}} কাস্টম কনফিগারেশনের মধ্যে {{start}} থেকে {{end}} দেখানো হচ্ছে",

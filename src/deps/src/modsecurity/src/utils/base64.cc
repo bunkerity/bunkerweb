@@ -18,54 +18,92 @@
 #include <string.h>
 
 #include <string>
-#include <fstream>
-#include <iostream>
+#include <utility>
 
 #include "mbedtls/base64.h"
 
-template<typename Operation>
-inline std::string base64Helper(const char *data, const unsigned int len, Operation op) { // cppcheck-suppress syntaxError ; false positive
+namespace {
+template<typename Base64MbedtlsOperation>
+bool base64HelperMbedtls(const char *data, const unsigned int len,
+    Base64MbedtlsOperation op, std::string *output) {
+    if (output == nullptr) {
+        return false;
+    }
+
+    size_t out_len = 0;
+
+    if (const int sizingRet = op(nullptr, 0, &out_len,
+            reinterpret_cast<const unsigned char *>(data), len);
+        sizingRet != 0 && sizingRet != MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL) {
+        return false;
+    }
+
+    std::string ret(out_len, {});
+    if (out_len > 0) {
+        if (const int retCode = op(reinterpret_cast<unsigned char *>(ret.data()),
+                ret.size(), &out_len,
+                reinterpret_cast<const unsigned char *>(data), len);
+            retCode != 0) {
+            return false;
+        }
+
+        ret.resize(out_len);
+    }
+
+    *output = std::move(ret);
+    return true;
+}
+
+template<typename Base64ForgivenOperation>
+bool base64HelperForgiven(const char *data, const unsigned int len,
+    Base64ForgivenOperation op, std::string *output) {
+    if (output == nullptr) {
+        return false;
+    }
+
     size_t out_len = 0;
 
     op(nullptr, 0, &out_len,
         reinterpret_cast<const unsigned char *>(data), len);
 
     std::string ret(out_len, {});
-    if(out_len > 0) {
+    if (out_len > 0) {
         op(reinterpret_cast<unsigned char *>(ret.data()), ret.size(), &out_len,
             reinterpret_cast<const unsigned char *>(data), len);
 
         ret.resize(out_len);
     }
 
-    return ret;
+    *output = std::move(ret);
+    return true;
 }
+}  // namespace
 
 namespace modsecurity {
 namespace Utils {
 
 
-std::string Base64::encode(const std::string& data) {
-    return base64Helper(data.c_str(), data.size(), mbedtls_base64_encode);
+bool Base64::encode(const std::string& data, std::string *output) {
+    return base64HelperMbedtls(data.c_str(), data.size(), mbedtls_base64_encode, output);
 }
 
 
-std::string Base64::decode(const std::string& data, bool forgiven) {
+bool Base64::decode(const std::string& data, std::string *output, bool forgiven) {
     if (forgiven) {
-        return decode_forgiven(data);
+        return decode_forgiven(data, output);
     }
 
-    return decode(data);
+    return decode(data, output);
 }
 
 
-std::string Base64::decode(const std::string& data) {
-    return base64Helper(data.c_str(), strlen(data.c_str()), mbedtls_base64_decode);
+bool Base64::decode(const std::string& data, std::string *output) {
+    return base64HelperMbedtls(data.c_str(), strlen(data.c_str()), mbedtls_base64_decode, output);
 }
 
 
-std::string Base64::decode_forgiven(const std::string& data) {
-    return base64Helper(data.c_str(), data.size(), decode_forgiven_engine);
+bool Base64::decode_forgiven(const std::string& data, std::string *output) {
+    return base64HelperForgiven(data.c_str(), data.size(), decode_forgiven_engine, output);
 }
 
 

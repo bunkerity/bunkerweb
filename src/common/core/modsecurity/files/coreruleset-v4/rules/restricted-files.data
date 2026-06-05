@@ -32,6 +32,7 @@
 .aiignore
 .cursorignore
 .docker/
+.dockerenv
 .dockerignore
 .drush/
 .env
@@ -55,7 +56,7 @@
 .gsutil/
 .hg/
 .hgignore
-#.history
+#/.history
 .hplip/hplip.conf
 .htaccess
 .htdigest
@@ -425,6 +426,7 @@ weblogic.xml
 php_error.log
 php_errors.log
 # Java directory for non-public application data
+META-INF/
 WEB-INF/
 # Fortinet SSL VPN session file
 sslvpn_websession
@@ -581,3 +583,182 @@ sys/power
 # These endpoints allow arbitrary file system access and should never be exposed
 /@fs/
 /@id/
+
+cargo.toml
+# ash shell
+.ashrc
+.ash_history
+# NuShell
+config.nu
+# Cshell history file
+.csh_history
+# KornShell config file
+.kshrc
+# Fish Startup file
+config.fish
+# tcsh history file
+.tcsh_history
+
+
+pyproject.toml
+pytest.ini
+go.mod
+go.sum
+setup.py
+build.zig.zon
+
+# GNU screen
+.screenrc
+
+# Chocolatey package manager
+.chocolatey/
+# Gradle build tool
+.gradle/
+# Python IDLE
+.idlerc/
+# Kaggle config
+.kaggle/
+# Keras deep learning framework
+.keras/
+# MyPy type checker cache
+.mypy_cache/
+# Red Hat Subscription Manager config
+.redhat/
+# NPM node modules
+# node_modules/
+# Bun Dir
+.bun/
+# Bun global config
+.bunfig.toml
+# Ruby Shell config
+.irbrc/
+# Ruby Shell history
+.irb_history
+# Pry REPL config
+.pryrc/
+# RubyGems config
+.gemrc
+# RubyGems dir
+.gem/
+# Bundler dir
+.bundle/
+# Ruby environment manager
+.rbenv/
+# RVM dir
+.rvm/
+# RuboCop config file
+.rubocop.yml
+# PIP config
+.pip/
+# Conda
+.condarc
+anaconda3/
+miniconda3/
+# PyEnv
+.pyenv/
+# Apache Maven
+.m2/
+# SDKMAN!
+.sdkman/
+# Eclipse IDE
+.eclipse/
+# NPM Global Dir
+.npm-global/
+# YarnRc config file
+.yarnrc.yml
+# Prettier
+.prettierrc
+# Node-GYP
+.node-gyp
+# Curl Config File
+.curlrc
+# Wget Config File
+.wgetrc
+# Perl REPL & Core files
+.perldb
+.perl_repl_history
+.perlhistory
+perl/lib
+perl/bin
+# CPAN & Cpan+
+.cpan/
+.cpanplus/
+# perlenv
+.plenv
+# Kotlin Core & Cache
+.konan/
+# Kotlin REPL
+.kotlinc_history
+# git credentials
+.git-credentials
+# OpenVPN config
+.openvpn/
+openvpn/
+# WireGuard config
+wg-clients/
+# gFTP dir
+.gftp/
+# LFTP Configuration File
+.lftprc
+# NCFTP Conf Dir
+.ncftp/
+# Rsync Exclude File and Logs
+.rsync_exclude
+rsync.log
+# Wine dir
+.wine/
+# Nano Config Files & Dirs
+.nanorc
+.nano/
+# PostGresQL connection file
+.pg_service.conf
+# MySQL Login file
+.mylogin.cnf
+# MongoDB config
+.mongodb/
+.mongoshrc.js
+# Mongo shell
+.dbshell
+# PGAdmin config
+.pgadmin/
+# pm2 configs/logs/database
+.pm2/
+# Stubby config
+.stubby.yml
+.getdns/
+# Dig config
+.digrc
+# Unbond config
+.unbound/
+# mb sync config
+.mbsyncrc
+# OfflineIMAP config
+.offlineimaprc
+# getmail config
+.getmail/
+# usermin config
+.usermin/
+# cpanel ssl cerificates configs
+.cpanel/
+# OpenSSL
+.openssl.cnf
+# Terraform plugin cache dir and config file
+.terraformrc
+.terraform.d/
+# Pulimi
+.pulumi/
+.linode-cli/
+.oci/
+.opc/
+# SQL*Plus startup files and history
+.sqlplus_history
+login.sql
+# Microsoft EditorConfig config
+.editorconfig
+# Data Dog config
+.datadog-agent/
+# WP Cli config
+.wp-cli/
+# IBM Cloud Cli config
+.bluemix/
+.ibmcloud/

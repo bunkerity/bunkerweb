@@ -23,9 +23,9 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
       - name: Install kubectl
-        uses: azure/setup-kubectl@15650b3ad78fff148532a140b8a4c821796b2d7b # v5.0.0
+        uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.29.1"
@@ -52,8 +52,9 @@ jobs:
         if: always()
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: tf-${{ inputs.TYPE }}
+          retention-days: 7
           path: terraform.tar.enc

@@ -26,12 +26,22 @@
     "MTLS_VERIFY_CLIENT": {
       "context": "multisite",
       "default": "on",
-      "help": "Client verification mode. 'on' requires a valid certificate, 'optional' lets requests through when no certificate is presented, and 'optional_no_ca' skips CA validation.",
+      "help": "Client verification mode. 'on' requires a valid certificate, 'optional' lets requests through when no certificate is presented, and 'optional_no_ca' skips CA validation (diagnostics only, not real protection).",
       "id": "mtls-verify-client",
       "label": "Verify client mode",
       "regex": "^(on|optional|optional_no_ca)$",
       "type": "select",
       "select": ["on", "optional", "optional_no_ca"]
+    },
+    "MTLS_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Regex matched against the request URI to require a valid client certificate only on matching paths (HTTP only). Set MTLS_VERIFY_CLIENT to optional so the handshake completes for non-matching paths; enforcement runs per-request in Lua. An invalid regex fails closed (matching requests are denied and logged) instead of being silently allowed. Use numbered slots for several paths (MTLS_URL_1, MTLS_URL_2). Leave empty to enforce mTLS on the whole site.",
+      "id": "mtls-url",
+      "label": "mTLS URL",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "mtls"
     },
     "MTLS_VERIFY_DEPTH": {
       "context": "multisite",

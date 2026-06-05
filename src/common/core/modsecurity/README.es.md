@@ -45,12 +45,17 @@ Siga estos pasos para configurar y usar ModSecurity:
 
     El equipo de CRS mantiene activamente una lista de exclusiones para aplicaciones populares como WordPress, Nextcloud, Drupal y Cpanel, lo que facilita la integración sin afectar la funcionalidad. Los beneficios de seguridad superan con creces el mínimo esfuerzo de configuración necesario para solucionar los falsos positivos.
 
+!!! warning "Recomendación de seguridad para cargas grandes"
+    ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si — **y solo si** — una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL para emitir `modsecurity off;` en su bloque `location`. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
+
+    Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
+
 ### Versiones de CRS Disponibles
 
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
 - **`3`**: Estable [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
-- **`4`**: Estable [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**predeterminada**).
+- **`4`**: Estable [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**predeterminada**).
 
 !!! warning "Compilación Nocturna Obsoleta"
     La opción `nightly` para `MODSECURITY_CRS_VERSION` está obsoleta ya que el proyecto OWASP Core Rule Set ha descontinuado las versiones nocturnas. Si su configuración aún utiliza `nightly`, se usará CRS v4 en su lugar. Por favor, actualice su configuración para usar `MODSECURITY_CRS_VERSION=4`.

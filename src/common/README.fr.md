@@ -128,6 +128,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | ------------------------------ | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------- |
     | `WORKERLOCK_MEMORY_SIZE`       | `48k`             | global   | Non      | **Mémoire workerlock :** Taille de lua_shared_dict pour l’initialisation des workers. |
     | `DATASTORE_MEMORY_SIZE`        | `64m`             | global   | Non      | **Mémoire datastore :** Taille du datastore interne.                                  |
+    | `DATASTORE_LRU_SIZE`           | `1k`              | global   | Non      | **Taille du LRU datastore :** Nombre d'emplacements pour le LRU du datastore partagé par worker. Accepte un entier ou les suffixes `k`/`m` (par exemple `1k`, `10k`, `1m`). |
     | `CACHESTORE_MEMORY_SIZE`       | `64m`             | global   | Non      | **Mémoire cachestore :** Taille du cache interne.                                     |
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | Non      | **Mémoire cachestore IPC :** Taille du cache interne (IPC).                           |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | Non      | **Mémoire cachestore miss :** Taille du cache interne (miss).                         |

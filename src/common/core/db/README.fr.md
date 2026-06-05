@@ -37,14 +37,24 @@ Comment ça marche :
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | non      | **Tentatives de réessai :** Nombre de tentatives en cas d'erreurs transitoires lors des opérations.                                                                            |
 | `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | non      | **Délai entre réessais :** Délai en secondes entre les tentatives de réessai en cas d'erreurs transitoires.                                                                    |
 
-!!! tip "Choix du moteur" - SQLite (défaut) : simple et fichier unique, idéal mono‑nœud/tests. - PostgreSQL : recommandé en production multi‑instances (robustesse, concurrence). - MySQL/MariaDB : alternative solide aux capacités proches de PostgreSQL. - Oracle : adapté aux environnements d'entreprise standardisés sur Oracle.
+!!! tip "Choix du moteur"
+    - **SQLite** (défaut) : simple et fichier unique, idéal mono‑nœud/tests.
+    - **PostgreSQL** : recommandé en production multi‑instances (robustesse, concurrence).
+    - **MySQL/MariaDB** : alternative solide aux capacités proches de PostgreSQL.
+    - **Oracle** : adapté aux environnements d'entreprise standardisés sur Oracle.
 
-!!! info "Format SQLAlchemy" - SQLite : `sqlite:////chemin/vers/database.sqlite3` - PostgreSQL : `postgresql://user:password@hôte:port/base` - MySQL/MariaDB : `mysql://user:password@hôte:port/base` ou `mariadb://user:password@hôte:port/base` - Oracle : `oracle://user:password@hôte:port/base`
+!!! info "Format SQLAlchemy"
+    L'URI de base de données suit le format SQLAlchemy :
+
+    - SQLite : `sqlite:////chemin/vers/database.sqlite3`
+    - PostgreSQL : `postgresql://user:password@hôte:port/base`
+    - MySQL/MariaDB : `mysql://user:password@hôte:port/base` ou `mariadb://user:password@hôte:port/base`
+    - Oracle : `oracle://user:password@hôte:port/base`
 
 !!! warning "Maintenance"
     Des tâches quotidiennes assurent la maintenance automatique :
 
-- **Purge des runs de jobs excédentaires** : supprime l'historique au-delà de `DATABASE_MAX_JOBS_RUNS`.
-- **Purge des sessions UI expirées** : enlève les sessions plus anciennes que `DATABASE_MAX_SESSION_AGE_DAYS`.
+    - **Purge des runs de jobs excédentaires** : supprime l'historique au-delà de `DATABASE_MAX_JOBS_RUNS`.
+    - **Purge des sessions UI expirées** : enlève les sessions plus anciennes que `DATABASE_MAX_SESSION_AGE_DAYS`.
 
-Ces jobs évitent la croissance illimitée tout en conservant un historique d'exploitation pertinent.
+    Ces jobs évitent la croissance illimitée tout en conservant un historique d'exploitation pertinent.

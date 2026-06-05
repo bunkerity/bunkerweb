@@ -6,7 +6,6 @@ from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)

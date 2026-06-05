@@ -105,9 +105,10 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         - Prevents file upload attacks
         - Reduces the risk of server resource exhaustion
 
-    | Setting           | Default | Context   | Multiple | Description                                                                                        |
-    | ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-    | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads). |
+    | Setting           | Default | Context   | Multiple | Description                                                                                                                            |
+    | ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+    | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads).                                     |
+    | `MAX_HEADERS`     | `100`   | global    | no       | **Maximum Headers:** Maximum number of header lines per request. Requests exceeding this limit are rejected with `400 Bad Request`.    |
 
     !!! tip "Request Size Configuration Best Practices"
         If you need to allow a request body of unlimited size, you can set the `MAX_CLIENT_SIZE` value to `0`. However, this is **not recommended** due to potential security and performance risks.
@@ -292,3 +293,4 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     OPEN_FILE_CACHE_ERRORS: "yes"
     OPEN_FILE_CACHE_MIN_USES: "3"
     OPEN_FILE_CACHE_VALID: "60s"
+    ```

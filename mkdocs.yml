@@ -168,6 +168,7 @@ plugins:
         color: "white"
   - mike:
       canonical_version: latest
+  - optimize
 
 hooks:
   - docs/hooks/llmstxt.py

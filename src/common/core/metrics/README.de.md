@@ -91,8 +91,9 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
 | ------------------------------------ | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_METRICS`                        | `yes`    | multisite | nein     | **Metriken aktivieren:** Auf `yes` setzen, um die Erfassung und den Abruf von Metriken zu aktivieren.                                     |
 | `METRICS_MEMORY_SIZE`                | `16m`    | global    | nein     | **Speichergröße:** Größe des internen Speichers für Metriken (z. B. `8192`, `16m`, `32m`).                                                 |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen.                             |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen.                         |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`. |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`. |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | nein     | **Max. LRU-Verlauf:** Anzahl der LRU-Slots pro Worker und Limit des Ereignisverlaufsarrays pro Schlüssel (Blockierungsverläufe, Authentifizierungsverläufe usw.). Akzeptiert die Kurzschreibweise `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | nein     | **Metriken in Redis speichern:** Auf `yes` setzen, um Metriken (Zähler und Tabellen) zur clusterweiten Aggregation in Redis zu speichern. |
 
 !!! tip "Dimensionierung der Speicherzuweisung"
@@ -116,8 +117,9 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -130,6 +132,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -142,6 +145,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 

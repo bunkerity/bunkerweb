@@ -5,6 +5,7 @@
             aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
             data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
             data-default="{{ setting_default }}"
+            data-method="{{ setting_method }}"
             {% if disabled %}disabled{% endif %}
             {% if required %}required{% endif %}>
         {% for option in setting_data["select"] %}

@@ -21,6 +21,7 @@
 #include <string>
 #include <iostream>
 #include <iterator>
+#include <memory>
 
 #include "test/common/colors.h"
 #include "src/utils/regex.h"
@@ -105,15 +106,17 @@ std::string UnitTest::print() const {
 }
 
 
-UnitTest *UnitTest::from_yajl_node(const yajl_val &node) {
+std::unique_ptr<UnitTest> UnitTest::from_yajl_node(const yajl_val &node) {
     size_t num_tests = node->u.object.len;
-    UnitTest *u = new UnitTest();
+    auto u = std::make_unique<UnitTest>();
+
+    u->skipped = false;
+    u->capture = 0;
 
     for (int i = 0; i < num_tests; i++) {
         const char *key = node->u.object.keys[ i ];
         yajl_val val = node->u.object.values[ i ];
 
-        u->skipped = false;
         if (strcmp(key, "param") == 0) {
            u->param = YAJL_GET_STRING(val);
         } else if (strcmp(key, "input") == 0) {
@@ -127,6 +130,10 @@ UnitTest *UnitTest::from_yajl_node(const yajl_val &node) {
            u->type = YAJL_GET_STRING(val);
         } else if (strcmp(key, "ret") == 0) {
            u->ret = YAJL_GET_INTEGER(val);
+        } else if (strcmp(key, "capture") == 0) {
+           u->capture = YAJL_GET_INTEGER(val);
+        } else if (strcmp(key, "libinjection_override") == 0) {
+           u->libinjection_override = YAJL_GET_STRING(val);
         } else if (strcmp(key, "output") == 0) {
            u->output = std::string(YAJL_GET_STRING(val));
            json2bin(&u->output);

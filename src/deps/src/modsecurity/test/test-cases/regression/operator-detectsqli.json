@@ -1,46 +1,465 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Operator :: @detectSQLi",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "Content-Length": "27",
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: known stable fingerprint ascii substring",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "61",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "param1=ascii(substring(version() from 1 for 1))&param2=value2"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "expected": {
+      "http_code": 403,
+      "debug_log": "Added DetectSQLi match TX.0: f\\(f\\(f"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1201,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2201,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Added DetectSQLi match TX.0: f\\(f\\(f"
+    "title": "Testing Operator :: @detectSQLi :: trim still detects stable fingerprint",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "67",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=   ascii(substring(version() from 1 for 1))   &param2=value2"
+      ]
     },
-    "rules":[
+    "expected": {
+      "http_code": 403,
+      "debug_log": "Added DetectSQLi match TX.0: f\\(f\\(f"
+    },
+    "rules": [
       "SecRuleEngine On",
-      "SecRule ARGS \"@detectSQLi\" \"id:1,phase:2,capture,pass,t:trim\""
+      "SecRule ARGS \"@detectSQLi\" \"id:1202,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2202,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: boolean based payload",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "33",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=' or 1=1 -- &param2=value2"
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1203,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2203,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: union select variation",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "46",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=-1 union select 1,2,3 -- &param2=value2"
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1204,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2204,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: time function payload",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "38",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=1;select sleep(1)&param2=value2"
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1205,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2205,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: inline comment obfuscation",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "35",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=1/**/or/**/1=1&param2=value2"
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1206,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2206,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: benign identifier with sql words",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "38",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=selective_catalog&param2=normal"
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1207,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2207,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: numeric edge case should not match",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "23",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=100001&param2=42"
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1208,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2208,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: capture stores fingerprint in TX.0",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "61",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=ascii(substring(version() from 1 for 1))&param2=value2"
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1209,phase:2,capture,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:0 \"@streq f(f(f\" \"id:2209,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "title": "Testing Operator :: @detectSQLi :: no capture keeps TX.0 unchanged",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "61",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "param1=ascii(substring(version() from 1 for 1))&param2=value2"
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@detectSQLi\" \"id:1210,phase:2,pass,t:trim,setvar:tx.sqli_hit=1\"",
+      "SecRule TX:0 \"@streq f(f(f\" \"id:2210,phase:2,deny,status:409\"",
+      "SecRule TX:sqli_hit \"@eq 1\" \"id:2211,phase:2,deny,status:403\""
     ]
   }
 ]

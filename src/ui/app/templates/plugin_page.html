@@ -118,7 +118,16 @@
                                     {% if key.startswith("info_") %}
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">
-                                                <p class="card-text mb-1">{{ value.get("value") }}</p>
+                                                {% if value.get("secret") %}
+                                                    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                                                        <p class="card-text mb-0 courier-prime secret-field" data-secret="{{ value.get('value') }}">••••••••••••</p>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary p-1 lh-1 secret-toggle" aria-label="Toggle visibility" title="Toggle visibility">
+                                                            <i class="bx bx-show bx-xs"></i>
+                                                        </button>
+                                                    </div>
+                                                {% else %}
+                                                    <p class="card-text mb-1">{{ value.get("value") }}</p>
+                                                {% endif %}
                                                 {% set description = value.get("description") %}
                                                 {% if description
                                                     %}

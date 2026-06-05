@@ -1,12 +1,12 @@
-FROM ubuntu:noble@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b AS builder
+FROM ubuntu:resolute@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64 AS builder
 
 # Install dependencies
 RUN apt update && \
     apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
-    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.12 python3.12-dev python3-pip -y
+    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.14 python3.14-dev python3-pip -y
 
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.28.3
+ENV NGINX_VERSION=1.30.2
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx
@@ -42,8 +42,15 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
-    python3.12 -m pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
-    python3.12 -m pip install --no-cache-dir --require-hashes --break-system-packages --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+    python3.14 -m pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
+    python3.14 -m pip install --no-cache-dir --require-hashes --break-system-packages --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+
+# Apply BunkerWeb patches to vendored Python deps before they are tarballed (DNS alias / CNAME delegation for certbot).
+COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
+RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+    patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+    grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
+    rm -f /tmp/certbot-dns-alias.patch
 
 RUN apt-get install -y pigz && \
     tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
@@ -120,7 +127,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM ubuntu:noble@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
+FROM ubuntu:resolute@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -143,7 +150,7 @@ WORKDIR /usr/share/bunkerweb
 RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     echo "Linux" > INTEGRATION && \
     mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
-    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
     touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb

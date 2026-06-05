@@ -11,9 +11,9 @@ Los atacantes suelen utilizar herramientas automatizadas (bots) para intentar ex
 
 Siga estos pasos para habilitar y configurar la función Antibot:
 
-1.  **Elija un tipo de desafío:** Decida qué tipo de desafío antibot usar (p. ej., [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [javascript](#__tabbed_3_2)).
+1.  **Elija un tipo de desafío:** Decida qué tipo de desafío antibot usar (p. ej., [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [capjs](#__tabbed_3_8), [javascript](#__tabbed_3_2)).
 2.  **Habilite la función:** Establezca la configuración `USE_ANTIBOT` en el tipo de desafío elegido en su configuración de BunkerWeb.
-3.  **Configure los ajustes:** Ajuste las otras configuraciones `ANTIBOT_*` según sea necesario. Para reCAPTCHA, hCaptcha, Turnstile y mCaptcha, debe crear una cuenta con el servicio respectivo y obtener claves de API.
+3.  **Configure los ajustes:** Ajuste las otras configuraciones `ANTIBOT_*` según sea necesario. Para reCAPTCHA, hCaptcha y Turnstile, cree una cuenta con el servicio respectivo y obtenga claves de API. Para mCaptcha y Cap.js, puede autoalojar el proveedor o usar un servicio alojado y luego configurar la clave de sitio y la clave secreta requeridas.
 4.  **Importante:** Asegúrese de que el `ANTIBOT_URI` sea una URL única en su sitio que no esté en uso.
 
 !!! important "Acerca de la configuración `ANTIBOT_URI`"
@@ -229,6 +229,30 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
+=== "Cap.js"
+
+    [Cap.js](https://capjs.js.org/) es un CAPTCHA de prueba de trabajo autoalojado, de código abierto y respetuoso con la privacidad. En lugar de delegar la verificación en un servicio de terceros, usted ejecuta el servidor Cap.js y BunkerWeb verifica los tokens contra ese servidor.
+
+    Use la URL frontend para el endpoint visible desde el navegador que sirve el widget. Si BunkerWeb puede llegar al servidor Cap.js mediante una dirección interna, establezca la URL backend en ese endpoint interno; de lo contrario, déjela vacía y BunkerWeb usará la URL frontend para `/siteverify`.
+
+    **Ajustes de configuración:**
+
+    | Configuración                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                       |
+    | ---------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `capjs` para habilitar el desafío de Cap.js.                                                  |
+    | `ANTIBOT_CAPJS_FRONTEND_URL` |                   | multisite | no       | **URL frontend de Cap.js:** URL visible para el navegador del servidor Cap.js que sirve el widget.                                 |
+    | `ANTIBOT_CAPJS_BACKEND_URL`  |                   | multisite | no       | **URL backend de Cap.js:** URL interna opcional que BunkerWeb usa para `/siteverify`; si está vacía, usa la URL frontend.          |
+    | `ANTIBOT_CAPJS_SITEKEY`      |                   | multisite | no       | **Clave del sitio de Cap.js:** La clave de sitio para el desafío de Cap.js.                                                        |
+    | `ANTIBOT_CAPJS_SECRET`       |                   | multisite | no       | **Clave secreta de Cap.js:** La clave secreta que BunkerWeb usa para verificar los tokens de Cap.js.                               |
+
+    !!! note "Requisitos operativos"
+        - Use HTTPS para `ANTIBOT_CAPJS_FRONTEND_URL` en producción. El worker del navegador requiere `crypto.subtle` en un contexto seguro, y HTTPS evita cambios MITM en el widget.
+        - Configure CORS en la clave de sitio de Cap.js para permitir el origen protegido.
+        - Defina `ANTIBOT_CAPJS_FRONTEND_URL` y `ANTIBOT_CAPJS_BACKEND_URL` solo como orígenes: esquema, host y puerto opcional, sin ruta.
+        - Use el widget de Cap.js **0.1.48 o posterior**. BunkerWeb sirve una CSP estricta basada en nonce; los widgets anteriores rompen los desafíos de instrumentación porque el `<script>` inline del iframe `srcdoc` aislado no propaga el nonce. Si autoaloja `tiago2/cap`, fije una etiqueta reciente (p. ej. `tiago2/cap:3.1.2` o posterior) o establezca `WIDGET_VERSION` en `0.1.48` o posterior.
+
+    Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
+
 ### Configuraciones de ejemplo
 
 === "Desafío de Cookie"
@@ -336,6 +360,21 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
     ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
     ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
     ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Desafío de Cap.js"
+
+    Configuración de ejemplo para habilitar el desafío de Cap.js:
+
+    ```yaml
+    USE_ANTIBOT: "capjs"
+    ANTIBOT_CAPJS_FRONTEND_URL: "https://cap.example.com"
+    ANTIBOT_CAPJS_BACKEND_URL: "http://cap-server:3000"
+    ANTIBOT_CAPJS_SITEKEY: "your-site-key"
+    ANTIBOT_CAPJS_SECRET: "your-secret-key"
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
     ANTIBOT_TIME_VALID: "86400"

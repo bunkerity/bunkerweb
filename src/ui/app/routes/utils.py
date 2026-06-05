@@ -1,11 +1,12 @@
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
 from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
 
-from flask import Response, redirect, request, url_for
+from flask import Response, g, has_request_context, redirect, request, url_for
 from qrcode.main import QRCode
 from regex import compile as re_compile
 
@@ -20,7 +21,7 @@ REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
 CUSTOM_CONF_RX = re_compile(
-    r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|DEFAULT_SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
+    r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
 FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?$")
 
@@ -167,7 +168,17 @@ def cors_required(f):
 def get_redis_client():
     """
     Get a Redis client using configuration from BW_CONFIG.
+
+    The client is cached on ``flask.g`` for the duration of the current request,
+    so a single request that touches Redis multiple times only pays one
+    BW_CONFIG DB query and one connection PING. The cache stores ``None`` too
+    (Redis disabled or unreachable), so we don't keep re-probing within a
+    request. Outside of a request context (e.g. background executor threads,
+    CLI) the client is never cached and ``flash`` is skipped.
     """
+    if has_request_context() and "bw_redis_client" in g:
+        return g.bw_redis_client
+
     db_config = BW_CONFIG.get_config(
         global_only=True,
         methods=False,
@@ -206,8 +217,11 @@ def get_redis_client():
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
     )
 
-    if use_redis and not redis_client:
+    if use_redis and not redis_client and has_request_context():
         flash("Couldn't connect to redis", "error")
+
+    if has_request_context():
+        g.bw_redis_client = redis_client
 
     return redis_client
 
@@ -230,3 +244,44 @@ def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:
         file_setting_names[setting_name] = _sanitize_filename(variables.pop(key, ""))
 
     return file_setting_names
+
+
+def parse_search_panes(source, *, sort_values: bool = False) -> str:
+    """Parse `searchPanes[field][i]=value` keys from a Werkzeug MultiDict-like
+    source (request.form, request.args, ...) into the `field1:value1,value2;field2:value3`
+    format expected by data-collection helpers (BW_INSTANCES_UTILS.get_reports_query, etc.)."""
+    search_panes = defaultdict(list)
+    for key, value in source.items():
+        if not key.startswith("searchPanes["):
+            continue
+        try:
+            field = key.split("[", 1)[1].split("]", 1)[0]
+        except IndexError:
+            continue
+        if field:
+            search_panes[field].append(value)
+
+    if not search_panes:
+        return ""
+
+    if sort_values:
+        items = sorted(search_panes.items())
+        return ";".join(f"{field}:{','.join(sorted(values))}" for field, values in items)
+
+    return ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items())
+
+
+def parse_search_panes_dict(source) -> Dict[str, list]:
+    """Same as `parse_search_panes` but returns the parsed mapping for callers
+    that need to apply the filter in-process rather than forwarding a string."""
+    parsed: Dict[str, list] = defaultdict(list)
+    for key, value in source.items():
+        if not key.startswith("searchPanes["):
+            continue
+        try:
+            field = key.split("[", 1)[1].split("]", 1)[0]
+        except IndexError:
+            continue
+        if field:
+            parsed[field].append(value)
+    return parsed

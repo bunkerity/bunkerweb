@@ -6,7 +6,6 @@ from signal import SIGINT, SIGTERM, signal
 from subprocess import PIPE, Popen, call
 from sys import path as sys_path
 
-
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)

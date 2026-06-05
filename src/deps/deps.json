@@ -31,9 +31,9 @@
     },
     {
       "id": "libinjection",
-      "name": "libinjection v3.10.0+",
+      "name": "libinjection v4.0.0",
       "url": "https://github.com/libinjection/libinjection.git",
-      "commit": "73268cfd85f9ee625e1d73ec2b37672bb2fd83f6",
+      "commit": "211782219663f889f471650150df12b623c5766e",
       "post_install": "rm -r src/deps/src/libinjection/tests"
     },
     {
@@ -44,9 +44,9 @@
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.16",
+      "name": "lua-cjson v2.1.0.17",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "e6daf3cdfac61055af3f7d88d9886942ff0de6e6"
+      "commit": "617164a0fe3bb647128178f9caefb304b8573bb6"
     },
     {
       "id": "lua-ffi-zlib",
@@ -166,9 +166,9 @@
     },
     {
       "id": "lua-resty-string",
-      "name": "lua-resty-string v0.16",
+      "name": "lua-resty-string v0.18",
       "url": "https://github.com/openresty/lua-resty-string.git",
-      "commit": "7be2e1d907744f965af115819cca9e6580f2e760",
+      "commit": "e10c1cc2ca85ea277a8d759333444f37f77c884c",
       "post_install": "rm -r src/deps/src/lua-resty-string/t"
     },
     {
@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260311",
+      "name": "LuaJIT v2.1-20260415",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "3640b6c590f9c383ffa5d0955f35e646f684a1da",
+      "commit": "7fcf52f5bc7a91d938312ed76b18f3d76cb78483",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -227,17 +227,18 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v3.6.5",
+      "name": "Mbed TLS v4.1.0",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "e185d7fd85499c8ce5ca2a54f5cf8fe7dbe3f8df",
+      "commit": "0fe989b6b514192783c469039edd325fd0989806",
+      "submodules": true,
       "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.14",
+      "name": "ModSecurity v3.0.15",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
-      "commit": "a555e5a44573e50f04ad997b3b24c214c42f8e29",
-      "post_install": "rm src/deps/src/modsecurity/.gitmodules && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
+      "commit": "0fb4aff98b4980cf6426697d5605c424e3d5bb60",
+      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
     },
     {
       "id": "modsecurity-nginx",
@@ -248,9 +249,9 @@
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.28.3",
+      "name": "Nginx v1.30.2",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "9b958b000776c88036cd800c66e7e4ad39e6fd41",
+      "commit": "a92a537860c7b87d3793d9eb41c9cf3ed833b53c",
       "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {

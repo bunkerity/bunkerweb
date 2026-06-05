@@ -1,191 +1,171 @@
 from collections import defaultdict
+from contextlib import suppress
 from datetime import datetime
+from io import BytesIO, StringIO
 from ipaddress import ip_address as validate_ip_address
 from json import JSONDecodeError, loads
 from math import floor
 from time import time
 from traceback import format_exc
-from html import escape
+from html import escape, unescape
 
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
-from app.utils import LOGGER, RESERVED_SERVICE_NAMES, flash
+from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash
 
-from app.routes.utils import cors_required, get_redis_client, get_remain, handle_error, verify_data_in_form
+from app.routes.utils import (
+    cors_required,
+    get_redis_client,
+    get_remain,
+    handle_error,
+    parse_search_panes_dict,
+    verify_data_in_form,
+)
 
 bans = Blueprint("bans", __name__)
 
 
-@bans.route("/bans", methods=["GET"])
-@login_required
-def bans_page():
-    # Get list of services for the service dropdown in the UI
-    services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"]
-    if isinstance(services, str):
-        services = services.split()
+# Column order shared between the table and exports — must stay in sync with bans.js
+_BAN_COLUMNS = (
+    "date",  # 0
+    "ip",  # 1
+    "country",  # 2
+    "reason",  # 3
+    "scope",  # 4
+    "service",  # 5
+    "end_date",  # 6
+    "time_left",  # 7
+    "actions",  # 8
+)
 
-    return render_template("bans.html", services=services)
 
-
-@bans.route("/bans/fetch", methods=["POST"])
-@login_required
-@cors_required
-def bans_fetch():
+def _collect_all_bans():
+    """Pull every ban from Redis (global + service-scoped) and from each
+    BunkerWeb instance, deduplicate them, and enrich with `remain`/`start_date`/
+    `end_date` for display. Returns the raw (unfiltered) list."""
     redis_client = get_redis_client()
 
-    bans = []
+    bans_list = []
     if redis_client:
         try:
-            # Retrieve global bans from Redis (stored with prefix "bans_ip_")
-            for key in redis_client.scan_iter("bans_ip_*"):
-                key_str = key.decode("utf-8", "replace")
-                ip = key_str.replace("bans_ip_", "")
-                data = redis_client.get(key)
-                if not data:
-                    continue
-                exp = redis_client.ttl(key)
-                raw_value = data.decode("utf-8", "replace")
-                try:
-                    ban_data = loads(raw_value)
-                except (JSONDecodeError, ValueError) as e:
-                    LOGGER.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
-                    ban_data = {"reason": raw_value, "service": "unknown", "date": 0, "country": "unknown", "ban_scope": "global", "permanent": False}
+            # Collect keys first, then pipeline GET+TTL for all of them. This
+            # turns 2 round-trips per ban (get + ttl) into ~2 round-trips total.
+            # Results come back flat: [data0, ttl0, data1, ttl1, ...].
+            global_keys = list(redis_client.scan_iter("bans_ip_*"))
+            if global_keys:
+                pipe = redis_client.pipeline(transaction=False)
+                for key in global_keys:
+                    pipe.get(key)
+                    pipe.ttl(key)
+                results = pipe.execute()
+                for idx, key in enumerate(global_keys):
+                    data = results[2 * idx]
+                    exp = results[2 * idx + 1]
+                    if not data:
+                        continue
+                    key_str = key.decode("utf-8", "replace")
+                    ip = key_str.replace("bans_ip_", "")
+                    raw_value = data.decode("utf-8", "replace")
+                    try:
+                        ban_data = loads(raw_value)
+                    except (JSONDecodeError, ValueError) as e:
+                        LOGGER.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
+                        ban_data = {"reason": raw_value, "service": "unknown", "date": 0, "country": "unknown", "ban_scope": "global", "permanent": False}
 
-                # Ensure consistent scope for frontend display
-                ban_data["ban_scope"] = "global"
-                ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
+                    ban_data["ban_scope"] = "global"
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
-                # Check if this is a permanent ban
-                if ban_data.get("permanent", False):
-                    exp = 0  # Override TTL for permanent bans
+                    if ban_data.get("permanent", False):
+                        exp = 0
 
-                bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
+                    bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
 
-            # Retrieve service-specific bans from Redis (stored with prefix "bans_service_*_ip_*")
-            for key in redis_client.scan_iter("bans_service_*_ip_*"):
-                key_str = key.decode("utf-8", "replace")
-                service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
-                data = redis_client.get(key)
-                if not data:
-                    continue
-                exp = redis_client.ttl(key)
-                raw_value = data.decode("utf-8", "replace")
-                try:
-                    ban_data = loads(raw_value)
-                except (JSONDecodeError, ValueError) as e:
-                    LOGGER.warning(f"Failed to decode ban data for {ip} on service {service}, using raw value as reason: {e}")
-                    ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": "service", "permanent": False}
+            service_keys = list(redis_client.scan_iter("bans_service_*_ip_*"))
+            if service_keys:
+                pipe = redis_client.pipeline(transaction=False)
+                for key in service_keys:
+                    pipe.get(key)
+                    pipe.ttl(key)
+                results = pipe.execute()
+                for idx, key in enumerate(service_keys):
+                    data = results[2 * idx]
+                    exp = results[2 * idx + 1]
+                    if not data:
+                        continue
+                    key_str = key.decode("utf-8", "replace")
+                    service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
+                    raw_value = data.decode("utf-8", "replace")
+                    try:
+                        ban_data = loads(raw_value)
+                    except (JSONDecodeError, ValueError) as e:
+                        LOGGER.warning(f"Failed to decode ban data for {ip} on service {service}, using raw value as reason: {e}")
+                        ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": "service", "permanent": False}
 
-                # Ensure consistent scope for frontend display
-                ban_data["ban_scope"] = "service"
-                ban_data["service"] = service
-                ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
+                    ban_data["ban_scope"] = "service"
+                    ban_data["service"] = service
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
-                # Check if this is a permanent ban
-                if ban_data.get("permanent", False):
-                    exp = 0  # Override TTL for permanent bans
+                    if ban_data.get("permanent", False):
+                        exp = 0
 
-                bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
+                    bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Couldn't get bans from redis: {e}")
-            flash("Failed to fetch bans from Redis, see logs for more information.", "error")
-            bans = []
+            bans_list = []
 
-    # Also fetch bans from all connected BunkerWeb instances
     instance_bans = BW_INSTANCES_UTILS.get_bans()
 
-    # Current timestamp for calculating remaining times
     timestamp_now = time()
 
-    # Process instance bans and avoid duplicates with Redis bans
     for ban in instance_bans:
-        # Normalize ban scope to ensure consistent frontend display
         if "ban_scope" not in ban:
-            if ban.get("service", "_") == "_":
-                ban["ban_scope"] = "global"
-            else:
-                ban["ban_scope"] = "service"
+            ban["ban_scope"] = "global" if ban.get("service", "_") == "_" else "service"
+        if not any(b["ip"] == ban["ip"] and b["ban_scope"] == ban["ban_scope"] and (b.get("service", "_") == ban.get("service", "_")) for b in bans_list):
+            bans_list.append(ban)
 
-        # Skip if this ban already exists in the list (checking IP, scope and service combination)
-        if not any(b["ip"] == ban["ip"] and b["ban_scope"] == ban["ban_scope"] and (b.get("service", "_") == ban.get("service", "_")) for b in bans):
-            bans.append(ban)
-
-    # Format ban times for display
-    for ban in bans:
+    for ban in bans_list:
         exp = ban.pop("exp", 0)
-
-        # Handle permanent bans (exp = 0)
         if exp == 0 or ban.get("permanent", False):
             ban["remain"] = "permanent"
             ban["permanent"] = True
             ban["end_date"] = "permanent"
         else:
-            # Calculate human-readable remaining time for non-permanent bans
             remain = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
             ban["remain"] = remain[0]
-            # Format timestamps for start and end dates
             ban["start_date"] = datetime.fromtimestamp(floor(ban["date"])).astimezone().isoformat()
             ban["end_date"] = datetime.fromtimestamp(floor(timestamp_now + exp)).astimezone().isoformat()
+        # Preserve `exp` for end_date pane filters that still need it
+        ban["exp"] = exp
 
-    # DataTables parameters
-    draw = int(request.form.get("draw", 1))
-    start = max(0, int(request.form.get("start", 0)))
-    length = max(1, min(int(request.form.get("length", 10)), 1000))
-    search_value = request.form.get("search[value]", "").lower()
-    # DataTables includes two leading non-data columns (details-control and select)
-    # Adjust incoming index to align with backend data columns
+    return bans_list
+
+
+def _to_float(value, default=0.0):
     try:
-        order_column_index_dt = int(request.form.get("order[0][column]", 0))
+        if isinstance(value, (int, float)):
+            return float(value)
+        if value is None:
+            return float(default)
+        return float(str(value))
     except Exception:
-        order_column_index_dt = 0
-    order_column_index = max(order_column_index_dt - 2, 0)
-    order_direction = request.form.get("order[0][dir]", "desc")
-    search_panes = defaultdict(list)
-    for key, value in request.form.items():
-        if key.startswith("searchPanes["):
-            field = key.split("[")[1].split("]")[0]
-            search_panes[field].append(value)
+        return float(default)
 
-    # DataTable columns (must match frontend order)
-    columns = [
-        "date",  # 0
-        "ip",  # 1
-        "country",  # 2
-        "reason",  # 3
-        "scope",  # 4
-        "service",  # 5
-        "end_date",  # 6
-        "time_left",  # 7
-        "actions",  # 8
-    ]
 
-    # Helper: format a ban for DataTable row
-    def format_ban(ban):
-        # Defensive: some bans may lack some fields
-        return {
-            "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
-            "ip": escape(str(ban.get("ip", "N/A"))),
-            "country": escape(str(ban.get("country", "N/A"))),
-            "reason": escape(str(ban.get("reason", "N/A"))),
-            "scope": escape(str(ban.get("ban_scope", "global"))),
-            "service": escape(str(ban.get("service") or "_")),
-            "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
-            "time_left": "permanent" if ban.get("permanent", False) else escape(str(ban.get("remain", "N/A"))),
-            "permanent": bool(ban.get("permanent", False)),
-            "actions": "",  # Actions column for buttons
-        }
+def _filter_and_sort_bans(all_bans, search_value, search_panes, order_column_index, order_direction):
+    """Apply the same filtering + sorting logic as `/bans/fetch`, returning the
+    full filtered list (no pagination)."""
 
-    # Apply searchPanes filters
-    def filter_by_search_panes(bans):
-        filtered = bans
+    def filter_by_search_panes(items):
+        filtered = items
         for field, selected_values in search_panes.items():
             if not selected_values:
                 continue
             if field == "date":
-                # Special handling for date searchpane
                 now = time()
 
                 def date_filter(ban):
@@ -203,30 +183,19 @@ def bans_fetch():
 
                 filtered = list(filter(date_filter, filtered))
             elif field == "scope":
-                # Special handling for scope searchpane
+
                 def scope_filter(ban):
-                    for val in selected_values:
-                        if val == "global" == ban.get("ban_scope"):
-                            return True
-                        if val == "service" == ban.get("ban_scope"):
-                            return True
-                    return False
+                    return ban.get("ban_scope") in selected_values
 
                 filtered = list(filter(scope_filter, filtered))
-            # Special handling for end_date searchpane
-            if field == "end_date":
-                # Special handling for end_date searchpane
-                now = time()
+            elif field == "end_date":
 
                 def end_date_filter(ban):
-                    # Always include permanent bans in the "future_30d" category
                     if ban.get("permanent", False) and "future_30d" in selected_values:
                         return True
-
                     exp = ban.get("exp", 0)
                     if ban.get("permanent", False):
                         return "permanent" in selected_values
-
                     for val in selected_values:
                         if val == "permanent" and ban.get("permanent", False):
                             return True
@@ -242,58 +211,99 @@ def bans_fetch():
 
                 filtered = list(filter(end_date_filter, filtered))
             elif field == "service":
-                # Special handling for service searchpane
+
                 def service_filter(ban):
                     ban_service = ban.get("service")
-                    # Normalize global bans to "_"
                     if ban.get("ban_scope") == "global" or ban_service in (None, ""):
                         ban_service = "_"
                     return str(ban_service) in selected_values
 
                 filtered = list(filter(service_filter, filtered))
             else:
-                filtered = [ban for ban in filtered if str(ban.get(field, "N/A")) in selected_values]
+                filtered = [b for b in filtered if str(b.get(field, "N/A")) in selected_values]
         return filtered
 
-    # Global search filtering
     def global_search_filter(ban):
-        # Special handling for permanent bans in search
         if search_value == "permanent" and ban.get("permanent", False):
             return True
+        return any(search_value in str(ban.get(col, "")).lower() for col in _BAN_COLUMNS)
 
-        return any(search_value in str(ban.get(col, "")).lower() for col in columns)
-
-    # Sort bans
-    def _to_float(value, default=0.0):
-        try:
-            if isinstance(value, (int, float)):
-                return float(value)
-            if value is None:
-                return float(default)
-            return float(str(value))
-        except Exception:
-            return float(default)
-
-    def sort_bans(bans):
-        if 0 <= order_column_index < len(columns):
-            sort_key = columns[order_column_index]
-            # Special handling for end_date and time_left sorting for permanent bans
-            if sort_key in ("end_date", "time_left"):
-                # For these columns, permanent bans should sort either at the top or bottom
-                # depending on sort order
-                bans.sort(
-                    key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
-                    reverse=(order_direction == "desc"),
-                )
-            elif sort_key == "date":
-                bans.sort(key=lambda x: _to_float(x.get("date", 0.0), 0.0), reverse=(order_direction == "desc"))
-            else:
-                bans.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
-
-    # Apply filters and sort
-    filtered_bans = filter(global_search_filter, bans) if search_value else bans
+    filtered_bans = list(filter(global_search_filter, all_bans)) if search_value else list(all_bans)
     filtered_bans = list(filter_by_search_panes(filtered_bans))
-    sort_bans(filtered_bans)
+
+    if 0 <= order_column_index < len(_BAN_COLUMNS):
+        sort_key = _BAN_COLUMNS[order_column_index]
+        if sort_key in ("end_date", "time_left"):
+            filtered_bans.sort(
+                key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
+                reverse=(order_direction == "desc"),
+            )
+        elif sort_key == "date":
+            filtered_bans.sort(key=lambda x: _to_float(x.get("date", 0.0), 0.0), reverse=(order_direction == "desc"))
+        else:
+            filtered_bans.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
+
+    return filtered_bans
+
+
+@bans.route("/bans", methods=["GET"])
+@login_required
+def bans_page():
+    # Get list of services for the service dropdown in the UI
+    services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"]
+    if isinstance(services, str):
+        services = services.split()
+
+    return render_template("bans.html", services=services)
+
+
+@bans.route("/bans/fetch", methods=["POST"])
+@login_required
+@cors_required
+def bans_fetch():
+    try:
+        bans = _collect_all_bans()
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Couldn't get bans from redis: {e}")
+        flash("Failed to fetch bans from Redis, see logs for more information.", "error")
+        bans = []
+
+    # DataTables parameters
+    draw = int(request.form.get("draw", 1))
+    start = max(0, int(request.form.get("start", 0)))
+    length = max(1, min(int(request.form.get("length", 10)), 1000))
+    search_value = request.form.get("search[value]", "").lower()
+    # DataTables includes two leading non-data columns (details-control and select)
+    # Adjust incoming index to align with backend data columns
+    try:
+        order_column_index_dt = int(request.form.get("order[0][column]", 0))
+    except Exception:
+        order_column_index_dt = 0
+    order_column_index = max(order_column_index_dt - 2, 0)
+    order_direction = request.form.get("order[0][dir]", "desc")
+    search_panes = parse_search_panes_dict(request.form)
+
+    # Local alias kept for the formatter / pane-counts code below
+    columns = list(_BAN_COLUMNS)
+
+    # Helper: format a ban for DataTable row
+    def format_ban(ban):
+        # Defensive: some bans may lack some fields
+        return {
+            "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
+            "ip": escape(str(ban.get("ip", "N/A"))),
+            "country": escape(str(ban.get("country", "N/A"))),
+            "reason": escape(str(ban.get("reason", "N/A"))),
+            "scope": escape(str(ban.get("ban_scope", "global"))),
+            "service": escape(str(ban.get("service") or "_")),
+            "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
+            "time_left": "permanent" if ban.get("permanent", False) else escape(str(ban.get("remain", "N/A"))),
+            "permanent": bool(ban.get("permanent", False)),
+            "actions": "",  # Actions column for buttons
+        }
+
+    filtered_bans = _filter_and_sort_bans(bans, search_value, search_panes, order_column_index, order_direction)
 
     paginated_bans = filtered_bans if length == -1 else filtered_bans[start : start + length]  # noqa: E203
 
@@ -462,6 +472,146 @@ def bans_fetch():
             "data": formatted_bans,
             "searchPanes": {"options": search_panes_options},
         }
+    )
+
+
+def _bans_export_rows():
+    """Collect, filter, and sort bans using the request's search/searchPanes/order
+    parameters and return them as plain dict rows ready to be written to CSV/XLSX."""
+    bans = _collect_all_bans()
+
+    search_value = request.args.get("search", "").lower()
+    order_column = request.args.get("order_column", "date").strip().lower()
+    order_dir = request.args.get("order_dir", "desc").strip().lower()
+    if order_dir not in ("asc", "desc"):
+        order_dir = "desc"
+    try:
+        order_column_index = _BAN_COLUMNS.index(order_column)
+    except ValueError:
+        order_column_index = 0
+
+    search_panes = parse_search_panes_dict(request.args)
+    filtered_bans = _filter_and_sort_bans(bans, search_value, search_panes, order_column_index, order_dir)
+
+    rows = []
+    for ban in filtered_bans:
+        date_value = "N/A"
+        ban_date = ban.get("date")
+        if ban_date:
+            with suppress(Exception):
+                date_value = datetime.fromtimestamp(floor(ban_date)).astimezone().isoformat()
+
+        ban_scope = ban.get("ban_scope") or "global"
+        service = ban.get("service") or "_"
+        if ban_scope == "global" or service in (None, ""):
+            service = "_"
+
+        if ban.get("permanent", False):
+            end_date = "permanent"
+            time_left = "permanent"
+        else:
+            end_date = unescape(str(ban.get("end_date", "N/A")))
+            time_left = unescape(str(ban.get("remain", "N/A")))
+
+        rows.append(
+            {
+                "date": date_value,
+                "ip": str(ban.get("ip", "N/A")),
+                "country": str(ban.get("country", "N/A")),
+                "reason": str(ban.get("reason", "N/A")),
+                "scope": ban_scope,
+                "service": service,
+                "end_date": end_date,
+                "time_left": time_left,
+            }
+        )
+    return rows
+
+
+_BAN_EXPORT_HEADERS = (
+    "Date",
+    "IP Address",
+    "Country",
+    "Reason",
+    "Scope",
+    "Service",
+    "End Date",
+    "Time Left",
+)
+_BAN_EXPORT_FIELDS = ("date", "ip", "country", "reason", "scope", "service", "end_date", "time_left")
+
+
+@bans.route("/bans/export/csv", methods=["GET"])
+@login_required
+def bans_export_csv():
+    """Export the current filtered+sorted ban list as CSV (all columns, all rows)."""
+    try:
+        rows = _bans_export_rows()
+    except Exception as e:
+        LOGGER.error(f"Error collecting bans for CSV export: {e}")
+        LOGGER.debug(format_exc())
+        return jsonify({"error": "Failed to export bans"}), 500
+
+    output = StringIO()
+    writer = csv_writer(output)
+    writer.writerow(_BAN_EXPORT_HEADERS)
+    for row in rows:
+        writer.writerow([row[field] for field in _BAN_EXPORT_FIELDS])
+
+    output.seek(0)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=bunkerweb_bans_{timestamp}.csv"},
+    )
+
+
+@bans.route("/bans/export/excel", methods=["GET"])
+@login_required
+def bans_export_excel():
+    """Export the current filtered+sorted ban list as XLSX (all columns, all rows)."""
+    try:
+        rows = _bans_export_rows()
+    except Exception as e:
+        LOGGER.error(f"Error collecting bans for Excel export: {e}")
+        LOGGER.debug(format_exc())
+        return jsonify({"error": "Failed to export bans"}), 500
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Bans"
+
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+
+    ws.append(list(_BAN_EXPORT_HEADERS))
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+
+    for row in rows:
+        ws.append([csv_safe(row[field]) for field in _BAN_EXPORT_FIELDS])
+
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            with suppress(Exception):
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+        ws.column_dimensions[column_letter].width = min(max_length + 2, 50)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"bunkerweb_bans_{timestamp}.xlsx",
     )
 
 

@@ -45,12 +45,17 @@ Follow these steps to configure and use ModSecurity:
 
     The CRS team actively maintains a list of exclusions for popular applications such as WordPress, Nextcloud, Drupal, and Cpanel, making it easier to integrate without impacting functionality. The security benefits far outweigh the minimal configuration effort required to address false positives.
 
+!!! warning "Safety recommendation for large uploads"
+    ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — **and only if** — a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL to emit `modsecurity off;` in its `location` block. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
+
+    To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
+
 ### Available CRS Versions
 
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
-- **`4`**: Stable [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**default**).
+- **`4`**: Stable [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**default**).
 
 !!! warning "Nightly Build Deprecated"
     The `nightly` option for `MODSECURITY_CRS_VERSION` has been deprecated as the OWASP Core Rule Set project has discontinued nightly releases. If your configuration still uses `nightly`, CRS v4 will be used instead. Please update your configuration to use `MODSECURITY_CRS_VERSION=4`.

@@ -83,6 +83,7 @@ class IngressController(KubernetesController):
 
                 if not service_list:
                     self._logger.warning(f"Ignoring ingress rule with service {path.backend.service.name} : service not found.")
+                    self.note_missing_backend(namespace, path.backend.service.name)
                     continue
 
                 port = 80

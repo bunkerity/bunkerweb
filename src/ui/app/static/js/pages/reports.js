@@ -113,6 +113,33 @@ $(document).ready(function () {
     filtersStateCache.set(stateKey, { ts: Date.now(), payload });
   };
 
+  // Build the server-side export URL, forwarding the current search,
+  // ordering, and any active SearchPanes selections so the file matches
+  // what the user sees in the table.
+  const buildReportsExportUrl = (dt, format) => {
+    const params = dt.ajax.params();
+    const exportParams = {
+      csrf_token: $("#csrf_token").val(),
+      search: params.search ? params.search.value : "",
+      order_column:
+        params.order && params.order.length > 0
+          ? params.columns[params.order[0].column].data
+          : "",
+      order_dir:
+        params.order && params.order.length > 0 ? params.order[0].dir : "",
+    };
+
+    Object.keys(params).forEach((key) => {
+      if (key.startsWith("searchPanes[")) {
+        exportParams[key] = params[key];
+      }
+    });
+
+    return `${window.location.pathname}/export/${format}?${$.param(
+      exportParams,
+    )}`;
+  };
+
   const headers = [
     {
       title: "Date",
@@ -285,72 +312,17 @@ $(document).ready(function () {
           },
         },
         {
-          extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_csv_visible">CSV (Visible)</span>',
-          bom: true,
-          filename: "bw_report_visible",
-          exportOptions: {
-            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
-          },
-        },
-        {
-          text: '<span class="tf-icons bx bx-download bx-18px me-2"></span><span data-i18n="button.export_csv_all">CSV (All)</span>',
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_csv">CSV</span>',
           className: "buttons-csv",
           action: function (e, dt, button, config) {
-            // Get current table state for filters
-            const params = dt.ajax.params();
-            // Build URL with parameters for server-side export
-            const exportUrl = `${window.location.pathname}/export/csv?${$.param(
-              {
-                csrf_token: $("#csrf_token").val(),
-                draw: params.draw,
-                search: params.search ? params.search.value : "",
-                order_column:
-                  params.order && params.order.length > 0
-                    ? params.columns[params.order[0].column].data
-                    : "",
-                order_dir:
-                  params.order && params.order.length > 0
-                    ? params.order[0].dir
-                    : "",
-              },
-            )}`;
-            // Trigger download
-            window.location.href = exportUrl;
+            window.location.href = buildReportsExportUrl(dt, "csv");
           },
         },
         {
-          extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_excel_visible">Excel (Visible)</span>',
-          filename: "bw_report_visible",
-          exportOptions: {
-            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
-          },
-        },
-        {
-          text: '<span class="tf-icons bx bx-download bx-18px me-2"></span><span data-i18n="button.export_excel_all">Excel (All)</span>',
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_excel">Excel</span>',
           className: "buttons-excel",
           action: function (e, dt, button, config) {
-            // Get current table state for filters
-            const params = dt.ajax.params();
-            // Build URL with parameters for server-side export
-            const exportUrl = `${
-              window.location.pathname
-            }/export/excel?${$.param({
-              csrf_token: $("#csrf_token").val(),
-              draw: params.draw,
-              search: params.search ? params.search.value : "",
-              order_column:
-                params.order && params.order.length > 0
-                  ? params.columns[params.order[0].column].data
-                  : "",
-              order_dir:
-                params.order && params.order.length > 0
-                  ? params.order[0].dir
-                  : "",
-            })}`;
-            // Trigger download
-            window.location.href = exportUrl;
+            window.location.href = buildReportsExportUrl(dt, "excel");
           },
         },
       ],
@@ -405,12 +377,11 @@ $(document).ready(function () {
 
       if (!bans.length) return;
 
-      // Submit form to /bans/ban in new tab
+      // Submit form to /bans/ban in the same tab
       const form = $("<form>", {
         method: "POST",
         action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
         class: "visually-hidden",
-        target: "_blank",
       });
       form.append(
         $("<input>", {
@@ -666,7 +637,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       processing: true,
@@ -1287,30 +1258,58 @@ $(document).ready(function () {
       return [];
     }
 
+    let entries;
     if (Array.isArray(data)) {
-      return data.filter((entry) => isBadBehaviorEntry(entry));
-    }
-
-    if (typeof data === "object") {
+      entries = data.filter((entry) => isBadBehaviorEntry(entry));
+    } else if (typeof data === "object") {
       if (Array.isArray(data.events)) {
-        return data.events.filter((entry) => isBadBehaviorEntry(entry));
+        entries = data.events.filter((entry) => isBadBehaviorEntry(entry));
+      } else {
+        const numericKeys = Object.keys(data).filter((key) =>
+          /^\d+$/.test(key),
+        );
+        if (numericKeys.length) {
+          entries = numericKeys
+            .map((key) => data[key])
+            .filter((entry) => isBadBehaviorEntry(entry));
+        } else if (isBadBehaviorEntry(data)) {
+          entries = [data];
+        } else {
+          entries = [];
+        }
       }
-
-      const numericKeys = Object.keys(data).filter((key) => /^\d+$/.test(key));
-
-      if (numericKeys.length) {
-        return numericKeys
-          .sort((a, b) => Number(a) - Number(b))
-          .map((key) => data[key])
-          .filter((entry) => isBadBehaviorEntry(entry));
-      }
-
-      if (isBadBehaviorEntry(data)) {
-        return [data];
-      }
+    } else {
+      return [];
     }
 
-    return [];
+    // Sort newest-first by entry.date so all input shapes match the rest of
+    // the Reports UI. Entries with no parseable timestamp keep their relative
+    // order at the bottom.
+    return entries
+      .map((entry, idx) => ({
+        entry,
+        idx,
+        ts: parseBadBehaviorEntryTimestamp(entry),
+      }))
+      .sort((a, b) => (b.ts !== a.ts ? b.ts - a.ts : a.idx - b.idx))
+      .map((item) => item.entry);
+  }
+
+  function parseBadBehaviorEntryTimestamp(entry) {
+    if (
+      !entry ||
+      entry.date === null ||
+      entry.date === undefined ||
+      entry.date === ""
+    ) {
+      return -Infinity;
+    }
+    const numeric = Number(entry.date);
+    if (Number.isFinite(numeric)) {
+      return numeric < 1e12 ? numeric * 1000 : numeric;
+    }
+    const parsed = Date.parse(entry.date);
+    return Number.isFinite(parsed) ? parsed : -Infinity;
   }
 
   function isBadBehaviorEntry(entry) {
@@ -1880,7 +1879,6 @@ $(document).ready(function () {
       method: "POST",
       action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
       class: "visually-hidden",
-      target: "_blank",
     });
     form.append(
       $("<input>", {

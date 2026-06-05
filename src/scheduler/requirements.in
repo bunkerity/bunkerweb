@@ -3,7 +3,6 @@ cryptography==48.0.0
 importlib-metadata==9.0.0
 pydantic==2.13.4
 python-magic==0.4.27
-requests==2.33.1
+requests==2.34.2
 schedule==1.2.2
-
 setuptools<81

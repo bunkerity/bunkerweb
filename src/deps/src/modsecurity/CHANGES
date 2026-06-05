@@ -1,3 +1,97 @@
+v3.0.15 - 2026-Apr-28
+---------------------
+
+  - [fix: unsig integer underflow issue in verify* operators]
+    [PR from private repo - @fumfel, @airween; fixed CVE-2026-42268]
+  - [fix: buffer overflow in hex_decode.cc]
+    [PR from private repo - @EsadCetiner, @fumfel, @airween; fixed CVE-2026-30923]
+  - Add is_interrupted flag in the audit JSON log
+    [PR #3553 - @meirdev]
+  - Add C API to retrieve matched rules from a transaction
+    [PR #3551 - @meirdev]
+  - fix: buffer overflow in multipart body proc
+    [PR #3546 - @fumfel, @airween]
+  - fix: heap buffer overflow in acmp pm
+    [PR #3544 - @fumfel, @airween]
+  - fix: nullptr dereference in seclang scanner
+    [PR #3543 - @fumfel, @airween]
+  - fix: probably UB (left shift of neg. val) in ip_tree
+    [PR #3541 - @fumfel, @airween]
+  - Add initial mbedTLS v4 support
+    [PR #3532 - @Easton97-Jens]
+  - Fix Lua Detection on ci_new
+    [PR #3531 - @Easton97-Jens]
+  - ci: update workflows (checkout v6, recursive submodules), prep for mbedTLS v4, Windows fixes
+    [PR #3529 - @Easton97-Jens]
+  - Update SQLi/XSS operators for libinjection v4.0.0 cleaned
+    [PR #3528 - @Easton97-Jens]
+  - feat: added Lua5.5 support
+    [PR #3525 - @airween]
+  - fix: cppcheck warnings
+    [PR #3508 - @airween]
+  - CI: Align workflow with configure.ac (recursive submodules, v2 Linux job, drop x32)
+    [PR #3504 - @Easton97-Jens]
+  - fix(parser): add destructor directives to prevent memory leaks
+    [PR #3500 - @fzipi]
+  - Add missing CRLF to regression test request bodies
+    [PR #3497 - @hnakamur]
+  - refactor: autotools files
+    [PR #3494 - @fzipi]
+  - V3/do not add newline to test body lines
+    [PR #3486 - @hnakamur]
+  - fix: cppcheck warnings, cppcheck 2.19.0
+    [PR #3485 - @airween]
+  - Fix multipart boundaries in regression tests
+    [PR #3482 - @hnakamur]
+  - v3: fix readme on running tests (fixes #3328)
+    [PR #3481 - @hnakamur]
+  - Collection: Include `<cstdint>`.
+    [PR #3473 - @Gacko]
+  - Minor edit with remove useless checks
+    [PR #3467 - @chenuduss]
+  - fix: encode possible binary characters from user input in audit logs
+    [PR #3464 - @airween]
+  - fix: libxml2 related deprecated issues in v3
+    [PR #3455 - @airween]
+  - correct handling result of CPTRetriveNode
+    [PR #3447 - @chenuduss]
+  - fix: ignore case when evaluating exceptions
+    [PR #3442 - @airween]
+  - fix: eliminate non-posix standard variables
+    [PR #3437 - @airween]
+  - chore: fix cppcheck warning
+    [PR #3434 - @airween]
+  - Add custom leading text to audit log lines
+    [PR #3432 - @szedenik-adam]
+  - fix: add Windows specific characters to config value syntax
+    [PR #3430 - @airween]
+  - fix: rx operators better null checks
+    [PR #3426 - @wooffie]
+  - fix: confusing indentation at acmp.cc
+    [PR #3424 - @wooffie]
+  - Refactoring the cleaning of MATCHED_VAR* variables
+    [PR #3422 - @airween]
+  - fix: integer type limits, 2nd try
+    [PR #3421 - @airween]
+  - fix: @pmFromFile with multiple files issue
+    [PR #3405 - @airween]
+  - Add hostname to JSON log
+    [PR #3393 - @JakubOnderka]
+  - Fix memory/socket leak in `UniqueId::ethernetMacAddress()`
+    [PR #3392 - @amezin]
+  - Buildsystem fixes
+    [PR #3390 - @arvedarved]
+  - Disable Expect when sending audit logs to remote HTTP server
+    [PR #3365 - @JakubOnderka]
+  - Simplify code for JSON audit log
+    [PR #3364 - @JakubOnderka]
+  - feat: improved XMLArgs processing
+    [PR #3363 - @airween]
+  - doc: update testing section of README
+    [PR #3354 - @cjihrig]
+  - fix: align code to fix cppcheck errors
+    [PR #3350 - @airween]
+
 v3.0.14 - 2025-Feb-25
 ---------------------
 

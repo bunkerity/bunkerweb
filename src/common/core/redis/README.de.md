@@ -1,19 +1,19 @@
-Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://valkey.io/) in BunkerWeb zur Zwischenspeicherung and für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken and andere Informationen zwischen mehreren Knoten zu teilen.
+Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://valkey.io/) in BunkerWeb zur Zwischenspeicherung und für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken und andere Informationen zwischen mehreren Knoten zu teilen.
 
 **Funktionsweise:**
 
 1.  Nach der Aktivierung verbindet sich BunkerWeb mit dem konfigurierten Redis-/Valkey-Server.
 2.  Kritische Daten (Sitzungen, Metriken, Sicherheit) werden dort gespeichert.
 3.  Mehrere Instanzen teilen diese Daten für ein reibungsloses Clustering.
-4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS and Redis Sentinel.
-5.  Automatische Wiederverbindung and konfigurierbare Timeouts sorgen für Robustheit.
+4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS und Redis Sentinel.
+5.  Automatische Wiederverbindung und konfigurierbare Timeouts sorgen für Robustheit.
 
 ### Verwendung
 
-1.  **Aktivieren:** `USE_REDIS: yes`.
-2.  **Verbindung:** Host/IP and Port.
+1.  **Aktivieren:** Setzen Sie den Parameter `USE_REDIS` auf `yes`.
+2.  **Verbindung:** Host/IP und Port.
 3.  **Sicherheit:** Anmeldeinformationen, falls erforderlich.
-4.  **Erweitert:** Datenbank, SSL and Timeouts.
+4.  **Erweitert:** Datenbank, SSL und Timeouts.
 5.  **Hochverfügbarkeit:** Konfigurieren Sie Sentinel, falls verwendet.
 
 ### Parameter
@@ -111,7 +111,8 @@ Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb dies
 
 #### Speicherverwaltung
 - **Speichernutzung überwachen:** Konfigurieren Sie Redis mit geeigneten `maxmemory`-Einstellungen, um Fehler wegen unzureichendem Speicher zu vermeiden
-- **Verdrängungsrichtlinie festlegen:** Verwenden Sie eine für Ihren Anwendungsfall geeignete `maxmemory-policy` (z. B. `volatile-lru` oder `allkeys-lru`)
+- **Verdrängungsrichtlinie festlegen:** Verwenden Sie eine für Ihren Anwendungsfall geeignete `maxmemory-policy` (z. B. `volatile-lru` für den allgemeinen Einsatz oder `allkeys-lru` für stark cache-lastige Workloads)
+- **All-in-One-Standards:** Das AIO-Docker-Image liefert Redis bereits mit `maxmemory=256mb` und `maxmemory-policy=volatile-lru` aus; überschreiben Sie dies über die Umgebungsvariablen `REDIS_MAXMEMORY` und `REDIS_MAXMEMORY_POLICY`. Mit `volatile-lru` werden temporäre Zähler (Rate-Limit, Bad-Behavior) vor Schlüsseln mit für Sessions und befristete Sperren wichtigen TTLs verdrängt, und Schlüssel ohne Ablaufzeit (dauerhafte Sperren) bleiben unangetastet. Dieselbe Richtlinie wird auch für externe Redis- oder Valkey-Server empfohlen.
 - **Große Schlüssel vermeiden:** Stellen Sie sicher, dass einzelne Redis-Schlüssel eine angemessene Größe behalten, um Leistungseinbußen zu vermeiden
 
 #### Datenpersistenz

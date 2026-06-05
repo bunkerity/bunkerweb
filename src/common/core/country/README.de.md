@@ -40,7 +40,10 @@ Sie können Gruppentokens mit `@` verwenden. Diese werden serverseitig in Mitgli
 - `@LATAM`: in diesem Plugin verwendete Lateinamerika-Gruppe.
 
 !!! tip "Whitelist vs. Blacklist"
-    Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.
+    Wählen Sie den Ansatz, der zu Ihren Anforderungen passt:
+
+    - Verwenden Sie die Whitelist, wenn Sie den Zugriff auf wenige Länder beschränken möchten.
+    - Verwenden Sie die Blacklist, wenn Sie bestimmte problematische Regionen blockieren und alle anderen zulassen möchten.
 
 !!! warning "Priorität"
     Wenn eine Whitelist und eine Blacklist definiert sind, hat die Whitelist Vorrang: Wenn das Land nicht auf der Whitelist steht, wird der Zugriff verweigert.
