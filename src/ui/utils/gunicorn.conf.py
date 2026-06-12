@@ -523,7 +523,7 @@ def on_starting(server):
                 api_client._patch(
                     f"/users/{ADMIN_USER['username']}",
                     json={
-                        "password": ADMIN_USER["password"],
+                        "password": ADMIN_USER["password"].decode("utf-8") if isinstance(ADMIN_USER["password"], bytes) else ADMIN_USER["password"],
                         "totp_secret": None,
                         "theme": ADMIN_USER.get("theme", "light"),
                         "method": ADMIN_USER.get("method", "manual"),
@@ -578,7 +578,7 @@ def on_starting(server):
                         LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
                     try:
                         patch_payload = {
-                            "password": ADMIN_USER["password"],
+                            "password": ADMIN_USER["password"].decode("utf-8") if isinstance(ADMIN_USER["password"], bytes) else ADMIN_USER["password"],
                             "totp_secret": ADMIN_USER.get("totp_secret"),
                             "theme": ADMIN_USER.get("theme", "light"),
                             "method": "manual",
@@ -645,7 +645,7 @@ def on_starting(server):
                 "/users",
                 json={
                     "username": user_name,
-                    "password": password_hash,
+                    "password": password_hash.decode("utf-8") if isinstance(password_hash, bytes) else password_hash,
                     "roles": ["admin"],
                     "admin": True,
                     "method": "wizard",

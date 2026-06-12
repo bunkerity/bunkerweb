@@ -220,8 +220,8 @@ def services_delete():
         db_services = API_CLIENT.get_services(with_drafts=True)
         all_drafts = True
         services_to_delete = set()
-        # Drafted autoconf services are deleted directly against the DB — save_config(method="ui")
-        # would otherwise ignore them (method mismatch) and leave the rows untouched.
+        # Drafted autoconf services are hard-deleted via the API (DELETE /services/<id> routes them
+        # to a method-agnostic delete); save_config(method="ui") would otherwise skip them.
         autoconf_drafts_to_delete = set()
         non_deletable_services = set()
 
@@ -250,10 +250,11 @@ def services_delete():
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
-        if autoconf_drafts_to_delete:
-            err = DB.delete_services(list(autoconf_drafts_to_delete))
-            if err:
-                DATA["TO_FLASH"].append({"content": f"Failed to delete drafted autoconf services: {err}", "type": "error"})
+        for service_id in autoconf_drafts_to_delete:
+            try:
+                API_CLIENT.delete_service(service_id)
+            except (ApiClientError, ApiUnavailableError) as e:
+                DATA["TO_FLASH"].append({"content": f"Failed to delete drafted autoconf service {service_id}: {e.message}", "type": "error"})
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 

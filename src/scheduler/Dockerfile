@@ -23,16 +23,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
-# Apply BunkerWeb patches to vendored Python deps (DNS alias / CNAME delegation for certbot).
-# -F0 + --dry-run first so any context drift from a future certbot bump fails the build loudly
-# instead of fuzzing onto the wrong code; the post-patch grep is a positive assertion that the
-# expected marker landed in the patched file.
-COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
-RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
-  patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
-  grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
-  rm -f /tmp/certbot-dns-alias.patch
-
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
 COPY src/common/confs confs

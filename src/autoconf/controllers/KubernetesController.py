@@ -808,7 +808,7 @@ class KubernetesController(Controller):
                         self._logger.error("Backend retry worker: error while deploying new configuration")
                     else:
                         self._logger.info("Backend retry worker: successfully deployed recovered configuration")
-                        self._set_autoconf_load_db()
+                        self._set_autoconf_loaded()
                 except BaseException as e:
                     self._logger.debug(format_exc())
                     self._logger.error(f"Backend retry worker: exception while deploying new configuration: {e}")

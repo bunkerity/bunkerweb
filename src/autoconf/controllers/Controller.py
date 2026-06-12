@@ -128,7 +128,7 @@ class Controller(Config):
             success = False
 
         if success:
-            self._set_autoconf_load_db()
+            self._set_autoconf_loaded()
             self._logger.info("Initial autoconf configuration applied 🚀")
         else:
             self._logger.error("Initial autoconf apply failed, scheduler may start with stale configuration")

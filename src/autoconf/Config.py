@@ -152,12 +152,11 @@ class Config:
                     if error_since is None:
                         error_since = datetime.now().astimezone()
                     elapsed = (datetime.now().astimezone() - error_since).seconds
-                    if not startup:
-                        if elapsed >= self._api_error_timeout:
-                            self._api._expect_errors = False  # Escalate to real errors now
-                            self.__logger.error(f"API has been failing for {elapsed}s ({metadata})")
-                        else:
-                            self.__logger.warning(f"Could not check metadata via API ({metadata}), will retry ...")
+                    if elapsed >= self._api_error_timeout:
+                        self._api._expect_errors = False  # Escalate to real errors now
+                        self.__logger.error(f"API has been failing for {elapsed}s ({metadata})")
+                    else:
+                        self.__logger.warning(f"Could not check metadata via API ({metadata}), will retry ...")
                 elif (
                     metadata.get("is_initialized")
                     and metadata.get("first_config_saved")

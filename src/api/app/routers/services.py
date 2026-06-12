@@ -172,8 +172,19 @@ def delete_service(service: str) -> JSONResponse:
     services_list = (conf.get("SERVER_NAME", "") or "").split()
     if service not in services_list:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Service {service} not found"})
-    if _service_method(service) == "wizard":
+
+    svc = next((s for s in get_db().get_services(with_drafts=True) if s.get("id") == service), None)
+    if (svc.get("method") if svc else _service_method(service)) == "wizard":
         return JSONResponse(status_code=403, content={"status": "error", "message": f"Service {service} is managed by wizard and cannot be deleted"})
+
+    # Drafted autoconf services can't be removed through save_config(method="api") — the bulk-method
+    # guard protects autoconf-owned rows. Hard-delete them directly for this authorized deletion.
+    if svc is not None and svc.get("method") == "autoconf" and svc.get("is_draft"):
+        err = get_db().delete_services([service])
+        if err:
+            code = 400 if "read-only" in err else 500
+            return JSONResponse(status_code=code, content={"status": "error", "message": err})
+        return JSONResponse(status_code=200, content={"status": "success", "changed_plugins": []})
 
     # Remove from server list
     conf["SERVER_NAME"] = " ".join([s for s in services_list if s != service])
