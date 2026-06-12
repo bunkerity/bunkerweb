@@ -2,6 +2,7 @@
 
 ## v1.6.12~rc2 - 2026/??/??
 
+- [SECURITY] `api`: build the Biscuit auth token through the parameter API so the Host header, client IP and username are bound as typed terms and cannot inject signed Datalog facts (token issuance and verification); a malicious `Host` header is now an inert `domain` string rather than escapable Datalog. Adds an opt-in `API_ALLOWED_HOSTS` TrustedHost allowlist.
 - [SECURITY] `ui`: fix session fixation on login (CWE-384) — `session.clear()` ran before the session-id regeneration, and `flask-session` only rotates a non-empty session, so the id never changed across the authentication boundary and a pre-planted session id could be reused post-login. The id is now rotated on every login (the new state is seeded before regeneration).
 - [SECURITY] `ui`: fix an open redirect via the post-login `next` parameter (CWE-601) — `/..//host` (and `/.//host`, `/\host`, and percent-encoded variants) normalized to a protocol-relative URL in the browser and navigated cross-origin. `_sanitize_internal_next` now rejects protocol-relative, backslash, scheme and `.`/`..` path-segment values on both the raw and once-decoded forms, and `loading.js`/`unauthorized.js` collapse leading slashes and enforce same-origin before navigating.
 - [SECURITY] `ui`: a password change now revokes the user's other active sessions (previously only the current session was ended), so a parallel or stolen session cannot outlive the credential it was authenticated with.
