@@ -568,7 +568,8 @@ def custom_plugin_page(plugin: str):
         # send the user to their dedicated page when it is registered instead of
         # rendering an empty (previously misleading) embedded page
         if not (tmp_page_dir / "template.html").is_file() and not (tmp_page_dir / "actions.py").is_file():
-            if not str(tmp_page_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
+            # Only ever delete DB-blob extractions, never a permanent plugin directory
+            if str(tmp_page_dir).startswith(str(TMP_DIR)):
                 rmtree(tmp_page_dir.parent, ignore_errors=True)
 
             try:

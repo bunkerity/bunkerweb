@@ -2814,6 +2814,7 @@ span.cursor-pointer ~ .reset-setting {
   --bs-body-color-rgb: 255, 255, 255;
   --dt-row-selected: 31, 31, 31;
   --bs-breadcrumb-item-active-color: #fff;
+  --bw-dark-surface: #0c283a;
 }
 
 .dark-style .list-group {
@@ -2833,7 +2834,7 @@ span.cursor-pointer ~ .reset-setting {
 }
 
 .dark-style .dropdown-menu {
-  --bs-dropdown-bg: #0c283a;
+  --bs-dropdown-bg: var(--bw-dark-surface);
 }
 
 /* Flash toasts: the bundled core.css paints .bg-dark toasts with Sneat's
@@ -2842,12 +2843,12 @@ span.cursor-pointer ~ .reset-setting {
    Use the same opaque surface as the dark dropdowns instead. */
 .dark-style .toast.bg-dark,
 .dark-style .bs-toast.bg-dark {
-  background-color: #0c283a !important;
+  background-color: var(--bw-dark-surface) !important;
 }
 
 .dark-style .toast.bg-dark .toast-header .btn-close,
 .dark-style .bs-toast.bg-dark .toast-header .btn-close {
-  background-color: #0c283a !important;
+  background-color: var(--bw-dark-surface) !important;
 }
 
 .dark-style div.dt-button-collection,
@@ -3030,6 +3031,10 @@ div.dt-button-background {
 }
 
 .dark-style .text-muted {
+  color: #9caeb7 !important;
+}
+
+.dark-style .text-body-secondary {
   color: #9caeb7 !important;
 }
 
