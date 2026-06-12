@@ -245,6 +245,13 @@ button.list-group-item-secondary.active {
   color: #8b9197 !important;
 }
 
+/* Bootstrap 5.3 utility missing from the bundled core.css build: without it the
+   toast timestamps ("just now") inherit the header's category color (e.g. danger
+   red) instead of rendering muted */
+.text-body-secondary {
+  color: #8b9197 !important;
+}
+
 .raw-template-editor {
   min-height: 420px;
 }
@@ -2827,6 +2834,20 @@ span.cursor-pointer ~ .reset-setting {
 
 .dark-style .dropdown-menu {
   --bs-dropdown-bg: #0c283a;
+}
+
+/* Flash toasts: the bundled core.css paints .bg-dark toasts with Sneat's
+   semi-transparent purple (rgba(43, 44, 64, 0.85)), which clashes with the
+   navy dark theme and lets the page content bleed through the message.
+   Use the same opaque surface as the dark dropdowns instead. */
+.dark-style .toast.bg-dark,
+.dark-style .bs-toast.bg-dark {
+  background-color: #0c283a !important;
+}
+
+.dark-style .toast.bg-dark .toast-header .btn-close,
+.dark-style .bs-toast.bg-dark .toast-header .btn-close {
+  background-color: #0c283a !important;
 }
 
 .dark-style div.dt-button-collection,

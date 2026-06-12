@@ -62,16 +62,25 @@
                 </p>
             </div>
         </div>
+    {% elif no_page %}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="text-center text-primary">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                   data-i18n="plugin.page.status.dedicated_page_unavailable">
+                    This plugin is managed on a dedicated page that isn't loaded yet. Restart the web UI to access it.
+                </p>
+            </div>
+        </div>
     {% elif plugin_page and "Plugin page uses old template" not in plugin_page %}
         {{
-        plugin_page|safe }} {% elif pre_render.get("status", False) and
-        pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {})
-        or pre_render.get("data") is not mapping %}
+        plugin_page|safe }} {% elif pre_render.get("status") == "ko" or
+        (pre_render.get("data") is mapping and "error" in pre_render.get("data")) %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
-                    (Pre rendering error) {{ pre_render.get('data', {'error': 'No log to
-                     show'}).get("error", "No log to show") }}
+                    <span data-i18n="plugin.page.status.pre_render_error">Pre-rendering error</span>
+                    {% set pre_render_detail = pre_render.get("data", {}).get("error") if pre_render.get("data") is mapping else none %}
+                    {% if pre_render_detail or pre_render.get("message") %}: {{ pre_render_detail or pre_render.get("message") }}{% endif %}
                 </p>
             </div>
         </div>
@@ -230,8 +239,8 @@
             <div class="d-flex align-items-center justify-content-center">
                 <div class="text-center text-primary">
                     <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-                       data-i18n="plugin.page.status.not_available">
-                        Plugin page not yet available during the beta phase.
+                       data-i18n="plugin.page.status.no_content">
+                        This plugin does not provide an embedded page.
                     </p>
                 </div>
             </div>
