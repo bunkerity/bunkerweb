@@ -10,8 +10,7 @@
 
 
 #if (NGX_HTTP_SSL)
-#if HAVE_LUA_PROXY_SSL
-
+#ifdef HAVE_PROXY_SSL_PATCH
 
 /* do not introduce ngx_http_proxy_module to pollute ngx_http_lua_module.c */
 extern ngx_module_t  ngx_http_proxy_module;
@@ -33,7 +32,7 @@ int ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store,
 
 ngx_int_t ngx_http_lua_proxy_ssl_verify_set_callback(ngx_conf_t *cf);
 
-#endif  /* HAVE_LUA_PROXY_SSL */
+#endif  /* HAVE_PROXY_SSL_PATCH */
 #endif  /* NGX_HTTP_SSL */
 
 

@@ -221,16 +221,12 @@ ngx_http_lua_ssl_client_hello_handler(ngx_ssl_conn_t *ssl_conn,
     dd("first time");
 
 #if (nginx_version > 1029001)
-#ifdef SSL_CLIENT_HELLO_SUCCESS
-#if !defined freenginx
     /* see commit 0373fe5d98c1515640 for more details */
     rc = ngx_ssl_client_hello_callback(ssl_conn, al, arg);
 
     if (rc == 0) {
         return rc;
     }
-#endif
-#endif
 #endif
 
 #if (nginx_version < 1017009)
@@ -712,14 +708,10 @@ ngx_http_lua_ffi_ssl_get_client_hello_ext_present(ngx_http_request_t *r,
     }
 
     *extensions = ngx_palloc(r->connection->pool, sizeof(int) * ext_len);
-    if (*extensions == NULL) {
-        OPENSSL_free(ext_out);
-        *err = "no memory";
-        return NGX_ERROR;
+    if (*extensions != NULL) {
+        ngx_memcpy(*extensions, ext_out, sizeof(int) * ext_len);
+        *extensions_len = ext_len;
     }
-
-    ngx_memcpy(*extensions, ext_out, sizeof(int) * ext_len);
-    *extensions_len = ext_len;
 
     OPENSSL_free(ext_out);
     return NGX_OK;
