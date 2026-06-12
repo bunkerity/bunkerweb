@@ -439,13 +439,16 @@ class Database:
         return f"{cfg_type}/{cfg_name}.conf"
 
     @staticmethod
-    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
+    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str], *, allow_scheduler_override: bool = False) -> bool:
         """
         Compatibility rules for overwriting a setting's existing method:
         - autoconf wins over everything (and only autoconf overwrites autoconf).
         - ui and api are interchangeable.
-        - scheduler (env-var origin) overwrites ui/api so config-as-code stays
-          authoritative; the reverse stays blocked to protect in-session UI edits.
+        - scheduler (env-var origin) overwrites ui/api only when the caller asserts the
+          setting was explicitly declared in the environment (allow_scheduler_override),
+          so config-as-code stays authoritative without default-filled scheduler passes
+          wiping UI/API customizations; the reverse stays blocked to protect in-session
+          UI edits.
         """
         if new_method is None:
             return True
@@ -458,7 +461,7 @@ class Database:
         if {new_method, current_method} <= {"ui", "api"}:
             return True
         if new_method == "scheduler" and current_method in ("ui", "api"):
-            return True
+            return allow_scheduler_override
         return new_method == current_method
 
     def _is_transient_connection_error(self, error: BaseException) -> bool:
@@ -1629,6 +1632,7 @@ class Database:
         *,
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
+        explicit_keys: Optional[Set[str]] = None,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1643,6 +1647,14 @@ class Database:
                                      misleading: it does not restrict input to global
                                      settings, it only disables the service-management
                                      side-effects.
+            explicit_keys: Raw environment/variables keys explicitly declared by the
+                           caller (e.g. Configurator.explicit_keys), service-prefixed
+                           and suffixed forms included. Only consulted when
+                           method == "scheduler": a scheduler pass may overwrite or
+                           delete-to-default a ui/api-owned row only for keys in this
+                           set. None or empty means the scheduler never touches
+                           ui/api-owned rows (the incoming config is treated as
+                           default-filled, not user-declared).
         """
         to_put = []
         to_update = []
@@ -1656,6 +1668,17 @@ class Database:
             db_config = self.get_non_default_settings(with_drafts=True)
 
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
+
+        explicit_env_keys = frozenset(explicit_keys or ())
+
+        def scheduler_can_override(full_key: str, incoming_value: Any) -> bool:
+            if full_key not in explicit_env_keys:
+                return False
+            # The Linux dummy variables.env ships "SERVER_NAME=" — an explicitly-declared
+            # but EMPTY SERVER_NAME must not clobber a ui/api-owned service list.
+            if full_key == "SERVER_NAME" and not str(incoming_value).strip():
+                return False
+            return True
 
         def get_setting_file_name(setting_type: str, original_key: str, value_changed: bool, current_file_name: str = "") -> Tuple[Optional[str], bool]:
             if setting_type != "file":
@@ -2078,9 +2101,14 @@ class Database:
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
                             current_file_name = service_setting["file_name"] if service_setting else ""
                             value_changed = bool(service_setting and service_setting["value"] != value)
-                            should_update_value = (value_changed and self._methods_are_compatible(method, service_setting["method"])) or (
-                                bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
-                            )
+                            should_update_value = (
+                                value_changed
+                                and self._methods_are_compatible(
+                                    method,
+                                    service_setting["method"],
+                                    allow_scheduler_override=scheduler_can_override(f"{server_name}_{original_key}", value),
+                                )
+                            ) or (bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf")
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2167,9 +2195,12 @@ class Database:
                             )
                             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                             value_changed = bool(global_value and global_value.value != value)
-                            should_update_value = (value_changed and self._methods_are_compatible(method, global_value.method)) or (
-                                bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
-                            )
+                            should_update_value = (
+                                value_changed
+                                and self._methods_are_compatible(
+                                    method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
+                                )
+                            ) or (bool(global_value) and method == "autoconf" and global_value.method != "autoconf")
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2293,7 +2324,11 @@ class Database:
                         )
                         current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                         value_changed = bool(global_value and global_value.value != value)
-                        should_update_value = bool(global_value and self._methods_are_compatible(method, global_value.method) and value_changed)
+                        should_update_value = bool(
+                            global_value
+                            and self._methods_are_compatible(method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value))
+                            and value_changed
+                        )
                         target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
                         template_setting = None
@@ -2495,7 +2530,10 @@ class Database:
                         custom_conf.checksum = custom_config["checksum"]
                     if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
                         custom_conf.is_draft = custom_config["is_draft"]
-                elif self._methods_are_compatible(method, custom_conf.method):
+                # Scheduler-method custom configs only ever originate from explicit
+                # CUSTOM_CONF_* environment variables, so the scheduler override is
+                # legitimate here (no default-filled pass exists for custom configs).
+                elif self._methods_are_compatible(method, custom_conf.method, allow_scheduler_override=True):
                     should_update_data = custom_config["checksum"] != custom_conf.checksum
                     if should_update_data:
                         custom_conf.data = custom_config["data"]
