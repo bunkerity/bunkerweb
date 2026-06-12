@@ -192,6 +192,9 @@ RESOLVED_SERVER_IP=""
 DNS_RESOLVERS_INPUT=""
 API_LISTEN_HTTPS_INPUT=""
 UPGRADE_SCENARIO="no"
+# Canonical host-package install marker — written by the BunkerWeb package, never
+# by Docker mode. Its presence means "a native Linux install already exists here".
+_BW_VERSION_FILE="/usr/share/bunkerweb/VERSION"
 BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
 SYSTEM_ARCH=""
@@ -2941,6 +2944,15 @@ ask_docker_preferences() {
 # unsupported for host packages can still be used for a Docker deployment.
 ask_deployment_platform() {
     [ "$DOCKER_MODE" = "yes" ] && return 0          # --docker already chose it
+    # A host-package install is unambiguously Linux (Docker mode never writes host
+    # packages). On a reinstall/upgrade, don't re-ask Linux-vs-Docker — keep the
+    # Linux deployment already present; check_existing_installation() then drives
+    # the upgrade / already-installed path.
+    if [ -f "$_BW_VERSION_FILE" ]; then
+        [ "$INTERACTIVE_MODE" = "yes" ] && \
+            print_status "Existing Linux installation detected — keeping the Linux deployment."
+        return 0
+    fi
     [ "$INTERACTIVE_MODE" != "yes" ] && return 0    # non-interactive: --docker, else Linux
     local _platform=""
     echo
