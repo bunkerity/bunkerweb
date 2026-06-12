@@ -591,6 +591,11 @@ ngx_http_lua_ffi_ssl_set_serialized_session(ngx_http_request_t *r,
         return NGX_ERROR;
     }
 
+    if (len <= 0 || (size_t) len > sizeof(buf)) {
+        *err = "invalid session length";
+        return NGX_ERROR;
+    }
+
     ngx_memcpy(buf, data, len);
     p = buf;
     session = d2i_SSL_SESSION(NULL, (const unsigned char **)&p,  len);
@@ -602,6 +607,7 @@ ngx_http_lua_ffi_ssl_set_serialized_session(ngx_http_request_t *r,
 
     cctx = ngx_http_lua_ssl_get_ctx(c->ssl->connection);
     if (cctx == NULL) {
+        ngx_ssl_free_session(session);
         *err = "bad lua context";
         return NGX_ERROR;
     }
