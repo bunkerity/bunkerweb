@@ -241,8 +241,8 @@ LJLIB_CF(os_time)
     ts.tm_min = getfield(L, "min", 0);
     ts.tm_hour = getfield(L, "hour", 12);
     ts.tm_mday = getfield(L, "day", -1);
-    ts.tm_mon = getfield(L, "month", -1) - 1;
-    ts.tm_year = getfield(L, "year", -1) - 1900;
+    ts.tm_mon = (int)((unsigned int)getfield(L, "month", -1) - 1u);
+    ts.tm_year = (int)((unsigned int)getfield(L, "year", -1) - 1900u);
     ts.tm_isdst = getboolfield(L, "isdst");
     t = mktime(&ts);
   }
