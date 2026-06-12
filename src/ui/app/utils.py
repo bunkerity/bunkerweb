@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from datetime import datetime
+from ipaddress import ip_address
 from os import _exit
 from os.path import sep
 from pathlib import Path
@@ -12,7 +14,7 @@ from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
 from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
-from flask import flash as flask_flash, session
+from flask import current_app, flash as flask_flash, session
 from regex import compile as re_compile, match
 from requests import get
 
@@ -25,7 +27,40 @@ LOGGER = getLogger("UI")
 
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 
+# A single DNS label: 1-63 chars of [A-Za-z0-9_-], no leading/trailing hyphen. Underscore is
+# permitted (RFC1123 forbids it, but Docker/internal DNS routinely uses it for container names).
+_HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
+
+
+def is_valid_host(host) -> bool:
+    """Return True if ``host`` is a valid IP address (v4/v6) or DNS hostname.
+
+    Positive validation (not a metacharacter blocklist): rejects ``;``, ``@``, ``%``, spaces,
+    empty/over-long labels, ``..``, etc. Accepts bare IPv4/IPv6 literals via the stdlib
+    ``ipaddress`` parser and hostnames as dot-separated RFC1123-ish labels (underscores allowed,
+    optional trailing root dot). Callers should pass an already-parsed host (no scheme/port).
+    """
+    if not host or not isinstance(host, str) or len(host) > 253:
+        return False
+    with suppress(ValueError):
+        ip_address(host)  # IPv4/IPv6 literal
+        return True
+    hostname = host.removesuffix(".")  # tolerate FQDN root dot
+    if not hostname or len(hostname) > 253:
+        return False
+    return all(_HOSTNAME_LABEL_RX.match(label) for label in hostname.split("."))
+
+
+# Static-asset URL prefixes served by Flask that never carry privilege (no auth/authz needed).
+# Single source of truth shared by main.py (before_request fast-paths) and the Biscuit
+# authorization middleware, so the two never drift.
+STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
+
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
+# Characters that could break out of a quoted string when a username is embedded in
+# Datalog/Biscuit source. Token construction binds usernames as parameters already; this is a
+# defense-in-depth gate applied at user creation/rename/import (and SSO provisioning).
+USER_NAME_UNSAFE_RX = re_compile(r'["\\\x00-\x1f\x7f]')
 BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
 RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
@@ -388,26 +423,97 @@ def is_plugin_active(plugin_id: str, plugin_name: str, config: dict) -> bool:
 
 
 def _sanitize_internal_next(next_url, default):
-    """Return safe internal path; raise ValueError if invalid."""
+    """Return a safe same-origin internal path, else raise ValueError.
+
+    Hardened against open redirect (CWE-601). A value is accepted only if, in BOTH its
+    raw and its once-URL-decoded form, it is a single-slash-rooted path with:
+      * no protocol-relative prefix -- ``//host`` or ``/\\host`` (browsers fold ``\\`` to
+        ``/`` so ``/\\host`` becomes ``//host``);
+      * no scheme and no backslash anywhere (``scheme://`` / ``\\``);
+      * no control characters (defeats header/redirect splitting);
+      * no ``.`` or ``..`` path segment. The browser URL parser *normalizes* these rather
+        than rejecting them, and a leading collapse escapes the origin (``/..//host`` and
+        ``/.//host`` both normalize to the protocol-relative ``//host``). Rather than
+        replicate that normalization to isolate only the escaping subset, this rejects the
+        whole superset (so a harmless ``/a/../b`` is also refused) -- fail-closed, and the
+        app's own internal routes never carry dot segments, so the cost is nil. Only the
+        path portion is inspected, so dots inside a query string are preserved.
+
+    The browser URL parser decodes percent-encoding only once, so evaluating the raw and
+    the once-decoded forms matches its behavior: single-encoded escapes (``/%2f%2fhost``,
+    ``/%5chost``) are caught, while double-encoded payloads stay percent-encoded and remain
+    same-origin (and therefore harmless) when navigated.
+    """
     if next_url is None:
         return default
     if not isinstance(next_url, str):
         raise ValueError("next must be str")
     candidate = next_url.strip()
-    if not candidate.startswith("/"):
-        raise ValueError("must start with /")
-    if candidate.startswith("//"):
-        raise ValueError("protocol-relative not allowed")
-    if "://" in candidate:
-        raise ValueError("scheme not allowed")
-    if len(candidate) > 4096:  # temporary upper bound before decode to avoid abuse
+    if len(candidate) > 4096:  # bound before decode to avoid abuse
         raise ValueError("too long")
     decoded = unquote(candidate)[:4096]
-    if decoded.startswith("//") or "://" in decoded:
-        raise ValueError("encoded protocol-relative or scheme not allowed")
-    if any(ord(c) < 32 for c in decoded):
-        raise ValueError("control chars not allowed")
+    for value in (candidate, decoded):
+        if not value.startswith("/"):
+            raise ValueError("must start with /")
+        if value[1:2] in ("/", "\\"):
+            raise ValueError("protocol-relative not allowed")
+        if "\\" in value or "://" in value:
+            raise ValueError("scheme or backslash not allowed")
+        if any(ord(c) < 32 for c in value):
+            raise ValueError("control chars not allowed")
+        path_segments = value.split("?", 1)[0].split("#", 1)[0].split("/")
+        if "." in path_segments or ".." in path_segments:
+            raise ValueError("dot path segment not allowed")
     return decoded or default
+
+
+# Revoked UI session ids are kept in DATA["REVOKED_SESSIONS"] (file-backed, checked on every
+# request) so a logged-out / wiped / password-changed session is rejected before its server-side
+# store entry naturally expires. Without pruning this set grows without bound. A revoked id only
+# needs to be retained until the session it names can no longer exist, i.e. the maximum session
+# lifetime; after that the store entry is gone and the id is dead weight.
+REVOKED_SESSION_TTL_FALLBACK_SECONDS = 30 * 24 * 3600  # used only if no lifetime is configured
+
+
+def _revoked_session_ttl_seconds():
+    """Longest a revoked session id must be retained = the max possible session lifetime."""
+    cfg = getattr(current_app, "config", {})
+    candidates = []
+    with suppress(Exception):
+        candidates.append(int(cfg.get("SESSION_ABSOLUTE_SECONDS", 0) or 0))
+    with suppress(Exception):
+        perm = cfg.get("PERMANENT_SESSION_LIFETIME")
+        if perm is not None:
+            candidates.append(int(perm.total_seconds()))
+    ttl = max(candidates) if candidates else 0
+    return ttl if ttl > 0 else REVOKED_SESSION_TTL_FALLBACK_SECONDS
+
+
+def prune_revoked_sessions(revoked, now_ts=None, ttl_seconds=None):
+    """Return a {session_id: revoked_at_epoch} dict with entries older than the TTL dropped.
+
+    Tolerates the legacy ``list[str]`` format (no timestamps): those entries are migrated and
+    stamped at ``now`` so a format change never silently un-revokes a still-live session.
+    """
+    if now_ts is None:
+        now_ts = datetime.now().timestamp()
+    if ttl_seconds is None:
+        ttl_seconds = _revoked_session_ttl_seconds()
+    if isinstance(revoked, dict):
+        return {sid: ts for sid, ts in revoked.items() if isinstance(ts, (int, float)) and (now_ts - ts) < ttl_seconds}
+    if isinstance(revoked, (list, tuple, set)):
+        return {str(sid): now_ts for sid in revoked if sid}
+    return {}
+
+
+def add_revoked_sessions(revoked, ids):
+    """Prune stale entries, then add ``ids`` stamped at now. Returns the updated dict."""
+    now_ts = datetime.now().timestamp()
+    pruned = prune_revoked_sessions(revoked, now_ts)
+    for sid in ids:
+        if sid:
+            pruned[str(sid)] = now_ts
+    return pruned
 
 
 # OWASP lists \t (0x09) and \r (0x0D) as spreadsheet-injection leaders, but defusedcsv's
