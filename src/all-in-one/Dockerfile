@@ -171,9 +171,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "libpng>=1.6.58-r1" # CVE-2026-40930
-RUN apk add --no-cache "mariadb-client>=11.4.12-r0" # CVE-2026-48165 CVE-2026-48163
-RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
+# There are no CVEs for the following packages
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
