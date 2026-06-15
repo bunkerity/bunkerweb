@@ -13,8 +13,9 @@
 - [BUGFIX] `ssl`: `SSL_ECDH_CURVE=auto` no longer emits `X25519` on FIPS OpenSSL (NGINX failed to start with `group 'X25519' cannot be set`, blocking the Setup Wizard). Auto-detection now probes the same `SSL_CTX_set1_groups_list` call NGINX makes, falls back to FIPS-approved `prime256v1:secp384r1`, and the internal API listener honors `SSL_ECDH_CURVE` instead of a hardcoded curve.
 - [DEPS] Updated LuaJIT version to v2.1-20260606
 - [DEPS] Updated lua-resty-openssl version to v1.8.0
-- [CONTRIBUTION] Thank you [Cleverguns](https://github.com/Cleverguns) for your contribution regarding the `Filipino (Tagalog)` translation of the web UI.
-- [CONTRIBUTION] Thank you [ray910408](https://github.com/ray910408) for your contribution regarding the refresh of the `src/deps` npm build-tool dependencies.
+- [CONTRIBUTION] Thank you [Cleverguns](https://github.com/Cleverguns) for your contribution regarding the `Filipino (Tagalog)` translation of the web UI. (#3607)
+- [CONTRIBUTION] Thank you [ray910408](https://github.com/ray910408) for your contribution regarding the refresh of the `src/deps` npm build-tool dependencies. (#3623)
+- [CONTRIBUTION] Thank you [immanuwell](https://github.com/immanuwell) for your contribution regarding parsing the `DEBUG` environment variable as a boolean in the `Gunicorn` configuration (UI and API), so a string value no longer always enables debug logging. (#3589)
 
 ## v1.6.12~rc1 - 2026/06/03
 
