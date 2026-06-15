@@ -3491,6 +3491,17 @@ class Database:
                 ids = [plugin["id"] for plugin in plugins]
                 missing_ids = [plugin for plugin in db_ids if plugin not in ids]
 
+                # Never cascade-delete a pro plugin just because it's absent from the incoming list
+                # (a transient disk/glob gap during re-ingest); that wipes UI-set values via
+                # Plugins -> Settings -> Global_values. Pro removal only happens via only_clear_metadata.
+                if missing_ids and _type == "pro" and not only_clear_metadata:
+                    self.logger.warning(
+                        f"Refusing to cascade-delete {len(missing_ids)} pro plugin(s) absent from the incoming list "
+                        f"(likely a transient disk/glob gap); preserving their settings and user values. "
+                        f"missing={sorted(missing_ids)}"
+                    )
+                    missing_ids = []
+
                 if missing_ids:
                     # Data-loss guard: refuse the destructive plugin-wide cascade (Settings +
                     # Global_values + Services_settings + Jobs + Templates + Plugin_pages) when
