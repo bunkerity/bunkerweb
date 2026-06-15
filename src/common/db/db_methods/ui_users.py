@@ -1,0 +1,414 @@
+#!/usr/bin/env python3
+from datetime import datetime, timedelta
+from typing import List, Optional, Union
+
+from model import Roles, RolesPermissions, RolesUsers, UserColumnsPreferences, UserRecoveryCodes, UserSessions, Users  # type: ignore
+
+from sqlalchemy import delete, select, update
+from sqlalchemy.orm import joinedload
+
+from .common import DatabaseMixinBase
+
+
+class DatabaseUIUsersMixin(DatabaseMixinBase):
+    """Web UI users, sessions, recovery codes and RBAC reads."""
+
+    def cleanup_expired_ui_sessions(self, max_age_days: int) -> str:
+        """Remove UI sessions older than the provided age threshold."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            cutoff = datetime.now().astimezone() - timedelta(days=max_age_days)
+
+            deleted = session.execute(delete(UserSessions).where(UserSessions.last_activity < cutoff).execution_options(synchronize_session=False)).rowcount
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return f"Removed {deleted} expired UI user sessions"
+
+    def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[Users, dict]]]:
+        """Get ui users."""
+        with self._db_session() as session:
+            try:
+                users = (
+                    session.scalars(select(Users).options(joinedload(Users.roles), joinedload(Users.recovery_codes), joinedload(Users.columns_preferences)))
+                    .unique()
+                    .all()
+                )
+                if not as_dict:
+                    return users
+
+                users_data = []
+                for user in users:
+                    user_data = {
+                        "username": user.username,
+                        "email": user.email,
+                        "password": user.password.encode("utf-8"),
+                        "method": user.method,
+                        "admin": user.admin,
+                        "theme": user.theme,
+                        "totp_secret": user.totp_secret,
+                        "creation_date": user.creation_date.astimezone(),
+                        "update_date": user.update_date.astimezone(),
+                        "roles": [role.role_name for role in user.roles],
+                        "recovery_codes": [recovery_code.code for recovery_code in user.recovery_codes],
+                    }
+
+                    users_data.append(user_data)
+
+                return users_data
+            except BaseException as e:
+                return str(e)
+
+    def get_ui_user_sessions(self, username: str, current_session_id: Optional[str] = None) -> List[dict]:
+        """Get ui user sessions."""
+        with self._db_session() as session:
+            sessions = []
+            if current_session_id:
+                current_session = session.scalars(select(UserSessions).filter_by(user_name=username, id=current_session_id)).all()
+                other_sessions = session.scalars(
+                    select(UserSessions).filter_by(user_name=username).where(UserSessions.id != current_session_id).order_by(UserSessions.creation_date.desc())
+                ).all()
+                query = current_session + other_sessions
+            else:
+                query = session.scalars(select(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc())).all()
+
+            for session_data in query:
+                sessions.append(
+                    {
+                        "id": session_data.id,
+                        "ip": session_data.ip,
+                        "user_agent": self._empty_if_none(session_data.user_agent),
+                        "creation_date": session_data.creation_date,
+                        "last_activity": session_data.last_activity,
+                    }
+                )
+
+            return sessions
+
+    def get_ui_user(self, *, username: Optional[str] = None, as_dict: bool = False) -> Optional[Union[Users, dict]]:
+        """Get ui user. If username is None, return the first admin user."""
+        with self._db_session() as session:
+            query = select(Users)
+            query = query.filter_by(username=username) if username else query.filter_by(admin=True)
+            query = query.options(joinedload(Users.roles), joinedload(Users.recovery_codes))
+
+            ui_user = session.scalars(query.limit(1)).unique().first()
+            if not ui_user:
+                return None
+
+            if not as_dict:
+                return ui_user
+
+            return {
+                "username": ui_user.username,
+                "email": ui_user.email,
+                "password": ui_user.password.encode("utf-8"),
+                "method": ui_user.method,
+                "admin": ui_user.admin,
+                "theme": ui_user.theme,
+                "language": ui_user.language,
+                "totp_secret": ui_user.totp_secret,
+                "creation_date": ui_user.creation_date.astimezone(),
+                "update_date": ui_user.update_date.astimezone(),
+                "roles": [role.role_name for role in ui_user.roles],
+                "recovery_codes": [rc.code for rc in ui_user.recovery_codes],
+            }
+
+    def create_ui_user(
+        self,
+        username: str,
+        password: bytes,
+        roles: List[str],
+        email: Optional[str] = None,
+        *,
+        theme: str = "light",
+        language: str = "en",
+        totp_secret: Optional[str] = None,
+        totp_recovery_codes: Optional[List[str]] = None,
+        creation_date: Optional[datetime] = None,
+        method: str = "manual",
+        admin: bool = False,
+    ) -> str:
+        """Create ui user."""
+        from bcrypt import gensalt, hashpw
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            if admin and session.execute(select(Users.username).filter_by(admin=True).limit(1)).first():
+                return "An admin user already exists"
+
+            user = session.execute(select(Users.username).filter_by(username=username).limit(1)).first()
+            if user:
+                return f"User {username} already exists"
+
+            # Auto-create default roles and permissions if they don't exist
+            _DEFAULT_ROLES = {
+                "admin": ("Admins can create new users, edit and read the data.", ["manage", "write", "read"]),
+                "writer": ("Writers can edit and read the data but can't create new users.", ["write", "read"]),
+                "reader": ("Readers can only read the data.", ["read"]),
+            }
+            for role in roles:
+                if not session.execute(select(Roles.name).filter_by(name=role).limit(1)).first():
+                    if role in _DEFAULT_ROLES:
+                        desc, perms = _DEFAULT_ROLES[role]
+                        from model import Permissions, RolesPermissions  # type: ignore
+
+                        session.add(Roles(name=role, description=desc, update_datetime=datetime.now().astimezone()))
+                        for perm in perms:
+                            if not session.execute(select(Permissions.name).filter_by(name=perm).limit(1)).first():
+                                session.add(Permissions(name=perm))
+                            session.add(RolesPermissions(role_name=role, permission_name=perm))
+                    else:
+                        return f"Role {role} doesn't exist"
+                session.add(RolesUsers(user_name=username, role_name=role))
+
+            current_time = datetime.now().astimezone()
+            session.add(
+                Users(
+                    username=username,
+                    email=email,
+                    password=password.decode("utf-8"),
+                    method=method,
+                    admin=admin,
+                    theme=theme,
+                    language=language,
+                    totp_secret=totp_secret,
+                    creation_date=creation_date or current_time,
+                    update_date=current_time,
+                )
+            )
+
+            for code in totp_recovery_codes or []:
+                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def update_ui_user(
+        self,
+        username: str,
+        password: bytes,
+        totp_secret: Optional[str],
+        *,
+        theme: str = "light",
+        old_username: Optional[str] = None,
+        email: Optional[str] = None,
+        totp_recovery_codes: Optional[List[str]] = None,
+        method: str = "manual",
+        language: str = "en",
+    ) -> str:
+        """Update ui user."""
+        totp_changed = False
+        old_username = old_username or username
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            user = session.scalars(select(Users).filter_by(username=old_username).limit(1)).first()
+            if not user:
+                return f"User {old_username} doesn't exist"
+
+            if username != old_username:
+                if session.execute(select(Users.username).filter_by(username=username).limit(1)).first():
+                    return f"User {username} already exists"
+
+                user.username = username
+
+                session.execute(update(RolesUsers).filter_by(user_name=old_username).values({"user_name": username}))
+                session.execute(update(UserRecoveryCodes).filter_by(user_name=old_username).values({"user_name": username}))
+                session.execute(update(UserSessions).filter_by(user_name=old_username).values({"user_name": username}))
+                session.execute(update(UserColumnsPreferences).filter_by(user_name=old_username).values({"user_name": username}))
+
+            totp_changed = user.totp_secret != totp_secret
+
+            user.email = email
+            user.password = password.decode("utf-8")
+            user.totp_secret = totp_secret
+            user.method = method
+            user.theme = theme
+            user.language = language
+            user.update_date = datetime.now().astimezone()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        if totp_changed:
+            if totp_recovery_codes:
+                self.refresh_ui_user_recovery_codes(username, totp_recovery_codes)
+            else:
+                self._delete_ui_user_recovery_codes(username)
+
+        return ""
+
+    def mark_ui_user_login(self, username: str, date: datetime, ip: str, user_agent: str) -> Union[str, int]:
+        """Mark ui user login."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            user = session.scalars(select(Users).filter_by(username=username).limit(1)).first()
+            if not user:
+                return f"User {username} doesn't exist"
+
+            user_session = UserSessions(
+                user_name=username,
+                ip=ip,
+                user_agent=user_agent,
+                creation_date=date,
+                last_activity=date,
+            )
+            session.add(user_session)
+
+            try:
+                session.flush()
+                session_id = user_session.id
+                session.commit()
+                return session_id
+            except BaseException as e:
+                return str(e)
+
+    def delete_ui_user_old_sessions(self, username: str) -> str:
+        """Delete ui user old sessions."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            user = session.scalars(select(Users).filter_by(username=username).limit(1)).first()
+            if not user:
+                return f"User {username} doesn't exist"
+
+            sessions_to_delete = session.scalars(select(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).offset(1)).all()
+            for session_to_delete in sessions_to_delete:
+                session.delete(session_to_delete)
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def refresh_ui_user_recovery_codes(self, username: str, codes: List[str]) -> str:
+        """Refresh ui user recovery codes."""
+        from bcrypt import gensalt, hashpw
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            if not codes:
+                return "No recovery codes provided"
+
+            user = session.scalars(select(Users).filter_by(username=username).limit(1)).first()
+            if not user:
+                return f"User {username} doesn't exist"
+
+            session.execute(delete(UserRecoveryCodes).filter_by(user_name=username))
+
+            for code in codes:
+                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def _delete_ui_user_recovery_codes(self, username: str) -> str:
+        """Delete ui user recovery codes."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            session.execute(delete(UserRecoveryCodes).filter_by(user_name=username))
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def use_ui_user_recovery_code(self, username: str, hashed_code: str) -> str:
+        """Use ui user recovery code."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            user = session.scalars(select(Users).filter_by(username=username).limit(1)).first()
+            if not user:
+                return f"User {username} doesn't exist"
+
+            recovery_code = session.scalars(select(UserRecoveryCodes).filter_by(user_name=username, code=hashed_code).limit(1)).first()
+            if not recovery_code:
+                return "Invalid recovery code"
+
+            session.delete(recovery_code)
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def mark_ui_user_access(self, session_id, date):
+        """Mark ui user access."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+            user_session = session.scalars(select(UserSessions).filter_by(id=session_id).limit(1)).first()
+            if not user_session:
+                return f"Session {session_id} doesn't exist"
+            user_session.last_activity = date
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+        return ""
+
+    def get_ui_user_columns_preferences(self, username, table_name):
+        """Get ui user columns preferences."""
+        with self._db_session() as session:
+            columns_preferences = session.scalars(select(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).limit(1)).first()
+            if not columns_preferences:
+                return {}
+            return columns_preferences.columns
+
+    def update_ui_user_columns_preferences(self, username, table_name, columns):
+        """Update ui user columns preferences."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+            user = session.scalars(select(Users).filter_by(username=username).limit(1)).first()
+            if not user:
+                return f"User {username} doesn't exist"
+            columns_preferences = session.scalars(select(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).limit(1)).first()
+            if not columns_preferences:
+                session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=columns))
+            else:
+                columns_preferences.columns = columns
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+        return ""
+
+    def get_ui_role_permissions(self, role_name):
+        """Get ui role permissions."""
+        with self._db_session() as session:
+            return [permission.permission_name for permission in session.execute(select(RolesPermissions.permission_name).filter_by(role_name=role_name))]

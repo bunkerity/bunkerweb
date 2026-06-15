@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 from json import dumps, loads
-from typing import Any, Optional
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
+from typing import Any, ClassVar, List, Optional
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
 
 # Large text type that maps to MEDIUMTEXT on MySQL/MariaDB, TEXT elsewhere
@@ -41,54 +42,62 @@ PLUGIN_TYPES_ENUM = Enum("core", "external", "ui", "pro", name="plugin_types_enu
 PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
 INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum")
 INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", "failover", name="instance_status_enum")
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    """SQLAlchemy 2.0 declarative base.
+
+    No ``type_annotation_map`` on purpose: every ``mapped_column()`` receives its
+    SQL type explicitly, so annotation-driven type inference is never exercised
+    and the emitted schema stays byte-identical to the legacy declarative one.
+    """
 
 
 class Plugins(Base):
     __tablename__ = "bw_plugins"
 
-    id = Column(String(64), primary_key=True)
-    name = Column(String(128), nullable=False)
-    description = Column(String(256), nullable=False)
-    version = Column(String(32), nullable=False)
-    stream = Column(STREAM_TYPES_ENUM, default="no", nullable=False)
-    type = Column(PLUGIN_TYPES_ENUM, default="core", nullable=False)
-    method = Column(METHODS_ENUM, default="manual", nullable=False)
-    data = Column(LargeBinary(length=(2**32) - 1), default=None, nullable=True)
-    checksum = Column(String(128), default=None, nullable=True)
-    config_changed = Column(Boolean, default=False, nullable=True, index=True)
-    last_config_change = Column(DateTime(timezone=True), nullable=True)
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    description: Mapped[str] = mapped_column(String(256), nullable=False)
+    version: Mapped[str] = mapped_column(String(32), nullable=False)
+    stream: Mapped[str] = mapped_column(STREAM_TYPES_ENUM, default="no", nullable=False)
+    type: Mapped[str] = mapped_column(PLUGIN_TYPES_ENUM, default="core", nullable=False)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, default="manual", nullable=False)
+    data: Mapped[Optional[bytes]] = mapped_column(LargeBinary(length=(2**32) - 1), default=None, nullable=True)
+    checksum: Mapped[Optional[str]] = mapped_column(String(128), default=None, nullable=True)
+    config_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True, index=True)
+    last_config_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
-    jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
-    pages = relationship("Plugin_pages", back_populates="plugin", cascade="all")
-    commands = relationship("Bw_cli_commands", back_populates="plugin", cascade="all")
-    templates = relationship("Templates", back_populates="plugin", cascade="all")
+    settings: Mapped[List["Settings"]] = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
+    jobs: Mapped[List["Jobs"]] = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
+    pages: Mapped[List["Plugin_pages"]] = relationship("Plugin_pages", back_populates="plugin", cascade="all")
+    commands: Mapped[List["Bw_cli_commands"]] = relationship("Bw_cli_commands", back_populates="plugin", cascade="all")
+    templates: Mapped[List["Templates"]] = relationship("Templates", back_populates="plugin", cascade="all")
 
 
 class Settings(Base):
     __tablename__ = "bw_settings"
 
-    id = Column(String(256), primary_key=True)
-    name = Column(String(256), unique=True, nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    context = Column(CONTEXTS_ENUM, nullable=False)
-    default = Column(Text, nullable=True, default="")
-    help = Column(String(512), nullable=False)
-    label = Column(String(256), nullable=True)
-    regex = Column(String(1024), nullable=False)
-    type = Column(SETTINGS_TYPES_ENUM, nullable=False)
-    multiple = Column(String(128), nullable=True)
-    separator = Column(String(10), default=" ", nullable=True)
-    accept = Column(String(512), nullable=True)
-    order = Column(Integer, default=0, nullable=False)
+    id: Mapped[str] = mapped_column(String(256), primary_key=True)
+    name: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
+    plugin_id: Mapped[str] = mapped_column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    context: Mapped[str] = mapped_column(CONTEXTS_ENUM, nullable=False)
+    default: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
+    help: Mapped[str] = mapped_column(String(512), nullable=False)
+    label: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    regex: Mapped[str] = mapped_column(String(1024), nullable=False)
+    type: Mapped[str] = mapped_column(SETTINGS_TYPES_ENUM, nullable=False)
+    multiple: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    separator: Mapped[Optional[str]] = mapped_column(String(10), default=" ", nullable=True)
+    accept: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    selects = relationship("Selects", back_populates="setting", cascade="all")
-    multiselects = relationship("Multiselects", back_populates="setting", cascade="all")
-    services = relationship("Services_settings", back_populates="setting", cascade="all")
-    global_value = relationship("Global_values", back_populates="setting", cascade="all")
-    templates = relationship("Template_settings", back_populates="setting", cascade="all")
-    plugin = relationship("Plugins", back_populates="settings")
+    selects: Mapped[List["Selects"]] = relationship("Selects", back_populates="setting", cascade="all")
+    multiselects: Mapped[List["Multiselects"]] = relationship("Multiselects", back_populates="setting", cascade="all")
+    services: Mapped[List["Services_settings"]] = relationship("Services_settings", back_populates="setting", cascade="all")
+    global_value: Mapped[List["Global_values"]] = relationship("Global_values", back_populates="setting", cascade="all")
+    templates: Mapped[List["Template_settings"]] = relationship("Template_settings", back_populates="setting", cascade="all")
+    plugin: Mapped["Plugins"] = relationship("Plugins", back_populates="settings")
 
 
 class Selects(Base):
@@ -98,12 +107,12 @@ class Selects(Base):
         UniqueConstraint("setting_id", "order"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    value = Column(String(256), nullable=True, default="")
-    order = Column(Integer, default=0, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    setting_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    value: Mapped[Optional[str]] = mapped_column(String(256), nullable=True, default="")
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    setting = relationship("Settings", back_populates="selects")
+    setting: Mapped["Settings"] = relationship("Settings", back_populates="selects")
 
 
 class Multiselects(Base):
@@ -113,182 +122,186 @@ class Multiselects(Base):
         UniqueConstraint("setting_id", "order"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    option_id = Column(String(256), nullable=False)
-    label = Column(String(256), nullable=False)
-    value = Column(Text, nullable=True, default="")
-    order = Column(Integer, default=0, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    setting_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    option_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    label: Mapped[str] = mapped_column(String(256), nullable=False)
+    value: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    setting = relationship("Settings", back_populates="multiselects")
+    setting: Mapped["Settings"] = relationship("Settings", back_populates="multiselects")
 
 
 class Global_values(Base):
     __tablename__ = "bw_global_values"
     __table_args__ = (UniqueConstraint("setting_id", "suffix"),)
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    value = Column(LargeText, nullable=True, default="")
-    file_name = Column(String(512), nullable=True, default=None)
-    suffix = Column(Integer, nullable=True, default=0)
-    method = Column(METHODS_ENUM, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    setting_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    value: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default="")
+    file_name: Mapped[Optional[str]] = mapped_column(String(512), nullable=True, default=None)
+    suffix: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False)
 
-    setting = relationship("Settings", back_populates="global_value")
+    setting: Mapped["Settings"] = relationship("Settings", back_populates="global_value")
 
 
 class Services(Base):
     __tablename__ = "bw_services"
 
-    id = Column(String(256), primary_key=True)
-    method = Column(METHODS_ENUM, nullable=False)
-    is_draft = Column(Boolean, default=False, nullable=False, index=True)
-    creation_date = Column(DateTime(timezone=True), nullable=False)
-    last_update = Column(DateTime(timezone=True), nullable=False)
+    id: Mapped[str] = mapped_column(String(256), primary_key=True)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False)
+    is_draft: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_update: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    settings = relationship("Services_settings", back_populates="service", cascade="all")
-    custom_configs = relationship("Custom_configs", back_populates="service", cascade="all")
-    jobs_cache = relationship("Jobs_cache", back_populates="service", cascade="all")
+    settings: Mapped[List["Services_settings"]] = relationship("Services_settings", back_populates="service", cascade="all")
+    custom_configs: Mapped[List["Custom_configs"]] = relationship("Custom_configs", back_populates="service", cascade="all")
+    jobs_cache: Mapped[List["Jobs_cache"]] = relationship("Jobs_cache", back_populates="service", cascade="all")
 
 
 class Services_settings(Base):
     __tablename__ = "bw_services_settings"
     __table_args__ = (UniqueConstraint("service_id", "setting_id", "suffix"),)
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    value = Column(LargeText, nullable=True, default="")
-    file_name = Column(String(512), nullable=True, default=None)
-    suffix = Column(Integer, nullable=True, default=0)
-    method = Column(METHODS_ENUM, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    service_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    value: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default="")
+    file_name: Mapped[Optional[str]] = mapped_column(String(512), nullable=True, default=None)
+    suffix: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False)
 
-    service = relationship("Services", back_populates="settings")
-    setting = relationship("Settings", back_populates="services")
+    service: Mapped["Services"] = relationship("Services", back_populates="settings")
+    setting: Mapped["Settings"] = relationship("Settings", back_populates="services")
 
 
 class Jobs(Base):
     __tablename__ = "bw_jobs"
 
-    name = Column(String(128), primary_key=True)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), index=True)
-    file_name = Column(String(256), nullable=False)
-    every = Column(SCHEDULES_ENUM, nullable=False)
-    reload = Column(Boolean, default=False, nullable=False)
-    run_async = Column(Boolean, default=False, nullable=False)
+    name: Mapped[str] = mapped_column(String(128), primary_key=True)
+    # nullable=True was implicit before the SQLAlchemy 2.0 typed rewrite — made explicit, same schema
+    plugin_id: Mapped[Optional[str]] = mapped_column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True)
+    file_name: Mapped[str] = mapped_column(String(256), nullable=False)
+    every: Mapped[str] = mapped_column(SCHEDULES_ENUM, nullable=False)
+    reload: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    run_async: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    plugin = relationship("Plugins", back_populates="jobs")
-    cache = relationship("Jobs_cache", back_populates="job", cascade="all")
-    runs = relationship("Jobs_runs", back_populates="job", cascade="all")
+    plugin: Mapped[Optional["Plugins"]] = relationship("Plugins", back_populates="jobs")
+    cache: Mapped[List["Jobs_cache"]] = relationship("Jobs_cache", back_populates="job", cascade="all")
+    runs: Mapped[List["Jobs_runs"]] = relationship("Jobs_runs", back_populates="job", cascade="all")
 
 
 class Plugin_pages(Base):
     __tablename__ = "bw_plugin_pages"
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), unique=True, nullable=False)
-    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
-    checksum = Column(String(128), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    plugin_id: Mapped[str] = mapped_column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), unique=True, nullable=False)
+    data: Mapped[bytes] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=False)
+    checksum: Mapped[str] = mapped_column(String(128), nullable=False)
 
-    plugin = relationship("Plugins", back_populates="pages")
+    plugin: Mapped["Plugins"] = relationship("Plugins", back_populates="pages")
 
 
 class Jobs_cache(Base):
     __tablename__ = "bw_jobs_cache"
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True)
-    file_name = Column(String(256), nullable=False)
-    data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
-    last_update = Column(DateTime(timezone=True), nullable=True)
-    checksum = Column(String(128), nullable=True)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    job_name: Mapped[str] = mapped_column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    service_id: Mapped[Optional[str]] = mapped_column(
+        String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True
+    )
+    file_name: Mapped[str] = mapped_column(String(256), nullable=False)
+    data: Mapped[Optional[bytes]] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=True)
+    last_update: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    checksum: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
-    job = relationship("Jobs", back_populates="cache")
-    service = relationship("Services", back_populates="jobs_cache")
+    job: Mapped["Jobs"] = relationship("Jobs", back_populates="cache")
+    service: Mapped[Optional["Services"]] = relationship("Services", back_populates="jobs_cache")
 
 
 class Jobs_runs(Base):
     __tablename__ = "bw_jobs_runs"
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    success = Column(Boolean, nullable=True, default=False)
-    start_date = Column(DateTime(timezone=True), nullable=False)
-    end_date = Column(DateTime(timezone=True), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    job_name: Mapped[str] = mapped_column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    success: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=False)
+    start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    job = relationship("Jobs", back_populates="runs")
+    job: Mapped["Jobs"] = relationship("Jobs", back_populates="runs")
 
 
 class Custom_configs(Base):
     __tablename__ = "bw_custom_configs"
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
-    type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
-    name = Column(String(256), nullable=False)
-    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
-    checksum = Column(String(128), nullable=False)
-    method = Column(METHODS_ENUM, nullable=False)
-    is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    service_id: Mapped[Optional[str]] = mapped_column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    type: Mapped[str] = mapped_column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    data: Mapped[bytes] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=False)
+    checksum: Mapped[str] = mapped_column(String(128), nullable=False)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False)
+    is_draft: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
-    service = relationship("Services", back_populates="custom_configs")
+    service: Mapped[Optional["Services"]] = relationship("Services", back_populates="custom_configs")
 
 
 class Instances(Base):
     __tablename__ = "bw_instances"
 
-    hostname = Column(String(256), primary_key=True)
-    name = Column(String(256), nullable=False, default="manual instance")
-    port = Column(Integer, nullable=False)
-    listen_https = Column(Boolean, nullable=False, default=False)
-    https_port = Column(Integer, nullable=False, default=5443)
-    server_name = Column(String(256), nullable=False)
-    type = Column(INSTANCE_TYPE_ENUM, nullable=False, default="static")
-    status = Column(INSTANCE_STATUS_ENUM, nullable=False, default="loading")
-    method = Column(METHODS_ENUM, nullable=False, default="manual")
-    creation_date = Column(DateTime(timezone=True), nullable=False)
-    last_seen = Column(DateTime(timezone=True), nullable=False)
+    hostname: Mapped[str] = mapped_column(String(256), primary_key=True)
+    name: Mapped[str] = mapped_column(String(256), nullable=False, default="manual instance")
+    port: Mapped[int] = mapped_column(Integer, nullable=False)
+    listen_https: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    https_port: Mapped[int] = mapped_column(Integer, nullable=False, default=5443)
+    server_name: Mapped[str] = mapped_column(String(256), nullable=False)
+    type: Mapped[str] = mapped_column(INSTANCE_TYPE_ENUM, nullable=False, default="static")
+    status: Mapped[str] = mapped_column(INSTANCE_STATUS_ENUM, nullable=False, default="loading")
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False, default="manual")
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class Bw_cli_commands(Base):
     __tablename__ = "bw_cli_commands"
     __table_args__ = (UniqueConstraint("plugin_id", "name"),)
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    name = Column(String(64), nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    file_name = Column(String(256), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    plugin_id: Mapped[str] = mapped_column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    file_name: Mapped[str] = mapped_column(String(256), nullable=False)
 
-    plugin = relationship("Plugins", back_populates="commands")
+    plugin: Mapped["Plugins"] = relationship("Plugins", back_populates="commands")
 
 
 class Templates(Base):
     __tablename__ = "bw_templates"
 
-    id = Column(String(256), primary_key=True)
-    name = Column(String(256), unique=True, nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True)
-    method = Column(METHODS_ENUM, nullable=False, default="manual")
-    creation_date = Column(DateTime(timezone=True), nullable=False)
-    last_update = Column(DateTime(timezone=True), nullable=False)
+    id: Mapped[str] = mapped_column(String(256), primary_key=True)
+    name: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
+    plugin_id: Mapped[Optional[str]] = mapped_column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False, default="manual")
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_update: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    plugin = relationship("Plugins", back_populates="templates")
-    steps = relationship("Template_steps", back_populates="template", cascade="all")
-    settings = relationship("Template_settings", back_populates="template", cascade="all")
-    custom_configs = relationship("Template_custom_configs", back_populates="template", cascade="all")
+    plugin: Mapped[Optional["Plugins"]] = relationship("Plugins", back_populates="templates")
+    steps: Mapped[List["Template_steps"]] = relationship("Template_steps", back_populates="template", cascade="all")
+    settings: Mapped[List["Template_settings"]] = relationship("Template_settings", back_populates="template", cascade="all")
+    custom_configs: Mapped[List["Template_custom_configs"]] = relationship("Template_custom_configs", back_populates="template", cascade="all")
 
 
 class Template_steps(Base):
     __tablename__ = "bw_template_steps"
 
-    id = Column(Integer, primary_key=True)
-    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    title = Column(Text, nullable=False)
-    subtitle = Column(Text, nullable=True)
+    # composite PK without Identity (autoincrement resolves to False) — keep exactly as before
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    template_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    subtitle: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    template = relationship("Templates", back_populates="steps")
+    template: Mapped["Templates"] = relationship("Templates", back_populates="steps")
 
 
 class Template_settings(Base):
@@ -298,16 +311,16 @@ class Template_settings(Base):
         UniqueConstraint("template_id", "setting_id", "order"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    step_id = Column(Integer, nullable=False)
-    default = Column(Text, nullable=True, default="")
-    suffix = Column(Integer, nullable=True, default=0)
-    order = Column(Integer, nullable=False, default=0)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    template_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    step_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    default: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
+    suffix: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-    template = relationship("Templates", back_populates="settings")
-    setting = relationship("Settings", back_populates="templates")
+    template: Mapped["Templates"] = relationship("Templates", back_populates="settings")
+    setting: Mapped["Settings"] = relationship("Settings", back_populates="templates")
 
 
 class Template_custom_configs(Base):
@@ -317,48 +330,49 @@ class Template_custom_configs(Base):
         UniqueConstraint("template_id", "order"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, nullable=False)
-    type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
-    name = Column(String(256), nullable=False)
-    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
-    checksum = Column(String(128), nullable=False)
-    order = Column(Integer, default=0, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    template_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    step_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    type: Mapped[str] = mapped_column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    data: Mapped[bytes] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=False)
+    checksum: Mapped[str] = mapped_column(String(128), nullable=False)
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    template = relationship("Templates", back_populates="custom_configs")
+    template: Mapped["Templates"] = relationship("Templates", back_populates="custom_configs")
 
 
 class Metadata(Base):
     __tablename__ = "bw_metadata"
 
-    id = Column(Integer, primary_key=True, default=1)
-    is_initialized = Column(Boolean, nullable=False)
-    is_pro = Column(Boolean, default=False, nullable=False)
-    pro_license = Column(String(128), default="", nullable=True)
-    pro_expire = Column(DateTime(timezone=True), nullable=True)
-    pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
-    pro_services = Column(Integer, default=0, nullable=False)
-    non_draft_services = Column(Integer, default=0, nullable=False)
-    pro_overlapped = Column(Boolean, default=False, nullable=False)
-    last_pro_check = Column(DateTime(timezone=True), nullable=True)
-    first_config_saved = Column(Boolean, nullable=False)
-    autoconf_loaded = Column(Boolean, default=False, nullable=True)
-    scheduler_first_start = Column(Boolean, nullable=True)
-    custom_configs_changed = Column(Boolean, default=False, nullable=True)
-    last_custom_configs_change = Column(DateTime(timezone=True), nullable=True)
-    external_plugins_changed = Column(Boolean, default=False, nullable=True)
-    last_external_plugins_change = Column(DateTime(timezone=True), nullable=True)
-    pro_plugins_changed = Column(Boolean, default=False, nullable=True)
-    last_pro_plugins_change = Column(DateTime(timezone=True), nullable=True)
-    instances_changed = Column(Boolean, default=False, nullable=True)
-    last_instances_change = Column(DateTime(timezone=True), nullable=True)
-    reload_ui_plugins = Column(Boolean, default=False, nullable=True)
-    force_pro_update = Column(Boolean, default=False, nullable=True)
-    failover = Column(Boolean, default=None, nullable=True)
-    failover_message = Column(Text, nullable=True, default="")
-    integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.12~rc1", nullable=False)
+    # singleton row: client-side default=1, no Identity — keep exactly as before
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    is_initialized: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    is_pro: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    pro_license: Mapped[Optional[str]] = mapped_column(String(128), default="", nullable=True)
+    pro_expire: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    pro_status: Mapped[str] = mapped_column(PRO_STATUS_ENUM, default="invalid", nullable=False)
+    pro_services: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    non_draft_services: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    pro_overlapped: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    last_pro_check: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    first_config_saved: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    autoconf_loaded: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    scheduler_first_start: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    custom_configs_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    last_custom_configs_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    external_plugins_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    last_external_plugins_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    pro_plugins_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    last_pro_plugins_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    instances_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    last_instances_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    reload_ui_plugins: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    force_pro_update: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    failover: Mapped[Optional[bool]] = mapped_column(Boolean, default=None, nullable=True)
+    failover_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
+    integration: Mapped[str] = mapped_column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
+    version: Mapped[str] = mapped_column(String(32), default="1.6.12~rc1", nullable=False)
 
 
 ## UI Models
@@ -374,6 +388,7 @@ class JSONText(TypeDecorator):
     """
 
     impl = Text  # Stores JSON as a TEXT field in the database
+    cache_ok = True  # stateless/deterministic type: safe for SQLAlchemy's compiled-statement cache
 
     def process_bind_param(self, value: Optional[dict], dialect: Any) -> Optional[str]:
         """
@@ -398,101 +413,105 @@ class JSONText(TypeDecorator):
 class Users(Base):
     __tablename__ = "bw_ui_users"
 
-    username = Column(String(256), primary_key=True)
-    email = Column(String(256), unique=True, nullable=True)
-    password = Column(String(60), nullable=False)
-    method = Column(METHODS_ENUM, nullable=False, default="manual")
-    admin = Column(Boolean, nullable=False, default=False, index=True)
-    theme = Column(THEMES_ENUM, nullable=False, default="light")
-    language = Column(String(2), nullable=False, default="en")
+    username: Mapped[str] = mapped_column(String(256), primary_key=True)
+    email: Mapped[Optional[str]] = mapped_column(String(256), unique=True, nullable=True)
+    password: Mapped[str] = mapped_column(String(60), nullable=False)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False, default="manual")
+    admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
+    theme: Mapped[str] = mapped_column(THEMES_ENUM, nullable=False, default="light")
+    language: Mapped[str] = mapped_column(String(2), nullable=False, default="en")
 
     # 2FA
-    totp_secret = Column(String(256), nullable=True)
+    totp_secret: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
 
-    creation_date = Column(DateTime(timezone=True), nullable=False)
-    update_date = Column(DateTime(timezone=True), nullable=False)
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    update_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    roles = relationship("RolesUsers", back_populates="user", cascade="all")
-    recovery_codes = relationship("UserRecoveryCodes", back_populates="user", cascade="all")
-    sessions = relationship("UserSessions", back_populates="user", cascade="all")
-    columns_preferences = relationship("UserColumnsPreferences", back_populates="user", cascade="all")
-    list_roles: list[str] = []
-    list_permissions: list[str] = []
-    list_recovery_codes: list[str] = []
+    roles: Mapped[List["RolesUsers"]] = relationship("RolesUsers", back_populates="user", cascade="all")
+    recovery_codes: Mapped[List["UserRecoveryCodes"]] = relationship("UserRecoveryCodes", back_populates="user", cascade="all")
+    sessions: Mapped[List["UserSessions"]] = relationship("UserSessions", back_populates="user", cascade="all")
+    columns_preferences: Mapped[List["UserColumnsPreferences"]] = relationship("UserColumnsPreferences", back_populates="user", cascade="all")
+    # plain (non-ORM) class attributes filled in by the UI layer; ClassVar keeps
+    # DeclarativeBase from rejecting them as unmapped annotations
+    list_roles: ClassVar[List[str]] = []
+    list_permissions: ClassVar[List[str]] = []
+    list_recovery_codes: ClassVar[List[str]] = []
 
 
 class Roles(Base):
     __tablename__ = "bw_ui_roles"
 
-    name = Column(String(64), primary_key=True)
-    description = Column(String(256), nullable=False)
-    update_datetime = Column(DateTime(timezone=True), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), primary_key=True)
+    description: Mapped[str] = mapped_column(String(256), nullable=False)
+    update_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    users = relationship("RolesUsers", back_populates="role", cascade="all")
-    permissions = relationship("RolesPermissions", back_populates="role", cascade="all")
+    users: Mapped[List["RolesUsers"]] = relationship("RolesUsers", back_populates="role", cascade="all")
+    permissions: Mapped[List["RolesPermissions"]] = relationship("RolesPermissions", back_populates="role", cascade="all")
 
 
 class RolesUsers(Base):
     __tablename__ = "bw_ui_roles_users"
 
-    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    role_name = Column(String(64), ForeignKey("bw_ui_roles.name", onupdate="cascade", ondelete="cascade"), primary_key=True, index=True)
+    user_name: Mapped[str] = mapped_column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    role_name: Mapped[str] = mapped_column(String(64), ForeignKey("bw_ui_roles.name", onupdate="cascade", ondelete="cascade"), primary_key=True, index=True)
 
-    user = relationship("Users", back_populates="roles")
-    role = relationship("Roles", back_populates="users")
+    user: Mapped["Users"] = relationship("Users", back_populates="roles")
+    role: Mapped["Roles"] = relationship("Roles", back_populates="users")
 
 
 class UserRecoveryCodes(Base):
     __tablename__ = "bw_ui_user_recovery_codes"
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    code = Column(UnicodeText, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    user_name: Mapped[str] = mapped_column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    code: Mapped[str] = mapped_column(UnicodeText, nullable=False)
 
-    user = relationship("Users", back_populates="recovery_codes")
+    user: Mapped["Users"] = relationship("Users", back_populates="recovery_codes")
 
 
 class RolesPermissions(Base):
     __tablename__ = "bw_ui_roles_permissions"
 
-    role_name = Column(String(64), ForeignKey("bw_ui_roles.name", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    permission_name = Column(String(64), ForeignKey("bw_ui_permissions.name", onupdate="cascade", ondelete="cascade"), primary_key=True, index=True)
+    role_name: Mapped[str] = mapped_column(String(64), ForeignKey("bw_ui_roles.name", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    permission_name: Mapped[str] = mapped_column(
+        String(64), ForeignKey("bw_ui_permissions.name", onupdate="cascade", ondelete="cascade"), primary_key=True, index=True
+    )
 
-    role = relationship("Roles", back_populates="permissions")
-    permission = relationship("Permissions", back_populates="roles")
+    role: Mapped["Roles"] = relationship("Roles", back_populates="permissions")
+    permission: Mapped["Permissions"] = relationship("Permissions", back_populates="roles")
 
 
 class Permissions(Base):
     __tablename__ = "bw_ui_permissions"
 
-    name = Column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(64), primary_key=True)
 
-    roles = relationship("RolesPermissions", back_populates="permission", cascade="all")
+    roles: Mapped[List["RolesPermissions"]] = relationship("RolesPermissions", back_populates="permission", cascade="all")
 
 
 class UserSessions(Base):
     __tablename__ = "bw_ui_user_sessions"
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    ip = Column(String(39), nullable=False)
-    user_agent = Column(Text, nullable=True, default="")
-    creation_date = Column(DateTime(timezone=True), nullable=False)
-    last_activity = Column(DateTime(timezone=True), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    user_name: Mapped[str] = mapped_column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    ip: Mapped[str] = mapped_column(String(39), nullable=False)
+    user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_activity: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    user = relationship("Users", back_populates="sessions")
+    user: Mapped["Users"] = relationship("Users", back_populates="sessions")
 
 
 class UserColumnsPreferences(Base):
     __tablename__ = "bw_ui_user_columns_preferences"
     __table_args__ = (UniqueConstraint("user_name", "table_name"),)
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
-    table_name = Column(String(256), nullable=False)
-    columns = Column(JSONText, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    user_name: Mapped[str] = mapped_column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
+    table_name: Mapped[str] = mapped_column(String(256), nullable=False)
+    columns: Mapped[dict] = mapped_column(JSONText, nullable=False)
 
-    user = relationship("Users", back_populates="columns_preferences")
+    user: Mapped["Users"] = relationship("Users", back_populates="columns_preferences")
 
 
 ## API Models
@@ -554,26 +573,26 @@ API_RESOURCE_ENUM = Enum(
 class API_users(Base):
     __tablename__ = "bw_api_users"
 
-    username = Column(String(256), primary_key=True)
-    password = Column(String(60), nullable=False)
-    method = Column(METHODS_ENUM, nullable=False, default="manual")
-    admin = Column(Boolean, nullable=False, default=False)
-    creation_date = Column(DateTime(timezone=True), nullable=False)
-    update_date = Column(DateTime(timezone=True), nullable=False)
+    username: Mapped[str] = mapped_column(String(256), primary_key=True)
+    password: Mapped[str] = mapped_column(String(60), nullable=False)
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False, default="manual")
+    admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    update_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    permissions = relationship("API_permissions", back_populates="user", cascade="all, delete-orphan")
+    permissions: Mapped[List["API_permissions"]] = relationship("API_permissions", back_populates="user", cascade="all, delete-orphan")
 
 
 class API_permissions(Base):
     __tablename__ = "bw_api_user_permissions"
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    api_user = Column(String(256), ForeignKey("bw_api_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
-    resource_type = Column(API_RESOURCE_ENUM, nullable=False)
-    resource_id = Column(String(256), nullable=True)
-    permission = Column(String(512), nullable=False)
-    granted = Column(Boolean, nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    api_user: Mapped[str] = mapped_column(String(256), ForeignKey("bw_api_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    resource_type: Mapped[str] = mapped_column(API_RESOURCE_ENUM, nullable=False)
+    resource_id: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    permission: Mapped[str] = mapped_column(String(512), nullable=False)
+    granted: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    user = relationship("API_users", back_populates="permissions")
+    user: Mapped["API_users"] = relationship("API_users", back_populates="permissions")
