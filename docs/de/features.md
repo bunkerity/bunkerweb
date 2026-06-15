@@ -1832,7 +1832,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.12-rc1
+        image: bunkerity/bunkerweb:1.6.12-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1849,7 +1849,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.12-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -3046,39 +3046,47 @@ STREAM-Unterstützung :x:
 
 LDAP-based single sign-on plugin with session-backed authentication.
 
-| Einstellung                       | Standardwert                                                                                                            | Kontext   | Mehrfach | Beschreibung                                                                       |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------- |
-| `USE_LDAP`                        | `no`                                                                                                                    | multisite | nein     | Enable or disable LDAP SSO authentication.                                         |
-| `LDAP_HOST`                       |                                                                                                                         | multisite | nein     | LDAP server hostname or IP address.                                                |
-| `LDAP_PORT`                       | `389`                                                                                                                   | multisite | nein     | LDAP server port (389 for LDAP/STARTTLS, 636 for LDAPS).                           |
-| `LDAP_LDAPS`                      | `no`                                                                                                                    | multisite | nein     | Use LDAPS (TLS from connection start).                                             |
-| `LDAP_STARTTLS`                   | `no`                                                                                                                    | multisite | nein     | Use STARTTLS upgrade on LDAP connection.                                           |
-| `LDAP_SSL_VERIFY`                 | `yes`                                                                                                                   | multisite | nein     | Verify server TLS certificate.                                                     |
-| `LDAP_TIMEOUT`                    | `10000`                                                                                                                 | multisite | nein     | LDAP socket timeout in milliseconds.                                               |
-| `LDAP_KEEPALIVE_TIMEOUT`          | `60000`                                                                                                                 | multisite | nein     | LDAP keepalive timeout in milliseconds.                                            |
-| `LDAP_KEEPALIVE_POOL_SIZE`        | `10`                                                                                                                    | multisite | nein     | LDAP keepalive connection pool size.                                               |
-| `LDAP_KEEPALIVE_POOL_NAME`        |                                                                                                                         | multisite | nein     | Optional custom LDAP keepalive pool name.                                          |
-| `LDAP_BIND_DN`                    |                                                                                                                         | multisite | nein     | Optional service account DN used to perform LDAP user searches.                    |
-| `LDAP_BIND_PASSWORD`              |                                                                                                                         | multisite | nein     | Password for LDAP Bind DN service account.                                         |
-| `LDAP_USER_SEARCH_BASE_DN`        |                                                                                                                         | multisite | nein     | Base DN for user discovery search (enables enterprise search mode when set).       |
-| `LDAP_USER_SEARCH_FILTER`         | `(&(objectClass=person)(\|(uid={username})(mail={username})(sAMAccountName={username})(userPrincipalName={username})))` | multisite | nein     | LDAP user search filter template. Use {username} placeholder.                      |
-| `LDAP_AUTHZ_FILTER`               |                                                                                                                         | multisite | nein     | Optional extra LDAP authorization filter (AND-ed with user search filter).         |
-| `LDAP_USER_SEARCH_SCOPE`          | `subtree`                                                                                                               | multisite | nein     | LDAP search scope for user lookup.                                                 |
-| `LDAP_USER_SEARCH_DEREF_ALIASES`  | `always`                                                                                                                | multisite | nein     | LDAP alias dereferencing mode during user lookup.                                  |
-| `LDAP_USER_SEARCH_SIZE_LIMIT`     | `10`                                                                                                                    | multisite | nein     | Maximum number of LDAP entries returned by user search.                            |
-| `LDAP_USER_SEARCH_TIME_LIMIT`     | `10`                                                                                                                    | multisite | nein     | Maximum LDAP user search time in seconds.                                          |
-| `LDAP_USER_SEARCH_ATTRIBUTES`     | `dn`                                                                                                                    | multisite | nein     | Attributes requested during user search (space separated).                         |
-| `LDAP_USER_SEARCH_DN_FIELD`       | `object_name`                                                                                                           | multisite | nein     | Preferred field name in search response to extract user DN (e.g. object_name, dn). |
-| `LDAP_USER_SEARCH_REQUIRE_UNIQUE` | `yes`                                                                                                                   | multisite | nein     | Require exactly one search result before authenticating user.                      |
-| `LDAP_USER_DN_TEMPLATE`           | `uid={username},ou=people,dc=example,dc=com`                                                                            | multisite | nein     | User DN template used for direct bind fallback. Must include {username} when set.  |
-| `LDAP_USERNAME_REGEX`             | `^[A-Za-z0-9@._-]+$`                                                                                                    | multisite | nein     | PCRE regex used to validate submitted usernames.                                   |
-| `LDAP_LOGIN_PATH`                 | `/ldap/login`                                                                                                           | multisite | nein     | Login page path exposed by the LDAP plugin.                                        |
-| `LDAP_LOGOUT_PATH`                | `/ldap/logout`                                                                                                          | multisite | nein     | Logout path exposed by the LDAP plugin.                                            |
-| `LDAP_SESSION_TTL`                | `3600`                                                                                                                  | multisite | nein     | LDAP session validity duration in seconds.                                         |
-| `LDAP_REALM`                      | `LDAP SSO`                                                                                                              | multisite | nein     | Authentication realm displayed on LDAP login form.                                 |
-| `LDAP_USER_HEADER`                | `X-User`                                                                                                                | multisite | nein     | Header to pass authenticated username to upstream (empty to disable).              |
-| `LDAP_REDIRECT_AFTER_LOGIN`       | `/`                                                                                                                     | multisite | nein     | Fallback relative path after successful login when no redirect target is provided. |
-| `LDAP_REDIRECT_AFTER_LOGOUT`      | `/`                                                                                                                     | multisite | nein     | Relative path to redirect users to after logout.                                   |
+| Einstellung                       | Standardwert                                                                                                            | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_LDAP`                        | `no`                                                                                                                    | multisite | nein     | Enable or disable LDAP SSO authentication.                                                                                                                                                                 |
+| `LDAP_HOST`                       |                                                                                                                         | multisite | nein     | LDAP server hostname or IP address.                                                                                                                                                                        |
+| `LDAP_PORT`                       | `389`                                                                                                                   | multisite | nein     | LDAP server port (389 for LDAP/STARTTLS, 636 for LDAPS).                                                                                                                                                   |
+| `LDAP_LDAPS`                      | `no`                                                                                                                    | multisite | nein     | Use LDAPS (TLS from connection start).                                                                                                                                                                     |
+| `LDAP_STARTTLS`                   | `no`                                                                                                                    | multisite | nein     | Use STARTTLS upgrade on LDAP connection.                                                                                                                                                                   |
+| `LDAP_SSL_VERIFY`                 | `yes`                                                                                                                   | multisite | nein     | Verify server TLS certificate.                                                                                                                                                                             |
+| `LDAP_TIMEOUT`                    | `10000`                                                                                                                 | multisite | nein     | LDAP socket timeout in milliseconds.                                                                                                                                                                       |
+| `LDAP_KEEPALIVE_TIMEOUT`          | `60000`                                                                                                                 | multisite | nein     | LDAP keepalive timeout in milliseconds.                                                                                                                                                                    |
+| `LDAP_KEEPALIVE_POOL_SIZE`        | `10`                                                                                                                    | multisite | nein     | LDAP keepalive connection pool size.                                                                                                                                                                       |
+| `LDAP_KEEPALIVE_POOL_NAME`        |                                                                                                                         | multisite | nein     | Optional custom LDAP keepalive pool name.                                                                                                                                                                  |
+| `LDAP_BIND_DN`                    |                                                                                                                         | multisite | nein     | Optional service account DN used to perform LDAP user searches.                                                                                                                                            |
+| `LDAP_BIND_PASSWORD`              |                                                                                                                         | multisite | nein     | Password for LDAP Bind DN service account.                                                                                                                                                                 |
+| `LDAP_USER_SEARCH_BASE_DN`        |                                                                                                                         | multisite | nein     | Base DN for user discovery search (enables enterprise search mode when set).                                                                                                                               |
+| `LDAP_USER_SEARCH_FILTER`         | `(&(objectClass=person)(\|(uid={username})(mail={username})(sAMAccountName={username})(userPrincipalName={username})))` | multisite | nein     | LDAP user search filter template. Use {username} placeholder.                                                                                                                                              |
+| `LDAP_AUTHZ_FILTER`               |                                                                                                                         | multisite | nein     | Optional extra LDAP authorization filter (AND-ed with user search filter).                                                                                                                                 |
+| `LDAP_USER_SEARCH_SCOPE`          | `subtree`                                                                                                               | multisite | nein     | LDAP search scope for user lookup.                                                                                                                                                                         |
+| `LDAP_USER_SEARCH_DEREF_ALIASES`  | `always`                                                                                                                | multisite | nein     | LDAP alias dereferencing mode during user lookup.                                                                                                                                                          |
+| `LDAP_USER_SEARCH_SIZE_LIMIT`     | `10`                                                                                                                    | multisite | nein     | Maximum number of LDAP entries returned by user search.                                                                                                                                                    |
+| `LDAP_USER_SEARCH_TIME_LIMIT`     | `10`                                                                                                                    | multisite | nein     | Maximum LDAP user search time in seconds.                                                                                                                                                                  |
+| `LDAP_USER_SEARCH_ATTRIBUTES`     | `dn`                                                                                                                    | multisite | nein     | Attributes requested during user search (space separated).                                                                                                                                                 |
+| `LDAP_USER_SEARCH_DN_FIELD`       | `object_name`                                                                                                           | multisite | nein     | Preferred field name in search response to extract user DN (e.g. object_name, dn).                                                                                                                         |
+| `LDAP_USER_SEARCH_REQUIRE_UNIQUE` | `yes`                                                                                                                   | multisite | nein     | Require exactly one search result before authenticating user.                                                                                                                                              |
+| `LDAP_USER_DN_TEMPLATE`           | `uid={username},ou=people,dc=example,dc=com`                                                                            | multisite | nein     | User DN template used for direct bind fallback. Must include {username} when set.                                                                                                                          |
+| `LDAP_USERNAME_REGEX`             | `^[A-Za-z0-9@._-]+$`                                                                                                    | multisite | nein     | PCRE regex used to validate submitted usernames.                                                                                                                                                           |
+| `LDAP_LOGIN_PATH`                 | `/ldap/login`                                                                                                           | multisite | nein     | Login page path exposed by the LDAP plugin.                                                                                                                                                                |
+| `LDAP_LOGOUT_PATH`                | `/ldap/logout`                                                                                                          | multisite | nein     | Logout path exposed by the LDAP plugin.                                                                                                                                                                    |
+| `LDAP_SESSION_TTL`                | `3600`                                                                                                                  | multisite | nein     | LDAP session validity duration in seconds.                                                                                                                                                                 |
+| `LDAP_REALM`                      | `LDAP SSO`                                                                                                              | multisite | nein     | Authentication realm displayed on LDAP login form.                                                                                                                                                         |
+| `LDAP_USER_HEADER`                | `X-User`                                                                                                                | multisite | nein     | Header to pass authenticated username to upstream (empty to disable).                                                                                                                                      |
+| `LDAP_EMAIL_HEADER`               | `X-Email`                                                                                                               | multisite | nein     | Header to pass the user email to upstream (empty to disable). Requires search mode and the email attribute returned by the directory.                                                                      |
+| `LDAP_EMAIL_ATTRIBUTE`            | `mail`                                                                                                                  | multisite | nein     | LDAP attribute used for the email header (e.g. mail).                                                                                                                                                      |
+| `LDAP_GROUPS_HEADER`              | `X-Groups`                                                                                                              | multisite | nein     | Header to pass the user groups to upstream (empty to disable). Requires search mode and the groups attribute returned by the directory.                                                                    |
+| `LDAP_GROUPS_ATTRIBUTE`           | `memberOf`                                                                                                              | multisite | nein     | LDAP attribute used for the groups header (e.g. memberOf).                                                                                                                                                 |
+| `LDAP_GROUPS_VALUE`               | `cn`                                                                                                                    | multisite | nein     | How to serialize group values: 'cn' forwards only the first RDN value (group name, recommended with a comma separator), 'dn' forwards full group DNs (use a non-comma separator since DNs contain commas). |
+| `LDAP_GROUPS_SEPARATOR`           | `,`                                                                                                                     | multisite | nein     | Separator used to join multiple group values in the groups header.                                                                                                                                         |
+| `LDAP_NAME_HEADER`                | `X-Name`                                                                                                                | multisite | nein     | Header to pass the user display name to upstream (empty to disable). Requires search mode and the display name attribute returned by the directory.                                                        |
+| `LDAP_NAME_ATTRIBUTE`             | `displayName`                                                                                                           | multisite | nein     | LDAP attribute used for the display name header (e.g. displayName, cn).                                                                                                                                    |
+| `LDAP_REDIRECT_AFTER_LOGIN`       | `/`                                                                                                                     | multisite | nein     | Fallback relative path after successful login when no redirect target is provided.                                                                                                                         |
+| `LDAP_REDIRECT_AFTER_LOGOUT`      | `/`                                                                                                                     | multisite | nein     | Relative path to redirect users to after logout.                                                                                                                                                           |
 
 ## Let's Encrypt
 
@@ -3146,7 +3154,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | nein     | **Parallele Anfragen:** Wenn auf `yes` gesetzt, stellt certbot-new Zertifikatsanfragen parallel. Vorsicht wegen Rate-Limits.                                                                                                                                                                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                                                                                                                             |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                                                                                                                            |
-| `LETS_ENCRYPT_MAX_RETRIES`                  | `3`           | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
+| `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | nein     | **Maximale Certbot-Log-Backups:** Anzahl rotierter `letsencrypt.log`-Backups, die Certbot pro Job behält. Certbots eigener Standardwert von 1000 sammelt sich schnell an; `50` ist ein sinnvoller Grenzwert. Setzen Sie `0`, um nur das aktuelle Log zu behalten.                                                                                                      |
 
 !!! info "Informationen und Verhalten"
@@ -3192,7 +3200,7 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
-| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                                 | [Dokumentation](https://github.com/bunkerity/certbot-plugin-gandi)                                |
+| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                                 | [Dokumentation](https://github.com/bunkerity/certbot-plugin-gandi)                                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (Standard: `600`)                                                                                                                                                                                                                                                      | [Dokumentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (Standard: `service_account`)<br>`auth_uri` (Standard: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (Standard: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (Standard: `https://www.googleapis.com/oauth2/v1/certs`) | [Dokumentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -4012,7 +4020,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
-- **`4`**: Stabile [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**Standard**).
+- **`4`**: Stabile [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**Standard**).
 
 !!! warning "Nightly-Build veraltet"
     Die Option `nightly` für `MODSECURITY_CRS_VERSION` ist veraltet, da das OWASP Core Rule Set-Projekt die Nightly-Releases eingestellt hat. Wenn Ihre Konfiguration noch `nightly` verwendet, wird stattdessen CRS v4 verwendet. Bitte aktualisieren Sie Ihre Konfiguration auf `MODSECURITY_CRS_VERSION=4`.
@@ -4224,14 +4232,15 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 
 ### Konfigurationseinstellungen
 
-| Einstellung                   | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                            |
-| ----------------------------- | ------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`         | multisite | nein     | **Mutual TLS verwenden:** Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.                                                                      |
-| `MTLS_CA_CERTIFICATE`         |              | multisite | nein     | **Client-CA-Bundle:** Absoluter Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM). Erforderlich, wenn `MTLS_VERIFY_CLIENT` `on` oder `optional` ist; muss lesbar sein. |
-| `MTLS_VERIFY_CLIENT`          | `on`         | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).      |
-| `MTLS_VERIFY_DEPTH`           | `2`          | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                            |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`        | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter.     |
-| `MTLS_CRL`                    |              | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde.                              |
+| Einstellung                   | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                  |
+| ----------------------------- | ------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                    | `no`         | multisite | nein     | **Mutual TLS verwenden:** Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.                                                                                                                                                                            |
+| `MTLS_CA_CERTIFICATE`         |              | multisite | nein     | **Client-CA-Bundle:** Absoluter Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM). Erforderlich, wenn `MTLS_VERIFY_CLIENT` `on` oder `optional` ist; muss lesbar sein.                                                                                                       |
+| `MTLS_VERIFY_CLIENT`          | `on`         | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).                                                                                                            |
+| `MTLS_URL`                    |              | multisite | ja       | **mTLS-URL:** Regex, der gegen die Anfrage-URI geprüft wird, um nur auf passenden Pfaden ein gültiges Client-Zertifikat zu verlangen (nur HTTP). Erfordert `MTLS_VERIFY_CLIENT` auf `optional` oder `optional_no_ca`. Leer lassen, um mTLS für die gesamte Site zu erzwingen. |
+| `MTLS_VERIFY_DEPTH`           | `2`          | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                                                                                                                                  |
+| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`        | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter.                                                                                                           |
+| `MTLS_CRL`                    |              | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde.                                                                                                                                    |
 
 !!! tip "Zertifikate aktuell halten"
     Speichern Sie CA-Bundles und Sperrlisten in einem eingehängten Volume, das der Scheduler lesen kann, damit Neustarts die neuesten Vertrauensanker übernehmen.
@@ -4241,6 +4250,12 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 
 !!! info "Vertrauensquelle und Verifizierung"
     BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.
+
+!!! warning "Pfadbezogenes mTLS erfordert den optionalen Modus"
+    Die NGINX-Direktive `ssl_verify_client` ist nur im `server`-Kontext gültig – sie kann nicht in einem `location`-Block stehen. Um ein Zertifikat nur auf bestimmten Pfaden zu verlangen, setzen Sie `MTLS_VERIFY_CLIENT` auf `optional` (oder `optional_no_ca`), damit der Handshake für jeden Pfad abgeschlossen wird, und listen Sie die geschützten Pfade in `MTLS_URL_n` auf. BunkerWeb erzwingt das Zertifikat dann pro Anfrage in Lua auf den passenden URLs. Belassen Sie `MTLS_VERIFY_CLIENT` auf `on`, während Sie `MTLS_URL_n` setzen, weist NGINX Clients ohne Zertifikat bereits beim Handshake ab, bevor die pfadbezogene Logik greift – die Erzwingung bleibt dann site-weit.
+
+!!! info "Browser-Zertifikatsabfragen im optionalen Modus"
+    Der TLS-Handshake erfolgt, bevor NGINX die angeforderte URL kennt; im Modus `optional` sendet NGINX daher weiterhin bei jeder Verbindung einen `CertificateRequest`. Die Erzwingung wird pfadbezogen, die Einladung auf Handshake-Ebene jedoch nicht – Browser fragen unter Umständen auch auf ungeschützten Pfaden nach einem Zertifikat (Verhalten je nach Browser unterschiedlich). Auf diesen Pfaden lässt BunkerWeb die Anfrage zu, ob ein Zertifikat vorgelegt wird oder nicht.
 
 ### Konfigurationsbeispiele
 
@@ -4276,6 +4291,26 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
     MTLS_VERIFY_CLIENT: "optional_no_ca"
     MTLS_FORWARD_CLIENT_HEADERS: "no"
     ```
+
+=== "Pfadbezogenes mTLS (z. B. nur `/login`)"
+
+    Verlangen Sie Client-Zertifikate nur auf ausgewählten Pfaden und lassen Sie den Rest der Site offen. Die Verifizierung läuft im Modus `optional`, damit der Handshake auf nicht authentifizierten Pfaden abgeschlossen wird; BunkerWeb erzwingt das Zertifikat anschließend pro Anfrage auf URLs, die zu `MTLS_URL_n` passen (eine Regex pro Eintrag):
+
+    ```yaml
+    USE_MTLS: "yes"
+    MTLS_CA_CERTIFICATE: "/etc/bunkerweb/mtls/partner-ca.pem"
+    MTLS_VERIFY_CLIENT: "optional"
+    MTLS_URL_1: "^/login"
+    MTLS_URL_2: "^/admin"
+    MTLS_FORWARD_CLIENT_HEADERS: "yes"
+    ```
+
+    | Anfrage      | Zertifikat            | Ergebnis                                 |
+    | ------------ | --------------------- | ---------------------------------------- |
+    | `GET /`      | keines                | Erlaubt (Pfad ohne mTLS)                 |
+    | `GET /login` | keines                | Abgelehnt (`403`)                        |
+    | `GET /login` | gültig                | Erlaubt, `X-SSL-Client-*` weitergeleitet |
+    | `GET /login` | ungültig / abgelaufen | Abgelehnt (`403`)                        |
 
 ## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4345,6 +4380,13 @@ OpenID Connect authentication plugin providing SSO capabilities with identity pr
 | `OPENIDC_USER_HEADER`                     | `X-User`               | multisite | nein     | Header to pass user info to upstream (empty to disable).                                                                                                    |
 | `OPENIDC_USER_HEADER_CLAIM`               | `sub`                  | multisite | nein     | ID token claim to use for the user header (e.g. sub, email, preferred_username).                                                                            |
 | `OPENIDC_DISPLAY_CLAIM`                   | `preferred_username`   | multisite | nein     | Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.                          |
+| `OPENIDC_EMAIL_HEADER`                    | `X-Email`              | multisite | nein     | Header to pass the user email to upstream (empty to disable).                                                                                               |
+| `OPENIDC_EMAIL_CLAIM`                     | `email`                | multisite | nein     | ID token/userinfo claim used for the email header (e.g. email).                                                                                             |
+| `OPENIDC_GROUPS_HEADER`                   | `X-Groups`             | multisite | nein     | Header to pass the user groups to upstream (empty to disable).                                                                                              |
+| `OPENIDC_GROUPS_CLAIM`                    | `groups`               | multisite | nein     | ID token/userinfo claim used for the groups header (e.g. groups, roles).                                                                                    |
+| `OPENIDC_GROUPS_SEPARATOR`                | `,`                    | multisite | nein     | Separator used to join multiple group values in the groups header.                                                                                          |
+| `OPENIDC_NAME_HEADER`                     | `X-Name`               | multisite | nein     | Header to pass the user display name to upstream (empty to disable).                                                                                        |
+| `OPENIDC_NAME_CLAIM`                      | `name`                 | multisite | nein     | ID token/userinfo claim used for the display name header (e.g. name).                                                                                       |
 | `OPENIDC_DISCOVERY_DICT_SIZE`             | `1m`                   | global    | nein     | Size of the shared dictionary to cache discovery data.                                                                                                      |
 | `OPENIDC_JWKS_DICT_SIZE`                  | `1m`                   | global    | nein     | Size of the shared dictionary to cache JWKS data.                                                                                                           |
 | `OPENIDC_USE_ACL`                         | `no`                   | multisite | nein     | Enable claim-based access control (ACL) after OIDC authentication. When enabled, only users whose claims match the configured rules will be granted access. |
@@ -4790,23 +4832,23 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
 ### Parameter
 
-| Parameter                 | Standard   | Kontext | Mehrfach | Beschreibung                                                  |
-| :------------------------ | :--------- | :------ | :------- | :------------------------------------------------------------ |
-| `USE_REDIS`               | `no`       | global  | nein     | Aktiviert die Redis-/Valkey-Integration (Cluster-Modus).      |
-| `REDIS_HOST`              |            | global  | nein     | Host/IP des Redis-/Valkey-Servers.                            |
-| `REDIS_PORT`              | `6379`     | global  | nein     | Redis-/Valkey-Port.                                           |
-| `REDIS_DATABASE`          | `0`        | global  | nein     | Datenbanknummer (0–15).                                       |
-| `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                            |
-| `REDIS_SSL_VERIFY`        | `yes`      | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                     |
-| `REDIS_TIMEOUT`           | `5`        | global  | nein     | Timeout (Sekunden).                                           |
-| `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                   |
-| `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                     |
-| `REDIS_SENTINEL_HOSTS`    |            | global  | nein     | Sentinel-Hosts (durch Leerzeichen getrennt, `host:port`).     |
-| `REDIS_SENTINEL_USERNAME` |            | global  | nein     | Sentinel-Benutzer.                                            |
-| `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                            |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                    |
-| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | nein     | TCP-Keepalive-Intervall (Sekunden) für inaktive Verbindungen. |
-| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.          |
+| Parameter                 | Standard   | Kontext | Mehrfach | Beschreibung                                                                                                                                   |
+| :------------------------ | :--------- | :------ | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REDIS`               | `no`       | global  | nein     | Aktiviert die Redis-/Valkey-Integration (Cluster-Modus).                                                                                       |
+| `REDIS_HOST`              |            | global  | nein     | Host/IP des Redis-/Valkey-Servers. Nicht erforderlich, wenn `REDIS_SENTINEL_HOSTS` gesetzt ist (der Master wird über die Sentinels aufgelöst). |
+| `REDIS_PORT`              | `6379`     | global  | nein     | Redis-/Valkey-Port.                                                                                                                            |
+| `REDIS_DATABASE`          | `0`        | global  | nein     | Datenbanknummer (0–15).                                                                                                                        |
+| `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                                                                                                             |
+| `REDIS_SSL_VERIFY`        | `yes`      | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                                                                                                      |
+| `REDIS_TIMEOUT`           | `1000`     | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben.                                                                                                   |
+| `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                                                                                                    |
+| `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                                                                                                      |
+| `REDIS_SENTINEL_HOSTS`    |            | global  | nein     | Sentinel-Hosts (durch Leerzeichen getrennt, `host:port`).                                                                                      |
+| `REDIS_SENTINEL_USERNAME` |            | global  | nein     | Sentinel-Benutzer.                                                                                                                             |
+| `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                                                                                                             |
+| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                                                                                                     |
+| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird.                                                     |
+| `REDIS_KEEPALIVE_POOL`    | `10`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.                                                                                           |
 
 !!! tip "Hochverfügbarkeit"
     Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
@@ -4856,6 +4898,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
     ```yaml
     USE_REDIS: "yes"
+    # REDIS_HOST ist nicht erforderlich: Der Master wird über die Sentinels aufgelöst
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
     REDIS_SENTINEL_MASTER: "mymaster"
     REDIS_SENTINEL_PASSWORD: "sentinel-password"
@@ -4872,10 +4915,19 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     REDIS_PORT: "6379"
     REDIS_PASSWORD: "your-strong-password"
     REDIS_DATABASE: "3"
-    REDIS_TIMEOUT: "3"
-    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_TIMEOUT: "3000"
+    REDIS_KEEPALIVE_IDLE: "60000"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+!!! info "Redis auf Kubernetes (vom Scheduler gesteuerte Konfiguration)"
+    Auf Kubernetes liest der **Scheduler** die Einstellungen und überträgt die generierte
+    Konfiguration an die BunkerWeb-Instanzen — die Instanzen lesen diese Redis-Einstellungen nicht aus
+    ihrer eigenen Pod-Umgebung. Konfigurieren Sie Redis mit dem offiziellen Helm-Chart unter
+    `settings.redis`, einschließlich Sentinel über `settings.redis.redisSentinelHosts` und
+    `settings.redis.redisSentinelMaster` (Chart ≥ v1.0.21). Für jede Einstellung ohne dedizierten
+    Chart-Schlüssel verwenden Sie `scheduler.extraEnvs`. Werden sie nur auf `bunkerweb.extraEnvs`
+    gesetzt, hat dies **keine Wirkung**.
 
 ### Redis Best Practices
 
@@ -6092,7 +6144,7 @@ Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten 
 
 STREAM-Unterstützung :x:
 
-Adds wildcard server_name support (*.domain) for services.
+Adds wildcard server_name support (*.domain) for services, and serves the matching certificate to all sub-domains.
 
 | Einstellung    | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                      |
 | -------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------- |

@@ -646,6 +646,8 @@ def bans_ban():
         ip = ban.get("ip", "")
         reason = ban.get("reason", "ui")
         ban_scope = ban.get("ban_scope", "global")
+        if ban_scope not in ("global", "service"):  # only two valid scopes; clamp anything else
+            ban_scope = "global"
         service = ban.get("service", "")
 
         # Validate IP address

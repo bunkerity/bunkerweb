@@ -55,7 +55,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9)。
-- **`4`**：稳定版 [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**默认**)。
+- **`4`**：稳定版 [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**默认**)。
 
 !!! warning "每日构建版已弃用"
     `MODSECURITY_CRS_VERSION` 的 `nightly` 选项已弃用，因为 OWASP 核心规则集项目已停止每日构建发布。如果您的配置仍使用 `nightly`，将改为使用 CRS v4。请将您的配置更新为 `MODSECURITY_CRS_VERSION=4`。

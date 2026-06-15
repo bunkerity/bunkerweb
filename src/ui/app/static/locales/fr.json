@@ -909,7 +909,10 @@
       "status": {
         "deactivated": "Le plugin est désactivé ; par conséquent, aucune information n'est disponible.",
         "metrics_deactivated": "Le plugin de métriques n'est pas activé ; par conséquent, aucune information n'est disponible.",
-        "not_available": "La page du plugin n'est pas encore disponible pendant la phase bêta."
+        "not_available": "La page du plugin n'est pas encore disponible pendant la phase bêta.",
+        "pre_render_error": "Erreur de pré-rendu",
+        "no_content": "Ce plugin ne fournit pas de page intégrée.",
+        "dedicated_page_unavailable": "Ce plugin est géré sur une page dédiée qui n'est pas encore chargée. Redémarrez l'interface web pour y accéder."
       }
     },
     "type": {

@@ -909,7 +909,10 @@
       "status": {
         "deactivated": "外掛程式已停用；因此，沒有可用資訊。",
         "metrics_deactivated": "指標外掛程式未啟用；因此，沒有可用資訊。",
-        "not_available": "外掛程式頁面在 Beta 階段尚不可用。"
+        "not_available": "外掛程式頁面在 Beta 階段尚不可用。",
+        "pre_render_error": "預先渲染錯誤",
+        "no_content": "此外掛不提供內嵌頁面。",
+        "dedicated_page_unavailable": "此外掛在專屬頁面中管理，該頁面尚未載入。請重新啟動 Web UI 以存取。"
       }
     },
     "type": {

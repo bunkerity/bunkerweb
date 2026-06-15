@@ -6,6 +6,7 @@ local ffi_new = ffi.new
 local ffi_str = ffi.string
 local C = ffi.C
 local setmetatable = setmetatable
+local resty_string = require "resty.string"
 --local error = error
 
 
@@ -57,6 +58,15 @@ end
 function _M.final(self)
     if C.MD5_Final(buf, self._ctx) == 1 then
         return ffi_str(buf, 16)
+    end
+
+    return nil
+end
+
+
+function _M.final_hex(self)
+    if C.MD5_Final(buf, self._ctx) == 1 then
+        return resty_string.to_hex(buf, 16)
     end
 
     return nil

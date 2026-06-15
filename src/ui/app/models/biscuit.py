@@ -21,7 +21,7 @@ from flask_login import current_user
 from flask import redirect, url_for
 
 from app.routes.logout import logout_page
-from app.utils import BISCUIT_PRIVATE_KEY_FILE
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, STATIC_PATH_PREFIXES
 
 from common_utils import get_version  # type: ignore
 
@@ -111,7 +111,13 @@ class BiscuitMiddleware:
         Flask's `before_request` hook to intercept requests and perform Biscuit authorization.
         Enhanced to handle dynamic permissions per route.
         """
-        if request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/", "/cache/", "/logout")):
+        # Only truly static assets and logout bypass authorization. NOTE: "/cache/" is
+        # deliberately NOT excluded -- its routes carry real privilege (GET serves job
+        # cache file contents = read; POST /cache/delete purges cache = write). Excluding
+        # it would let any authenticated non-admin (e.g. a PRO "reader") delete cache,
+        # because these routes have no role check of their own. Let them flow through the
+        # operation policy below (GET->read, POST->write) like every other route.
+        if request.path.startswith(STATIC_PATH_PREFIXES + ("/logout",)):
             return
 
         token_str: Optional[str] = session.get("biscuit_token")  # Retrieve token from session
@@ -153,7 +159,7 @@ class BiscuitMiddleware:
 
                 authorizer.add_check(Check(f'check if version("{get_version()}")'))
                 if current_app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private:
-                    authorizer.add_check(Check(f'check if client_ip("{request.remote_addr}")'))
+                    authorizer.add_check(Check("check if client_ip({client_ip})", {"client_ip": request.remote_addr or "0.0.0.0"}))
 
                 authorizer.add_policy(Policy("allow if true"))
 
@@ -180,8 +186,10 @@ class BiscuitMiddleware:
             try:
                 authorizer = AuthorizerBuilder()
 
-                authorizer.add_fact(Fact(f'resource("{resource_path}")'))
-                authorizer.add_fact(Fact(f'operation("{operation}")'))
+                # resource_path can fall back to the attacker-controlled request path, so
+                # bind it (and the operation) as parameters to prevent Datalog injection.
+                authorizer.add_fact(Fact("resource({resource_path})", {"resource_path": resource_path}))
+                authorizer.add_fact(Fact("operation({operation})", {"operation": operation}))
 
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
@@ -285,13 +293,25 @@ class BiscuitTokenFactory:
         Returns:
             Biscuit: The generated Biscuit token.
         """
-        builder = BiscuitBuilder(f"""
-            user("{user_id}");
-            time({datetime.now(timezone.utc).isoformat()});
-            client_ip("{request.remote_addr}");
-            domain("{request.host}");
-            version("{get_version()}");
-            """)  # Start with basic user facts
+        # Bind untrusted values (Host header, client IP, user id) through the biscuit
+        # parameter API so they cannot inject additional signed Datalog facts.
+        builder = BiscuitBuilder(
+            """
+            user({user});
+            time({time});
+            client_ip({client_ip});
+            domain({domain});
+            version({version});
+            """,
+            {
+                "user": user_id,
+                "time": datetime.now(timezone.utc),
+                "client_ip": request.remote_addr or "0.0.0.0",
+                # Clamp the attacker-controlled Host to a sane length so it cannot bloat the signed token.
+                "domain": (request.host or "")[:255],
+                "version": get_version(),
+            },
+        )  # Start with basic user facts
 
         self._apply_core_role_permissions(builder, role)  # Apply core role permissions
 

@@ -2,6 +2,8 @@
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from contextlib import suppress
+from ctypes import CDLL, c_char_p, c_int, c_long, c_void_p
+from ctypes.util import find_library
 from functools import lru_cache
 from importlib import import_module
 from glob import glob
@@ -31,22 +33,82 @@ logger = getLogger("TEMPLATOR")
 _ssl_ecdh_curve_resolution_logged = False
 
 
-@lru_cache(maxsize=32)
+@lru_cache(maxsize=1)
+def _set1_groups_list_probe():
+    """Return a callable(group)->bool using the SAME call nginx makes for ssl_ecdh_curve
+    (SSL_CTX_set1_groups_list), or None if libssl can't be bound. Faithful oracle:
+    ssl.set_ecdh_curve() uses a different name table and ignores provider/FIPS policy, so it
+    can pass a group nginx then refuses; set1_groups_list mirrors the active provider exactly.
+    """
+    try:
+        SSL_CTRL_SET_GROUPS_LIST = 92  # == SSL_CTRL_SET_CURVES_LIST
+
+        # find_library() returns None on musl/Alpine and slim images often lack the unversioned
+        # libssl.so, so try the versioned sonames too.
+        lib = None
+        for _cand in (find_library("ssl"), "libssl.so.3", "libssl.so", "libssl.so.1.1"):
+            if not _cand:
+                continue
+            try:
+                lib = CDLL(_cand)
+                break
+            except OSError:
+                continue
+        if lib is None:
+            logger.warning(
+                "ssl_ecdh_curve: could not bind libssl for the faithful set1_groups_list probe; "
+                "falling back to the looser ssl.set_ecdh_curve detection (FIPS-blind)"
+            )
+            return None
+        lib.TLS_server_method.restype = c_void_p
+        lib.SSL_CTX_new.restype = c_void_p
+        lib.SSL_CTX_new.argtypes = [c_void_p]
+        lib.SSL_CTX_ctrl.restype = c_long
+        lib.SSL_CTX_ctrl.argtypes = [c_void_p, c_int, c_long, c_char_p]
+        lib.SSL_CTX_free.argtypes = [c_void_p]
+
+        def _probe(group: str) -> bool:
+            try:
+                method = lib.TLS_server_method()
+                ctx = lib.SSL_CTX_new(method) if method else None
+                if not ctx:
+                    return False
+                try:
+                    return lib.SSL_CTX_ctrl(ctx, SSL_CTRL_SET_GROUPS_LIST, 0, group.encode("ascii")) == 1
+                finally:
+                    lib.SSL_CTX_free(ctx)
+            except BaseException:
+                return False
+
+        # Smoke test: a real group must pass and a bogus one fail, else the binding is wrong.
+        if not _probe("prime256v1") or _probe("bunkerweb-not-a-real-group"):
+            logger.warning(
+                "ssl_ecdh_curve: set1_groups_list smoke test failed (unexpected libssl/ctrl); "
+                "falling back to the looser ssl.set_ecdh_curve detection (FIPS-blind)"
+            )
+            return None
+        return _probe
+    except BaseException:
+        logger.warning("ssl_ecdh_curve: faithful set1_groups_list probe unavailable; using ssl.set_ecdh_curve (FIPS-blind)")
+        return None
+
+
+@lru_cache(maxsize=64)
 def _supports_tls_group(name: str) -> bool:
+    probe = _set1_groups_list_probe()
+    if probe is not None:
+        return probe(name)
+
+    # Degraded fallback (libssl unbindable): looser, FIPS-blind, but better than nothing.
     with suppress(BaseException):
         ctx = SSLContext(PROTOCOL_TLS_SERVER)
         ctx.set_ecdh_curve(name)
         return True
 
-    # Fall through to subprocess probe below
-
-    # Python's ssl module doesn't recognize hybrid PQC groups (e.g. X25519MLKEM768)
-    # via set_ecdh_curve() even when OpenSSL supports them. Fall back to CLI probe.
+    # set_ecdh_curve() misses PQC hybrids (e.g. X25519MLKEM768); try the CLI listing last.
     try:
-        logger.debug(f"Python ssl module does not support TLS group '{name}', trying openssl CLI fallback")
         result = run(["openssl", "list", "-kem-algorithms"], capture_output=True, text=True, timeout=5)
         if result.returncode == 0 and re_search(r"\b" + re_escape(name) + r"\b", result.stdout):
-            logger.debug(f"OpenSSL CLI confirms TLS group '{name}' is supported")
             return True
     except BaseException:
         logger.debug(f"OpenSSL CLI fallback failed for TLS group '{name}'")
@@ -56,8 +118,10 @@ def _supports_tls_group(name: str) -> bool:
 
 @lru_cache(maxsize=1)
 def _best_ssl_ecdh_curve() -> Optional[str]:
-    preferred = ("X25519MLKEM768", "X25519", "prime256v1", "secp384r1")
-    aliases = {"prime256v1": ("P-256",), "secp384r1": ("P-384",)}
+    # PQC-hybrid first, then classical CFRG/NIST. Keep every probed-supported group, so a
+    # FIPS OpenSSL (rejects X25519/X448) lands on its NIST subset automatically.
+    preferred = ("X25519MLKEM768", "X25519", "prime256v1", "secp384r1", "secp521r1", "X448")
+    aliases = {"prime256v1": ("P-256",), "secp384r1": ("P-384",), "secp521r1": ("P-521",)}
 
     selected = []
     for name in preferred:
@@ -75,7 +139,7 @@ def _best_ssl_ecdh_curve() -> Optional[str]:
     return ":".join(selected)
 
 
-def resolve_ssl_ecdh_curve(value: str, fallback: str = "X25519:prime256v1:secp384r1") -> str:
+def resolve_ssl_ecdh_curve(value: str, fallback: str = "prime256v1:secp384r1") -> str:
     global _ssl_ecdh_curve_resolution_logged
 
     if value and value != "auto":

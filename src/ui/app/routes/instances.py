@@ -1,5 +1,4 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from re import compile as re_compile
 from time import time
 from typing import Literal
 from urllib.parse import urlsplit
@@ -7,7 +6,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB
-from app.utils import flash, is_ui_api_method
+from app.utils import flash, is_ui_api_method, is_valid_host
 
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
@@ -62,9 +61,8 @@ def instances_new():
     hostname = (parts.hostname or "").lower()
     provided_port = parts.port  # int | None
 
-    domain_pattern = re_compile(r"^(?!.*\.\.)[^\s\/:]{1,256}$")
-    if not domain_pattern.match(hostname):
-        return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain.", "instances", True)
+    if not is_valid_host(hostname):
+        return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain or IP address.", "instances", True)
 
     # Derive defaults
     default_http_port = str(db_config.get("API_HTTP_PORT", "5000"))
