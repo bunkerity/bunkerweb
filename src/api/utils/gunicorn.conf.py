@@ -16,7 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 
-from common_utils import effective_cpu_count, handle_docker_secrets  # type: ignore
+from common_utils import effective_cpu_count, getenv_bool, handle_docker_secrets  # type: ignore
 from logger import getLogger, log_types  # type: ignore
 
 from app.models.api_database import APIDatabase
@@ -132,7 +132,7 @@ max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h3,h2,h1"
 
-DEBUG = getenv("DEBUG", False)
+DEBUG = getenv_bool("DEBUG")
 
 loglevel = "debug" if DEBUG else LOG_LEVEL.lower()
 

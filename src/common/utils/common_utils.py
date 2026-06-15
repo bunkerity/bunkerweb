@@ -15,6 +15,10 @@ import logging
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 
 
+def getenv_bool(name: str, default: str = "no") -> bool:
+    return getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
+
+
 def handle_docker_secrets() -> Dict[str, str]:
     """Handle Docker secrets by reading from /run/secrets directory (Alpine only)"""
     secrets = {}
