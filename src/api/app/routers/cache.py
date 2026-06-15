@@ -9,7 +9,6 @@ from ..schemas import CacheFilesDeleteRequest, CacheFileKey
 from ..auth.guard import guard
 from ..utils import get_db
 
-
 router = APIRouter(prefix="/cache", tags=["cache"])
 
 

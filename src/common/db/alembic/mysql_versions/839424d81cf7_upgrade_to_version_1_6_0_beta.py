@@ -219,13 +219,11 @@ def upgrade():
         batch_op.add_column(sa.Column("checksum", sa.String(128), nullable=False))
 
     # Add old data to new columns
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugin_pages
         SET data = template_file, checksum = template_checksum
         WHERE template_file IS NOT NULL
-        """
-    )
+        """)
 
     with op.batch_alter_table("bw_plugin_pages") as batch_op:
         batch_op.drop_column("template_file")

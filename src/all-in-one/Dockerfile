@@ -75,11 +75,10 @@ COPY src/api/requirements.txt /tmp/req/requirements-api.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
-COPY src/common/db/requirements.386.txt /tmp/req/requirements-db.386.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
+    if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
     pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -172,7 +171,9 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "libpng>=1.6.58-r1" "mariadb-client>=11.4.11-r0"
+RUN apk add --no-cache "openssl>=3.5.7-r0" # CVE-2026-34182 CVE-2026-45447 CVE-2026-7383 CVE-2026-9076 CVE-2026-45445 CVE-2026-42764 CVE-2026-34183 CVE-2026-34180 CVE-2026-34181 CVE-2026-42767 CVE-2026-42766 CVE-2026-42769 CVE-2026-45446 CVE-2026-42770 CVE-2026-42768
+RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
+RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-48165 CVE-2026-48163 CVE-2026-44168 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44173 CVE-2026-44169
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -239,7 +240,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.11"
+LABEL version="1.6.12~rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

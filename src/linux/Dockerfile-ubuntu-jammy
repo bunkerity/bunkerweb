@@ -3,7 +3,12 @@ FROM ubuntu:jammy@sha256:4f838adc7181d9039ac795a7d0aba05a9bd9ecd480d294483169c5d
 # Install Nginx and dependencies
 RUN apt update && \
     apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
-    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.11 python3.11-dev python3.11-venv python3-pip -y
+    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo-1.85 coreutils python3.11 python3.11-dev python3.11-venv python3-pip -y
+
+# jammy's default cargo is ~1.66; pin cargo/rustc >= 1.83 (biscuit-python's PyO3 0.28.3 MSRV) to build it from source
+RUN update-alternatives --install /usr/bin/cargo cargo /usr/bin/cargo-1.85 100 && \
+    update-alternatives --install /usr/bin/rustc rustc /usr/bin/rustc-1.85 100 && \
+    cargo --version && rustc --version
 
 ENV OS=ubuntu
 ENV NGINX_VERSION=1.30.2

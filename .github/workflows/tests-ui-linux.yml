@@ -16,7 +16,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Set up Python 3.12
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -49,7 +49,7 @@ jobs:
             sudo chmod +x /usr/local/bin/geckodriver
             rm -f geckodriver.tar.gz
       - name: Login to ghcr
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -76,7 +76,7 @@ jobs:
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo -E apt install -y nginx=1.30.0-1~noble
+          sudo -E apt install -y nginx=1.30.2-1~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.5'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg

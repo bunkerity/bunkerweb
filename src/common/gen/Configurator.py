@@ -11,7 +11,7 @@ from os.path import join
 from pathlib import Path
 from re import DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
@@ -115,6 +115,10 @@ class Configurator:
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
 
+        # Raw variables/environ keys that passed __check_var during the last get_config()
+        # call (service-prefixed and suffixed forms included, default fills excluded).
+        self.explicit_keys: Set[str] = set()
+
     def get_settings(self) -> Dict[str, str]:
         return self.__settings.copy()
 
@@ -130,6 +134,24 @@ class Configurator:
     @cache
     def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, str]:
         return {k: v for plugin in self.get_plugins(_type) for k, v in plugin.get("settings", {}).items()}
+
+    @staticmethod
+    def _redact_value(value: str) -> str:
+        """Return a redacted summary safe for log output.
+
+        The Configurator emits a WARN line for every unknown environment variable
+        ("Ignoring variable X : ..."). Because the variable is unknown, its type
+        is also unknown — it may carry a DNS API token, ACME EAB key, or other
+        credential that the operator dropped into the env (e.g. via `env_file`
+        in docker compose). Printing the raw value to syslog / docker logs /
+        downstream log shippers leaks the secret.
+
+        We log only the length so the operator can still spot empty-vs-set
+        misconfigurations. Empty strings stay empty (helpful for typos).
+        """
+        if not value:
+            return "''"
+        return f"'<redacted, length={len(value)}>'"
 
     @cache
     def __map_servers(self) -> Dict[str, List[str]]:
@@ -270,6 +292,7 @@ class Configurator:
                 config[setting] = template_settings.get(setting, data["default"])
 
         # Override with variables
+        self.explicit_keys = set()
         for variable, value in self.__variables.items():
             # Use optimized exclusion checks
             if variable.startswith(self.__excluded_prefixes) or variable in self.__excluded_vars or "CUSTOM_CONF" in variable:
@@ -278,6 +301,7 @@ class Configurator:
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
+                self.explicit_keys.add(variable)
             elif variable == "SERVER_NAME":
                 self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value=!r}")
                 exit(1)
@@ -287,7 +311,10 @@ class Configurator:
                 or variable in self.get_plugins_settings("core")
                 or not self.__variables.get("EXTERNAL_PLUGIN_URLS")
             ) or variable == "KUBERNETES_MODE":
-                self.__logger.warning(f"Ignoring variable {variable} : {err} - {value=!r}")
+                # Redact the value: unknown variables may carry secrets dropped via env_file
+                # (DNS API tokens, ACME EAB keys, etc.). Logging the raw value would leak them
+                # into syslog / docker logs / log shippers downstream.
+                self.__logger.warning(f"Ignoring variable {variable} : {err} - value={self._redact_value(value)}")
 
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":

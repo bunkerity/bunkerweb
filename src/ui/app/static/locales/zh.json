@@ -909,7 +909,10 @@
       "status": {
         "deactivated": "插件已停用；因此，没有可用信息。",
         "metrics_deactivated": "指标插件未激活；因此，没有可用信息。",
-        "not_available": "插件页面在 Beta 阶段尚不可用。"
+        "not_available": "插件页面在 Beta 阶段尚不可用。",
+        "pre_render_error": "预渲染错误",
+        "no_content": "此插件不提供嵌入式页面。",
+        "dedicated_page_unavailable": "此插件在专属页面中管理，该页面尚未加载。请重启 Web UI 以访问。"
       }
     },
     "type": {

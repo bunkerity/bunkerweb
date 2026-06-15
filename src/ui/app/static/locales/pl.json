@@ -909,7 +909,10 @@
       "status": {
         "deactivated": "Wtyczka jest wyłączona, dlatego nie są dostępne żadne informacje.",
         "metrics_deactivated": "Wtyczka Metrics nie jest aktywna, dlatego nie są dostępne żadne informacje.",
-        "not_available": "Strona wtyczki nie jest jeszcze dostępna w fazie beta."
+        "not_available": "Strona wtyczki nie jest jeszcze dostępna w fazie beta.",
+        "pre_render_error": "Błąd wstępnego renderowania",
+        "no_content": "Ta wtyczka nie udostępnia osadzonej strony.",
+        "dedicated_page_unavailable": "Ta wtyczka jest zarządzana na dedykowanej stronie, która nie została jeszcze załadowana. Uruchom ponownie interfejs web, aby uzyskać do niej dostęp."
       }
     },
     "type": {

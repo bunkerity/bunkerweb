@@ -34,6 +34,7 @@ Follow these steps to deploy mutual TLS with confidence:
 | `USE_MTLS`                    | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                     |
 | `MTLS_CA_CERTIFICATE`         |         | multisite | no       | **Client CA bundle:** Absolute path to the trusted client CA bundle (PEM). Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`; must be readable. |
 | `MTLS_VERIFY_CLIENT`          | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).  |
+| `MTLS_URL`                    |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site. |
 | `MTLS_VERIFY_DEPTH`           | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                    |
 | `MTLS_FORWARD_CLIENT_HEADERS` | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window).   |
 | `MTLS_CRL`                    |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list. Applied only when the CA bundle is successfully loaded.               |
@@ -46,6 +47,12 @@ Follow these steps to deploy mutual TLS with confidence:
 
 !!! info "Trusted certificate vs. verification"
     BunkerWeb reuses the same CA bundle for client verification and for building trust chains, keeping revocation checks and handshake validation consistent.
+
+!!! warning "Per-path mTLS requires optional mode"
+    NGINX's `ssl_verify_client` directive is server-scope only — it cannot be set per `location`. To require a certificate on some paths only, set `MTLS_VERIFY_CLIENT` to `optional` so the handshake completes for every path, then list the protected paths in `MTLS_URL_n`. BunkerWeb enforces the certificate per-request in Lua on the matching URLs. Use `optional` for real enforcement: `optional_no_ca` skips CA chain validation, so a matching URL would accept any presented certificate and provides no meaningful protection. If you leave `MTLS_VERIFY_CLIENT` at `on` while setting `MTLS_URL_n`, NGINX rejects certificate-less clients during the handshake before BunkerWeb can apply the per-path logic, so enforcement stays site-wide (BunkerWeb logs a warning at startup in this case). If an `MTLS_URL_n` value is not a valid regex, BunkerWeb fails closed — requests are denied (`403`) and the offending pattern is logged — rather than silently letting the path through; fix the pattern to restore service.
+
+!!! info "Browser certificate prompts with optional mode"
+    The TLS handshake happens before NGINX knows which URL was requested, so under `optional` NGINX still sends a `CertificateRequest` on every connection. Enforcement becomes per-path, but the handshake-level invitation does not — browsers may still prompt for a certificate on unprotected paths (behaviour varies per browser). On those paths BunkerWeb allows the request whether or not a certificate is presented.
 
 ### Example Configurations
 
@@ -81,3 +88,23 @@ Follow these steps to deploy mutual TLS with confidence:
     MTLS_VERIFY_CLIENT: "optional_no_ca"
     MTLS_FORWARD_CLIENT_HEADERS: "no"
     ```
+
+=== "Per-path mTLS (e.g. only `/login`)"
+
+    Require client certificates on selected paths while keeping the rest of the site open. Verification runs in `optional` mode so the handshake completes for unauthenticated paths; BunkerWeb then enforces the certificate per-request on URLs matching `MTLS_URL_n` (a regex per slot):
+
+    ```yaml
+    USE_MTLS: "yes"
+    MTLS_CA_CERTIFICATE: "/etc/bunkerweb/mtls/partner-ca.pem"
+    MTLS_VERIFY_CLIENT: "optional"
+    MTLS_URL_1: "^/login"
+    MTLS_URL_2: "^/admin"
+    MTLS_FORWARD_CLIENT_HEADERS: "yes"
+    ```
+
+    | Request          | Certificate         | Result                                  |
+    | ---------------- | ------------------- | --------------------------------------- |
+    | `GET /`          | none                | Allowed (path not under mTLS)           |
+    | `GET /login`     | none                | Denied (`403`)                          |
+    | `GET /login`     | valid               | Allowed, `X-SSL-Client-*` forwarded     |
+    | `GET /login`     | invalid / expired   | Denied (`403`)                          |

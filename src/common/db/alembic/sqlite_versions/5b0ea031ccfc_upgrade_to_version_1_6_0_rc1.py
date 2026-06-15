@@ -11,7 +11,6 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
 revision: str = "5b0ea031ccfc"
 down_revision: Union[str, None] = "1e1fc017a424"
@@ -38,12 +37,10 @@ def upgrade() -> None:
     )
 
     # Copy data from old bw_services to bw_services_new
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_new (id, method, is_draft, creation_date, last_update)
         SELECT id, method, is_draft, creation_date, last_update FROM bw_services
-    """
-    )
+    """)
 
     op.drop_table("bw_services")
     op.rename_table("bw_services_new", "bw_services")
@@ -65,13 +62,11 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["setting_id"], ["bw_settings.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_settings_new (service_id, setting_id, value, suffix, method)
         SELECT service_id, setting_id, value, suffix, method
         FROM bw_services_settings
-    """
-    )
+    """)
 
     op.drop_table("bw_services_settings")
     op.rename_table("bw_services_settings_new", "bw_services_settings")
@@ -110,12 +105,10 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["service_id"], ["bw_services.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_custom_configs_new (id, service_id, type, name, data, checksum, method)
         SELECT id, service_id, type, name, data, checksum, method FROM bw_custom_configs
-    """
-    )
+    """)
 
     op.drop_table("bw_custom_configs")
     op.rename_table("bw_custom_configs_new", "bw_custom_configs")
@@ -138,12 +131,10 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["service_id"], ["bw_services.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_jobs_cache_new (id, job_name, service_id, file_name, data, last_update, checksum)
         SELECT id, job_name, service_id, file_name, data, last_update, checksum FROM bw_jobs_cache
-    """
-    )
+    """)
 
     op.drop_table("bw_jobs_cache")
     op.rename_table("bw_jobs_cache_new", "bw_jobs_cache")
@@ -166,12 +157,10 @@ def upgrade() -> None:
         sa.Column("last_seen", sa.DateTime(timezone=True), nullable=False),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_instances_new (hostname, name, port, server_name, type, status, method, creation_date, last_seen)
         SELECT hostname, name, port, server_name, type, status, method, creation_date, last_seen FROM bw_instances
-    """
-    )
+    """)
 
     op.drop_table("bw_instances")
     op.rename_table("bw_instances_new", "bw_instances")
@@ -224,19 +213,15 @@ def upgrade() -> None:
     )
 
     # Copy data to new tables with default order=0
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_template_settings_new (template_id, setting_id, step_id, "default", suffix, "order")
         SELECT template_id, setting_id, step_id, "default", suffix, 0 FROM bw_template_settings
-    """
-    )
+    """)
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_template_custom_configs_new (template_id, step_id, type, name, data, checksum, "order")
         SELECT template_id, step_id, type, name, data, checksum, 0 FROM bw_template_custom_configs
-    """
-    )
+    """)
 
     # Drop old tables and rename new ones
     op.drop_table("bw_template_settings")
@@ -266,12 +251,10 @@ def downgrade() -> None:
         sa.Column("last_update", sa.DateTime(timezone=True), nullable=False),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_old (id, method, is_draft, creation_date, last_update)
         SELECT id, method, is_draft, creation_date, last_update FROM bw_services
-    """
-    )
+    """)
 
     op.drop_table("bw_services")
     op.rename_table("bw_services_old", "bw_services")
@@ -290,12 +273,10 @@ def downgrade() -> None:
         sa.ForeignKeyConstraint(["setting_id"], ["bw_settings.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_settings_old (service_id, setting_id, value, suffix, method)
         SELECT service_id, setting_id, value, suffix, method FROM bw_services_settings
-    """
-    )
+    """)
 
     op.drop_table("bw_services_settings")
     op.rename_table("bw_services_settings_old", "bw_services_settings")
@@ -331,12 +312,10 @@ def downgrade() -> None:
         sa.ForeignKeyConstraint(["service_id"], ["bw_services.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_custom_configs_old (id, service_id, type, name, data, checksum, method)
         SELECT id, service_id, type, name, data, checksum, method FROM bw_custom_configs
-    """
-    )
+    """)
 
     op.drop_table("bw_custom_configs")
     op.rename_table("bw_custom_configs_old", "bw_custom_configs")
@@ -356,12 +335,10 @@ def downgrade() -> None:
         sa.ForeignKeyConstraint(["service_id"], ["bw_services.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_jobs_cache_old (id, job_name, service_id, file_name, data, last_update, checksum)
         SELECT id, job_name, service_id, file_name, data, last_update, checksum FROM bw_jobs_cache
-    """
-    )
+    """)
 
     op.drop_table("bw_jobs_cache")
     op.rename_table("bw_jobs_cache_old", "bw_jobs_cache")

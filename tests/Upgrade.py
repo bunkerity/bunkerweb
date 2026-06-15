@@ -1112,7 +1112,7 @@ elif distro == "fedora":
     bash_script = """
     dnf update -y
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core
-    dnf install -y nginx-1.30.1-1.fc37
+    dnf install -y nginx-1.30.2-1.fc37
     dnf install /data/bunkerweb.rpm -y
     """
 
@@ -1552,7 +1552,7 @@ elif distro == "fedora":
             "systemd-fedora",
             "bash",
             "-c",
-            "sudo dnf install nginx-1.30.1-1.fc37 -y",
+            "sudo dnf install nginx-1.30.2-1.fc37 -y",
         ]
     )
     subprocess.run(

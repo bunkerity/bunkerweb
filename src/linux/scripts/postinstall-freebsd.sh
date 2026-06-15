@@ -70,6 +70,10 @@ if [ -d db/alembic/ ]; then
     chmod -R 770 db/alembic/
 fi
 
+# Retro-tighten 0644 backups left by pre-fix versions.
+chmod 0600 /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
+           /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 2>/dev/null || true
+
 # Function to migrate files from old locations to new ones
 migrate_file() {
     old_path="$1"
@@ -136,6 +140,31 @@ SERVICE_SCHEDULER=$(get_env_value "SERVICE_SCHEDULER" "/etc/bunkerweb/variables.
 SERVICE_UI=$(get_env_value "SERVICE_UI" "/etc/bunkerweb/variables.env")
 SERVICE_API=$(get_env_value "SERVICE_API" "/etc/bunkerweb/variables.env")
 UI_WIZARD=$(get_env_value "UI_WIZARD" "/etc/bunkerweb/variables.env")
+
+# Resolve whether the topology was DECLARED this run — fresh install or an explicit
+# mode/service signal (here read back from variables.env). On a bare `pkg upgrade` with
+# no signal we mutate no persistent state: no self-heal of enabled-but-stopped units,
+# no install-type marker write, leaving the upgrade-time detector to infer. Single gate
+# behind the marker write and the enabled-but-stopped leg of the self-heal branches.
+FRESH_INSTALL="no"
+[ ! -f /var/tmp/bunkerweb_upgrade ] && FRESH_INSTALL="yes"
+RESOLVED_INSTALL_TYPE=""
+EXPLICIT_TOPOLOGY="no"
+if [ "${WORKER_MODE:-no}" = "yes" ] && [ "${MANAGER_MODE:-no}" != "yes" ]; then
+    RESOLVED_INSTALL_TYPE="worker"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${MANAGER_MODE:-no}" = "yes" ] && [ "${WORKER_MODE:-no}" != "yes" ]; then
+    RESOLVED_INSTALL_TYPE="manager"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${SERVICE_API:-no}" = "yes" ] && [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
+    RESOLVED_INSTALL_TYPE="api"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-no}" = "yes" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
+    RESOLVED_INSTALL_TYPE="scheduler"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_UI:-no}" = "yes" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ]; then
+    RESOLVED_INSTALL_TYPE="ui"; EXPLICIT_TOPOLOGY="yes"
+else
+    RESOLVED_INSTALL_TYPE="full"
+fi
+TOPOLOGY_DECLARED="no"
+{ [ "$FRESH_INSTALL" = "yes" ] || [ "$EXPLICIT_TOPOLOGY" = "yes" ]; } && TOPOLOGY_DECLARED="yes"
 
 # FreeBSD: Stop nginx if running
 if service nginx status >/dev/null 2>&1; then
@@ -216,8 +245,11 @@ if {
         do_and_check_cmd service_enable bunkerweb
         do_and_check_cmd service_start bunkerweb
     fi
-# Disable BunkerWeb if it should not be running but is active
-elif service_is_running bunkerweb; then
+# Disable BunkerWeb if it should not be running but is still active, or — only when the
+# topology was declared this run — enabled-but-stopped. Clearing leftovers keeps rc.d
+# state consistent with the real topology so upgrade-time detection stays correct; on a
+# bare upgrade we never touch enabled-but-stopped units.
+elif service_is_running bunkerweb || { [ "$TOPOLOGY_DECLARED" = "yes" ] && service_is_enabled bunkerweb; }; then
     echo "[STOP] Disabling and stopping the BunkerWeb service..."
     service_stop bunkerweb
     service_disable bunkerweb
@@ -254,8 +286,9 @@ if {
             do_and_check_cmd service_restart bunkerweb_scheduler
         fi
     fi
-# Disable scheduler if it should not be running but is active
-elif service_is_running bunkerweb_scheduler; then
+# Disable scheduler if it should not be running but is still active, or — only when the
+# topology was declared this run — enabled-but-stopped.
+elif service_is_running bunkerweb_scheduler || { [ "$TOPOLOGY_DECLARED" = "yes" ] && service_is_enabled bunkerweb_scheduler; }; then
     echo "[STOP] Disabling and stopping the BunkerWeb Scheduler service..."
     service_stop bunkerweb_scheduler
     service_disable bunkerweb_scheduler
@@ -324,8 +357,9 @@ EOF
             do_and_check_cmd service_restart bunkerweb_ui
         fi
     fi
-# Disable UI if it should not be running but is active
-elif service_is_running bunkerweb_ui; then
+# Disable UI if it should not be running but is still active, or — only when the
+# topology was declared this run — enabled-but-stopped.
+elif service_is_running bunkerweb_ui || { [ "$TOPOLOGY_DECLARED" = "yes" ] && service_is_enabled bunkerweb_ui; }; then
     echo "[STOP] Disabling and stopping the BunkerWeb UI service..."
     service_stop bunkerweb_ui
     service_disable bunkerweb_ui
@@ -350,12 +384,24 @@ if [ "${SERVICE_API:-no}" = "yes" ]; then
             do_and_check_cmd service_restart bunkerweb_api
         fi
     fi
-elif service_is_running bunkerweb_api; then
+elif service_is_running bunkerweb_api || { [ "$TOPOLOGY_DECLARED" = "yes" ] && service_is_enabled bunkerweb_api; }; then
     echo "[STOP] Disabling and stopping the BunkerWeb API service..."
     service_stop bunkerweb_api
     service_disable bunkerweb_api
 else
     echo "[INFO] BunkerWeb API service is not enabled in the current configuration."
+fi
+
+# Record the resolved install type so future upgrades detect it deterministically
+# instead of inferring from rc.d state. Only written when the topology was declared this
+# run (fresh install, or explicit mode/service signal) — a bare `pkg upgrade` carries no
+# intent, so we must NOT stamp the standalone "full" default onto a legacy
+# worker/scheduler/ui/api host and have it override inference forever.
+INSTALL_TYPE_MARKER="/usr/share/bunkerweb/INSTALL_TYPE"
+if [ "$TOPOLOGY_DECLARED" = "yes" ] && [ -n "$RESOLVED_INSTALL_TYPE" ]; then
+    echo "$RESOLVED_INSTALL_TYPE" > "$INSTALL_TYPE_MARKER" 2>/dev/null \
+        && chmod 0644 "$INSTALL_TYPE_MARKER" 2>/dev/null \
+        || echo "[INFO] Note: could not persist install-type marker at $INSTALL_TYPE_MARKER"
 fi
 
 if [ -f /var/tmp/bunkerweb_upgrade ]; then

@@ -909,7 +909,10 @@
       "status": {
         "deactivated": "Eklenti devre dışı; bu nedenle bilgi mevcut değil.",
         "metrics_deactivated": "Metrik eklentisi etkin değil; bu nedenle bilgi mevcut değil.",
-        "not_available": "Eklenti sayfası beta aşamasında henüz mevcut değil."
+        "not_available": "Eklenti sayfası beta aşamasında henüz mevcut değil.",
+        "pre_render_error": "Ön işleme hatası",
+        "no_content": "Bu eklenti gömülü bir sayfa sunmaz.",
+        "dedicated_page_unavailable": "Bu eklenti, henüz yüklenmemiş özel bir sayfada yönetilir. Erişmek için web arayüzünü yeniden başlatın."
       }
     },
     "type": {

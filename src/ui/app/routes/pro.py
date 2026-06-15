@@ -7,7 +7,6 @@ from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
 from app.utils import flash
 
-
 pro = Blueprint("pro", __name__)
 
 

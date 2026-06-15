@@ -77,9 +77,20 @@ function remove_path() {
     fi
 }
 
+function print_leftover_hint() {
+    echo "ℹ️ Logs and upgrade backups are NEVER auto-removed."
+    echo "ℹ️   Logs:    rm -rf /var/log/bunkerweb"
+    echo "ℹ️   Backups: rm -rf /var/backups/bunkerweb; rm -f /var/tmp/bunkerweb_upgrade"
+}
+
 # Perform actions for package removal
 function remove() {
     echo "ℹ️ Package is being uninstalled"
+
+    # Tighten any backups left 0644 by pre-fix versions (legacy /var/tmp + current dir).
+    chmod 0600 /var/backups/bunkerweb/* \
+               /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
+               /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 2>/dev/null || true
 
     # Stop nginx if it is active
     if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx; then
@@ -90,27 +101,17 @@ function remove() {
     # Dynamically remove all related systemd services
     remove_systemd_services "bunkerweb"
 
-    # Remove associated paths
+    # /etc, /var/lib, /var/log, /var/backups/bunkerweb preserved (Fedora Packaging Guidelines).
     remove_path "/usr/share/bunkerweb" "application files"
     remove_path "/var/tmp/bunkerweb" "temporary files"
     remove_path "/var/run/bunkerweb" "runtime files"
-    remove_path "/var/log/bunkerweb" "log files"
     remove_path "/var/cache/bunkerweb" "cache files"
     remove_path "/usr/bin/bwcli" "CLI binary"
 
     echo "ℹ️ BunkerWeb successfully uninstalled"
-}
-
-# Perform actions for package purge
-function purge() {
-    echo "ℹ️ Package is being purged"
-    remove
-
-    # Remove additional paths during purge
-    remove_path "/var/lib/bunkerweb" "data files"
-    remove_path "/etc/bunkerweb" "configuration files"
-
-    echo "ℹ️ BunkerWeb successfully purged"
+    echo "ℹ️ Preserved: /etc/bunkerweb, /var/lib/bunkerweb"
+    echo "ℹ️ To purge configs + data run: rm -rf /etc/bunkerweb /var/lib/bunkerweb"
+    print_leftover_hint
 }
 
 # Check for root privileges
@@ -155,34 +156,41 @@ fi
 # Handle script arguments
 case "$1" in
     0)
+        # Final uninstall. RPM scriptlets only ever pass 0 (uninstall) or 1 (upgrade);
+        # purge is manual on RPM (see print_leftover_hint).
         remove
-        purge
         ;;
     1)
         echo "ℹ️ Package is being upgraded"
-        # Backup important files during upgrade
-        remove_path "/var/tmp/variables.env" "temporary environment variables"
-        remove_path "/var/tmp/ui.env" "UI environment variables"
-        remove_path "/var/tmp/scheduler.env" "Scheduler environment variables"
-        remove_path "/var/tmp/api.env" "API environment variables"
-        remove_path "/var/tmp/db.sqlite3" "database"
+        # Back up config + DB to /var/backups/bunkerweb. /var/tmp is reaped by
+        # systemd-tmpfiles after 30d, which silently lost backups on delayed reinstalls.
+        backup_dir="/var/backups/bunkerweb"
+        do_and_check_cmd mkdir -p "$backup_dir"
+        do_and_check_cmd chmod 0700 "$backup_dir"
+        remove_path "$backup_dir/variables.env" "environment variables backup"
+        remove_path "$backup_dir/ui.env" "UI environment variables backup"
+        remove_path "$backup_dir/scheduler.env" "Scheduler environment variables backup"
+        remove_path "$backup_dir/api.env" "API environment variables backup"
+        remove_path "$backup_dir/api.yml" "API config backup"
+        remove_path "$backup_dir/db.sqlite3" "database backup"
+        # install -m 0600 (atomic) — backups must not leak credentials.
         if [ -f /etc/bunkerweb/variables.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
+            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/variables.env "$backup_dir/variables.env"
         fi
         if [ -f /etc/bunkerweb/ui.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
+            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/ui.env "$backup_dir/ui.env"
         fi
         if [ -f /etc/bunkerweb/scheduler.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/scheduler.env /var/tmp/scheduler.env
+            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/scheduler.env "$backup_dir/scheduler.env"
         fi
         if [ -f /etc/bunkerweb/api.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/api.env /var/tmp/api.env
+            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/api.env "$backup_dir/api.env"
         fi
         if [ -f /etc/bunkerweb/api.yml ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/api.yml /var/tmp/api.yml
+            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/api.yml "$backup_dir/api.yml"
         fi
         if [ -f /var/lib/bunkerweb/db.sqlite3 ]; then
-            do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
+            do_and_check_cmd install -m 0600 -o root -g root /var/lib/bunkerweb/db.sqlite3 "$backup_dir/db.sqlite3"
         fi
         do_and_check_cmd touch /var/tmp/bunkerweb_upgrade
         ;;

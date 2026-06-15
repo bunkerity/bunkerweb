@@ -6,7 +6,7 @@ from io import BytesIO
 from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
 
-from flask import Response, redirect, request, url_for
+from flask import Response, g, has_request_context, redirect, request, url_for
 from qrcode.main import QRCode
 from regex import compile as re_compile
 
@@ -164,7 +164,17 @@ def cors_required(f):
 def get_redis_client():
     """
     Get a Redis client using configuration from BW_CONFIG.
+
+    The client is cached on ``flask.g`` for the duration of the current request,
+    so a single request that touches Redis multiple times only pays one
+    BW_CONFIG DB query and one connection PING. The cache stores ``None`` too
+    (Redis disabled or unreachable), so we don't keep re-probing within a
+    request. Outside of a request context (e.g. background executor threads,
+    CLI) the client is never cached and ``flash`` is skipped.
     """
+    if has_request_context() and "bw_redis_client" in g:
+        return g.bw_redis_client
+
     db_config = BW_CONFIG.get_config(
         global_only=True,
         methods=False,
@@ -203,8 +213,11 @@ def get_redis_client():
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
     )
 
-    if use_redis and not redis_client:
+    if use_redis and not redis_client and has_request_context():
         flash("Couldn't connect to redis", "error")
+
+    if has_request_context():
+        g.bw_redis_client = redis_client
 
     return redis_client
 

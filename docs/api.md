@@ -41,7 +41,7 @@ Choose the flavor that matches your environment.
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.11
+        image: bunkerity/bunkerweb:1.6.12-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Choose the flavor that matches your environment.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.11
+        image: bunkerity/bunkerweb-scheduler:1.6.12-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -76,7 +76,7 @@ Choose the flavor that matches your environment.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.11
+        image: bunkerity/bunkerweb-api:1.6.12-rc2
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ Choose the flavor that matches your environment.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.11
+      bunkerity/bunkerweb-all-in-one:1.6.12-rc2
     ```
 
 === "Linux"
@@ -188,7 +188,22 @@ Choose the flavor that matches your environment.
   - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
   - `jobs`: `job_read`, `job_run`
 - `resource_id` is usually the second path component (e.g. `/services/{id}`); `"*"` grants global access.
-- Bootstrap non-admin users and grants with `API_ACL_BOOTSTRAP_FILE` or a mounted `/var/lib/bunkerweb/api_acl_bootstrap.json`. Passwords may be plaintext or bcrypt hashes.
+- Bootstrap non-admin users and grants with `API_ACL_BOOTSTRAP_FILE` or a mounted `/var/lib/bunkerweb/api_acl_bootstrap.json`. Each user takes a plaintext `password` or a pre-hashed `password_hash`/`password_bcrypt` (see tip below).
+
+!!! tip "Pre-hashed bootstrap passwords"
+    Replace a user's plaintext `password` with a **bcrypt hash** via `password_hash` (or `password_bcrypt`) so credentials never sit in the file as plaintext. The hash must be a valid bcrypt hash (`$2a$`/`$2b$`/`$2y$`) whose cost factor is at least `10` (`12`+ recommended). A malformed or too-weak hash is **ignored**: the loader falls back to the user's plaintext `password` if present; otherwise a new user gets a secure random password you won't know, and an existing user keeps its current one. A plaintext `password` is strength-checked (8+ chars with upper/lower/digit/special). The admin `API_PASSWORD` env var accepts plaintext only — pre-hashing applies to these ACL users.
+
+    Generate a hash:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+    Then use it in the bootstrap file instead of `password`:
+
+    ```json
+    "password_hash": "$2b$13$replace-with-the-hash-printed-above"
+    ```
 
 ??? example "Minimal ACL bootstrap"
     ```json

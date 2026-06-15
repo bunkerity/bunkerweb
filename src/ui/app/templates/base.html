@@ -33,6 +33,56 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="BunkerWeb user interface" />
         <meta name="author" content="Bunkerity" />
+        <!-- Anti-FOUC: resolve theme before first paint on anon pages (logged-in
+             renders the DB theme inline); tracks OS scheme live until an explicit choice. -->
+        {% if not current_user.is_authenticated %}
+            <script nonce="{{ script_nonce }}">
+          (function () {
+            try {
+              var serverTheme = {{ theme | tojson }};
+              var mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+              function readStored() {
+                try {
+                  var s = localStorage.getItem("theme");
+                  return s === "light" || s === "dark" ? s : null;
+                } catch (e) {
+                  return null;
+                }
+              }
+              function osTheme() {
+                return mq && mq.matches ? "dark" : "light";
+              }
+              function apply(theme) {
+                var html = document.documentElement;
+                if (theme === "dark") {
+                  html.classList.remove("light-style");
+                  html.classList.add("dark-style", "dark");
+                  html.setAttribute("data-bs-theme", "dark");
+                } else {
+                  html.classList.remove("dark-style", "dark");
+                  html.classList.add("light-style");
+                  html.removeAttribute("data-bs-theme");
+                }
+                window.__bwResolvedTheme = theme;
+                var toggle = document.getElementById("dark-mode-toggle");
+                if (toggle) toggle.checked = theme === "dark";
+                var field = document.querySelector("input[name='theme']");
+                if (field) field.value = theme;
+              }
+              var desired = readStored() || osTheme();
+              window.__bwResolvedTheme = desired;
+              if (desired !== serverTheme) apply(desired);
+              // Live OS tracking: only while the visitor has no explicit stored choice.
+              if (mq && typeof mq.addEventListener === "function") {
+                mq.addEventListener("change", function () {
+                  if (readStored()) return; // explicit choice wins
+                  apply(osTheme());
+                });
+              }
+            } catch (e) {}
+          })();
+            </script>
+        {% endif %}
         {% set page_title_fallback = (current_endpoint or "") | replace('-', ' ') | replace('_', ' ') | title %}
         <title>
             {% if page_title_fallback %}{{ page_title_fallback }} -&nbsp;{% endif %}
@@ -95,7 +145,8 @@
             {% endif %}
         {% endfor %}
     </head>
-    <body data-page-title="{{ page_title_fallback if page_title_fallback else 'BunkerWeb UI' }}">
+    <body data-page-title="{{ page_title_fallback if page_title_fallback else 'BunkerWeb UI' }}"
+          data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}">
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="db-read-only" value="{{ db_readonly }}" />

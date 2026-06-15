@@ -87,6 +87,27 @@ def create_app() -> FastAPI:
             LOGGER.warning(f"Blocking API request from non-whitelisted IP {request.client.host if request.client else 'unknown'}")
             return JSONResponse(status_code=403, content={"status": "error", "message": "forbidden"})
 
+    # Optional Host header allowlist (defense-in-depth; disabled by default).
+    # Rejects requests whose Host header is not in the configured allowlist before
+    # any token issuance or route handling.
+    allowed_hosts = api_config.allowed_hosts
+    if allowed_hosts:
+        from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+        # Always permit the internal Host used by scheduler/Lua -> API calls (default "bwapi",
+        # or API_SERVER_NAME) so enabling the allowlist cannot brick the control plane.
+        internal_host = api_config.internal_api_host_header
+        if internal_host and internal_host not in allowed_hosts:
+            allowed_hosts = [*allowed_hosts, internal_host]
+        # A malformed entry (e.g. a wildcard not of the form "*.domain") makes Starlette raise
+        # at startup. Guard so a misconfigured allowlist logs an error and is skipped rather
+        # than preventing the API from booting.
+        try:
+            app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+            LOGGER.info(f"API Host header allowlist enabled: {allowed_hosts}")
+        except Exception:
+            LOGGER.error(f"Invalid API_ALLOWED_HOSTS {allowed_hosts!r}, host allowlist NOT enabled: {format_exc()}")
+
     # Rate limiter (optional, safe if disabled)
     setup_rate_limiter(app)
 
@@ -134,8 +155,7 @@ def create_app() -> FastAPI:
     return app
 
 
-description = (
-    """# BunkerWeb API
+description = """# BunkerWeb API
 
 This API is the control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
 
@@ -181,9 +201,7 @@ Settings can be provided via `/etc/bunkerweb/api.yml`, `/etc/bunkerweb/api.env`,
 - `API_RATE_LIMIT_*`: knobs to enable/shape rate limiting.
 - `API_BISCUIT_TTL_SECONDS`: lifetime of Biscuit tokens in seconds (0 disables expiry; default 3600).
 
-"""
-    + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."
-)  # noqa: E501
+""" + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."  # noqa: E501
 
 tags_metadata = [
     {"name": "core", "description": "Health probes and global utility endpoints"},

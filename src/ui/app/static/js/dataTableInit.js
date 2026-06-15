@@ -21,7 +21,7 @@ function bwCsvSafe(value) {
   if (value === null || value === undefined) return value;
   if (typeof value === "number") return value;
   let s = String(value);
-  if (s && /^[@+\-=|%]/.test(s) && !/^-?[0-9,.]+$/.test(s)) {
+  if (s && /^[@+\-=|%\t\r]/.test(s) && !/^-?[0-9,.]+$/.test(s)) {
     s = s.replace(/\\/g, "\\\\");
     s = s.replace(/\|/g, "\\|");
     s = "'" + s;
@@ -511,12 +511,16 @@ function initializeDataTable(config) {
     if (!actionButton.length) return;
 
     // Enable the actions button
+    // Strip data-i18n alongside the tooltip attrs: leaving it while
+    // data-bs-original-title is removed makes applyTranslations() fall through
+    // to .text() and overwrite the button content with the raw tooltip string.
     actionButton
       .removeClass("disabled")
       .parent()
       .attr("data-bs-toggle", null)
       .attr("data-bs-original-title", null)
       .attr("data-bs-placement", null)
+      .removeAttr("data-i18n")
       .tooltip("dispose");
   });
 

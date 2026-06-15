@@ -106,7 +106,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
 
                 # Validate the certificate using OpenSSL
                 result = run(
-                    ["openssl", "x509", "-checkend", "86400", "-noout", "-in", cert_temp.name],
+                    ["openssl", "x509", "-noout", "-in", cert_temp.name],
                     stdin=DEVNULL,
                     stderr=DEVNULL,
                     check=False,
@@ -114,7 +114,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
                 )
 
                 if result.returncode != 0:
-                    return False, "Certificate is invalid or will expire within the next 24 hours."
+                    return False, "Certificate is invalid."
             finally:
                 # Clean up temporary files
                 Path(cert_temp.name).unlink(missing_ok=True)

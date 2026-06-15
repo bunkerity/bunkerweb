@@ -1,0 +1,173 @@
+FROM ubuntu:noble@sha256:786a8b558f7be160c6c8c4a54f9a57274f3b4fb1491cf65146521ae77ff1dc54 AS builder
+
+# Install dependencies
+RUN apt update && \
+    apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
+    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo-1.85 coreutils python3.12 python3.12-dev python3-pip -y
+
+# noble's default cargo is 1.75; pin cargo/rustc >= 1.83 (biscuit-python's PyO3 0.28.3 MSRV) to build it from source
+RUN update-alternatives --install /usr/bin/cargo cargo /usr/bin/cargo-1.85 100 && \
+    update-alternatives --install /usr/bin/rustc rustc /usr/bin/rustc-1.85 100 && \
+    cargo --version && rustc --version
+
+ENV OS=ubuntu
+ENV NGINX_VERSION=1.30.2
+ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+
+# Install Nginx
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output /usr/share/keyrings/nginx-archive-keyring.gpg && \
+    gpg --batch --no-default-keyring --keyring /usr/share/keyrings/nginx-archive-keyring.gpg --list-keys --with-colons | awk -F: '/^fpr:/ { print $10 }' | grep -qx "$EXPECTED_FPR" || { echo "ERROR: expected fingerprint $EXPECTED_FPR not found in keyring" >&2; exit 1; } && \
+    . /etc/os-release && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://nginx.org/packages/${OS} ${VERSION_CODENAME} nginx" | tee /etc/apt/sources.list.d/nginx.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
+
+WORKDIR /tmp/bunkerweb/deps
+
+# Copy dependencies sources folder
+COPY src/deps/misc misc
+COPY src/deps/src src
+COPY src/deps/deps.json deps.json
+COPY --chmod=644 src/deps/install.sh install.sh
+
+# Compile and install dependencies
+RUN bash install.sh
+
+# Copy dependencies sources folder
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
+COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
+COPY src/api/requirements.txt /tmp/req/requirements-api.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
+
+WORKDIR /usr/share/bunkerweb
+
+# Compile and install dependencies
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    mkdir -p deps/python && \
+    python3.12 -m pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
+    python3.12 -m pip install --no-cache-dir --require-hashes --break-system-packages --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+
+# Apply BunkerWeb patches to vendored Python deps before they are tarballed (DNS alias / CNAME delegation for certbot).
+COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
+RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+    patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+    grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
+    rm -f /tmp/certbot-dns-alias.patch
+
+RUN apt-get install -y pigz && \
+    tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
+    rm -rf deps
+
+# Copy files
+# can't exclude deps from . so we are copying everything by hand
+COPY src/bw/loading loading
+COPY src/bw/lua lua
+COPY src/bw/misc misc
+COPY src/common/api api
+COPY src/common/cli cli
+COPY src/common/confs confs
+COPY src/common/core core
+COPY src/common/db db
+COPY src/common/gen gen
+COPY src/common/helpers helpers
+COPY src/common/settings.json settings.json
+COPY src/common/utils utils
+COPY src/scheduler scheduler
+COPY src/VERSION VERSION
+COPY src/ui ui
+COPY src/api api
+
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
+    apt-get install -y nodejs npm parallel && \
+    cd /tmp && \
+    npm ci --ignore-scripts; \
+    fi
+
+# Minify JS files
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
+
+# Minify CSS files
+ARG SKIP_MINIFY_CSS=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
+    else \
+    echo "Skipping CSS minification"; \
+    fi
+
+# Minify HTML files
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+    find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+    parallel 'npx html-minifier-terser \
+    --collapse-whitespace \
+    --remove-comments \
+    --remove-optional-tags \
+    --remove-redundant-attributes \
+    --remove-script-type-attributes \
+    --remove-style-link-type-attributes \
+    --minify-css true \
+    --minify-js true \
+    --output {} {}'; \
+    else \
+    echo "Skipping HTML minification"; \
+    fi
+
+FROM ubuntu:noble@sha256:786a8b558f7be160c6c8c4a54f9a57274f3b4fb1491cf65146521ae77ff1dc54
+
+# Set default umask to prevent huge recursive chmod increasing the final image size
+RUN umask 027
+
+# Install fpm
+RUN apt-get update && \
+    apt-get -y install ruby ruby-dev rubygems build-essential autoconf libtool rpm binutils && \
+    gem install -N fpm && \
+    apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
+COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+
+WORKDIR /usr/share/bunkerweb
+
+# Setup BunkerWeb
+RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
+    echo "Linux" > INTEGRATION && \
+    mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
+    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
+
+COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+
+# Copy Linux files
+COPY --chmod=740 src/linux/scripts scripts
+COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
+COPY src/linux/fpm-ubuntu-noble /usr/share/.fpm
+COPY --chmod=644 src/linux/*.service /lib/systemd/system/
+COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
+
+# Generate DEB at startup
+VOLUME /data
+WORKDIR /usr/share/
+ENTRYPOINT [ "./fpm.sh", "deb" ]

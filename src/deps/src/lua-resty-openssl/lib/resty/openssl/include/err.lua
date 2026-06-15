@@ -1,7 +1,7 @@
 local ffi = require "ffi"
 
 require "resty.openssl.include.ossl_typ"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   unsigned long ERR_peek_error(void);
@@ -12,7 +12,7 @@ ffi.cdef [[
   const char *ERR_reason_error_string(unsigned long e);
 ]]
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   ffi.cdef [[
     unsigned long ERR_get_error_all(const char **file, int *line,
                                     const char **func,

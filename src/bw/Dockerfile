@@ -78,7 +78,8 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl tzdata brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "libpng>=1.6.58-r1" # CVE-2026-40930
+RUN apk add --no-cache "openssl>=3.5.7-r0" # CVE-2026-34182 CVE-2026-45447 CVE-2026-7383 CVE-2026-9076 CVE-2026-45445 CVE-2026-42764 CVE-2026-34183 CVE-2026-34180 CVE-2026-34181 CVE-2026-42767 CVE-2026-42766 CVE-2026-42769 CVE-2026-45446 CVE-2026-42770 CVE-2026-42768
+RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -108,7 +109,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.11"
+LABEL version="1.6.12~rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"
