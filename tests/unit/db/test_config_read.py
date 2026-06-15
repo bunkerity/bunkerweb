@@ -98,3 +98,47 @@ class TestGetServicesSettings:
         assert len(services) == 2  # app1 + app2
         assert all("MULTISITE" in svc for svc in services)  # global keys retained, unprefixed
         assert any(svc.get("USE_REVERSE_PROXY") == "yes" for svc in services)  # app1's override
+
+
+class TestGetConfigTemplateExpansion:
+    """get_config expands USE_TEMPLATE into per-setting defaults, tagging them template=<id>,
+    without overriding values that were set explicitly."""
+
+    def _make_template(self, db, *, default="tmpl-default"):
+        return db.create_template(
+            "low",
+            name="Low",
+            settings={"USE_REVERSE_PROXY": default},
+            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}],
+        )
+
+    def test_global_template_applies_defaults(self, db):
+        from fixtures.seed import add_global_value
+
+        seed_minimal(db)
+        assert self._make_template(db, default="yes") == ""
+        add_global_value(db, setting_id="USE_TEMPLATE", value="low")
+        cfg = db.get_config(methods=True)
+        assert cfg["USE_REVERSE_PROXY"]["value"] == "yes"
+        assert cfg["USE_REVERSE_PROXY"]["template"] == "low"
+
+    def test_service_template_applies_defaults(self, db):
+        from fixtures.seed import add_service_setting
+
+        seed_multisite(db)
+        self._make_template(db)
+        add_service_setting(db, service_id="app2.example.com", setting_id="USE_TEMPLATE", value="low")
+        cfg = db.get_config(methods=True)
+        assert cfg["app2.example.com_USE_REVERSE_PROXY"]["value"] == "tmpl-default"
+        assert cfg["app2.example.com_USE_REVERSE_PROXY"]["template"] == "low"
+
+    def test_explicit_service_value_beats_template(self, db):
+        from fixtures.seed import add_service_setting
+
+        seed_multisite(db)  # app1 explicitly sets USE_REVERSE_PROXY=yes (method manual)
+        self._make_template(db)
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low")
+        add_service_setting(db, service_id="app2.example.com", setting_id="USE_TEMPLATE", value="low")
+        cfg = db.get_config(methods=True)
+        assert cfg["app1.example.com_USE_REVERSE_PROXY"]["value"] == "yes"  # explicit override survives
+        assert cfg["app2.example.com_USE_REVERSE_PROXY"]["value"] == "tmpl-default"  # template fills the gap

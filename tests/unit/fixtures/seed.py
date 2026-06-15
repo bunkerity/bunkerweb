@@ -7,6 +7,7 @@ FKs) as well as SQLite (which does not).
 """
 
 from contextlib import contextmanager
+from copy import deepcopy
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
@@ -23,6 +24,7 @@ from model import (  # type: ignore
     Services,
     Services_settings,
     Settings,
+    UserRecoveryCodes,
     Users,
 )
 
@@ -174,6 +176,16 @@ def add_role_user(db, username, role_name) -> None:
         s.add(RolesUsers(user_name=username, role_name=role_name))
 
 
+def add_recovery_code(db, username, code) -> None:
+    """Insert a UserRecoveryCodes row with a KNOWN literal code.
+
+    use_ui_user_recovery_code matches on exact string equality, so seeding a literal
+    (rather than a bcrypt hash) lets a test consume a specific code deterministically.
+    """
+    with session(db) as s:
+        s.add(UserRecoveryCodes(user_name=username, code=code))
+
+
 def add_plugin(db, plugin_id, *, type="core", method="manual", version="1.0", name=None, description="d", checksum=None) -> None:
     with session(db) as s:
         s.add(Plugins(id=plugin_id, name=name or plugin_id, description=description, version=version, type=type, method=method, checksum=checksum))
@@ -182,3 +194,63 @@ def add_plugin(db, plugin_id, *, type="core", method="manual", version="1.0", na
 def add_plugin_page(db, plugin_id, *, data=b"<page>", checksum="pagesum") -> None:
     with session(db) as s:
         s.add(Plugin_pages(plugin_id=plugin_id, data=data, checksum=checksum))
+
+
+def make_core_plugin(plugin_id="testplugin", *, version="1.0", settings=None, jobs=None) -> dict:
+    """Build a fresh ``default_plugins``-shaped core plugin dict for init_tables.
+
+    A fresh deepcopy is returned every call because init_tables MUTATES its input
+    (pops ``settings``/``jobs``, rewrites each setting's ``id``/``name``). Setting ``id``
+    becomes ``Settings.name`` (unique), so ids are namespaced per plugin.
+    """
+    pid_up = plugin_id.upper().replace("-", "_")
+    base = {
+        "id": plugin_id,
+        "name": f"{plugin_id} plugin",
+        "description": "desc",
+        "version": version,
+        "stream": "no",
+        "settings": (
+            settings
+            if settings is not None
+            else {
+                f"{pid_up}_GLOBAL": {
+                    "id": f"{plugin_id}-global",
+                    "context": "global",
+                    "default": "def",
+                    "help": "h",
+                    "label": "L",
+                    "regex": "^.*$",
+                    "type": "text",
+                },
+                f"{pid_up}_MS": {
+                    "id": f"{plugin_id}-ms",
+                    "context": "multisite",
+                    "default": "msdef",
+                    "help": "h",
+                    "label": "L2",
+                    "regex": "^.*$",
+                    "type": "text",
+                },
+            }
+        ),
+        "jobs": jobs if jobs is not None else [],
+    }
+    return deepcopy(base)
+
+
+def make_external_plugin(plugin_id="extplugin", *, version="1.0", data=b"fake-tar", checksum="extsum", method="manual") -> dict:
+    """Build a fresh external/pro plugin dict for update_external_plugins (carries tar data
+    + ``method``, which that method requires with no default)."""
+    p = make_core_plugin(plugin_id, version=version)
+    p.update({"data": data, "checksum": checksum, "page": False, "method": method})
+    return p
+
+
+def make_general_settings() -> dict:
+    """Fresh ``default_plugins`` entry (no ``id`` -> the 'general' plugin) carrying the
+    core global settings save_config needs: MULTISITE + SERVER_NAME."""
+    return {
+        "MULTISITE": {"id": "multisite", "context": "global", "default": "no", "help": "h", "label": "M", "regex": "^(yes|no)$", "type": "check"},
+        "SERVER_NAME": {"id": "server-name", "context": "multisite", "default": "www.example.com", "help": "h", "label": "S", "regex": "^.*$", "type": "text"},
+    }

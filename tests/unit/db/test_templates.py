@@ -90,3 +90,150 @@ class TestTemplateDetailsAndUpdate:
     def test_update_template_missing(self, db):
         seed_minimal(db)
         assert db.update_template("ghost", name="x") == "Template not found"
+
+
+def _args_with_config():
+    # server_http is a valid server-scoped template config type; the step must reference it.
+    return {
+        "name": "Low",
+        "settings": {"USE_REVERSE_PROXY": "yes"},
+        "steps": [{"title": "Step 1", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/cfg.conf"]}],
+        "configs": [{"type": "server_http", "name": "cfg", "data": "# tmpl-data"}],
+    }
+
+
+class TestCreateTemplateWithConfigs:
+    def test_create_with_config_persists(self, db):
+        seed_minimal(db)
+        assert db.create_template("low", **_args_with_config()) == ""
+        configs = db.get_templates()["low"]["configs"]
+        assert configs["server_http/cfg.conf"] == "# tmpl-data"
+
+    def test_details_expose_config(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_args_with_config())
+        details = db.get_template_details("low")
+        assert any(c["key"] == "server_http/cfg.conf" and c["data"] == "# tmpl-data" for c in details["configs"])
+
+
+class TestTemplateConfigValidation:
+    def _create(self, db, *, steps, configs):
+        return db.create_template("x", name="X", settings={"USE_REVERSE_PROXY": "yes"}, steps=steps, configs=configs)
+
+    def test_config_entry_not_dict(self, db):
+        seed_minimal(db)
+        msg = self._create(
+            db,
+            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/c.conf"]}],
+            configs=["not-a-dict"],
+        )
+        assert msg == "Config entries must be objects"
+
+    def test_step_references_unknown_config(self, db):
+        seed_minimal(db)
+        msg = self._create(
+            db,
+            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/ghost.conf"]}],
+            configs=[],
+        )
+        assert "unknown config" in msg
+
+    def test_config_not_assigned_to_step(self, db):
+        seed_minimal(db)
+        msg = self._create(
+            db,
+            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}],
+            configs=[{"type": "server_http", "name": "c", "data": "# d"}],
+        )
+        assert "is not assigned to any step" in msg
+
+    def test_duplicate_config_rejected(self, db):
+        seed_minimal(db)
+        msg = self._create(
+            db,
+            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/dup.conf"]}],
+            configs=[{"type": "server_http", "name": "dup", "data": "# a"}, {"type": "server-http", "name": "dup", "data": "# b"}],
+        )
+        assert "Duplicate config" in msg
+
+
+class TestTemplateSettingValidation:
+    def test_step_missing_title(self, db):
+        seed_minimal(db)
+        assert db.create_template("x", name="X", settings={}, steps=[{"settings": []}]) == "Step 1 must have a title"
+
+    def test_setting_not_assigned_to_step(self, db):
+        seed_minimal(db)
+        msg = db.create_template("x", name="X", settings={"USE_REVERSE_PROXY": "yes"}, steps=[{"title": "S", "settings": []}])
+        assert "are not assigned to any step" in msg
+
+    def test_setting_assigned_to_multiple_steps(self, db):
+        seed_minimal(db)
+        msg = db.create_template(
+            "x",
+            name="X",
+            settings={"USE_REVERSE_PROXY": "yes"},
+            steps=[{"title": "S1", "settings": ["USE_REVERSE_PROXY"]}, {"title": "S2", "settings": ["USE_REVERSE_PROXY"]}],
+        )
+        assert "assigned to multiple steps" in msg
+
+    def test_restricted_setting_rejected(self, db):
+        seed_minimal(db)
+        # USE_TEMPLATE is in RESTRICTED_TEMPLATE_SETTINGS -> cannot live inside a template.
+        msg = db.create_template("x", name="X", settings={"USE_TEMPLATE": "low"}, steps=[{"title": "S", "settings": ["USE_TEMPLATE"]}])
+        assert msg == "Setting USE_TEMPLATE cannot be part of a template"
+
+
+class TestCreateTemplateGuards:
+    def test_name_already_exists(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())  # name "Low"
+        assert db.create_template("other", **_minimal_template_args()) == "Template name Low already exists"
+
+    def test_unknown_plugin_rejected(self, db):
+        seed_minimal(db)
+        assert db.create_template("low", plugin_id="ghostplugin", **_minimal_template_args()) == "Plugin ghostplugin does not exist"
+
+    def test_known_plugin_accepted(self, db):
+        seed_minimal(db)
+        # 'general' plugin exists from seed_minimal.
+        assert db.create_template("low", plugin_id="general", **_minimal_template_args()) == ""
+        assert db.get_templates()["low"]["plugin_id"] == "general"
+
+
+class TestUpdateTemplateBranches:
+    def test_update_adds_config(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())  # no configs initially
+        assert (
+            db.update_template(
+                "low",
+                settings={"USE_REVERSE_PROXY": "yes"},
+                steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/added.conf"]}],
+                configs=[{"type": "server_http", "name": "added", "data": "# new"}],
+            )
+            == ""
+        )
+        assert db.get_templates()["low"]["configs"]["server_http/added.conf"] == "# new"
+
+    def test_update_name_conflict(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        db.create_template("high", **(_minimal_template_args() | {"name": "High"}))
+        assert db.update_template("high", name="Low") == "Template name Low already exists"
+
+    def test_update_name_empty_rejected(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        assert db.update_template("low", name="   ") == "Template name cannot be empty"
+
+    def test_update_unknown_plugin_rejected(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        assert db.update_template("low", plugin_id="ghost") == "Plugin ghost does not exist"
+
+    def test_update_change_plugin(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        assert db.update_template("low", plugin_id="general") == ""
+        assert db.get_templates()["low"]["plugin_id"] == "general"

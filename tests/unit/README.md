@@ -88,9 +88,24 @@ tar determinism, tar/zip extraction safety), `api/app/schemas.py` Pydantic valid
 `gen/Templator.py` SSL ECDH-curve ranking, `scheduler/JobScheduler` job validation + dispatch,
 `worker/executor` path-sandbox guard, `ui/app/utils` bcrypt password helpers.
 
-Coverage on the unit-targeted modules runs 60–93% (services 93, api-users 88, api-permissions 87,
-ui-preferences 91, ui-rbac 82, config_read/metadata/plugins ~75, Configurator/custom_configs/jobs ~60–66).
+Coverage on the unit-targeted modules runs 75–93% (services 93, config_read 93, custom_configs 92,
+templates 92, api-users 88, api-permissions 87, ui-users 85, ui-preferences 91, ui-rbac 82,
+metadata/plugins ~75, Configurator/jobs ~60–66).
 The deliberately-deferred high-risk files sit at 4–8% (see below) — by design, not a gap.
+
+**Done — branch polish:** a follow-up pass closed the leftover conditional branches on the
+already-tested DB mixins (lifting `custom_configs` 66→92%, `templates` →92%, `config_read`
+75→93%, base `ui_users` 47→85%): the UI/API "exploded" custom-config payload shape, the
+cross-method `save_custom_configs` reconciliation (manual-updates-surviving-ui-row,
+scheduler-overwrites-ui), the autoconf `disable_cleanup` orphan→draft path, the
+template→service custom-config merge + override suppression (`get_custom_configs` /
+`get_custom_config`), `create_template`/`update_template` with `configs=` and the full
+`_prepare_template_entities` validation matrix, `get_config` template-default expansion
+(global + per-service + explicit-value precedence), and the base `ui_users` recovery-code
+lifecycle / column-preferences / role-permissions / session methods the API `/users` router
+reaches (UIDatabase overrides them, so only the plain `db` fixture exercises the base).
+The remaining uncovered lines are the readonly-guard and commit-`except` branches (no readonly
+`Database` fixture; a forced-commit-failure is not unit-isolatable) — consistent across the suite.
 
 `src/api` and `src/ui` both expose a top-level `app` package. The API user/permission
 mixins use only absolute imports, so the API fixture **recomposes** `APIDatabase` from
@@ -98,11 +113,27 @@ mixins use only absolute imports, so the API fixture **recomposes** `APIDatabase
 fixture imports the real `UIDatabase` with `src/ui` on the path. Because only the UI imports
 `app`, it resolves uniquely to `src/ui/app` — db, api and ui coexist in one process.
 
+**Done — integration tier (`slow` marker):** `init_tables`, `save_config`,
+`update_external_plugins` end-to-end (init_tables seeds the plugin/settings schema →
+save_config persists → read back), on all engines. Files:
+`tests/unit/db/test_{init_tables,config_save,plugins_update}.py`. Coverage lifted from
+4–8% to **57 / 56 / 35%**; the `misc/refactor/` snapshot harness still complements for
+full behavioral parity. Run the fast loop with `pytest -m 'not slow'`.
+
 **Remaining / deferred (by design):**
 - `api/app/rate_limit.py` — not unit-isolatable: relative `app.*` imports pull `app.config`
   (pydantic-settings) and `app.utils` (→ `APIDatabase`), plus fastapi/slowapi/biscuit/yaml.
   Importing it boots most of the app, so its parsing helpers belong to integration/e2e, not
   isolated unit tests. (The equivalent bcrypt helpers are covered via `ui/app/utils`.)
-- `config_save`, `init_tables`, `plugins_update` — highest-risk; covered today by the
-  behavioral snapshot harness in `misc/refactor/` (`snapshot.sh` + `db_snapshot.py`) and
-  earmarked for a pytest integration tier later.
+- Plugin-page tar extraction inside the integration-tier methods — lower-value, left to the
+  snapshot harness / e2e. (The "exploded" custom-config payloads and template-config rebuild
+  that used to live here are now covered — see "branch polish" above.)
+- Readonly-mode guards and commit-`except` handlers across the mutators — there is no readonly
+  `Database` fixture and a mid-commit failure cannot be forced in isolation; these are the bulk
+  of the residual uncovered lines and are intentionally left.
+- The deep multiple-group template-default branch in `get_config` (suffixed `multiple` settings
+  inheriting a template default) — narrow, lower-value.
+
+> **Operational note:** the matrix uses ONE shared PostgreSQL/MariaDB. Do **not** run two
+> matrix `pytest` invocations at once — concurrent `drop_all`/`create_all` deadlock on table
+> locks. Run serially (or give each run its own database).
