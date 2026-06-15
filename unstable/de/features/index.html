@@ -9002,6 +9002,62 @@ TrustedMonitor/\d+\.\d+
 <td>Header to pass authenticated username to upstream (empty to disable).</td>
 </tr>
 <tr>
+<td><code>LDAP_EMAIL_HEADER</code></td>
+<td><code>X-Email</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Header to pass the user email to upstream (empty to disable). Requires search mode and the email attribute returned by the directory.</td>
+</tr>
+<tr>
+<td><code>LDAP_EMAIL_ATTRIBUTE</code></td>
+<td><code>mail</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>LDAP attribute used for the email header (e.g. mail).</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_HEADER</code></td>
+<td><code>X-Groups</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Header to pass the user groups to upstream (empty to disable). Requires search mode and the groups attribute returned by the directory.</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_ATTRIBUTE</code></td>
+<td><code>memberOf</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>LDAP attribute used for the groups header (e.g. memberOf).</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_VALUE</code></td>
+<td><code>cn</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>How to serialize group values: 'cn' forwards only the first RDN value (group name, recommended with a comma separator), 'dn' forwards full group DNs (use a non-comma separator since DNs contain commas).</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_SEPARATOR</code></td>
+<td><code>,</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Separator used to join multiple group values in the groups header.</td>
+</tr>
+<tr>
+<td><code>LDAP_NAME_HEADER</code></td>
+<td><code>X-Name</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Header to pass the user display name to upstream (empty to disable). Requires search mode and the display name attribute returned by the directory.</td>
+</tr>
+<tr>
+<td><code>LDAP_NAME_ATTRIBUTE</code></td>
+<td><code>displayName</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>LDAP attribute used for the display name header (e.g. displayName, cn).</td>
+</tr>
+<tr>
 <td><code>LDAP_REDIRECT_AFTER_LOGIN</code></td>
 <td><code>/</code></td>
 <td>multisite</td>
@@ -9213,7 +9269,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_MAX_RETRIES</code></td>
-<td><code>3</code></td>
+<td><code>0</code></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>Maximale Wiederholungen:</strong> Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf <code>0</code> setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.</td>
@@ -10750,7 +10806,7 @@ TrustedMonitor/\d+\.\d+
 <p>Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9">v3.3.9</a>.</li>
-<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0">v4.25.0</a> (<strong>Standard</strong>).</li>
+<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0">v4.27.0</a> (<strong>Standard</strong>).</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Nightly-Build veraltet</p>
@@ -11010,6 +11066,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>Verifizierungsmodus:</strong> Legen Sie fest, ob Zertifikate erforderlich sind (<code>on</code>), optional (<code>optional</code>) oder ohne CA-Prüfung akzeptiert werden (<code>optional_no_ca</code>).</td>
 </tr>
 <tr>
+<td><code>MTLS_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>ja</td>
+<td><strong>mTLS-URL:</strong> Regex, der gegen die Anfrage-URI geprüft wird, um nur auf passenden Pfaden ein gültiges Client-Zertifikat zu verlangen (nur HTTP). Erfordert <code>MTLS_VERIFY_CLIENT</code> auf <code>optional</code> oder <code>optional_no_ca</code>. Leer lassen, um mTLS für die gesamte Site zu erzwingen.</td>
+</tr>
+<tr>
 <td><code>MTLS_VERIFY_DEPTH</code></td>
 <td><code>2</code></td>
 <td>multisite</td>
@@ -11044,8 +11107,16 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Vertrauensquelle und Verifizierung</p>
 <p>BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Pfadbezogenes mTLS erfordert den optionalen Modus</p>
+<p>Die NGINX-Direktive <code>ssl_verify_client</code> ist nur im <code>server</code>-Kontext gültig – sie kann nicht in einem <code>location</code>-Block stehen. Um ein Zertifikat nur auf bestimmten Pfaden zu verlangen, setzen Sie <code>MTLS_VERIFY_CLIENT</code> auf <code>optional</code> (oder <code>optional_no_ca</code>), damit der Handshake für jeden Pfad abgeschlossen wird, und listen Sie die geschützten Pfade in <code>MTLS_URL_n</code> auf. BunkerWeb erzwingt das Zertifikat dann pro Anfrage in Lua auf den passenden URLs. Belassen Sie <code>MTLS_VERIFY_CLIENT</code> auf <code>on</code>, während Sie <code>MTLS_URL_n</code> setzen, weist NGINX Clients ohne Zertifikat bereits beim Handshake ab, bevor die pfadbezogene Logik greift – die Erzwingung bleibt dann site-weit.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Browser-Zertifikatsabfragen im optionalen Modus</p>
+<p>Der TLS-Handshake erfolgt, bevor NGINX die angeforderte URL kennt; im Modus <code>optional</code> sendet NGINX daher weiterhin bei jeder Verbindung einen <code>CertificateRequest</code>. Die Erzwingung wird pfadbezogen, die Einladung auf Handshake-Ebene jedoch nicht – Browser fragen unter Umständen auch auf ungeschützten Pfaden nach einem Zertifikat (Verhalten je nach Browser unterschiedlich). Auf diesen Pfaden lässt BunkerWeb die Anfrage zu, ob ein Zertifikat vorgelegt wird oder nicht.</p>
+</div>
 <h3 id="konfigurationsbeispiele_3">Konfigurationsbeispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:3"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Strikte Zugriffskontrolle</label><label for="__tabbed_34_2">Optionale Client-Authentifizierung</label><label for="__tabbed_34_3">Diagnose ohne CA</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:4"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Strikte Zugriffskontrolle</label><label for="__tabbed_34_2">Optionale Client-Authentifizierung</label><label for="__tabbed_34_3">Diagnose ohne CA</label><label for="__tabbed_34_4">Pfadbezogenes mTLS (z. B. nur <code>/login</code>)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Verlangen Sie gültige Client-Zertifikate Ihrer privaten CA und leiten Sie die Verifizierungsergebnisse an das Backend weiter:</p>
@@ -11070,6 +11141,47 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional_no_ca&quot;</span>
 <span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Verlangen Sie Client-Zertifikate nur auf ausgewählten Pfaden und lassen Sie den Rest der Site offen. Die Verifizierung läuft im Modus <code>optional</code>, damit der Handshake auf nicht authentifizierten Pfaden abgeschlossen wird; BunkerWeb erzwingt das Zertifikat anschließend pro Anfrage auf URLs, die zu <code>MTLS_URL_n</code> passen (eine Regex pro Eintrag):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_CA_CERTIFICATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/bunkerweb/mtls/partner-ca.pem&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional&quot;</span>
+<span class="nt">MTLS_URL_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^/login&quot;</span>
+<span class="nt">MTLS_URL_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^/admin&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Anfrage</th>
+<th>Zertifikat</th>
+<th>Ergebnis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /</code></td>
+<td>keines</td>
+<td>Erlaubt (Pfad ohne mTLS)</td>
+</tr>
+<tr>
+<td><code>GET /login</code></td>
+<td>keines</td>
+<td>Abgelehnt (<code>403</code>)</td>
+</tr>
+<tr>
+<td><code>GET /login</code></td>
+<td>gültig</td>
+<td>Erlaubt, <code>X-SSL-Client-*</code> weitergeleitet</td>
+</tr>
+<tr>
+<td><code>GET /login</code></td>
+<td>ungültig / abgelaufen</td>
+<td>Abgelehnt (<code>403</code>)</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -11395,6 +11507,55 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>nein</td>
 <td>Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_EMAIL_HEADER</code></td>
+<td><code>X-Email</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Header to pass the user email to upstream (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_EMAIL_CLAIM</code></td>
+<td><code>email</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>ID token/userinfo claim used for the email header (e.g. email).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_GROUPS_HEADER</code></td>
+<td><code>X-Groups</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Header to pass the user groups to upstream (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_GROUPS_CLAIM</code></td>
+<td><code>groups</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>ID token/userinfo claim used for the groups header (e.g. groups, roles).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_GROUPS_SEPARATOR</code></td>
+<td><code>,</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Separator used to join multiple group values in the groups header.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_NAME_HEADER</code></td>
+<td><code>X-Name</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Header to pass the user display name to upstream (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_NAME_CLAIM</code></td>
+<td><code>name</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>ID token/userinfo claim used for the display name header (e.g. name).</td>
 </tr>
 <tr>
 <td><code>OPENIDC_DISCOVERY_DICT_SIZE</code></td>
@@ -12024,7 +12185,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td style="text-align: left;"></td>
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Host/IP des Redis-/Valkey-Servers.</td>
+<td style="text-align: left;">Host/IP des Redis-/Valkey-Servers. Nicht erforderlich, wenn <code>REDIS_SENTINEL_HOSTS</code> gesetzt ist (der Master wird über die Sentinels aufgelöst).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_PORT</code></td>
@@ -12056,10 +12217,10 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_TIMEOUT</code></td>
-<td style="text-align: left;"><code>5</code></td>
+<td style="text-align: left;"><code>1000</code></td>
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Timeout (Sekunden).</td>
+<td style="text-align: left;">Timeout (ms) für Verbindung/Lesen/Schreiben.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_USERNAME</code></td>
@@ -12105,14 +12266,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_KEEPALIVE_IDLE</code></td>
-<td style="text-align: left;"><code>300</code></td>
+<td style="text-align: left;"><code>30000</code></td>
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">TCP-Keepalive-Intervall (Sekunden) für inaktive Verbindungen.</td>
+<td style="text-align: left;">Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_KEEPALIVE_POOL</code></td>
-<td style="text-align: left;"><code>3</code></td>
+<td style="text-align: left;"><code>10</code></td>
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
 <td style="text-align: left;">Maximale Anzahl der im Pool gehaltenen Verbindungen.</td>
@@ -12164,6 +12325,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="tabbed-block">
 <p>Konfiguration für Hochverfügbarkeit mit Redis Sentinel:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="c1"># REDIS_HOST ist nicht erforderlich: Der Master wird über die Sentinels aufgelöst</span>
 <span class="nt">REDIS_SENTINEL_HOSTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sentinel1:26379</span><span class="nv"> </span><span class="s">sentinel2:26379</span><span class="nv"> </span><span class="s">sentinel3:26379&quot;</span>
 <span class="nt">REDIS_SENTINEL_MASTER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
 <span class="nt">REDIS_SENTINEL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sentinel-password&quot;</span>
@@ -12177,12 +12339,22 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">REDIS_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;6379&quot;</span>
 <span class="nt">REDIS_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-strong-password&quot;</span>
 <span class="nt">REDIS_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
-<span class="nt">REDIS_TIMEOUT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
-<span class="nt">REDIS_KEEPALIVE_IDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
+<span class="nt">REDIS_TIMEOUT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3000&quot;</span>
+<span class="nt">REDIS_KEEPALIVE_IDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60000&quot;</span>
 <span class="nt">REDIS_KEEPALIVE_POOL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5&quot;</span>
 </code></pre></div>
 </div>
 </div>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Redis auf Kubernetes (vom Scheduler gesteuerte Konfiguration)</p>
+<p>Auf Kubernetes liest der <strong>Scheduler</strong> die Einstellungen und überträgt die generierte
+Konfiguration an die BunkerWeb-Instanzen — die Instanzen lesen diese Redis-Einstellungen nicht aus
+ihrer eigenen Pod-Umgebung. Konfigurieren Sie Redis mit dem offiziellen Helm-Chart unter
+<code>settings.redis</code>, einschließlich Sentinel über <code>settings.redis.redisSentinelHosts</code> und
+<code>settings.redis.redisSentinelMaster</code> (Chart ≥ v1.0.21). Für jede Einstellung ohne dedizierten
+Chart-Schlüssel verwenden Sie <code>scheduler.extraEnvs</code>. Werden sie nur auf <code>bunkerweb.extraEnvs</code>
+gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 </div>
 <h3 id="redis-best-practices">Redis Best Practices</h3>
 <p>Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb diese Best Practices, um optimale Leistung, Sicherheit und Zuverlässigkeit zu gewährleisten:</p>
@@ -14377,7 +14549,7 @@ TrustedMonitor/\d+\.\d+
 <h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#wildcard-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
-<p>Adds wildcard server_name support (*.domain) for services.</p>
+<p>Adds wildcard server_name support (*.domain) for services, and serves the matching certificate to all sub-domains.</p>
 <table>
 <thead>
 <tr>

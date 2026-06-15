@@ -4788,6 +4788,25 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <p>Pour une configuration optimale, il est recommandé de définir BunkerWeb en tant que <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong>, ce qui garantit qu'un pod est créé sur tous les nœuds, tandis que l'<strong>autoconf et le scheduler</strong> sont définis comme  un <strong>seul déploiement<a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"> répliqué</a></strong>.</p>
 <p>Compte tenu de la présence de plusieurs instances BunkerWeb, il est nécessaire d'établir un magasin de données partagé implémenté en tant que <a href="https://redis.io/"> service Redis</a> ou <a href="https://valkey.io/">Valkey</a>. Ce service sera utilisé par les instances pour mettre en cache et partager des données entre elles. Vous trouverez de plus amples informations sur les paramètres Redis/Valkey <a href="../features/#redis">ici</a>.</p>
 <div class="admonition info">
+<p class="admonition-title">Où placer les paramètres Redis (configuration pilotée par le scheduler)</p>
+<p>Sur Kubernetes, c’est le <strong>scheduler</strong> qui lit les paramètres et génère la configuration qu’il
+pousse vers les instances BunkerWeb ; les instances ne lisent pas les paramètres Redis depuis leur
+propre environnement de pod. Avec le chart Helm, configurez Redis sous <code>settings.redis</code> — y compris
+Redis Sentinel via <code>settings.redis.redisSentinelHosts</code> et <code>settings.redis.redisSentinelMaster</code>
+(chart ≥ v1.0.21) — ou sur <code>scheduler.extraEnvs</code> pour tout paramètre sans clé dédiée. Avec
+Sentinel, <code>REDIS_HOST</code> n’est <strong>pas</strong> nécessaire (le master est résolu via les Sentinels). Les
+définir uniquement sur <code>bunkerweb.extraEnvs</code> n’a aucun effet.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">redis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">        </span><span class="c1"># cluster Redis/Sentinel externe</span>
+<span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">useRedis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelHosts</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis-node-01.redis:26379</span><span class="nv"> </span><span class="s">redis-node-02.redis:26379</span><span class="nv"> </span><span class="s">redis-node-03.redis:26379&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelMaster</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
+<span class="w">    </span><span class="c1"># redisPassword / redisSentinelPassword si votre master/sentinels exigent une auth</span>
+</code></pre></div>
+</div>
+<div class="admonition info">
 <p class="admonition-title">Backend de base de données</p>
 <p>Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
 <p>La configuration des backends de base de données en cluster est hors du périmètre de cette documentation.</p>

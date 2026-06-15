@@ -4783,6 +4783,23 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <p>为了获得最佳设置，建议将 BunkerWeb 定义为一个 <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong>，这样可以确保在所有节点上都创建一个 pod，而将 <strong>autoconf 和 scheduler</strong> 定义为<strong>单个副本的 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a></strong>。</p>
 <p>鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 <a href="https://redis.io/">Redis</a> 或 <a href="https://valkey.io/">Valkey</a> 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见<a href="../features/#redis">此处</a>。</p>
 <div class="admonition info">
+<p class="admonition-title">Redis 设置应放在哪里（由 scheduler 驱动的配置）</p>
+<p>在 Kubernetes 上，由 <strong>scheduler</strong> 读取设置并生成配置，再推送到 BunkerWeb 实例；实例不会从自身的
+Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 <code>settings.redis</code> 下配置 Redis——包括通过
+<code>settings.redis.redisSentinelHosts</code> 和 <code>settings.redis.redisSentinelMaster</code> 配置 Redis Sentinel
+（chart ≥ v1.0.21）——或对没有专用键的任何设置使用 <code>scheduler.extraEnvs</code>。使用 Sentinel 时<strong>无需</strong>
+<code>REDIS_HOST</code>（主节点通过 Sentinels 解析）。仅在 <code>bunkerweb.extraEnvs</code> 上设置它们将不起作用。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">redis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">        </span><span class="c1"># 外部 Redis/Sentinel 集群</span>
+<span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">useRedis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelHosts</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis-node-01.redis:26379</span><span class="nv"> </span><span class="s">redis-node-02.redis:26379</span><span class="nv"> </span><span class="s">redis-node-03.redis:26379&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelMaster</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
+<span class="w">    </span><span class="c1"># 如主节点/哨兵需要鉴权，请设置 redisPassword / redisSentinelPassword</span>
+</code></pre></div>
+</div>
+<div class="admonition info">
 <p class="admonition-title">数据库后端</p>
 <p>请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
 <p>集群数据库后端的设置超出了本文档的范围。</p>

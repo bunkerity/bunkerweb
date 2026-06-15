@@ -5029,6 +5029,25 @@ it is necessary to establish a shared data store implemented as a <a href="https
 This service will be utilized by the instances to cache and share data among themselves.
 Further information about the Redis/Valkey settings can be found <a href="../features/#redis">here</a>.</p>
 <div class="admonition info">
+<p class="admonition-title">Where Redis settings go (scheduler-driven config)</p>
+<p>On Kubernetes the <strong>scheduler</strong> is the component that reads settings and generates the
+configuration it pushes to the BunkerWeb instances; the instances do not read Redis settings from
+their own pod environment. With the Helm chart, configure Redis under <code>settings.redis</code> — including
+Redis Sentinel via <code>settings.redis.redisSentinelHosts</code> and <code>settings.redis.redisSentinelMaster</code>
+(chart ≥ v1.0.21) — or on <code>scheduler.extraEnvs</code> for any setting without a dedicated key. When
+using Sentinel you do <strong>not</strong> need <code>REDIS_HOST</code> (the master is resolved through the Sentinels).
+Setting these only on <code>bunkerweb.extraEnvs</code> has no effect.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">redis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">        </span><span class="c1"># external Redis/Sentinel cluster</span>
+<span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">useRedis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelHosts</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis-node-01.redis:26379</span><span class="nv"> </span><span class="s">redis-node-02.redis:26379</span><span class="nv"> </span><span class="s">redis-node-03.redis:26379&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelMaster</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
+<span class="w">    </span><span class="c1"># redisPassword / redisSentinelPassword if your master/sentinels require auth</span>
+</code></pre></div>
+</div>
+<div class="admonition info">
 <p class="admonition-title">Database backend</p>
 <p>Please be aware that our instructions assume you are using MariaDB as the default database backend,
 as configured by the <code>DATABASE_URI</code> setting.

@@ -4787,6 +4787,25 @@ para configuraciones personalizadas.</p>
 <p>Para una configuración óptima, se recomienda definir BunkerWeb como un <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong>, lo que asegura que se cree un pod en todos los nodos, mientras que la <strong>autoconfiguración y el programador</strong> se definen como un <strong>único <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a> replicado</strong>.</p>
 <p>Dada la presencia de múltiples instancias de BunkerWeb, es necesario establecer un almacén de datos compartido implementado como un servicio de <a href="https://redis.io/">Redis</a> o <a href="https://valkey.io/">Valkey</a>. Este servicio será utilizado por las instancias para almacenar en caché y compartir datos entre ellas. Se puede encontrar más información sobre la configuración de Redis/Valkey <a href="../features/#redis">aquí</a>.</p>
 <div class="admonition info">
+<p class="admonition-title">Dónde colocar los ajustes de Redis (configuración gestionada por el scheduler)</p>
+<p>En Kubernetes, el <strong>scheduler</strong> lee los ajustes y genera la configuración que envía a las
+instancias de BunkerWeb; las instancias no leen los ajustes de Redis desde su propio entorno de
+pod. Con el chart de Helm, configure Redis bajo <code>settings.redis</code> —incluido Redis Sentinel mediante
+<code>settings.redis.redisSentinelHosts</code> y <code>settings.redis.redisSentinelMaster</code> (chart ≥ v1.0.21)— o en
+<code>scheduler.extraEnvs</code> para cualquier ajuste sin clave dedicada. Con Sentinel, <code>REDIS_HOST</code> <strong>no</strong>
+es necesario (el maestro se resuelve a través de los Sentinels). Definirlos solo en
+<code>bunkerweb.extraEnvs</code> no tiene ningún efecto.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">redis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">        </span><span class="c1"># clúster Redis/Sentinel externo</span>
+<span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">useRedis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelHosts</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis-node-01.redis:26379</span><span class="nv"> </span><span class="s">redis-node-02.redis:26379</span><span class="nv"> </span><span class="s">redis-node-03.redis:26379&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelMaster</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
+<span class="w">    </span><span class="c1"># redisPassword / redisSentinelPassword si su maestro/sentinels requieren auth</span>
+</code></pre></div>
+</div>
+<div class="admonition info">
 <p class="admonition-title">Backend de la base de datos</p>
 <p>Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste <code>DATABASE_URI</code>. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">carpeta misc/integrations</a> del repositorio para obtener más información.</p>
 <p>La configuración de backends de bases de datos en clúster está fuera del alcance de esta documentación.</p>

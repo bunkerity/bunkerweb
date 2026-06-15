@@ -2057,7 +2057,7 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 | Option                  | Description                                                                                            |
 | ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `testing`).                                           |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `testing`).                                       |
 | `-w, --enable-wizard`   | Enables the setup wizard.                                                                              |
 | `-n, --no-wizard`       | Disables the setup wizard.                                                                             |
 | `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.                                    |
@@ -2895,6 +2895,26 @@ Given the presence of multiple BunkerWeb instances,
 it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service.
 This service will be utilized by the instances to cache and share data among themselves.
 Further information about the Redis/Valkey settings can be found [here](https://docs.bunkerweb.io/latest/features/#redis).
+
+!!! info "Where Redis settings go (scheduler-driven config)"
+    On Kubernetes the **scheduler** is the component that reads settings and generates the
+    configuration it pushes to the BunkerWeb instances; the instances do not read Redis settings from
+    their own pod environment. With the Helm chart, configure Redis under `settings.redis` — including
+    Redis Sentinel via `settings.redis.redisSentinelHosts` and `settings.redis.redisSentinelMaster`
+    (chart ≥ v1.0.21) — or on `scheduler.extraEnvs` for any setting without a dedicated key. When
+    using Sentinel you do **not** need `REDIS_HOST` (the master is resolved through the Sentinels).
+    Setting these only on `bunkerweb.extraEnvs` has no effect.
+
+    ```yaml
+    redis:
+      enabled: false        # external Redis/Sentinel cluster
+    settings:
+      redis:
+        useRedis: "yes"
+        redisSentinelHosts: "redis-node-01.redis:26379 redis-node-02.redis:26379 redis-node-03.redis:26379"
+        redisSentinelMaster: "mymaster"
+        # redisPassword / redisSentinelPassword if your master/sentinels require auth
+    ```
 
 !!! info "Database backend"
     Please be aware that our instructions assume you are using MariaDB as the default database backend,

@@ -9069,6 +9069,62 @@ TrustedMonitor/\d+\.\d+
 <td>Header to pass authenticated username to upstream (empty to disable).</td>
 </tr>
 <tr>
+<td><code>LDAP_EMAIL_HEADER</code></td>
+<td><code>X-Email</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Header to pass the user email to upstream (empty to disable). Requires search mode and the email attribute returned by the directory.</td>
+</tr>
+<tr>
+<td><code>LDAP_EMAIL_ATTRIBUTE</code></td>
+<td><code>mail</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>LDAP attribute used for the email header (e.g. mail).</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_HEADER</code></td>
+<td><code>X-Groups</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Header to pass the user groups to upstream (empty to disable). Requires search mode and the groups attribute returned by the directory.</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_ATTRIBUTE</code></td>
+<td><code>memberOf</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>LDAP attribute used for the groups header (e.g. memberOf).</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_VALUE</code></td>
+<td><code>cn</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>How to serialize group values: 'cn' forwards only the first RDN value (group name, recommended with a comma separator), 'dn' forwards full group DNs (use a non-comma separator since DNs contain commas).</td>
+</tr>
+<tr>
+<td><code>LDAP_GROUPS_SEPARATOR</code></td>
+<td><code>,</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Separator used to join multiple group values in the groups header.</td>
+</tr>
+<tr>
+<td><code>LDAP_NAME_HEADER</code></td>
+<td><code>X-Name</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Header to pass the user display name to upstream (empty to disable). Requires search mode and the display name attribute returned by the directory.</td>
+</tr>
+<tr>
+<td><code>LDAP_NAME_ATTRIBUTE</code></td>
+<td><code>displayName</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>LDAP attribute used for the display name header (e.g. displayName, cn).</td>
+</tr>
+<tr>
 <td><code>LDAP_REDIRECT_AFTER_LOGIN</code></td>
 <td><code>/</code></td>
 <td>multisite</td>
@@ -9280,7 +9336,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_MAX_RETRIES</code></td>
-<td><code>3</code></td>
+<td><code>0</code></td>
 <td>multisite</td>
 <td>否</td>
 <td><strong>最大重试次数：</strong> 证书生成失败时重试的次数。设置为 <code>0</code> 以禁用重试。用于处理临时网络问题或 API 速率限制。</td>
@@ -10817,7 +10873,7 @@ TrustedMonitor/\d+\.\d+
 <p>选择一个 CRS 版本以最符合您的安全需求：</p>
 <ul>
 <li><strong><code>3</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9">v3.3.9</a>。</li>
-<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0">v4.25.0</a> (<strong>默认</strong>)。</li>
+<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0">v4.27.0</a> (<strong>默认</strong>)。</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">每日构建版已弃用</p>
@@ -11077,6 +11133,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>验证模式：</strong> 选择是否强制要求证书（<code>on</code>）、允许可选证书（<code>optional</code>），或在不验证 CA 的情况下接受证书（<code>optional_no_ca</code>）。</td>
 </tr>
 <tr>
+<td><code>MTLS_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>是</td>
+<td><strong>mTLS URL：</strong> 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 <code>MTLS_VERIFY_CLIENT</code> 设置为 <code>optional</code> 或 <code>optional_no_ca</code>。留空则对整个站点强制 mTLS。</td>
+</tr>
+<tr>
 <td><code>MTLS_VERIFY_DEPTH</code></td>
 <td><code>2</code></td>
 <td>multisite</td>
@@ -11111,8 +11174,16 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">受信证书与验证</p>
 <p>BunkerWeb 使用同一份 CA 证书包完成链路校验与信任构建，确保吊销检查和握手验证保持一致。</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">按路径的 mTLS 需要可选模式</p>
+<p>NGINX 的 <code>ssl_verify_client</code> 指令仅在 <code>server</code> 上下文有效，无法置于 <code>location</code> 块中。若只想在部分路径上要求证书，请将 <code>MTLS_VERIFY_CLIENT</code> 设为 <code>optional</code>（或 <code>optional_no_ca</code>），使所有路径都能完成握手，然后在 <code>MTLS_URL_n</code> 中列出受保护的路径。BunkerWeb 随后会在 Lua 中按请求对匹配的 URL 强制证书。如果在设置 <code>MTLS_URL_n</code> 的同时仍将 <code>MTLS_VERIFY_CLIENT</code> 保持为 <code>on</code>，NGINX 会在握手阶段直接拒绝无证书的客户端，按路径逻辑无从生效，强制仍是全站范围。</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">可选模式下浏览器的证书提示</p>
+<p>TLS 握手发生在 NGINX 获知请求 URL 之前，因此在 <code>optional</code> 模式下，NGINX 仍会在每次连接时发送 <code>CertificateRequest</code>。强制变为按路径，但握手层面的请求邀请不会——浏览器在未受保护的路径上仍可能提示选择证书（行为因浏览器而异）。在这些路径上，无论是否提供证书，BunkerWeb 都会放行请求。</p>
+</div>
 <h3 id="_92">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:3"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">严格访问控制</label><label for="__tabbed_34_2">可选客户端认证</label><label for="__tabbed_34_3">无 CA 的诊断</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:4"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">严格访问控制</label><label for="__tabbed_34_2">可选客户端认证</label><label for="__tabbed_34_3">无 CA 的诊断</label><label for="__tabbed_34_4">按路径的 mTLS（例如仅 <code>/login</code>）</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>要求客户端提供由您的私有 CA 签发的有效证书，并将验证信息转发给后端：</p>
@@ -11137,6 +11208,47 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional_no_ca&quot;</span>
 <span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>仅在选定路径上要求客户端证书，同时保持站点其余部分开放。验证以 <code>optional</code> 模式运行，使未认证路径能够完成握手；随后 BunkerWeb 会在 Lua 中按请求对匹配 <code>MTLS_URL_n</code> 的 URL 强制证书（每个条目一个正则）：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_CA_CERTIFICATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/bunkerweb/mtls/partner-ca.pem&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional&quot;</span>
+<span class="nt">MTLS_URL_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^/login&quot;</span>
+<span class="nt">MTLS_URL_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^/admin&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>请求</th>
+<th>证书</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /</code></td>
+<td>无</td>
+<td>允许（路径不受 mTLS 约束）</td>
+</tr>
+<tr>
+<td><code>GET /login</code></td>
+<td>无</td>
+<td>拒绝（<code>403</code>）</td>
+</tr>
+<tr>
+<td><code>GET /login</code></td>
+<td>有效</td>
+<td>允许，转发 <code>X-SSL-Client-*</code></td>
+</tr>
+<tr>
+<td><code>GET /login</code></td>
+<td>无效 / 过期</td>
+<td>拒绝（<code>403</code>）</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -11462,6 +11574,55 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>否</td>
 <td>Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_EMAIL_HEADER</code></td>
+<td><code>X-Email</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Header to pass the user email to upstream (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_EMAIL_CLAIM</code></td>
+<td><code>email</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>ID token/userinfo claim used for the email header (e.g. email).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_GROUPS_HEADER</code></td>
+<td><code>X-Groups</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Header to pass the user groups to upstream (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_GROUPS_CLAIM</code></td>
+<td><code>groups</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>ID token/userinfo claim used for the groups header (e.g. groups, roles).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_GROUPS_SEPARATOR</code></td>
+<td><code>,</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Separator used to join multiple group values in the groups header.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_NAME_HEADER</code></td>
+<td><code>X-Name</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Header to pass the user display name to upstream (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_NAME_CLAIM</code></td>
+<td><code>name</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>ID token/userinfo claim used for the display name header (e.g. name).</td>
 </tr>
 <tr>
 <td><code>OPENIDC_DISCOVERY_DICT_SIZE</code></td>
@@ -12093,7 +12254,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td></td>
 <td>global</td>
 <td>否</td>
-<td><strong>Redis/Valkey 服务器：</strong> Redis/Valkey 服务器的 IP 地址或主机名。</td>
+<td><strong>Redis/Valkey 服务器：</strong> Redis/Valkey 服务器的 IP 地址或主机名。设置了 <code>REDIS_SENTINEL_HOSTS</code> 时无需配置（主节点通过 Sentinels 解析）。</td>
 </tr>
 <tr>
 <td><code>REDIS_PORT</code></td>
@@ -12125,10 +12286,10 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 <tr>
 <td><code>REDIS_TIMEOUT</code></td>
-<td><code>5</code></td>
+<td><code>1000</code></td>
 <td>global</td>
 <td>否</td>
-<td><strong>Redis/Valkey 超时：</strong> Redis/Valkey 操作的连接超时时间（秒）。</td>
+<td><strong>Redis/Valkey 超时：</strong> Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。</td>
 </tr>
 <tr>
 <td><code>REDIS_USERNAME</code></td>
@@ -12174,14 +12335,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 <tr>
 <td><code>REDIS_KEEPALIVE_IDLE</code></td>
-<td><code>300</code></td>
+<td><code>30000</code></td>
 <td>global</td>
 <td>否</td>
-<td><strong>Keepalive 空闲时间：</strong> 空闲连接的 TCP keepalive 探测之间的时间（秒）。</td>
+<td><strong>Keepalive 空闲时间：</strong> 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。</td>
 </tr>
 <tr>
 <td><code>REDIS_KEEPALIVE_POOL</code></td>
-<td><code>3</code></td>
+<td><code>10</code></td>
 <td>global</td>
 <td>否</td>
 <td><strong>Keepalive 池：</strong> 池中保留的最大 Redis/Valkey 连接数。</td>
@@ -12234,6 +12395,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="tabbed-block">
 <p>使用 Redis Sentinel 实现高可用性的配置：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="c1"># 无需 REDIS_HOST：主节点通过 Sentinels 解析</span>
 <span class="nt">REDIS_SENTINEL_HOSTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sentinel1:26379</span><span class="nv"> </span><span class="s">sentinel2:26379</span><span class="nv"> </span><span class="s">sentinel3:26379&quot;</span>
 <span class="nt">REDIS_SENTINEL_MASTER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
 <span class="nt">REDIS_SENTINEL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sentinel-password&quot;</span>
@@ -12247,12 +12409,19 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">REDIS_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;6379&quot;</span>
 <span class="nt">REDIS_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-strong-password&quot;</span>
 <span class="nt">REDIS_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
-<span class="nt">REDIS_TIMEOUT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
-<span class="nt">REDIS_KEEPALIVE_IDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
+<span class="nt">REDIS_TIMEOUT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3000&quot;</span>
+<span class="nt">REDIS_KEEPALIVE_IDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60000&quot;</span>
 <span class="nt">REDIS_KEEPALIVE_POOL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5&quot;</span>
 </code></pre></div>
 </div>
 </div>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Kubernetes 上的 Redis（由 scheduler 驱动的配置）</p>
+<p>在 Kubernetes 上，由 <strong>scheduler</strong> 读取设置并将生成的配置推送到 BunkerWeb 实例——实例不会从自身的
+Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code>settings.redis</code> 下配置 Redis，包括通过
+<code>settings.redis.redisSentinelHosts</code> 和 <code>settings.redis.redisSentinelMaster</code> 配置 Sentinel（chart ≥ v1.0.21）。
+对于没有专用 chart 键的任何设置，请使用 <code>scheduler.extraEnvs</code>。仅在 <code>bunkerweb.extraEnvs</code> 上设置它们将<strong>不起作用</strong>。</p>
 </div>
 <h3 id="redis_1">Redis 最佳实践</h3>
 <p>在使用 Redis 或 Valkey 与 BunkerWeb 时，请考虑以下最佳实践以确保最佳性能、安全性和可靠性：</p>
@@ -14456,7 +14625,7 @@ TrustedMonitor/\d+\.\d+
 <h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#wildcard-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
-<p>Adds wildcard server_name support (*.domain) for services.</p>
+<p>Adds wildcard server_name support (*.domain) for services, and serves the matching certificate to all sub-domains.</p>
 <table>
 <thead>
 <tr>
