@@ -909,7 +909,10 @@
       "status": {
         "deactivated": "Ang plugin ay hindi aktibo; kaya naman, walang available na impormasyon.",
         "metrics_deactivated": "Ang Metrics plugin ay hindi aktibo; kaya naman, walang available na impormasyon.",
-        "not_available": "Ang pahina ng plugin ay hindi pa available sa panahon ng beta phase."
+        "not_available": "Ang pahina ng plugin ay hindi pa available sa panahon ng beta phase.",
+        "pre_render_error": "Error sa pre-rendering",
+        "no_content": "Ang plugin na ito ay hindi nagbibigay ng naka-embed na pahina.",
+        "dedicated_page_unavailable": "Ang plugin na ito ay pinamamahalaan sa isang dedicated na pahina na hindi pa naka-load. I-restart ang web UI upang ma-access ito."
       }
     },
     "type": {
