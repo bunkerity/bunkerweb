@@ -73,7 +73,7 @@ def login_page():
                 "email": current_user.email,
                 "totp_secret": current_user.totp_secret,
                 "method": current_user.method,
-                "theme": request.form.get("theme", "light"),
+                "theme": current_user.theme,
                 "language": request.form.get("language", "en"),
             }
 
