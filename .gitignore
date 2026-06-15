@@ -14,6 +14,11 @@ docs/package-lock.json
 .pytest_cache/
 .env
 .venv/
+.venv-unit/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 /package*.json
 src/ui/client/static
 src/ui/client/templates

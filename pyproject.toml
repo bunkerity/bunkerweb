@@ -17,3 +17,18 @@ exclude = '''
   | env
 )/
 '''
+
+[tool.pytest.ini_options]
+minversion = "8.4"
+testpaths = ["tests/unit"]
+addopts = "-ra --strict-markers"
+markers = [
+    "sqlite: test exercises the SQLite engine",
+    "postgresql: test exercises PostgreSQL",
+    "mariadb: test exercises MariaDB",
+    "multiengine: parametrized across all selected DB engines",
+    "slow: heavier tests (init_tables / large seeds); deselect with -m 'not slow'",
+]
+filterwarnings = [
+    "ignore::sqlalchemy.exc.SAWarning",
+]

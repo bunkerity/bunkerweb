@@ -1,0 +1,33 @@
+# Unit-test dependencies for tests/unit/ (DB-layer milestone 1).
+#
+# Install into a dedicated venv — the repo's runtime deps are NOT installed
+# locally (src/deps/python/ is empty; they are baked into the containers):
+#   python3 -m venv .venv-unit
+#   .venv-unit/bin/pip install -r tests/unit/requirements.txt
+#
+# DB libraries under test — pinned to match src/common/db/requirements.in so the
+# tests run the exact library versions BunkerWeb ships.
+SQLAlchemy==2.0.50
+PyMySQL==1.2.0
+psycopg[binary,pool]==3.3.4
+cryptography==48.0.0
+
+# UI-layer import deps: importing UIDatabase pulls app.utils + app.models.models,
+# which require Flask/bcrypt/etc. Pinned to src/ui/requirements.txt.
+bcrypt==5.0.0
+defusedcsv==3.0.0
+flask==3.1.3
+flask-login==0.6.3
+regex==2026.5.9
+requests==2.34.2
+pydantic==2.13.4
+# gen/Templator import (jinja2) + scheduler/JobScheduler import (schedule). Pinned to src.
+jinja2==3.1.6
+schedule==1.2.2
+
+# Test framework. pytest pinned to the version used by the e2e repo
+# (~/dev/bunkerweb-tests). pytest-randomly surfaces inter-test state leakage.
+pytest==8.4.2
+pytest-cov==6.0.0
+pytest-mock==3.14.0
+pytest-randomly==3.16.0
