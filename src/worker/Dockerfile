@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40 AS builder
+FROM python:3.13-alpine@sha256:db66119d6609a3a941a9433b225f4e13d33c459cede097cf3ec2fc4d1bd314b2 AS builder
 
 ARG TARGETPLATFORM
 
@@ -31,7 +31,7 @@ COPY src/common/utils utils
 COPY src/worker worker
 COPY src/VERSION VERSION
 
-FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40
+FROM python:3.13-alpine@sha256:db66119d6609a3a941a9433b225f4e13d33c459cede097cf3ec2fc4d1bd314b2
 
 RUN umask 027
 
