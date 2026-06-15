@@ -2059,7 +2059,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 | Opción                  | Descripción                                                                                             |
 | :---------------------- | :------------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.12~rc2`).                                       |
+| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.12~rc2`).                                   |
 | `-w, --enable-wizard`   | Habilita el asistente de configuración.                                                                 |
 | `-n, --no-wizard`       | Deshabilita el asistente de configuración.                                                              |
 | `-y, --yes`             | Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas.       |
@@ -2807,6 +2807,26 @@ para configuraciones personalizadas.
 Para una configuración óptima, se recomienda definir BunkerWeb como un **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**, lo que asegura que se cree un pod en todos los nodos, mientras que la **autoconfiguración y el programador** se definen como un **único [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) replicado**.
 
 Dada la presencia de múltiples instancias de BunkerWeb, es necesario establecer un almacén de datos compartido implementado como un servicio de [Redis](https://redis.io/) o [Valkey](https://valkey.io/). Este servicio será utilizado por las instancias para almacenar en caché y compartir datos entre ellas. Se puede encontrar más información sobre la configuración de Redis/Valkey [aquí](features.md#redis).
+
+!!! info "Dónde colocar los ajustes de Redis (configuración gestionada por el scheduler)"
+    En Kubernetes, el **scheduler** lee los ajustes y genera la configuración que envía a las
+    instancias de BunkerWeb; las instancias no leen los ajustes de Redis desde su propio entorno de
+    pod. Con el chart de Helm, configure Redis bajo `settings.redis` —incluido Redis Sentinel mediante
+    `settings.redis.redisSentinelHosts` y `settings.redis.redisSentinelMaster` (chart ≥ v1.0.21)— o en
+    `scheduler.extraEnvs` para cualquier ajuste sin clave dedicada. Con Sentinel, `REDIS_HOST` **no**
+    es necesario (el maestro se resuelve a través de los Sentinels). Definirlos solo en
+    `bunkerweb.extraEnvs` no tiene ningún efecto.
+
+    ```yaml
+    redis:
+      enabled: false        # clúster Redis/Sentinel externo
+    settings:
+      redis:
+        useRedis: "yes"
+        redisSentinelHosts: "redis-node-01.redis:26379 redis-node-02.redis:26379 redis-node-03.redis:26379"
+        redisSentinelMaster: "mymaster"
+        # redisPassword / redisSentinelPassword si su maestro/sentinels requieren auth
+    ```
 
 !!! info "Backend de la base de datos"
     Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.12-rc2/misc/integrations) del repositorio para obtener más información.

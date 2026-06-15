@@ -2058,7 +2058,7 @@ sudo ./install-bunkerweb.sh
 
 | 选项                    | 描述                                                            |
 | ----------------------- | --------------------------------------------------------------- |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.12~rc2`）。                  |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.12~rc2`）。              |
 | `-w, --enable-wizard`   | 启用设置向导。                                                  |
 | `-n, --no-wizard`       | 禁用设置向导。                                                  |
 | `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。                      |
@@ -2805,6 +2805,24 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 为了获得最佳设置，建议将 BunkerWeb 定义为一个 **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**，这样可以确保在所有节点上都创建一个 pod，而将 **autoconf 和 scheduler** 定义为**单个副本的 [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**。
 
 鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见[此处](features.md#redis)。
+
+!!! info "Redis 设置应放在哪里（由 scheduler 驱动的配置）"
+    在 Kubernetes 上，由 **scheduler** 读取设置并生成配置，再推送到 BunkerWeb 实例；实例不会从自身的
+    Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 `settings.redis` 下配置 Redis——包括通过
+    `settings.redis.redisSentinelHosts` 和 `settings.redis.redisSentinelMaster` 配置 Redis Sentinel
+    （chart ≥ v1.0.21）——或对没有专用键的任何设置使用 `scheduler.extraEnvs`。使用 Sentinel 时**无需**
+    `REDIS_HOST`（主节点通过 Sentinels 解析）。仅在 `bunkerweb.extraEnvs` 上设置它们将不起作用。
+
+    ```yaml
+    redis:
+      enabled: false        # 外部 Redis/Sentinel 集群
+    settings:
+      redis:
+        useRedis: "yes"
+        redisSentinelHosts: "redis-node-01.redis:26379 redis-node-02.redis:26379 redis-node-03.redis:26379"
+        redisSentinelMaster: "mymaster"
+        # 如主节点/哨兵需要鉴权，请设置 redisPassword / redisSentinelPassword
+    ```
 
 !!! info "数据库后端"
     请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.12-rc2/misc/integrations)中的 docker-compose 文件。
