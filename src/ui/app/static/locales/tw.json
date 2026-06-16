@@ -610,6 +610,8 @@
     "easter_egg": "如果你讀到這條訊息，表示你很好奇 👀",
     "error": "錯誤",
     "message": "訊息",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "您的服務數量超出了 PRO 授權允許的範圍。請升級授權，或將部分服務轉換為草稿模式以解鎖您的 PRO 授權。",
     "time": {
       "just_now": "剛才"
     },

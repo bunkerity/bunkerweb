@@ -610,6 +610,8 @@
     "easter_egg": "Kung nabasa mo ito, ibig sabihin ay mausisa ka 👀",
     "error": "Error",
     "message": "Impormasyon",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "Mayroon kang higit pang serbisyo kaysa sa pinapayagan ng iyong PRO license. I-upgrade ang iyong license o ilipat ang ilang serbisyo sa Draft mode upang i-unlock ang iyong PRO license.",
     "time": {
       "just_now": "ngayon lang"
     },

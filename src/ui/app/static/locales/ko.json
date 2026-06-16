@@ -610,6 +610,8 @@
     "easter_egg": "이 글을 보고 계신다면 호기심이 많으시군요! 👀",
     "error": "오류",
     "message": "정보",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "PRO 라이선스에서 허용하는 것보다 많은 서비스가 있습니다. 라이선스를 업그레이드하거나 일부 서비스를 초안(Draft) 모드로 전환하여 PRO 라이선스를 활성화하세요.",
     "time": {
       "just_now": "방금 전"
     },

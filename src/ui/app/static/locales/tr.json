@@ -610,6 +610,8 @@
     "easter_egg": "Bunu okuyorsan meraklısın demektir 👀",
     "error": "Hata",
     "message": "Bilgi",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "PRO lisansınızın izin verdiğinden daha fazla servise sahipsiniz. Lisansınızı yükseltin veya PRO lisansınızı açmak için bazı servisleri Taslak moduna dönüştürün.",
     "time": {
       "just_now": "az önce"
     },
