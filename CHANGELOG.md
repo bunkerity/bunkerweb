@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.12~rc2 - 2026/??/??
+## v1.6.12~rc3 - 2026/??/??
+
+- [BUGFIX] `api`: a malformed `API_ALLOWED_HOSTS` wildcard (e.g. `foo.*.com`) no longer bricks the API on every request — the patterns are now validated at startup and a bad entry is logged and skipped, instead of tripping Starlette's `TrustedHostMiddleware` assertion lazily on the first request (which the `add_middleware` `try`/`except` could not catch) or being silently accepted under `python -O`.
+
+## v1.6.12~rc2 - 2026/06/16
 
 - [SECURITY] `api`: build the Biscuit auth token through the parameter API so the Host header, client IP and username are bound as typed terms and cannot inject signed Datalog facts (token issuance and verification); a malicious `Host` header is now an inert `domain` string rather than escapable Datalog. Adds an opt-in `API_ALLOWED_HOSTS` TrustedHost allowlist.
 - [SECURITY] `ui`: fix session fixation on login (CWE-384) — `session.clear()` ran before the session-id regeneration, and `flask-session` only rotates a non-empty session, so the id never changed across the authentication boundary and a pre-planted session id could be reused post-login. The id is now rotated on every login (the new state is seeded before regeneration).

@@ -23,6 +23,7 @@ from .routers.core import router as core_router
 from .utils import LOGGER
 from .rate_limit import setup_rate_limiter, limiter_dep_dynamic
 from .config import api_config
+from .host_allowlist import invalid_host_patterns
 
 BUNKERWEB_VERSION = get_version()
 
@@ -99,14 +100,17 @@ def create_app() -> FastAPI:
         internal_host = api_config.internal_api_host_header
         if internal_host and internal_host not in allowed_hosts:
             allowed_hosts = [*allowed_hosts, internal_host]
-        # A malformed entry (e.g. a wildcard not of the form "*.domain") makes Starlette raise
-        # at startup. Guard so a misconfigured allowlist logs an error and is skipped rather
-        # than preventing the API from booting.
-        try:
-            app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
-            LOGGER.info(f"API Host header allowlist enabled: {allowed_hosts}")
-        except Exception:
-            LOGGER.error(f"Invalid API_ALLOWED_HOSTS {allowed_hosts!r}, host allowlist NOT enabled: {format_exc()}")
+        # Validate wildcards ourselves: Starlette's assert runs lazily on first request (a
+        # try/except around add_middleware can't catch it) and is stripped under -O.
+        bad_hosts = invalid_host_patterns(allowed_hosts)
+        if bad_hosts:
+            LOGGER.error(f"Invalid API_ALLOWED_HOSTS entries {bad_hosts!r} (wildcards must be like '*.example.com'); host allowlist NOT enabled")
+        else:
+            try:
+                app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+                LOGGER.info(f"API Host header allowlist enabled: {allowed_hosts}")
+            except Exception:
+                LOGGER.error(f"Invalid API_ALLOWED_HOSTS {allowed_hosts!r}, host allowlist NOT enabled: {format_exc()}")
 
     # Rate limiter (optional, safe if disabled)
     setup_rate_limiter(app)
