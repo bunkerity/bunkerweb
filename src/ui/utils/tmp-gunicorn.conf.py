@@ -7,7 +7,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import handle_docker_secrets  # type: ignore
+from common_utils import getenv_bool, handle_docker_secrets  # type: ignore
 from logger import getLogger, log_types  # type: ignore
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
@@ -29,7 +29,7 @@ FORWARDED_ALLOW_IPS = getenv(
 )
 PROXY_ALLOW_IPS = getenv("UI_PROXY_ALLOW_IPS", getenv("PROXY_ALLOW_IPS", FORWARDED_ALLOW_IPS))
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
-DEBUG = getenv("DEBUG", False)
+DEBUG = getenv_bool("DEBUG")
 
 if CAPTURE_OUTPUT or "file" in log_types:
     errorlog = getenv("LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "tmp-ui.log"))

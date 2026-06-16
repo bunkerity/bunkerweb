@@ -23,20 +23,20 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | Ajuste                    | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                             |
 | ------------------------- | ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `USE_REDIS`               | `no`              | global   | no       | **Habilitar Redis:** Establezca en `yes` para habilitar la integración de Redis/Valkey para el modo de clúster.         |
-| `REDIS_HOST`              |                   | global   | no       | **Servidor Redis/Valkey:** Dirección IP o nombre de host del servidor Redis/Valkey.                                     |
+| `REDIS_HOST`              |                   | global   | no       | **Servidor Redis/Valkey:** Dirección IP o nombre de host del servidor Redis/Valkey. No es necesario cuando `REDIS_SENTINEL_HOSTS` está definido (el maestro se resuelve a través de los Sentinels). |
 | `REDIS_PORT`              | `6379`            | global   | no       | **Puerto Redis/Valkey:** Número de puerto del servidor Redis/Valkey.                                                    |
 | `REDIS_DATABASE`          | `0`               | global   | no       | **Base de datos Redis/Valkey:** Número de base de datos a utilizar en el servidor Redis/Valkey (0-15).                  |
 | `REDIS_SSL`               | `no`              | global   | no       | **SSL de Redis/Valkey:** Establezca en `yes` para habilitar el cifrado SSL/TLS para la conexión de Redis/Valkey.        |
 | `REDIS_SSL_VERIFY`        | `yes`             | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.  |
-| `REDIS_TIMEOUT`           | `5`               | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de la conexión en segundos para las operaciones de Redis/Valkey. |
+| `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey. |
 | `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).            |
 | `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                       |
 | `REDIS_SENTINEL_HOSTS`    |                   | global   | no       | **Hosts de Sentinel:** Lista de hosts de Redis Sentinel separados por espacios (nombredehost:puerto).                   |
 | `REDIS_SENTINEL_USERNAME` |                   | global   | no       | **Nombre de usuario de Sentinel:** Nombre de usuario para la autenticación de Redis Sentinel.                           |
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                      |
-| `REDIS_KEEPALIVE_IDLE`    | `300`             | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo (en segundos) entre las sondas TCP keepalive para conexiones inactivas.  |
-| `REDIS_KEEPALIVE_POOL`    | `3`               | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
+| `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. |
+| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
     Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
@@ -87,6 +87,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 
     ```yaml
     USE_REDIS: "yes"
+    # REDIS_HOST no es necesario: el maestro se resuelve a través de los Sentinels
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
     REDIS_SENTINEL_MASTER: "mymaster"
     REDIS_SENTINEL_PASSWORD: "sentinel-password"
@@ -103,10 +104,18 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     REDIS_PORT: "6379"
     REDIS_PASSWORD: "your-strong-password"
     REDIS_DATABASE: "3"
-    REDIS_TIMEOUT: "3"
-    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_TIMEOUT: "3000"
+    REDIS_KEEPALIVE_IDLE: "60000"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+!!! info "Redis en Kubernetes (configuración gestionada por el scheduler)"
+    En Kubernetes, el **scheduler** lee los ajustes y envía la configuración generada a las instancias
+    de BunkerWeb; las instancias no leen estos ajustes de Redis desde su propio entorno de pod. Con el
+    chart de Helm oficial, configure Redis bajo `settings.redis`, incluido Sentinel mediante
+    `settings.redis.redisSentinelHosts` y `settings.redis.redisSentinelMaster` (chart ≥ v1.0.21). Para
+    cualquier ajuste sin una clave dedicada en el chart, use `scheduler.extraEnvs`. Definirlos solo en
+    `bunkerweb.extraEnvs` no tiene **ningún efecto**.
 
 ### Mejores Prácticas de Redis
 

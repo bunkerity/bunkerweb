@@ -135,7 +135,7 @@ static int carith_ptr(lua_State *L, CTState *cts, CDArith *ca, MMS mm)
       return 0;
     lj_cconv_ct_ct(cts, ctype_get(cts, CTID_INT_PSZ), ca->ct[1],
 		   (uint8_t *)&idx, ca->p[1], 0);
-    if (mm == MM_sub) idx = -idx;
+    if (mm == MM_sub) idx = (ptrdiff_t)(~(uintptr_t)idx+1u);
   } else if (mm == MM_add && ctype_isnum(ctp->info) &&
       (ctype_isptr(ca->ct[1]->info) || ctype_isrefarray(ca->ct[1]->info))) {
     /* Swap pointer and index. */

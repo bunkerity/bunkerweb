@@ -9,7 +9,9 @@ local nginx_aux = require("resty.openssl.auxiliary.nginx")
 local x509_lib = require("resty.openssl.x509")
 local chain_lib = require("resty.openssl.x509.chain")
 local stack_lib = require("resty.openssl.stack")
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local version = require("resty.openssl.version")
+local OPENSSL_3_UP = version.OPENSSL_3_UP
+local OPENSSL_4X = version.OPENSSL_4X
 local format_error = require("resty.openssl.err").format_error
 
 local _M = {
@@ -109,7 +111,7 @@ end
 
 function _M:get_peer_certificate()
   local x509
-  if OPENSSL_3X then
+  if OPENSSL_3_UP then
     x509 = C.SSL_get1_peer_certificate(self.ctx)
   else
     x509 = C.SSL_get_peer_certificate(self.ctx)
@@ -299,12 +301,14 @@ function _M:clear_options(...)
 end
 
 local valid_protocols = {
-  ["SSLv3"] = ops.SSL_OP_NO_SSLv3,
   ["TLSv1"] = ops.SSL_OP_NO_TLSv1,
   ["TLSv1.1"] = ops.SSL_OP_NO_TLSv1_1,
   ["TLSv1.2"] = ops.SSL_OP_NO_TLSv1_2,
   ["TLSv1.3"] = ops.SSL_OP_NO_TLSv1_3,
 }
+if not OPENSSL_4X then
+  valid_protocols["SSLv3"] = ops.SSL_OP_NO_SSLv3
+end
 local any_tlsv1 = ops.SSL_OP_NO_TLSv1_1 + ops.SSL_OP_NO_TLSv1_2 + ops.SSL_OP_NO_TLSv1_3
 
 function _M:set_protocols(...)

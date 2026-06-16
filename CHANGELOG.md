@@ -1,6 +1,24 @@
 # Changelog
 
-## v1.6.12~rc1 - 2026/??/??
+## v1.6.12~rc2 - 2026/??/??
+
+- [SECURITY] `api`: build the Biscuit auth token through the parameter API so the Host header, client IP and username are bound as typed terms and cannot inject signed Datalog facts (token issuance and verification); a malicious `Host` header is now an inert `domain` string rather than escapable Datalog. Adds an opt-in `API_ALLOWED_HOSTS` TrustedHost allowlist.
+- [SECURITY] `ui`: fix session fixation on login (CWE-384) — `session.clear()` ran before the session-id regeneration, and `flask-session` only rotates a non-empty session, so the id never changed across the authentication boundary and a pre-planted session id could be reused post-login. The id is now rotated on every login (the new state is seeded before regeneration).
+- [SECURITY] `ui`: fix an open redirect via the post-login `next` parameter (CWE-601) — `/..//host` (and `/.//host`, `/\host`, and percent-encoded variants) normalized to a protocol-relative URL in the browser and navigated cross-origin. `_sanitize_internal_next` now rejects protocol-relative, backslash, scheme and `.`/`..` path-segment values on both the raw and once-decoded forms, and `loading.js`/`unauthorized.js` collapse leading slashes and enforce same-origin before navigating.
+- [SECURITY] `ui`: a password change now revokes the user's other active sessions (previously only the current session was ended), so a parallel or stolen session cannot outlive the credential it was authenticated with.
+- [SECURITY] `ui`: cache routes no longer bypass Biscuit authorization — `POST /cache/delete` is now evaluated as a write operation, so a non-admin (`reader`) role can no longer purge the job cache (read access to cache views is unchanged).
+- [SECURITY] `ui`: validate the instance hostname as a real IPv4/IPv6 literal (stdlib `ipaddress`) or DNS hostname instead of a permissive character blocklist that accepted `;`, `@`, `%` and other metacharacters; ban scope is clamped to `global`/`service`.
+- [BUGFIX] `ui`: bound `REVOKED_SESSIONS` growth — the revoked-session set is now a TTL-pruned map (retained only for the maximum session lifetime) and is persisted across workers from the password-change/wipe paths, instead of an ever-growing list.
+- [BUGFIX] `database`: fix 1.6.12~rc1 regression that reset UI/API-saved settings to defaults on scheduler restart — the scheduler now overrides `method=ui`/`api` rows only for settings explicitly declared in `variables.env` / the container environment (per-service via the service-prefixed key). Affected installs can restore lost settings with `bwcli plugin backup restore`.
+- [BUGFIX] `ssl`: `SSL_ECDH_CURVE=auto` no longer emits `X25519` on FIPS OpenSSL (NGINX failed to start with `group 'X25519' cannot be set`, blocking the Setup Wizard). Auto-detection now probes the same `SSL_CTX_set1_groups_list` call NGINX makes, falls back to FIPS-approved `prime256v1:secp384r1`, and the internal API listener honors `SSL_ECDH_CURVE` instead of a hardcoded curve.
+- [BUGFIX] `autoconf`: re-check service labels when the set of valid settings changes (e.g. a valid PRO license installs PRO plugins, or an external plugin is added) — labels referencing a not-yet-valid setting were dropped and never re-applied until an unrelated label change or restart. A background worker now re-applies on settings change (interval via `AUTOCONF_SETTINGS_RECHECK_INTERVAL`, default `300`s, `0` disables).
+- [DEPS] Updated LuaJIT version to v2.1-20260606
+- [DEPS] Updated lua-resty-openssl version to v1.8.0
+- [CONTRIBUTION] Thank you [Cleverguns](https://github.com/Cleverguns) for your contribution regarding the `Filipino (Tagalog)` translation of the web UI. (#3607)
+- [CONTRIBUTION] Thank you [ray910408](https://github.com/ray910408) for your contribution regarding the refresh of the `src/deps` npm build-tool dependencies. (#3623)
+- [CONTRIBUTION] Thank you [immanuwell](https://github.com/immanuwell) for your contribution regarding parsing the `DEBUG` environment variable as a boolean in the `Gunicorn` configuration (UI and API), so a string value no longer always enables debug logging. (#3589)
+
+## v1.6.12~rc1 - 2026/06/03
 
 - [SECURITY] `antibot`: Cap.js `script-src` now uses a strict per-request nonce (no more `'unsafe-inline'`); every challenge response also sends `Cache-Control: no-store`. Requires Cap.js widget `0.1.48`+.
 - [SECURITY] `letsencrypt` (UI): harden delete + new heal flow — per-request scratch dir, `fcntl.flock`, `.`/`..` rejected in `cert_name`, DOMPurify + `markupsafe.escape` at every HTML sink, 500 on persistence failure; new `/letsencrypt/{orphans,accounts,cache-status,heal}` endpoints, per-row Heal button, sidebar orphan toast.

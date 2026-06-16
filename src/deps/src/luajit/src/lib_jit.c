@@ -793,7 +793,7 @@ static void jit_init(lua_State *L)
 #if LJ_TARGET_UNALIGNED
   G(L)->tmptv.u64 = U64x(0000504d,4d500000);
 #endif
-  lj_dispatch_update(G(L));
+  lj_dispatch_update(G(L), 0);
 #if LJ_TARGET_UNALIGNED
   /* If you get a crash below then your toolchain indicates unaligned
   ** accesses are OK, but your kernel disagrees. I.e. fix your toolchain.

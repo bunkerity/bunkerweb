@@ -1,6 +1,6 @@
 # lua-resty-openssl
 
-FFI-based OpenSSL binding for LuaJIT, supporting OpenSSL 3.x, 1.1 series.
+FFI-based OpenSSL binding for LuaJIT, supporting OpenSSL 3, 4 and the 1.1.1 series.
 
 OpenSSL 1.1.0, 1.0.2 and BoringSSL support has been dropped, but are still available at the [0.x branch](https://github.com/fffonion/lua-resty-openssl/tree/0.x).
 
@@ -41,6 +41,8 @@ Table of Contents
     + [version.version](#versionversion)
     + [version.info](#versioninfo)
     + [version.OPENSSL_3X](#versionOPENSSL_3X)
+    + [version.OPENSSL_4X](#versionOPENSSL_4X)
+    + [version.OPENSSL_3_UP](#versionOPENSSL_3_UP)
     + [version.OPENSSL_111](#versionopenssl_111)
   * [resty.openssl.provider](#restyopensslprovider)
     + [provider.load](#providerload)
@@ -308,7 +310,7 @@ Description
 ===========
 
 `lua-resty-openssl` is a FFI-based OpenSSL binding library, currently
-supports OpenSSL `3.x` and `1.1.1` series.
+supports OpenSSL `3.x`, `4.x` and the `1.1.1` series.
 
 [Back to TOC](#table-of-contents)
 
@@ -320,16 +322,16 @@ Production.
 Synopsis
 ========
 
-This library is greatly inspired by [luaossl](https://github.com/wahern/luaossl), while uses the
+This library is greatly inspired by [luaossl](https://github.com/wahern/luaossl), and uses a
 naming conversion closer to original OpenSSL API.
-For example, a function called `X509_set_pubkey` in OpenSSL C API will expect to exist
+For example, a function called `X509_set_pubkey` in OpenSSL C API is exposed
 as `resty.openssl.x509:set_pubkey`.
-*CamelCase*s are replaced to *underscore_case*s, for exmaple `X509_set_serialNumber` becomes
+*CamelCase*s are replaced to *underscore_case*s, for example `X509_set_serialNumber` becomes
 `resty.openssl.x509:set_serial_number`. Another difference than `luaossl` is that errors are never thrown
 using `error()` but instead return as last parameter.
 
-Each Lua table returned by `new()` contains a cdata object `ctx`. User are not supposed to manully setting
-`ffi.gc` or calling corresponding destructor of the `ctx` struct (like `*_free` functions).
+Each Lua table returned by `new()` contains a cdata object `ctx`. Users are not supposed to manually set
+`ffi.gc` or call the corresponding destructor of the `ctx` struct (like `*_free` functions).
 
 [Back to TOC](#table-of-contents)
 
@@ -343,9 +345,9 @@ This meta module provides a version sanity check against linked OpenSSL library.
 
 **syntax**: *name, err = openssl.load_library()*
 
-Try to load OpenSSL shared libraries. This function tries couple of known patterns
-the library could be named and return the name of `crypto` library if it's being
-successfully loaded and error if any.
+Try to load OpenSSL shared libraries. This function tries a couple of known
+library name patterns and returns the name of the `crypto` library when it is
+successfully loaded, or an error if any.
 
 When running inside `resty` CLI or OpenResty with SSL enabled, calling this function
 is not necessary.
@@ -381,9 +383,8 @@ Load all available sub modules into current module:
   ssl_ctx = require("resty.openssl.ssl_ctx"),
 ```
 
-Starting OpenSSL 3.0, [`provider`](#restyopensslprovider) and [`mac`](#restyopensslmac)
-[`ctx`](#restyopensslctx)
-is also available.
+Starting with OpenSSL 3.0, [`provider`](#restyopensslprovider),
+[`mac`](#restyopensslmac), and [`ctx`](#restyopensslctx) are also available.
 
 [Back to TOC](#table-of-contents)
 
@@ -391,7 +392,7 @@ is also available.
 
 **syntax**: *openssl.luaossl_compat()*
 
-Provides `luaossl` flavored API which uses *camelCase* naming; user can expect drop in replacement.
+Provides `luaossl` flavored API which uses *camelCase* naming; users can expect a drop-in replacement.
 
 For example, `pkey:get_parameters` is mapped to `pkey:getParameters`.
 
@@ -419,22 +420,22 @@ lua-resty-openssl supports following modes:
 
 Compile the module per [security policy](https://www.openssl.org/docs/fips/SecurityPolicy-2.0.2.pdf),
 
-**OpenSSL 3.0.0 fips provider**
+**OpenSSL 3 FIPS provider**
 
 Refer to https://wiki.openssl.org/index.php/OpenSSL_3.0 Section 7
 Compile the provider per guide, install the fipsmodule.cnf that
 matches hash of FIPS provider fips.so.
 
-On OpenSSL 3.0 or later, this function also turns on and off default
+Starting with OpenSSL 3.0, this function also turns on and off default
 properties for EVP functions. When turned on, all applications using
 EVP_* API will be redirected to FIPS-compliant implementations and
 have no access to non-FIPS-compliant algorithms.
 
-Calling this function is equivalent of loading `fips` provider and
-call [openssl.set_default_properties("fips=yes")](#opensslset_default_properties).
+Calling this function is equivalent to loading the `fips` provider and
+calling [openssl.set_default_properties("fips=yes")](#opensslset_default_properties).
 
-If fips provider is loaded but default properties are not set, use following
-to explictly fetch FIPS implementation.
+If the FIPS provider is loaded but default properties are not set, use the following
+to explicitly fetch FIPS implementation.
 ```lua
 local provider = require "resty.openssl.provider"
 assert(provider.load("fips"))
@@ -451,7 +452,7 @@ print(c:get_provider_name()) -- prints "fips"
 
 **syntax**: *text, err = openssl.get_fips_version_text()*
 
-Returns the version text of the FIPS module, only available on OpenSSL 3.x.
+Returns the version text of the FIPS module, available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -505,7 +506,8 @@ hide provider name from the result.
 
 Return default SSL ciphers as a string. `cipher_list` (prior TLSv1.3) and
 `ciphersuites` (TLSv1.3) can be used to expand the cipher settings matches
-`protocol`.
+`protocol`. OpenSSL 4.x rejects `"SSLv3"` because SSLv3 support has been
+removed.
 
 ```lua
 openssl.list_ssl_ciphers()
@@ -537,7 +539,7 @@ The context is currently effective following modules:
 - [rand](#restyopensslrand)
 - [x509](#restyopensslx509), [x509.csr](#restyopensslx509csr), [x509.crl](#restyopensslx509crl) and some [x509.store](#restyopensslx509store) functions
 
-This module is only available on OpenSSL 3.0 or later.
+This module is available on OpenSSL 3.0 or later.
  
 [Back to TOC](#table-of-contents)
 
@@ -589,7 +591,7 @@ Return the latest error message from the last error code. Errors are formatted a
 
     [ctx_msg]: code: [return_code]: error:[error code]:[library name]:[func name]:[reason string]:[file name]:[line number]:
 
-On OpenSSL prior to 3.x, errors are formatted as:
+For OpenSSL versions prior to 3.0, errors are formatted as:
 
     [ctx_msg]: code: [return_code]: [file name]:[line number]:error:[error code]:[library name]:[func name]:[reason string]:
 
@@ -700,7 +702,10 @@ Returns various OpenSSL information. Available values for `types` are:
     INFO_SEED_SOURCE
     INFO_MODULES_DIR
 
-This function is only available on OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
+Information entries removed by the linked OpenSSL release return `nil`; for
+example, `INFO_ENGINES_DIR` returns `nil` on OpenSSL 4.0 because engine support
+has been removed.
 Please refer to
 [OPENSSL_VERSION_NUMBER(3)](https://www.openssl.org/docs/manmaster/man3/OPENSSL_VERSION_NUMBER.html)
 for explanation of each type.
@@ -719,6 +724,20 @@ A boolean indicates whether the linked OpenSSL is 3.x series.
 
 [Back to TOC](#table-of-contents)
 
+### version.OPENSSL_4X
+
+A boolean indicates whether the linked OpenSSL is 4.x series.
+
+[Back to TOC](#table-of-contents)
+
+### version.OPENSSL_3_UP
+
+A boolean indicates whether the linked OpenSSL is OpenSSL 3.0 or later.
+Use this when guarding APIs and symbols that exist on OpenSSL 3.0 or later.
+Use `OPENSSL_3X` or `OPENSSL_4X` for version-specific behavior.
+
+[Back to TOC](#table-of-contents)
+
 ### version.OPENSSL_111
 
 A boolean indicates whether the linked OpenSSL is 1.1.1 series.
@@ -727,7 +746,7 @@ A boolean indicates whether the linked OpenSSL is 1.1.1 series.
 
 ## resty.openssl.provider
 
-Module to interact with providers. This module only work on OpenSSL >= 3.0.0.
+Module to interact with providers. This module works only on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -740,7 +759,7 @@ fall-back providers if the provider cannot be loaded and initialized. If the pro
 loads successfully, however, the fall-back providers are disabled.
 
 By default this functions loads provider into the default context, meaning it will affect
-other applications in the same process using the default context as well. If such behaviour
+other applications in the same process using the default context as well. If such behavior
 is not desired, consider using [ctx](#restyopensslctx) to load
 provider only to limited scope.
 
@@ -804,7 +823,7 @@ print(name)
 
 local result = assert(p:get_params("name", "version", "buildinfo", "status"))
 print(require("cjson").encode(result))
--- outputs '{"buildinfo":"3.0.0-alpha7","name":"OpenSSL Default Provider","status":1,"version":"3.0.0"}'
+-- outputs provider metadata; version and buildinfo vary by OpenSSL release
 ```
 
 [Back to TOC](#table-of-contents)
@@ -839,21 +858,21 @@ processes like ECIES is possible with [pkey:derive](#pkeyderive),
 
 Supports loading a private or public key in PEM, DER or JWK format passed as first argument `string`.
 
-The second parameter `opts` accepts an optional table to constraint the behaviour of key loading.
+The second parameter `opts` accepts an optional table to constrain key-loading behavior.
 
-- `opts.format`: set explictly to `"PEM"`, `"DER"`, `"JWK"` to load specific format or set to `"*"` for auto detect
-- `opts.type`: set explictly to `"pr"` for privatekey, `"pu"` for public key; set to `"*"` for auto detect
+- `opts.format`: set explicitly to `"PEM"`, `"DER"`, `"JWK"` to load specific format or set to `"*"` for auto detect
+- `opts.type`: set explicitly to `"pr"` for private key, `"pu"` for public key; set to `"*"` for auto detect
 
 When loading a PEM encoded RSA key, it can either be a PKCS#8 encoded
 `SubjectPublicKeyInfo`/`PrivateKeyInfo` or a PKCS#1 encoded `RSAPublicKey`/`RSAPrivateKey`.
 
-When loading a encrypted PEM encoded key, the `passphrase` to decrypt it can either be set
+When loading an encrypted PEM encoded key, the `passphrase` to decrypt it can either be set
 in `opts.passphrase` or `opts.passphrase_cb`:
 
 ```lua
 pkey.new(pem_or_der_text, {
   format = "*", -- choice of "PEM", "DER", "JWK" or "*" for auto detect
-  type = "*", -- choice of "pr" for privatekey, "pu" for public key and "*" for auto detect
+  type = "*", -- choice of "pr" for private key, "pu" for public key and "*" for auto detect
   passphrase = "secret password", -- the PEM encryption passphrase
   passphrase_cb = function()
     return "secret password"
@@ -864,11 +883,12 @@ pkey.new(pem_or_der_text, {
 
 When loading JWK, there are couple of caveats:
 - Make sure the encoded JSON text is passed in, it must have been base64 decoded.
-- When using OpenSSL 1.1.1 or lua-resty-openssl earlier than 1.6.0, constraint `type`
-on JWK key is only supported on OpenSSL 3.x and lua-resty-openssl 1.6.0.
-Otherwise the parameters in provided JSON will decide if a private or public key is loaded, 
-specifying `type` will result in an error; also public key part for `OKP` keys (the `x` parameter)
-is not honored and derived from private key part (the `d` parameter) if it's specified.
+- Constraining `opts.type` for JWK keys requires OpenSSL 3.0 or later and
+lua-resty-openssl 1.6.0 or later. With OpenSSL 1.1.1 or older
+lua-resty-openssl releases, the parameters in the provided JSON will decide if
+a private or public key is loaded, specifying `type` will result in an error;
+also public key part for `OKP` keys (the `x` parameter) is not honored and
+derived from private key part (the `d` parameter) if it's specified.
 - Only key type of `RSA`, `P-256`, `P-384` and `P-512` `EC`,
 `Ed25519`, `X25519`, `Ed448` and `X448` `OKP` keys are supported.
 - Signatures and verification must use `ecdsa_use_raw` option to work with JWS standards
@@ -923,7 +943,7 @@ local key, err = pkey.new({
 ```
 
 It's also possible to pass raw pkeyopt control strings in `config` table as used in the `genpkey` CLI program.
-See [openssl-genpkey(1)](https://www.openssl.org/docs/man3.0/man1/openssl-genpkey.html) for a list of options.
+See [openssl-genpkey(1)](https://docs.openssl.org/master/man1/openssl-genpkey/) for a list of options.
 
 For example:
 
@@ -985,14 +1005,14 @@ For EC key:
  Parameter | Description
 -----------|-------------
 type | `"EC"`
-curve | EC curves. If omitted, default to `"prime192v1"`. To see list of supported EC curves, use `openssl ecparam -list_curves`.
+curve | EC curves. If omitted, defaults to `"prime192v1"`. To see list of supported EC curves, use `openssl ecparam -list_curves`.
 
 For DH key:
   
  Parameter | Description
 -----------|-------------
 type | `"DH"`
-bits | Generate a new DH parameter with `bits` long prime. If omitted, default to `2048`. Starting OpenSSL 3.0, only bits equal to 2048 is allowed.
+bits | Generate a new DH parameter with `bits` long prime. If omitted, defaults to `2048`. Starting with OpenSSL 3.0, only bits equal to 2048 is allowed.
 group | Use predefined groups instead of generating new one. `bit` will be ignored if `group` is set.
 
 Possible values for `group` are:
@@ -1015,7 +1035,7 @@ local pem, err = pkey.paramgen({
 ```
 
 It's also possible to pass raw pkeyopt control strings in `config` table as used in the `genpkey` CLI program.
-See [openssl-genpkey(1)](https://www.openssl.org/docs/man3.0/man1/openssl-genpkey.html) for a list of options.
+See [openssl-genpkey(1)](https://docs.openssl.org/master/man1/openssl-genpkey/) for a list of options.
 
 [Back to TOC](#table-of-contents)
 
@@ -1025,7 +1045,7 @@ See [openssl-genpkey(1)](https://www.openssl.org/docs/man3.0/man1/openssl-genpke
 
 Returns the provider name of `pkey`.
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -1181,7 +1201,7 @@ instance. The first parameter must be a [resty.openssl.digest](#restyopenssldige
 instance or a string. Returns the signed text and error if any.
 
 When passing a [digest](#restyopenssldigest) instance as first parameter, it should not
-have been called [final()](#digestfinal), user should only use [update()](#digestupdate).
+have been called [final()](#digestfinal); users should only use [update()](#digestupdate).
 This mode only supports RSA and EC keys.
 
 When passing a string as first parameter, `md_alg` parameter will specify the name
@@ -1224,8 +1244,8 @@ This is useful for example to send the signature as JWS.
 }
 ```
 
-It's also possible to pass raw pkeyopt control strings as used in the `pkeyutl` CLI program. This lets user pass in options that
-are not explictly supported as parameters above.
+It's also possible to pass raw pkeyopt control strings as used in the `pkeyutl` CLI program. This lets users pass in options that
+are not explicitly supported as parameters above.
 See [openssl-pkeyutl(1)](https://www.openssl.org/docs/manmaster/man1/openssl-pkeyutl.html) for a list of options.
 
 ```lua
@@ -1250,14 +1270,14 @@ To sign a message without doing message digest, please check [pkey:sign_raw](#pk
 
 **syntax**: *ok, err = pk:verify(signature, message, md_alg?, padding?, opts?)*
 
-Verify a signture (which can be the string returned by [pkey:sign](#pkey-sign)). The second
+Verify a signature (which can be the string returned by [pkey:sign](#pkey-sign)). The second
 argument must be a [resty.openssl.digest](#restyopenssldigest) instance that uses
-the same digest algorithm as used in `sign` or a string. `ok` returns `true` if verficiation is
-successful and `false` otherwise. Note when verfication failed `err` will not be set when used
+the same digest algorithm as used in `sign` or a string. `ok` returns `true` if verification is
+successful and `false` otherwise. Note when verification fails, `err` will not be set when used
 with OpenSSL 1.1.1 or lower.
 
 When passing [digest](#restyopenssldigest) instances as second parameter, it should not
-have been called [final()](#digestfinal), user should only use [update()](#digestupdate).
+have been called [final()](#digestfinal); users should only use [update()](#digestupdate).
 This mode only supports RSA and EC keys.
 
 When passing a string as second parameter, `md_alg` parameter will specify the name
@@ -1317,10 +1337,10 @@ To verify a message without doing message digest, please check [pkey:verify_raw]
 
 **syntax**: *cipher_txt, err = pk:encrypt(txt, padding?, opts?)*
 
-Encrypts plain text `txt` with `pkey` instance, which must loaded a public key.
+Encrypts plain text `txt` with a `pkey` instance, which must contain a public key.
 
 The optional second argument `padding` has same meaning as in [pkey:sign](#pkeysign).
-If omitted, `padding` is default to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
+If omitted, `padding` defaults to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
 
 The third optional argument `opts` has same meaning as in [pkey:sign](#pkeysign).
 
@@ -1331,10 +1351,10 @@ The third optional argument `opts` has same meaning as in [pkey:sign](#pkeysign)
 
 **syntax**: *txt, err = pk:decrypt(cipher_txt, padding?, opts?)*
 
-Decrypts cipher text `cipher_txt` with pkey instance, which must loaded a private key.
+Decrypts cipher text `cipher_txt` with a pkey instance, which must contain a private key.
 
 The optional second argument `padding` has same meaning as in [pkey:sign](#pkeysign).
-If omitted, `padding` is default to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
+If omitted, `padding` defaults to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
 
 The third optional argument `opts` has same meaning as in [pkey:sign](#pkeysign).
 
@@ -1357,16 +1377,16 @@ ngx.say(decrypted)
 
 **syntax**: *signature, err = pk:sign_raw(txt, padding?, opts?)*
 
-Signs the cipher text `cipher_txt` with pkey instance, which must loaded a private key.
+Signs the cipher text `cipher_txt` with a pkey instance, which must contain a private key.
 
 The optional second argument `padding` has same meaning as in [pkey:sign](#pkeysign).
-If omitted, `padding` is default to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
+If omitted, `padding` defaults to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
 
 The third optional argument `opts` has same meaning as in [pkey:sign](#pkeysign).
 
 This function may also be called "private encrypt" in some implementations like NodeJS or PHP.
-Do note as the function names suggested, this function is not secure to be regarded as an encryption.
-When developing new applications, user should use [pkey:sign](#pkeysign) for signing with digest, or 
+Note that despite the function name, this function is not secure enough to be regarded as encryption.
+When developing new applications, users should use [pkey:sign](#pkeysign) for signing with digest, or
 [pkey:encrypt](#pkeyencrypt) for encryption.
 
 See [examples/raw-sign-and-recover.lua](https://github.com/fffonion/lua-resty-openssl/blob/master/examples/raw-sign-and-recover.lua)
@@ -1378,13 +1398,14 @@ for an example.
 
 **syntax**: *ok, err = pk:verify_raw(signature, data, md_alg, padding?, opts?)*
 
-Verify the cipher text `signature` with the message `data` with pkey instance, which must loaded a public key. Set the message digest to `md_alg` but doesn't do message digest
-automatically, in other words, this function assumes `data` has already been hashed with `md_alg`.
+Verifies the cipher text `signature` with the message `data` using a pkey instance, which must contain a public key.
+It sets the message digest to `md_alg` but does not compute the message digest
+automatically; in other words, this function assumes `data` has already been hashed with `md_alg`.
 
 When `md_alg` is undefined, for RSA and EC keys, this function does SHA256 by default. For Ed25519 or Ed448 keys, no default value is set.
 
-The optinal fourth argument `padding` has same meaning as in [pkey:sign](#pkeysign).
-If omitted, `padding` is default to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
+The optional fourth argument `padding` has same meaning as in [pkey:sign](#pkeysign).
+If omitted, `padding` defaults to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
 
 The fifth optional argument `opts` has same meaning as in [pkey:sign](#pkeysign).
 
@@ -1397,11 +1418,11 @@ for an example.
 
 **syntax**: *txt, err = pk:verify_recover(signature, padding?, opts?)*
 
-Verify the cipher text `signature` with pkey instance, which must loaded a public key, and also
+Verifies the cipher text `signature` with a pkey instance, which must contain a public key, and also
 returns the original text being signed. This operation is only supported by RSA key.
 
 The optional second argument `padding` has same meaning as in [pkey:sign](#pkeysign).
-If omitted, `padding` is default to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
+If omitted, `padding` defaults to `pkey.PADDINGS.RSA_PKCS1_PADDING`.
 
 The third optional argument `opts` has same meaning as in [pkey:sign](#pkeysign).
 
@@ -1436,7 +1457,7 @@ If both arguments are omitted, this functions returns the `PEM` representation o
 
 If `is_pkcs1` is set to true, the output is encoded using a PKCS#1 RSAPublicKey structure;
 `PKCS#1` encoding is currently supported for RSA key in PEM format. Writing out a PKCS#1
-encoded RSA key is currently not supported when using with OpenSSL 3.0.
+encoded RSA key is currently not supported when using OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -1595,7 +1616,7 @@ ngx.say(dec)
 **syntax**: *n, err = bn:tonumber()*
 
 Export the lowest 32 bits or 64 bits part (based on the ABI) of `bn` instance
-to a number. This is useful when user wants to perform bitwise operations.
+to a number. This is useful when users want to perform bitwise operations.
 
 ```lua
 local bn = require("resty.openssl.bn")
@@ -1624,7 +1645,7 @@ The prime number generation has a negligible error probability.
 
 ### bn:__metamethods
 
-Various mathematical operations can be performed as if it's a number.
+Various mathematical operations can be performed as if it were a number.
 
 ```lua
 local bn = require("resty.openssl.bn")
@@ -1797,8 +1818,8 @@ To view a list of cipher algorithms implemented, use
 [openssl.list_cipher_algorithms](#openssllist_cipher_algorithms)
 or `openssl list -cipher-algorithms`
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -1820,7 +1841,7 @@ If you are expecting to pass input text larger than 1024 bytes at one time to `u
 or `decrypt()`, setting the buffer to larger than the expected input size will improve performance
 by let more code to be JIT-able.
 
-Avoid call this function at hotpath, as this re-allocate the buffer every time it's called.
+Avoid calling this function on the hot path, as this reallocates the buffer every time it is called.
 
 [Back to TOC](#table-of-contents)
 
@@ -1830,7 +1851,7 @@ Avoid call this function at hotpath, as this re-allocate the buffer every time i
 
 Returns the provider name of `cipher`.
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -1854,7 +1875,7 @@ block size or an error will occur.
 When using GCM or CCM mode or `chacha20-poly1305` cipher, it's also possible to pass
 the Additional Authenticated Data (AAD) as the fifth argument.
 
-This function is a shorthand of `cipher:init`, `cipher:set_aead_aad` (if appliable) then `cipher:final`.
+This function is a shorthand of `cipher:init`, `cipher:set_aead_aad` (if applicable) then `cipher:final`.
 
 [Back to TOC](#table-of-contents)
 
@@ -1868,12 +1889,12 @@ Optionally accepts a boolean `no_padding` which tells the cipher to enable or di
 to `false` (enable padding). If `no_padding` is `true`, the length of `s` must then be a multiple of the
 block size or an error will occur; also, padding in the decrypted text will not be removed.
 
-When using GCM or CCM mode or `chacha20-poly1305` cipher, it's also possible to pas
+When using GCM or CCM mode or `chacha20-poly1305` cipher, it's also possible to pass
 the Additional Authenticated Data (AAD) as the fifth argument and authentication tag
 as the sixth argument.
 
-This function is a shorthand of `cipher:init`, `cipher:set_aead_aad` (if appliable),
-`cipher:set_aead_tag` (if appliable) then `cipher:final`.
+This function is a shorthand of `cipher:init`, `cipher:set_aead_aad` (if applicable),
+`cipher:set_aead_tag` (if applicable) then `cipher:final`.
 
 [Back to TOC](#table-of-contents)
 
@@ -1980,8 +2001,8 @@ ngx.say(cipher)
 ```
 
 **Note:** in some implementations like `libsodium` or Java, AEAD ciphers append the `tag` (or `MAC`)
-at the end of encrypted ciphertext. In such case, user will need to manually cut off the `tag`
-with correct size(usually 16 bytes) and pass in the ciphertext and `tag` seperately.
+at the end of encrypted ciphertext. In such cases, users will need to manually cut off the `tag`
+with correct size(usually 16 bytes) and pass in the ciphertext and `tag` separately.
 
 See [examples/aes-gcm-aead.lua](https://github.com/fffonion/lua-resty-openssl/blob/master/examples/aes-gcm-aead.lua)
 for an example to use AEAD modes with authentication.
@@ -1992,16 +2013,16 @@ for an example to use AEAD modes with authentication.
 
 **syntax**: *key, iv, err = cipher:derive(key, salt?, count?, md?)*
 
-Derive a key and IV (if appliable) from given material that can be used in current cipher. This function
-is useful mainly to work with keys that were already derived from same algorithm. Newer applications should
+Derive a key and IV (if applicable) from given material that can be used in the current cipher. This function
+is useful mainly to work with keys that were already derived from the same algorithm. Newer applications should
 use a more modern algorithm such as PBKDF2 provided by [kdf.derive](#kdfderive).
 
-`count` is the iteration count to perform. If it's omitted, it's set to `1`. Note the recent version of
-`openssl enc` cli tool automatically use PBKDF2 if `-iter` is set to larger than 1,
+`count` is the iteration count to perform. If omitted, it is set to `1`. Note that recent versions of the
+`openssl enc` CLI tool automatically use PBKDF2 if `-iter` is set to larger than 1,
 while this function will not. To use PBKDF2 to derive a key, please refer to [kdf.derive](#kdfderive).
 
 `md` is the message digest name to use, it can take one of the values `md2`, `md5`, `sha` or `sha1`.
-If it's omitted, it's default to `sha1`.
+If omitted, it defaults to `sha1`.
 
 ```lua
 local cipher = require("resty.openssl.cipher").new("aes-128-cfb")
@@ -2026,11 +2047,11 @@ To view a list of digest algorithms implemented, use
 [openssl.list_digest_algorithms](#openssllist_digest_algorithms) or
 `openssl list -digest-algorithms`.
 
-If `digest_name` is omitted, it's default to `sha1`. Specially, the digest_name `"null"`
+If `digest_name` is omitted, it defaults to `sha1`. Specifically, the digest_name `"null"`
 represents a "null" message digest that does nothing: i.e. the hash it returns is of zero length.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -2048,7 +2069,7 @@ Returns `true` if table is an instance of `digest`. Returns `false` otherwise.
 
 Returns the provider name of `digest`.
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -2092,7 +2113,7 @@ ngx.say(ngx.encode_base64(digest))
 
 **syntax**: *ok, err = digest:reset()*
 
-Reset the internal state of `digest` instance as it's just created by [digest.new](#digestnew).
+Reset the internal state of a `digest` instance as if it had just been created by [digest.new](#digestnew).
 It calls [EVP_DigestInit_ex](https://www.openssl.org/docs/manmaster/man3/EVP_DigestInit_ex.html) under
 the hood.
 
@@ -2104,7 +2125,7 @@ User must call this before reusing the same `digest` instance.
 
 Module to interact with hash-based message authentication code (HMAC_CTX).
 
-Use of this module is deprecated since OpenSSL 3.0, please use [resty.openssl.mac](#restyopensslmac)
+This module is deprecated starting with OpenSSL 3.0; use [resty.openssl.mac](#restyopensslmac)
 instead.
 
 [Back to TOC](#table-of-contents)
@@ -2118,7 +2139,7 @@ To view a list of digest algorithms implemented, use
 [openssl.list_digest_algorithms](#openssllist_digest_algorithms) or
 `openssl list -digest-algorithms`.
 
-If `digest_name` is omitted, it's default to `sha1`.
+If `digest_name` is omitted, it defaults to `sha1`.
 
 [Back to TOC](#table-of-contents)
 
@@ -2163,7 +2184,7 @@ ngx.say(ngx.encode_base64(hmac))
 
 **syntax**: *ok, err = hmac:reset()*
 
-Reset the internal state of `hmac` instance as it's just created by [hmac.new](#hmacnew).
+Reset the internal state of an `hmac` instance as if it had just been created by [hmac.new](#hmacnew).
 It calls [HMAC_Init_ex](https://www.openssl.org/docs/manmaster/man3/HMAC_Init_ex.html) under
 the hood.
 
@@ -2196,7 +2217,7 @@ To view a list of digest algorithms implemented, use
 To view a list of digest algorithms implemented, use
 [openssl.list_digest_algorithms](#openssllist_digest_algorithms) or
 `openssl list -digest-algorithms`.
-`properties` parameter can be used to explictly select provider to fetch algorithms.
+`properties` parameter can be used to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -2214,7 +2235,7 @@ Returns `true` if table is an instance of `mac`. Returns `false` otherwise.
 
 Returns the provider name of `mac`.
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -2258,7 +2279,7 @@ ngx.say(ngx.encode_base64(mac))
 
 **syntax**: *ok, err = mac:reset()*
 
-Reset the internal state of `mac` instance as it's just created by [mac.new](#macnew).
+Reset the internal state of a `mac` instance as if it had just been created by [mac.new](#macnew).
 It calls [EVP_MAC_Init](https://www.openssl.org/docs/manmaster/man3/EVP_MAC_init.html) under
 the hood.
 
@@ -2274,7 +2295,7 @@ Module to interact with KDF (key derivation function).
 
 **syntax**: *key, err = kdf.derive(options)*
 
-Use of this module is deprecated since OpenSSL 3.0, please use [kdf.new](#kdfnew)
+This module is deprecated starting with OpenSSL 3.0; use [kdf.new](#kdfnew)
 instead.
 
 Derive a key from given material. Various KDFs are supported based on OpenSSL version:
@@ -2291,11 +2312,11 @@ Derive a key from given material. Various KDFs are supported based on OpenSSL ve
 | pass    | string | Initial key material to derive from | (empty string) |
 | salt    | string | Add some salt | (empty string) |
 | md    | string | Message digest method name to use, not effective for `scrypt` type | `"sha1"` |
-| properties | string | Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms. | |
+| properties | string | Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms. | |
 | pbkdf2_iter     | number | PBKDF2 iteration count. RFC 2898 suggests an iteration count of at least 1000. Any value less than 1 is treated as a single iteration.  | `1` |
 | hkdf_key     | string | HKDF key  | **required** |
-| hkdf_mode     | number | HKDF mode to use, one of `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`, `kdf.HKDEF_MODE_EXTRACT_ONLY` or `kdf.HKDEF_MODE_EXPAND_ONLY`. To learn about mode, please refer to [EVP_PKEY_CTX_set1_hkdf_key(3)](https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_CTX_set1_hkdf_key.html). Note with `kdf.HKDEF_MODE_EXTRACT_ONLY`, `outlen` is ignored and the output will be fixed size of `HMAC-<md>`.  | `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`|
+| hkdf_mode     | number | HKDF mode to use, one of `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`, `kdf.HKDEF_MODE_EXTRACT_ONLY` or `kdf.HKDEF_MODE_EXPAND_ONLY`. To learn about mode, please refer to [EVP_PKEY_CTX_set1_hkdf_key(3)](https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_CTX_set1_hkdf_key.html). Note with `kdf.HKDEF_MODE_EXTRACT_ONLY`, `outlen` is ignored and the output will be fixed size for `HMAC-<md>`.  | `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`|
 | hkdf_info     | string | HKDF info value  | (empty string) |
 | tls1_prf_secret     | string | TLS1-PRF secret  | **required** |
 | tls1_prf_seed     | string | TLS1-PRF seed  | **required** |
@@ -2339,10 +2360,10 @@ To view a list of kdf algorithms implemented, use
 [openssl.list_kdf_algorithms](#openssllist_kdf_algorithms) or
 `openssl list -kdf-algorithms`.
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 This function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -2352,7 +2373,7 @@ to explictly select provider to fetch algorithms.
 
 Returns `true` if table is an instance of `kdf`. Returns `false` otherwise.
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -2362,7 +2383,7 @@ This function is available since OpenSSL 3.0.
 
 Returns the provider name of `kdf`.
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -2371,7 +2392,7 @@ This function is available since OpenSSL 3.0.
 Query settable or gettable params and set or get params.
 See [Generic EVP parameter getter/setter](#generic-evp-parameter-gettersetter).
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -2385,7 +2406,7 @@ length of key where `outlen` should be unset.
 `options` is a table map holding parameters passing to `kdf`. To view the list of parameters
 acceptable by selecter algorithm and provider, use `kdf:settable_params`.
 
-Optionally, if length of `options` is known, user can provide its length through `options_count`
+Optionally, if the length of `options` is known, users can provide its length through `options_count`
 to gain better performance where `options` table is relatively large.
 
 ```lua
@@ -2399,7 +2420,7 @@ key = assert(k:derive(16, {
 ngx.say(ngx.encode_base64(key))
 -- outputs "cDRFLQ7NWt+AP4i0TdBzog=="
 assert(k:reset())
--- kdf instance is reusable, user can set common parameters
+-- kdf instance is reusable, users can set common parameters
 -- through set_params and don't need to repeat in derive()
 assert(k:set_params({
     iter = 1000,
@@ -2424,7 +2445,7 @@ key = assert(k:derive(16, {
 }))
 ```
 
-This function is available since OpenSSL 3.0.
+This function is available on OpenSSL 3.0 or later.
 
 [Back to TOC](#table-of-contents)
 
@@ -2432,7 +2453,7 @@ This function is available since OpenSSL 3.0.
 
 **syntax**: *ok, err = kdf:reset()*
 
-Reset the internal state of `kdf` instance as it's just created by [kdf.new](#kdfnew).
+Reset the internal state of a `kdf` instance as if it had just been created by [kdf.new](#kdfnew).
 
 User must call this before reusing the same `kdf` instance.
 
@@ -2498,17 +2519,17 @@ Encode data in `data` to a PKCS#12 text.
 | cert   | [x509](#restyopensslx509) | Certificate | **required** |
 | cacerts   | A list of [x509](#restyopensslx509) as Lua table | Additional certificates | `[]` |
 | friendly_name | string | The name used for the supplied certificate and key | `""` |
-| nid_key | number or string | The [NID] or text to specify algorithm to encrypt key | `"PBE-SHA1-RC2-4"` if compiled with RC2, otherwise `"PBE-SHA1-3DES"`; on OpenSSL 3.0 and later `PBES2 with PBKDF2 and AES-256-CBC`. |
-| nid_cert | number or string | The [NID] or text to specify algorithm to encrypt cert | `"PBE-SHA1-3DES"`; on OpenSSL 3.0 and later `PBES2 with PBKDF2 and AES-256-CBC` |
-| iter | number | Key iterration count | `PKCS12_DEFAULT_ITER` (2048) |
-| mac_iter | number | MAC iterration count | 1 |
+| nid_key | number or string | The [NID] or text to specify algorithm to encrypt key | `"PBE-SHA1-RC2-4"` if compiled with RC2, otherwise `"PBE-SHA1-3DES"`; on OpenSSL 3.0 or later `PBES2 with PBKDF2 and AES-256-CBC`. |
+| nid_cert | number or string | The [NID] or text to specify algorithm to encrypt cert | `"PBE-SHA1-3DES"`; on OpenSSL 3.0 or later `PBES2 with PBKDF2 and AES-256-CBC` |
+| iter | number | Key iteration count | `PKCS12_DEFAULT_ITER` (2048) |
+| mac_iter | number | MAC iteration count | 1 |
 
 `passphrase` is the string for encryption. If omitted, an empty string will be used.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
-Note in OpenSSL 3.0 `RC2` has been moved to **legacy** provider. In order to encode p12 data with RC2
+Starting with OpenSSL 3.0, `RC2` has been moved to the **legacy** provider. In order to encode p12 data with RC2
 encryption, you need to [load the legacy provider](#providerload) first.
 
 ```lua
@@ -2525,11 +2546,11 @@ assert(legacy_provider:unload())
 **syntax**: *data, err = pkcs12.decode(p12, passphrase?)*
 
 Decode a PKCS#12 text to Lua table `data`. Similar to the `data` table passed to [pkcs12.encode](#pkcs12encode),
-but onle `cert`, `key`, `cacerts` and `friendly_name` are returned.
+but only `cert`, `key`, `cacerts` and `friendly_name` are returned.
 
 `passphrase` is the string for encryption. If omitted, an empty string will be used.
 
-Note in OpenSSL 3.0 `RC2` has been moved to **legacy** provider. In order to decode p12 data with RC2
+Starting with OpenSSL 3.0, `RC2` has been moved to the **legacy** provider. In order to decode p12 data with RC2
 encryption, you need to [load the legacy provider](#providerload) first.
 
 [Back to TOC](#table-of-contents)
@@ -2567,8 +2588,8 @@ Creates a `x509` instance. `txt` can be **PEM** or **DER** formatted text;
 
 When `txt` is omitted, `new()` creates an empty `x509` instance.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -2599,10 +2620,10 @@ To view a list of digest algorithms implemented, use
 [openssl.list_digest_algorithms](#openssllist_digest_algorithms) or
 `openssl list -digest-algorithms`.
 
-If `digest_name` is omitted, it's default to `sha1`.
+If `digest_name` is omitted, it defaults to `sha1`.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -2617,10 +2638,10 @@ To view a list of digest algorithms implemented, use
 [openssl.list_digest_algorithms](#openssllist_digest_algorithms) or
 `openssl list -digest-algorithms`.
 
-If `digest_name` is omitted, it's default to `sha1`.
+If `digest_name` is omitted, it defaults to `sha1`.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -2630,7 +2651,7 @@ to explictly select provider to fetch algorithms.
 
 Checks the consistency of private key `pkey` with the public key in current X509 object.
 
-Returns a boolean indicating if it's a match and err describing the reason.
+Returns a boolean indicating whether it is a match, and an error describing the reason.
 
 Note this function also checks if k itself is indeed a private key or not.
 
@@ -2650,7 +2671,7 @@ Setters and getters for x509 attributes share the same syntax.
 | not_before    | number | Unix timestamp when certificate is not valid before |
 | not_after     | number | Unix timestamp when certificate is not valid after |
 | pubkey        | [pkey](#restyopensslpkey)   | Public key of the certificate |
-| serial_number | [bn](#restyopensslbn) | Serial number of the certficate |
+| serial_number | [bn](#restyopensslbn) | Serial number of the certificate |
 | subject_name  | [x509.name](#restyopensslx509name) | Subject of the certificate |
 | version       | number | Version of the certificate, value is one less than version. For example, `2` represents `version 3` |
 
@@ -2660,9 +2681,9 @@ Additionally, getters and setters for extensions are also available:
 | ------------   | ---- | ----------- |
 | subject_alt_name   | [x509.altname](#restyopensslx509altname) | [Subject Alternative Name](https://tools.ietf.org/html/rfc5280#section-4.2.1.6) of the certificate, SANs are usually used to define "additional Common Names"  |
 | issuer_alt_name    | [x509.altname](#restyopensslx509altname) | [Issuer Alternative Name](https://tools.ietf.org/html/rfc5280#section-4.2.1.7) of the certificate |
-| basic_constraints  | table, { ca = bool, pathlen = int} | [Basic Constriants](https://tools.ietf.org/html/rfc5280#section-4.2.1.9) of the certificate  |
-| info_access        | [x509.extension.info_access](#restyopensslx509extensioninfo_access) | [Authority Information Access](https://tools.ietf.org/html/rfc5280#section-4.2.2.1) of the certificate, contains information like OCSP reponder URL. |
-| crl_distribution_points | [x509.extension.dist_points](#restyopensslx509extensiondist_points) | [CRL Distribution Points](https://tools.ietf.org/html/rfc5280#section-4.2.1.13) of the certificate, contains information like Certificate Revocation List(CRL) URLs. |
+| basic_constraints  | table, { ca = bool, pathlen = int} | [Basic Constraints](https://tools.ietf.org/html/rfc5280#section-4.2.1.9) of the certificate  |
+| info_access        | [x509.extension.info_access](#restyopensslx509extensioninfo_access) | [Authority Information Access](https://tools.ietf.org/html/rfc5280#section-4.2.2.1) of the certificate, contains information like OCSP responder URL. |
+| crl_distribution_points | [x509.extension.dist_points](#restyopensslx509extensiondist_points) | [CRL Distribution Points](https://tools.ietf.org/html/rfc5280#section-4.2.1.13) of the certificate, contains information like Certificate Revocation List (CRL) URLs. |
 
 For all extensions, `get_{extension}_critical` and `set_{extension}_critical` is also supported to
 access the `critical` flag of the extension.
@@ -2696,11 +2717,11 @@ ngx.say(x509:get_basic_constraints())
 -- outputs '{"ca":false,"pathlen":0}'
 ```
 
-Note that user may also access the certain extension by [x509:get_extension](#x509get_extension) and
-[x509:set_extension](#x509set_extension), while the later two function returns or requires
-[extension](#restyopensslx509extension) instead. User may use getter and setters listed here if modification
+Note that users may also access certain extensions by [x509:get_extension](#x509get_extension) and
+[x509:set_extension](#x509set_extension), while the latter two functions return or require
+[extension](#restyopensslx509extension) instead. Users may use the getters and setters listed here if modification
 of current extensions is needed; use [x509:get_extension](#x509get_extension) or
-[x509:set_extension](#x509set_extension) if user are adding or replacing the whole extension or
+[x509:set_extension](#x509set_extension) if users are adding or replacing the whole extension or
 getters/setters are not implemented. If the getter returned a type of `x509.*` instance, it can be
 converted to a [extension](#restyopensslx509extension) instance by [extension:from_data](#extensionfrom_data),
 and thus used by [x509:get_extension](#x509get_extension) and [x509:set_extension](#x509set_extension) 
@@ -2746,7 +2767,7 @@ used to sign the certificate.
 Get X.509 `extension` matching the given [NID] to certificate, returns a
 [resty.openssl.x509.extension](#restyopensslx509extension) instance and the found position.
 
-If `last_pos` is defined, the function searchs from that position; otherwise it
+If `last_pos` is defined, the function searches from that position; otherwise it
 finds from beginning. Index is 1-based.
 
 ```lua
@@ -2836,9 +2857,8 @@ Returns `nil` if the extension is not found.
 **syntax**: *ok, err = x509:sign(pkey, digest?)*
 
 Sign the certificate using the private key specified by `pkey`, which must be a 
-[resty.openssl.pkey](#restyopensslpkey) that stores private key. Optionally accept `digest`
-parameter to set digest method, whichmust be a [resty.openssl.digest](#restyopenssldigest) instance.
-Returns a boolean indicating if signing is successful and error if any.
+[resty.openssl.pkey](#restyopensslpkey) that stores a private key. Optionally accepts a `digest` parameter to set digest method, which must be a [resty.openssl.digest](#restyopenssldigest) instance.
+Returns a boolean indicating whether signing succeeded, and an error if any.
 
 [Back to TOC](#table-of-contents)
 
@@ -2847,8 +2867,8 @@ Returns a boolean indicating if signing is successful and error if any.
 **syntax**: *ok, err = x509:verify(pkey)*
 
 Verify the certificate signature using the public key specified by `pkey`, which
-must be a [resty.openssl.pkey](#restyopensslpkey). Returns a boolean indicating if
-verification is successful and error if any.
+must be a [resty.openssl.pkey](#restyopensslpkey). Returns a boolean indicating whether
+verification succeeded, and an error if any.
 
 [Back to TOC](#table-of-contents)
 
@@ -2887,8 +2907,8 @@ Create an empty `csr` instance. `txt` can be **PEM** or **DER** formatted text;
 
 When `txt` is omitted, `new()` creates an empty `csr` instance.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -2906,7 +2926,7 @@ Returns `true` if table is an instance of `csr`. Returns `false` otherwise.
 
 Checks the consistency of private key `pkey` with the public key in current CSR object.
 
-Returns a boolean indicating if it's a match and err describing the reason.
+Returns a boolean indicating whether it is a match, and an error describing the reason.
 
 Note this function also checks if k itself is indeed a private key or not.
 
@@ -2945,11 +2965,11 @@ ngx.say(version)
 -- outputs 3
 ```
 
-Note that user may also access the certain extension by [csr:get_extension](#csrget_extension) and
-[csr:set_extension](#csrset_extension), while the later two function returns or requires
-[extension](#restyopensslx509extension) instead. User may use getter and setters listed here if modification
+Note that users may also access certain extensions by [csr:get_extension](#csrget_extension) and
+[csr:set_extension](#csrset_extension), while the latter two functions return or require
+[extension](#restyopensslx509extension) instead. Users may use the getters and setters listed here if modification
 of current extensions is needed; use [csr:get_extension](#csrget_extension) or
-[csr:set_extension](#csrset_extension) if user are adding or replacing the whole extension or
+[csr:set_extension](#csrset_extension) if users are adding or replacing the whole extension or
 getters/setters are not implemented. If the getter returned a type of `x509.*` instance, it can be
 converted to a [extension](#restyopensslx509extension) instance by [extension:from_data](#extensionfrom_data),
 and thus used by [csr:get_extension](#csrget_extension) and [csr:set_extension](#csrset_extension) 
@@ -2959,7 +2979,7 @@ and thus used by [csr:get_extension](#csrget_extension) and [csr:set_extension](
 ### csr:set_subject_alt
 
 Same as [csr:set_subject_alt_name](#csrget_-csrset_), this function is deprecated to align
-with naming convension with other functions.
+with naming convention with other functions.
 
 [Back to TOC](#table-of-contents)
 
@@ -2985,7 +3005,7 @@ used to sign the certificate.
 Get X.509 `extension` matching the given [NID] to certificate, returns a
 [resty.openssl.x509.extension](#restyopensslx509extension) instance and the found position.
 
-If `last_pos` is defined, the function searchs from that position; otherwise it
+If `last_pos` is defined, the function searches from that position; otherwise it
 finds from beginning. Index is 1-based.
 
 ```lua
@@ -3046,9 +3066,8 @@ Set critical flag of the X.509 `extension` matching the given [NID] to csr.
 **syntax**: *ok, err = csr:sign(pkey, digest?)*
 
 Sign the certificate request using the private key specified by `pkey`, which must be a 
-[resty.openssl.pkey](#restyopensslpkey) that stores private key. Optionally accept `digest`
-parameter to set digest method, whichmust be a [resty.openssl.digest](#restyopenssldigest) instance.
-Returns a boolean indicating if signing is successful and error if any.
+[resty.openssl.pkey](#restyopensslpkey) that stores a private key. Optionally accepts a `digest` parameter to set digest method, which must be a [resty.openssl.digest](#restyopenssldigest) instance.
+Returns a boolean indicating whether signing succeeded, and an error if any.
 
 [Back to TOC](#table-of-contents)
 
@@ -3057,8 +3076,8 @@ Returns a boolean indicating if signing is successful and error if any.
 **syntax**: *ok, err = csr:verify(pkey)*
 
 Verify the CSR signature using the public key specified by `pkey`, which
-must be a [resty.openssl.pkey](#restyopensslpkey). Returns a boolean indicating if
-verification is successful and error if any.
+must be a [resty.openssl.pkey](#restyopensslpkey). Returns a boolean indicating whether
+verification succeeded, and an error if any.
 
 [Back to TOC](#table-of-contents)
 
@@ -3094,8 +3113,8 @@ Creates a `crl` instance. `txt` can be **PEM** or **DER** formatted text;
 
 When `txt` is omitted, `new()` creates an empty `crl` instance.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -3148,11 +3167,11 @@ ngx.say(not_before)
 -- outputs 1571875065
 ```
 
-Note that user may also access the certain extension by [crl:get_extension](#crlget_extension) and
-[crl:set_extension](#crlset_extension), while the later two function returns or requires
-[extension](#restyopensslcrlextension) instead. User may use getter and setters listed here if modification
+Note that users may also access certain extensions by [crl:get_extension](#crlget_extension) and
+[crl:set_extension](#crlset_extension), while the latter two functions return or require
+[extension](#restyopensslcrlextension) instead. Users may use the getters and setters listed here if modification
 of current extensions is needed; use [crl:get_extension](#crlget_extension) or
-[crl:set_extension](#crlset_extension) if user are adding or replacing the whole extension or
+[crl:set_extension](#crlset_extension) if users are adding or replacing the whole extension or
 getters/setters are not implemented. If the getter returned a type of `crl.*` instance, it can be
 converted to a [extension](#restyopensslcrlextension) instance by [extension:from_data](#extensionfrom_data),
 and thus used by [crl:get_extension](#crlget_extension) and [crl:set_extension](#crlset_extension) 
@@ -3200,7 +3219,7 @@ Returns `false` if not found; specially if a serial number is removed from CRL, 
 Get X.509 `extension` matching the given [NID] to CRL, returns a
 [resty.openssl.x509.extension](#restyopensslx509extension) instance and the found position.
 
-If `last_pos` is defined, the function searchs from that position; otherwise it
+If `last_pos` is defined, the function searches from that position; otherwise it
 finds from beginning. Index is 1-based.
 
 [Back to TOC](#table-of-contents)
@@ -3260,9 +3279,8 @@ Adds a [resty.openssl.x509.revoked](#restyopensslx509revoked) instance to the CR
 **syntax**: *ok, err = crl:sign(pkey, digest?)*
 
 Sign the CRL using the private key specified by `pkey`, which must be a 
-[resty.openssl.pkey](#restyopensslpkey) that stores private key. Optionally accept `digest`
-parameter to set digest method, whichmust be a [resty.openssl.digest](#restyopenssldigest) instance.
-Returns a boolean indicating if signing is successful and error if any.
+[resty.openssl.pkey](#restyopensslpkey) that stores a private key. Optionally accepts a `digest` parameter to set digest method, which must be a [resty.openssl.digest](#restyopenssldigest) instance.
+Returns a boolean indicating whether signing succeeded, and an error if any.
 
 [Back to TOC](#table-of-contents)
 
@@ -3271,8 +3289,8 @@ Returns a boolean indicating if signing is successful and error if any.
 **syntax**: *ok, err = crl:verify(pkey)*
 
 Verify the CRL signature using the public key specified by `pkey`, which
-must be a [resty.openssl.pkey](#restyopensslpkey). Returns a boolean indicating if
-verification is successful and error if any.
+must be a [resty.openssl.pkey](#restyopensslpkey). Returns a boolean indicating whether
+verification succeeded, and an error if any.
 
 [Back to TOC](#table-of-contents)
 
@@ -3309,7 +3327,7 @@ Outputs the CRL in PEM-formatted text.
 
 **syntax**: *revoked = crl[i]*
 
-Access the revoked list as it's a Lua table. Make sure your LuaJIT compiled
+Access the revoked list as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag; otherwise use `all`, `each`, `index` and `count`
 instead.
 
@@ -3440,7 +3458,7 @@ ngx.say(name:tostring())
 
 **syntax**: *k, v = name[i]*
 
-Access the underlying objects as it's a Lua table. Make sure your LuaJIT compiled
+Access the underlying objects as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag; otherwise use `all`, `each`, `index` and `count`
 instead.
 
@@ -3548,7 +3566,7 @@ ngx.say(altname:tostring())
 
 **syntax**: *k, v = altname[i]*
 
-Access the underlying objects as it's a Lua table. Make sure your LuaJIT compiled
+Access the underlying objects as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag; otherwise use `all`, `each`, `index` and `count`
 instead.
 
@@ -3587,11 +3605,11 @@ data = {
   subject = resty.openssl.x509 instance,
   request = resty.openssl.x509.csr instance,
   crl = resty.openssl.x509.crl instance,
-  issuer_pkey = resty.openssl.pkey instance, -- >= OpenSSL 3.0
+  issuer_pkey = resty.openssl.pkey instance, -- OpenSSL 3.0 or later
 }
 ```
 
-From OpenSSL 3.0, `issuer_pkey` can be specified as a fallback source for
+Starting with OpenSSL 3.0, `issuer_pkey` can be specified as a fallback source for
 generating the authority key identifier extension when `issuer` is same as `subject`.
 
 When `data` is a string, it's the full nconf string. Using section lookup from `value` to
@@ -3810,13 +3828,13 @@ Returns `true` if table is an instance of `dist_points`. Returns `false` otherwi
 
 **syntax**: *obj = dist_points[i]*
 
-Access the underlying objects as it's a Lua table. Make sure your LuaJIT compiled
+Access the underlying objects as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag; otherwise use `all`, `each`, `index` and `count`
 instead.
 
 See also [functions for stack-like objects](#functions-for-stack-like-objects).
 
-Each object returned when iterrating dist_points instance is a [x509.altname](#restyopensslx509altname)
+Each object returned when iterating dist_points instance is a [x509.altname](#restyopensslx509altname)
 instance.
 
 ```lua
@@ -3883,13 +3901,13 @@ Add a `x509` object to the info_access. The first argument must be a
 
 **syntax**: *obj = info_access[i]*
 
-Access the underlying objects as it's a Lua table. Make sure your LuaJIT compiled
+Access the underlying objects as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag; otherwise use `all`, `each`, `index` and `count`
 instead.
 
 See also [functions for stack-like objects](#functions-for-stack-like-objects).
 
-Each object returned when iterrating dist_points instance is a table of [NID] type and values.
+Each object returned when iterating dist_points instance is a table of [NID] type and values.
 
 ```lua
 local cjson = require("cjosn")
@@ -3956,7 +3974,7 @@ Add a `x509` object to the extensions. The first argument must be a
 
 **syntax**: *obj = extensions[i]*
 
-Access the underlying objects as it's a Lua table. Make sure your LuaJIT compiled
+Access the underlying objects as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag; otherwise use `all`, `each`, `index` and `count`
 instead.
 
@@ -4013,7 +4031,7 @@ Add a `x509` object to the chain. The first argument must be a
 
 **syntax**: *obj = chain[i]*
 
-Access the underlying objects as it's a Lua table. Make sure your LuaJIT compiled
+Access the underlying objects as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag; otherwise use `all`, `each`, `index` and `count`
 instead.
 
@@ -4033,8 +4051,8 @@ Module to interact with X.509 certificate store (X509_STORE).
 
 Creates a new `store` instance.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -4055,8 +4073,8 @@ Loads certificates into the X509_STORE from the hardcoded default paths.
 Note that to load "default" CAs correctly, usually you need to install a CA
 certificates bundle. For example, the package in Debian/Ubuntu is called `ca-certificates`.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -4070,7 +4088,7 @@ The argument must be a [resty.openssl.x509](#restyopensslx509) instance or a
 
 By default, adding a CRL object will automatically set the flag to store
 `X509_V_FLAG_CRL_CHECK`. Setting the second optional argument to `true` will
-skip settting the flags.
+skip setting the flags.
 
 [Back to TOC](#table-of-contents)
 
@@ -4080,8 +4098,8 @@ skip settting the flags.
 
 Loads a X.509 certificate on file system into store.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -4093,8 +4111,8 @@ Loads a directory of X.509 certificates on file system into store. The certifica
 must be in hashed form, as documented in
 [X509_LOOKUP_hash_dir(3)](https://www.openssl.org/docs/manmaster/man3/X509_LOOKUP_hash_dir.html).
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 [Back to TOC](#table-of-contents)
 
@@ -4117,7 +4135,7 @@ Possible values are:
 	timestampsign	Time Stamp signing
 ```
 
-Normally user should use `verify_method` parameter of [store:verify](#storeverify) unless the purpose
+Normally users should use the `verify_method` parameter of [store:verify](#storeverify) unless the purpose
 is not included in the default verify methods.
 
 [Back to TOC](#table-of-contents)
@@ -4185,17 +4203,17 @@ argument, which must be a [resty.openssl.x509.chain](#restyopensslx509chain) ins
 
 If verification succeed, and `return_chain` is set to true, returns the proof of validation as a 
 [resty.openssl.x509.chain](#restyopensslx509chain); otherwise
-returns `true` only. If verification failed, returns `nil` and error explaining the reason.
+returns `true` only. If verification fails, returns `nil` and an error explaining the reason.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 `verify_method` can be set to use predefined verify parameters such as `"default"`, `"pkcs7"`,
 `"smime_sign"`, `"ssl_client"` and `"ssl_server"`. This set corresponding `purpose`, `trust` and
 couple of other defaults but **does not** override the parameters set from
 [store:set_purpose](#storeset_purpose).
 
-`verify_flags` paramter is the additional verify flags to be set. See [store:set_flags](#storeset_flags)
+`verify_flags` parameter is the additional verify flags to be set. See [store:set_flags](#storeset_flags)
 for all available flags.
 
 [Back to TOC](#table-of-contents)
@@ -4209,11 +4227,11 @@ Only does the revocation check. The first argument `verified_chain` must be a
 `store_ctx:verify` or be built by yourself. Note the first cert needs to be the end entity
 certificate you want to check and the second cert needs to be its issuer.
 
-Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
-to explictly select provider to fetch algorithms.
+Starting with OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explicitly select provider to fetch algorithms.
 
 Returns `true` when the certificate isn't revoked,
-otherwise returns `nil` and error explaining the reason.
+otherwise returns `nil` and an error explaining the reason.
 
 [Back to TOC](#table-of-contents)
 
@@ -4246,7 +4264,7 @@ Module to interact with SSL connection.
 
 **This module is currently considered experimental.**
 
-**Note: to use this module in production, user is encouraged to compile [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module).**
+**Note: to use this module in production, users are encouraged to compile [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module).**
 
 [Back to TOC](#table-of-contents)
 
@@ -4414,7 +4432,7 @@ Set one or more options in current session. Available options are:
 ```
 </details>
 
-Multiple options can be passed in seperatedly, or in a bitwise or bitmask.
+Multiple options can be passed in separately, or in a bitwise or bitmask.
 
 ```lua
 assert(ssl:set_options(bit.bor(ssl.SSL_OP_NO_TLSv1_1, ssl.SSL_OP_NO_TLSv1_2)))
@@ -4435,7 +4453,7 @@ is only effective in `ssl_client_hello_by` phase.
 **syntax**: *bitmask, err = ssl:get_options(readable?)*
 
 Get the options for current session. If `readable` is not set or set to `false`, the function
-return the bit mask for all optinos; if `readable` is set to `true,` the function returns
+return the bit mask for all options; if `readable` is set to `true,` the function returns
 a sorted Lua table containing literals for all options.
 
 [Back to TOC](#table-of-contents)
@@ -4447,7 +4465,7 @@ a sorted Lua table containing literals for all options.
 Clear one or more options in current session.
 Available options are same as that in [ssl:set_options](#sslset_options).
 
-Multiple options can be passed in seperatedly, or in a bitwise or bitmask.
+Multiple options can be passed in separately, or in a bitwise or bitmask.
 
 ```lua
 assert(ssl:clear_options(bit.bor(ssl.SSL_OP_NO_TLSv1_1, ssl.SSL_OP_NO_TLSv1_2)))
@@ -4466,9 +4484,10 @@ is only effective in `ssl_client_hello_by` phase.
 
 **syntax**: *bitmask, err = ssl:set_protocols(protocol, ...)*
 
-Set avaialable protocols for handshake, this is a convenient function that
+Set available protocols for handshake, this is a convenient function that
 calls [ssl:set_options](#sslset_options) and [ssl:clear_options](#sslclear_options) to
 set appropriate options.
+OpenSSL 4.x rejects `"SSLv3"` because SSLv3 support has been removed.
 
 Returns the options of current session in bitmask.
 
@@ -4490,7 +4509,7 @@ Module to interact with SSL_CTX context.
 
 **This module is currently considered experimental.**
 
-**Note: to use this module in production, user is encouraged to compile [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module).**
+**Note: to use this module in production, users are encouraged to compile [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module).**
 
 [Back to TOC](#table-of-contents)
 
@@ -4551,7 +4570,7 @@ Returns 0 if the memory regions are equal and nonzero otherwise.
 
 **syntax**: *obj = x[i]*
 
-Access the underlying objects as it's a Lua table. Make sure your LuaJIT compiled
+Access the underlying objects as a Lua table. Make sure your LuaJIT is compiled
 with `-DLUAJIT_ENABLE_LUA52COMPAT` flag.
 
 Each object may only support either `pairs` or `ipairs`. Index is 1-based.
@@ -4609,14 +4628,14 @@ Returns count of objects of the table. Use this while `LUAJIT_ENABLE_LUA52COMPAT
 
 **syntax**: *obj = x:index(i)*
 
-Returns objects at index of `i` of the table, index is 1-based. If index is out of bound, `nil` is returned.
+Returns objects at index of `i` of the table, index is 1-based. If index is out of bounds, `nil` is returned.
 
 [Back to TOC](#table-of-contents)
 
 General rules on garbage collection
 ====
 
-- When a type is added or returned to another type, it's internal cdata is always copied.
+- When a type is added or returned to another type, its internal cdata is always copied.
 ```lua
 local name = require("resty.openssl.x509.name"):add("CN", "example.com")
 local x509 = require("resty.openssl.x509").new()
@@ -4626,26 +4645,26 @@ x509:set_subject_name(name)
 name:add("L", "Mars")
 -- subject_name in x509 will not be modified
 ```
-- The creator set the GC handler; the user must not free it.
+- The creator sets the GC handler; users must not free it.
 - For a stack:
-  - If it's created by `new()`: set GC handler to sk_TYPE_pop_free 
+  - If it is created by `new()`: set GC handler to sk_TYPE_pop_free
     - The gc handler for elements being added to stack should not be set. Instead, rely on the gc
-      handler of the stack to free each individual elements.
-  - If it's created by `dup()` (shallow copy):
-    - If elements support reference counter (like X509): increase ref count for all elements by 1;
+      handler of the stack to free each individual element.
+  - If it is created by `dup()` (shallow copy):
+    - If elements support reference counting (like X509): increase ref count for all elements by 1;
       set GC handler to sk_TYPE_pop_free.
     - If not, set GC handler to sk_free
-      - Additionally, the stack duplicates the element when it's added to stack, a GC handler for the duplicate
+      - Additionally, the stack duplicates the element when it is added to stack, a GC handler for the duplicate
         must be set. But a reference should be kept in Lua land to prevent premature
         gc of individual elements. (See x509.altname).
-    - Shallow copy for stack is fine because in current design user can't modify the element in the
-      stack directly. Each elemente is duplicated when added to stack and when returned.
+    - Shallow copy for stack is fine because in current design users can't modify the element in the
+      stack directly. Each element is duplicated when added to stack and when returned.
 
 [Back to TOC](#table-of-contents)
 
 ## Generic EVP parameter getter/setter
 
-Starting from OpenSSL 3.0, this library provides a genric interface to get and set abitrary parameters
+Starting with OpenSSL 3.0, this library provides a generic interface to get and set arbitrary parameters
 from underlying implementation. This works for [cipher](#resty.openssl.cipher),
 [pkey](#resty.openssl.pkey), [digest](#resty.openssl.digest), [mac](#resty.openssl.mac) and
 [kdf](#resty.openssl.kdf).
@@ -4696,10 +4715,10 @@ print(cjson.encode(c:gettable_params()))
 
 Read the param `key` and return its value. The return value is a Lua number
 or a string.
-Certain params requires exact size to be set, in such case,
-`want_size` should be specified; if `want_size` is not specified and, the
-library use a buffer of 100 bytes to hold the return value.
-Certain params returns a special type, user should explictly set `want_type`
+Certain params require an exact size to be set; in such cases,
+`want_size` should be specified. If `want_size` is not specified, the
+library uses a buffer of 100 bytes to hold the return value.
+Certain params return a special type; users should explicitly set `want_type`
 as a string to correctly decode them. Currently `want_type` can only be
 `"bn"` or unset. Note it may also be necessary to increase temporary buffer
 size `want_size` when `want_type` is `"bn"`.
@@ -4709,7 +4728,7 @@ local c = require("resty.openssl.cipher").new("aes-256-gcm")
 print(c:get_param("taglen"))
 -- outputs 16
 print(c:get_param("tag"))
--- returns error, tag must have a explict size
+-- returns error, tag must have an explicit size
 print(c:get_param("tag", 16))
 -- outputs the tag
 local p = require("resty.openssl.pkey").new())
@@ -4725,8 +4744,8 @@ print(p:get_param("d", 256, "bn"):to_hex())
 
 **syntax**: *ok, err = x:set_params(params)*
 
-Set params passed in with Lua table `params`. The library does limited type check, user
-is responsible for validity of input.
+Set params passed in with Lua table `params`. The library does limited type checking; users
+are responsible for the validity of input.
 
 ```lua
 local k = require("resty.openssl.kdf").new("HKDF")
@@ -4774,6 +4793,14 @@ are accessed directly. They are accessed by memory offset in assembly.
 OpenSSL [keeps ABI/binary compatibility](https://wiki.openssl.org/index.php/Versioning)
 with minor releases or letter releases. So all structs offsets and macro constants are kept
 same.
+
+OpenSSL 4.0 is a major release and removes APIs that had been deprecated in
+earlier major releases, including ENGINE support, fixed-version SSL/TLS method
+functions, SSLv3 support, custom EVP method APIs, and several legacy ERR APIs.
+See the [OpenSSL 4.0.0 release notes](https://github.com/openssl/openssl/releases/tag/openssl-4.0.0)
+and [ossl-removed-api(7)](https://docs.openssl.org/master/man7/ossl-removed-api/)
+for details. This library avoids cdef'ing removed OpenSSL 4.0 APIs; APIs and
+symbols shared by OpenSSL 3.0 or later are guarded with `version.OPENSSL_3_UP`.
 
 If you plan to use this library on an untested version of OpenSSL (like custom builds or pre releases),
 [this](https://abi-laboratory.pro/index.php?view=timeline&l=openssl) can be a good source to consult.

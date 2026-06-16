@@ -18,7 +18,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
-from common_utils import effective_cpu_count, handle_docker_secrets  # type: ignore
+from common_utils import effective_cpu_count, getenv_bool, handle_docker_secrets  # type: ignore
 from logger import getLogger, log_types  # type: ignore
 
 from app.models.ui_database import UIDatabase
@@ -133,7 +133,7 @@ max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h1"  # TODO: add h2 when fixed and h3 when supported
 
-DEBUG = getenv("DEBUG", False)
+DEBUG = getenv_bool("DEBUG")
 
 loglevel = "debug" if DEBUG else LOG_LEVEL.lower()
 

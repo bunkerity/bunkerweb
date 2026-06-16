@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, session, url_for
 from flask_login import current_user, logout_user
 
 from app.dependencies import DATA
-from app.utils import LOGGER
+from app.utils import LOGGER, add_revoked_sessions
 
 logout = Blueprint("logout", __name__)
 
@@ -13,15 +13,13 @@ def logout_page():
         if current_user.is_authenticated:
             DATA.load_from_file()
 
-            # Track the revoked session ID to prevent token reuse
+            # Track the revoked session ID to prevent token reuse (pruning stale entries so
+            # the set stays bounded — see app.utils.add_revoked_sessions).
             if "session_id" in session:
                 LOGGER.info(f"Revoking session ID {session['session_id']} for user {current_user.username}")
-                if "REVOKED_SESSIONS" not in DATA:
-                    DATA["REVOKED_SESSIONS"] = []
-                if session["session_id"] not in DATA["REVOKED_SESSIONS"]:
-                    DATA["REVOKED_SESSIONS"].append(session["session_id"])
-                    # Save changes to the DATA file
-                    DATA.write_to_file()
+                DATA["REVOKED_SESSIONS"] = add_revoked_sessions(DATA.get("REVOKED_SESSIONS", {}), [session["session_id"]])
+                # Save changes to the DATA file
+                DATA.write_to_file()
 
             # Log the logout event
             LOGGER.info(f"User {current_user.username} logged out")

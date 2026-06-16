@@ -2,14 +2,31 @@
 $(document).ready(function () {
   const $goBackBtn = $("#go-back-btn");
 
-  // Helper to check if endpoint is a safe relative path
+  // Helper to check if endpoint is a safe SAME-ORIGIN relative path
   const RELATIVE_PATH_REGEX = /^\/[a-zA-Z0-9\-._\/?&=%#]*$/;
   function isSafeEndpoint(endpoint) {
     if (typeof endpoint !== "string") return false;
-    // Only allow relative paths starting with `/` and composed of safe URL characters.
-    // This implicitly disallows schemes like `javascript:` or `http://` and
-    // blocks characters such as `<` and `>` that could be used for XSS.
-    return RELATIVE_PATH_REGEX.test(endpoint);
+    // Reject protocol-relative ("//host", "/\\host" -- browsers fold "\\" to "/"),
+    // schemes, backslashes, and ".." segments (which normalize to a protocol-relative
+    // path in the URL parser and escape the origin). The regex alone is insufficient:
+    // it permits a second leading slash, so "//evil.com" would pass.
+    if (
+      !endpoint.startsWith("/") ||
+      endpoint[1] === "/" ||
+      endpoint[1] === "\\"
+    )
+      return false;
+    if (endpoint.includes("\\") || endpoint.includes("://")) return false;
+    if (endpoint.split("/").includes("..")) return false;
+    if (!RELATIVE_PATH_REGEX.test(endpoint)) return false;
+    try {
+      const u = new URL(endpoint, window.location.origin);
+      return (
+        u.origin === window.location.origin && !u.pathname.startsWith("//")
+      );
+    } catch (e) {
+      return false;
+    }
   }
 
   // Handle go back button click

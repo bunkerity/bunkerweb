@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
         changes = []
         changed_plugins = set()
-        err = db.save_config(settings, args.method, changed=False)
+        err = db.save_config(settings, args.method, changed=False, explicit_keys=config.explicit_keys)
 
         if isinstance(err, str):
             LOGGER.warning(f"Couldn't save config to database : {err}, config may not work as expected")

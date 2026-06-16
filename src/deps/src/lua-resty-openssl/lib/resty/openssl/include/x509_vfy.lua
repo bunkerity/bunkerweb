@@ -3,7 +3,7 @@ local C = ffi.C
 
 require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.stack"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   X509_STORE *X509_STORE_new(void);
@@ -83,7 +83,7 @@ local _M = {
   },
 }
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   ffi.cdef [[
     X509_STORE_CTX *X509_STORE_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq);
 

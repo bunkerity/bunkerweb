@@ -45,7 +45,7 @@ function get_python_bin() {
 		fi
 	fi
 
-	for version in 3.13 3.12 3.11 3.10 3.9; do
+	for version in 3.14 3.13 3.12 3.11 3.10; do
 		if resolved_python=$(resolve_python_cmd "python${version}"); then
 			echo "$resolved_python"
 			return

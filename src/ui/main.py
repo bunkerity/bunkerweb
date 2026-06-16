@@ -10,7 +10,7 @@ from json import dumps, loads
 from operator import itemgetter
 from os import getenv, getpid, sep
 from os.path import abspath, join
-from re import fullmatch
+from re import fullmatch, split as resplit
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path, modules as sys_modules
@@ -42,6 +42,7 @@ from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
+    STATIC_PATH_PREFIXES,
     _sanitize_internal_next,
     flash,
     get_blacklisted_settings,
@@ -147,8 +148,6 @@ DB_CHECK_LAST_RUN_KEY = "DB_STATE_CHECK_LAST_RUN"
 DB_CHECK_RUNNING_KEY = "DB_STATE_CHECK_RUNNING"
 
 # Flask serves app/static/* at the URL root (static_url_path="/"); before_request short-circuits these.
-STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
-
 # Shared thread pool executors for background tasks to prevent thread spawning on every request
 _db_check_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-db-check")
 _periodic_tasks_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="bw-ui-periodic")
@@ -597,6 +596,13 @@ with app.app_context():
 
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
+
+    # Host header allowlist (defense-in-depth). Space/comma separated list of allowed
+    # Host values (wildcards like "*.example.com" supported). Empty = disabled/permissive.
+    _raw_allowed_hosts = getenv("UI_ALLOWED_HOSTS", "").strip()
+    app.config["ALLOWED_HOSTS"] = [h for h in resplit(r"[\s,]+", _raw_allowed_hosts) if h] if _raw_allowed_hosts else []
+    if app.config["ALLOWED_HOSTS"]:
+        LOGGER.info(f"UI Host header allowlist enabled: {app.config['ALLOWED_HOSTS']}")
 
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -1087,12 +1093,43 @@ def _enforce_session_lifetime() -> bool:
     return False
 
 
+def _host_allowed(host: str, allowed: list) -> bool:
+    """Return True if the request Host matches the configured allowlist.
+
+    Supports exact matches and "*.example.com" wildcards (which also match the bare
+    domain). The port, if present, is ignored for comparison.
+    """
+    if not host:
+        return False
+    hostname = host.split(":", 1)[0].strip().lower()
+    for entry in allowed:
+        e = entry.strip().lower()
+        if not e:
+            continue
+        if e == "*":
+            return True
+        e = e.split(":", 1)[0]
+        if e.startswith("*."):
+            base = e[2:]
+            if hostname == base or hostname.endswith("." + base):
+                return True
+        elif hostname == e:
+            return True
+    return False
+
+
 @app.before_request
 def before_request():
     # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
     # returning None lets the static view still serve the file (after_request supplies the nonce).
     if request.path.startswith(STATIC_PATH_PREFIXES):
         return
+
+    # Defense-in-depth: reject unexpected Host headers when an allowlist is configured.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and not _host_allowed(request.host, allowed_hosts):
+        LOGGER.warning(f"Blocking UI request with disallowed Host header: {request.host!r}")
+        return make_response(jsonify({"message": "Invalid host"}), 400)
 
     DATA.load_from_file()
     if DATA.get("SERVER_STOPPING", False):
@@ -1181,7 +1218,7 @@ def before_request():
                     raw_next = request.values.get("next")
                     try:
                         safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
-                    except Exception:
+                    except ValueError:
                         safe_next = url_for("home.home_page")
 
                     return redirect(url_for("totp.totp_page", next=safe_next))

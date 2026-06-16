@@ -5,14 +5,16 @@ local ffi_str = ffi.string
 
 local format_error = require("resty.openssl.err").format_error
 
-local OPENSSL_3X
+local OPENSSL_3_UP
+local OPENSSL_4X
 
 local function try_require_modules()
   package.loaded["resty.openssl.version"] = nil
 
   local pok, lib = pcall(require, "resty.openssl.version")
   if pok then
-    OPENSSL_3X = lib.OPENSSL_3X
+    OPENSSL_3_UP = lib.OPENSSL_3_UP
+    OPENSSL_4X = lib.OPENSSL_4X
 
     require "resty.openssl.include.crypto"
     require "resty.openssl.include.objects"
@@ -24,7 +26,7 @@ try_require_modules()
 
 
 local _M = {
-  _VERSION = '1.7.1',
+  _VERSION = '1.8.0',
 }
 
 function _M.load_modules()
@@ -51,7 +53,7 @@ function _M.load_modules()
   _M.ssl = require("resty.openssl.ssl")
   _M.ssl_ctx = require("resty.openssl.ssl_ctx")
 
-  if OPENSSL_3X then
+  if OPENSSL_3_UP then
     _M.provider = require("resty.openssl.provider")
     _M.mac = require("resty.openssl.mac")
     _M.ctx = require("resty.openssl.ctx")
@@ -214,7 +216,7 @@ function _M.luaossl_compat()
   end
 end
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   require "resty.openssl.include.evp"
   local provider = require "resty.openssl.provider"
   local ctx_lib = require "resty.openssl.ctx"
@@ -294,8 +296,8 @@ else
 end
 
 function _M.set_default_properties(props)
-  if not OPENSSL_3X then
-    return nil, "openssl.set_default_properties is only not supported from OpenSSL 3.0"
+  if not OPENSSL_3_UP then
+    return nil, "openssl.set_default_properties is only supported on OpenSSL 3.0 or later"
   end
 
   local ctx_lib = require "resty.openssl.ctx"
@@ -357,7 +359,7 @@ end
 function _M.list_cipher_algorithms(hide_provider)
   require "resty.openssl.include.evp.cipher"
 
-  if OPENSSL_3X then
+  if OPENSSL_3_UP then
     return list_provided("EVP_CIPHER", hide_provider)
   else
     return list_legacy("EVP_CIPHER", C.EVP_CIPHER_nid)
@@ -367,7 +369,7 @@ end
 function _M.list_digest_algorithms(hide_provider)
   require "resty.openssl.include.evp.md"
 
-  if OPENSSL_3X then
+  if OPENSSL_3_UP then
     return list_provided("EVP_MD", hide_provider)
   else
     return list_legacy("EVP_MD", C.EVP_MD_type)
@@ -375,28 +377,30 @@ function _M.list_digest_algorithms(hide_provider)
 end
 
 function _M.list_mac_algorithms(hide_provider)
-  if not OPENSSL_3X then
-    return nil, "openssl.list_mac_algorithms is only supported from OpenSSL 3.0"
+  if not OPENSSL_3_UP then
+    return nil, "openssl.list_mac_algorithms is only supported on OpenSSL 3.0 or later"
   end
 
   return list_provided("EVP_MAC", hide_provider)
 end
 
 function _M.list_kdf_algorithms(hide_provider)
-  if not OPENSSL_3X then
-    return nil, "openssl.list_kdf_algorithms is only supported from OpenSSL 3.0"
+  if not OPENSSL_3_UP then
+    return nil, "openssl.list_kdf_algorithms is only supported on OpenSSL 3.0 or later"
   end
 
   return list_provided("EVP_KDF", hide_provider)
 end
 
 local valid_ssl_protocols = {
-  ["SSLv3"]   = 0x0300,
   ["TLSv1"]   = 0x0301,
   ["TLSv1.1"] = 0x0302,
   ["TLSv1.2"] = 0x0303,
   ["TLSv1.3"] = 0x0304,
 }
+if not OPENSSL_4X then
+  valid_ssl_protocols["SSLv3"] = 0x0300
+end
 
 function _M.list_ssl_ciphers(cipher_list, ciphersuites, protocol)
   local ssl_lib = require("resty.openssl.ssl")

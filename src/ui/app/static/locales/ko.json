@@ -909,7 +909,10 @@
       "status": {
         "deactivated": "플러그인이 비활성화되어 정보를 표시할 수 없습니다.",
         "metrics_deactivated": "메트릭 플러그인이 활성화되지 않아 정보를 표시할 수 없습니다.",
-        "not_available": "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다."
+        "not_available": "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다.",
+        "pre_render_error": "사전 렌더링 오류",
+        "no_content": "이 플러그인은 내장 페이지를 제공하지 않습니다.",
+        "dedicated_page_unavailable": "이 플러그인은 아직 로드되지 않은 전용 페이지에서 관리됩니다. 접근하려면 웹 UI를 다시 시작하세요."
       }
     },
     "type": {
