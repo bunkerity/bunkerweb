@@ -747,7 +747,10 @@ def certbot_new(
                     break
 
     if stale_account_detected and account_id:
-        _purge_stale_account(paths.config_dir.joinpath("accounts"), account_id)
+        # Purge the canonical store, not paths.config_dir: in concurrent mode config_dir is a
+        # throwaway scratch (merged only on success), so purging it leaves DATA_PATH untouched
+        # and the stale account is restored next run. Non-concurrent: config_dir == DATA_PATH.
+        _purge_stale_account(DATA_PATH.joinpath("accounts"), account_id)
 
     return process.returncode
 

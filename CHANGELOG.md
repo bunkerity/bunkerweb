@@ -3,6 +3,7 @@
 ## v1.6.12~rc3 - 2026/??/??
 
 - [BUGFIX] `api`: a malformed `API_ALLOWED_HOSTS` wildcard (e.g. `foo.*.com`) no longer bricks the API on every request — the patterns are now validated at startup and a bad entry is logged and skipped, instead of tripping Starlette's `TrustedHostMiddleware` assertion lazily on the first request (which the `add_middleware` `try`/`except` could not catch) or being silently accepted under `python -O`.
+- [BUGFIX] `letsencrypt`: stale-ACME-account recovery now works under `LETS_ENCRYPT_CONCURRENT_REQUESTS=yes` — the JWS-rejection purge targeted the per-service temporary scratch dir (discarded on the failed run, merged back only on success) instead of the canonical account store, so a server-pruned account was restored on every retry and issuance kept failing identically. It now purges `DATA_PATH/accounts`.
 
 ## v1.6.12~rc2 - 2026/06/16
 
