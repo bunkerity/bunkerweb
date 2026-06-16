@@ -38,7 +38,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 | Setting                     | Default | Context   | Multiple | Description                                                                                                                            |
 | --------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge.                                    |
+| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
 | `ANTIBOT_IGNORE_IP`         |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                            |
 | `ANTIBOT_IGNORE_RDNS`       |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                           |
 | `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                          |
@@ -58,6 +58,9 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   This will exclude all URIs starting with `/api/`, `/webhook/`, or `/assets/` from the antibot challenge.
+
+- `ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&c=d$"`
+  This will exclude the exact `/index.php?a=b&c=d` request from the antibot challenge.
 
 - `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
   This will exclude the internal network `192.168.1.0/24` and the specific IP `10.0.0.1` from the antibot challenge.

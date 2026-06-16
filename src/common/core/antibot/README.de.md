@@ -38,7 +38,7 @@ BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die d
 
 | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                              |
 | :-------------------------- | :------- | :-------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.                                                        |
+| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den Pfad und die vollständige Request-URI mit Query-String geprüft. |
 | `ANTIBOT_IGNORE_IP`         |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                  |
 | `ANTIBOT_IGNORE_RDNS`       |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                            |
 | `ANTIBOT_RDNS_GLOBAL`       | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                              |
@@ -58,6 +58,9 @@ Beispiele:
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   Schließt alle URIs aus, die mit `/api/`, `/webhook/` oder `/assets/` beginnen.
+
+- `ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&c=d$"`
+  Schließt exakt die Anfrage `/index.php?a=b&c=d` von der Antibot-Herausforderung aus.
 
 - `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
   Schließt das interne Netzwerk `192.168.1.0/24` und die spezifische IP `10.0.0.1` aus.

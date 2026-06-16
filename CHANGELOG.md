@@ -2,6 +2,7 @@
 
 ## v1.6.12~rc3 - 2026/??/??
 
+- [FEATURE] `antibot`: `ANTIBOT_IGNORE_URI` can now match full request URIs including query strings. (Fixes #3374)
 - [BUGFIX] `api`: a malformed `API_ALLOWED_HOSTS` wildcard (e.g. `foo.*.com`) no longer bricks the API on every request — the patterns are now validated at startup and a bad entry is logged and skipped, instead of tripping Starlette's `TrustedHostMiddleware` assertion lazily on the first request (which the `add_middleware` `try`/`except` could not catch) or being silently accepted under `python -O`.
 - [BUGFIX] `letsencrypt`: stale-ACME-account recovery now works under `LETS_ENCRYPT_CONCURRENT_REQUESTS=yes` — the JWS-rejection purge targeted the per-service temporary scratch dir (discarded on the failed run, merged back only on success) instead of the canonical account store, so a server-pruned account was restored on every retry and issuance kept failing identically. It now purges `DATA_PATH/accounts`.
 - [BUGFIX] `letsencrypt` (UI): deleting a certificate no longer fails with a 500 (leaving the cache row stale so the cert reappears on the next scheduler sync) when an *unrelated* orphaned certificate is present in the cache — the delete now bypasses the global consistency gate like the Heal flow, since removing one certificate cannot introduce a new orphan reference (the scheduler-side gate still guards against runtime poisoning).
