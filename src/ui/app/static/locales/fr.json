@@ -610,6 +610,8 @@
     "easter_egg": "Si vous lisez ceci, c'est que vous êtes curieux 👀",
     "error": "Erreur",
     "message": "Info",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "Vous avez plus de services que ce que votre licence PRO autorise. Mettez à niveau votre licence ou passez certains services en mode Brouillon pour débloquer votre licence PRO.",
     "time": {
       "just_now": "à l'instant"
     },

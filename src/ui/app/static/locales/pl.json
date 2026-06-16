@@ -610,6 +610,8 @@
     "easter_egg": "Jeśli to czytasz, oznacza to, że jesteś ciekawy 👀",
     "error": "Błąd",
     "message": "Info",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "Masz więcej usług, niż pozwala Twoja licencja PRO. Zaktualizuj licencję lub przekonwertuj niektóre usługi do trybu Szkicu, aby odblokować licencję PRO.",
     "time": {
       "just_now": "właśnie teraz"
     },

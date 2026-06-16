@@ -610,6 +610,8 @@
     "easter_egg": "如果你读到了这条信息，说明你很好奇 👀",
     "error": "错误",
     "message": "信息",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "您的服务数量超出了 PRO 许可证允许的范围。请升级许可证，或将部分服务转换为草稿模式以解锁您的 PRO 许可证。",
     "time": {
       "just_now": "刚才"
     },

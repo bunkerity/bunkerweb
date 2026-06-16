@@ -610,6 +610,8 @@
     "easter_egg": "Wenn du das liest, bist du neugierig 👀",
     "error": "Fehler",
     "message": "Info",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "Sie haben mehr Dienste, als Ihre PRO-Lizenz erlaubt. Aktualisieren Sie Ihre Lizenz oder versetzen Sie einige Dienste in den Entwurfsmodus, um Ihre PRO-Lizenz freizuschalten.",
     "time": {
       "just_now": "gerade eben"
     },

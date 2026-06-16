@@ -610,6 +610,8 @@
     "easter_egg": "If you read this, it means that you're curious 👀",
     "error": "Error",
     "message": "Info",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.",
     "time": {
       "just_now": "just now"
     },
