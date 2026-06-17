@@ -105,9 +105,13 @@
                                 <div class="card-body position-relative pb-0">
                                     <div class="d-flex align-items-center justify-content-center h-100">
                                         <div class="text-center mt-2">
-                                            <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-lg fw-bold">
+                                            <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-lg fw-bold mb-0">
                                                 {{ 'Active' if up else 'Inactive' }}
                                             </p>
+                                            {% set ping_subtitle = value.get("subtitle") %}
+                                            {% if ping_subtitle %}
+                                                <p class="card-text small mb-0 text-{{ value.get('subtitle_color', 'muted') }}">{{ ping_subtitle }}</p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
