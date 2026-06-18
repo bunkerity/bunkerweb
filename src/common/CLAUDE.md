@@ -26,16 +26,16 @@ settings.json + plugin.json schemas
 
 ### Database Layer (`db/`)
 
-**`Database.py` (5700+ lines)** is the largest and most critical file. Key patterns:
+**`Database.py` (~520 lines)** is a thin coordinator: it composes the domain mixins in `db_methods/` (`config_read`, `config_save`, `plugins`, `plugins_update`, `jobs`, `services`, `instances`, `templates`, `ui_users`, `metadata`, `initialization`, `custom_configs`) and owns connection pooling and session management. The query implementations described below now live in those mixins — the 5,974-line monolith was split in commit `f97db1261`, modernizing to SQLAlchemy 2.0. Key patterns:
 
 - **Transient error resilience**: The `@retry_on_transient_db_errors` decorator wraps most DB methods with configurable retry count/delay (`DATABASE_REQUEST_RETRY_*` env vars). Readonly fallback mode exists for degraded reads.
 - **Settings validation is in Database, not just Configurator**: `is_valid_setting(setting, value)` validates against pre-compiled regex caches at runtime.
 - **Multisite prefixing**: Settings with `context=multisite` are stored/queried with server name prefix (`www.example.com_SETTING_ID`). Global settings have no prefix. The Database class handles dual lookup (service-specific → global fallback).
 - **Suffix settings**: Settings marked with `"multiple": "group-name"` in `plugin.json` support `SETTING_1`, `SETTING_2`, etc. Regex validation applies per-value.
 - **File-backed settings**: When a setting's value is a file, `Global_values` / `Services_settings` store the filename separately from the value for atomic updates.
-- **Custom configs storage**: Custom NGINX blocks are stored as `LargeBinary` (up to 4GB) with checksum tracking. Types: `http`, `stream`, `server_http`, `server_stream`, `default_server_http`, `default_server_stream`, `modsec`, `modsec_crs`, `crs_plugins_before`, `crs_plugins_after`. Custom configs have an `is_draft` flag for multi-step UI workflows.
+- **Custom configs storage**: Custom NGINX blocks are stored as `LargeBinary` (up to 4GB) with checksum tracking. Types (per `CUSTOM_CONFIGS_TYPES_ENUM` in `model.py`): `http`, `stream`, `server_http`, `server_stream`, `default_server_http`, `modsec`, `modsec_crs`, `crs_plugins_before`, `crs_plugins_after` — note there is a `default_server_http` but no `default_server_stream`. Custom configs have an `is_draft` flag for multi-step UI workflows.
 
-**`model.py`** defines 30 SQLAlchemy ORM classes. Key tables:
+**`model.py`** defines 29 SQLAlchemy ORM classes (plus the `JSONText` TypeDecorator). Key tables:
 
 - `Plugins`, `Settings` — plugin registry and settings schema
 - `Global_values`, `Services_settings` — actual config values (with optional file names)
@@ -71,7 +71,7 @@ settings.json + plugin.json schemas
 - `confs/` — NGINX config template fragments
 - `ui/` (optional) — Custom UI pages and actions
 
-`order.json` defines plugin execution order across phases: `init`, `init_worker`, `init_workers`, `set`, `ssl_certificate`, `access`, `headers`, `log`, `preread`, `log_stream`, `log_default`, `timer`.
+`order.json` defines plugin execution order across phases: `init`, `init_worker`, `set`, `ssl_client_hello_default`, `ssl_certificate`, `access`, `headers`, `log`, `preread`, `log_stream`, `log_default`, `timer`, `init_workers`.
 
 The `stream` field in `plugin.json` (`yes`/`no`/`partial`) controls whether a plugin runs in TCP/UDP stream mode.
 
@@ -79,7 +79,7 @@ The `stream` field in `plugin.json` (`yes`/`no`/`partial`) controls whether a pl
 
 - **`jobs.py`**: `Job` class manages cache at `/var/cache/bunkerweb/<plugin_id>/`. Uses `_write_atomic()` to prevent partial files. Thread-safe tar.gz extraction with LOCK. `restore_cache()` rebuilds from database. `EXPIRE_TIME` dict controls cleanup scheduling.
 - **`ApiCaller.py`**: `send_to_apis()` POSTs/GETs to multiple API endpoints in parallel via `ThreadPoolExecutor`. `send_files()` handles tar.gz uploads. Used by CLI, Scheduler, and Autoconf.
-- **`common_utils.py`**: `handle_docker_secrets()` reads from `/run/secrets` (Alpine only). `effective_cpu_count()` respects cgroup limits. `bytes_hash()`/`file_hash()` use SHA512. `PLUGIN_TAR_COMPRESS_LEVEL = 3`.
+- **`common_utils.py`**: `handle_docker_secrets()` reads from `/run/secrets` when present (distro-agnostic). `effective_cpu_count()` respects cgroup limits. `bytes_hash()`/`file_hash()` use SHA512. `PLUGIN_TAR_COMPRESS_LEVEL = 3`.
 - **`logger.py`**: `BWLogger` supports stderr, file, and syslog (UDP/TCP). Configured via `LOG_LEVEL`, `LOG_FILE_PATH`, `LOG_SYSLOG_ADDRESS`, `LOG_SYSLOG_TAG`. Has SQLAlchemy-specific log level control.
 
 ### API Client (`api/`)
@@ -92,7 +92,8 @@ The `stream` field in `plugin.json` (`yes`/`no`/`partial`) controls whether a pl
 
 ### Settings Schema (`settings.json`)
 
-64 global settings (additional settings defined per-plugin in `plugin.json`). Each entry:
+65 settings in `settings.json` (mostly `global`; additional settings defined per-plugin in `plugin.json`). Each entry:
+
 ```json
 {
   "SETTING_ID": {

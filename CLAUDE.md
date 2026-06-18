@@ -22,7 +22,7 @@ BunkerWeb is an open-source Web Application Firewall (WAF) built on NGINX with a
 - **Autoconf** (`src/autoconf/`): Listens for Docker/Swarm/Kubernetes events and dynamically reconfigures BunkerWeb. Controllers in `controllers/`: DockerController, SwarmController, IngressController, GatewayController (all inherit from `Controller.py`).
 - **API** (`src/api/`): FastAPI service. Entry point: `src/api/app/main.py`. Routers in `src/api/app/routers/` (`auth`, `bans`, `cache`, `configs`, `global_settings`, `instances`, `jobs`, `metadata`, `plugins`, `services`, `system`, `templates`, `users`). `core.py` is the router hub that assembles all routers — it is NOT the FastAPI app entry point.
 - **Web UI** (`src/ui/`): Flask app using Blueprints. Entry point: `src/ui/main.py`. Routes in `src/ui/app/routes/` (~20 blueprints including configs, plugins, jobs, logs, instances, services, bans, cache, global_settings, templates, reports, etc.). Uses Flask-Login for auth and Jinja2 templates. `dependencies.py` is the central dependency injection point providing API_CLIENT, DATA, BW_CONFIG, BW_INSTANCES_UTILS, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH. The UI no longer accesses the database directly — all data flows through the API via `api_client.py`. Frontend assets are static files in `src/ui/app/static/` (no separate build system).
-- **Database** (`src/common/db/`): SQLAlchemy ORM with `model.py` defining all tables (Plugins, Settings, Services, Jobs, Custom_configs, Users, etc.). `Database.py` wraps high-level query methods. Supports SQLite (WAL mode), MariaDB, MySQL, PostgreSQL with QueuePool for connection pooling.
+- **Database** (`src/common/db/`): SQLAlchemy 2.0 ORM with `model.py` defining all tables (Plugins, Settings, Services, Jobs, Custom_configs, Users, etc.). `Database.py` is a thin coordinator (~520 lines) handling connection pooling and session management; high-level query methods live in mixins under `db_methods/` (`config_read`, `config_save`, `plugins`, `plugins_update`, `jobs`, `services`, `instances`, `templates`, `ui_users`, `metadata`, `initialization`, `custom_configs`) composed onto the `Database` class. Supports SQLite (WAL mode), MariaDB, MySQL, PostgreSQL with QueuePool for connection pooling.
 - **Linux packaging** (`src/linux/`): Native deb/rpm packaging — systemd units, `postinst`/`prerm` scripts, `bwcli` installation. Used by the Linux integration mode.
 - **Vendored deps** (`src/deps/`): Third-party dependencies (Lua modules, Python packages, NGINX modules) bundled into the Docker images and Linux packages.
 
@@ -103,7 +103,7 @@ pre-commit run --all-files
 # Individual tools
 black .                          # Python formatting (160 char lines, config in pyproject.toml)
 flake8 --max-line-length=160 --ignore=E266,E402,E501,E722,W503 .  # Python linting (config in .pre-commit-config.yaml, no .flake8 file)
-stylua .                         # Lua formatting (no .stylua.toml, uses defaults)
+stylua .                         # Lua formatting (config in stylua.toml: call_parentheses=Input, sort_requires)
 luacheck src/                    # Lua linting (--std min, config in .luacheckrc: globals ngx/delay/unpack, ignores 411)
 shellcheck scripts/*.sh          # Shell script linting
 prettier --write "**/*.{js,ts,css,html,json,yaml,md}"  # Frontend formatting
@@ -118,7 +118,7 @@ refurb                           # Python refactoring suggestions (excludes test
 docker compose -f misc/dev/docker-compose.ui.api.yml up -d
 ```
 
-Key dev compose files in `misc/dev/` (18 total):
+Key dev compose files in `misc/dev/` (21 `docker-compose.*.yml` files):
 
 - `docker-compose.ui.api.yml` — Full stack (UI + API + core + MariaDB) — **recommended**
 - `docker-compose.ui.yml` — UI + API + core + MariaDB (UI requires bw-api)
@@ -130,7 +130,7 @@ Key dev compose files in `misc/dev/` (18 total):
 
 Dev credentials: UI `admin`/`P@ssw0rd`, API `admin`/`P@ssw0rd`, DB `bunkerweb`/`secret`.
 
-The dev compose mounts `src/ui/app/` and `src/api/app/` as read-only volumes, so UI and API code changes apply without rebuilding (restart the container to pick up changes).
+The dev compose (`docker-compose.ui.api.yml`) mounts `src/ui/app/` and `src/api/app/` as read-only (`:ro`) volumes, so UI and API code changes apply without rebuilding (restart the container to pick up changes).
 
 `docker-compose.ui.api.yml` brings up a Redis (Valkey) broker (`bw-jobs-broker`) and a `bw-worker` service alongside the scheduler — required since the Celery-based job executor landed. Other compose files in `misc/dev/` do not yet include the worker/broker, so jobs requiring the Celery path will not run under those stacks.
 
@@ -161,7 +161,7 @@ Alembic migrations in `src/common/db/alembic/` with separate version directories
 - `AGENTS.md`: Primary short-form entry point for AI agents — indexes component CLAUDE.md files, critical architecture facts, and pitfalls. Keep in sync with this file.
 - `BUILD.md`: Reproducible artifact build instructions (Docker images, Linux packages).
 - `CONTRIBUTING.md`: Contribution process and review expectations.
-- `.github/copilot-instructions.md`: Mirror of this guidance for GitHub Copilot — keep in sync when editing this file
+- `.github/copilot-instructions.md`: Lightweight dispatcher pointing GitHub Copilot to AGENTS.md (the canonical short-form guide) and the primary reference docs — not a full mirror; keep its reference links valid when files move
 
 ## Important Patterns
 

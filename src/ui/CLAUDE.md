@@ -47,13 +47,13 @@ All UI data access goes through `API_CLIENT` — the UI no longer talks to the d
 
 Global singletons:
 
-| Object | Type | Purpose |
-|--------|------|---------|
-| `API_CLIENT` | `ApiClient` | HTTP client for the BunkerWeb API — primary data access for all routes |
-| `DATA` | `UIData` | JSON file at `/var/tmp/bunkerweb/ui_data.json` — shared transient state (reload flags, flash messages) |
-| `BW_CONFIG` | `Config` | Settings & config builder (takes `API_CLIENT`) |
-| `BW_INSTANCES_UTILS` | `InstancesUtils` | Instance metrics and Redis access (takes `API_CLIENT`) |
-| `DB` | `None` | Legacy shim — kept only for backward compatibility with plugins that still import it |
+| Object               | Type             | Purpose                                                                                                |
+| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
+| `API_CLIENT`         | `ApiClient`      | HTTP client for the BunkerWeb API — primary data access for all routes                                 |
+| `DATA`               | `UIData`         | JSON file at `/var/tmp/bunkerweb/ui_data.json` — shared transient state (reload flags, flash messages) |
+| `BW_CONFIG`          | `Config`         | Settings & config builder (takes `API_CLIENT`)                                                         |
+| `BW_INSTANCES_UTILS` | `InstancesUtils` | Instance metrics and Redis access (takes `API_CLIENT`)                                                 |
+| `DB`                 | `None`           | Legacy shim — kept only for backward compatibility with plugins that still import it                   |
 
 Also exported: `CONFIG_TASKS_EXECUTOR` (ThreadPoolExecutor, 4 workers) for non-blocking config tasks, plugin filesystem paths `CORE_PLUGINS_PATH` / `EXTERNAL_PLUGINS_PATH` / `PRO_PLUGINS_PATH`, and `reload_plugins()` / `safe_reload_plugins()` which pull plugin tarballs via `API_CLIENT.get_plugins(with_data=True)` and materialize them on disk.
 
@@ -86,18 +86,18 @@ Route → DATA["RELOADING"] = True → CONFIG_TASKS_EXECUTOR.submit(task)
 
 ### Models: `app/models/`
 
-| File | Purpose |
-|------|---------|
-| `ui_database.py` | `UIDatabase` — UI-specific DB methods (users, sessions, roles, permissions) |
-| `models.py` | `UiUsers` (extends SQLAlchemy `Users` + Flask-Login `UserMixin`), `AnonymousUser` |
-| `config.py` | `Config` — configuration builder and validator (takes an `api_client` dependency — no direct DB access) |
-| `instance.py` | `InstancesUtils` — instance aggregation, Redis operations (takes an `api_client` dependency) |
-| `ui_data.py` | `UIData` — JSON file store for cross-process state |
-| `biscuit.py` | Biscuit token auth (RBAC middleware) |
-| `totp.py` | TOTP/2FA management |
-| `reverse_proxied.py` | WSGI middleware for X-Forwarded-* headers |
-| `template.py` | `get_ui_templates()` — template wizard functionality |
-| `safe_session_cache.py` | `SafeFileSystemCache` — secure JSON-serialized session storage fallback |
+| File                    | Purpose                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ui_database.py`        | `UIDatabase` — UI-specific DB methods (users, sessions, roles, permissions)                             |
+| `models.py`             | `UiUsers` (extends SQLAlchemy `Users` + Flask-Login `UserMixin`), `AnonymousUser`                       |
+| `config.py`             | `Config` — configuration builder and validator (takes an `api_client` dependency — no direct DB access) |
+| `instance.py`           | `InstancesUtils` — instance aggregation, Redis operations (takes an `api_client` dependency)            |
+| `ui_data.py`            | `UIData` — JSON file store for cross-process state                                                      |
+| `biscuit.py`            | Biscuit token auth (RBAC middleware)                                                                    |
+| `totp.py`               | TOTP/2FA management                                                                                     |
+| `reverse_proxied.py`    | WSGI middleware for X-Forwarded-\* headers                                                              |
+| `template.py`           | `get_ui_templates()` — template wizard functionality                                                    |
+| `safe_session_cache.py` | `SafeFileSystemCache` — secure JSON-serialized session storage fallback                                 |
 
 ### Authentication
 
@@ -122,7 +122,9 @@ Plugins can extend the UI by providing `ui/hooks.py` and `ui/blueprints/`. Hook 
 
 ### Gunicorn: `utils/gunicorn.conf.py`
 
-`gthread` worker class (multi-threaded). Workers = CPU count - 1, threads = workers * 2. Port 7000. TLS support via env vars. `post_fork()` hook disposes inherited DB connections.
+`gthread` worker class (multi-threaded). Workers = CPU count - 1, threads = workers \* 2. Port 7000. TLS support via env vars. `post_fork()` is a no-op now — the UI no longer holds SQLAlchemy connections (all data flows through the API), so there is nothing to dispose after fork.
+
+**Two-app handoff:** `temp.py` serves a "starting" placeholder on 7000 until `main.py` is ready, then `gunicorn.conf.py on_starting` shells out (`subprocess.call(["kill", ...])`) to stop temp and bind 7000. `app/utils.py:restart_workers` similarly uses `pgrep`+`kill -HUP` on plugin reload. **`procps` must be installed** (Debian images have no `/bin/kill`/`pgrep` without it) or the UI never starts — keep it in the Dockerfile.
 
 ## Key utilities
 
@@ -131,15 +133,15 @@ Plugins can extend the UI by providing `ui/hooks.py` and `ui/blueprints/`. Hook 
 
 ## Important env vars for the UI
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | — | Initial admin credentials |
-| `API_URL` | `http://bw-api:5000` | BunkerWeb API base URL — all UI data flows through it |
-| `API_TOKEN` | — | Shared secret for authenticating to the API (required in dev compose) |
-| `DATABASE_URI` | sqlite | SQLAlchemy connection string (used indirectly via the API; UI does not connect) |
-| `FLASK_SECRET` | generated | Session signing key |
-| `SESSION_LIFETIME_HOURS` | 12 | Session duration |
-| `MAX_WORKERS` / `MAX_THREADS` | auto | Gunicorn workers/threads |
-| `UI_MAX_CONTENT_LENGTH` | 50MB | Max upload size |
-| `UI_SSL_ENABLED` / `UI_SSL_CERTFILE` / `UI_SSL_KEYFILE` | — | TLS config |
-| `DEBUG` | — | Flask debug mode |
+| Variable                                                | Default              | Purpose                                                                         |
+| ------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------- |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD`                     | —                    | Initial admin credentials                                                       |
+| `API_URL`                                               | `http://bw-api:5000` | BunkerWeb API base URL — all UI data flows through it                           |
+| `API_TOKEN`                                             | —                    | Shared secret for authenticating to the API (required in dev compose)           |
+| `DATABASE_URI`                                          | sqlite               | SQLAlchemy connection string (used indirectly via the API; UI does not connect) |
+| `FLASK_SECRET`                                          | generated            | Session signing key                                                             |
+| `SESSION_LIFETIME_HOURS`                                | 12                   | Session duration                                                                |
+| `MAX_WORKERS` / `MAX_THREADS`                           | auto                 | Gunicorn workers/threads                                                        |
+| `UI_MAX_CONTENT_LENGTH`                                 | 50MB                 | Max upload size                                                                 |
+| `UI_SSL_ENABLED` / `UI_SSL_CERTFILE` / `UI_SSL_KEYFILE` | —                    | TLS config                                                                      |
+| `DEBUG`                                                 | —                    | Flask debug mode                                                                |

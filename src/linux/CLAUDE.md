@@ -47,59 +47,61 @@ bash src/linux/package.sh rhel-9 x86_64
 
 ### Supported Distros
 
-| Distro | Dockerfile | fpm file | Package type |
-|---|---|---|---|
-| Ubuntu Noble (24.04) | `Dockerfile-ubuntu` | `fpm-ubuntu` | DEB |
-| Ubuntu Jammy (22.04) | `Dockerfile-ubuntu-jammy` | `fpm-ubuntu-jammy` | DEB |
-| Debian Bookworm | `Dockerfile-debian-bookworm` | `fpm-debian-bookworm` | DEB |
-| Debian Trixie | `Dockerfile-debian-trixie` | `fpm-debian-trixie` | DEB |
-| RHEL 8 | `Dockerfile-rhel-8` | `fpm-rhel-8` | RPM |
-| RHEL 9 | `Dockerfile-rhel-9` | `fpm-rhel-9` | RPM |
-| RHEL 10 | `Dockerfile-rhel-10` | `fpm-rhel-10` | RPM |
-| Fedora 42 | `Dockerfile-fedora-42` | `fpm-fedora-42` | RPM |
-| Fedora 43 | `Dockerfile-fedora-43` | `fpm-fedora-43` | RPM |
-| FreeBSD | N/A (native build) | `fpm-freebsd` | FreeBSD pkg |
+| Distro                  | Dockerfile                   | fpm file              | Package type |
+| ----------------------- | ---------------------------- | --------------------- | ------------ |
+| Ubuntu 26.04 (Resolute) | `Dockerfile-ubuntu`          | `fpm-ubuntu`          | DEB          |
+| Ubuntu Noble (24.04)    | `Dockerfile-ubuntu-noble`    | `fpm-ubuntu-noble`    | DEB          |
+| Ubuntu Jammy (22.04)    | `Dockerfile-ubuntu-jammy`    | `fpm-ubuntu-jammy`    | DEB          |
+| Debian Bookworm         | `Dockerfile-debian-bookworm` | `fpm-debian-bookworm` | DEB          |
+| Debian Trixie           | `Dockerfile-debian-trixie`   | `fpm-debian-trixie`   | DEB          |
+| RHEL 8                  | `Dockerfile-rhel-8`          | `fpm-rhel-8`          | RPM          |
+| RHEL 9                  | `Dockerfile-rhel-9`          | `fpm-rhel-9`          | RPM          |
+| RHEL 10                 | `Dockerfile-rhel-10`         | `fpm-rhel-10`         | RPM          |
+| Fedora 43               | `Dockerfile-fedora-43`       | `fpm-fedora-43`       | RPM          |
+| Fedora 44               | `Dockerfile-fedora-44`       | `fpm-fedora-44`       | RPM          |
+| FreeBSD                 | N/A (native build)           | `fpm-freebsd`         | FreeBSD pkg  |
 
 ### Systemd Services (Linux)
 
-Four systemd units, all using `Type=simple` with `Restart=always`:
+Five systemd units, all using `Type=simple` with `Restart=always`:
 
-| Service | Script | PID file | Purpose |
-|---|---|---|---|
-| `bunkerweb.service` | `scripts/start.sh` | `nginx.pid` | NGINX reverse proxy |
-| `bunkerweb-scheduler.service` | `scripts/bunkerweb-scheduler.sh` | `scheduler.pid` | Job scheduler + DB migrations |
-| `bunkerweb-ui.service` | `scripts/bunkerweb-ui.sh` | `ui.pid` / `tmp-ui.pid` | Web UI (gunicorn) |
-| `bunkerweb-api.service` | `scripts/bunkerweb-api.sh` | `api.pid` | REST API (gunicorn) |
+| Service                       | Script                           | PID file                | Purpose                                                                                                                                                                                                 |
+| ----------------------------- | -------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bunkerweb.service`           | `scripts/start.sh`               | `nginx.pid`             | NGINX reverse proxy                                                                                                                                                                                     |
+| `bunkerweb-scheduler.service` | `scripts/bunkerweb-scheduler.sh` | `scheduler.pid`         | Job scheduler + DB migrations. Pre-inits the DB (`save_config.py --init`) before `main.py` to break the scheduler↔API↔DB-init deadlock                                                                  |
+| `bunkerweb-worker.service`    | `scripts/bunkerweb-worker.sh`    | `worker.pid`            | Celery job executor (runs the jobs the scheduler dispatches, incl. `push-configs`). Peer of the scheduler. Broker = redis-server/valkey/redis, shipped as an fpm `--depends` and enabled by postinstall |
+| `bunkerweb-ui.service`        | `scripts/bunkerweb-ui.sh`        | `ui.pid` / `tmp-ui.pid` | Web UI (gunicorn)                                                                                                                                                                                       |
+| `bunkerweb-api.service`       | `scripts/bunkerweb-api.sh`       | `api.pid`               | REST API (gunicorn). The scheduler hard-requires it (shares a generated `API_TOKEN` via `variables.env`); enabled whenever the scheduler is enabled                                                     |
 
 ### rc.d Services (FreeBSD)
 
-FreeBSD uses `rc.d/` scripts (`bunkerweb`, `bunkerweb_scheduler`, `bunkerweb_ui`, `bunkerweb_api`) that wrap the same `scripts/*.sh` via `/usr/sbin/daemon`.
+FreeBSD uses `rc.d/` scripts (`bunkerweb`, `bunkerweb_scheduler`, `bunkerweb_ui`, `bunkerweb_api`) that wrap the same `scripts/*.sh` via `/usr/sbin/daemon`. The Celery **worker is not yet packaged for FreeBSD** — there is no `bunkerweb_worker` rc.d script, `fpm-freebsd` declares no broker dependency, and `postinstall-freebsd.sh` does not install or enable it. (Linux DEB/RPM packages do ship `bunkerweb-worker.service` and a `redis-server` dependency.)
 
 ### Package Lifecycle Scripts
 
-| Script | When | Purpose |
-|---|---|---|
-| `scripts/beforeInstall.sh` | Pre-install | Backs up `/etc/nginx`, creates scheduler enablement flag for upgrades from <= 1.5.12 |
-| `scripts/postinstall.sh` | Post-install | Decompresses deps, sets permissions, migrates config files from old locations, manages systemd services based on `MANAGER_MODE`/`WORKER_MODE`/`SERVICE_*` env vars, runs setup wizard on fresh install |
-| `scripts/afterRemoveDEB.sh` | Post-remove (DEB) | Handles remove vs purge vs upgrade; backs up env files and DB during upgrades |
-| `scripts/afterRemoveRPM.sh` | Post-remove (RPM) | Same logic adapted for RPM's `$1` argument convention (`0`=remove, `1`=upgrade) |
-| `scripts/postinstall-freebsd.sh` | Post-install (FreeBSD) | FreeBSD-specific postinstall (delegated from `postinstall.sh`) |
-| `scripts/beforeInstallFreeBSD.sh` | Pre-install (FreeBSD) | FreeBSD-specific pre-install tasks |
-| `scripts/afterRemoveFreeBSD.sh` | Post-remove (FreeBSD) | FreeBSD-specific cleanup (delegated from afterRemove scripts) |
+| Script                            | When                   | Purpose                                                                                                                                                                                                |
+| --------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/beforeInstall.sh`        | Pre-install            | Backs up `/etc/nginx`, creates scheduler enablement flag for upgrades from <= 1.5.12                                                                                                                   |
+| `scripts/postinstall.sh`          | Post-install           | Decompresses deps, sets permissions, migrates config files from old locations, manages systemd services based on `MANAGER_MODE`/`WORKER_MODE`/`SERVICE_*` env vars, runs setup wizard on fresh install |
+| `scripts/afterRemoveDEB.sh`       | Post-remove (DEB)      | Handles remove vs purge vs upgrade; backs up env files and DB during upgrades                                                                                                                          |
+| `scripts/afterRemoveRPM.sh`       | Post-remove (RPM)      | Same logic adapted for RPM's `$1` argument convention (`0`=remove, `1`=upgrade)                                                                                                                        |
+| `scripts/postinstall-freebsd.sh`  | Post-install (FreeBSD) | FreeBSD-specific postinstall (delegated from `postinstall.sh`)                                                                                                                                         |
+| `scripts/beforeInstallFreeBSD.sh` | Pre-install (FreeBSD)  | FreeBSD-specific pre-install tasks                                                                                                                                                                     |
+| `scripts/afterRemoveFreeBSD.sh`   | Post-remove (FreeBSD)  | FreeBSD-specific cleanup (delegated from afterRemove scripts)                                                                                                                                          |
 
 ### Service Mode Logic (postinstall.sh)
 
 The postinstall script enables/disables services based on environment variables:
 
-- **Standalone mode** (default, no `MANAGER_MODE`/`WORKER_MODE`): enables BunkerWeb + Scheduler + UI
-- **Manager-only mode** (`MANAGER_MODE=yes`, no `WORKER_MODE`): enables Scheduler + UI, disables BunkerWeb
-- **Worker-only mode** (`WORKER_MODE=yes`, no `MANAGER_MODE`): enables BunkerWeb, disables Scheduler + UI
-- **API**: only enabled when `SERVICE_API=yes`
+- **Standalone mode** (default, no `MANAGER_MODE`/`WORKER_MODE`): enables BunkerWeb + Scheduler + Worker + API + UI
+- **Manager-only mode** (`MANAGER_MODE=yes`, no `WORKER_MODE`): enables Scheduler + Worker + API + UI, disables BunkerWeb
+- **Worker-only mode** (`WORKER_MODE=yes`, no `MANAGER_MODE`): enables BunkerWeb, disables Scheduler + Worker + UI
+- **bunkerweb-worker** (Celery) and **bunkerweb-api**: enabled wherever the scheduler is enabled (they are peers of the scheduler, since the scheduler dispatches jobs through the API to the Celery worker). `SERVICE_API=no` opts the API out. The broker (redis-server/valkey/redis) is enabled by postinstall when the worker will run.
 - Individual services can be disabled with `SERVICE_BUNKERWEB=no`, `SERVICE_SCHEDULER=no`, `SERVICE_UI=no`
 
 ### Runtime Script Patterns
 
-All service scripts (`start.sh`, `bunkerweb-scheduler.sh`, `bunkerweb-ui.sh`, `bunkerweb-api.sh`):
+All service scripts (`start.sh`, `bunkerweb-scheduler.sh`, `bunkerweb-worker.sh`, `bunkerweb-ui.sh`, `bunkerweb-api.sh`):
 
 - Source `/usr/share/bunkerweb/helpers/utils.sh` for `get_python_bin`, `get_bunkerweb_pythonpath`, `run_as_nginx`, `export_env_file`, `log`
 - Accept `start|stop|reload|restart` as the first argument
@@ -108,15 +110,15 @@ All service scripts (`start.sh`, `bunkerweb-scheduler.sh`, `bunkerweb-ui.sh`, `b
 
 ### Key Filesystem Paths (Installed System)
 
-| Path | Purpose |
-|---|---|
-| `/usr/share/bunkerweb/` | Application code, plugins, deps |
-| `/etc/bunkerweb/` | Configuration (variables.env, ui.env, scheduler.env, api.env, plugins/, configs/) |
-| `/var/lib/bunkerweb/` | Persistent data (db.sqlite3) |
-| `/var/tmp/bunkerweb/` | Temporary files (setgid 2770) |
-| `/var/log/bunkerweb/` | Log files |
-| `/var/run/bunkerweb/` | PID files |
-| `/var/cache/bunkerweb/` | Cache |
+| Path                    | Purpose                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `/usr/share/bunkerweb/` | Application code, plugins, deps                                                   |
+| `/etc/bunkerweb/`       | Configuration (variables.env, ui.env, scheduler.env, api.env, plugins/, configs/) |
+| `/var/lib/bunkerweb/`   | Persistent data (db.sqlite3)                                                      |
+| `/var/tmp/bunkerweb/`   | Temporary files (setgid 2770)                                                     |
+| `/var/log/bunkerweb/`   | Log files                                                                         |
+| `/var/run/bunkerweb/`   | PID files                                                                         |
+| `/var/cache/bunkerweb/` | Cache                                                                             |
 
 ## Key Conventions
 

@@ -18,7 +18,7 @@ docker build -f src/all-in-one/Dockerfile -t bunkerweb:dev .
 docker build -f src/all-in-one/Dockerfile --build-arg SKIP_MINIFY=yes -t bunkerweb:dev .
 ```
 
-The Dockerfile is a multi-stage build: a `builder` stage compiles Go (for CrowdSec), re2, CrowdSec, NGINX deps, and Python packages; the final stage is `nginx:alpine-slim`.
+The Dockerfile is a multi-stage build: a `builder` stage compiles Go (for CrowdSec), re2, CrowdSec, NGINX deps, and Python packages; the final stage is `nginx:1.30.2` (Debian/trixie — migrated off Alpine because the certbot-dns-multi lego bridge is glibc-only). `procps` is required (the supervisord→main-app handoff and `healthcheck-all-in-one.sh` use `kill`/`pgrep`/`pkill`).
 
 ## Run (Dev)
 
@@ -111,7 +111,7 @@ These are unique to the AIO image (not in the root CLAUDE.md):
 
 - `SERVICE_UI`, `SERVICE_SCHEDULER`, `SERVICE_API`: Enable/disable individual services
 - `SERVICE_WORKER`: Enable/disable the Celery worker service. `entrypoint.sh` auto-defaults it to `yes` only when `SERVICE_SCHEDULER=yes`; set it explicitly to override
-- `WORKER_CONCURRENCY` / `WORKER_MAX_MEMORY_KB` / `WORKER_QUEUES` / `WORKER_HOSTNAME`: Worker tuning knobs (concurrency default 2, memory cap default 300000 KB, queues default `default,heavy`)
+- `WORKER_CONCURRENCY` / `WORKER_MAX_MEMORY_KB` / `WORKER_QUEUES`: Worker tuning knobs (concurrency default 2, memory cap default 300000 KB, queues default `default,heavy`). The AIO worker hostname is hardcoded to `worker@%%h` in `supervisor.d/worker.ini` — there is no `WORKER_HOSTNAME` override here
 - `AUTOCONF_MODE`: Enables the autoconf service
 - `USE_CROWDSEC` / `CROWDSEC_API` / `CROWDSEC_API_KEY` / `CROWDSEC_APPSEC_URL`: CrowdSec configuration
 - `CROWDSEC_EXTRA_COLLECTIONS` / `CROWDSEC_DISABLE_PARSERS`: Space-separated lists for CrowdSec customization

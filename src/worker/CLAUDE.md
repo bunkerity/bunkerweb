@@ -12,16 +12,16 @@ The worker runs independently of the Scheduler, shares the BunkerWeb database fo
 
 ## File Overview
 
-| File                                   | Purpose                                                                                                                                                                                                                                                                                                      |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app.py`                               | Celery app construction. Defines the broker URL, queues (`default`, `heavy`), task time limits, prefork tuning, `HEAVY_JOBS` routing set, `route_job` callable wired into `task_routes`, and the `worker_process_init` / `worker_process_shutdown` hooks that create/close a per-process `Database` instance |
-| `tasks.py`                             | The single Celery task `worker.execute_job`. Snapshots `os.environ`, strips `SENSITIVE_ENV_KEYS`, overlays `job_data["env"]`, runs the job via `JobExecutor`, persists every run via `db.add_job_run`, and triggers a debounced cache+reload broadcast when the job returns `1`                              |
-| `executor.py`                          | `JobExecutor` class. Sandboxed dynamic loader: resolves the job file, refuses anything outside `ALLOWED_ROOTS`, imports it under a hashed module name, restores `sys.path` afterwards                                                                                                                        |
-| `entrypoint.sh`                        | Docker entrypoint. Writes the `INTEGRATION` file, waits up to 30×2s for the database to be reachable, then `exec`s `celery -A worker.app worker` with the prefork pool and `default,heavy` queues                                                                                                            |
-| `Dockerfile`                           | Multi-stage alpine build. Final image runs as UID/GID `102` (`worker:worker`); workdir is `/usr/share/bunkerweb/worker`                                                                                                                                                                                      |
-| `healthcheck-worker.sh`                | Container healthcheck: `celery inspect ping --destination worker@<hostname>` and greps for `pong`                                                                                                                                                                                                            |
-| `requirements.in` / `requirements.txt` | Direct deps: `celery==5.6.3`, `redis[hiredis]==7.4.0` (Kombu is pulled in transitively by Celery)                                                                                                                                                                                                            |
-| `__init__.py`                          | Package marker — makes `worker.app` / `worker.tasks` importable                                                                                                                                                                                                                                              |
+| File                                   | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app.py`                               | Celery app construction. Defines the broker URL, queues (`default`, `heavy`), task time limits, prefork tuning, `HEAVY_JOBS` routing set, `route_job` callable wired into `task_routes`, and the `worker_process_init` / `worker_process_shutdown` lifecycle hooks (see Database Lifecycle)                                                                                                                                                              |
+| `tasks.py`                             | The single Celery task `worker.execute_job`. Snapshots `os.environ`, strips `SENSITIVE_ENV_KEYS`, overlays `job_data["env"]`, runs the job via `JobExecutor`, persists every run via `db.add_job_run`, and triggers a debounced cache+reload broadcast when the job returns `1`                                                                                                                                                                          |
+| `executor.py`                          | `JobExecutor` class. Sandboxed dynamic loader: resolves the job file, refuses anything outside `ALLOWED_ROOTS`, imports it under a hashed module name, restores `sys.path` afterwards                                                                                                                                                                                                                                                                    |
+| `entrypoint.sh`                        | Docker entrypoint. Writes the `INTEGRATION` file, waits up to 30×2s for the database to be reachable, then `exec`s `celery -A worker.app worker` with the prefork pool and `default,heavy` queues                                                                                                                                                                                                                                                        |
+| `Dockerfile`                           | Multi-stage **Debian-slim** build (`python:3.14-slim`, not Alpine — the certbot-dns-multi Go/CGO bridge cannot load on musl). Final image runs as UID/GID `102` (`worker:worker`); workdir is `/usr/share/bunkerweb/worker`                                                                                                                                                                                                                              |
+| `healthcheck-worker.sh`                | Container healthcheck: `celery inspect ping --destination worker@<hostname>` and greps for `pong`                                                                                                                                                                                                                                                                                                                                                        |
+| `requirements.in` / `requirements.txt` | Direct deps: `celery==5.6.3`, `redis[hiredis]==8.0.0`, `maxminddb==3.1.1`, `certbot==5.6.0`, `certbot-dns-multi==5.2.0` (Kombu transitively via Celery; `acme`/`cryptography` via certbot). certbot + certbot-dns-multi are required because the worker runs the `certbot-*` Let's Encrypt jobs; certbot-dns-multi ships a Go/CGO bridge that cannot load on musl, which is why this image is Debian-slim (glibc) rather than Alpine (see `Dockerfile`). |
+| `__init__.py`                          | Package marker — makes `worker.app` / `worker.tasks` importable                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ## Architecture
 
@@ -103,7 +103,7 @@ This keeps broker credentials and the HMAC secret out of any subprocess the job 
 - If `DATABASE_URI` is set, imports `Database` + `setup_logger` from the shared code and assigns the instance to module-global `_worker_db`
 - Otherwise leaves `_worker_db = None` (jobs run, persistence is skipped with a warning)
 
-`worker_process_shutdown` closes `_worker_db`. `tasks.execute_job` fetches it via `get_worker_db()`.
+`worker_process_shutdown` closes `_worker_db`. `tasks.execute_job` fetches it via `get_worker_db()`. The shared `Database` (from `src/common/db/`) is composed from the mixins in `db_methods/` (SQLAlchemy 2.0) — the worker imports the same class the scheduler and API use, so query methods like `get_instances()`, `get_config()`, and `add_job_run()` are available unchanged.
 
 ### Sandboxed Module Loading (`executor.py`)
 
@@ -119,13 +119,16 @@ This keeps broker credentials and the HMAC secret out of any subprocess the job 
 
 ### Reload Broadcast Target
 
-`_get_apis` reads `BUNKERWEB_INSTANCES` and splits on whitespace. Each non-empty token becomes:
+`_get_apis` resolves reload targets in two tiers:
+
+1. **Primary — the database.** When a worker `Database` is available, it calls `db.get_instances()`, drops any host marked `down`, and builds one `API.from_instance(inst, token=...)` per remaining instance.
+2. **Fallback — `BUNKERWEB_INSTANCES`.** If the DB is unavailable or returns no usable instances, it splits `BUNKERWEB_INSTANCES` on whitespace and builds one API per token:
 
 ```python
-API(f"http://{hostname}:5000", host=hostname)
+API(f"http://{hostname}:5000", host=hostname, token=token)
 ```
 
-If the env var is empty, `_get_apis` returns `None` and the reload step is silently skipped — by design, so a worker can run standalone for diagnostics.
+If both sources are empty, `_get_apis` returns `None` and the reload step is silently skipped — by design, so a worker can run standalone for diagnostics.
 
 ## Build and Run
 

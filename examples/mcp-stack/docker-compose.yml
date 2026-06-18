@@ -30,6 +30,7 @@ services:
       MULTISITE: "yes"
       USE_REDIS: "yes"
       REDIS_HOST: "redis"
+      CELERY_BROKER_URL: "redis://redis:6379/0" # Celery broker shared with bw-api and bw-worker
       DISABLE_DEFAULT_SERVER: "yes"
       AUTO_LETS_ENCRYPT: "yes"
       api.example.com_USE_TEMPLATE: "api"
@@ -53,10 +54,27 @@ services:
       API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24" # bw-api uses API_WHITELIST_IPS (plural), not the anchor's API_WHITELIST_IP
       FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" # Be careful with this setting; only use it if you are sure that the reverse proxy is the only way to access the API
       API_ROOT_PATH: "/"
+      CELERY_BROKER_URL: "redis://redis:6379/0" # The API dispatches jobs to the worker via this broker
     networks:
       - bw-universe
       - bw-db
       - bw-mcp
+
+  bw-worker: # Celery worker — executes the jobs the scheduler dispatches via the API (blocklists, certbot, backups, etc.)
+    image: bunkerity/bunkerweb-worker:1.6.12-rc1
+    depends_on:
+      - bw-db
+      - redis
+    environment:
+      <<: *bw-env
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      WORKER_CONCURRENCY: "2"
+      WORKER_QUEUES: "default,heavy"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
 
   bw-mcp:
     image: bunkerity/bunkerweb-mcp:v0.1.0

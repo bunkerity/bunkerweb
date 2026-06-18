@@ -6,7 +6,7 @@ See also the [root CLAUDE.md](../../CLAUDE.md) for project-wide architecture, bu
 
 ## Component Overview
 
-`src/bw/` is the BunkerWeb core NGINX container — the reverse proxy runtime that processes HTTP/Stream requests through a Lua plugin pipeline. It packages the Lua runtime, entrypoint script, loading page, and static assets (GeoIP databases, root CA) into a Docker image based on `nginx:1.28.3-alpine-slim`.
+`src/bw/` is the BunkerWeb core NGINX container — the reverse proxy runtime that processes HTTP/Stream requests through a Lua plugin pipeline. It packages the Lua runtime, entrypoint script, loading page, and static assets (GeoIP databases, root CA) into a Docker image based on `nginx:1.30.2` (Debian/glibc — migrated off Alpine because the certbot-dns-multi Go/CGO bridge cannot load on musl).
 
 This component has no Python code of its own. It depends on `src/common/` (core plugins, confs, gen, helpers, utils, settings.json) and `src/deps/` (compiled NGINX modules, Python deps for config generation).
 
@@ -20,7 +20,7 @@ docker build -f src/bw/Dockerfile -t bunkerweb:dev .
 docker build -f src/bw/Dockerfile -t bunkerweb:dev --build-arg SKIP_MINIFY=yes .
 ```
 
-The Dockerfile is a multi-stage build: stage 1 compiles NGINX deps from `src/deps/`, stage 2 copies artifacts into a slim runtime image. The final image runs as `nginx:nginx` (non-root).
+The Dockerfile is a multi-stage build: stage 1 compiles NGINX deps from `src/deps/`, stage 2 copies artifacts into the Debian-based `nginx:1.30.2` runtime image. The final image runs as `nginx:nginx` (non-root).
 
 ## Linting & Formatting
 
@@ -51,7 +51,7 @@ All classes use `middleclass` (third-party OOP in `lua/middleclass.lua` — do n
 | `plugin.lua`       | Base class for all plugins. Instantiated per-request with access to variables, datastores, and metrics.                            |
 | `helpers.lua`      | Init-time utilities: plugin loading/ordering, variable parsing, context filling (`fill_ctx`), context saving for subrequests.      |
 | `utils.lua`        | Request-time utilities: variable lookup, IP/ban/whitelist management, DNS, GeoIP, sessions, security helpers.                      |
-| `datastore.lua`    | Worker-local LRU (100k entries) + NGINX shared dict abstraction.                                                                   |
+| `datastore.lua`    | Worker-local LRU (1k entries by default, set via `DATASTORE_LRU_SIZE`) + NGINX shared dict abstraction.                            |
 | `cachestore.lua`   | Multi-level cache: L1 worker LRU → L2 shared dict (mlcache) → L3 Redis (optional). Gracefully degrades without Redis.              |
 | `clusterstore.lua` | Redis connection pool with Sentinel support. Lazy init — only connects when cosockets are available.                               |
 | `api.lua`          | Internal NGINX API (`/ping`, `/reload`, `/ban`, `/unban`, `/bans`, `/health`, config upload endpoints). Token + IP whitelist auth. |
@@ -64,7 +64,7 @@ All classes use `middleclass` (third-party OOP in `lua/middleclass.lua` — do n
 1. **Init phase**: `helpers.lua` loads plugin metadata into `internalstore` shared dict, parses variables, pre-compiles require paths.
 2. **Per-request**: `helpers.fill_ctx()` populates `ngx.ctx.bw` with IP, URI, headers, and fresh datastore/cachestore/clusterstore instances.
 3. **Plugin execution**: For each plugin in `PLUGINS_ORDER_<PHASE>`, instantiate via `plugin:new(ctx)` and call the phase method (set/rewrite/access/content/header_filter/body_filter/log/preread).
-4. **Return convention**: All phase methods return `{ret, msg, status, redirect, data}`.
+4. **Return convention**: All phase methods return a table with named keys (built by `self:ret(...)`): `{ ret = ..., msg = ..., status = ..., redirect = ..., data = ... }`.
 
 ### Subsystem Handling (HTTP vs Stream)
 
@@ -78,7 +78,7 @@ Async operations (Redis, DNS) require cosockets, which are only available in cer
 
 | Dict                                           | Purpose                                    |
 | ---------------------------------------------- | ------------------------------------------ |
-| `internalstore`                                | Plugin metadata, compiled variables        |
+| `internalstore` / `internalstore_stream`       | Plugin metadata, compiled variables        |
 | `datastore` / `datastore_stream`               | General key-value store                    |
 | `cachestore` / `cachestore_stream`             | mlcache L1+L2                              |
 | `cachestore_ipc` / `cachestore_ipc_stream`     | mlcache IPC                                |

@@ -15,7 +15,7 @@ The BunkerWeb API — a FastAPI control plane for BunkerWeb (open-source WAF). M
 1. `entrypoint.sh` launches Gunicorn with a custom Uvicorn worker (`utils/worker.py`)
 2. `utils/gunicorn.conf.py` `on_starting()` hook runs pre-fork: initializes Biscuit EdDSA keys, creates/updates API user in DB, builds ACL cache file, bootstraps permissions from JSON
 3. `app/main.py` `create_app()` builds the FastAPI app: mounts middleware (IP whitelist, rate limiter, rate-limit headers), includes the core router, registers error handlers
-4. `app/routers/core.py` assembles all sub-routers and conditionally exposes `/auth` only if API users exist in the database
+4. `app/routers/core.py` assembles all sub-routers; `/auth` is mounted **unconditionally** (the endpoint itself returns 401 when no API users exist in the database)
 
 ### Request Lifecycle
 
@@ -115,7 +115,7 @@ Dev credentials: API `admin`/`P@ssw0rd`, DB `bunkerweb`/`secret`.
 pip install -r src/api/requirements.txt  # compiled from requirements.in
 ```
 
-Key packages: `fastapi==0.136.1`, `uvicorn==0.46.0`, `gunicorn==25.1.0`, `biscuit-python==0.4.0`, `bcrypt`, `slowapi==0.1.9`, `pydantic==2.13.4`, `pydantic-settings==2.14.1`, `celery` (lazy via `app/celery_app.py` — used by the `jobs` router to dispatch to the worker queue)
+Key packages: `fastapi==0.137.1`, `uvicorn==0.49.0`, `gunicorn==26.0.0`, `biscuit-python` (pinned to a Git commit, ~0.4.1), `bcrypt==5.0.0`, `slowapi==0.1.10`, `pydantic==2.13.4`, `pydantic-settings==2.14.1`. `celery` is **not** in `requirements.in`; it (with `redis`) is installed into the image from `src/worker/requirements.txt` at build time (the certbot stack is stripped — see `src/api/Dockerfile`). The `jobs` router uses it lazily via `app/celery_app.py` to dispatch to the worker queue.
 
 ### Linting & Formatting
 

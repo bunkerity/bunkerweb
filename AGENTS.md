@@ -24,7 +24,7 @@ This is the primary instruction file for AI coding agents in this repository.
 
 ## Critical Architecture Facts
 
-- Scheduler does not execute all jobs in-process anymore; it dispatches execution to Celery workers in `src/worker/` (Redis broker required).
+- Scheduler does not execute all jobs in-process anymore; it dispatches execution to Celery workers in `src/worker/` (Redis or Valkey broker required).
 - UI should not bypass the API for data access; UI reads/writes flow through API client layers.
 - `src/api/app/routers/core.py` is router assembly, not the FastAPI app entry point (`src/api/app/main.py`).
 - Config pipeline is settings -> Configurator -> Templator -> rendered NGINX files; avoid bypassing validation.
@@ -36,6 +36,7 @@ This is the primary instruction file for AI coding agents in this repository.
 - API deps: `pip install -r src/api/requirements.txt`
 - UI deps: `pip install -r src/ui/requirements.txt`
 - Scheduler deps: `pip install -r src/scheduler/requirements.txt`
+- Worker deps: `pip install -r src/worker/requirements.txt`
 - Dev stack (recommended): `docker compose -f misc/dev/docker-compose.ui.api.yml up -d`
 - Integration tests: `python3 tests/main.py docker` (or `autoconf`, `swarm`, `kubernetes`, `linux`)
 
@@ -70,3 +71,4 @@ For packaging commands and distro-specific build details, use [BUILD.md](BUILD.m
   - [src/common/CLAUDE.md](src/common/CLAUDE.md)
   - [src/linux/CLAUDE.md](src/linux/CLAUDE.md)
   - [src/all-in-one/CLAUDE.md](src/all-in-one/CLAUDE.md)
+  - [examples/mcp-stack/CLAUDE.md](examples/mcp-stack/CLAUDE.md)

@@ -32,12 +32,13 @@ Config (Config.py)
 2. Initialize `AutoconfApiClient` from `API_URL` and `API_TOKEN` env vars
 3. Instantiate the appropriate controller (passing `api_client` kwarg)
 4. `controller.wait()` — poll until API is ready and at least one healthy BunkerWeb instance exists
-5. `controller.wait_applying(True)` — block until Scheduler finishes any in-progress config apply
+5. `controller.initial_apply()` — gather the current instances/services/configs and perform the first configuration apply
 6. `controller.process_events()` — enter the infinite event loop
 
 ### Event Processing Pattern
 
 All controllers share a debounce pattern (2-second window):
+
 1. Receive platform event (Docker event stream / K8s watch)
 2. Filter: only process events with relevant labels/annotations (and matching namespace if `NAMESPACES` is set)
 3. Set `pending_apply = True`, record timestamp
@@ -63,25 +64,26 @@ All controllers share a debounce pattern (2-second window):
 
 ### Key Environment Variables
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `SWARM_MODE` | `no` | Enable Swarm controller |
-| `KUBERNETES_MODE` | `no` | Enable Kubernetes Ingress controller |
-| `KUBERNETES_GATEWAY_MODE` | `no` | Enable Kubernetes Gateway API controller |
-| `DOCKER_HOST` | `unix:///var/run/docker.sock` | Docker socket path |
-| `WAIT_RETRY_INTERVAL` | `5` | Seconds between readiness retries |
-| `NAMESPACES` | (all) | Space-separated namespace filter |
-| `USE_KUBERNETES_FQDN` | `yes` | Use Pod FQDN vs IP as hostname |
-| `KUBERNETES_DOMAIN_NAME` | `cluster.local` | K8s cluster domain |
-| `KUBERNETES_SERVICE_PROTOCOL` | `http` | Protocol for backend service URLs |
-| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | `1` | Starting index for numbered reverse proxy settings |
-| `API_URL` | `http://bw-api:5000` | FastAPI backend URL |
-| `API_TOKEN` | (empty) | Bearer token for API authentication |
-| `API_ERROR_TIMEOUT` | `60` | Seconds of consecutive API failures before `wait_applying()` escalates warnings to errors (see `Config.py`) |
+| Variable                                | Default                       | Purpose                                                                                                     |
+| --------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `SWARM_MODE`                            | `no`                          | Enable Swarm controller                                                                                     |
+| `KUBERNETES_MODE`                       | `no`                          | Enable Kubernetes Ingress controller                                                                        |
+| `KUBERNETES_GATEWAY_MODE`               | `no`                          | Enable Kubernetes Gateway API controller                                                                    |
+| `DOCKER_HOST`                           | `unix:///var/run/docker.sock` | Docker socket path                                                                                          |
+| `WAIT_RETRY_INTERVAL`                   | `5`                           | Seconds between readiness retries                                                                           |
+| `NAMESPACES`                            | (all)                         | Space-separated namespace filter                                                                            |
+| `USE_KUBERNETES_FQDN`                   | `yes`                         | Use Pod FQDN vs IP as hostname                                                                              |
+| `KUBERNETES_DOMAIN_NAME`                | `cluster.local`               | K8s cluster domain                                                                                          |
+| `KUBERNETES_SERVICE_PROTOCOL`           | `http`                        | Protocol for backend service URLs                                                                           |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | `1`                           | Starting index for numbered reverse proxy settings                                                          |
+| `API_URL`                               | `http://bw-api:5000`          | FastAPI backend URL                                                                                         |
+| `API_TOKEN`                             | (empty)                       | Bearer token for API authentication                                                                         |
+| `API_ERROR_TIMEOUT`                     | `60`                          | Seconds of consecutive API failures before `wait_applying()` escalates warnings to errors (see `Config.py`) |
 
 ### API Interaction
 
 Autoconf communicates exclusively through the FastAPI API via `AutoconfApiClient` (subclass of `BaseApiClient` from `src/common/utils/`). Key patterns:
+
 - **Hybrid availability**: `_check_api_available()` checks `_api.readonly` before writes. If the API is unreachable, enters degraded mode (`_api_available = False`) — continues watching events but skips `apply()`. Recovers automatically via `_api.ping()` on the next cycle.
 - **Change signaling**: After writing config, calls `_api.checked_changes()` which sets metadata flags the Scheduler watches
 - **Settings validation**: `_api.validate_setting()` validates each setting extracted from labels/annotations via `POST /global_settings/validate`
@@ -116,7 +118,7 @@ docker build -f src/autoconf/Dockerfile -t bunkerweb-autoconf:dev .
 docker compose -f misc/dev/docker-compose.autoconf.yml up -d
 
 # Install Python deps locally (for IDE support)
-pip install -r src/autoconf/requirements.in
+pip install -r src/autoconf/requirements.txt
 ```
 
 The Dockerfile is a multi-stage build: builder stage compiles Python deps, final stage runs as `autoconf` user (UID 101). Autoconf has no database dependencies — it communicates exclusively via the API.
