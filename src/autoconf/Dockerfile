@@ -1,10 +1,12 @@
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f AS builder
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
 # Install python dependencies
-RUN apk add --no-cache build-base libffi-dev cargo
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends build-essential libffi-dev cargo && \
+  rm -rf /var/lib/apt/lists/*
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -28,19 +30,17 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/VERSION VERSION
 
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
 # Install bash and create autoconf user
-RUN apk add --no-cache bash tzdata && \
-  addgroup -g 101 autoconf && \
-  adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
-
-# Fix CVEs
-RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
-RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends bash tzdata ca-certificates && \
+  rm -rf /var/lib/apt/lists/* && \
+  groupadd -g 101 autoconf && \
+  useradd -u 101 -g autoconf -d /usr/share/bunkerweb/autoconf -s /usr/sbin/nologin -M autoconf
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
