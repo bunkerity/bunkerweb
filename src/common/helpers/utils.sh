@@ -128,6 +128,14 @@ function export_env_file() {
 		[[ -z "$key" || "$key" =~ ^# ]] && continue
 		key=$(echo "$key" | xargs)
 		[[ -z "$key" ]] && continue
+		# Skip keys that are not valid shell identifiers (e.g. dotted multisite
+		# settings like www.example.com_USE_REVERSE_PROXY). Bash refuses to export
+		# them and would emit "not a valid identifier" errors. These are read
+		# directly from variables.env as a file by the Python config layer, so they
+		# do not need to be present in the shell environment.
+		if [[ ! "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+			continue
+		fi
 		export "$key=$value"
 	done < "$env_file"
 }

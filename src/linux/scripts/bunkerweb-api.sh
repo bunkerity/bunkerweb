@@ -235,6 +235,12 @@ start() {
     export_env_file /etc/bunkerweb/variables.env
     export_env_file /etc/bunkerweb/api.env
 
+    # The API enqueues Celery tasks on the broker when the scheduler dispatches jobs
+    # (POST /jobs/dispatch). Without CELERY_BROKER_URL, get_celery_app() returns None and
+    # the dispatch endpoint answers 503 — no jobs ever run. Default to the local broker.
+    : "${CELERY_BROKER_URL:=redis://127.0.0.1:6379/0}"
+    export CELERY_BROKER_URL
+
     if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
         --chdir /usr/share/bunkerweb/api \
         --logger-class utils.logger.APILogger \

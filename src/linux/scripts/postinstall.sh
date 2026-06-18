@@ -25,6 +25,35 @@ function do_and_check_cmd() {
     return 0
 }
 
+# Detect the broker (Redis/Valkey) systemd unit shipped by this distro. Names differ:
+# Debian/Ubuntu → redis-server, Fedora/RHEL-10 → valkey, RHEL-8/9 → redis. Echoes the
+# first installed unit name, or nothing if none is present.
+function detect_broker_unit() {
+    local unit
+    for unit in redis-server valkey redis; do
+        if systemctl list-unit-files "${unit}.service" 2>/dev/null | grep -q "^${unit}.service"; then
+            echo "$unit"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Enable + start the broker once when the worker will run. Best-effort: the worker's
+# Celery client retries the broker connection on startup, so a transient failure here
+# is not fatal to the install.
+function enable_broker_now() {
+    local broker_unit
+    broker_unit="$(detect_broker_unit)"
+    if [ -z "$broker_unit" ]; then
+        echo "ℹ️ No Redis/Valkey broker unit found; the worker will retry once a broker is available."
+        return 0
+    fi
+    echo "🚀 Enabling and starting the message broker (${broker_unit})..."
+    systemctl enable --now "$broker_unit" || echo "ℹ️ Could not enable/start ${broker_unit}; the worker will retry when it is available."
+    return 0
+}
+
 # Decompress deps directory with pigz for fastest decompression
 echo "Decompressing deps directory with pigz..."
 cd /usr/share/bunkerweb || exit 1
@@ -52,8 +81,8 @@ chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
 # Ensure temp dir enforces group inheritance and no access for others
 chmod 2770 /var/tmp/bunkerweb/
 chmod 550 -R /usr/share/bunkerweb/
-find . \( -path './api' -o -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
-find api/ scheduler/ ui/ cli/ lua/ core/ db/ gen/ utils/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+find . \( -path './api' -o -path './scheduler' -o -path './worker' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+find api/ scheduler/ worker/ ui/ cli/ lua/ core/ db/ gen/ utils/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
 chmod 770 -R db/alembic/
 
 # Retro-tighten 0644 backups left by pre-fix versions.
@@ -105,6 +134,30 @@ if [ ! -d /var/www/html ] ; then
     do_and_check_cmd chown root:nginx /var/www/html
 else
     echo "/var/www/html directory already exists, skipping copy..."
+fi
+
+# Resolve a single shared API_TOKEN BEFORE any unit starts. The scheduler sends
+# `Authorization: Bearer $API_TOKEN`; the API guard rejects an empty/mismatched token and the
+# scheduler then loops forever on "Database is not initialized" (it confirms init via the API).
+# Both units source /etc/bunkerweb/variables.env, so the same token reaches both. Precedence:
+# operator-supplied env API_TOKEN > an existing token in variables.env > a freshly generated one.
+# BW_API_TOKEN is reused below in the migrate path AND in the wizard's default variables.env so
+# every install path ends up with the same shared token (the wizard heredoc overwrites the file).
+if [ -n "${API_TOKEN:-}" ]; then
+    BW_API_TOKEN="$API_TOKEN"
+elif [ -f /etc/bunkerweb/variables.env ] && grep -q "^API_TOKEN=" /etc/bunkerweb/variables.env; then
+    BW_API_TOKEN="$(grep "^API_TOKEN=" /etc/bunkerweb/variables.env | head -n1 | cut -d '=' -f2-)"
+else
+    BW_API_TOKEN="$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+fi
+export BW_API_TOKEN
+
+# Migrate path: variables.env already exists (restored/migrated) but lacks a token → append it.
+if [ -f /etc/bunkerweb/variables.env ] && ! grep -q "^API_TOKEN=" /etc/bunkerweb/variables.env; then
+    echo "🔑 Provisioning a shared API_TOKEN for the scheduler and API..."
+    printf 'API_TOKEN=%s\n' "$BW_API_TOKEN" >> /etc/bunkerweb/variables.env
+    chown root:nginx /etc/bunkerweb/variables.env
+    chmod 660 /etc/bunkerweb/variables.env
 fi
 
 systemctl daemon-reload
@@ -182,10 +235,18 @@ if {
     # Manager-only mode (manager enabled, worker disabled)
     { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
 } && [ "$SERVICE_SCHEDULER" != "no" ]; then
+    # The worker (Celery) executes every job the scheduler dispatches, so it is a peer of
+    # the scheduler: enabled in the same topology, restarted/disabled on the same legs.
     # Fresh installation or explicit scheduler enablement
     if [[ -f /var/tmp/bunkerweb_enable_scheduler || ! -f /var/tmp/bunkerweb_upgrade ]]; then
+        # The broker must be up before the worker; enable it first (best-effort).
+        enable_broker_now
+
         echo "🚀 Enabling and starting the BunkerWeb Scheduler service..."
         do_and_check_cmd systemctl enable --now bunkerweb-scheduler
+
+        echo "🚀 Enabling and starting the BunkerWeb Worker service..."
+        do_and_check_cmd systemctl enable --now bunkerweb-worker
 
         # Clean up scheduler enablement flag if it exists
         if [ -f /var/tmp/bunkerweb_enable_scheduler ]; then
@@ -194,10 +255,23 @@ if {
         fi
     # Upgrade scenario
     else
+        # Make sure the broker is available before (re)starting the worker.
+        enable_broker_now
+
         # Restart the scheduler service only if it's already running
         if systemctl is-active --quiet bunkerweb-scheduler; then
             echo "📋 Restarting the BunkerWeb Scheduler service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb-scheduler
+        fi
+        # The worker unit is new in this release: enable+start it if absent, restart if active.
+        if systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; then
+            if systemctl is-active --quiet bunkerweb-worker; then
+                echo "📋 Restarting the BunkerWeb Worker service after upgrade..."
+                do_and_check_cmd systemctl restart bunkerweb-worker
+            fi
+        else
+            echo "🚀 Enabling and starting the BunkerWeb Worker service..."
+            do_and_check_cmd systemctl enable --now bunkerweb-worker
         fi
     fi
 # Disable scheduler if it shouldn't be running but is still active, or — only when the
@@ -207,8 +281,18 @@ if {
 elif systemctl is-active --quiet bunkerweb-scheduler || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
     do_and_check_cmd systemctl disable --now bunkerweb-scheduler
+    # Tear the worker down alongside the scheduler (same self-heal gating).
+    if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
+        echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
+        do_and_check_cmd systemctl disable --now bunkerweb-worker
+    fi
 else
     echo "ℹ️ BunkerWeb Scheduler service is not enabled in the current configuration."
+    # Self-heal a leftover-enabled worker when the scheduler isn't running here either.
+    if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
+        echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
+        do_and_check_cmd systemctl disable --now bunkerweb-worker
+    fi
 fi
 
 # Manage the BunkerWeb UI service
@@ -237,8 +321,18 @@ API_LISTEN_IP=127.0.0.1
 MULTISITE=yes
 UI_HOST=http://127.0.0.1:7000
 SERVER_NAME=
+API_TOKEN=${BW_API_TOKEN}
 EOF
             fi
+
+            # The scheduler and worker were enabled before this default variables.env (which
+            # carries the shared API_TOKEN) existed; restart them so they re-read it and stop
+            # looping on 401 / "Database is not initialized".
+            for _bw_svc in bunkerweb-scheduler bunkerweb-worker; do
+                if systemctl is-enabled --quiet "$_bw_svc" 2>/dev/null; then
+                    do_and_check_cmd systemctl restart "$_bw_svc"
+                fi
+            done
 
             # Create empty UI environment file if it doesn't exist
             if [ ! -f /etc/bunkerweb/ui.env ]; then
@@ -283,8 +377,17 @@ fi
 # Manage the BunkerWeb API service
 echo "Configuring BunkerWeb API service..."
 
-# Enable API only when explicitly requested (via env or flag)
-if [ "${SERVICE_API:-no}" = "yes" ]; then
+# The scheduler dispatches every job through the API → Celery broker → worker. A scheduler
+# without a reachable API cannot run jobs (push-configs never generates NGINX config), so the
+# API is now enabled wherever the scheduler runs (standalone or manager-only). An operator can
+# still opt out with SERVICE_API=no, and an explicit SERVICE_API=yes always wins (preserves the
+# api-only topology where the scheduler is disabled). Mirrors the scheduler-enable mode gating.
+if [ "${SERVICE_API:-}" = "yes" ] || { {
+    # Standalone mode (no manager or worker specified)
+    { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
+    # Manager-only mode (manager enabled, worker disabled)
+    { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
+} && [ "${SERVICE_SCHEDULER:-yes}" != "no" ] && [ "${SERVICE_API:-yes}" != "no" ]; }; then
     # Fresh installation or explicit API enablement
     if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
         echo "🚀 Enabling and starting the BunkerWeb API service..."

@@ -257,6 +257,23 @@ EOL
 
     cd - > /dev/null || exit 1
 
+    # API connection settings. On Linux the API binds 127.0.0.1:8888 (see
+    # bunkerweb-api.sh: LISTEN_ADDR/LISTEN_PORT defaults) — the bw-api:5000 default
+    # baked into main.py is container-only. The scheduler and API share API_TOKEN
+    # (sourced from variables.env) so the scheduler's Bearer auth matches the API guard.
+    : "${API_URL:=http://127.0.0.1:8888}"
+    export API_URL
+    export API_TOKEN
+
+    # Pre-initialize the database (create tables + mark metadata.is_initialized=True)
+    # BEFORE main.py starts. The API's gunicorn pre-fork hook blocks on is_initialized;
+    # without this, the scheduler's API-wait and the API's DB-wait deadlock each other on
+    # a fresh DB. Mirrors the container entrypoint (src/scheduler/entrypoint.sh).
+    log "SYSTEMCTL" "ℹ️" "Pre-initializing database (breaks API/scheduler deadlock)..."
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" DATABASE_URI="$DATABASE_URI" "$PYTHON_BIN" /usr/share/bunkerweb/gen/save_config.py --init --method scheduler; then
+        log "SYSTEMCTL" "⚠️" "Pre-init exited non-zero (continuing)"
+    fi
+
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."
     if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/scheduler/main.py \

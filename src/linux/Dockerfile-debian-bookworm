@@ -51,13 +51,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     python3.11 -m pip install --break-system-packages --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
     python3.11 -m pip install --break-system-packages --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
-# Apply BunkerWeb patches to vendored Python deps before they are tarballed (DNS alias / CNAME delegation for certbot).
-COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
-RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
-    patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
-    grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
-    rm -f /tmp/certbot-dns-alias.patch
-
 RUN apt-get install -y pigz && \
     tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
     rm -rf deps
@@ -77,6 +70,7 @@ COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/scheduler scheduler
+COPY src/worker worker
 COPY src/VERSION VERSION
 COPY src/ui ui
 COPY src/api api
