@@ -10,6 +10,16 @@
 - [BUGFIX] `datastore`: setting `DATASTORE_LRU_SIZE` to any value other than the default (`1k`) no longer bricks every BunkerWeb worker API with HTTP 444 (a full scheduler↔worker bootstrap deadlock). The lazy per-worker LRU resize replaced the cache with a fresh empty instance mid-`init_by_lua`, discarding the bootstrap variables (including `API_WHITELIST_IP`) and plugin metadata it had just stored, so the API rejected every IP. The resize now migrates existing entries into the new cache and only ever grows above the default. (Fixes #3618)
 - [FEATURE] `reverseproxy`: verify the upstream HTTPS certificate with `REVERSE_PROXY_SSL_VERIFY`, `REVERSE_PROXY_SSL_VERIFY_DEPTH`, and a trusted CA as a path or base64/PEM data (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, `_DATA`, `_PRIORITY`), for HTTP and stream. The scheduler caches the CA and distributes it to every instance; fails safe to `off` when no CA is available. (Fixes #574)
 - [FEATURE] `ui`: overhaul the logs viewer — per-format syntax highlighting (BunkerWeb, certbot and NGINX access logs), severity filter chips with counts, in-page search and next/previous error navigation, live-tail with pause and a "new lines" cue, download/copy, an opt-in local-time toggle, and collapsible multi-line entries (tracebacks and config dumps fold to a labelled `⋯ N lines` / `Traceback (N lines)` pill). Hiding a severity hides the whole multi-line entry, and the toolbar reflows into a tidy, touch-friendly layout on mobile.
+- [DEPS] `ui`: update jQuery to v4.0.0.
+- [DEPS] `ui`: update Bootstrap to v5.3.8 and drop the redundant standalone Popper.js (it is already bundled in `bootstrap.bundle.min.js`).
+- [DEPS] `ui`: update DataTables (and bundled extensions) to v2.3.8.
+- [DEPS] `ui`: update Ace editor to v1.44.0.
+- [DEPS] `ui`: update ApexCharts.js to v5.15.0.
+- [DEPS] `ui`: update DOMPurify to v3.4.11.
+- [DEPS] `ui`: update i18next to v26.3.1 and i18next-http-backend to v4.0.0.
+- [DEPS] `ui`: update Perfect Scrollbar to v1.5.6.
+- [DEPS] `ui`: update lottie-player to v2.0.12, canvas-confetti to v1.9.4, and ipaddr.js to v2.4.0.
+- [DEPS] update build tooling — cssnano to v8.0.2 and domino to v2.1.7; remove the unused root `jquery` dependency.
 
 ## v1.6.12~rc2 - 2026/06/16
 
