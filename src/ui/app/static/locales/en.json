@@ -1609,6 +1609,7 @@
     "issue_count": "Errors and warnings in this view",
     "local_time": "Show timestamps in your local time",
     "collapse_multiline": "Collapse multi-line entries (tracebacks, payloads)",
+    "collapse_raw_values": "Collapse multi-line values (certificates, keys)",
     "next_issue": "Jump to next error or warning",
     "prev_issue": "Jump to previous error or warning",
     "search_logs": "Search logs (Ctrl+F)",

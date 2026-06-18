@@ -1609,6 +1609,7 @@
     "issue_count": "此檢視中的錯誤與警告",
     "local_time": "以您的本地時間顯示時間戳記",
     "collapse_multiline": "收合多行項目（traceback、payload）",
+    "collapse_raw_values": "收合多行值（憑證、金鑰）",
     "next_issue": "跳至下一個錯誤或警告",
     "prev_issue": "跳至上一個錯誤或警告",
     "search_logs": "搜尋日誌 (Ctrl+F)",

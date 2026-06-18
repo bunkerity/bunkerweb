@@ -96,6 +96,60 @@ $(document).ready(() => {
     return new RegExp(pattern);
   };
 
+  // Canonical RAW-editor key universe emitted by the server (#raw-known-keys).
+  // Shared by the raw-config parser (issue #3651) and the settings fold mode.
+  // Returns {keys, bases, multiline, multilineBases} (all arrays).
+  const parseRawKeySpec = () => {
+    try {
+      const parsed = JSON.parse($("#raw-known-keys").val() || "{}") || {};
+      return {
+        keys: parsed.keys || [],
+        bases: parsed.bases || [],
+        multiline: parsed.multiline || [],
+        multilineBases: parsed.multilineBases || [],
+      };
+    } catch (_e) {
+      return { keys: [], bases: [], multiline: [], multilineBases: [] };
+    }
+  };
+
+  // Build the shared RAW key predicates from #raw-known-keys. Single source of
+  // truth for the raw-config parser, the locked-line highlighter, and the
+  // settings fold mode, so "what is a setting key" / "what can be multiline" is
+  // decided identically everywhere (issue #3651).
+  const makeRawKeyPredicates = () => {
+    const spec = parseRawKeySpec();
+    const knownKeys = new Set(spec.keys);
+    const multilineKeys = new Set(spec.multiline);
+    const matchesKeySet = (token, keySet, baseList) => {
+      if (!token) return false;
+      if (keySet.has(token)) return true;
+      for (let i = 0; i < baseList.length; i++) {
+        const base = baseList[i];
+        if (
+          base &&
+          token.indexOf(base + "_") === 0 &&
+          /^\d+$/.test(token.slice(base.length + 1))
+        ) {
+          return true;
+        }
+      }
+      return false;
+    };
+    return {
+      spec,
+      // The setting key a physical line declares, or null if it is not a
+      // `KEY=...` line at all.
+      keyOfLine: (line) => {
+        const eq = line.indexOf("=");
+        return eq === -1 ? null : line.slice(0, eq).trim();
+      },
+      isKnownSettingKey: (token) => matchesKeySet(token, knownKeys, spec.bases),
+      isMultilineKey: (token) =>
+        matchesKeySet(token, multilineKeys, spec.multilineBases),
+    };
+  };
+
   const FILE_NAME_STORAGE_PREFIX = "bw-file-setting-name::";
 
   const getFileNameStorageKey = ($fileTextInput) => {
@@ -1157,23 +1211,61 @@ $(document).ready(() => {
     } else if (currentMode === undefined || currentMode === "advanced") {
       addChildrenToForm(form, $("div[id^='navs-plugins-']"));
     } else if (currentMode === "raw") {
-      // Helper function to parse configuration strings into an object
-      const parseConfig = (selector) => {
-        const rawConfig = $(selector).val();
-        if (!rawConfig) return {};
-        return rawConfig
-          .trim()
+      // Key universe emitted by the RAW template (#raw-known-keys): every valid
+      // setting key, the base-prefixes of "multiple" settings, and the subset of
+      // keys that hold multiline values (type:"file" settings such as
+      // CUSTOM_SSL_CERT_DATA / CUSTOM_SSL_KEY_DATA / *_TRUSTED_CERTIFICATE_DATA).
+      // The parser below uses it so a PEM/base64 block is reassembled instead of
+      // being shattered into bogus variables on save (issue #3651).
+      const { isKnownSettingKey, isMultilineKey } = makeRawKeyPredicates();
+
+      // Parse env-style raw config into ordered [key, value] pairs. A physical
+      // line begins a new pair only when the token before its first "=" is a
+      // known setting key; any other line is a continuation that is folded back
+      // into the current value — but ONLY when the current key is multiline
+      // capable, so ordinary single-line settings can never absorb stray lines.
+      // Split once on the first "=" (indexOf, not split) so base64 "==" padding
+      // and "=" inside values survive untouched.
+      const parseRawConfig = (rawText) => {
+        const pairs = [];
+        if (!rawText) return pairs;
+        let current = null;
+        const flush = () => {
+          if (!current) return;
+          // Single-line values keep the historical trim(); multiline (file)
+          // values are preserved verbatim because PEM/base64 are byte-sensitive.
+          if (!isMultilineKey(current.key))
+            current.value = current.value.trim();
+          pairs.push(current);
+          current = null;
+        };
+        rawText
+          .replace(/\r\n?/g, "\n")
           .split("\n")
-          .reduce((acc, line) => {
-            const [key, ...valueParts] = line
-              .split("=")
-              .map((str) => str.trim());
-            const value = valueParts.join("=");
-            if (key && value !== undefined) {
-              acc[key.trim()] = value.trim();
+          .forEach((line) => {
+            const eq = line.indexOf("=");
+            const candidateKey = eq === -1 ? null : line.slice(0, eq).trim();
+            if (candidateKey !== null && isKnownSettingKey(candidateKey)) {
+              flush();
+              current = { key: candidateKey, value: line.slice(eq + 1) };
+            } else if (current && isMultilineKey(current.key)) {
+              current.value += "\n" + line;
             }
-            return acc;
-          }, {});
+            // Otherwise: a stray/blank/comment line under a single-line setting,
+            // or content before the first key -> ignore (generated config never
+            // produces these).
+          });
+        flush();
+        return pairs;
+      };
+
+      // Helper to fold a raw config blob into a {key: value} object.
+      const parseConfig = (selector) => {
+        const acc = {};
+        parseRawConfig($(selector).val()).forEach(({ key, value }) => {
+          if (key) acc[key] = value;
+        });
+        return acc;
       };
 
       // Parse original and default configurations
@@ -1189,33 +1281,25 @@ $(document).ready(() => {
       const rawConfigSource = rawEditor
         ? rawEditor.getValue()
         : $("#raw-config").val();
-      if (rawConfigSource) {
-        const configLines = rawConfigSource
-          .split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line && !line.startsWith("#"));
-
-        configLines.forEach((line) => {
-          const [key, ...valueParts] = line.split("=").map((str) => str.trim());
-          const value = valueParts.join("=");
-          if (!key || value === undefined) {
-            console.warn(`Skipping malformed line: ${line}`);
-            return;
-          }
-          if (key === "IS_DRAFT") {
-            skippedKeys.add(key);
-            return;
-          }
-
-          appendHiddenInput(form, key, value);
-          formKeys.add(key);
-        });
-      }
+      parseRawConfig(rawConfigSource).forEach(({ key, value }) => {
+        if (!key) return;
+        if (key === "IS_DRAFT") {
+          skippedKeys.add(key);
+          return;
+        }
+        appendHiddenInput(form, key, value, String(value).indexOf("\n") !== -1);
+        formKeys.add(key);
+      });
 
       // Append default values if they are not already in the form and not skipped
       Object.entries(configDefaults).forEach(([key, value]) => {
         if (!formKeys.has(key) && !skippedKeys.has(key)) {
-          appendHiddenInput(form, key, value);
+          appendHiddenInput(
+            form,
+            key,
+            value,
+            String(value).indexOf("\n") !== -1,
+          );
           formKeys.add(key);
         }
       });
@@ -1223,7 +1307,12 @@ $(document).ready(() => {
       // Append original values if they are not already in the form and not skipped
       Object.entries(entireconfigOriginals).forEach(([key, value]) => {
         if (!formKeys.has(key) && !skippedKeys.has(key)) {
-          appendHiddenInput(form, key, value);
+          appendHiddenInput(
+            form,
+            key,
+            value,
+            String(value).indexOf("\n") !== -1,
+          );
           formKeys.add(key);
         }
       });
@@ -2498,6 +2587,12 @@ $(document).ready(() => {
         }),
     );
 
+    // Same key predicates as the raw parser, so a locked MULTILINE setting
+    // (e.g. a method-managed CUSTOM_SSL_CERT_DATA) highlights its whole
+    // PEM/base64 block, not just the header row.
+    const { keyOfLine, isKnownSettingKey, isMultilineKey } =
+      makeRawKeyPredicates();
+
     const refreshDisabledIndicators = () => {
       rawDisabledMarkers.forEach((id) => editor.session.removeMarker(id));
       rawDisabledMarkers = [];
@@ -2512,23 +2607,41 @@ $(document).ready(() => {
       const disabledAnnotations = [];
 
       const lines = editor.session.getDocument().getAllLines();
-      lines.forEach((line, index) => {
-        const key = line.split("=")[0].trim();
-        if (!key || !disabledMap.has(key)) return;
+      let row = 0;
+      while (row < lines.length) {
+        const key = keyOfLine(lines[row]);
+        if (!key || !isKnownSettingKey(key) || !disabledMap.has(key)) {
+          row++;
+          continue;
+        }
+
+        // A locked multiline setting spans its continuation rows too, up to the
+        // next real KEY= line.
+        let endRow = row;
+        if (isMultilineKey(key)) {
+          while (
+            endRow + 1 < lines.length &&
+            !isKnownSettingKey(keyOfLine(lines[endRow + 1]) || "")
+          ) {
+            endRow++;
+          }
+        }
 
         const methodKey = disabledMap.get(key);
         const methodLabel = methodKey
           .replace(/_/g, " ")
           .replace(/\b\w/g, (char) => char.toUpperCase());
-        const range = new AceRange(index, 0, index, Infinity);
-        rawDisabledMarkers.push(
-          editor.session.addMarker(range, "raw-disabled-line", "fullLine"),
-        );
-        editor.session.addGutterDecoration(index, "raw-disabled-gutter");
-        rawDisabledGutterRows.push(index);
+        for (let r = row; r <= endRow; r++) {
+          const range = new AceRange(r, 0, r, Infinity);
+          rawDisabledMarkers.push(
+            editor.session.addMarker(range, "raw-disabled-line", "fullLine"),
+          );
+          editor.session.addGutterDecoration(r, "raw-disabled-gutter");
+          rawDisabledGutterRows.push(r);
+        }
 
         disabledAnnotations.push({
-          row: index,
+          row,
           column: 0,
           rawDisabled: true,
           type: "info",
@@ -2539,7 +2652,8 @@ $(document).ready(() => {
             rawMethod: methodKey,
           }),
         });
-      });
+        row = endRow + 1;
+      }
 
       editor.session.setAnnotations(
         baseAnnotations.concat(disabledAnnotations),
@@ -2607,6 +2721,54 @@ $(document).ready(() => {
     }
 
     if (elementId === "raw-config-editor") {
+      // Env-style settings get their own fold-aware mode instead of the generic
+      // nginx grammar: multiline file values (PEM/base64) collapse under their
+      // KEY= header. The fold predicates come from the SAME #raw-known-keys the
+      // save-time parser uses (issue #3651) and are stashed on the session so
+      // the (schema-agnostic) FoldMode can read them.
+      const rawFoldPreds = makeRawKeyPredicates();
+      const lineKeyMatches = (line, test) => {
+        const key = rawFoldPreds.keyOfLine(line || "");
+        return key !== null && test(key);
+      };
+      editor.session.$bwRawFold = {
+        isKnownKeyLine: (line) =>
+          lineKeyMatches(line, rawFoldPreds.isKnownSettingKey),
+        isMultilineKeyLine: (line) =>
+          lineKeyMatches(line, rawFoldPreds.isMultilineKey),
+      };
+      editor.session.setMode("ace/mode/bunkerweb_settings");
+
+      // foldAll()/the gutter chevron create folds with the default "..."
+      // placeholder; copy back the FoldMode's "⋯ N lines" label (same trick as
+      // the logs viewer).
+      editor.session.on("changeFold", (e) => {
+        const fold = e.data;
+        if (
+          e.action === "add" &&
+          fold &&
+          fold.placeholder === "..." &&
+          fold.range &&
+          fold.range.placeholder
+        ) {
+          fold.placeholder = fold.range.placeholder;
+        }
+      });
+
+      // Collapse-all / expand-all toggle in the raw toolbar (default expanded).
+      const $foldToggle = $(".raw-config-fold-toggle");
+      if ($foldToggle.length) {
+        let collapsed = false;
+        $foldToggle.on("click", function () {
+          collapsed = !collapsed;
+          $(this)
+            .toggleClass("active", collapsed)
+            .attr("aria-pressed", String(collapsed));
+          if (collapsed) editor.session.foldAll();
+          else editor.session.unfold();
+        });
+      }
+
       editor.commands.addCommand({
         name: "saveRawConfigShortcut",
         bindKey: { win: "Ctrl-S", mac: "Command-S" },

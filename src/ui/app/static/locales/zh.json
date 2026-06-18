@@ -1609,6 +1609,7 @@
     "issue_count": "此视图中的错误和警告",
     "local_time": "以你的本地时间显示时间戳",
     "collapse_multiline": "折叠多行条目（traceback、payload）",
+    "collapse_raw_values": "折叠多行值（证书、密钥）",
     "next_issue": "跳转到下一个错误或警告",
     "prev_issue": "跳转到上一个错误或警告",
     "search_logs": "搜索日志 (Ctrl+F)",

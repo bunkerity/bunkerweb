@@ -1609,6 +1609,7 @@
     "issue_count": "Mga error at babala sa view na ito",
     "local_time": "Ipakita ang mga timestamp sa iyong lokal na oras",
     "collapse_multiline": "I-collapse ang mga multi-line na entry (tracebacks, payloads)",
+    "collapse_raw_values": "I-collapse ang mga multi-line na value (mga certificate, key)",
     "next_issue": "Tumalon sa susunod na error o babala",
     "prev_issue": "Tumalon sa nakaraang error o babala",
     "search_logs": "Maghanap sa mga log (Ctrl+F)",

@@ -1609,6 +1609,7 @@
     "issue_count": "Errori e avvisi in questa vista",
     "local_time": "Mostra timestamp nella tua ora locale",
     "collapse_multiline": "Comprimi voci multilinea (traceback, payload)",
+    "collapse_raw_values": "Comprimi valori multilinea (certificati, chiavi)",
     "next_issue": "Vai al prossimo errore o avviso",
     "prev_issue": "Vai all'errore o avviso precedente",
     "search_logs": "Cerca nei log (Ctrl+F)",

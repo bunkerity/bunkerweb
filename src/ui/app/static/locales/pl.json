@@ -1609,6 +1609,7 @@
     "issue_count": "Błędy i ostrzeżenia w tym widoku",
     "local_time": "Pokaż znaczniki czasu w Twoim czasie lokalnym",
     "collapse_multiline": "Zwiń wpisy wielowierszowe (tracebacki, payloady)",
+    "collapse_raw_values": "Zwiń wartości wielowierszowe (certyfikaty, klucze)",
     "next_issue": "Przejdź do następnego błędu lub ostrzeżenia",
     "prev_issue": "Przejdź do poprzedniego błędu lub ostrzeżenia",
     "search_logs": "Szukaj w logach (Ctrl+F)",

@@ -1609,6 +1609,7 @@
     "issue_count": "이 보기의 오류와 경고",
     "local_time": "타임스탬프를 사용자 현지 시간으로 표시",
     "collapse_multiline": "여러 줄 항목 접기(트레이스백, 페이로드)",
+    "collapse_raw_values": "여러 줄 값 접기(인증서, 키)",
     "next_issue": "다음 오류 또는 경고로 이동",
     "prev_issue": "이전 오류 또는 경고로 이동",
     "search_logs": "로그 검색(Ctrl+F)",

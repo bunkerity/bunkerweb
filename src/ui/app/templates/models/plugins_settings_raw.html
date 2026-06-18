@@ -6,6 +6,11 @@
 {% set entire_config = config_lines|list %}
 {% set default_settings = ["IS_DRAFT=no"] if (current_endpoint != "global-config" and current_endpoint != "global-settings") else [] %}
 {% set disabled_settings = namespace(items=[]) %}
+{# Canonical set of valid keys (+ multiple base-prefixes) for this editor, built
+   from the SAME settings walk that produces the raw config text below. The
+   client parser uses it to tell a real `KEY=value` line apart from a
+   continuation line of a multiline value (PEM cert/key, base64 block). #}
+{% set known_keys = namespace(keys=[], bases=[], multiline=[], multiline_bases=[]) %}
 {% for plugin_data in plugins.values() %}
     {% set filtered_settings = get_filtered_settings(plugin_data["settings"], (current_endpoint == "global-config" or current_endpoint == "global-settings")) %}
     {% if filtered_settings %}
@@ -26,6 +31,8 @@
                 {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
             {% endif %}
             {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
+            {% if known_keys.keys.append(setting) %}{% endif %}
+            {% if setting_data.get("type") == "file" and known_keys.multiline.append(setting) %}{% endif %}
             {% if setting_value != setting_default %}
                 {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                 {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
@@ -46,6 +53,9 @@
                         {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
                     {% endif %}
                     {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
+                    {% if known_keys.keys.append(setting) %}{% endif %}
+                    {% if setting_data.get("setting_no_suffix") %}{% if known_keys.bases.append(setting_data["setting_no_suffix"]) %}{% endif %}{% endif %}
+                    {% if setting_data.get("type") == "file" %}{% if known_keys.multiline.append(setting) %}{% endif %}{% if setting_data.get("setting_no_suffix") %}{% if known_keys.multiline_bases.append(setting_data["setting_no_suffix"]) %}{% endif %}{% endif %}{% endif %}
                     {% if setting_value != setting_default %}
                         {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                         {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
@@ -55,6 +65,10 @@
         {% endfor %}
     {% endif %}
 {% endfor %}
+{# Control keys that appear in the editor text (or are posted alongside it) but
+   are not iterated as plugin settings above (IS_DRAFT is emitted at the top;
+   the rest are defensive against future template changes). #}
+{% for _control_key in ["IS_DRAFT", "SERVER_NAME", "OLD_SERVER_NAME", "USE_TEMPLATE", "OVERRIDE_NON_GLOBAL_SERVICES"] %}{% if known_keys.keys.append(_control_key) %}{% endif %}{% endfor %}
 <!-- Join the configuration lines with newlines -->
 {% set raw_config = config_lines | join('\r\n') %}
 {% set raw_entire_config = entire_config | join('\r\n') %}
@@ -69,6 +83,9 @@
 <input type="hidden"
        id="raw-config-disabled"
        value="{{ disabled_settings.items | join('\r\n') }}">
+<input type="hidden"
+       id="raw-known-keys"
+       value='{{ {"keys": known_keys.keys | unique | list, "bases": known_keys.bases | unique | list, "multiline": known_keys.multiline | unique | list, "multilineBases": known_keys.multiline_bases | unique | list} | tojson }}'>
 <div class="card raw-config-container border-0 shadow-sm mt-3 mt-lg-4">
     <div class="card-header raw-config-toolbar d-flex flex-wrap justify-content-between align-items-start gap-3 border-0">
         <div class="raw-config-toolbar__title">
@@ -80,6 +97,18 @@
             </div>
         </div>
         <div class="raw-config-toolbar__actions d-flex flex-wrap align-items-center gap-2">
+            <div class="raw-config-toolbar__action">
+                <button type="button"
+                        class="btn btn-sm btn-outline-light raw-config-action-btn raw-config-fold-toggle"
+                        aria-pressed="false"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-i18n-title="tooltip.collapse_raw_values"
+                        title="Collapse multi-line values (certificates, keys)">
+                    <i class="bx bx-collapse-vertical bx-xs" aria-hidden="true"></i>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.collapse_multiline">Collapse</span></span>
+                </button>
+            </div>
             <div class="raw-config-toolbar__action"
                  {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
                 <button type="button"
