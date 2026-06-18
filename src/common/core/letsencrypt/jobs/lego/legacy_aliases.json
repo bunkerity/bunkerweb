@@ -1,0 +1,394 @@
+{
+  "_meta": {
+    "note": "Hand-authored backward-compat map: historical BunkerWeb DNS provider names + their legacy credential-item key spellings -> lego provider code + lego env-var names. Source of truth for the key spellings is the pre-1.7 Pydantic classes in letsencrypt_providers.py. Keys in every cred_key_map are lowercased because extract_provider() lowercases credential-item keys before lookup. 'required' lists lego env vars that must be present after translation (early-fail). 'defaults' are applied when absent. 'special' triggers extra handling in translate_credentials(): ionos_combine (prefix.secret -> IONOS_API_KEY), rfc2136_port (fold port into DNSUPDATE_NAMESERVER), google_sa (reassemble a service-account JSON sidecar -> GCE_SERVICE_ACCOUNT_FILE).",
+    "lego_version": "v5.2.0"
+  },
+
+  "bunny": {
+    "lego_code": "bunny",
+    "cred_key_map": {
+      "dns_bunny_api_key": "BUNNY_API_KEY",
+      "bunnynet_api_key": "BUNNY_API_KEY",
+      "api_key": "BUNNY_API_KEY"
+    },
+    "required": ["BUNNY_API_KEY"]
+  },
+
+  "cloudns": {
+    "lego_code": "cloudns",
+    "cred_key_map": {
+      "dns_cloudns_auth_id": "CLOUDNS_AUTH_ID",
+      "cloudns_auth_id": "CLOUDNS_AUTH_ID",
+      "auth_id": "CLOUDNS_AUTH_ID",
+      "dns_cloudns_sub_auth_id": "CLOUDNS_SUB_AUTH_ID",
+      "cloudns_sub_auth_id": "CLOUDNS_SUB_AUTH_ID",
+      "sub_auth_id": "CLOUDNS_SUB_AUTH_ID",
+      "dns_cloudns_auth_password": "CLOUDNS_AUTH_PASSWORD",
+      "cloudns_auth_password": "CLOUDNS_AUTH_PASSWORD",
+      "auth_password": "CLOUDNS_AUTH_PASSWORD"
+    },
+    "required": ["CLOUDNS_AUTH_PASSWORD"]
+  },
+
+  "cloudflare": {
+    "lego_code": "cloudflare",
+    "cred_key_map": {
+      "dns_cloudflare_api_token": "CF_DNS_API_TOKEN",
+      "cloudflare_api_token": "CF_DNS_API_TOKEN",
+      "api_token": "CF_DNS_API_TOKEN",
+      "dns_cloudflare_email": "CF_API_EMAIL",
+      "cloudflare_email": "CF_API_EMAIL",
+      "email": "CF_API_EMAIL",
+      "dns_cloudflare_api_key": "CF_API_KEY",
+      "cloudflare_api_key": "CF_API_KEY",
+      "api_key": "CF_API_KEY"
+    }
+  },
+
+  "desec": {
+    "lego_code": "desec",
+    "cred_key_map": {
+      "dns_desec_token": "DESEC_TOKEN",
+      "desec_token": "DESEC_TOKEN",
+      "token": "DESEC_TOKEN"
+    },
+    "required": ["DESEC_TOKEN"]
+  },
+
+  "digitalocean": {
+    "lego_code": "digitalocean",
+    "cred_key_map": {
+      "dns_digitalocean_token": "DO_AUTH_TOKEN",
+      "digitalocean_token": "DO_AUTH_TOKEN",
+      "token": "DO_AUTH_TOKEN"
+    },
+    "required": ["DO_AUTH_TOKEN"]
+  },
+
+  "domainoffensive": {
+    "lego_code": "dode",
+    "cred_key_map": {
+      "dns_domainoffensive_api_token": "DODE_TOKEN",
+      "domainoffensive_api_token": "DODE_TOKEN",
+      "api_token": "DODE_TOKEN"
+    },
+    "required": ["DODE_TOKEN"]
+  },
+
+  "domeneshop": {
+    "lego_code": "domeneshop",
+    "cred_key_map": {
+      "dns_domeneshop_client_token": "DOMENESHOP_API_TOKEN",
+      "domeneshop_client_token": "DOMENESHOP_API_TOKEN",
+      "client_token": "DOMENESHOP_API_TOKEN",
+      "token": "DOMENESHOP_API_TOKEN",
+      "dns_domeneshop_client_secret": "DOMENESHOP_API_SECRET",
+      "domeneshop_client_secret": "DOMENESHOP_API_SECRET",
+      "client_secret": "DOMENESHOP_API_SECRET",
+      "secret": "DOMENESHOP_API_SECRET"
+    },
+    "required": ["DOMENESHOP_API_TOKEN", "DOMENESHOP_API_SECRET"]
+  },
+
+  "dnsimple": {
+    "lego_code": "dnsimple",
+    "cred_key_map": {
+      "dns_dnsimple_token": "DNSIMPLE_OAUTH_TOKEN",
+      "dnsimple_token": "DNSIMPLE_OAUTH_TOKEN",
+      "token": "DNSIMPLE_OAUTH_TOKEN"
+    },
+    "required": ["DNSIMPLE_OAUTH_TOKEN"]
+  },
+
+  "dnsmadeeasy": {
+    "lego_code": "dnsmadeeasy",
+    "cred_key_map": {
+      "dns_dnsmadeeasy_api_key": "DNSMADEEASY_API_KEY",
+      "dnsmadeeasy_api_key": "DNSMADEEASY_API_KEY",
+      "api_key": "DNSMADEEASY_API_KEY",
+      "dns_dnsmadeeasy_secret_key": "DNSMADEEASY_API_SECRET",
+      "dnsmadeeasy_secret_key": "DNSMADEEASY_API_SECRET",
+      "secret_key": "DNSMADEEASY_API_SECRET"
+    },
+    "required": ["DNSMADEEASY_API_KEY", "DNSMADEEASY_API_SECRET"]
+  },
+
+  "duckdns": {
+    "lego_code": "duckdns",
+    "cred_key_map": {
+      "dns_duckdns_token": "DUCKDNS_TOKEN",
+      "duckdns_token": "DUCKDNS_TOKEN",
+      "token": "DUCKDNS_TOKEN"
+    },
+    "required": ["DUCKDNS_TOKEN"]
+  },
+
+  "dynu": {
+    "lego_code": "dynu",
+    "cred_key_map": {
+      "dns_dynu_auth_token": "DYNU_API_KEY",
+      "dynu_auth_token": "DYNU_API_KEY",
+      "auth_token": "DYNU_API_KEY"
+    },
+    "required": ["DYNU_API_KEY"]
+  },
+
+  "gandi": {
+    "lego_code": "gandiv5",
+    "cred_key_map": {
+      "dns_gandi_token": "GANDIV5_PERSONAL_ACCESS_TOKEN",
+      "gandi_token": "GANDIV5_PERSONAL_ACCESS_TOKEN",
+      "token": "GANDIV5_PERSONAL_ACCESS_TOKEN"
+    },
+    "required": ["GANDIV5_PERSONAL_ACCESS_TOKEN"]
+  },
+
+  "gehirn": {
+    "lego_code": "gehirn",
+    "cred_key_map": {
+      "dns_gehirn_api_token": "GEHIRN_TOKEN_ID",
+      "gehirn_api_token": "GEHIRN_TOKEN_ID",
+      "api_token": "GEHIRN_TOKEN_ID",
+      "dns_gehirn_api_secret": "GEHIRN_TOKEN_SECRET",
+      "gehirn_api_secret": "GEHIRN_TOKEN_SECRET",
+      "api_secret": "GEHIRN_TOKEN_SECRET"
+    },
+    "required": ["GEHIRN_TOKEN_ID", "GEHIRN_TOKEN_SECRET"]
+  },
+
+  "godaddy": {
+    "lego_code": "godaddy",
+    "cred_key_map": {
+      "dns_godaddy_key": "GODADDY_API_KEY",
+      "godaddy_key": "GODADDY_API_KEY",
+      "key": "GODADDY_API_KEY",
+      "dns_godaddy_secret": "GODADDY_API_SECRET",
+      "godaddy_secret": "GODADDY_API_SECRET",
+      "secret": "GODADDY_API_SECRET",
+      "dns_godaddy_ttl": "GODADDY_TTL",
+      "godaddy_ttl": "GODADDY_TTL",
+      "ttl": "GODADDY_TTL"
+    },
+    "required": ["GODADDY_API_KEY", "GODADDY_API_SECRET"]
+  },
+
+  "google": {
+    "lego_code": "gcloud",
+    "special": "google_sa",
+    "cred_key_map": {
+      "project_id": "GCE_PROJECT",
+      "google_project_id": "GCE_PROJECT",
+      "dns_google_project_id": "GCE_PROJECT"
+    },
+    "sa_key_map": {
+      "type": ["type", "google_type", "dns_google_type"],
+      "project_id": ["project_id", "google_project_id", "dns_google_project_id"],
+      "private_key_id": ["private_key_id", "google_private_key_id", "dns_google_private_key_id"],
+      "private_key": ["private_key", "google_private_key", "dns_google_private_key"],
+      "client_email": ["client_email", "google_client_email", "dns_google_client_email"],
+      "client_id": ["client_id", "google_client_id", "dns_google_client_id"],
+      "auth_uri": ["auth_uri", "google_auth_uri", "dns_google_auth_uri"],
+      "token_uri": ["token_uri", "google_token_uri", "dns_google_token_uri"],
+      "auth_provider_x509_cert_url": ["auth_provider_x509_cert_url", "google_auth_provider_x509_cert_url", "dns_google_auth_provider_x509_cert_url"],
+      "client_x509_cert_url": ["client_x509_cert_url", "google_client_x509_cert_url", "dns_google_client_x509_cert_url"]
+    },
+    "sa_defaults": {
+      "type": "service_account",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://accounts.google.com/o/oauth2/token",
+      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
+    }
+  },
+
+  "hetzner": {
+    "lego_code": "hetzner",
+    "cred_key_map": {
+      "dns_hetzner_api_token": "HETZNER_API_TOKEN",
+      "hetzner_api_token": "HETZNER_API_TOKEN",
+      "api_token": "HETZNER_API_TOKEN"
+    },
+    "required": ["HETZNER_API_TOKEN"]
+  },
+
+  "infomaniak": {
+    "lego_code": "infomaniak",
+    "cred_key_map": {
+      "dns_infomaniak_token": "INFOMANIAK_ACCESS_TOKEN",
+      "infomaniak_token": "INFOMANIAK_ACCESS_TOKEN",
+      "token": "INFOMANIAK_ACCESS_TOKEN"
+    },
+    "required": ["INFOMANIAK_ACCESS_TOKEN"]
+  },
+
+  "ionos": {
+    "lego_code": "ionos",
+    "special": "ionos_combine",
+    "cred_key_map": {
+      "dns_ionos_prefix": "__IONOS_PREFIX",
+      "ionos_prefix": "__IONOS_PREFIX",
+      "prefix": "__IONOS_PREFIX",
+      "dns_ionos_secret": "__IONOS_SECRET",
+      "ionos_secret": "__IONOS_SECRET",
+      "secret": "__IONOS_SECRET"
+    },
+    "required": ["IONOS_API_KEY"]
+  },
+
+  "linode": {
+    "lego_code": "linode",
+    "cred_key_map": {
+      "dns_linode_key": "LINODE_TOKEN",
+      "linode_key": "LINODE_TOKEN",
+      "key": "LINODE_TOKEN"
+    },
+    "required": ["LINODE_TOKEN"]
+  },
+
+  "luadns": {
+    "lego_code": "luadns",
+    "cred_key_map": {
+      "dns_luadns_email": "LUADNS_API_USERNAME",
+      "luadns_email": "LUADNS_API_USERNAME",
+      "email": "LUADNS_API_USERNAME",
+      "dns_luadns_token": "LUADNS_API_TOKEN",
+      "luadns_token": "LUADNS_API_TOKEN",
+      "token": "LUADNS_API_TOKEN"
+    },
+    "required": ["LUADNS_API_USERNAME", "LUADNS_API_TOKEN"]
+  },
+
+  "njalla": {
+    "lego_code": "njalla",
+    "cred_key_map": {
+      "dns_njalla_token": "NJALLA_TOKEN",
+      "njalla_token": "NJALLA_TOKEN",
+      "token": "NJALLA_TOKEN",
+      "api_token": "NJALLA_TOKEN",
+      "auth_token": "NJALLA_TOKEN"
+    },
+    "required": ["NJALLA_TOKEN"]
+  },
+
+  "nsone": {
+    "lego_code": "ns1",
+    "cred_key_map": {
+      "dns_nsone_api_key": "NS1_API_KEY",
+      "nsone_api_key": "NS1_API_KEY",
+      "api_key": "NS1_API_KEY"
+    },
+    "required": ["NS1_API_KEY"]
+  },
+
+  "ovh": {
+    "lego_code": "ovh",
+    "cred_key_map": {
+      "dns_ovh_endpoint": "OVH_ENDPOINT",
+      "ovh_endpoint": "OVH_ENDPOINT",
+      "endpoint": "OVH_ENDPOINT",
+      "dns_ovh_application_key": "OVH_APPLICATION_KEY",
+      "ovh_application_key": "OVH_APPLICATION_KEY",
+      "application_key": "OVH_APPLICATION_KEY",
+      "dns_ovh_application_secret": "OVH_APPLICATION_SECRET",
+      "ovh_application_secret": "OVH_APPLICATION_SECRET",
+      "application_secret": "OVH_APPLICATION_SECRET",
+      "dns_ovh_consumer_key": "OVH_CONSUMER_KEY",
+      "ovh_consumer_key": "OVH_CONSUMER_KEY",
+      "consumer_key": "OVH_CONSUMER_KEY"
+    },
+    "defaults": {"OVH_ENDPOINT": "ovh-eu"},
+    "required": ["OVH_APPLICATION_KEY", "OVH_APPLICATION_SECRET", "OVH_CONSUMER_KEY"]
+  },
+
+  "pdns": {
+    "lego_code": "pdns",
+    "cred_key_map": {
+      "dns_pdns_endpoint": "PDNS_API_URL",
+      "pdns_endpoint": "PDNS_API_URL",
+      "endpoint": "PDNS_API_URL",
+      "dns_pdns_api_key": "PDNS_API_KEY",
+      "pdns_api_key": "PDNS_API_KEY",
+      "api_key": "PDNS_API_KEY",
+      "dns_pdns_server_id": "PDNS_SERVER_NAME",
+      "pdns_server_id": "PDNS_SERVER_NAME",
+      "server_id": "PDNS_SERVER_NAME"
+    },
+    "required": ["PDNS_API_URL", "PDNS_API_KEY"]
+  },
+
+  "rfc2136": {
+    "lego_code": "dnsupdate",
+    "special": "rfc2136_port",
+    "cred_key_map": {
+      "dns_rfc2136_server": "DNSUPDATE_NAMESERVER",
+      "rfc2136_server": "DNSUPDATE_NAMESERVER",
+      "server": "DNSUPDATE_NAMESERVER",
+      "dns_rfc2136_port": "__RFC2136_PORT",
+      "rfc2136_port": "__RFC2136_PORT",
+      "port": "__RFC2136_PORT",
+      "dns_rfc2136_name": "DNSUPDATE_TSIG_KEY",
+      "rfc2136_name": "DNSUPDATE_TSIG_KEY",
+      "name": "DNSUPDATE_TSIG_KEY",
+      "dns_rfc2136_secret": "DNSUPDATE_TSIG_SECRET",
+      "rfc2136_secret": "DNSUPDATE_TSIG_SECRET",
+      "secret": "DNSUPDATE_TSIG_SECRET",
+      "dns_rfc2136_algorithm": "DNSUPDATE_TSIG_ALGORITHM",
+      "rfc2136_algorithm": "DNSUPDATE_TSIG_ALGORITHM",
+      "algorithm": "DNSUPDATE_TSIG_ALGORITHM"
+    },
+    "required": ["DNSUPDATE_NAMESERVER"]
+  },
+
+  "route53": {
+    "lego_code": "route53",
+    "cred_key_map": {
+      "aws_access_key_id": "AWS_ACCESS_KEY_ID",
+      "dns_aws_access_key_id": "AWS_ACCESS_KEY_ID",
+      "access_key_id": "AWS_ACCESS_KEY_ID",
+      "aws_secret_access_key": "AWS_SECRET_ACCESS_KEY",
+      "dns_aws_secret_access_key": "AWS_SECRET_ACCESS_KEY",
+      "secret_access_key": "AWS_SECRET_ACCESS_KEY",
+      "aws_region": "AWS_REGION",
+      "dns_aws_region": "AWS_REGION",
+      "region": "AWS_REGION",
+      "aws_hosted_zone_id": "AWS_HOSTED_ZONE_ID",
+      "hosted_zone_id": "AWS_HOSTED_ZONE_ID"
+    },
+    "required": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]
+  },
+
+  "sakuracloud": {
+    "lego_code": "sakuracloud",
+    "cred_key_map": {
+      "dns_sakuracloud_api_token": "SAKURACLOUD_ACCESS_TOKEN",
+      "sakuracloud_api_token": "SAKURACLOUD_ACCESS_TOKEN",
+      "api_token": "SAKURACLOUD_ACCESS_TOKEN",
+      "dns_sakuracloud_api_secret": "SAKURACLOUD_ACCESS_TOKEN_SECRET",
+      "sakuracloud_api_secret": "SAKURACLOUD_ACCESS_TOKEN_SECRET",
+      "api_secret": "SAKURACLOUD_ACCESS_TOKEN_SECRET"
+    },
+    "required": ["SAKURACLOUD_ACCESS_TOKEN", "SAKURACLOUD_ACCESS_TOKEN_SECRET"]
+  },
+
+  "scaleway": {
+    "lego_code": "scaleway",
+    "cred_key_map": {
+      "dns_scaleway_application_token": "SCW_SECRET_KEY",
+      "scaleway_application_token": "SCW_SECRET_KEY",
+      "application_token": "SCW_SECRET_KEY"
+    },
+    "required": ["SCW_SECRET_KEY"]
+  },
+
+  "transip": {
+    "lego_code": "transip",
+    "cred_key_map": {
+      "dns_transip_username": "TRANSIP_ACCOUNT_NAME",
+      "transip_username": "TRANSIP_ACCOUNT_NAME",
+      "username": "TRANSIP_ACCOUNT_NAME",
+      "dns_transip_key_file": "TRANSIP_PRIVATE_KEY_PATH",
+      "transip_key_file": "TRANSIP_PRIVATE_KEY_PATH",
+      "key_file": "TRANSIP_PRIVATE_KEY_PATH"
+    },
+    "required": ["TRANSIP_ACCOUNT_NAME", "TRANSIP_PRIVATE_KEY_PATH"]
+  }
+}

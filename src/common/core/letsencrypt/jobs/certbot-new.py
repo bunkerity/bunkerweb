@@ -25,12 +25,14 @@ from certbot_concurrency import (
     select_account_id,
 )
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from requests import get
 
+from API import API  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
 from common_utils import bytes_hash, effective_cpu_count, file_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
@@ -43,11 +45,11 @@ from letsencrypt_utils import (
     LETSENCRYPT_JOBS_PATH as JOBS_PATH,
     LETSENCRYPT_LOGS_DIR as LOGS_DIR,
     LETSENCRYPT_WORK_DIR as WORK_DIR,
-    PROVIDERS,
     certbot_log_backup_flags,
     ZEROSSL_BOT_SCRIPT,
     build_certbot_env,
     extract_provider,
+    is_supported_provider,
     get_expected_acme_directory,
     le_cache_write_lock,
     letsencrypt_cache_consistent,
@@ -364,27 +366,25 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
             dns_propagation_val = DNS_PROPAGATION_DEFAULT
 
     provider = None
+    dns_provider = ""  # operator-facing provider name (LETS_ENCRYPT_DNS_PROVIDER); "" for HTTP-01
     if challenge_val == "dns":
         if not authenticator:
             if activated:
                 LOGGER.warning(f"[Service: {service}] DNS challenge selected but no DNS provider is configured, skipping generation.")
             activated = False
-        elif authenticator not in PROVIDERS:
+        elif not is_supported_provider(authenticator):
             if activated:
-                LOGGER.warning(
-                    f"[Service: {service}] DNS provider '{authenticator}' is not supported. Must be one of {list(PROVIDERS.keys())!r}, skipping generation."
-                )
+                LOGGER.warning(f"[Service: {service}] DNS provider '{authenticator}' is not supported by certbot-dns-multi (lego), skipping generation.")
             activated = False
         else:
+            dns_provider = authenticator
             credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
             provider = extract_provider(service, credential_key, authenticator, decode_base64, LOGGER)
             if not provider:
                 activated = False
-    else:
-        authenticator = "manual"
-        if wildcard:
-            LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
-            wildcard = False
+    elif wildcard:
+        LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
+        wildcard = False
 
     server_names = server_names_val.split()
 
@@ -401,7 +401,12 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "zerossl_api_max_time": zerossl_api_max_time_int,
         "email": email_val,
         "challenge": challenge_val,
-        "authenticator": authenticator or "manual",
+        # certbot authenticator name persisted in renewal/*.conf: "multi" for DNS-01 via
+        # certbot-dns-multi, "manual" for HTTP-01. The existing-cert parser strips the "dns-"
+        # prefix, so a legacy "dns-cloudflare" cert reads back as "cloudflare" and mismatches
+        # "multi" -> one-time re-issue migration onto certbot-dns-multi.
+        "authenticator": "multi" if challenge_val == "dns" else "manual",
+        "dns_provider": dns_provider,
         "dns_propagation": dns_propagation_val,
         "provider": provider,
         "wildcard": wildcard,
@@ -454,6 +459,7 @@ def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, st
         config.get("zerossl_api_key_hash"),
         config.get("challenge"),
         config.get("authenticator"),
+        config.get("dns_provider"),
         config.get("staging"),
         config.get("profile"),
         config.get("email"),
@@ -676,25 +682,31 @@ def certbot_new(
         # * Adding DNS challenge hooks
         command.append("--preferred-challenges=dns")
 
-        # * Adding the propagation time to the command
+        # * Adding the propagation time to the command (certbot-dns-multi honors --dns-multi-propagation-seconds)
         if config["dns_propagation"] != DNS_PROPAGATION_DEFAULT:
-            command.extend([f"--dns-{config['authenticator']}-propagation-seconds", str(config["dns_propagation"])])
+            command.extend(["--dns-multi-propagation-seconds", str(config["dns_propagation"])])
+
+        provider = config["provider"]
+
+        # * Caching any provider sidecar files (e.g. the google service-account JSON pointed at
+        # * by GCE_SERVICE_ACCOUNT_FILE). extract_provider already finalized the env path to
+        # * CACHE_PATH/<basename>, so the credentials body below stays stable across runs.
+        for sidecar_name, (sidecar_content, _sidecar_env_key) in provider.sidecars.items():
+            sidecar_path = CACHE_PATH.joinpath(sidecar_name)
+            if not sidecar_path.is_file() or config["force_renew"]:
+                JOB.cache_file(sidecar_name, sidecar_content)
+            sidecar_path.chmod(0o600)
 
         # * Caching the credentials file if not already done
-        credentials = config["provider"].get_formatted_credentials()
-        credentials_file = f"credentials_{bytes_hash(credentials, algorithm='sha256')[:12]}.{config['provider'].get_file_type()}"
+        credentials = provider.get_formatted_credentials()
+        credentials_file = f"credentials_{bytes_hash(credentials, algorithm='sha256')[:12]}.{provider.get_file_type()}"
         credentials_path = CACHE_PATH.joinpath(credentials_file)
         if not credentials_path.is_file() or config["force_renew"]:
             JOB.cache_file(credentials_file, credentials)
         credentials_path.chmod(0o600)  # Set permissions to read/write for owner only
 
-        # * Adding the credentials to the command
-        if config["authenticator"] == "route53":
-            cmd_env["AWS_CONFIG_FILE"] = credentials_path.as_posix()
-        else:
-            command.extend([f"--dns-{config['authenticator']}-credentials", credentials_path.as_posix()])
-
-        command.extend(config["provider"].get_extra_args())
+        # * Adding the credentials to the command — one dns-multi authenticator for every provider
+        command.extend(["-a", "dns-multi", "--dns-multi-credentials", credentials_path.as_posix()])
     else:
         # * Adding HTTP challenge hooks
         command.extend(
@@ -941,7 +953,12 @@ try:
             LOGGER.warning(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["authenticator"] != existing_cert["authenticator"]:
-            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
+            if config["challenge"] == "dns" and existing_cert["authenticator"] not in ("multi", "manual"):
+                LOGGER.warning(
+                    f"[Service: {server_name}] Migrating from legacy certbot-dns-{existing_cert['authenticator']} to certbot-dns-multi, re-issuing certificate."
+                )
+            else:
+                LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["staging"] != existing_cert["staging"]:
             LOGGER.warning(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
@@ -1111,6 +1128,41 @@ try:
                     LOGGER.error(f"Error while saving data to db cache : {err}")
                 else:
                     LOGGER.info("Successfully saved data to db cache")
+                    # Only when a cert was actually issued/renewed this run (status==1, set per
+                    # successful service above): deliver the freshly issued LE cache to every live
+                    # instance NOW, directly. This is the same whole-/var/cache push + /reload the
+                    # worker's reload path performs on ret==1 (src/worker/tasks.py:81), but issued
+                    # here so it CANNOT be silently dropped by the shared 10s bw:reload_pending
+                    # debounce — which any other reload-flagged job finishing in the same window can
+                    # steal, killing this cert's /cache push. On no-op runs (status==0) we push
+                    # nothing, matching today's behavior. On any failure we leave status==1 so the
+                    # worker's debounced reload path still runs as a fallback. le_cache_write_lock is
+                    # held around the read so push-configs cannot rmtree/rebuild the tree mid-send.
+                    if status == 1:
+                        try:
+                            token = getenv("API_TOKEN") or None
+                            instances = [i for i in JOB.db.get_instances() if i.get("status") != "down"]
+                            if instances:
+                                api_caller = ApiCaller([API.from_instance(i, token=token) for i in instances])
+                                with le_cache_write_lock():
+                                    pushed = bool(api_caller.send_files(str(CACHE_PATH.parent), "/cache"))
+                                if not pushed:
+                                    LOGGER.error("Failed to push Let's Encrypt cache to one or more instances; leaving worker reload path as fallback")
+                                else:
+                                    test = "no" if getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
+                                    sent = api_caller.send_to_apis("POST", f"/reload?test={test}")[0]
+                                    if not sent:
+                                        LOGGER.error(
+                                            "LE cache pushed but reload request failed on at least one instance; leaving worker reload path as fallback"
+                                        )
+                                    else:
+                                        LOGGER.info("Successfully delivered Let's Encrypt cache and reloaded instances")
+                                        status = 0  # delivered here; don't double-fire the debounced worker reload
+                            else:
+                                LOGGER.info("No live instances registered; leaving delivery to the reload path")
+                        except BaseException as e:
+                            LOGGER.error(f"Exception while delivering LE cache to instances: {e}; falling back to reload path")
+                            # status stays 1 → the worker's debounced reload path retries the push+reload
 except SystemExit as e:
     status = e.code
 except BaseException as e:

@@ -6,7 +6,7 @@
 # in-process generate_*/send_file_to_bunkerweb path that lived in the
 # scheduler before the worker refactor.
 
-from contextlib import suppress
+from contextlib import nullcontext, suppress
 from datetime import datetime
 from io import BytesIO
 from os import getenv, sep
@@ -30,6 +30,11 @@ from ApiCaller import ApiCaller  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import _write_atomic  # type: ignore
+
+try:
+    from letsencrypt_consistency import le_cache_write_lock  # type: ignore
+except Exception:
+    le_cache_write_lock = None  # type: ignore
 
 LOGGER = setup_logger("JOBS.PUSH-CONFIGS")
 
@@ -169,13 +174,26 @@ def _materialize_caches(db: Database) -> None:
                 extract_path = cache_dir
                 if file_name.startswith("folder:"):
                     extract_path = Path(file_name.split("folder:", 1)[1].rsplit(".tgz", 1)[0])
-                rmtree(extract_path, ignore_errors=True)
-                extract_path.mkdir(parents=True, exist_ok=True)
+                is_letsencrypt = plugin_id == "letsencrypt"
+                # Open once to inspect membership before any destructive rmtree.
                 with tar_open(fileobj=BytesIO(cache["data"]), mode="r:gz") as tar:
-                    try:
-                        tar.extractall(extract_path, filter="fully_trusted")
-                    except TypeError:
-                        tar.extractall(extract_path)
+                    members = tar.getmembers()
+                    if is_letsencrypt and not any(
+                        m.name.replace("\\", "/").endswith("fullchain.pem") and "/live/" in ("/" + m.name.replace("\\", "/")) for m in members
+                    ):
+                        # Empty/skeleton LE row: never wipe a possibly-good on-disk tree
+                        # (certbot may be mid-issuance or already delivered a real cert).
+                        LOGGER.warning("Skipping rebuild of Let's Encrypt cache tree: DB row contains no live/*/fullchain.pem (empty/skeleton row)")
+                        continue
+                    # Serialize the LE-tree rebuild against certbot-new's direct /cache push.
+                    lock_cm = le_cache_write_lock() if (is_letsencrypt and le_cache_write_lock is not None) else nullcontext()
+                    with lock_cm:
+                        rmtree(extract_path, ignore_errors=True)
+                        extract_path.mkdir(parents=True, exist_ok=True)
+                        try:
+                            tar.extractall(extract_path, members=members, filter="fully_trusted")
+                        except TypeError:
+                            tar.extractall(extract_path, members=members)
                 continue
             _write_atomic(cache_path, cache["data"])
             if cache_path.stat().st_mode & 0o777 != desired_perms:

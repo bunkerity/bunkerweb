@@ -1,677 +1,231 @@
 # -*- coding: utf-8 -*-
+"""DNS provider translation layer for certbot-dns-multi.
+
+BunkerWeb used to ship ~29 hand-written Pydantic provider classes, each driving a
+dedicated ``certbot-dns-<provider>`` plugin. They are replaced by the single
+``certbot-dns-multi`` certbot plugin, which embeds lego's DNS providers. This module
+turns the operator-facing provider name + credential items into a ``dns-multi``
+credentials INI body of the form::
+
+    dns_multi_provider = <lego_code>
+    <LEGO_ENV_KEY> = <value>
+    ...
+
+certbot-dns-multi exports every INI key (except ``dns_multi_provider``) verbatim as an
+environment variable to lego, so credentials, route53 AWS keys, and lego tuning knobs
+all travel through the same file.
+
+Two vendored data files drive the translation (both in ``lego/`` next to this module):
+
+* ``lego_providers.json`` — generated from lego's TOML metadata (see
+  ``src/deps/misc/gen_lego_providers.py``); the authoritative list of lego codes and the
+  env-var names each accepts.
+* ``legacy_aliases.json`` — hand-authored backward-compat map: the historical BunkerWeb
+  provider names and their legacy credential-item key spellings → lego code + lego env
+  names (incl. the 5 name remaps and the ionos/rfc2136/google special cases).
+"""
+
+from json import dumps as json_dumps, loads as json_loads
 from pathlib import Path
-from sys import path as sys_path
-from typing import Any, List, Literal, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from common_utils import bytes_hash  # type: ignore
 
-# Define paths
-LIB_PATH = Path("/var/lib/bunkerweb/letsencrypt")
-PYTHON_PATH = LIB_PATH / "python"
-
-# Add to sys.path if not already present
-python_path_str = PYTHON_PATH.as_posix()
-if python_path_str not in sys_path:
-    sys_path.append(python_path_str)
+_LEGO_DIR = Path(__file__).resolve().parent / "lego"
 
 
-def alias_model_validator(field_map: dict):
-    """Factory function for creating a `model_validator` for alias mapping."""
-
-    def validator(cls, values):
-        for field, aliases in field_map.items():
-            for alias in aliases:
-                if alias in values:
-                    values[field] = values[alias]
-                    break
-        return values
-
-    return model_validator(mode="before")(validator)
+def _load_json(name: str) -> dict:
+    with (_LEGO_DIR / name).open("r", encoding="utf-8") as fh:
+        data = json_loads(fh.read())
+    data.pop("_meta", None)
+    return data
 
 
-class Provider(BaseModel):
-    """Base class for DNS providers."""
+# lego_code -> {"name", "credentials_env": [...], "additional_env": [...]}
+LEGO_PROVIDERS: Dict[str, dict] = _load_json("lego_providers.json")
+# legacy BunkerWeb provider name -> {"lego_code", "cred_key_map", "required", "defaults", "special", ...}
+LEGACY_ALIASES: Dict[str, dict] = _load_json("legacy_aliases.json")
 
-    model_config = ConfigDict(extra="ignore")
-
-    def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials to be written to a file."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}).items()).encode("utf-8")
-
-    @staticmethod
-    def get_file_type() -> Literal["ini"]:
-        """Return the file type that the credentials should be written to."""
-        return "ini"
-
-    @staticmethod
-    def get_extra_args() -> List[str]:
-        """Return additional arguments for the provider."""
-        return []
-
-    @classmethod
-    def _redact_field_value(cls, field_name: str, value: Any) -> Any:
-        if value in ("", None):
-            return value
-        return "***"
-
-    def __repr_args__(self) -> List[Tuple[str, Any]]:
-        """Redact secret-like fields when a provider is stringified for logs/debug output."""
-        return [(field_name, self._redact_field_value(field_name, value)) for field_name, value in super().__repr_args__()]
+# Every value the LETS_ENCRYPT_DNS_PROVIDER setting may take: all lego codes plus the
+# historical BunkerWeb names that remap to a different code (cloudflare, google, ...).
+SUPPORTED_PROVIDER_INPUTS = frozenset(LEGO_PROVIDERS) | frozenset(LEGACY_ALIASES)
 
 
-class BunnyNetProvider(Provider):
-    """BunnyNet DNS provider."""
+def resolve_lego_code(provider_input: str) -> Optional[str]:
+    """Resolve an operator-facing provider name to its lego code, or ``None`` if unknown.
 
-    dns_bunny_api_key: str
+    Legacy BunkerWeb names map through ``legacy_aliases.json`` (5 of them remap, e.g.
+    ``google`` -> ``gcloud``); any value that is already a lego code is returned as-is.
+    """
+    if not provider_input:
+        return None
+    alias = LEGACY_ALIASES.get(provider_input)
+    if alias:
+        return alias["lego_code"]
+    if provider_input in LEGO_PROVIDERS:
+        return provider_input
+    return None
 
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_bunny_api_key": ("dns_bunny_api_key", "bunnynet_api_key", "api_key"),
-        }
-    )
 
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-bunny"]
+def is_supported_provider(provider_input: str) -> bool:
+    """True when ``provider_input`` resolves to a known lego code."""
+    return resolve_lego_code(provider_input) is not None
 
 
-class ClouDNSProvider(Provider):
-    """ClouDNS DNS provider."""
+def is_base64_skip_code(lego_code: Optional[str]) -> bool:
+    """True for providers whose secrets are legitimately base64 and must not be decoded.
 
-    dns_cloudns_auth_id: str = ""
-    dns_cloudns_sub_auth_id: str = ""
-    dns_cloudns_sub_auth_user: str = ""
-    dns_cloudns_auth_password: str
+    rfc2136 (lego code ``dnsupdate``) TSIG secrets are base64 payloads.
+    """
+    return lego_code == "dnsupdate"
 
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_cloudns_auth_id": ("dns_cloudns_auth_id", "cloudns_auth_id", "auth_id"),
-            "dns_cloudns_sub_auth_id": ("dns_cloudns_sub_auth_id", "cloudns_sub_auth_id", "sub_auth_id"),
-            "dns_cloudns_sub_auth_user": ("dns_cloudns_sub_auth_user", "cloudns_sub_auth_user", "sub_auth_user"),
-            "dns_cloudns_auth_password": ("dns_cloudns_auth_password", "cloudns_auth_password", "auth_password"),
-        }
-    )
+
+def _known_env(lego_code: str) -> frozenset:
+    entry = LEGO_PROVIDERS.get(lego_code, {})
+    return frozenset(entry.get("credentials_env", [])) | frozenset(entry.get("additional_env", []))
+
+
+def provider_display_name(lego_code: str) -> str:
+    return LEGO_PROVIDERS.get(lego_code, {}).get("name", lego_code)
+
+
+class DnsMultiProvider:
+    """A resolved set of lego credentials for the certbot-dns-multi authenticator.
+
+    ``env`` holds ``{LEGO_ENV_KEY: value}`` pairs written to the credentials INI.
+    ``sidecars`` holds ``{basename: (content_bytes, env_key)}`` for providers that need a
+    companion file (currently only google service-account JSON -> GCE_SERVICE_ACCOUNT_FILE);
+    the caller (certbot-new.py) materialises each sidecar into the cache dir and rewrites
+    ``env[env_key]`` to the absolute path before the INI is written.
+    """
+
+    __slots__ = ("lego_code", "env", "sidecars")
+
+    def __init__(self, lego_code: str, env: Dict[str, str], sidecars: Optional[Dict[str, Tuple[bytes, str]]] = None):
+        self.lego_code = lego_code
+        self.env = dict(env)
+        self.sidecars = dict(sidecars or {})
 
     def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
-
-    @model_validator(mode="after")
-    def validate_cloudns_credentials(self):
-        """Validate ClouDNS credentials."""
-        if not self.dns_cloudns_auth_id and not self.dns_cloudns_sub_auth_id and not self.dns_cloudns_sub_auth_user:
-            raise ValueError("Either 'dns_cloudns_auth_id', 'dns_cloudns_sub_auth_id', or 'dns_cloudns_sub_auth_user' must be provided.")
-        return self
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-cloudns"]
-
-
-class CloudflareProvider(Provider):
-    """Cloudflare DNS provider."""
-
-    dns_cloudflare_api_token: str = ""
-    dns_cloudflare_email: str = ""
-    dns_cloudflare_api_key: str = ""
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_cloudflare_api_token": ("dns_cloudflare_api_token", "cloudflare_api_token", "api_token"),
-            "dns_cloudflare_email": ("dns_cloudflare_email", "cloudflare_email", "email"),
-            "dns_cloudflare_api_key": ("dns_cloudflare_api_key", "cloudflare_api_key", "api_key"),
-        }
-    )
-
-    def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
-
-    @model_validator(mode="after")
-    def validate_cloudflare_credentials(self):
-        """Validate Cloudflare credentials."""
-        if not self.dns_cloudflare_api_token and not (self.dns_cloudflare_email and self.dns_cloudflare_api_key):
-            raise ValueError("Either 'dns_cloudflare_api_token' or both 'dns_cloudflare_email' and 'dns_cloudflare_api_key' must be provided.")
-        return self
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-cloudflare"]
-
-
-class DesecProvider(Provider):
-    """deSEC DNS provider."""
-
-    dns_desec_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_desec_token": ("dns_desec_token", "desec_token", "token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-desec"]
-
-
-class DigitalOceanProvider(Provider):
-    """DigitalOcean DNS provider."""
-
-    dns_digitalocean_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_digitalocean_token": ("dns_digitalocean_token", "digitalocean_token", "token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-digitalocean"]
-
-
-class DomainOffensiveProvider(Provider):
-    """Domain Offensive DNS provider."""
-
-    dns_domainoffensive_api_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_domainoffensive_api_token": ("dns_domainoffensive_api_token", "domainoffensive_api_token", "api_token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-domainoffensive"]
-
-
-class DomeneshopProvider(Provider):
-    """Domeneshop DNS provider."""
-
-    dns_domeneshop_client_token: str
-    dns_domeneshop_client_secret: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_domeneshop_client_token": ("dns_domeneshop_client_token", "domeneshop_client_token", "client_token", "token"),
-            "dns_domeneshop_client_secret": ("dns_domeneshop_client_secret", "domeneshop_client_secret", "client_secret", "secret"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-domeneshop"]
-
-
-class DnsimpleProvider(Provider):
-    """DNSimple DNS provider."""
-
-    dns_dnsimple_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_dnsimple_token": ("dns_dnsimple_token", "dnsimple_token", "token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-dnsimple"]
-
-
-class DnsMadeEasyProvider(Provider):
-    """DNS Made Easy DNS provider."""
-
-    dns_dnsmadeeasy_api_key: str
-    dns_dnsmadeeasy_secret_key: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_dnsmadeeasy_api_key": ("dns_dnsmadeeasy_api_key", "dnsmadeeasy_api_key", "api_key"),
-            "dns_dnsmadeeasy_secret_key": ("dns_dnsmadeeasy_secret_key", "dnsmadeeasy_secret_key", "secret_key"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-dnsmadeeasy"]
-
-
-class DuckDnsProvider(Provider):
-    """DuckDNS DNS provider."""
-
-    dns_duckdns_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_duckdns_token": ("dns_duckdns_token", "duckdns_token", "token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-duckdns"]
-
-
-class DynuProvider(Provider):
-    """Dynu DNS provider."""
-
-    dns_dynu_auth_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_dynu_auth_token": ("dns_dynu_auth_token", "dynu_auth_token", "auth_token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-dynu"]
-
-
-class GandiProvider(Provider):
-    """Gandi DNS provider."""
-
-    dns_gandi_token: str
-    dns_gandi_sharing_id: str = ""
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_gandi_token": ("dns_gandi_token", "gandi_token", "token"),
-            "dns_gandi_sharing_id": ("dns_gandi_sharing_id", "gandi_sharing_id", "sharing_id"),
-        }
-    )
-
-    def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-gandi"]
-
-
-class GehirnProvider(Provider):
-    """Gehirn DNS provider."""
-
-    dns_gehirn_api_token: str
-    dns_gehirn_api_secret: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_gehirn_api_token": ("dns_gehirn_api_token", "gehirn_api_token", "api_token"),
-            "dns_gehirn_api_secret": ("dns_gehirn_api_secret", "gehirn_api_secret", "api_secret"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-gehirn"]
-
-
-class GoDaddyProvider(Provider):
-    """GoDaddy DNS provider."""
-
-    dns_godaddy_key: str
-    dns_godaddy_secret: str
-    dns_godaddy_ttl: str = "600"
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_godaddy_key": ("dns_godaddy_key", "godaddy_key", "key"),
-            "dns_godaddy_secret": ("dns_godaddy_secret", "godaddy_secret", "secret"),
-            "dns_godaddy_ttl": ("dns_godaddy_ttl", "godaddy_ttl", "ttl"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-godaddy"]
-
-
-class GoogleProvider(Provider):
-    """Google Cloud DNS provider."""
-
-    type: str = "service_account"
-    project_id: str
-    private_key_id: str
-    private_key: str
-    client_email: str
-    client_id: str
-    auth_uri: str = "https://accounts.google.com/o/oauth2/auth"
-    token_uri: str = "https://accounts.google.com/o/oauth2/token"
-    auth_provider_x509_cert_url: str = "https://www.googleapis.com/oauth2/v1/certs"
-    client_x509_cert_url: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "type": ("type", "google_type", "dns_google_type"),
-            "project_id": ("project_id", "google_project_id", "dns_google_project_id"),
-            "private_key_id": ("private_key_id", "google_private_key_id", "dns_google_private_key_id"),
-            "private_key": ("private_key", "google_private_key", "dns_google_private_key"),
-            "client_email": ("client_email", "google_client_email", "dns_google_client_email"),
-            "client_id": ("client_id", "google_client_id", "dns_google_client_id"),
-            "auth_uri": ("auth_uri", "google_auth_uri", "dns_google_auth_uri"),
-            "token_uri": ("token_uri", "google_token_uri", "dns_google_token_uri"),
-            "auth_provider_x509_cert_url": ("auth_provider_x509_cert_url", "google_auth_provider_x509_cert_url", "dns_google_auth_provider_x509_cert_url"),
-            "client_x509_cert_url": ("client_x509_cert_url", "google_client_x509_cert_url", "dns_google_client_x509_cert_url"),
-        }
-    )
-
-    def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials in JSON format."""
-        return self.model_dump_json(indent=2, exclude={"file_type"}).encode("utf-8")
-
-    @staticmethod
-    def get_file_type() -> Literal["json"]:
-        """Return the file type that the credentials should be written to."""
-        return "json"
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-google"]
-
-
-class HetznerProvider(Provider):
-    """Hetzner DNS provider."""
-
-    dns_hetzner_api_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_hetzner_api_token": ("dns_hetzner_api_token", "hetzner_api_token", "api_token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-hetzner"]
-
-
-class InfomaniakProvider(Provider):
-    """Infomaniak DNS provider."""
-
-    dns_infomaniak_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_infomaniak_token": ("dns_infomaniak_token", "infomaniak_token", "token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-infomaniak", "--rsa-key-size", "4096"]
-
-
-class IonosProvider(Provider):
-    """Ionos DNS provider."""
-
-    dns_ionos_prefix: str
-    dns_ionos_secret: str
-    dns_ionos_endpoint: str = "https://api.hosting.ionos.com"
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_ionos_prefix": ("dns_ionos_prefix", "ionos_prefix", "prefix"),
-            "dns_ionos_secret": ("dns_ionos_secret", "ionos_secret", "secret"),
-            "dns_ionos_endpoint": ("dns_ionos_endpoint", "ionos_endpoint", "endpoint"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-ionos", "--rsa-key-size", "4096"]
-
-
-class LinodeProvider(Provider):
-    """Linode DNS provider."""
-
-    dns_linode_key: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_linode_key": ("dns_linode_key", "linode_key", "key"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-linode"]
-
-
-class LuaDnsProvider(Provider):
-    """LuaDns DNS provider."""
-
-    dns_luadns_email: str
-    dns_luadns_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_luadns_email": ("dns_luadns_email", "luadns_email", "email"),
-            "dns_luadns_token": ("dns_luadns_token", "luadns_token", "token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-luadns"]
-
-
-class NjallaProvider(Provider):
-    """Njalla DNS provider."""
-
-    dns_njalla_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_njalla_token": ("dns_njalla_token", "njalla_token", "token", "api_token", "auth_token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-njalla"]
-
-
-class NSOneProvider(Provider):
-    """NS1 DNS provider."""
-
-    dns_nsone_api_key: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_nsone_api_key": ("dns_nsone_api_key", "nsone_api_key", "api_key"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-nsone"]
-
-
-class OvhProvider(Provider):
-    """OVH DNS provider."""
-
-    dns_ovh_endpoint: str = "ovh-eu"
-    dns_ovh_application_key: str
-    dns_ovh_application_secret: str
-    dns_ovh_consumer_key: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_ovh_endpoint": ("dns_ovh_endpoint", "ovh_endpoint", "endpoint"),
-            "dns_ovh_application_key": ("dns_ovh_application_key", "ovh_application_key", "application_key"),
-            "dns_ovh_application_secret": ("dns_ovh_application_secret", "ovh_application_secret", "application_secret"),
-            "dns_ovh_consumer_key": ("dns_ovh_consumer_key", "ovh_consumer_key", "consumer_key"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-ovh"]
-
-
-class PowerdnsProvider(Provider):
-    """PowerDNS DNS provider."""
-
-    dns_pdns_endpoint: str
-    dns_pdns_api_key: str
-    dns_pdns_server_id: str = "localhost"
-    dns_pdns_disable_notify: str = "false"
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_pdns_endpoint": ("dns_pdns_endpoint", "pdns_endpoint", "endpoint"),
-            "dns_pdns_api_key": ("dns_pdns_api_key", "pdns_api_key", "api_key"),
-            "dns_pdns_server_id": ("dns_pdns_server_id", "pdns_server_id", "server_id"),
-            "dns_pdns_disable_notify": ("dns_pdns_disable_notify", "pdns_disable_notify", "disable_notify"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-pdns"]
-
-
-class Rfc2136Provider(Provider):
-    """RFC 2136 DNS provider."""
-
-    dns_rfc2136_server: str
-    dns_rfc2136_port: Optional[str] = None
-    dns_rfc2136_name: str
-    dns_rfc2136_secret: str
-    dns_rfc2136_algorithm: str = "HMAC-MD5"
-    dns_rfc2136_sign_query: str = "false"
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_rfc2136_server": ("dns_rfc2136_server", "rfc2136_server", "server"),
-            "dns_rfc2136_port": ("dns_rfc2136_port", "rfc2136_port", "port"),
-            "dns_rfc2136_name": ("dns_rfc2136_name", "rfc2136_name", "name"),
-            "dns_rfc2136_secret": ("dns_rfc2136_secret", "rfc2136_secret", "secret"),
-            "dns_rfc2136_algorithm": ("dns_rfc2136_algorithm", "rfc2136_algorithm", "algorithm"),
-            "dns_rfc2136_sign_query": ("dns_rfc2136_sign_query", "rfc2136_sign_query", "sign_query"),
-        }
-    )
-
-    def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-rfc2136"]
-
-
-class Route53Provider(Provider):
-    """AWS Route 53 DNS provider."""
-
-    aws_access_key_id: str
-    aws_secret_access_key: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "aws_access_key_id": ("aws_access_key_id", "dns_aws_access_key_id", "access_key_id"),
-            "aws_secret_access_key": ("aws_secret_access_key", "dns_aws_secret_access_key", "secret_access_key"),
-        }
-    )
-
-    def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials in environment variable format, with [default] at the top."""
-        lines = ["[default]"]
-        for key, value in self.model_dump(exclude={"file_type"}).items():
-            lines.append(f"{key}={value}")
+        """Return the dns-multi credentials INI body (deterministic key order for stable hashing)."""
+        lines = [f"dns_multi_provider = {self.lego_code}"]
+        for key in sorted(self.env):
+            lines.append(f"{key} = {self.env[key]}")
         return "\n".join(lines).encode("utf-8")
 
     @staticmethod
-    def get_file_type() -> Literal["env"]:
-        """Return the file type that the credentials should be written to."""
-        return "env"
+    def get_file_type() -> str:
+        """certbot-dns-multi always reads an INI credentials file."""
+        return "ini"
 
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-route53"]
-
-
-class SakuraCloudProvider(Provider):
-    """Sakura Cloud DNS provider."""
-
-    dns_sakuracloud_api_token: str
-    dns_sakuracloud_api_secret: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_sakuracloud_api_token": ("dns_sakuracloud_api_token", "sakuracloud_api_token", "api_token"),
-            "dns_sakuracloud_api_secret": ("dns_sakuracloud_api_secret", "sakuracloud_api_secret", "api_secret"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["--dns-sakuracloud"]
+    def __repr__(self) -> str:
+        # Never expose secret values in logs/debug output.
+        redacted = {k: ("***" if v not in ("", None) else v) for k, v in self.env.items()}
+        return f"DnsMultiProvider(lego_code={self.lego_code!r}, env={redacted!r}, sidecars={sorted(self.sidecars)!r})"
 
 
-class ScalewayProvider(Provider):
-    """Scaleway DNS provider."""
-
-    dns_scaleway_application_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_scaleway_application_token": ("dns_scaleway_application_token", "scaleway_application_token", "application_token"),
-        }
-    )
-
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-scaleway"]
+def _apply_ionos_combine(env: Dict[str, str]) -> None:
+    """lego's ionos provider takes a single ``IONOS_API_KEY`` of the form ``<prefix>.<secret>``."""
+    prefix = env.pop("__IONOS_PREFIX", "")
+    secret = env.pop("__IONOS_SECRET", "")
+    if prefix and secret and not env.get("IONOS_API_KEY"):
+        env["IONOS_API_KEY"] = f"{prefix}.{secret}"
 
 
-class TransIPProvider(Provider):
-    """TransIP DNS provider."""
+def _apply_rfc2136_port(env: Dict[str, str]) -> None:
+    """lego's dnsupdate provider folds the port into ``DNSUPDATE_NAMESERVER`` (``host:port``)."""
+    port = env.pop("__RFC2136_PORT", "")
+    nameserver = env.get("DNSUPDATE_NAMESERVER", "")
+    if port and nameserver and ":" not in nameserver:
+        env["DNSUPDATE_NAMESERVER"] = f"{nameserver}:{port}"
 
-    dns_transip_key_file: str
-    dns_transip_username: str
 
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_transip_key_file": ("dns_transip_key_file", "transip_key_file", "key_file"),
-            "dns_transip_username": ("dns_transip_username", "transip_username", "username"),
-        }
-    )
+def _apply_google_sa(spec: dict, credential_items: Dict[str, str], env: Dict[str, str]) -> Dict[str, Tuple[bytes, str]]:
+    """Reassemble a legacy inline google service-account into a JSON sidecar file.
 
-    @staticmethod
-    def get_extra_args() -> dict:
-        """Return additional arguments for the provider."""
-        return ["-a", "dns-transip"]
+    lego's gcloud provider cannot read inline service-account fields; it reads
+    ``GCE_SERVICE_ACCOUNT_FILE`` (a path) or ``GCE_SERVICE_ACCOUNT`` (raw JSON). An inline
+    JSON value cannot live in the INI safely (certbot's configobj parser splits commas), so
+    the legacy per-field credentials are rebuilt into a JSON document written to a 0o600
+    sidecar; ``env["GCE_SERVICE_ACCOUNT_FILE"]`` is finalised by the caller to the cache path.
+    """
+    sa: Dict[str, str] = {}
+    for canonical, aliases in spec.get("sa_key_map", {}).items():
+        for alias in aliases:
+            if alias in credential_items:
+                sa[canonical] = credential_items[alias]
+                break
+
+    # No inline service-account material -> the operator supplied GCE_* directly (passthrough).
+    if "private_key" not in sa and "client_email" not in sa:
+        return {}
+
+    for default_key, default_value in spec.get("sa_defaults", {}).items():
+        sa.setdefault(default_key, default_value)
+
+    if env.get("GCE_PROJECT"):
+        sa["project_id"] = env["GCE_PROJECT"]
+    elif sa.get("project_id"):
+        env["GCE_PROJECT"] = sa["project_id"]
+
+    content = json_dumps(sa, indent=2).encode("utf-8")
+    basename = f"gce_service_account_{bytes_hash(content, algorithm='sha256')[:12]}.json"
+    return {basename: (content, "GCE_SERVICE_ACCOUNT_FILE")}
+
+
+def translate_credentials(
+    lego_code: str,
+    provider_input: str,
+    credential_items: Dict[str, str],
+    logger=None,
+) -> Optional[DnsMultiProvider]:
+    """Translate parsed credential items into a :class:`DnsMultiProvider`, or ``None`` on failure.
+
+    For historical providers, ``legacy_aliases.json`` maps each known legacy key spelling to
+    its lego env-var name (and raw lego env names are also accepted). For new providers, keys
+    pass through uppercased (they are already lego env-var names). Required env vars declared
+    for legacy providers are checked so a misconfiguration fails early instead of at issuance.
+    """
+    spec = LEGACY_ALIASES.get(provider_input)
+    env: Dict[str, str] = {}
+    sidecars: Dict[str, Tuple[bytes, str]] = {}
+
+    if spec:
+        known = _known_env(lego_code)
+        cred_map = spec.get("cred_key_map", {})
+        for key, value in credential_items.items():
+            if key in cred_map:
+                env[cred_map[key]] = value
+            elif key.upper() in known:
+                # Operators may also use raw lego env-var names with a legacy provider name.
+                env[key.upper()] = value
+            # Unknown keys for a known legacy provider are ignored (not silently passed to lego).
+
+        for default_key, default_value in spec.get("defaults", {}).items():
+            env.setdefault(default_key, default_value)
+
+        special = spec.get("special")
+        if special == "ionos_combine":
+            _apply_ionos_combine(env)
+        elif special == "rfc2136_port":
+            _apply_rfc2136_port(env)
+        elif special == "google_sa":
+            sidecars = _apply_google_sa(spec, credential_items, env)
+
+        missing = [var for var in spec.get("required", []) if not env.get(var)]
+        if missing:
+            if logger is not None:
+                logger.error(f"Missing required credential(s) for provider '{provider_input}' " f"({provider_display_name(lego_code)}): {', '.join(missing)}.")
+            return None
+    else:
+        # New lego provider configured directly: keys are already lego env-var names.
+        for key, value in credential_items.items():
+            env[key.upper()] = value
+
+    # Drop any internal sentinels that a special handler did not consume.
+    env = {key: value for key, value in env.items() if not key.startswith("__")}
+
+    if not env and not sidecars:
+        return None
+
+    return DnsMultiProvider(lego_code, env, sidecars)

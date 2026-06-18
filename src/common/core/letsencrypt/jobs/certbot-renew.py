@@ -7,10 +7,13 @@ from sys import exit as sys_exit, path as sys_path
 from time import monotonic
 from traceback import format_exc
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from API import API  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
+from common_utils import file_hash  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 from letsencrypt_utils import (
@@ -28,8 +31,19 @@ from letsencrypt_utils import (
     letsencrypt_cache_consistent,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
-    setup_route53_aws_config,
 )
+
+
+def _live_cert_hashes() -> dict:
+    """Map each live cert dir name -> SHA512 of its fullchain.pem (follows the live/->archive symlink)."""
+    hashes = {}
+    for fullchain in DATA_PATH.glob("live/*/fullchain.pem"):
+        try:
+            hashes[fullchain.parent.name] = file_hash(str(fullchain))
+        except BaseException:
+            hashes[fullchain.parent.name] = ""
+    return hashes
+
 
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
@@ -59,13 +73,9 @@ try:
 
     cmd_env = build_certbot_env(JOB, DEPS_PATH)
 
-    # route53 is the exception to certbot's persisted-credentials rule: certbot-dns-route53 has no
-    # --dns-route53-credentials flag and stores nothing in renewal/<cert>.conf — it reads AWS creds
-    # only from AWS_CONFIG_FILE. certbot-new.py sets that per-service at issuance, but `certbot renew`
-    # runs once for all certs, so re-derive the route53 credentials from the plugin settings and point
-    # AWS_CONFIG_FILE at them here. Without this, route53 certs issued with explicit access keys never
-    # auto-renew. Writes to CACHE_PATH (where issuance wrote them), not DATA_PATH.
-    setup_route53_aws_config(cmd_env, CACHE_PATH, LOGGER)
+    # Every provider (route53 included) now persists its credentials in renewal/<cert>.conf via
+    # dns_multi_credentials, so a plain `certbot renew` re-reads them uniformly — no per-provider
+    # credential re-derivation is needed here anymore.
 
     acme_server = "zerossl" if is_zerossl_used_in_env() else "letsencrypt"
     certbot_entrypoint = resolve_certbot_entrypoint(
@@ -79,6 +89,10 @@ try:
     certbot_bin = certbot_entrypoint[0]
     if acme_server == "zerossl" and certbot_bin != CERTBOT_BIN:
         LOGGER.info("Using zerossl-bot wrapper for certificate renewal.")
+
+    # Snapshot live cert fingerprints so we can tell whether `certbot renew` actually renewed
+    # anything (it returns 0 either way). Only an actual renewal should trigger delivery/reload.
+    before_hashes = _live_cert_hashes()
 
     process = Popen(
         [
@@ -116,6 +130,18 @@ try:
         status = 2
         LOGGER.error("Certificates renewal failed")
 
+    # `certbot renew` exits 0 whether or not it renewed anything. Compare cert fingerprints to
+    # detect a real renewal; only then signal a reload (status=1) so the renewed cert is delivered
+    # to the instances. Without this, a successful renewal stayed status=0 and the new cert was
+    # cached to the DB but never pushed to instances until an unrelated reload happened.
+    renewed = False
+    if status == 0:
+        after_hashes = _live_cert_hashes()
+        renewed = after_hashes != before_hashes
+        if renewed:
+            LOGGER.info("Detected renewed certificate(s); will deliver them to the instances.")
+            status = 1
+
     # Save Let's Encrypt data to db cache.
     # Guards: only re-cache if the initial restore succeeded AND we actually have live
     # certs on disk. Without these guards, a failed restore leaves DATA_PATH empty
@@ -150,6 +176,38 @@ try:
                 LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
             else:
                 LOGGER.info("Successfully saved Let's Encrypt data to db cache")
+                # Only when a cert was actually renewed this run (status==1): deliver the renewed LE
+                # cache to every live instance NOW, directly. Same whole-/var/cache push + /reload the
+                # worker's reload path performs on ret==1 (src/worker/tasks.py:81), issued here so it
+                # CANNOT be silently dropped by the shared 10s bw:reload_pending debounce that any other
+                # reload-flagged job finishing in the same window can steal. On any failure we leave
+                # status==1 so the worker's debounced reload path still runs as a fallback. We hold
+                # le_cache_write_lock around the read so push-configs cannot rmtree/rebuild the tree mid-send.
+                if status == 1:
+                    try:
+                        token = getenv("API_TOKEN") or None
+                        instances = [i for i in JOB.db.get_instances() if i.get("status") != "down"]
+                        if instances:
+                            api_caller = ApiCaller([API.from_instance(i, token=token) for i in instances])
+                            with le_cache_write_lock():
+                                pushed = bool(api_caller.send_files(str(CACHE_PATH.parent), "/cache"))
+                            if not pushed:
+                                LOGGER.error("Failed to push renewed Let's Encrypt cache to one or more instances; leaving worker reload path as fallback")
+                            else:
+                                test = "no" if getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
+                                sent = api_caller.send_to_apis("POST", f"/reload?test={test}")[0]
+                                if not sent:
+                                    LOGGER.error(
+                                        "Renewed LE cache pushed but reload request failed on at least one instance; leaving worker reload path as fallback"
+                                    )
+                                else:
+                                    LOGGER.info("Successfully delivered renewed Let's Encrypt cache and reloaded instances")
+                                    status = 0  # delivered here; don't double-fire the debounced worker reload
+                        else:
+                            LOGGER.info("No live instances registered; leaving delivery to the reload path")
+                    except BaseException as e:
+                        LOGGER.error(f"Exception while delivering renewed LE cache to instances: {e}; falling back to reload path")
+                        # status stays 1 → the worker's debounced reload path retries the push+reload
 except SystemExit as e:
     status = e.code
 except BaseException as e:
