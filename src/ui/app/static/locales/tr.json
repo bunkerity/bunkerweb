@@ -1609,6 +1609,7 @@
     "issue_count": "Bu görünümdeki hatalar ve uyarılar",
     "local_time": "Zaman damgalarını yerel saatinizde göster",
     "collapse_multiline": "Çok satırlı girdileri daralt (tracebackler, payloadlar)",
+    "collapse_raw_values": "Çok satırlı değerleri daralt (sertifikalar, anahtarlar)",
     "next_issue": "Sonraki hata veya uyarıya git",
     "prev_issue": "Önceki hata veya uyarıya git",
     "search_logs": "Günlüklerde ara (Ctrl+F)",

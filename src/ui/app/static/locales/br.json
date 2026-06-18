@@ -1609,6 +1609,7 @@
     "issue_count": "Erros e avisos nesta visualização",
     "local_time": "Mostrar carimbos de data/hora no seu horário local",
     "collapse_multiline": "Recolher entradas de várias linhas (tracebacks, payloads)",
+    "collapse_raw_values": "Recolher valores de várias linhas (certificados, chaves)",
     "next_issue": "Ir para o próximo erro ou aviso",
     "prev_issue": "Ir para o erro ou aviso anterior",
     "search_logs": "Pesquisar logs (Ctrl+F)",

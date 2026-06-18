@@ -1609,6 +1609,7 @@
     "issue_count": "Fehler und Warnungen in dieser Ansicht",
     "local_time": "Zeitstempel in Ihrer lokalen Zeit anzeigen",
     "collapse_multiline": "Mehrzeilige Einträge einklappen (Tracebacks, Payloads)",
+    "collapse_raw_values": "Mehrzeilige Werte einklappen (Zertifikate, Schlüssel)",
     "next_issue": "Zum nächsten Fehler oder zur nächsten Warnung springen",
     "prev_issue": "Zum vorherigen Fehler oder zur vorherigen Warnung springen",
     "search_logs": "Protokolle durchsuchen (Ctrl+F)",

@@ -1609,6 +1609,7 @@
     "issue_count": "Errores y advertencias en esta vista",
     "local_time": "Mostrar marcas de tiempo en tu hora local",
     "collapse_multiline": "Contraer entradas de varias líneas (tracebacks, payloads)",
+    "collapse_raw_values": "Contraer valores de varias líneas (certificados, claves)",
     "next_issue": "Saltar al siguiente error o advertencia",
     "prev_issue": "Saltar al error o advertencia anterior",
     "search_logs": "Buscar registros (Ctrl+F)",

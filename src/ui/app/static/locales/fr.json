@@ -1609,6 +1609,7 @@
     "issue_count": "Erreurs et avertissements dans cette vue",
     "local_time": "Afficher les horodatages dans votre heure locale",
     "collapse_multiline": "Replier les entrées multilignes (tracebacks, charges utiles)",
+    "collapse_raw_values": "Replier les valeurs multilignes (certificats, clés)",
     "next_issue": "Aller à l'erreur ou l'avertissement suivant",
     "prev_issue": "Aller à l'erreur ou l'avertissement précédent",
     "search_logs": "Rechercher dans les journaux (Ctrl+F)",
