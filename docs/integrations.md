@@ -1443,6 +1443,12 @@ The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persis
 - **Persistence overrides:** `REDIS_APPENDONLY=yes|no` toggles AOF (default `yes`); RDB snapshots are configured with `REDIS_SAVE` plus optional `REDIS_SAVE_0`, `REDIS_SAVE_1`, … each providing one `save <seconds> <changes>` pair (e.g. `REDIS_SAVE_0="900 1"`, `REDIS_SAVE_1="300 10"`). Setting any of these env vars replaces the built-in `900 1 / 300 10 / 60 10000` default set; an empty value emits `save ""`, disabling RDB. Ignored when the conf already declares `save` itself.
 - **Authentication:** when `REDIS_PASSWORD` is set and the conf does not already define `requirepass`, the embedded Redis is launched with `requirepass` so the BunkerWeb client and server stay in sync. The embedded server only supports the default user — set `REDIS_USERNAME` only when pointing at an external Redis with ACLs.
 - Redis logs appear with the `[REDIS]` prefix in Docker logs and in `/var/log/bunkerweb/redis.log`.
+- **Recovery (treat embedded Redis as a cache):** the embedded Redis only backs bans/reports/metrics/sessions, which are rebuilt at runtime — it is a cache, not a system of record. If `redis-server` fails to start (for example a corrupted append-only file or RDB snapshot after an unclean shutdown), supervisor parks it in `FATAL` and the container is reported **unhealthy**. To diagnose and recover from inside the container:
+    - `docker exec <container> supervisorctl status redis` (expect `FATAL`), and `docker logs <container> 2>&1 | grep '\[REDIS\]'` for the exact start-up error.
+    - A `docker restart` re-attempts start-up and clears transient failures.
+    - For persistent corruption, repair with the bundled tools — `redis-check-aof --fix /var/lib/redis/appendonlydir/appendonly.aof.manifest` (note: `--fix` truncates from the corruption point and **discards** data after it) — or simply wipe `/data/redis` to start clean. Either way only cached bans/reports are lost; they repopulate.
+- **Runtime config is rebuilt every boot:** `/var/lib/bunkerweb/redis-runtime.conf` is regenerated from `/etc/redis.conf` plus the env vars on each start, so any directive you want to keep must live in a mounted `/etc/redis.conf` or be expressed via the `REDIS_*` env vars above — edits made directly to the runtime file do not survive a restart.
+- **Loopback, unauthenticated by default:** with `bind 127.0.0.1` and no `requirepass` unless `REDIS_PASSWORD` is set, the embedded Redis is reachable only by processes already inside the container. Set `REDIS_PASSWORD` for defense-in-depth.
 
 ### CrowdSec Integration {#crowdsec-integration}
 
@@ -2349,7 +2355,7 @@ Depending on your installation type:
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.30.3 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian Bookworm/Trixie"
 
@@ -2364,11 +2370,11 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.2:
+    You should now be able to install NGINX 1.30.3:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2412,11 +2418,11 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.2:
+    You should now be able to install NGINX 1.30.3:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2506,10 +2512,10 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.30.2:
+    You should now be able to install NGINX 1.30.3:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.2
+    sudo dnf install --allowerasing nginx-1.30.3
     ```
 
     !!! example "Disable the setup wizard"
