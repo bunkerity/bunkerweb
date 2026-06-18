@@ -7,7 +7,6 @@ from selenium.common.exceptions import JavascriptException
 from traceback import format_exc
 from time import sleep
 
-
 try:
     ssl = getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
 
@@ -201,14 +200,12 @@ try:
         error = False
 
         try:
-            driver.execute_script(
-                f"""
+            driver.execute_script(f"""
                    var xhttp = new XMLHttpRequest();
                    xhttp.open("GET", "http{'s' if ssl else ''}://www.example.com", false);
                    xhttp.setRequestHeader("Host", "www.example.com");
                    xhttp.send();
-                """
-            )
+                """)
         except JavascriptException as e:
             if not f"{e}".startswith("Message: NetworkError"):
                 print(f"❌ {e}", flush=True)

@@ -4,7 +4,6 @@ from requests import RequestException, get, head
 from traceback import format_exc
 from time import sleep
 
-
 try:
     ready = False
     retries = 0

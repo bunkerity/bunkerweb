@@ -182,15 +182,39 @@
     },
     "sa_key_map": {
       "type": ["type", "google_type", "dns_google_type"],
-      "project_id": ["project_id", "google_project_id", "dns_google_project_id"],
-      "private_key_id": ["private_key_id", "google_private_key_id", "dns_google_private_key_id"],
-      "private_key": ["private_key", "google_private_key", "dns_google_private_key"],
-      "client_email": ["client_email", "google_client_email", "dns_google_client_email"],
+      "project_id": [
+        "project_id",
+        "google_project_id",
+        "dns_google_project_id"
+      ],
+      "private_key_id": [
+        "private_key_id",
+        "google_private_key_id",
+        "dns_google_private_key_id"
+      ],
+      "private_key": [
+        "private_key",
+        "google_private_key",
+        "dns_google_private_key"
+      ],
+      "client_email": [
+        "client_email",
+        "google_client_email",
+        "dns_google_client_email"
+      ],
       "client_id": ["client_id", "google_client_id", "dns_google_client_id"],
       "auth_uri": ["auth_uri", "google_auth_uri", "dns_google_auth_uri"],
       "token_uri": ["token_uri", "google_token_uri", "dns_google_token_uri"],
-      "auth_provider_x509_cert_url": ["auth_provider_x509_cert_url", "google_auth_provider_x509_cert_url", "dns_google_auth_provider_x509_cert_url"],
-      "client_x509_cert_url": ["client_x509_cert_url", "google_client_x509_cert_url", "dns_google_client_x509_cert_url"]
+      "auth_provider_x509_cert_url": [
+        "auth_provider_x509_cert_url",
+        "google_auth_provider_x509_cert_url",
+        "dns_google_auth_provider_x509_cert_url"
+      ],
+      "client_x509_cert_url": [
+        "client_x509_cert_url",
+        "google_client_x509_cert_url",
+        "dns_google_client_x509_cert_url"
+      ]
     },
     "sa_defaults": {
       "type": "service_account",
@@ -295,8 +319,12 @@
       "ovh_consumer_key": "OVH_CONSUMER_KEY",
       "consumer_key": "OVH_CONSUMER_KEY"
     },
-    "defaults": {"OVH_ENDPOINT": "ovh-eu"},
-    "required": ["OVH_APPLICATION_KEY", "OVH_APPLICATION_SECRET", "OVH_CONSUMER_KEY"]
+    "defaults": { "OVH_ENDPOINT": "ovh-eu" },
+    "required": [
+      "OVH_APPLICATION_KEY",
+      "OVH_APPLICATION_SECRET",
+      "OVH_CONSUMER_KEY"
+    ]
   },
 
   "pdns": {

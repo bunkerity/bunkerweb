@@ -59,9 +59,18 @@ def dispatch_jobs(payload: DispatchJobsRequest) -> JSONResponse:
         # HEAVY_JOBS mirrors src/worker/app.py — keeps queue routing in sync
         # without importing worker package on the API side.
         HEAVY_JOBS = {
-            "backup-data", "bunkernet-data", "bunkernet-register",
-            "certbot-auth", "certbot-cleanup", "certbot-deploy", "certbot-new", "certbot-renew",
-            "coreruleset-nightly", "download-crs-plugins", "download-plugins", "download-pro-plugins",
+            "backup-data",
+            "bunkernet-data",
+            "bunkernet-register",
+            "certbot-auth",
+            "certbot-cleanup",
+            "certbot-deploy",
+            "certbot-new",
+            "certbot-renew",
+            "coreruleset-nightly",
+            "download-crs-plugins",
+            "download-plugins",
+            "download-pro-plugins",
             "push-configs",
         }
         queue = "heavy" if job.name in HEAVY_JOBS else "default"

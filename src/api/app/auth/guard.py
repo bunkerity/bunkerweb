@@ -58,7 +58,7 @@ class BiscuitWithAdminBearer:
             pwd_hash: bytes
             if hit and hit[2] > now:
                 is_admin, pwd_hash, _exp = hit
-                self._logger.debug(f"Admin cache hit for user={username}, expires_in={int(hit[2]-now)}s")
+                self._logger.debug(f"Admin cache hit for user={username}, expires_in={int(hit[2] - now)}s")
             else:
                 db = get_api_db(log=False)
                 user = db.get_api_user(username=username, as_dict=True)

@@ -3,7 +3,6 @@ from typing import Optional
 
 from celery import Celery
 
-
 celery_app: Optional[Celery] = None
 
 

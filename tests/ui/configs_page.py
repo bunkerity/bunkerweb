@@ -51,15 +51,13 @@ try:
 
     configs_modal_editor_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-configs-modal-editor='']/textarea")
     assert isinstance(configs_modal_editor_elem, WebElement), "The editor element is not an instance of WebElement"
-    configs_modal_editor_elem.send_keys(
-        """
+    configs_modal_editor_elem.send_keys("""
 location /hello {
     default_type 'text/plain';
     content_by_lua_block {
         ngx.say('hello app1')
     }
-}"""
-    )
+}""")
 
     access_page(DRIVER, "//button[@data-configs-modal-submit='']", "configs", False)
 
@@ -187,15 +185,13 @@ location /hello {
 
     configs_modal_editor_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-configs-modal-editor='']/textarea")
     assert isinstance(configs_modal_editor_elem, WebElement), "The editor element is not an instance of WebElement"
-    configs_modal_editor_elem.send_keys(
-        """
+    configs_modal_editor_elem.send_keys("""
 location /hello {
     default_type 'text/plain';
     content_by_lua_block {
         ngx.say('hello app1')
     }
-}"""
-    )
+}""")
 
     access_page(DRIVER, "//button[@data-configs-modal-submit='']", "configs", False)
 

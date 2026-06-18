@@ -2,7 +2,6 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-
 app = FastAPI()
 instance_id = None
 report_num = 0

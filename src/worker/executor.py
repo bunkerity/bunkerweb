@@ -3,7 +3,6 @@ import importlib.util
 import sys
 from pathlib import Path
 
-
 ALLOWED_ROOTS = (
     Path("/usr/share/bunkerweb/core"),
     Path("/etc/bunkerweb/plugins"),

@@ -12,7 +12,6 @@ from json import loads as json_loads
 import letsencrypt_providers as P
 from letsencrypt_utils import LETSENCRYPT_CACHE_PATH, extract_provider
 
-
 # --------------------------------------------------------------------------- resolve / support
 
 

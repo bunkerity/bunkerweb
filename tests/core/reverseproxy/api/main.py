@@ -3,7 +3,6 @@ from time import sleep
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import JSONResponse, PlainTextResponse
 
-
 app = FastAPI()
 asked_auth = False
 CONTENT = """<html>
@@ -61,26 +60,22 @@ async def headers(request: Request):
 async def auth():
     global asked_auth
     asked_auth = True
-    return PlainTextResponse(
-        """<html>
+    return PlainTextResponse("""<html>
     <body>
         <h1>This is the authentication page</h1>
     </body>
-</html>"""
-    )
+</html>""")
 
 
 @app.get("/bad-auth")
 async def bad_auth():
     global asked_auth
     if asked_auth:
-        return PlainTextResponse(
-            """<html>
+        return PlainTextResponse("""<html>
     <body>
         <h1>This is the login page</h1>
     </body>
-</html>"""
-        )
+</html>""")
 
     asked_auth = True
     return PlainTextResponse("Unauthorized", status_code=401)

@@ -7,9 +7,7 @@
   },
   "abion": {
     "name": "Abion",
-    "credentials_env": [
-      "ABION_API_KEY"
-    ],
+    "credentials_env": ["ABION_API_KEY"],
     "additional_env": [
       "ABION_POLLING_INTERVAL",
       "ABION_PROPAGATION_TIMEOUT",
@@ -24,16 +22,11 @@
       "ACME_DNS_STORAGE_PATH",
       "ACME_DNS_STORAGE_BASE_URL"
     ],
-    "additional_env": [
-      "ACME_DNS_ALLOWLIST"
-    ]
+    "additional_env": ["ACME_DNS_ALLOWLIST"]
   },
   "active24": {
     "name": "Active24",
-    "credentials_env": [
-      "ACTIVE24_API_KEY",
-      "ACTIVE24_SECRET"
-    ],
+    "credentials_env": ["ACTIVE24_API_KEY", "ACTIVE24_SECRET"],
     "additional_env": [
       "ACTIVE24_POLLING_INTERVAL",
       "ACTIVE24_PROPAGATION_TIMEOUT",
@@ -75,10 +68,7 @@
   },
   "allinkl": {
     "name": "all-inkl",
-    "credentials_env": [
-      "ALL_INKL_LOGIN",
-      "ALL_INKL_PASSWORD"
-    ],
+    "credentials_env": ["ALL_INKL_LOGIN", "ALL_INKL_PASSWORD"],
     "additional_env": [
       "ALL_INKL_POLLING_INTERVAL",
       "ALL_INKL_PROPAGATION_TIMEOUT",
@@ -87,9 +77,7 @@
   },
   "alwaysdata": {
     "name": "Alwaysdata",
-    "credentials_env": [
-      "ALWAYSDATA_API_KEY"
-    ],
+    "credentials_env": ["ALWAYSDATA_API_KEY"],
     "additional_env": [
       "ALWAYSDATA_ACCOUNT",
       "ALWAYSDATA_POLLING_INTERVAL",
@@ -100,9 +88,7 @@
   },
   "anexia": {
     "name": "Anexia CloudDNS",
-    "credentials_env": [
-      "ANEXIA_TOKEN"
-    ],
+    "credentials_env": ["ANEXIA_TOKEN"],
     "additional_env": [
       "ANEXIA_API_URL",
       "ANEXIA_POLLING_INTERVAL",
@@ -113,10 +99,7 @@
   },
   "artfiles": {
     "name": "ArtFiles",
-    "credentials_env": [
-      "ARTFILES_USERNAME",
-      "ARTFILES_PASSWORD"
-    ],
+    "credentials_env": ["ARTFILES_USERNAME", "ARTFILES_PASSWORD"],
     "additional_env": [
       "ARTFILES_SERVER_NAME",
       "ARTFILES_POLLING_INTERVAL",
@@ -127,9 +110,7 @@
   },
   "arvancloud": {
     "name": "ArvanCloud",
-    "credentials_env": [
-      "ARVANCLOUD_API_KEY"
-    ],
+    "credentials_env": ["ARVANCLOUD_API_KEY"],
     "additional_env": [
       "ARVANCLOUD_POLLING_INTERVAL",
       "ARVANCLOUD_PROPAGATION_TIMEOUT",
@@ -139,10 +120,7 @@
   },
   "auroradns": {
     "name": "Aurora DNS",
-    "credentials_env": [
-      "AURORA_API_KEY",
-      "AURORA_SECRET"
-    ],
+    "credentials_env": ["AURORA_API_KEY", "AURORA_SECRET"],
     "additional_env": [
       "AURORA_ENDPOINT",
       "AURORA_POLLING_INTERVAL",
@@ -152,10 +130,7 @@
   },
   "autodns": {
     "name": "Autodns",
-    "credentials_env": [
-      "AUTODNS_API_USER",
-      "AUTODNS_API_PASSWORD"
-    ],
+    "credentials_env": ["AUTODNS_API_USER", "AUTODNS_API_PASSWORD"],
     "additional_env": [
       "AUTODNS_ENDPOINT",
       "AUTODNS_CONTEXT",
@@ -167,10 +142,7 @@
   },
   "axelname": {
     "name": "Axelname",
-    "credentials_env": [
-      "AXELNAME_NICKNAME",
-      "AXELNAME_TOKEN"
-    ],
+    "credentials_env": ["AXELNAME_NICKNAME", "AXELNAME_TOKEN"],
     "additional_env": [
       "AXELNAME_POLLING_INTERVAL",
       "AXELNAME_PROPAGATION_TIMEOUT",
@@ -180,9 +152,7 @@
   },
   "azion": {
     "name": "Azion",
-    "credentials_env": [
-      "AZION_PERSONAL_TOKEN"
-    ],
+    "credentials_env": ["AZION_PERSONAL_TOKEN"],
     "additional_env": [
       "AZION_PAGE_SIZE",
       "AZION_POLLING_INTERVAL",
@@ -227,10 +197,7 @@
   },
   "beget": {
     "name": "Beget.com",
-    "credentials_env": [
-      "BEGET_USERNAME",
-      "BEGET_PASSWORD"
-    ],
+    "credentials_env": ["BEGET_USERNAME", "BEGET_PASSWORD"],
     "additional_env": [
       "BEGET_POLLING_INTERVAL",
       "BEGET_PROPAGATION_TIMEOUT",
@@ -240,9 +207,7 @@
   },
   "binarylane": {
     "name": "Binary Lane",
-    "credentials_env": [
-      "BINARYLANE_API_TOKEN"
-    ],
+    "credentials_env": ["BINARYLANE_API_TOKEN"],
     "additional_env": [
       "BINARYLANE_POLLING_INTERVAL",
       "BINARYLANE_PROPAGATION_TIMEOUT",
@@ -252,9 +217,7 @@
   },
   "bindman": {
     "name": "Bindman",
-    "credentials_env": [
-      "BINDMAN_MANAGER_ADDRESS"
-    ],
+    "credentials_env": ["BINDMAN_MANAGER_ADDRESS"],
     "additional_env": [
       "BINDMAN_POLLING_INTERVAL",
       "BINDMAN_PROPAGATION_TIMEOUT",
@@ -297,10 +260,7 @@
   },
   "bookmyname": {
     "name": "BookMyName",
-    "credentials_env": [
-      "BOOKMYNAME_USERNAME",
-      "BOOKMYNAME_PASSWORD"
-    ],
+    "credentials_env": ["BOOKMYNAME_USERNAME", "BOOKMYNAME_PASSWORD"],
     "additional_env": [
       "BOOKMYNAME_POLLING_INTERVAL",
       "BOOKMYNAME_PROPAGATION_TIMEOUT",
@@ -310,9 +270,7 @@
   },
   "bunny": {
     "name": "Bunny",
-    "credentials_env": [
-      "BUNNY_API_KEY"
-    ],
+    "credentials_env": ["BUNNY_API_KEY"],
     "additional_env": [
       "BUNNY_POLLING_INTERVAL",
       "BUNNY_PROPAGATION_TIMEOUT",
@@ -322,9 +280,7 @@
   },
   "checkdomain": {
     "name": "Checkdomain",
-    "credentials_env": [
-      "CHECKDOMAIN_TOKEN"
-    ],
+    "credentials_env": ["CHECKDOMAIN_TOKEN"],
     "additional_env": [
       "CHECKDOMAIN_ENDPOINT",
       "CHECKDOMAIN_TTL",
@@ -335,9 +291,7 @@
   },
   "civo": {
     "name": "Civo",
-    "credentials_env": [
-      "CIVO_TOKEN"
-    ],
+    "credentials_env": ["CIVO_TOKEN"],
     "additional_env": [
       "CIVO_POLLING_INTERVAL",
       "CIVO_PROPAGATION_TIMEOUT",
@@ -380,10 +334,7 @@
   },
   "cloudns": {
     "name": "ClouDNS",
-    "credentials_env": [
-      "CLOUDNS_AUTH_ID",
-      "CLOUDNS_AUTH_PASSWORD"
-    ],
+    "credentials_env": ["CLOUDNS_AUTH_ID", "CLOUDNS_AUTH_PASSWORD"],
     "additional_env": [
       "CLOUDNS_SUB_AUTH_ID",
       "CLOUDNS_POLLING_INTERVAL",
@@ -409,10 +360,7 @@
   },
   "com35": {
     "name": "35.com/三五互联",
-    "credentials_env": [
-      "COM35_USERNAME",
-      "COM35_PASSWORD"
-    ],
+    "credentials_env": ["COM35_USERNAME", "COM35_PASSWORD"],
     "additional_env": [
       "COM35_POLLING_INTERVAL",
       "COM35_PROPAGATION_TIMEOUT",
@@ -422,9 +370,7 @@
   },
   "connbyte": {
     "name": "Connbyte",
-    "credentials_env": [
-      "CONNBYTE_TOKEN"
-    ],
+    "credentials_env": ["CONNBYTE_TOKEN"],
     "additional_env": [
       "CONNBYTE_POLLING_INTERVAL",
       "CONNBYTE_PROPAGATION_TIMEOUT",
@@ -464,10 +410,7 @@
   },
   "constellix": {
     "name": "Constellix",
-    "credentials_env": [
-      "CONSTELLIX_API_KEY",
-      "CONSTELLIX_SECRET_KEY"
-    ],
+    "credentials_env": ["CONSTELLIX_API_KEY", "CONSTELLIX_SECRET_KEY"],
     "additional_env": [
       "CONSTELLIX_POLLING_INTERVAL",
       "CONSTELLIX_PROPAGATION_TIMEOUT",
@@ -477,10 +420,7 @@
   },
   "corenetworks": {
     "name": "Core-Networks",
-    "credentials_env": [
-      "CORENETWORKS_LOGIN",
-      "CORENETWORKS_PASSWORD"
-    ],
+    "credentials_env": ["CORENETWORKS_LOGIN", "CORENETWORKS_PASSWORD"],
     "additional_env": [
       "CORENETWORKS_POLLING_INTERVAL",
       "CORENETWORKS_PROPAGATION_TIMEOUT",
@@ -491,11 +431,7 @@
   },
   "cpanel": {
     "name": "CPanel/WHM",
-    "credentials_env": [
-      "CPANEL_USERNAME",
-      "CPANEL_TOKEN",
-      "CPANEL_BASE_URL"
-    ],
+    "credentials_env": ["CPANEL_USERNAME", "CPANEL_TOKEN", "CPANEL_BASE_URL"],
     "additional_env": [
       "CPANEL_MODE",
       "CPANEL_POLLING_INTERVAL",
@@ -506,9 +442,7 @@
   },
   "curanet": {
     "name": "Curanet",
-    "credentials_env": [
-      "CURANET_API_KEY"
-    ],
+    "credentials_env": ["CURANET_API_KEY"],
     "additional_env": [
       "CURANET_POLLING_INTERVAL",
       "CURANET_PROPAGATION_TIMEOUT",
@@ -518,9 +452,7 @@
   },
   "czechia": {
     "name": "Czechia",
-    "credentials_env": [
-      "CZECHIA_TOKEN"
-    ],
+    "credentials_env": ["CZECHIA_TOKEN"],
     "additional_env": [
       "CZECHIA_POLLING_INTERVAL",
       "CZECHIA_PROPAGATION_TIMEOUT",
@@ -530,9 +462,7 @@
   },
   "dandomain": {
     "name": "DanDomain",
-    "credentials_env": [
-      "DANDOMAIN_API_KEY"
-    ],
+    "credentials_env": ["DANDOMAIN_API_KEY"],
     "additional_env": [
       "DANDOMAIN_POLLING_INTERVAL",
       "DANDOMAIN_PROPAGATION_TIMEOUT",
@@ -542,9 +472,7 @@
   },
   "ddnss": {
     "name": "DDnss (DynDNS Service)",
-    "credentials_env": [
-      "DDNSS_KEY"
-    ],
+    "credentials_env": ["DDNSS_KEY"],
     "additional_env": [
       "DDNSS_POLLING_INTERVAL",
       "DDNSS_PROPAGATION_TIMEOUT",
@@ -555,9 +483,7 @@
   },
   "derak": {
     "name": "Derak Cloud",
-    "credentials_env": [
-      "DERAK_API_KEY"
-    ],
+    "credentials_env": ["DERAK_API_KEY"],
     "additional_env": [
       "DERAK_WEBSITE_ID",
       "DERAK_POLLING_INTERVAL",
@@ -568,9 +494,7 @@
   },
   "desec": {
     "name": "deSEC.io",
-    "credentials_env": [
-      "DESEC_TOKEN"
-    ],
+    "credentials_env": ["DESEC_TOKEN"],
     "additional_env": [
       "DESEC_POLLING_INTERVAL",
       "DESEC_PROPAGATION_TIMEOUT",
@@ -602,9 +526,7 @@
   },
   "digitalocean": {
     "name": "Digital Ocean",
-    "credentials_env": [
-      "DO_AUTH_TOKEN"
-    ],
+    "credentials_env": ["DO_AUTH_TOKEN"],
     "additional_env": [
       "DO_API_URL",
       "DO_POLLING_INTERVAL",
@@ -615,10 +537,7 @@
   },
   "dinahosting": {
     "name": "Dinahosting",
-    "credentials_env": [
-      "DINAHOSTING_USERNAME",
-      "DINAHOSTING_PASSWORD"
-    ],
+    "credentials_env": ["DINAHOSTING_USERNAME", "DINAHOSTING_PASSWORD"],
     "additional_env": [
       "DINAHOSTING_POLLING_INTERVAL",
       "DINAHOSTING_PROPAGATION_TIMEOUT",
@@ -643,10 +562,7 @@
   },
   "dns51": {
     "name": "51DNS",
-    "credentials_env": [
-      "DNS51_API_KEY",
-      "DNS51_API_SECRET"
-    ],
+    "credentials_env": ["DNS51_API_KEY", "DNS51_API_SECRET"],
     "additional_env": [
       "DNS51_POLLING_INTERVAL",
       "DNS51_PROPAGATION_TIMEOUT",
@@ -656,9 +572,7 @@
   },
   "dnscale": {
     "name": "DNScale",
-    "credentials_env": [
-      "DNSCALE_API_TOKEN"
-    ],
+    "credentials_env": ["DNSCALE_API_TOKEN"],
     "additional_env": [
       "DNSCALE_POLLING_INTERVAL",
       "DNSCALE_PROPAGATION_TIMEOUT",
@@ -668,9 +582,7 @@
   },
   "dnsexit": {
     "name": "DNSExit",
-    "credentials_env": [
-      "DNSEXIT_API_KEY"
-    ],
+    "credentials_env": ["DNSEXIT_API_KEY"],
     "additional_env": [
       "DNSEXIT_POLLING_INTERVAL",
       "DNSEXIT_PROPAGATION_TIMEOUT",
@@ -680,9 +592,7 @@
   },
   "dnshomede": {
     "name": "dnsHome.de",
-    "credentials_env": [
-      "DNSHOMEDE_CREDENTIALS"
-    ],
+    "credentials_env": ["DNSHOMEDE_CREDENTIALS"],
     "additional_env": [
       "DNSHOMEDE_POLLING_INTERVAL",
       "DNSHOMEDE_PROPAGATION_TIMEOUT",
@@ -692,9 +602,7 @@
   },
   "dnsimple": {
     "name": "DNSimple",
-    "credentials_env": [
-      "DNSIMPLE_OAUTH_TOKEN"
-    ],
+    "credentials_env": ["DNSIMPLE_OAUTH_TOKEN"],
     "additional_env": [
       "DNSIMPLE_BASE_URL",
       "DNSIMPLE_POLLING_INTERVAL",
@@ -704,10 +612,7 @@
   },
   "dnsla": {
     "name": "dns.la",
-    "credentials_env": [
-      "DNSLA_API_ID",
-      "DNSLA_API_SECRET"
-    ],
+    "credentials_env": ["DNSLA_API_ID", "DNSLA_API_SECRET"],
     "additional_env": [
       "DNSLA_POLLING_INTERVAL",
       "DNSLA_PROPAGATION_TIMEOUT",
@@ -717,10 +622,7 @@
   },
   "dnsmadeeasy": {
     "name": "DNS Made Easy",
-    "credentials_env": [
-      "DNSMADEEASY_API_KEY",
-      "DNSMADEEASY_API_SECRET"
-    ],
+    "credentials_env": ["DNSMADEEASY_API_KEY", "DNSMADEEASY_API_SECRET"],
     "additional_env": [
       "DNSMADEEASY_SANDBOX",
       "DNSMADEEASY_POLLING_INTERVAL",
@@ -731,10 +633,7 @@
   },
   "dnsservices": {
     "name": "DNS.services",
-    "credentials_env": [
-      "DNSSERVICES_USERNAME",
-      "DNSSERVICES_PASSWORD"
-    ],
+    "credentials_env": ["DNSSERVICES_USERNAME", "DNSSERVICES_PASSWORD"],
     "additional_env": [
       "DNSSERVICES_POLLING_INTERVAL",
       "DNSSERVICES_PROPAGATION_TIMEOUT",
@@ -744,9 +643,7 @@
   },
   "dnsupdate": {
     "name": "DNS Update (RFC2136)",
-    "credentials_env": [
-      "DNSUPDATE_NAMESERVER"
-    ],
+    "credentials_env": ["DNSUPDATE_NAMESERVER"],
     "additional_env": [
       "DNSUPDATE_TSIG_ALGORITHM",
       "DNSUPDATE_TSIG_KEY",
@@ -766,9 +663,7 @@
   },
   "dode": {
     "name": "Domain Offensive (do.de)",
-    "credentials_env": [
-      "DODE_TOKEN"
-    ],
+    "credentials_env": ["DODE_TOKEN"],
     "additional_env": [
       "DODE_POLLING_INTERVAL",
       "DODE_PROPAGATION_TIMEOUT",
@@ -778,10 +673,7 @@
   },
   "domeneshop": {
     "name": "Domeneshop",
-    "credentials_env": [
-      "DOMENESHOP_API_TOKEN",
-      "DOMENESHOP_API_SECRET"
-    ],
+    "credentials_env": ["DOMENESHOP_API_TOKEN", "DOMENESHOP_API_SECRET"],
     "additional_env": [
       "DOMENESHOP_POLLING_INTERVAL",
       "DOMENESHOP_PROPAGATION_TIMEOUT",
@@ -790,9 +682,7 @@
   },
   "dreamhost": {
     "name": "DreamHost",
-    "credentials_env": [
-      "DREAMHOST_API_KEY"
-    ],
+    "credentials_env": ["DREAMHOST_API_KEY"],
     "additional_env": [
       "DREAMHOST_POLLING_INTERVAL",
       "DREAMHOST_PROPAGATION_TIMEOUT",
@@ -801,9 +691,7 @@
   },
   "duckdns": {
     "name": "Duck DNS",
-    "credentials_env": [
-      "DUCKDNS_TOKEN"
-    ],
+    "credentials_env": ["DUCKDNS_TOKEN"],
     "additional_env": [
       "DUCKDNS_POLLING_INTERVAL",
       "DUCKDNS_PROPAGATION_TIMEOUT",
@@ -813,11 +701,7 @@
   },
   "dyn": {
     "name": "Dyn",
-    "credentials_env": [
-      "DYN_CUSTOMER_NAME",
-      "DYN_USER_NAME",
-      "DYN_PASSWORD"
-    ],
+    "credentials_env": ["DYN_CUSTOMER_NAME", "DYN_USER_NAME", "DYN_PASSWORD"],
     "additional_env": [
       "DYN_POLLING_INTERVAL",
       "DYN_PROPAGATION_TIMEOUT",
@@ -827,10 +711,7 @@
   },
   "dynadot": {
     "name": "Dynadot",
-    "credentials_env": [
-      "DYNADOT_API_KEY",
-      "DYNADOT_API_SECRET"
-    ],
+    "credentials_env": ["DYNADOT_API_KEY", "DYNADOT_API_SECRET"],
     "additional_env": [
       "DYNADOT_POLLING_INTERVAL",
       "DYNADOT_PROPAGATION_TIMEOUT",
@@ -840,10 +721,7 @@
   },
   "dyndnsfree": {
     "name": "DynDnsFree.de",
-    "credentials_env": [
-      "DYNDNSFREE_USERNAME",
-      "DYNDNSFREE_PASSWORD"
-    ],
+    "credentials_env": ["DYNDNSFREE_USERNAME", "DYNDNSFREE_PASSWORD"],
     "additional_env": [
       "DYNDNSFREE_POLLING_INTERVAL",
       "DYNDNSFREE_PROPAGATION_TIMEOUT",
@@ -852,9 +730,7 @@
   },
   "dynu": {
     "name": "Dynu",
-    "credentials_env": [
-      "DYNU_API_KEY"
-    ],
+    "credentials_env": ["DYNU_API_KEY"],
     "additional_env": [
       "DYNU_POLLING_INTERVAL",
       "DYNU_PROPAGATION_TIMEOUT",
@@ -864,10 +740,7 @@
   },
   "easydns": {
     "name": "EasyDNS",
-    "credentials_env": [
-      "EASYDNS_TOKEN",
-      "EASYDNS_KEY"
-    ],
+    "credentials_env": ["EASYDNS_TOKEN", "EASYDNS_KEY"],
     "additional_env": [
       "EASYDNS_ENDPOINT",
       "EASYDNS_POLLING_INTERVAL",
@@ -879,9 +752,7 @@
   },
   "edgecenter": {
     "name": "EdgeCenter",
-    "credentials_env": [
-      "EDGECENTER_PERMANENT_API_TOKEN"
-    ],
+    "credentials_env": ["EDGECENTER_PERMANENT_API_TOKEN"],
     "additional_env": [
       "EDGECENTER_POLLING_INTERVAL",
       "EDGECENTER_PROPAGATION_TIMEOUT",
@@ -908,10 +779,7 @@
   },
   "edgeone": {
     "name": "Tencent EdgeOne",
-    "credentials_env": [
-      "EDGEONE_SECRET_ID",
-      "EDGEONE_SECRET_KEY"
-    ],
+    "credentials_env": ["EDGEONE_SECRET_ID", "EDGEONE_SECRET_KEY"],
     "additional_env": [
       "EDGEONE_SESSION_TOKEN",
       "EDGEONE_REGION",
@@ -940,9 +808,7 @@
   },
   "epik": {
     "name": "Epik",
-    "credentials_env": [
-      "EPIK_SIGNATURE"
-    ],
+    "credentials_env": ["EPIK_SIGNATURE"],
     "additional_env": [
       "EPIK_POLLING_INTERVAL",
       "EPIK_PROPAGATION_TIMEOUT",
@@ -952,10 +818,7 @@
   },
   "eurodns": {
     "name": "EuroDNS",
-    "credentials_env": [
-      "EURODNS_APP_ID",
-      "EURODNS_API_KEY"
-    ],
+    "credentials_env": ["EURODNS_APP_ID", "EURODNS_API_KEY"],
     "additional_env": [
       "EURODNS_POLLING_INTERVAL",
       "EURODNS_PROPAGATION_TIMEOUT",
@@ -965,11 +828,7 @@
   },
   "euserv": {
     "name": "EUserv",
-    "credentials_env": [
-      "EUSERV_EMAIL",
-      "EUSERV_PASSWORD",
-      "EUSERV_ORDER_ID"
-    ],
+    "credentials_env": ["EUSERV_EMAIL", "EUSERV_PASSWORD", "EUSERV_ORDER_ID"],
     "additional_env": [
       "EUSERV_POLLING_INTERVAL",
       "EUSERV_PROPAGATION_TIMEOUT",
@@ -979,10 +838,7 @@
   },
   "excedo": {
     "name": "Excedo",
-    "credentials_env": [
-      "EXCEDO_API_KEY",
-      "EXCEDO_API_URL"
-    ],
+    "credentials_env": ["EXCEDO_API_KEY", "EXCEDO_API_URL"],
     "additional_env": [
       "EXCEDO_POLLING_INTERVAL",
       "EXCEDO_PROPAGATION_TIMEOUT",
@@ -997,10 +853,7 @@
   },
   "exoscale": {
     "name": "Exoscale",
-    "credentials_env": [
-      "EXOSCALE_API_KEY",
-      "EXOSCALE_API_SECRET"
-    ],
+    "credentials_env": ["EXOSCALE_API_KEY", "EXOSCALE_API_SECRET"],
     "additional_env": [
       "EXOSCALE_ENDPOINT",
       "EXOSCALE_POLLING_INTERVAL",
@@ -1026,9 +879,7 @@
   },
   "fornex": {
     "name": "Fornex",
-    "credentials_env": [
-      "FORNEX_API_KEY"
-    ],
+    "credentials_env": ["FORNEX_API_KEY"],
     "additional_env": [
       "FORNEX_POLLING_INTERVAL",
       "FORNEX_PROPAGATION_TIMEOUT",
@@ -1038,9 +889,7 @@
   },
   "freemyip": {
     "name": "freemyip.com",
-    "credentials_env": [
-      "FREEMYIP_TOKEN"
-    ],
+    "credentials_env": ["FREEMYIP_TOKEN"],
     "additional_env": [
       "FREEMYIP_POLLING_INTERVAL",
       "FREEMYIP_PROPAGATION_TIMEOUT",
@@ -1051,9 +900,7 @@
   },
   "gandi": {
     "name": "Gandi",
-    "credentials_env": [
-      "GANDI_API_KEY"
-    ],
+    "credentials_env": ["GANDI_API_KEY"],
     "additional_env": [
       "GANDI_POLLING_INTERVAL",
       "GANDI_PROPAGATION_TIMEOUT",
@@ -1063,10 +910,7 @@
   },
   "gandiv5": {
     "name": "Gandi Live DNS (v5)",
-    "credentials_env": [
-      "GANDIV5_PERSONAL_ACCESS_TOKEN",
-      "GANDIV5_API_KEY"
-    ],
+    "credentials_env": ["GANDIV5_PERSONAL_ACCESS_TOKEN", "GANDIV5_API_KEY"],
     "additional_env": [
       "GANDIV5_POLLING_INTERVAL",
       "GANDIV5_PROPAGATION_TIMEOUT",
@@ -1093,9 +937,7 @@
   },
   "gcore": {
     "name": "G-Core",
-    "credentials_env": [
-      "GCORE_PERMANENT_API_TOKEN"
-    ],
+    "credentials_env": ["GCORE_PERMANENT_API_TOKEN"],
     "additional_env": [
       "GCORE_POLLING_INTERVAL",
       "GCORE_PROPAGATION_TIMEOUT",
@@ -1105,10 +947,7 @@
   },
   "gehirn": {
     "name": "Gehirn",
-    "credentials_env": [
-      "GEHIRN_TOKEN_ID",
-      "GEHIRN_TOKEN_SECRET"
-    ],
+    "credentials_env": ["GEHIRN_TOKEN_ID", "GEHIRN_TOKEN_SECRET"],
     "additional_env": [
       "GEHIRN_POLLING_INTERVAL",
       "GEHIRN_PROPAGATION_TIMEOUT",
@@ -1118,10 +957,7 @@
   },
   "gigahostno": {
     "name": "Gigahost.no",
-    "credentials_env": [
-      "GIGAHOSTNO_USERNAME",
-      "GIGAHOSTNO_PASSWORD"
-    ],
+    "credentials_env": ["GIGAHOSTNO_USERNAME", "GIGAHOSTNO_PASSWORD"],
     "additional_env": [
       "GIGAHOSTNO_SECRET",
       "GIGAHOSTNO_POLLING_INTERVAL",
@@ -1132,10 +968,7 @@
   },
   "glesys": {
     "name": "Glesys",
-    "credentials_env": [
-      "GLESYS_API_USER",
-      "GLESYS_API_KEY"
-    ],
+    "credentials_env": ["GLESYS_API_USER", "GLESYS_API_KEY"],
     "additional_env": [
       "GLESYS_POLLING_INTERVAL",
       "GLESYS_PROPAGATION_TIMEOUT",
@@ -1145,10 +978,7 @@
   },
   "gname": {
     "name": "Gname",
-    "credentials_env": [
-      "GNAME_APP_ID",
-      "GNAME_APP_KEY"
-    ],
+    "credentials_env": ["GNAME_APP_ID", "GNAME_APP_KEY"],
     "additional_env": [
       "GNAME_POLLING_INTERVAL",
       "GNAME_PROPAGATION_TIMEOUT",
@@ -1158,10 +988,7 @@
   },
   "godaddy": {
     "name": "Go Daddy",
-    "credentials_env": [
-      "GODADDY_API_KEY",
-      "GODADDY_API_SECRET"
-    ],
+    "credentials_env": ["GODADDY_API_KEY", "GODADDY_API_SECRET"],
     "additional_env": [
       "GODADDY_POLLING_INTERVAL",
       "GODADDY_PROPAGATION_TIMEOUT",
@@ -1185,9 +1012,7 @@
   },
   "hetzner": {
     "name": "Hetzner",
-    "credentials_env": [
-      "HETZNER_API_TOKEN"
-    ],
+    "credentials_env": ["HETZNER_API_TOKEN"],
     "additional_env": [
       "HETZNER_POLLING_INTERVAL",
       "HETZNER_PROPAGATION_TIMEOUT",
@@ -1197,9 +1022,7 @@
   },
   "hostingde": {
     "name": "Hosting.de",
-    "credentials_env": [
-      "HOSTINGDE_API_KEY"
-    ],
+    "credentials_env": ["HOSTINGDE_API_KEY"],
     "additional_env": [
       "HOSTINGDE_ZONE_NAME",
       "HOSTINGDE_POLLING_INTERVAL",
@@ -1210,9 +1033,7 @@
   },
   "hostinger": {
     "name": "Hostinger",
-    "credentials_env": [
-      "HOSTINGER_API_TOKEN"
-    ],
+    "credentials_env": ["HOSTINGER_API_TOKEN"],
     "additional_env": [
       "HOSTINGER_POLLING_INTERVAL",
       "HOSTINGER_PROPAGATION_TIMEOUT",
@@ -1222,9 +1043,7 @@
   },
   "hostingnl": {
     "name": "Hosting.nl",
-    "credentials_env": [
-      "HOSTINGNL_API_KEY"
-    ],
+    "credentials_env": ["HOSTINGNL_API_KEY"],
     "additional_env": [
       "HOSTINGNL_POLLING_INTERVAL",
       "HOSTINGNL_PROPAGATION_TIMEOUT",
@@ -1234,10 +1053,7 @@
   },
   "hosttech": {
     "name": "Hosttech",
-    "credentials_env": [
-      "HOSTTECH_API_KEY",
-      "HOSTTECH_PASSWORD"
-    ],
+    "credentials_env": ["HOSTTECH_API_KEY", "HOSTTECH_PASSWORD"],
     "additional_env": [
       "HOSTTECH_POLLING_INTERVAL",
       "HOSTTECH_PROPAGATION_TIMEOUT",
@@ -1247,9 +1063,7 @@
   },
   "hostup": {
     "name": "HostUp",
-    "credentials_env": [
-      "HOSTUP_API_KEY"
-    ],
+    "credentials_env": ["HOSTUP_API_KEY"],
     "additional_env": [
       "HOSTUP_POLLING_INTERVAL",
       "HOSTUP_PROPAGATION_TIMEOUT",
@@ -1259,9 +1073,7 @@
   },
   "httpnet": {
     "name": "http.net",
-    "credentials_env": [
-      "HTTPNET_API_KEY"
-    ],
+    "credentials_env": ["HTTPNET_API_KEY"],
     "additional_env": [
       "HTTPNET_ZONE_NAME",
       "HTTPNET_POLLING_INTERVAL",
@@ -1272,10 +1084,7 @@
   },
   "httpreq": {
     "name": "HTTP request",
-    "credentials_env": [
-      "HTTPREQ_MODE",
-      "HTTPREQ_ENDPOINT"
-    ],
+    "credentials_env": ["HTTPREQ_MODE", "HTTPREQ_ENDPOINT"],
     "additional_env": [
       "HTTPREQ_USERNAME",
       "HTTPREQ_PASSWORD",
@@ -1300,9 +1109,7 @@
   },
   "hurricane": {
     "name": "Hurricane Electric DNS",
-    "credentials_env": [
-      "HURRICANE_TOKENS"
-    ],
+    "credentials_env": ["HURRICANE_TOKENS"],
     "additional_env": [
       "HURRICANE_POLLING_INTERVAL",
       "HURRICANE_PROPAGATION_TIMEOUT",
@@ -1325,10 +1132,7 @@
   },
   "ibmcloud": {
     "name": "IBM Cloud (SoftLayer)",
-    "credentials_env": [
-      "SOFTLAYER_USERNAME",
-      "SOFTLAYER_API_KEY"
-    ],
+    "credentials_env": ["SOFTLAYER_USERNAME", "SOFTLAYER_API_KEY"],
     "additional_env": [
       "SOFTLAYER_POLLING_INTERVAL",
       "SOFTLAYER_PROPAGATION_TIMEOUT",
@@ -1338,10 +1142,7 @@
   },
   "iijdpf": {
     "name": "IIJ DNS Platform Service",
-    "credentials_env": [
-      "IIJ_DPF_API_TOKEN",
-      "IIJ_DPF_DPM_SERVICE_CODE"
-    ],
+    "credentials_env": ["IIJ_DPF_API_TOKEN", "IIJ_DPF_DPM_SERVICE_CODE"],
     "additional_env": [
       "IIJ_DPF_API_ENDPOINT",
       "IIJ_DPF_POLLING_INTERVAL",
@@ -1370,9 +1171,7 @@
   },
   "infomaniak": {
     "name": "Infomaniak",
-    "credentials_env": [
-      "INFOMANIAK_ACCESS_TOKEN"
-    ],
+    "credentials_env": ["INFOMANIAK_ACCESS_TOKEN"],
     "additional_env": [
       "INFOMANIAK_ENDPOINT",
       "INFOMANIAK_POLLING_INTERVAL",
@@ -1383,10 +1182,7 @@
   },
   "internetbs": {
     "name": "Internet.bs",
-    "credentials_env": [
-      "INTERNET_BS_API_KEY",
-      "INTERNET_BS_PASSWORD"
-    ],
+    "credentials_env": ["INTERNET_BS_API_KEY", "INTERNET_BS_PASSWORD"],
     "additional_env": [
       "INTERNET_BS_POLLING_INTERVAL",
       "INTERNET_BS_PROPAGATION_TIMEOUT",
@@ -1396,10 +1192,7 @@
   },
   "inwx": {
     "name": "INWX",
-    "credentials_env": [
-      "INWX_USERNAME",
-      "INWX_PASSWORD"
-    ],
+    "credentials_env": ["INWX_USERNAME", "INWX_PASSWORD"],
     "additional_env": [
       "INWX_SHARED_SECRET",
       "INWX_POLLING_INTERVAL",
@@ -1410,9 +1203,7 @@
   },
   "ionos": {
     "name": "Ionos",
-    "credentials_env": [
-      "IONOS_API_KEY"
-    ],
+    "credentials_env": ["IONOS_API_KEY"],
     "additional_env": [
       "IONOS_POLLING_INTERVAL",
       "IONOS_PROPAGATION_TIMEOUT",
@@ -1422,9 +1213,7 @@
   },
   "ionoscloud": {
     "name": "Ionos Cloud",
-    "credentials_env": [
-      "IONOSCLOUD_API_TOKEN"
-    ],
+    "credentials_env": ["IONOSCLOUD_API_TOKEN"],
     "additional_env": [
       "IONOSCLOUD_POLLING_INTERVAL",
       "IONOSCLOUD_PROPAGATION_TIMEOUT",
@@ -1434,9 +1223,7 @@
   },
   "ipv64": {
     "name": "IPv64",
-    "credentials_env": [
-      "IPV64_API_KEY"
-    ],
+    "credentials_env": ["IPV64_API_KEY"],
     "additional_env": [
       "IPV64_POLLING_INTERVAL",
       "IPV64_PROPAGATION_TIMEOUT",
@@ -1460,10 +1247,7 @@
   },
   "ispconfigddns": {
     "name": "ISPConfig 3 - Dynamic DNS (DDNS) Module",
-    "credentials_env": [
-      "ISPCONFIG_DDNS_SERVER_URL",
-      "ISPCONFIG_DDNS_TOKEN"
-    ],
+    "credentials_env": ["ISPCONFIG_DDNS_SERVER_URL", "ISPCONFIG_DDNS_TOKEN"],
     "additional_env": [
       "ISPCONFIG_DDNS_POLLING_INTERVAL",
       "ISPCONFIG_DDNS_PROPAGATION_TIMEOUT",
@@ -1473,10 +1257,7 @@
   },
   "jdcloud": {
     "name": "JD Cloud",
-    "credentials_env": [
-      "JDCLOUD_ACCESS_KEY_ID",
-      "JDCLOUD_ACCESS_KEY_SECRET"
-    ],
+    "credentials_env": ["JDCLOUD_ACCESS_KEY_ID", "JDCLOUD_ACCESS_KEY_SECRET"],
     "additional_env": [
       "JDCLOUD_REGION_ID",
       "JDCLOUD_POLLING_INTERVAL",
@@ -1503,9 +1284,7 @@
   },
   "katapult": {
     "name": "Katapult",
-    "credentials_env": [
-      "KATAPULT_API_KEY"
-    ],
+    "credentials_env": ["KATAPULT_API_KEY"],
     "additional_env": [
       "KATAPULT_POLLING_INTERVAL",
       "KATAPULT_PROPAGATION_TIMEOUT",
@@ -1515,10 +1294,7 @@
   },
   "keyhelp": {
     "name": "KeyHelp",
-    "credentials_env": [
-      "KEYHELP_BASE_URL",
-      "KEYHELP_API_KEY"
-    ],
+    "credentials_env": ["KEYHELP_BASE_URL", "KEYHELP_API_KEY"],
     "additional_env": [
       "KEYHELP_POLLING_INTERVAL",
       "KEYHELP_PROPAGATION_TIMEOUT",
@@ -1528,9 +1304,7 @@
   },
   "leaseweb": {
     "name": "Leaseweb",
-    "credentials_env": [
-      "LEASEWEB_API_KEY"
-    ],
+    "credentials_env": ["LEASEWEB_API_KEY"],
     "additional_env": [
       "LEASEWEB_POLLING_INTERVAL",
       "LEASEWEB_PROPAGATION_TIMEOUT",
@@ -1540,9 +1314,7 @@
   },
   "liara": {
     "name": "Liara",
-    "credentials_env": [
-      "LIARA_API_KEY"
-    ],
+    "credentials_env": ["LIARA_API_KEY"],
     "additional_env": [
       "LIARA_TEAM_ID",
       "LIARA_POLLING_INTERVAL",
@@ -1566,9 +1338,7 @@
   },
   "limacity": {
     "name": "Lima-City",
-    "credentials_env": [
-      "LIMACITY_API_KEY"
-    ],
+    "credentials_env": ["LIMACITY_API_KEY"],
     "additional_env": [
       "LIMACITY_POLLING_INTERVAL",
       "LIMACITY_PROPAGATION_TIMEOUT",
@@ -1579,9 +1349,7 @@
   },
   "linode": {
     "name": "Linode (v4)",
-    "credentials_env": [
-      "LINODE_TOKEN"
-    ],
+    "credentials_env": ["LINODE_TOKEN"],
     "additional_env": [
       "LINODE_POLLING_INTERVAL",
       "LINODE_PROPAGATION_TIMEOUT",
@@ -1591,10 +1359,7 @@
   },
   "liquidweb": {
     "name": "Liquid Web",
-    "credentials_env": [
-      "LWAPI_USERNAME",
-      "LWAPI_PASSWORD"
-    ],
+    "credentials_env": ["LWAPI_USERNAME", "LWAPI_PASSWORD"],
     "additional_env": [
       "LWAPI_ZONE",
       "LWAPI_URL",
@@ -1606,10 +1371,7 @@
   },
   "loopia": {
     "name": "Loopia",
-    "credentials_env": [
-      "LOOPIA_API_USER",
-      "LOOPIA_API_PASSWORD"
-    ],
+    "credentials_env": ["LOOPIA_API_USER", "LOOPIA_API_PASSWORD"],
     "additional_env": [
       "LOOPIA_API_URL",
       "LOOPIA_POLLING_INTERVAL",
@@ -1620,10 +1382,7 @@
   },
   "luadns": {
     "name": "LuaDNS",
-    "credentials_env": [
-      "LUADNS_API_USERNAME",
-      "LUADNS_API_TOKEN"
-    ],
+    "credentials_env": ["LUADNS_API_USERNAME", "LUADNS_API_TOKEN"],
     "additional_env": [
       "LUADNS_POLLING_INTERVAL",
       "LUADNS_PROPAGATION_TIMEOUT",
@@ -1646,10 +1405,7 @@
   },
   "manageengine": {
     "name": "ManageEngine CloudDNS",
-    "credentials_env": [
-      "MANAGEENGINE_CLIENT_ID",
-      "MANAGEENGINE_CLIENT_SECRET"
-    ],
+    "credentials_env": ["MANAGEENGINE_CLIENT_ID", "MANAGEENGINE_CLIENT_SECRET"],
     "additional_env": [
       "MANAGEENGINE_POLLING_INTERVAL",
       "MANAGEENGINE_PROPAGATION_TIMEOUT",
@@ -1659,17 +1415,11 @@
   "manual": {
     "name": "Manual",
     "credentials_env": [],
-    "additional_env": [
-      "MANUAL_POLLING_INTERVAL",
-      "MANUAL_PROPAGATION_TIMEOUT"
-    ]
+    "additional_env": ["MANUAL_POLLING_INTERVAL", "MANUAL_PROPAGATION_TIMEOUT"]
   },
   "metaname": {
     "name": "Metaname",
-    "credentials_env": [
-      "METANAME_ACCOUNT_REFERENCE",
-      "METANAME_API_KEY"
-    ],
+    "credentials_env": ["METANAME_ACCOUNT_REFERENCE", "METANAME_API_KEY"],
     "additional_env": [
       "METANAME_POLLING_INTERVAL",
       "METANAME_PROPAGATION_TIMEOUT",
@@ -1678,9 +1428,7 @@
   },
   "metaregistrar": {
     "name": "Metaregistrar",
-    "credentials_env": [
-      "METAREGISTRAR_API_TOKEN"
-    ],
+    "credentials_env": ["METAREGISTRAR_API_TOKEN"],
     "additional_env": [
       "METAREGISTRAR_POLLING_INTERVAL",
       "METAREGISTRAR_PROPAGATION_TIMEOUT",
@@ -1690,9 +1438,7 @@
   },
   "mijnhost": {
     "name": "mijn.host",
-    "credentials_env": [
-      "MIJNHOST_API_KEY"
-    ],
+    "credentials_env": ["MIJNHOST_API_KEY"],
     "additional_env": [
       "MIJNHOST_POLLING_INTERVAL",
       "MIJNHOST_PROPAGATION_TIMEOUT",
@@ -1703,9 +1449,7 @@
   },
   "mittwald": {
     "name": "Mittwald",
-    "credentials_env": [
-      "MITTWALD_TOKEN"
-    ],
+    "credentials_env": ["MITTWALD_TOKEN"],
     "additional_env": [
       "MITTWALD_POLLING_INTERVAL",
       "MITTWALD_PROPAGATION_TIMEOUT",
@@ -1716,9 +1460,7 @@
   },
   "myaddr": {
     "name": "myaddr.{tools,dev,io}",
-    "credentials_env": [
-      "MYADDR_PRIVATE_KEYS_MAPPING"
-    ],
+    "credentials_env": ["MYADDR_PRIVATE_KEYS_MAPPING"],
     "additional_env": [
       "MYADDR_POLLING_INTERVAL",
       "MYADDR_PROPAGATION_TIMEOUT",
@@ -1729,10 +1471,7 @@
   },
   "mydnsjp": {
     "name": "MyDNS.jp",
-    "credentials_env": [
-      "MYDNSJP_MASTER_ID",
-      "MYDNSJP_PASSWORD"
-    ],
+    "credentials_env": ["MYDNSJP_MASTER_ID", "MYDNSJP_PASSWORD"],
     "additional_env": [
       "MYDNSJP_POLLING_INTERVAL",
       "MYDNSJP_PROPAGATION_TIMEOUT",
@@ -1741,10 +1480,7 @@
   },
   "mythicbeasts": {
     "name": "MythicBeasts",
-    "credentials_env": [
-      "MYTHICBEASTS_USERNAME",
-      "MYTHICBEASTS_PASSWORD"
-    ],
+    "credentials_env": ["MYTHICBEASTS_USERNAME", "MYTHICBEASTS_PASSWORD"],
     "additional_env": [
       "MYTHICBEASTS_API_ENDPOINT",
       "MYTHICBEASTS_AUTH_API_ENDPOINT",
@@ -1756,10 +1492,7 @@
   },
   "namecheap": {
     "name": "Namecheap",
-    "credentials_env": [
-      "NAMECHEAP_API_USER",
-      "NAMECHEAP_API_KEY"
-    ],
+    "credentials_env": ["NAMECHEAP_API_USER", "NAMECHEAP_API_KEY"],
     "additional_env": [
       "NAMECHEAP_POLLING_INTERVAL",
       "NAMECHEAP_PROPAGATION_TIMEOUT",
@@ -1770,10 +1503,7 @@
   },
   "namedotcom": {
     "name": "Name.com",
-    "credentials_env": [
-      "NAMECOM_USERNAME",
-      "NAMECOM_API_TOKEN"
-    ],
+    "credentials_env": ["NAMECOM_USERNAME", "NAMECOM_API_TOKEN"],
     "additional_env": [
       "NAMECOM_POLLING_INTERVAL",
       "NAMECOM_PROPAGATION_TIMEOUT",
@@ -1783,9 +1513,7 @@
   },
   "namesilo": {
     "name": "Namesilo",
-    "credentials_env": [
-      "NAMESILO_API_KEY"
-    ],
+    "credentials_env": ["NAMESILO_API_KEY"],
     "additional_env": [
       "NAMESILO_POLLING_INTERVAL",
       "NAMESILO_PROPAGATION_TIMEOUT",
@@ -1810,10 +1538,7 @@
   },
   "nearlyfreespeech": {
     "name": "NearlyFreeSpeech.NET",
-    "credentials_env": [
-      "NEARLYFREESPEECH_API_KEY",
-      "NEARLYFREESPEECH_LOGIN"
-    ],
+    "credentials_env": ["NEARLYFREESPEECH_API_KEY", "NEARLYFREESPEECH_LOGIN"],
     "additional_env": [
       "NEARLYFREESPEECH_POLLING_INTERVAL",
       "NEARLYFREESPEECH_PROPAGATION_TIMEOUT",
@@ -1824,9 +1549,7 @@
   },
   "nederhost": {
     "name": "NederHost",
-    "credentials_env": [
-      "NEDERHOST_API_KEY"
-    ],
+    "credentials_env": ["NEDERHOST_API_KEY"],
     "additional_env": [
       "NEDERHOST_POLLING_INTERVAL",
       "NEDERHOST_PROPAGATION_TIMEOUT",
@@ -1836,9 +1559,7 @@
   },
   "neodigit": {
     "name": "Neodigit",
-    "credentials_env": [
-      "NEODIGIT_TOKEN"
-    ],
+    "credentials_env": ["NEODIGIT_TOKEN"],
     "additional_env": [
       "NEODIGIT_POLLING_INTERVAL",
       "NEODIGIT_PROPAGATION_TIMEOUT",
@@ -1861,9 +1582,7 @@
   },
   "netlify": {
     "name": "Netlify",
-    "credentials_env": [
-      "NETLIFY_TOKEN"
-    ],
+    "credentials_env": ["NETLIFY_TOKEN"],
     "additional_env": [
       "NETLIFY_POLLING_INTERVAL",
       "NETLIFY_PROPAGATION_TIMEOUT",
@@ -1873,9 +1592,7 @@
   },
   "netnod": {
     "name": "Netnod",
-    "credentials_env": [
-      "NETNOD_TOKEN"
-    ],
+    "credentials_env": ["NETNOD_TOKEN"],
     "additional_env": [
       "NETNOD_POLLING_INTERVAL",
       "NETNOD_PROPAGATION_TIMEOUT",
@@ -1930,10 +1647,7 @@
   },
   "nifcloud": {
     "name": "NIFCloud",
-    "credentials_env": [
-      "NIFCLOUD_ACCESS_KEY_ID",
-      "NIFCLOUD_SECRET_ACCESS_KEY"
-    ],
+    "credentials_env": ["NIFCLOUD_ACCESS_KEY_ID", "NIFCLOUD_SECRET_ACCESS_KEY"],
     "additional_env": [
       "NIFCLOUD_POLLING_INTERVAL",
       "NIFCLOUD_PROPAGATION_TIMEOUT",
@@ -1943,9 +1657,7 @@
   },
   "njalla": {
     "name": "Njalla",
-    "credentials_env": [
-      "NJALLA_TOKEN"
-    ],
+    "credentials_env": ["NJALLA_TOKEN"],
     "additional_env": [
       "NJALLA_POLLING_INTERVAL",
       "NJALLA_PROPAGATION_TIMEOUT",
@@ -1955,9 +1667,7 @@
   },
   "nodion": {
     "name": "Nodion",
-    "credentials_env": [
-      "NODION_API_TOKEN"
-    ],
+    "credentials_env": ["NODION_API_TOKEN"],
     "additional_env": [
       "NODION_POLLING_INTERVAL",
       "NODION_PROPAGATION_TIMEOUT",
@@ -1967,9 +1677,7 @@
   },
   "ns1": {
     "name": "NS1",
-    "credentials_env": [
-      "NS1_API_KEY"
-    ],
+    "credentials_env": ["NS1_API_KEY"],
     "additional_env": [
       "NS1_POLLING_INTERVAL",
       "NS1_PROPAGATION_TIMEOUT",
@@ -1979,9 +1687,7 @@
   },
   "octenium": {
     "name": "Octenium",
-    "credentials_env": [
-      "OCTENIUM_API_KEY"
-    ],
+    "credentials_env": ["OCTENIUM_API_KEY"],
     "additional_env": [
       "OCTENIUM_POLLING_INTERVAL",
       "OCTENIUM_PROPAGATION_TIMEOUT",
@@ -1991,9 +1697,7 @@
   },
   "omglol": {
     "name": "omg.lol",
-    "credentials_env": [
-      "OMGLOL_API_KEY"
-    ],
+    "credentials_env": ["OMGLOL_API_KEY"],
     "additional_env": [
       "OMGLOL_POLLING_INTERVAL",
       "OMGLOL_PROPAGATION_TIMEOUT",
@@ -2003,9 +1707,7 @@
   },
   "onecloudru": {
     "name": "1cloud.ru",
-    "credentials_env": [
-      "ONECLOUDRU_TOKEN"
-    ],
+    "credentials_env": ["ONECLOUDRU_TOKEN"],
     "additional_env": [
       "ONECLOUDRU_POLLING_INTERVAL",
       "ONECLOUDRU_PROPAGATION_TIMEOUT",
@@ -2015,9 +1717,7 @@
   },
   "onlinenet": {
     "name": "Online.net",
-    "credentials_env": [
-      "ONLINENET_API_TOKEN"
-    ],
+    "credentials_env": ["ONLINENET_API_TOKEN"],
     "additional_env": [
       "ONLINENET_POLLING_INTERVAL",
       "ONLINENET_PROPAGATION_TIMEOUT",
@@ -2027,9 +1727,7 @@
   },
   "opusdns": {
     "name": "OpusDNS",
-    "credentials_env": [
-      "OPUSDNS_API_KEY"
-    ],
+    "credentials_env": ["OPUSDNS_API_KEY"],
     "additional_env": [
       "OPUSDNS_POLLING_INTERVAL",
       "OPUSDNS_PROPAGATION_TIMEOUT",
@@ -2101,10 +1799,7 @@
   },
   "pdns": {
     "name": "PowerDNS",
-    "credentials_env": [
-      "PDNS_API_KEY",
-      "PDNS_API_URL"
-    ],
+    "credentials_env": ["PDNS_API_KEY", "PDNS_API_URL"],
     "additional_env": [
       "PDNS_SERVER_NAME",
       "PDNS_API_VERSION",
@@ -2130,10 +1825,7 @@
   },
   "pointdns": {
     "name": "PointDNS/PointHQ",
-    "credentials_env": [
-      "POINTDNS_USERNAME",
-      "POINTDNS_PASSWORD"
-    ],
+    "credentials_env": ["POINTDNS_USERNAME", "POINTDNS_PASSWORD"],
     "additional_env": [
       "POINTDNS_POLLING_INTERVAL",
       "POINTDNS_PROPAGATION_TIMEOUT",
@@ -2143,10 +1835,7 @@
   },
   "porkbun": {
     "name": "Porkbun",
-    "credentials_env": [
-      "PORKBUN_SECRET_API_KEY",
-      "PORKBUN_API_KEY"
-    ],
+    "credentials_env": ["PORKBUN_SECRET_API_KEY", "PORKBUN_API_KEY"],
     "additional_env": [
       "PORKBUN_POLLING_INTERVAL",
       "PORKBUN_PROPAGATION_TIMEOUT",
@@ -2156,10 +1845,7 @@
   },
   "poweradmin": {
     "name": "Poweradmin",
-    "credentials_env": [
-      "POWERADMIN_BASE_URL",
-      "POWERADMIN_API_KEY"
-    ],
+    "credentials_env": ["POWERADMIN_BASE_URL", "POWERADMIN_API_KEY"],
     "additional_env": [
       "POWERADMIN_POLLING_INTERVAL",
       "POWERADMIN_PROPAGATION_TIMEOUT",
@@ -2169,10 +1855,7 @@
   },
   "rackspace": {
     "name": "Rackspace",
-    "credentials_env": [
-      "RACKSPACE_USER",
-      "RACKSPACE_API_KEY"
-    ],
+    "credentials_env": ["RACKSPACE_USER", "RACKSPACE_API_KEY"],
     "additional_env": [
       "RACKSPACE_POLLING_INTERVAL",
       "RACKSPACE_PROPAGATION_TIMEOUT",
@@ -2182,10 +1865,7 @@
   },
   "rage4": {
     "name": "Rage4",
-    "credentials_env": [
-      "RAGE4_USERNAME",
-      "RAGE4_PASSWORD"
-    ],
+    "credentials_env": ["RAGE4_USERNAME", "RAGE4_PASSWORD"],
     "additional_env": [
       "RAGE4_POLLING_INTERVAL",
       "RAGE4_PROPAGATION_TIMEOUT",
@@ -2195,9 +1875,7 @@
   },
   "rainyun": {
     "name": "Rain Yun/雨云",
-    "credentials_env": [
-      "RAINYUN_API_KEY"
-    ],
+    "credentials_env": ["RAINYUN_API_KEY"],
     "additional_env": [
       "RAINYUN_POLLING_INTERVAL",
       "RAINYUN_PROPAGATION_TIMEOUT",
@@ -2207,9 +1885,7 @@
   },
   "rcodezero": {
     "name": "RcodeZero",
-    "credentials_env": [
-      "RCODEZERO_API_TOKEN"
-    ],
+    "credentials_env": ["RCODEZERO_API_TOKEN"],
     "additional_env": [
       "RCODEZERO_POLLING_INTERVAL",
       "RCODEZERO_PROPAGATION_TIMEOUT",
@@ -2219,9 +1895,7 @@
   },
   "regfish": {
     "name": "Regfish",
-    "credentials_env": [
-      "REGFISH_API_KEY"
-    ],
+    "credentials_env": ["REGFISH_API_KEY"],
     "additional_env": [
       "REGFISH_POLLING_INTERVAL",
       "REGFISH_PROPAGATION_TIMEOUT",
@@ -2231,10 +1905,7 @@
   },
   "regru": {
     "name": "reg.ru",
-    "credentials_env": [
-      "REGRU_USERNAME",
-      "REGRU_PASSWORD"
-    ],
+    "credentials_env": ["REGRU_USERNAME", "REGRU_PASSWORD"],
     "additional_env": [
       "REGRU_TLS_CERT",
       "REGRU_TLS_KEY",
@@ -2246,9 +1917,7 @@
   },
   "rimuhosting": {
     "name": "RimuHosting",
-    "credentials_env": [
-      "RIMUHOSTING_API_KEY"
-    ],
+    "credentials_env": ["RIMUHOSTING_API_KEY"],
     "additional_env": [
       "RIMUHOSTING_POLLING_INTERVAL",
       "RIMUHOSTING_PROPAGATION_TIMEOUT",
@@ -2280,9 +1949,7 @@
   },
   "safedns": {
     "name": "ANS SafeDNS",
-    "credentials_env": [
-      "SAFEDNS_AUTH_TOKEN"
-    ],
+    "credentials_env": ["SAFEDNS_AUTH_TOKEN"],
     "additional_env": [
       "SAFEDNS_POLLING_INTERVAL",
       "SAFEDNS_PROPAGATION_TIMEOUT",
@@ -2305,10 +1972,7 @@
   },
   "scaleway": {
     "name": "Scaleway",
-    "credentials_env": [
-      "SCW_SECRET_KEY",
-      "SCW_PROJECT_ID"
-    ],
+    "credentials_env": ["SCW_SECRET_KEY", "SCW_PROJECT_ID"],
     "additional_env": [
       "SCW_ACCESS_KEY",
       "SCW_POLLING_INTERVAL",
@@ -2319,9 +1983,7 @@
   },
   "scannet": {
     "name": "ScanNet",
-    "credentials_env": [
-      "SCANNET_API_KEY"
-    ],
+    "credentials_env": ["SCANNET_API_KEY"],
     "additional_env": [
       "SCANNET_POLLING_INTERVAL",
       "SCANNET_PROPAGATION_TIMEOUT",
@@ -2331,9 +1993,7 @@
   },
   "selectel": {
     "name": "Selectel",
-    "credentials_env": [
-      "SELECTEL_API_TOKEN"
-    ],
+    "credentials_env": ["SELECTEL_API_TOKEN"],
     "additional_env": [
       "SELECTEL_POLLING_INTERVAL",
       "SELECTEL_PROPAGATION_TIMEOUT",
@@ -2376,10 +2036,7 @@
   },
   "servercow": {
     "name": "Servercow",
-    "credentials_env": [
-      "SERVERCOW_USERNAME",
-      "SERVERCOW_PASSWORD"
-    ],
+    "credentials_env": ["SERVERCOW_USERNAME", "SERVERCOW_PASSWORD"],
     "additional_env": [
       "SERVERCOW_POLLING_INTERVAL",
       "SERVERCOW_PROPAGATION_TIMEOUT",
@@ -2389,10 +2046,7 @@
   },
   "shellrent": {
     "name": "Shellrent",
-    "credentials_env": [
-      "SHELLRENT_USERNAME",
-      "SHELLRENT_TOKEN"
-    ],
+    "credentials_env": ["SHELLRENT_USERNAME", "SHELLRENT_TOKEN"],
     "additional_env": [
       "SHELLRENT_POLLING_INTERVAL",
       "SHELLRENT_PROPAGATION_TIMEOUT",
@@ -2402,10 +2056,7 @@
   },
   "simply": {
     "name": "Simply.com",
-    "credentials_env": [
-      "SIMPLY_ACCOUNT_NAME",
-      "SIMPLY_API_KEY"
-    ],
+    "credentials_env": ["SIMPLY_ACCOUNT_NAME", "SIMPLY_API_KEY"],
     "additional_env": [
       "SIMPLY_POLLING_INTERVAL",
       "SIMPLY_PROPAGATION_TIMEOUT",
@@ -2415,10 +2066,7 @@
   },
   "sonic": {
     "name": "Sonic",
-    "credentials_env": [
-      "SONIC_USER_ID",
-      "SONIC_API_KEY"
-    ],
+    "credentials_env": ["SONIC_USER_ID", "SONIC_API_KEY"],
     "additional_env": [
       "SONIC_POLLING_INTERVAL",
       "SONIC_PROPAGATION_TIMEOUT",
@@ -2429,10 +2077,7 @@
   },
   "spaceship": {
     "name": "Spaceship",
-    "credentials_env": [
-      "SPACESHIP_API_KEY",
-      "SPACESHIP_API_SECRET"
-    ],
+    "credentials_env": ["SPACESHIP_API_KEY", "SPACESHIP_API_SECRET"],
     "additional_env": [
       "SPACESHIP_POLLING_INTERVAL",
       "SPACESHIP_PROPAGATION_TIMEOUT",
@@ -2455,9 +2100,7 @@
   },
   "syse": {
     "name": "Syse",
-    "credentials_env": [
-      "SYSE_CREDENTIALS"
-    ],
+    "credentials_env": ["SYSE_CREDENTIALS"],
     "additional_env": [
       "SYSE_POLLING_INTERVAL",
       "SYSE_PROPAGATION_TIMEOUT",
@@ -2467,10 +2110,7 @@
   },
   "technitium": {
     "name": "Technitium",
-    "credentials_env": [
-      "TECHNITIUM_SERVER_BASE_URL",
-      "TECHNITIUM_API_TOKEN"
-    ],
+    "credentials_env": ["TECHNITIUM_SERVER_BASE_URL", "TECHNITIUM_API_TOKEN"],
     "additional_env": [
       "TECHNITIUM_POLLING_INTERVAL",
       "TECHNITIUM_PROPAGATION_TIMEOUT",
@@ -2480,10 +2120,7 @@
   },
   "tele3": {
     "name": "Tele3",
-    "credentials_env": [
-      "TELE3_KEY",
-      "TELE3_SECRET"
-    ],
+    "credentials_env": ["TELE3_KEY", "TELE3_SECRET"],
     "additional_env": [
       "TELE3_POLLING_INTERVAL",
       "TELE3_PROPAGATION_TIMEOUT",
@@ -2493,10 +2130,7 @@
   },
   "tencentcloud": {
     "name": "Tencent Cloud DNS",
-    "credentials_env": [
-      "TENCENTCLOUD_SECRET_ID",
-      "TENCENTCLOUD_SECRET_KEY"
-    ],
+    "credentials_env": ["TENCENTCLOUD_SECRET_ID", "TENCENTCLOUD_SECRET_KEY"],
     "additional_env": [
       "TENCENTCLOUD_SESSION_TOKEN",
       "TENCENTCLOUD_REGION",
@@ -2508,9 +2142,7 @@
   },
   "timewebcloud": {
     "name": "Timeweb Cloud",
-    "credentials_env": [
-      "TIMEWEBCLOUD_AUTH_TOKEN"
-    ],
+    "credentials_env": ["TIMEWEBCLOUD_AUTH_TOKEN"],
     "additional_env": [
       "TIMEWEBCLOUD_POLLING_INTERVAL",
       "TIMEWEBCLOUD_PROPAGATION_TIMEOUT",
@@ -2519,10 +2151,7 @@
   },
   "todaynic": {
     "name": "TodayNIC/时代互联",
-    "credentials_env": [
-      "TODAYNIC_AUTH_USER_ID",
-      "TODAYNIC_API_KEY"
-    ],
+    "credentials_env": ["TODAYNIC_AUTH_USER_ID", "TODAYNIC_API_KEY"],
     "additional_env": [
       "TODAYNIC_POLLING_INTERVAL",
       "TODAYNIC_PROPAGATION_TIMEOUT",
@@ -2532,10 +2161,7 @@
   },
   "transip": {
     "name": "TransIP",
-    "credentials_env": [
-      "TRANSIP_ACCOUNT_NAME",
-      "TRANSIP_PRIVATE_KEY_PATH"
-    ],
+    "credentials_env": ["TRANSIP_ACCOUNT_NAME", "TRANSIP_PRIVATE_KEY_PATH"],
     "additional_env": [
       "TRANSIP_POLLING_INTERVAL",
       "TRANSIP_PROPAGATION_TIMEOUT",
@@ -2545,10 +2171,7 @@
   },
   "ucloud": {
     "name": "UCloud",
-    "credentials_env": [
-      "UCLOUD_PUBLIC_KEY",
-      "UCLOUD_PRIVATE_KEY"
-    ],
+    "credentials_env": ["UCLOUD_PUBLIC_KEY", "UCLOUD_PRIVATE_KEY"],
     "additional_env": [
       "UCLOUD_REGION",
       "UCLOUD_PROJECT_ID",
@@ -2560,10 +2183,7 @@
   },
   "ultradns": {
     "name": "Ultradns",
-    "credentials_env": [
-      "ULTRADNS_USERNAME",
-      "ULTRADNS_PASSWORD"
-    ],
+    "credentials_env": ["ULTRADNS_USERNAME", "ULTRADNS_PASSWORD"],
     "additional_env": [
       "ULTRADNS_ENDPOINT",
       "ULTRADNS_TTL",
@@ -2573,9 +2193,7 @@
   },
   "uniteddomains": {
     "name": "United-Domains",
-    "credentials_env": [
-      "UNITEDDOMAINS_API_KEY"
-    ],
+    "credentials_env": ["UNITEDDOMAINS_API_KEY"],
     "additional_env": [
       "UNITEDDOMAINS_POLLING_INTERVAL",
       "UNITEDDOMAINS_PROPAGATION_TIMEOUT",
@@ -2585,9 +2203,7 @@
   },
   "variomedia": {
     "name": "Variomedia",
-    "credentials_env": [
-      "VARIOMEDIA_API_TOKEN"
-    ],
+    "credentials_env": ["VARIOMEDIA_API_TOKEN"],
     "additional_env": [
       "VARIOMEDIA_POLLING_INTERVAL",
       "VARIOMEDIA_PROPAGATION_TIMEOUT",
@@ -2598,10 +2214,7 @@
   },
   "veesp": {
     "name": "Veesp",
-    "credentials_env": [
-      "VEESP_USERNAME",
-      "VEESP_PASSWORD"
-    ],
+    "credentials_env": ["VEESP_USERNAME", "VEESP_PASSWORD"],
     "additional_env": [
       "VEESP_POLLING_INTERVAL",
       "VEESP_PROPAGATION_TIMEOUT",
@@ -2624,9 +2237,7 @@
   },
   "vercel": {
     "name": "Vercel",
-    "credentials_env": [
-      "VERCEL_API_TOKEN"
-    ],
+    "credentials_env": ["VERCEL_API_TOKEN"],
     "additional_env": [
       "VERCEL_TEAM_ID",
       "VERCEL_POLLING_INTERVAL",
@@ -2637,10 +2248,7 @@
   },
   "versio": {
     "name": "Versio.[nl|eu|uk]",
-    "credentials_env": [
-      "VERSIO_USERNAME",
-      "VERSIO_PASSWORD"
-    ],
+    "credentials_env": ["VERSIO_USERNAME", "VERSIO_PASSWORD"],
     "additional_env": [
       "VERSIO_ENDPOINT",
       "VERSIO_POLLING_INTERVAL",
@@ -2667,9 +2275,7 @@
   },
   "virtualname": {
     "name": "Virtualname",
-    "credentials_env": [
-      "VIRTUALNAME_TOKEN"
-    ],
+    "credentials_env": ["VIRTUALNAME_TOKEN"],
     "additional_env": [
       "VIRTUALNAME_POLLING_INTERVAL",
       "VIRTUALNAME_PROPAGATION_TIMEOUT",
@@ -2695,10 +2301,7 @@
   },
   "volcengine": {
     "name": "Volcano Engine/火山引擎",
-    "credentials_env": [
-      "VOLC_ACCESSKEY",
-      "VOLC_SECRETKEY"
-    ],
+    "credentials_env": ["VOLC_ACCESSKEY", "VOLC_SECRETKEY"],
     "additional_env": [
       "VOLC_REGION",
       "VOLC_HOST",
@@ -2711,9 +2314,7 @@
   },
   "vscale": {
     "name": "Vscale",
-    "credentials_env": [
-      "VSCALE_API_TOKEN"
-    ],
+    "credentials_env": ["VSCALE_API_TOKEN"],
     "additional_env": [
       "VSCALE_POLLING_INTERVAL",
       "VSCALE_PROPAGATION_TIMEOUT",
@@ -2723,9 +2324,7 @@
   },
   "vultr": {
     "name": "Vultr",
-    "credentials_env": [
-      "VULTR_API_KEY"
-    ],
+    "credentials_env": ["VULTR_API_KEY"],
     "additional_env": [
       "VULTR_POLLING_INTERVAL",
       "VULTR_PROPAGATION_TIMEOUT",
@@ -2735,9 +2334,7 @@
   },
   "wannafind": {
     "name": "Wannafind",
-    "credentials_env": [
-      "WANNAFIND_API_KEY"
-    ],
+    "credentials_env": ["WANNAFIND_API_KEY"],
     "additional_env": [
       "WANNAFIND_POLLING_INTERVAL",
       "WANNAFIND_PROPAGATION_TIMEOUT",
@@ -2747,10 +2344,7 @@
   },
   "webnamesca": {
     "name": "webnames.ca",
-    "credentials_env": [
-      "WEBNAMESCA_API_USER",
-      "WEBNAMESCA_API_KEY"
-    ],
+    "credentials_env": ["WEBNAMESCA_API_USER", "WEBNAMESCA_API_KEY"],
     "additional_env": [
       "WEBNAMESCA_POLLING_INTERVAL",
       "WEBNAMESCA_PROPAGATION_TIMEOUT",
@@ -2760,9 +2354,7 @@
   },
   "webnamesru": {
     "name": "webnames.ru",
-    "credentials_env": [
-      "WEBNAMESRU_API_KEY"
-    ],
+    "credentials_env": ["WEBNAMESRU_API_KEY"],
     "additional_env": [
       "WEBNAMESRU_POLLING_INTERVAL",
       "WEBNAMESRU_PROPAGATION_TIMEOUT",
@@ -2771,10 +2363,7 @@
   },
   "websupport": {
     "name": "Websupport",
-    "credentials_env": [
-      "WEBSUPPORT_API_KEY",
-      "WEBSUPPORT_SECRET"
-    ],
+    "credentials_env": ["WEBSUPPORT_API_KEY", "WEBSUPPORT_SECRET"],
     "additional_env": [
       "WEBSUPPORT_POLLING_INTERVAL",
       "WEBSUPPORT_PROPAGATION_TIMEOUT",
@@ -2785,10 +2374,7 @@
   },
   "wedos": {
     "name": "WEDOS",
-    "credentials_env": [
-      "WEDOS_USERNAME",
-      "WEDOS_WAPI_PASSWORD"
-    ],
+    "credentials_env": ["WEDOS_USERNAME", "WEDOS_WAPI_PASSWORD"],
     "additional_env": [
       "WEDOS_POLLING_INTERVAL",
       "WEDOS_PROPAGATION_TIMEOUT",
@@ -2798,10 +2384,7 @@
   },
   "westcn": {
     "name": "West.cn/西部数码",
-    "credentials_env": [
-      "WESTCN_USERNAME",
-      "WESTCN_PASSWORD"
-    ],
+    "credentials_env": ["WESTCN_USERNAME", "WESTCN_PASSWORD"],
     "additional_env": [
       "WESTCN_POLLING_INTERVAL",
       "WESTCN_PROPAGATION_TIMEOUT",
@@ -2811,10 +2394,7 @@
   },
   "xinnet": {
     "name": "Xinnet",
-    "credentials_env": [
-      "XINNET_SECRET",
-      "XINNET_AGENT_ID"
-    ],
+    "credentials_env": ["XINNET_SECRET", "XINNET_AGENT_ID"],
     "additional_env": [
       "XINNET_POLLING_INTERVAL",
       "XINNET_PROPAGATION_TIMEOUT",
@@ -2824,9 +2404,7 @@
   },
   "yandex": {
     "name": "Yandex PDD",
-    "credentials_env": [
-      "YANDEX_PDD_TOKEN"
-    ],
+    "credentials_env": ["YANDEX_PDD_TOKEN"],
     "additional_env": [
       "YANDEX_POLLING_INTERVAL",
       "YANDEX_PROPAGATION_TIMEOUT",
@@ -2836,10 +2414,7 @@
   },
   "yandex360": {
     "name": "Yandex 360",
-    "credentials_env": [
-      "YANDEX360_OAUTH_TOKEN",
-      "YANDEX360_ORG_ID"
-    ],
+    "credentials_env": ["YANDEX360_OAUTH_TOKEN", "YANDEX360_ORG_ID"],
     "additional_env": [
       "YANDEX360_POLLING_INTERVAL",
       "YANDEX360_PROPAGATION_TIMEOUT",
@@ -2849,10 +2424,7 @@
   },
   "yandexcloud": {
     "name": "Yandex Cloud",
-    "credentials_env": [
-      "YANDEX_CLOUD_IAM_TOKEN",
-      "YANDEX_CLOUD_FOLDER_ID"
-    ],
+    "credentials_env": ["YANDEX_CLOUD_IAM_TOKEN", "YANDEX_CLOUD_FOLDER_ID"],
     "additional_env": [
       "YANDEX_CLOUD_POLLING_INTERVAL",
       "YANDEX_CLOUD_PROPAGATION_TIMEOUT",
@@ -2861,9 +2433,7 @@
   },
   "zilore": {
     "name": "Zilore",
-    "credentials_env": [
-      "ZILORE_ACCESS_KEY"
-    ],
+    "credentials_env": ["ZILORE_ACCESS_KEY"],
     "additional_env": [
       "ZILORE_POLLING_INTERVAL",
       "ZILORE_PROPAGATION_TIMEOUT",
@@ -2873,10 +2443,7 @@
   },
   "zoneedit": {
     "name": "ZoneEdit",
-    "credentials_env": [
-      "ZONEEDIT_USER",
-      "ZONEEDIT_AUTH_TOKEN"
-    ],
+    "credentials_env": ["ZONEEDIT_USER", "ZONEEDIT_AUTH_TOKEN"],
     "additional_env": [
       "ZONEEDIT_POLLING_INTERVAL",
       "ZONEEDIT_PROPAGATION_TIMEOUT",
@@ -2885,10 +2452,7 @@
   },
   "zoneee": {
     "name": "Zone.ee",
-    "credentials_env": [
-      "ZONEEE_API_USER",
-      "ZONEEE_API_KEY"
-    ],
+    "credentials_env": ["ZONEEE_API_USER", "ZONEEE_API_KEY"],
     "additional_env": [
       "ZONEEE_ENDPOINT",
       "ZONEEE_POLLING_INTERVAL",
@@ -2898,9 +2462,7 @@
   },
   "zonomi": {
     "name": "Zonomi",
-    "credentials_env": [
-      "ZONOMI_API_KEY"
-    ],
+    "credentials_env": ["ZONOMI_API_KEY"],
     "additional_env": [
       "ZONOMI_POLLING_INTERVAL",
       "ZONOMI_PROPAGATION_TIMEOUT",

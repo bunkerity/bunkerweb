@@ -2,7 +2,6 @@ from os import getenv
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
-
 app = FastAPI()
 
 

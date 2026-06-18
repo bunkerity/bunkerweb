@@ -9,7 +9,6 @@ from uvicorn import run
 from contextlib import suppress
 from requests.exceptions import RequestException
 
-
 fastapi_proc = None
 if getenv("TEST_TYPE", "docker") == "docker":
     app = FastAPI()
