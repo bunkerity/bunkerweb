@@ -2,10 +2,6 @@
      class="toast-container position-fixed bottom-0 end-0 mb-3 me-3">
     <!-- prettier-ignore -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if pro_overlapped and current_endpoint != "pro" %}
-            {% if messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
-            {% endif %}
-        {% endif %}
         {% if user_readonly and current_endpoint != "profile" %}
             {% if messages.append(('warning', 'You are in read-only mode. You can\'t make changes that will be saved in the database.')) %}
             {% endif %}
@@ -15,29 +11,55 @@
         {% for category, message in messages %}
             {% if message not in unique_messages %}
                 {% if unique_messages.update({message: True}) %}{% endif %}
-                <div class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
-                     role="alert"
-                     aria-live="polite"
-                     aria-atomic="true"
-                     {% if category == 'message' %}data-bs-delay="5000"{% else %}data-bs-autohide="false"{% endif %}>
-                    <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
-                        <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
-                        <span class="fw-medium me-auto" data-i18n="flash.{{ category }}">
-                            {% if category != 'message' %}
-                                {{ category|capitalize }}
-                            {% else %}
-                                Info
-                            {% endif %}
-                        </span>
-                        <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="toast"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
+                {% if category == 'pro' %}
+                    <div class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border border-warning"
+                         role="alert"
+                         aria-live="polite"
+                         aria-atomic="true"
+                         data-bs-autohide="false">
+                        <div class="toast-header d-flex align-items-center text-warning">
+                            <img class="me-1"
+                                 src="{{ pro_diamond_url }}"
+                                 alt=""
+                                 aria-hidden="true"
+                                 width="18"
+                                 height="18" />
+                            <i class="d-block h-auto rounded tf-icons bx bx-xs bx-error bx-tada me-2"></i>
+                            <span class="fw-semibold me-auto courier-prime" data-i18n="flash.pro">BunkerWeb PRO</span>
+                            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="toast"
+                                    aria-label="Close"
+                                    data-i18n="aria.label.close"></button>
+                        </div>
+                        <div class="toast-body">{{ message|safe }}</div>
                     </div>
-                    <div class="toast-body">{{ message|safe }}</div>
-                </div>
+                {% else %}
+                    <div class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
+                         role="alert"
+                         aria-live="polite"
+                         aria-atomic="true"
+                         {% if category == 'message' %}data-bs-delay="5000"{% else %}data-bs-autohide="false"{% endif %}>
+                        <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
+                            <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+                            <span class="fw-medium me-auto" data-i18n="flash.{{ category }}">
+                                {% if category != 'message' %}
+                                    {{ category|capitalize }}
+                                {% else %}
+                                    Info
+                                {% endif %}
+                            </span>
+                            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="toast"
+                                    aria-label="Close"
+                                    data-i18n="aria.label.close"></button>
+                        </div>
+                        <div class="toast-body">{{ message|safe }}</div>
+                    </div>
+                {% endif %}
             {% endif %}
         {% endfor %}
         <!-- end flash message-->

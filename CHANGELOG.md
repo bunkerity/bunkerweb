@@ -1,6 +1,27 @@
 # Changelog
 
-## v1.6.12~rc2 - 2026/??/??
+## v1.6.12~rc3 - 2026/??/??
+
+- [SECURITY] `nginx`: update nginx to 1.30.3 (except for Fedora, which stays on 1.30.2 until it is available in its repositories) to fix CVE-2026-42055 — a heap buffer overflow in `ngx_http_proxy_v2_module`/`ngx_http_grpc_module` — and CVE-2026-48142 — a heap buffer overread in `ngx_http_charset_module`.
+- [FEATURE] `antibot`: `ANTIBOT_IGNORE_URI` can now match full request URIs including query strings. (Fixes #3374)
+- [BUGFIX] `api`: a malformed `API_ALLOWED_HOSTS` wildcard (e.g. `foo.*.com`) no longer bricks the API on every request — the patterns are now validated at startup and a bad entry is logged and skipped, instead of tripping Starlette's `TrustedHostMiddleware` assertion lazily on the first request (which the `add_middleware` `try`/`except` could not catch) or being silently accepted under `python -O`.
+- [BUGFIX] `letsencrypt`: stale-ACME-account recovery now works under `LETS_ENCRYPT_CONCURRENT_REQUESTS=yes` — the JWS-rejection purge targeted the per-service temporary scratch dir (discarded on the failed run, merged back only on success) instead of the canonical account store, so a server-pruned account was restored on every retry and issuance kept failing identically. It now purges `DATA_PATH/accounts`.
+- [BUGFIX] `letsencrypt` (UI): deleting a certificate no longer fails with a 500 (leaving the cache row stale so the cert reappears on the next scheduler sync) when an *unrelated* orphaned certificate is present in the cache — the delete now bypasses the global consistency gate like the Heal flow, since removing one certificate cannot introduce a new orphan reference (the scheduler-side gate still guards against runtime poisoning).
+- [BUGFIX] `datastore`: setting `DATASTORE_LRU_SIZE` to any value other than the default (`1k`) no longer bricks every BunkerWeb worker API with HTTP 444 (a full scheduler↔worker bootstrap deadlock). The lazy per-worker LRU resize replaced the cache with a fresh empty instance mid-`init_by_lua`, discarding the bootstrap variables (including `API_WHITELIST_IP`) and plugin metadata it had just stored, so the API rejected every IP. The resize now migrates existing entries into the new cache and only ever grows above the default. (Fixes #3618)
+- [FEATURE] `reverseproxy`: verify the upstream HTTPS certificate with `REVERSE_PROXY_SSL_VERIFY`, `REVERSE_PROXY_SSL_VERIFY_DEPTH`, and a trusted CA as a path or base64/PEM data (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, `_DATA`, `_PRIORITY`), for HTTP and stream. The scheduler caches the CA and distributes it to every instance; fails safe to `off` when no CA is available. (Fixes #574)
+- [FEATURE] `ui`: overhaul the logs viewer — per-format syntax highlighting (BunkerWeb, certbot and NGINX access logs), severity filter chips with counts, in-page search and next/previous error navigation, live-tail with pause and a "new lines" cue, download/copy, an opt-in local-time toggle, and collapsible multi-line entries (tracebacks and config dumps fold to a labelled `⋯ N lines` / `Traceback (N lines)` pill). Hiding a severity hides the whole multi-line entry, and the toolbar reflows into a tidy, touch-friendly layout on mobile.
+- [DEPS] `ui`: update jQuery to v4.0.0.
+- [DEPS] `ui`: update Bootstrap to v5.3.8 and drop the redundant standalone Popper.js (it is already bundled in `bootstrap.bundle.min.js`).
+- [DEPS] `ui`: update DataTables (and bundled extensions) to v2.3.8.
+- [DEPS] `ui`: update Ace editor to v1.44.0.
+- [DEPS] `ui`: update ApexCharts.js to v5.15.0.
+- [DEPS] `ui`: update DOMPurify to v3.4.11.
+- [DEPS] `ui`: update i18next to v26.3.1 and i18next-http-backend to v4.0.0.
+- [DEPS] `ui`: update Perfect Scrollbar to v1.5.6.
+- [DEPS] `ui`: update lottie-player to v2.0.12, canvas-confetti to v1.9.4, and ipaddr.js to v2.4.0.
+- [DEPS] update build tooling — cssnano to v8.0.2 and domino to v2.1.7; remove the unused root `jquery` dependency.
+
+## v1.6.12~rc2 - 2026/06/16
 
 - [SECURITY] `api`: build the Biscuit auth token through the parameter API so the Host header, client IP and username are bound as typed terms and cannot inject signed Datalog facts (token issuance and verification); a malicious `Host` header is now an inert `domain` string rather than escapable Datalog. Adds an opt-in `API_ALLOWED_HOSTS` TrustedHost allowlist.
 - [SECURITY] `ui`: fix session fixation on login (CWE-384) — `session.clear()` ran before the session-id regeneration, and `flask-session` only rotates a non-empty session, so the id never changed across the authentication boundary and a pre-planted session id could be reused post-login. The id is now rotated on every login (the new state is seeded before regeneration).
@@ -12,6 +33,7 @@
 - [BUGFIX] `database`: fix 1.6.12~rc1 regression that reset UI/API-saved settings to defaults on scheduler restart — the scheduler now overrides `method=ui`/`api` rows only for settings explicitly declared in `variables.env` / the container environment (per-service via the service-prefixed key). Affected installs can restore lost settings with `bwcli plugin backup restore`.
 - [BUGFIX] `ssl`: `SSL_ECDH_CURVE=auto` no longer emits `X25519` on FIPS OpenSSL (NGINX failed to start with `group 'X25519' cannot be set`, blocking the Setup Wizard). Auto-detection now probes the same `SSL_CTX_set1_groups_list` call NGINX makes, falls back to FIPS-approved `prime256v1:secp384r1`, and the internal API listener honors `SSL_ECDH_CURVE` instead of a hardcoded curve.
 - [BUGFIX] `autoconf`: re-check service labels when the set of valid settings changes (e.g. a valid PRO license installs PRO plugins, or an external plugin is added) — labels referencing a not-yet-valid setting were dropped and never re-applied until an unrelated label change or restart. A background worker now re-applies on settings change (interval via `AUTOCONF_SETTINGS_RECHECK_INTERVAL`, default `300`s, `0` disables).
+- [BUGFIX] `logger`: an unreachable `LOG_SYSLOG_ADDRESS` no longer crash-loops the scheduler and UI — building the `SysLogHandler` is now guarded, so a syslog host that does not resolve or refuses the connection (Python 3.14 resolves DNS eagerly in the handler constructor) logs a warning and falls back to stderr instead of raising out of module import and killing every BunkerWeb Python process.
 - [DEPS] Updated LuaJIT version to v2.1-20260606
 - [DEPS] Updated lua-resty-openssl version to v1.8.0
 - [CONTRIBUTION] Thank you [Cleverguns](https://github.com/Cleverguns) for your contribution regarding the `Filipino (Tagalog)` translation of the web UI. (#3607)

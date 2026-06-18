@@ -67,13 +67,17 @@ def login_page():
             except Exception as e:
                 LOGGER.error(f"Failed to create Biscuit token: {e}")
 
+            # Persist the theme the user explicitly chose on the login page (or
+            # carried over from the setup wizard). Falls back to the saved value
+            # when absent or invalid, so an OS-resolved theme never clobbers it.
+            submitted_theme = request.form.get("theme", "")
             user_data = {
                 "username": current_user.get_id(),
                 "password": current_user.password.encode("utf-8"),
                 "email": current_user.email,
                 "totp_secret": current_user.totp_secret,
                 "method": current_user.method,
-                "theme": current_user.theme,
+                "theme": submitted_theme if submitted_theme in ("dark", "light") else current_user.theme,
                 "language": request.form.get("language", "en"),
             }
 

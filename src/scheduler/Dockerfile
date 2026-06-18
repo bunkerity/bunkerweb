@@ -1,4 +1,4 @@
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f AS builder
+FROM python:3.14-alpine@sha256:94457973ea8a27a799f0b8ea1fe3e3147fcbebaed63497a8af63b28195a08108 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -45,7 +45,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f
+FROM python:3.14-alpine@sha256:94457973ea8a27a799f0b8ea1fe3e3147fcbebaed63497a8af63b28195a08108
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

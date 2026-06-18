@@ -87,6 +87,17 @@ local function is_static_like(uri)
 	return STATIC_EXTENSIONS[ext:lower()] == true
 end
 
+local function get_uri_cache_ele(ctx)
+	local uri = ctx.bw.uri
+	local request_uri = ctx.bw.request_uri
+	if request_uri and request_uri ~= "" and request_uri ~= uri then
+		local hash = sha256:new()
+		hash:update(request_uri)
+		return "uri#" .. to_hex(hash:final())
+	end
+	return "uri" .. uri
+end
+
 local function get_http_client()
 	local httpc, err = http_new()
 	if not httpc then
@@ -271,7 +282,7 @@ function antibot:access()
 		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
 	end
 	if self.ctx.bw.uri then
-		checks["URI"] = "uri" .. self.ctx.bw.uri
+		checks["URI"] = self:kind_to_ele("URI")
 	end
 	local already_cached = {
 		["IP"] = false,
@@ -899,7 +910,7 @@ function antibot:kind_to_ele(kind)
 	elseif kind == "UA" then
 		return "ua" .. self.ctx.bw.http_user_agent
 	elseif kind == "URI" then
-		return "uri" .. self.ctx.bw.uri
+		return get_uri_cache_ele(self.ctx)
 	elseif kind == "COUNTRY" then
 		return "country" .. self.ctx.bw.remote_addr
 	end
@@ -1023,8 +1034,13 @@ end
 
 function antibot:is_ignored_uri()
 	-- Check if URI is in ignore list
+	local uri = self.ctx.bw.uri
+	local request_uri = self.ctx.bw.request_uri
 	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-		if regex_match(self.ctx.bw.uri, ignore_uri) then
+		if regex_match(uri, ignore_uri) then
+			return true, "URI " .. ignore_uri
+		end
+		if request_uri and request_uri ~= uri and regex_match(request_uri, ignore_uri) then
 			return true, "URI " .. ignore_uri
 		end
 	end

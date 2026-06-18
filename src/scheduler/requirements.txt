@@ -34,9 +34,9 @@ annotated-types==0.7.0 \
     --hash=sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53 \
     --hash=sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89
     # via pydantic
-anyio==4.13.0 \
-    --hash=sha256:08b310f9e24a9594186fd75b4f73f4a4152069e3853f1ed8bfbf58369f4ad708 \
-    --hash=sha256:334b70e641fd2221c1505b3890c69882fe4a2df910cba14d97019b90b24439dc
+anyio==4.14.0 \
+    --hash=sha256:b47c1f9ccf73e67021df785332508f99379c68fa7d0684e8e3492cb1d4b23f89 \
+    --hash=sha256:dd9b7a2a9799ed6552fde617b2c5df02b7fdd7d88392fc48101e51bae46164d9
     # via
     #   cloudflare
     #   httpx
@@ -44,13 +44,13 @@ beautifulsoup4==4.15.0 \
     --hash=sha256:288e3ca7d54b06f2ac191970bc275c1939cb46d450b255bf6718b04aa37ab4f7 \
     --hash=sha256:d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9
     # via dns-lexicon
-boto3==1.43.29 \
-    --hash=sha256:354006c512cdb87ef8214a095f2ade961c8145734475cd7a7e6b39260ff5494a \
-    --hash=sha256:77c27ada27cdbf619a3bbc41fa9e991caef818d3a2988cf92ea722e107d90108
+boto3==1.43.30 \
+    --hash=sha256:6b1ee360f363a457f67a8f5702f522043d8a32d67a97c362ad12075d8b5b531e \
+    --hash=sha256:89e982463d94773136ccf69be77cccd54ff1ce351a6aadd1d3437fcb693681b5
     # via certbot-dns-route53
-botocore==1.43.29 \
-    --hash=sha256:5d62f2a03ed279a50207ca2824e009313df15f082b6bb591a095a4f04c7faef3 \
-    --hash=sha256:dce39d33b707aa162aa3820975f99d7f8f746d46576169fb42ce4f2b3b56b261
+botocore==1.43.30 \
+    --hash=sha256:19ed560cb35ae43bf010d37da429a553c07063bf7efea0f2cb53be8a78d3e3d5 \
+    --hash=sha256:26b1dded84d89b396180916f56900bd2ab1c0d545a66d1d2c3eeb40f772935b2
     # via
     #   boto3
     #   s3transfer
@@ -131,8 +131,9 @@ certbot-dns-duckdns==1.8.0 \
 certbot-dns-dynu==0.0.6.post2502111739272536 \
     --hash=sha256:3bca6343a5e962bdc666301228dcc73c6b3ebef9f2921d8afe1a56f1450d9229
     # via -r requirements.in
-certbot-dns-gandi @ https://github.com/bunkerity/certbot-plugin-gandi/archive/da4655bc6d39941b44de2a7c049163a7e34a5a39.zip \
-    --hash=sha256:b875034494ec49f305dba96212c202973def92618936636db3107e498a2abec4
+certbot-dns-gandi==1.6.2 \
+    --hash=sha256:611dcc60ce86a8ed74e55cee6abd792e4a9c4d6f72235fd8cbb58316fcc43cce \
+    --hash=sha256:b319031cfab9cff4a6e2a4eb559d9f5f0ce8ff17c582f209d45bf57fc3c73097
     # via -r requirements.in
 certbot-dns-gehirn==5.6.0 \
     --hash=sha256:9e3827d844501a43d61eea3f9ff58e389d2ad91fb93f0a2e593bafc5bd988624 \
@@ -548,9 +549,9 @@ google-api-python-client==2.197.0 \
     --hash=sha256:0f8b89aa75768161dd4f5092d6bcb386c13236b32e0d9a938c02f71342094d14 \
     --hash=sha256:32e03977eda4a66eafc6ae58dc9ec46426b6025636d5ef019c5703013eddd4e5
     # via certbot-dns-google
-google-auth==2.54.0 \
-    --hash=sha256:130f6fd5e3f497fdad897a23ed9489973437edf561238c4b92a4d02c435f8af9 \
-    --hash=sha256:784e9837f92244141250470d47c893df50cbab485ce491aca5e9deb558ad2b48
+google-auth==2.55.0 \
+    --hash=sha256:a17cef9dedf98c4ebae2fb0c48c8f75952c877cbc2efe09f329ef16c2783d88a \
+    --hash=sha256:fcd3a130f575fa36403d38774af1c64a4fbfbca09215f0589d2372b5119697cb
     # via
     #   certbot-dns-google
     #   google-api-core

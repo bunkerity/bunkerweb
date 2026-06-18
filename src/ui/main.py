@@ -1284,6 +1284,9 @@ def before_request():
         x_requested_with = request.headers.get("X-Requested-With")
         is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
 
+        # Default to the scheduler-computed flag; refined to a live count below on real page requests.
+        pro_overlapped = metadata["pro_overlapped"]
+
         if not is_cors and current_user.is_authenticated:
             seen = set()
             for f in DATA.get("TO_FLASH", []):
@@ -1293,6 +1296,18 @@ def before_request():
                 seen.add(content)
                 flash(content, f["type"], save=f.get("save", True))
             DATA["TO_FLASH"] = []
+
+            # Live, every-request overlap check — the metadata flag is only refreshed daily by the scheduler.
+            if metadata["is_pro"] and metadata["pro_services"]:
+                pro_overlapped = len(DB.get_services()) > metadata["pro_services"]
+                if pro_overlapped and current_endpoint != "pro":
+                    flash(
+                        "You have more services than allowed by your pro license. "
+                        "Upgrade your license or move some services to draft mode to unlock your pro license.",
+                        "pro",
+                        i18n_key="flash.pro_services_exceeded",
+                        save=False,  # transient toast; keep it out of the notification history
+                    )
 
         data = dict(
             current_endpoint=current_endpoint,
@@ -1304,7 +1319,7 @@ def before_request():
             pro_status=metadata["pro_status"],
             pro_services=metadata["pro_services"],
             pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
-            pro_overlapped=metadata["pro_overlapped"],
+            pro_overlapped=pro_overlapped,
             plugins=BW_CONFIG.get_plugins(),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),

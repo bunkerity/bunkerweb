@@ -492,7 +492,10 @@ def letsencrypt_delete():
                 LOGGER.error(f"Failed to remove renewal file {renewal_file}: {e}")
 
         try:
-            err = _persist_le_cache_dir(scratch)
+            # Bypass the consistency gate (like Heal): removing one cert cannot add an orphan
+            # ref, so the result is no worse than before. Without this, an UNRELATED orphan in
+            # the cache would block a legit delete (500) and the cert would reappear next sync.
+            err = _persist_le_cache_dir(scratch, bypass_gate=True)
             if err:
                 return jsonify({"status": "ko", "message": f"Successfully deleted certificate {cert_name}, but cache update failed: {err}"}), 500
         except Exception as e:

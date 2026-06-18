@@ -38,7 +38,7 @@ BunkerWeb permet d’indiquer certains utilisateurs, IP ou requêtes qui doivent
 
 | Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                      |
 | --------------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | non      | URL exclues : liste d’expressions régulières d’URI séparées par des espaces qui doivent contourner le défi.      |
+| `ANTIBOT_IGNORE_URI`        |        | multisite | non      | URL exclues : liste d’expressions régulières d’URI séparées par des espaces qui doivent contourner le défi. Les motifs sont vérifiés sur le chemin et l’URI complète de la requête avec query string. |
 | `ANTIBOT_IGNORE_IP`         |        | multisite | non      | IP exclues : liste d’adresses IP ou de plages CIDR séparées par des espaces qui doivent contourner le défi.      |
 | `ANTIBOT_IGNORE_RDNS`       |        | multisite | non      | rDNS exclu : liste de suffixes de DNS inversés séparés par des espaces qui doivent contourner le défi.           |
 | `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | non      | IP publiques uniquement : si `yes`, ne faire des vérifications rDNS que sur des IP publiques.                    |
@@ -58,6 +58,9 @@ Exemples :
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   Exclut toutes les URI commençant par `/api/`, `/webhook/` ou `/assets/`.
+
+- `ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&c=d$"`
+  Exclut du défi antibot la requête exacte `/index.php?a=b&c=d`.
 
 - `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
   Exclut le réseau interne `192.168.1.0/24` et l’IP spécifique `10.0.0.1`.

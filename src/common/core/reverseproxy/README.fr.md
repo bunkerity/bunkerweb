@@ -92,6 +92,21 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
     | ---------------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------- |
     | `REVERSE_PROXY_SSL_SNI`      | `no`   | multisite | no       | **SSL SNI :** Active ou désactive l'envoi du SNI (Server Name Indication) à l'amont.           |
     | `REVERSE_PROXY_SSL_SNI_NAME` |        | multisite | no       | **Nom SSL SNI :** Définit le nom d'hôte SNI à envoyer à l'amont lorsque le SSL SNI est activé. |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | no       | **SSL Verify :** Active ou désactive la vérification du certificat SSL du serveur amont.                |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | no       | **Priorité du certificat de confiance :** Source de l'AC de confiance : `file` (chemin) ou `data` (base64/PEM). |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | no       | **Chemin du certificat de confiance SSL :** Chemin vers un bundle d'AC au format PEM (lisible par le planificateur) utilisé pour vérifier l'amont. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **Données du certificat de confiance SSL :** AC de confiance fournie directement en base64 ou PEM (p. ex. via l'interface web). |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **Profondeur de vérification SSL :** Profondeur de vérification dans la chaîne de certificats de l'amont. |
+
+    !!! info "Vérification du certificat"
+        Lorsque `REVERSE_PROXY_SSL_VERIFY` est défini sur `yes`, NGINX valide à la fois la chaîne de certificats de l'amont et son nom :
+
+        - **AC de confiance :** fournissez-la soit comme chemin de fichier (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, lisible par le planificateur), soit comme données base64/PEM (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`), selon `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY`. Le planificateur la valide, la met en cache et la distribue à chaque instance, vous ne la configurez donc qu'une fois, sans montage par instance.
+        - **Obligatoire :** un certificat de confiance est requis ; NGINX n'a pas de magasin système implicite pour la vérification de l'amont. Pour vérifier un amont public, pointez le chemin vers le bundle d'AC du système (p. ex. `/etc/ssl/certs/ca-certificates.crt`).
+        - **Nom :** vérifié par défaut par rapport à l'hôte issu de `REVERSE_PROXY_HOST`. Si le CN/SAN du certificat du backend diffère, définissez `REVERSE_PROXY_SSL_SNI` sur `yes` et `REVERSE_PROXY_SSL_SNI_NAME` sur le nom attendu.
+        - **Sécurité intégrée :** si aucun certificat de confiance valide n'est disponible, la vérification est désactivée pour ce serveur au lieu de rompre chaque connexion amont.
+
+        Ces paramètres s'appliquent par service : toutes les entrées amont (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) partagent la même configuration de vérification.
 
     !!! info "Explication du SNI"
         L'Indication du Nom du Serveur (SNI) est une extension TLS qui permet à un client de spécifier le nom d'hôte auquel il tente de se connecter pendant la négociation. Cela permet aux serveurs de présenter plusieurs certificats sur la même adresse IP et le même port, permettant ainsi de servir plusieurs sites web sécurisés (HTTPS) à partir d'une seule adresse IP sans que tous ces sites n'utilisent le même certificat.
@@ -189,15 +204,15 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
     | --------------------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | yes      | **Configurations supplémentaires :** Incluez des configurations additionnelles dans le bloc location.                                                                                                                      |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | yes      | **Passer le corps de la requête :** Active ou désactive la transmission du corps de la requête.                                                                                                                            |
-    | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | yes      | **ModSecurity (par location) :** Mettez à `no` pour émettre `modsecurity off;` dans cette location — contourne le WAF sur les points de terminaison de gros téléversements afin d'éviter un OOM (voir la note ci-dessous). |
+    | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | yes      | **ModSecurity (par location) :** Mettez à `no` pour émettre `modsecurity off;` dans cette location ; contourne le WAF sur les points de terminaison de gros téléversements afin d'éviter un OOM (voir la note ci-dessous). |
 
     !!! warning "Considérations de sécurité"
         Soyez prudent lorsque vous incluez des extraits de configuration personnalisés car ils peuvent outrepasser les paramètres de sécurité de BunkerWeb ou introduire des vulnérabilités s'ils ne sont pas correctement configurés.
 
     !!! warning "Recommandation de sécurité pour les gros téléversements"
-        ModSecurity met en mémoire tampon le corps complet de la requête et ne peut pas le plafonner pour les téléversements de plusieurs Go, ce qui peut provoquer un OOM du worker. Si — **et seulement si** — une URL de reverse proxy est utilisée *exclusivement* pour les téléversements de fichiers (par exemple un point de terminaison `/upload` dédié), définissez `REVERSE_PROXY_MODSECURITY_N: "no"` sur cette URL. Ne le désactivez pas sur des URL à usage mixte : vous perdriez la couverture WAF sur tout ce qui est servi par cette location.
+        ModSecurity met en mémoire tampon le corps complet de la requête et ne peut pas le plafonner pour les téléversements de plusieurs Go, ce qui peut provoquer un OOM du worker. Si, **et seulement si**, une URL de reverse proxy est utilisée *exclusivement* pour les téléversements de fichiers (par exemple un point de terminaison `/upload` dédié), définissez `REVERSE_PROXY_MODSECURITY_N: "no"` sur cette URL. Ne le désactivez pas sur des URL à usage mixte : vous perdriez la couverture WAF sur tout ce qui est servi par cette location.
 
-        Pour conserver une protection des téléversements après le contournement de ModSecurity, associez cela à un plugin d'analyse de fichiers comme [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) ou [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — ils inspectent le fichier téléversé lui-même plutôt que le corps brut de la requête.
+        Pour conserver une protection des téléversements après le contournement de ModSecurity, associez cela à un plugin d'analyse de fichiers comme [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) ou [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) ; ils inspectent le fichier téléversé lui-même plutôt que le corps brut de la requête.
 
 === "Configuration du cache"
 

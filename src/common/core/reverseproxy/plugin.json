@@ -192,6 +192,53 @@
       "regex": "^.*$",
       "type": "text"
     },
+    "REVERSE_PROXY_SSL_VERIFY": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable or disable verification of the upstream server's SSL certificate.",
+      "id": "reverse-proxy-ssl-verify",
+      "label": "SSL verify",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+      "context": "multisite",
+      "default": "file",
+      "help": "Source of the trusted CA certificate: file path or base64/PEM data (file or data).",
+      "id": "reverse-proxy-ssl-trusted-certificate-priority",
+      "label": "Trusted certificate priority",
+      "regex": "^(file|data)$",
+      "type": "select",
+      "select": ["file", "data"]
+    },
+    "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Path to a PEM CA bundle used to verify the upstream certificate (priority 'file', readable by the scheduler, which caches and distributes it). Required for verification; for public upstreams use the system bundle (e.g. /etc/ssl/certs/ca-certificates.crt). If unset, verification is disabled.",
+      "id": "reverse-proxy-ssl-trusted-certificate",
+      "label": "SSL trusted certificate path",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Trusted CA certificate as base64 or plaintext PEM (priority 'data').",
+      "id": "reverse-proxy-ssl-trusted-certificate-data",
+      "label": "Trusted certificate data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crt,.cer,.txt"
+    },
+    "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
+      "context": "multisite",
+      "default": "1",
+      "help": "Sets the verification depth in the upstream server certificates chain.",
+      "id": "reverse-proxy-ssl-verify-depth",
+      "label": "SSL verify depth",
+      "regex": "^[1-9]\\d*$",
+      "type": "number"
+    },
     "REVERSE_PROXY_AUTH_REQUEST": {
       "context": "multisite",
       "default": "",
@@ -246,7 +293,7 @@
     "REVERSE_PROXY_MODSECURITY": {
       "context": "multisite",
       "default": "yes",
-      "help": "Enable or disable ModSecurity for this reverse proxy location. Set to no for endpoints that accept very large uploads (e.g. video, backup, object storage) — the ModSecurity-nginx connector buffers the full request body in memory regardless of SecRequestBodyLimit and can trigger OOM on multi-GB uploads. Emits 'modsecurity off;' inside the location block.",
+      "help": "Enable or disable ModSecurity for this reverse proxy location. Set to no for endpoints that accept very large uploads (e.g. video, backup, object storage): the ModSecurity-nginx connector buffers the full request body in memory regardless of SecRequestBodyLimit and can trigger OOM on multi-GB uploads. Emits 'modsecurity off;' inside the location block.",
       "id": "reverse-proxy-modsecurity",
       "label": "Reverse proxy ModSecurity",
       "regex": "^(yes|no)$",
@@ -370,5 +417,14 @@
       "regex": "^.*$",
       "type": "text"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "trusted-cert",
+      "file": "trusted-cert.py",
+      "every": "day",
+      "reload": true,
+      "async": true
+    }
+  ]
 }
