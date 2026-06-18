@@ -169,8 +169,7 @@ def bulk_save_custom_configs(req: BulkSaveCustomConfigsRequest) -> JSONResponse:
     Used by Autoconf to sync discovered custom configurations.
     """
     db = get_db()
-    err = db.save_custom_configs(req.custom_configs, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup)
-    if err:
+    if err := db.save_custom_configs(req.custom_configs, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup):
         code = 400 if "read-only" in err else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": err})
     return JSONResponse(status_code=200, content={"status": "success"})

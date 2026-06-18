@@ -33,7 +33,6 @@ def checked_changes(payload: CheckedChangesRequest) -> JSONResponse:
         payload.value: True to mark as changed, False to mark as checked (default: False)
     """
     db = get_db()
-    ret = db.checked_changes(payload.changes, plugins_changes=payload.plugins_changes, value=payload.value)
-    if ret:
+    if ret := db.checked_changes(payload.changes, plugins_changes=payload.plugins_changes, value=payload.value):
         return JSONResponse(status_code=500, content={"status": "error", "message": str(ret)})
     return JSONResponse(status_code=200, content={"status": "success"})

@@ -18,8 +18,7 @@ class JobExecutor:
 
     def run(self, job_data: dict) -> int:
         name = job_data["name"]
-        job_path = Path(job_data["path"]).joinpath("jobs", job_data["file"])
-        resolved = job_path.resolve()
+        resolved = Path(job_data["path"]).joinpath("jobs", job_data["file"]).resolve()
 
         if not self._is_allowed_job_path(resolved):
             self.logger.error(f"Path {resolved} is outside allowed job directories")

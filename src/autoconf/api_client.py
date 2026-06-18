@@ -11,8 +11,7 @@ class AutoconfApiClient(BaseApiClient):
 
     def get_plugins(self) -> list:
         """Fetch all plugins with their settings schemas."""
-        data = self._get("/plugins")
-        return data.get("plugins", [])
+        return self._get("/plugins").get("plugins", [])
 
     def validate_setting(
         self,
@@ -35,8 +34,7 @@ class AutoconfApiClient(BaseApiClient):
 
     def get_services(self) -> list:
         """Get all services (without drafts)."""
-        data = self._get("/services", params={"with_drafts": "false"})
-        return data.get("services", [])
+        return self._get("/services", params={"with_drafts": "false"}).get("services", [])
 
     # ── Instances ───────────────────────────────────────────────────────
 
@@ -45,8 +43,7 @@ class AutoconfApiClient(BaseApiClient):
         params = {}
         if autoconf:
             params["autoconf"] = "true"
-        data = self._get("/instances", params=params)
-        return data.get("instances", [])
+        return self._get("/instances", params=params).get("instances", [])
 
     def update_instances(self, instances: list, method: str, changed: bool = False) -> str:
         """Bulk replace instances for the given method. Returns empty string on success, error otherwise."""

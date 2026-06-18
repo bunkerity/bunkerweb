@@ -1,3 +1,4 @@
+from contextlib import suppress
 from html import escape
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -83,10 +84,8 @@ def delete_plugin():
                 DATA["TO_FLASH"].append({"content": f"Couldn't delete plugin {plugin}: {e.message}", "type": "error"})
 
         if deleted_plugins:
-            try:
-                API_CLIENT.checked_changes(["config"], plugins_changes=list(deleted_plugins), value=True)
-            except (ApiClientError, ApiUnavailableError):
-                pass
+            with suppress(ApiClientError, ApiUnavailableError):
+                API_CLIENT.checked_changes(["config"], plugins_changes=deleted_plugins.copy(), value=True)
 
         DATA["RELOADING"] = False
 

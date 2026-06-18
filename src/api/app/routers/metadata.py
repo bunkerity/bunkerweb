@@ -18,8 +18,7 @@ class MetadataUpdateRequest(BaseModel):
 @router.get("", dependencies=[Depends(guard)])
 def get_metadata() -> JSONResponse:
     """Get all metadata."""
-    db = get_db()
-    metadata = db.get_metadata()
+    metadata = get_db().get_metadata()
 
     # Serialize datetime fields for JSON (including nested dicts like plugins_config_changed)
     for key, value in metadata.items():
@@ -34,8 +33,7 @@ def get_metadata() -> JSONResponse:
 @router.patch("", dependencies=[Depends(guard)])
 def update_metadata(req: MetadataUpdateRequest) -> JSONResponse:
     """Update metadata key-value pairs."""
-    db = get_db()
-    ret = db.set_metadata(req.data)
+    ret = get_db().set_metadata(req.data)
     if ret:
         code = 400 if "read-only" in ret else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})

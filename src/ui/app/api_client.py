@@ -29,8 +29,7 @@ class ApiClient(BaseApiClient):
             params["filtered_settings"] = list(filtered_settings)
         if not global_only:
             params["global_only"] = "false"
-        data = self._get("/global_settings", params=params)
-        return data.get("settings", {})
+        return self._get("/global_settings", params=params).get("settings", {})
 
     def update_global_settings(self, settings: dict):
         return self._patch("/global_settings", json=settings)
@@ -38,8 +37,7 @@ class ApiClient(BaseApiClient):
     # ── Instances ───────────────────────────────────────────────────────
 
     def get_instances(self):
-        data = self._get("/instances")
-        return data.get("instances", [])
+        return self._get("/instances").get("instances", [])
 
     def get_instance(self, hostname):
         data = self._get(f"/instances/{hostname}")
@@ -90,8 +88,7 @@ class ApiClient(BaseApiClient):
             params["job_name"] = job_name
         if with_data:
             params["with_data"] = "true"
-        data = self._get("/cache", params=params)
-        return data.get("cache", [])
+        return self._get("/cache", params=params).get("cache", [])
 
     def get_cache_file(self, service, plugin, job, filename, download=False):
         params = {"download": "true"} if download else {}
@@ -110,8 +107,7 @@ class ApiClient(BaseApiClient):
     # ── Jobs ────────────────────────────────────────────────────────────
 
     def get_jobs(self):
-        data = self._get("/jobs")
-        return data.get("jobs", [])
+        return self._get("/jobs").get("jobs", [])
 
     def run_jobs(self, jobs: list):
         return self._post("/jobs/run", json={"jobs": jobs})
@@ -122,8 +118,7 @@ class ApiClient(BaseApiClient):
         params = {}
         if with_drafts:
             params["with_drafts"] = "true"
-        data = self._get("/services", params=params)
-        return data.get("services", [])
+        return self._get("/services", params=params).get("services", [])
 
     def get_service(self, service_id, full=False, methods=True, with_drafts=True):
         params = {}
@@ -165,8 +160,7 @@ class ApiClient(BaseApiClient):
             params["with_drafts"] = "true"
         if with_data:
             params["with_data"] = "true"
-        data = self._get("/configs", params=params)
-        return data.get("configs", [])
+        return self._get("/configs", params=params).get("configs", [])
 
     def get_config_item(self, service, type, name, with_data=True):
         params = {"with_data": "true"} if with_data else {}
@@ -194,8 +188,7 @@ class ApiClient(BaseApiClient):
         params = {"type": type}
         if with_data:
             params["with_data"] = "true"
-        data = self._get("/plugins", params=params)
-        plugins = data.get("plugins", [])
+        plugins = self._get("/plugins", params=params).get("plugins", [])
         if with_data:
             from base64 import b64decode
 
@@ -220,7 +213,7 @@ class ApiClient(BaseApiClient):
     # ── Users ───────────────────────────────────────────────────────────
 
     def create_user(self, username, password, **kwargs):
-        return self._post("/users", json={"username": username, "password": password, **kwargs})
+        return self._post("/users", json={"username": username, "password": password} | kwargs)
 
     def get_user(self, username):
         data = self._get(f"/users/{username}")
@@ -233,15 +226,13 @@ class ApiClient(BaseApiClient):
         params = {}
         if current_session_id:
             params["current_session_id"] = current_session_id
-        data = self._get(f"/users/{username}/sessions", params=params)
-        return data.get("sessions", [])
+        return self._get(f"/users/{username}/sessions", params=params).get("sessions", [])
 
     def delete_user_sessions(self, username):
         return self._delete(f"/users/{username}/sessions")
 
     def mark_user_login(self, username, ip, user_agent):
-        data = self._post(f"/users/{username}/login", json={"ip": ip, "user_agent": user_agent})
-        return data.get("session_id")
+        return self._post(f"/users/{username}/login", json={"ip": ip, "user_agent": user_agent}).get("session_id")
 
     def refresh_recovery_codes(self, username, codes):
         return self._post(f"/users/{username}/recovery-codes/refresh", json={"codes": codes})
@@ -252,8 +243,7 @@ class ApiClient(BaseApiClient):
     # ── User Preferences ────────────────────────────────────────────────
 
     def get_user_preferences(self, username, table_name):
-        data = self._get(f"/users/{username}/preferences/{table_name}")
-        return data.get("preferences", {})
+        return self._get(f"/users/{username}/preferences/{table_name}").get("preferences", {})
 
     def update_user_preferences(self, username, table_name, columns):
         return self._patch(f"/users/{username}/preferences/{table_name}", json={"columns": columns})
@@ -262,13 +252,11 @@ class ApiClient(BaseApiClient):
         return self._post(f"/users/{username}/access", json={"session_id": session_id})
 
     def get_user_permissions(self, username):
-        data = self._get(f"/users/{username}/permissions")
-        return data.get("permissions", [])
+        return self._get(f"/users/{username}/permissions").get("permissions", [])
 
     def get_user_for_auth(self, username):
         """Get user with auth data (password hash) for Flask-Login."""
-        data = self._get(f"/users/{username}", params={"auth": "true"})
-        return data.get("user")
+        return self._get(f"/users/{username}", params={"auth": "true"}).get("user")
 
     def get_admin_user(self, auth=False):
         """Get the admin user. Returns None if no admin exists."""
@@ -288,15 +276,14 @@ class ApiClient(BaseApiClient):
     # ── Templates ───────────────────────────────────────────────────────
 
     def get_templates(self):
-        data = self._get("/templates")
-        return data.get("templates", {})
+        return self._get("/templates").get("templates", {})
 
     def get_template(self, template_id):
         data = self._get(f"/templates/{template_id}")
         return data.get("template", data)
 
     def create_template(self, template_id, name, **kwargs):
-        return self._post("/templates", json={"id": template_id, "name": name, **kwargs})
+        return self._post("/templates", json={"id": template_id, "name": name} | kwargs)
 
     def update_template(self, template_id, **kwargs):
         return self._patch(f"/templates/{template_id}", json=kwargs)
@@ -307,8 +294,7 @@ class ApiClient(BaseApiClient):
     # ── Metadata ────────────────────────────────────────────────────────
 
     def get_metadata(self):
-        data = self._get("/metadata")
-        return data.get("metadata", {})
+        return self._get("/metadata").get("metadata", {})
 
     def update_metadata(self, data: dict):
         return self._patch("/metadata", json={"data": data})

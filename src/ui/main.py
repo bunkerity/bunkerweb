@@ -920,10 +920,8 @@ def update_latest_stable_release():
 
 def check_api_readonly_state():
     """Check API readonly state and update DATA accordingly."""
-    try:
+    with suppress(Exception):
         DATA["READONLY_MODE"] = API_CLIENT.readonly
-    except Exception:
-        pass
 
 
 def schedule_restart_workers():

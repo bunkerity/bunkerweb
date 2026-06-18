@@ -103,7 +103,7 @@ class DnsMultiProvider:
 
     def __init__(self, lego_code: str, env: Dict[str, str], sidecars: Optional[Dict[str, Tuple[bytes, str]]] = None):
         self.lego_code = lego_code
-        self.env = dict(env)
+        self.env = env.copy()
         self.sidecars = dict(sidecars or {})
 
     def get_formatted_credentials(self) -> bytes:

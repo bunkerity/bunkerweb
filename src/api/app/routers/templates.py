@@ -37,8 +37,7 @@ class TemplateUpdateRequest(BaseModel):
 @router.get("", dependencies=[Depends(guard)])
 def list_templates() -> JSONResponse:
     """List all templates with their settings, configs, and steps."""
-    db = get_db()
-    templates = db.get_templates()
+    templates = get_db().get_templates()
 
     # Serialize datetime fields
     for _tid, tdata in templates.items():
@@ -53,8 +52,7 @@ def list_templates() -> JSONResponse:
 @router.get("/{template_id}", dependencies=[Depends(guard)])
 def get_template(template_id: str) -> JSONResponse:
     """Get template details including settings, steps, and configs."""
-    db = get_db()
-    details = db.get_template_details(template_id)
+    details = get_db().get_template_details(template_id)
     if not details:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Template not found"})
 
@@ -70,8 +68,7 @@ def get_template(template_id: str) -> JSONResponse:
 @router.post("", dependencies=[Depends(guard)])
 def create_template(req: TemplateCreateRequest) -> JSONResponse:
     """Create a new template."""
-    db = get_db()
-    ret = db.create_template(
+    ret = get_db().create_template(
         req.id,
         plugin_id=req.plugin_id,
         name=req.name,
@@ -89,8 +86,7 @@ def create_template(req: TemplateCreateRequest) -> JSONResponse:
 @router.patch("/{template_id}", dependencies=[Depends(guard)])
 def update_template(template_id: str, req: TemplateUpdateRequest) -> JSONResponse:
     """Update an existing template."""
-    db = get_db()
-    ret = db.update_template(
+    ret = get_db().update_template(
         template_id,
         plugin_id=req.plugin_id,
         name=req.name,
@@ -107,8 +103,7 @@ def update_template(template_id: str, req: TemplateUpdateRequest) -> JSONRespons
 @router.delete("/{template_id}", dependencies=[Depends(guard)])
 def delete_template(template_id: str) -> JSONResponse:
     """Delete a template."""
-    db = get_db()
-    ret = db.delete_template(template_id)
+    ret = get_db().delete_template(template_id)
     if ret:
         code = 404 if "not found" in ret else (400 if "read-only" in ret or "currently used" in ret else 500)
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})

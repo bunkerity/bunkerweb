@@ -581,7 +581,7 @@ def services_service_page(service: str):
                 else:
                     serializable_configs = []
                     for cfg in final_custom_configs.values():
-                        cfg_copy = dict(cfg)
+                        cfg_copy = cfg.copy()
                         if isinstance(cfg_copy.get("data"), bytes):
                             cfg_copy["data"] = cfg_copy["data"].decode("utf-8", errors="replace")
                         serializable_configs.append(cfg_copy)

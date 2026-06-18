@@ -14,8 +14,7 @@ class SchedulerApiClient(BaseApiClient):
 
     def get_config(self) -> dict:
         """Get all global settings (full=true to include defaults)."""
-        data = self._get("/global_settings", params={"full": "true"})
-        return data.get("settings", {})
+        return self._get("/global_settings", params={"full": "true"}).get("settings", {})
 
     def save_config(self, config: dict, method: str, changed: bool = False) -> Union[str, list]:
         """Save full config dict. Returns error string on failure, or list of changed plugin IDs on success."""
@@ -31,8 +30,7 @@ class SchedulerApiClient(BaseApiClient):
 
     def get_instances(self) -> list:
         """Get registered instances."""
-        data = self._get("/instances")
-        return data.get("instances", [])
+        return self._get("/instances").get("instances", [])
 
     def update_instance(self, hostname: str, status: str) -> str:
         """Update instance status (up/down/failover). Returns empty string on success."""
@@ -103,8 +101,7 @@ class SchedulerApiClient(BaseApiClient):
         """Get all custom configs (with payload). API renames `service_id` → `service`
         and omits `data` unless with_data=true is requested — re-normalize back to the
         scheduler-expected shape (`service_id`, `data`)."""
-        data = self._get("/configs", params={"with_data": "true"})
-        configs = data.get("configs", [])
+        configs = self._get("/configs", params={"with_data": "true"}).get("configs", [])
         for c in configs:
             if "service" in c and "service_id" not in c:
                 c["service_id"] = c.pop("service")
@@ -128,8 +125,7 @@ class SchedulerApiClient(BaseApiClient):
     def get_plugins(self, _type: str = "all", with_data: bool = False) -> list:
         """Get plugins of the specified type. When with_data=True, API returns base64-encoded
         bytes — decode them so callers can pass directly to BytesIO/tar_open."""
-        data = self._get("/plugins", params={"type": _type, "with_data": str(with_data).lower()})
-        plugins = data.get("plugins", [])
+        plugins = self._get("/plugins", params={"type": _type, "with_data": str(with_data).lower()}).get("plugins", [])
         if with_data:
             for p in plugins:
                 d = p.get("data")
@@ -152,8 +148,7 @@ class SchedulerApiClient(BaseApiClient):
 
     def get_jobs_cache_files(self) -> list:
         """Get all job cache files."""
-        data = self._get("/cache")
-        return data.get("cache", [])
+        return self._get("/cache").get("cache", [])
 
     # ── Job Dispatch ────────────────────────────────────────────────────
 

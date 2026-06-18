@@ -64,8 +64,7 @@ class AccessRequest(BaseModel):
 @router.get("", dependencies=[Depends(guard)])
 def get_admin_user(auth: bool = False) -> JSONResponse:
     """Get the first admin user. Returns 404 if no admin exists."""
-    db = get_db()
-    user = db.get_ui_user(as_dict=True)
+    user = get_db().get_ui_user(as_dict=True)
     if not user:
         return JSONResponse(status_code=404, content={"status": "error", "message": "No admin user found"})
 
@@ -87,8 +86,7 @@ def get_admin_user(auth: bool = False) -> JSONResponse:
 @router.post("", dependencies=[Depends(guard)])
 def create_user(req: CreateUserRequest) -> JSONResponse:
     """Create a new UI user."""
-    db = get_db()
-    ret = db.create_ui_user(
+    ret = get_db().create_ui_user(
         username=req.username,
         password=req.password.encode("utf-8"),
         roles=req.roles,
@@ -109,8 +107,7 @@ def create_user(req: CreateUserRequest) -> JSONResponse:
 @router.get("/{username}", dependencies=[Depends(guard)])
 def get_user(username: str, auth: bool = False) -> JSONResponse:
     """Get a UI user by username. Set auth=True to include password hash."""
-    db = get_db()
-    user = db.get_ui_user(username=username, as_dict=True)
+    user = get_db().get_ui_user(username=username, as_dict=True)
     if not user:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"User {username} not found"})
 
@@ -160,8 +157,7 @@ def update_user(username: str, req: UpdateUserRequest) -> JSONResponse:
 @router.get("/{username}/sessions", dependencies=[Depends(guard)])
 def get_user_sessions(username: str, current_session_id: Optional[str] = None) -> JSONResponse:
     """List active sessions for a user."""
-    db = get_db()
-    sessions = db.get_ui_user_sessions(username, current_session_id)
+    sessions = get_db().get_ui_user_sessions(username, current_session_id)
 
     for s in sessions:
         if "creation_date" in s:
@@ -175,8 +171,7 @@ def get_user_sessions(username: str, current_session_id: Optional[str] = None) -
 @router.delete("/{username}/sessions", dependencies=[Depends(guard)])
 def delete_user_sessions(username: str) -> JSONResponse:
     """Delete old sessions for a user (keeps the most recent one)."""
-    db = get_db()
-    ret = db.delete_ui_user_old_sessions(username)
+    ret = get_db().delete_ui_user_old_sessions(username)
     if ret:
         return JSONResponse(status_code=500, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
@@ -187,8 +182,7 @@ def mark_user_login(username: str, req: LoginRequest) -> JSONResponse:
     """Mark a login event and return a session ID."""
     from datetime import datetime
 
-    db = get_db()
-    ret = db.mark_ui_user_login(username, datetime.now().astimezone(), req.ip, req.user_agent)
+    ret = get_db().mark_ui_user_login(username, datetime.now().astimezone(), req.ip, req.user_agent)
     if isinstance(ret, str):
         return JSONResponse(status_code=500, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success", "session_id": ret})
@@ -197,8 +191,7 @@ def mark_user_login(username: str, req: LoginRequest) -> JSONResponse:
 @router.post("/{username}/recovery-codes/refresh", dependencies=[Depends(guard)])
 def refresh_recovery_codes(username: str, req: RecoveryCodesRefreshRequest) -> JSONResponse:
     """Regenerate recovery codes for a user."""
-    db = get_db()
-    ret = db.refresh_ui_user_recovery_codes(username, req.codes)
+    ret = get_db().refresh_ui_user_recovery_codes(username, req.codes)
     if ret:
         return JSONResponse(status_code=500, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
@@ -207,8 +200,7 @@ def refresh_recovery_codes(username: str, req: RecoveryCodesRefreshRequest) -> J
 @router.post("/{username}/recovery-codes/use", dependencies=[Depends(guard)])
 def use_recovery_code(username: str, req: RecoveryCodeUseRequest) -> JSONResponse:
     """Validate and consume a recovery code."""
-    db = get_db()
-    ret = db.use_ui_user_recovery_code(username, req.hashed_code)
+    ret = get_db().use_ui_user_recovery_code(username, req.hashed_code)
     if ret:
         code = 400 if "Invalid" in ret or "doesn't exist" in ret else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
@@ -221,16 +213,14 @@ def use_recovery_code(username: str, req: RecoveryCodeUseRequest) -> JSONRespons
 @router.get("/{username}/preferences/{table_name}", dependencies=[Depends(guard)])
 def get_user_preferences(username: str, table_name: str) -> JSONResponse:
     """Get column visibility preferences for a table."""
-    db = get_db()
-    prefs = db.get_ui_user_columns_preferences(username, table_name)
+    prefs = get_db().get_ui_user_columns_preferences(username, table_name)
     return JSONResponse(status_code=200, content={"status": "success", "preferences": prefs})
 
 
 @router.patch("/{username}/preferences/{table_name}", dependencies=[Depends(guard)])
 def update_user_preferences(username: str, table_name: str, req: UpdatePreferencesRequest) -> JSONResponse:
     """Update column visibility preferences for a table."""
-    db = get_db()
-    ret = db.update_ui_user_columns_preferences(username, table_name, req.columns)
+    ret = get_db().update_ui_user_columns_preferences(username, table_name, req.columns)
     if ret:
         return JSONResponse(status_code=400, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
@@ -244,8 +234,7 @@ def mark_user_access(username: str, req: AccessRequest) -> JSONResponse:
     """Record user activity timestamp for a session."""
     from datetime import datetime
 
-    db = get_db()
-    ret = db.mark_ui_user_access(req.session_id, datetime.now().astimezone())
+    ret = get_db().mark_ui_user_access(req.session_id, datetime.now().astimezone())
     if ret:
         return JSONResponse(status_code=400, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
