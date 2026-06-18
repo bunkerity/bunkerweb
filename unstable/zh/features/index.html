@@ -4602,7 +4602,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>排除的 URL：</strong> 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。</td>
+<td><strong>排除的 URL：</strong> 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
@@ -4671,6 +4671,10 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>
 <p><code>ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"</code>
   这将从 antibot 挑战中排除所有以 <code>/api/</code>、<code>/webhook/</code> 或 <code>/assets/</code> 开头的 URI。</p>
+</li>
+<li>
+<p><code>ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&amp;c=d$"</code>
+  这将从 antibot 挑战中排除精确的 <code>/index.php?a=b&amp;c=d</code> 请求。</p>
 </li>
 <li>
 <p><code>ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"</code>

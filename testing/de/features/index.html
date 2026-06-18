@@ -4600,7 +4600,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td style="text-align: left;"></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.</td>
+<td style="text-align: left;">Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den Pfad und die vollständige Request-URI mit Query-String geprüft.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>ANTIBOT_IGNORE_IP</code></td>
@@ -4669,6 +4669,10 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>
 <p><code>ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"</code>
   Schließt alle URIs aus, die mit <code>/api/</code>, <code>/webhook/</code> oder <code>/assets/</code> beginnen.</p>
+</li>
+<li>
+<p><code>ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&amp;c=d$"</code>
+  Schließt exakt die Anfrage <code>/index.php?a=b&amp;c=d</code> von der Antibot-Herausforderung aus.</p>
 </li>
 <li>
 <p><code>ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"</code>

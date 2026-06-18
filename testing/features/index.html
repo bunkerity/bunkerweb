@@ -4600,7 +4600,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Excluded URLs:</strong> List of URI regex patterns separated by spaces that should bypass the challenge.</td>
+<td><strong>Excluded URLs:</strong> List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string.</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
@@ -4669,6 +4669,10 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>
 <p><code>ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"</code>
   This will exclude all URIs starting with <code>/api/</code>, <code>/webhook/</code>, or <code>/assets/</code> from the antibot challenge.</p>
+</li>
+<li>
+<p><code>ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&amp;c=d$"</code>
+  This will exclude the exact <code>/index.php?a=b&amp;c=d</code> request from the antibot challenge.</p>
 </li>
 <li>
 <p><code>ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"</code>

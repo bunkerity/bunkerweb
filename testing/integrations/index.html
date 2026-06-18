@@ -3114,6 +3114,14 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><strong>Persistence overrides:</strong> <code>REDIS_APPENDONLY=yes|no</code> toggles AOF (default <code>yes</code>); RDB snapshots are configured with <code>REDIS_SAVE</code> plus optional <code>REDIS_SAVE_0</code>, <code>REDIS_SAVE_1</code>, … each providing one <code>save &lt;seconds&gt; &lt;changes&gt;</code> pair (e.g. <code>REDIS_SAVE_0="900 1"</code>, <code>REDIS_SAVE_1="300 10"</code>). Setting any of these env vars replaces the built-in <code>900 1 / 300 10 / 60 10000</code> default set; an empty value emits <code>save ""</code>, disabling RDB. Ignored when the conf already declares <code>save</code> itself.</li>
 <li><strong>Authentication:</strong> when <code>REDIS_PASSWORD</code> is set and the conf does not already define <code>requirepass</code>, the embedded Redis is launched with <code>requirepass</code> so the BunkerWeb client and server stay in sync. The embedded server only supports the default user — set <code>REDIS_USERNAME</code> only when pointing at an external Redis with ACLs.</li>
 <li>Redis logs appear with the <code>[REDIS]</code> prefix in Docker logs and in <code>/var/log/bunkerweb/redis.log</code>.</li>
+<li><strong>Recovery (treat embedded Redis as a cache):</strong> the embedded Redis only backs bans/reports/metrics/sessions, which are rebuilt at runtime — it is a cache, not a system of record. If <code>redis-server</code> fails to start (for example a corrupted append-only file or RDB snapshot after an unclean shutdown), supervisor parks it in <code>FATAL</code> and the container is reported <strong>unhealthy</strong>. To diagnose and recover from inside the container:<ul>
+<li><code>docker exec &lt;container&gt; supervisorctl status redis</code> (expect <code>FATAL</code>), and <code>docker logs &lt;container&gt; 2&gt;&amp;1 | grep '\[REDIS\]'</code> for the exact start-up error.</li>
+<li>A <code>docker restart</code> re-attempts start-up and clears transient failures.</li>
+<li>For persistent corruption, repair with the bundled tools — <code>redis-check-aof --fix /var/lib/redis/appendonlydir/appendonly.aof.manifest</code> (note: <code>--fix</code> truncates from the corruption point and <strong>discards</strong> data after it) — or simply wipe <code>/data/redis</code> to start clean. Either way only cached bans/reports are lost; they repopulate.</li>
+</ul>
+</li>
+<li><strong>Runtime config is rebuilt every boot:</strong> <code>/var/lib/bunkerweb/redis-runtime.conf</code> is regenerated from <code>/etc/redis.conf</code> plus the env vars on each start, so any directive you want to keep must live in a mounted <code>/etc/redis.conf</code> or be expressed via the <code>REDIS_*</code> env vars above — edits made directly to the runtime file do not survive a restart.</li>
+<li><strong>Loopback, unauthenticated by default:</strong> with <code>bind 127.0.0.1</code> and no <code>requirepass</code> unless <code>REDIS_PASSWORD</code> is set, the embedded Redis is reachable only by processes already inside the container. Set <code>REDIS_PASSWORD</code> for defense-in-depth.</li>
 </ul>
 <h3 id="crowdsec-integration">CrowdSec Integration</h3>
 <p>The BunkerWeb <strong>All-In-One</strong> Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.</p>
@@ -4354,7 +4362,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <p>Standalone Manager, Scheduler, UI, and API deployments need a shared database using the <code>DATABASE_URI</code> setting. When the easy install script installs or wires a database for Full Stack or Manager mode, it writes <code>DATABASE_URI</code> to <code>/etc/bunkerweb/variables.env</code>; otherwise set it manually in the service environment files. The format is: <code>mariadb+pymysql://user:password@host:port/database</code> (or <code>postgresql://</code>, <code>mysql+pymysql://</code>, <code>sqlite:////path/to/db.sqlite</code>).</p>
 </div>
 <h3 id="installation-using-package-manager">Installation using package manager</h3>
-<p>Please ensure that you have <strong>NGINX 1.30.2 installed before installing BunkerWeb</strong>. For all distributions, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<p>Please ensure that you have <strong>NGINX 1.30.3 installed before installing BunkerWeb</strong>. For all distributions, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4366,9 +4374,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>You should now be able to install NGINX 1.30.2:</p>
+<p>You should now be able to install NGINX 1.30.3:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.2-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.3-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -4400,9 +4408,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>You should now be able to install NGINX 1.30.2:</p>
+<p>You should now be able to install NGINX 1.30.3:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.2-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.3-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -4469,8 +4477,8 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
-<p>You should now be able to install NGINX 1.30.2:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.2
+<p>You should now be able to install NGINX 1.30.3:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.3
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
