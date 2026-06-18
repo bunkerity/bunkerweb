@@ -1,10 +1,12 @@
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f AS builder
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
 # Install python dependencies
-RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo zlib-dev jpeg-dev
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends build-essential libffi-dev libpq-dev cargo zlib1g-dev libjpeg-dev && \
+  rm -rf /var/lib/apt/lists/*
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -44,7 +46,9 @@ ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ]; }; then \
-  apk add --no-cache nodejs npm parallel && \
+  apt-get update && \
+  apt-get install -y --no-install-recommends nodejs npm parallel && \
+  rm -rf /var/lib/apt/lists/* && \
   cd /tmp && \
   npm ci --ignore-scripts; \
   fi
@@ -65,7 +69,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -74,16 +78,14 @@ COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
+  pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add ui user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata && \
-  addgroup -g 101 ui && \
-  adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
-
-# Fix CVEs
-RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
-RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends bash unzip ca-certificates libmariadb3 mariadb-client sqlite3 postgresql-client tzdata procps && \
+  rm -rf /var/lib/apt/lists/* && \
+  groupadd -g 101 ui && \
+  useradd -u 101 -g ui -d /usr/share/bunkerweb/ui -s /usr/sbin/nologin -M ui
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

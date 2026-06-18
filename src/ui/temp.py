@@ -22,14 +22,15 @@ TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 ERROR_FILE = TMP_DIR.joinpath("ui.error")
 
 
-def stop(status):
-    pid_file = Path(sep, "var", "run", "bunkerweb", "tmp-ui.pid")
-    if pid_file.is_file():
-        pid = pid_file.read_bytes()
-    else:
-        p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
-        pid, _ = p.communicate()
-    call(["kill", "-SIGTERM", pid.strip().decode().split("\n")[0]])
+def stop(status, _stop: bool = True):
+    if _stop:
+        pid_file = Path(sep, "var", "run", "bunkerweb", "tmp-ui.pid")
+        if pid_file.is_file():
+            pid = pid_file.read_bytes()
+        else:
+            p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+            pid, _ = p.communicate()
+        call(["kill", "-SIGTERM", pid.strip().decode().split("\n")[0]])
     _exit(status)
 
 

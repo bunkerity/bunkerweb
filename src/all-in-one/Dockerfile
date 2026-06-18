@@ -1,10 +1,20 @@
-FROM nginx:1.30.2-alpine-slim@sha256:2c605dbeab79a6b2a63340474fe58119d0ef95bdc4b1f41df0aa689659b3d13b  AS builder
+FROM nginx:1.30.2@sha256:540858b3a92eed95cbcae475698c12f619b4a6afa122485f439e4d7227cbeb38 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
-# Install temporary requirements for the dependencies
-RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre2-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev libffi-dev postgresql-dev cargo rust lmdb-dev libfuzzy2-dev pkgconfig ca-certificates coreutils libc-dev
+# glibc base (was Alpine): certbot-dns-multi's Go/CGO bridge cannot load on musl, so the AIO image
+# — which bundles the worker that runs the certbot jobs — must be glibc. nginx:1.30.2 is the
+# official Debian image: nginx + the nginx user are prebuilt (--with-compat, so the BunkerWeb
+# dynamic modules compiled by install.sh load), no separate nginx build needed.
+
+# Install build dependencies (mirrors src/linux/Dockerfile-debian-trixie + the AIO Go/CrowdSec extras)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools \
+    pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc \
+    libxml2-dev make musl-dev patch libreadline-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev \
+    cargo coreutils python3 python3-dev python3-pip python3-venv jq gettext binutils wget
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -14,12 +24,10 @@ COPY src/deps/src src
 COPY src/deps/deps.json deps.json
 COPY --chmod=644 src/deps/install.sh install.sh
 
-# Compile and install dependencies
+# Compile and install dependencies (nginx modules, modsecurity, lua, etc.)
 RUN bash install.sh
 
 WORKDIR /tmp/crowdsec/deps
-
-RUN apk add --no-cache jq git libc-dev gettext binutils-gold coreutils pkgconfig wget
 
 COPY src/all-in-one/deps/go.json go.json
 COPY --chmod=644 src/all-in-one/scripts/install-go.sh install-go.sh
@@ -77,21 +85,14 @@ COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
 
-# Install python requirements
-RUN export MAKEFLAGS="-j$(nproc)" && \
+# Install python requirements. certbot-dns-multi has manylinux wheels for x86_64 + aarch64
+# (used directly on this glibc image, no Go needed); on linux/arm/v7 and linux/386 there is no
+# wheel, so pip builds the Go/CGO sdist using the Go toolchain installed above.
+RUN export MAKEFLAGS="-j$(nproc)" && export CGO_ENABLED=1 && export PATH="/usr/local/go/bin:$PATH" && \
+    mkdir -p deps/python && \
     if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
-    pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
-    pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
-
-# Apply BunkerWeb patches to vendored Python deps (DNS alias / CNAME delegation for certbot).
-# -F0 + --dry-run first so any context drift from a future certbot bump fails the build loudly
-# instead of fuzzing onto the wrong code; the post-patch grep is a positive assertion that the
-# expected marker landed in the patched file.
-COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
-RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
-    patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
-    grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
-    rm -f /tmp/certbot-dns-alias.patch
+    pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --break-system-packages --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 COPY src/bw/entrypoint.sh entrypoint.sh
@@ -126,7 +127,7 @@ ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-    apk add --no-cache nodejs npm parallel && \
+    apt-get install -y --no-install-recommends nodejs npm parallel && \
     cd /tmp && \
     npm ci --ignore-scripts; \
     fi
@@ -164,24 +165,25 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.2-alpine-slim@sha256:2c605dbeab79a6b2a63340474fe58119d0ef95bdc4b1f41df0aa689659b3d13b
+FROM nginx:1.30.2@sha256:540858b3a92eed95cbcae475698c12f619b4a6afa122485f439e4d7227cbeb38
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
-# Install runtime dependencies including supervisord
-RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
-
-# Fix CVEs
-RUN apk add --no-cache "libpng>=1.6.58-r1" # CVE-2026-40930
-RUN apk add --no-cache "mariadb-client>=11.4.12-r0" # CVE-2026-48165 CVE-2026-48163
-RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
+# Runtime dependencies incl. supervisord & redis (nginx + the nginx user are already in the base)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    bash curl ca-certificates grep sed tzdata unzip openssl supervisor gettext-base procps \
+    python3 python3-pip libpcre2-8-0 libmagic1 libpq5 libxml2 libgd3 libbrotli1 liblmdb0 libfuzzy2 libyajl2 libgeoip1 \
+    libmariadb3 mariadb-client postgresql-client sqlite3 redis-server && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
-# Install updated python requirements to fix CVEs
+# Install updated python requirements to fix CVEs (--ignore-installed: don't try to uninstall the
+# dpkg-managed setuptools/pip, which have no pip RECORD file on Debian)
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt && \
     rm -f /tmp/requirements-deps.txt
 
 # Copy dependencies
@@ -227,7 +229,6 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml && \
     # Setup Redis && \
     mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
-    apk add --no-cache redis && \
     mv all-in-one/conf/redis.conf /etc/redis.conf && \
     rm -rf all-in-one/conf && \
     chown -R root:nginx /data /var/lib/redis /etc/redis.conf && \

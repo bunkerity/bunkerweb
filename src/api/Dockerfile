@@ -1,9 +1,11 @@
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f AS builder
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061 AS builder
 
 ARG TARGETPLATFORM
 
 # Build-time deps
-RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo zlib-dev
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends build-essential libffi-dev libpq-dev cargo zlib1g-dev && \
+  rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -16,8 +18,14 @@ COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
 WORKDIR /usr/share/bunkerweb
 
 # Install python requirements
+# The API only needs celery/redis from the worker requirements (it dispatches jobs via
+# celery.send_task). Strip the certbot stack — the API never runs certbot, so there is no need to
+# pull in the certbot-dns-multi Go/CGO bridge. (Same awk strip pattern the worker Dockerfile uses
+# for schedule==.)
 RUN export MAKEFLAGS="-j$(nproc)" && \
   if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
+  awk 'BEGIN {skip=0} skip { if ($0 ~ /^    --hash=/ || $0 ~ /^    #/ || $0 == "") next; skip=0 } /^(acme|certbot|certbot-dns-multi)==/ { skip=1; next } { print }' /tmp/req/requirements-worker.txt > /tmp/req/requirements-worker.txt.new && \
+  mv /tmp/req/requirements-worker.txt.new /tmp/req/requirements-worker.txt && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -29,7 +37,7 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/api api
 
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061
 
 RUN umask 027
 
@@ -37,16 +45,14 @@ COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
+  pip install --no-cache-dir --require-hashes --break-system-packages --ignore-installed -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add api user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata && \
-  addgroup -g 101 api && \
-  adduser -h /usr/share/bunkerweb/api -g api -s /sbin/nologin -G api -D -H -u 101 --disabled-password api
-
-# Fix CVEs
-RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
-RUN apk add --no-cache "mariadb-client>=11.4.11-r0"  # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends bash unzip ca-certificates libmariadb3 mariadb-client sqlite3 postgresql-client tzdata && \
+  rm -rf /var/lib/apt/lists/* && \
+  groupadd -g 101 api && \
+  useradd -u 101 -g api -d /usr/share/bunkerweb/api -s /usr/sbin/nologin -M api
 
 # Copy deps and app
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

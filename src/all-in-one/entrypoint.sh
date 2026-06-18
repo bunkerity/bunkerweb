@@ -257,20 +257,35 @@ else
 	log "ENTRYPOINT" "ℹ️" "Worker service is disabled, autostart not enabled"
 fi
 
-# Enable autorestart for autoconf service if enabled
-if [ "${AUTOCONF_MODE}" = "yes" ]; then
-	# Autoconf requires the API service — enable it if not already
+# The scheduler and autoconf both hard-require the bundled API. Whenever either runs
+# in the AIO, enable the API service (if not already) and point API_URL/API_TOKEN at
+# the local instance so the scheduler does not fall back to the multi-container
+# default (http://bw-api:5000) and loop forever on "API not ready".
+if [ "${SERVICE_SCHEDULER}" = "yes" ] || [ "${AUTOCONF_MODE}" = "yes" ]; then
+	# Enable the API service if not already enabled
 	if [ "${SERVICE_API}" != "yes" ]; then
 		export SERVICE_API="yes"
 		export API_LISTEN_ADDR="${API_LISTEN_ADDR:-${LISTEN_ADDR:-0.0.0.0}}"
 		export API_LISTEN_PORT="${API_LISTEN_PORT:-${LISTEN_PORT:-8888}}"
 		sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/api.ini
 		sed -i 's/autostart=false/autostart=true/' /etc/supervisor.d/api.ini
-		log "ENTRYPOINT" "ℹ️" "Auto-enabled API service (required by autoconf)"
+		log "ENTRYPOINT" "ℹ️" "Auto-enabled API service (required by scheduler/autoconf)"
 	fi
-	# Set API connection defaults for autoconf
+	# Set API connection defaults for the local components. Generate a shared API_TOKEN when the
+	# operator did not provide one: the scheduler/UI authenticate to the bundled API with
+	# `Authorization: Bearer $API_TOKEN`, and an empty token is rejected (401) — so the scheduler
+	# would loop forever on "Database is not initialized". All supervisord-managed components
+	# inherit this exported value, so a single generated token is shared in-container.
 	export API_URL="${API_URL:-http://127.0.0.1:${API_LISTEN_PORT:-8888}}"
-	export API_TOKEN="${API_TOKEN:-}"
+	if [ -z "${API_TOKEN:-}" ]; then
+		API_TOKEN="$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+		log "ENTRYPOINT" "ℹ️" "Generated a shared API_TOKEN for the local components"
+	fi
+	export API_TOKEN
+fi
+
+# Enable autorestart for autoconf service if enabled
+if [ "${AUTOCONF_MODE}" = "yes" ]; then
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/autoconf.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for autoconf service"
 else

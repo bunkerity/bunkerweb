@@ -1,8 +1,12 @@
-FROM python:3.13-alpine@sha256:db66119d6609a3a941a9433b225f4e13d33c459cede097cf3ec2fc4d1bd314b2 AS builder
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061 AS builder
 
 ARG TARGETPLATFORM
 
-RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo
+# Build toolchain. On amd64/arm64 every dependency installs from a manylinux wheel (no
+# compilation), but the toolchain is kept for the 32-bit certbot-dns-multi sdist build below.
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends build-essential libffi-dev libpq-dev curl ca-certificates jq wget && \
+  rm -rf /var/lib/apt/lists/*
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
@@ -11,9 +15,28 @@ COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
 
+# Pinned Go toolchain (reused from the all-in-one build) — only used to compile the
+# certbot-dns-multi sdist on 32-bit arches, which have no prebuilt wheel.
+COPY src/all-in-one/deps/go.json /tmp/go/go.json
+COPY --chmod=644 src/all-in-one/scripts/install-go.sh /tmp/go/install-go.sh
+COPY --chmod=644 src/all-in-one/scripts/utils.sh /tmp/go/utils.sh
+
 WORKDIR /usr/share/bunkerweb
 
-RUN export MAKEFLAGS="-j$(nproc)" && \
+# certbot-dns-multi ships glibc manylinux wheels for x86_64 + aarch64 (loaded directly on this
+# glibc image — the Go/CGO bridge cannot load on musl, which is why the worker is not Alpine).
+# linux/arm/v7 and linux/386 have no wheel, so pip builds the Go/CGO sdist there, which needs
+# Go 1.25 (newer than Debian's package) — fetched via the pinned upstream toolchain.
+RUN export MAKEFLAGS="-j$(nproc)" && export CGO_ENABLED=1 && \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ]; then \
+  cd /tmp/go && \
+  export PLATFORM="$(case "$TARGETPLATFORM" in linux/arm/v7) echo armv6l ;; linux/386) echo 386 ;; esac)" && \
+  export VERSION="$(jq -r .version go.json)" && \
+  export URL="$(jq -r .url go.json | sed "s/{VERSION}/$VERSION/" | sed "s/{PLATFORM}/$PLATFORM/")" && \
+  export SHA256="$(if [ "$PLATFORM" = "386" ]; then jq -r '.checksums."386"' go.json; else jq -r ".checksums.$PLATFORM" go.json; fi)" && \
+  bash install-go.sh && cd /usr/share/bunkerweb ; \
+  fi && \
+  export PATH="/usr/local/go/bin:$PATH" && \
   if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
   awk 'BEGIN {skip=0} skip { if ($0 ~ /^    --hash=/ || $0 ~ /^    #/ || $0 == "") next; skip=0 } /^schedule==/ { skip=1; next } { print }' /tmp/req/requirements-scheduler.txt > /tmp/req/requirements-scheduler.txt.new && \
   mv /tmp/req/requirements-scheduler.txt.new /tmp/req/requirements-scheduler.txt && \
@@ -31,15 +54,15 @@ COPY src/common/utils utils
 COPY src/worker worker
 COPY src/VERSION VERSION
 
-FROM python:3.13-alpine@sha256:db66119d6609a3a941a9433b225f4e13d33c459cede097cf3ec2fc4d1bd314b2
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061
 
 RUN umask 027
 
-RUN apk add --no-cache bash curl libgcc libstdc++ libpq openssl libmagic mariadb-connector-c tzdata && \
-  addgroup -g 102 worker && \
-  adduser -h /usr/share/bunkerweb/worker -g worker -s /sbin/nologin -G worker -D -H -u 102 --disabled-password worker
-
-RUN apk add --no-cache "zlib>=1.3.2-r0"
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 tzdata && \
+  rm -rf /var/lib/apt/lists/* && \
+  groupadd -g 102 worker && \
+  useradd -u 102 -g worker -d /usr/share/bunkerweb/worker -s /usr/sbin/nologin -M worker
 
 COPY --from=builder --chown=0:102 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
@@ -65,7 +88,7 @@ COPY --chown=root:worker --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb
 COPY --chown=root:worker --chmod=550 src/worker/healthcheck-worker.sh /usr/share/bunkerweb/helpers/healthcheck-worker.sh
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc1"
+LABEL version="1.6.12~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="worker"
 

@@ -35,7 +35,7 @@
         <meta name="author" content="Bunkerity" />
         <!-- Anti-FOUC: resolve theme before first paint on anonymous pages.
              Logged-in pages already render the authoritative DB theme inline. -->
-        {% if not current_user.is_authenticated %}
+        {% if current_user is defined and not current_user.is_authenticated %}
             <script nonce="{{ script_nonce }}">
           (function () {
             try {

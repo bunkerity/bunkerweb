@@ -1,11 +1,13 @@
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f AS builder
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
 # Install python dependencies
-# TODO(Phase 3): Remove postgresql-dev once gen/ and db/ subprocess calls move to workers
-RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo patch
+# TODO(Phase 3): Drop libpq-dev (and the gen/db requirements) once config gen moves to workers
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends build-essential libffi-dev libpq-dev cargo patch && \
+  rm -rf /var/lib/apt/lists/*
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -38,20 +40,18 @@ COPY src/common/cli cli
 COPY src/common/db db
 COPY src/common/gen gen
 
-FROM python:3.14-alpine@sha256:003970a263347645cd23d4f90929ad16ba7ce7d808ee4674ffcc93cb21cc289f
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
 # Install runtime dependencies and add scheduler user
-# TODO(Phase 3): Remove libpq and mariadb-connector-c once gen/db subprocess calls move to workers
-RUN apk add --no-cache bash curl libgcc libstdc++ libpq openssl libmagic mariadb-connector-c tzdata && \
-  addgroup -g 101 scheduler && \
-  adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
-
-# Fix CVEs
-RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
-RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
+# TODO(Phase 3): Remove libpq5 and libmariadb3 once gen/db subprocess calls move to workers
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 tzdata && \
+  rm -rf /var/lib/apt/lists/* && \
+  groupadd -g 101 scheduler && \
+  useradd -u 101 -g scheduler -d /usr/share/bunkerweb/scheduler -s /usr/sbin/nologin -M scheduler
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

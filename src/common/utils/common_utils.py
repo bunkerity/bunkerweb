@@ -16,21 +16,10 @@ PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 
 
 def handle_docker_secrets() -> Dict[str, str]:
-    """Handle Docker secrets by reading from /run/secrets directory (Alpine only)"""
+    """Handle Docker secrets by reading from the /run/secrets directory when it exists."""
     secrets = {}
 
-    # Only check for Docker secrets on Alpine Linux
-    os_release_path = Path("/etc/os-release")
-    if not os_release_path.is_file():
-        return secrets
-
-    try:
-        os_release_content = os_release_path.read_text(encoding="utf-8")
-        if "alpine" not in os_release_content.casefold():
-            return secrets
-    except Exception:
-        return secrets
-
+    # Docker/Swarm secrets are mounted at /run/secrets regardless of the base distro.
     secrets_dir = Path("/run/secrets")
     if secrets_dir.is_dir():
         for secret_file in secrets_dir.glob("*"):
@@ -69,7 +58,9 @@ def get_integration() -> str:
             return "Autoconf"
         elif integration_path.is_file():
             return integration_path.read_text(encoding="utf-8").strip().title()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
+        elif Path(sep, ".dockerenv").is_file() or (os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8")):
+            # /.dockerenv exists in every Docker container regardless of base distro (Alpine match
+            # kept for backward compatibility); os-release no longer says "Alpine" on the Debian images.
             return "Docker"
 
         return "Linux"
