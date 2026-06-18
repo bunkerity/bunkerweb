@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+from base64 import b64encode
 from contextlib import suppress
 from concurrent.futures import Future, ThreadPoolExecutor
 from copy import deepcopy
@@ -510,7 +511,7 @@ if __name__ == "__main__":
                     sleep(5)
         LOGGER.info("API is ready")
 
-        SCHEDULER = JobScheduler(LOGGER, api_client=API_CLIENT)
+        SCHEDULER = JobScheduler(LOGGER, api_client=API_CLIENT, lock=SCHEDULER_LOCK)
 
         APPLYING_CHANGES.set()
 
@@ -711,7 +712,9 @@ if __name__ == "__main__":
                     common_data
                     | {
                         "method": "manual",
-                        "data": plugin_content.getvalue(),
+                        # base64 so the bytes survive JSON serialization to the API;
+                        # the API decodes it back to bytes before storing (see plugins router).
+                        "data": b64encode(plugin_content.getvalue()).decode("ascii"),
                     }
                     | ({"jobs": jobs} if jobs else {})
                 )
@@ -1014,6 +1017,9 @@ if __name__ == "__main__":
                 APPLYING_CHANGES.set()
                 LOGGER.debug(f"Changes: {changes}")
                 CHANGES.clear()
+
+                if INSTANCES_NEED_GENERATION:
+                    CHANGES.append("instances")
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")

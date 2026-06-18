@@ -1,4 +1,5 @@
-from base64 import b64encode
+from base64 import b64decode, b64encode
+from binascii import Error as BinasciiError
 from contextlib import suppress
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
@@ -113,6 +114,14 @@ def update_external_plugins(payload: UpdateExternalPluginsRequest) -> JSONRespon
     Args:
         payload: Plugin list, type, and delete_missing flag
     """
+    # Plugin archive bytes arrive base64-encoded over JSON (the DB layer expects raw bytes).
+    for plugin in payload.plugins:
+        data = plugin.get("data") if isinstance(plugin, dict) else None
+        if isinstance(data, str):
+            try:
+                plugin["data"] = b64decode(data)
+            except (BinasciiError, ValueError):
+                return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid base64 data for plugin {plugin.get('id', '?')!r}"})
     ret = get_db().update_external_plugins(payload.plugins, _type=payload.plugin_type, delete_missing=payload.delete_missing)
     if ret:
         return JSONResponse(status_code=500, content={"status": "error", "message": str(ret)})

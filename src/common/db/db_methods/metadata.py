@@ -25,6 +25,10 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
                 if metadata:
                     metadata.version = version
                     metadata.integration = integration
+                    # initialize_db() means the schema is ready: ensure the flag is set even
+                    # on an existing row (e.g. a partial prior init left it False) so the API's
+                    # DB-init wait cannot deadlock against the scheduler on upgrade.
+                    metadata.is_initialized = True
                 else:
                     session.add(
                         Metadata(

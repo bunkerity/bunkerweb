@@ -43,7 +43,7 @@ class ApiConfig(YamlBaseSettings):
 
     # Whitelist
     API_WHITELIST_ENABLED: bool | str = "yes"
-    API_WHITELIST_IPS: str = "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    API_WHITELIST_IPS: str = "127.0.0.0/8 ::1/128 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
 
     # Rate limiting
     API_RATE_LIMIT_ENABLED: bool | str = "yes"
