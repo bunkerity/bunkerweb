@@ -1,0 +1,33 @@
+# Override for the DB-layer refactor: bind-mount the working tree's
+# src/common/db over the baked-in copy so scheduler/worker/api/ui pick up
+# db changes without an image rebuild (restart the container instead).
+# Final phase gates must still run against rebuilt images (the baked path
+# is what ships).
+#
+# Usage:
+#   docker compose -p bw17db -f misc/dev/docker-compose.ui.api.yml \
+#     -f misc/dev/docker-compose.db-mount.yml up -d
+services:
+  bw-scheduler:
+    volumes:
+      - ../../src/common/db:/usr/share/bunkerweb/db:ro
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+  bw-worker:
+    volumes:
+      - ../../src/common/db:/usr/share/bunkerweb/db:ro
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+  bw-api:
+    volumes:
+      - ../../src/common/db:/usr/share/bunkerweb/db:ro
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+  bw-ui:
+    volumes:
+      - ../../src/common/db:/usr/share/bunkerweb/db:ro
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"

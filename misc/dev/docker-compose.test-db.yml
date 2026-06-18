@@ -1,0 +1,45 @@
+# Throwaway PostgreSQL + MariaDB for the unit-test DB matrix (tests/unit/).
+#
+# Purpose-built and disposable — NOT an app stack. Data is tmpfs-backed (ephemeral,
+# fast, clean on every `up`) and ports are non-default to avoid clashing with any
+# running dev stack.
+#
+# Usage:
+#   docker compose -f misc/dev/docker-compose.test-db.yml up -d
+#   export BW_TEST_PG_URI=postgresql://bw:bw@127.0.0.1:5433/bw_test
+#   export BW_TEST_MARIA_URI=mariadb://bw:bw@127.0.0.1:3307/bw_test
+#   .venv-unit/bin/pytest tests/unit/db --db-engines=sqlite,postgresql,mariadb
+#   docker compose -f misc/dev/docker-compose.test-db.yml down
+services:
+  test-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bw
+      POSTGRES_PASSWORD: bw
+      POSTGRES_DB: bw_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "bw", "-d", "bw_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  test-mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_USER: bw
+      MARIADB_PASSWORD: bw
+      MARIADB_DATABASE: bw_test
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
