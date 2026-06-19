@@ -257,6 +257,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
         - Configure CORS on the Cap.js sitekey to allow the protected origin.
         - Set both `ANTIBOT_CAPJS_FRONTEND_URL` and `ANTIBOT_CAPJS_BACKEND_URL` to origins only: scheme, host, and optional port, with no path.
         - Use the Cap.js widget **0.1.48 or later**. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed `srcdoc` iframe's inline script does not propagate the nonce. If you self-host `tiago2/cap`, pin a recent tag (e.g. `tiago2/cap:3.1.2` or newer) or set `WIDGET_VERSION` to `0.1.48` or later.
+        - Cap.js **instrumentation challenges** (on by default) run server-supplied JavaScript via `eval`, which a nonce cannot authorize. BunkerWeb runs the widget in an isolated same-origin iframe that carries the needed `'unsafe-eval'`, so the main challenge page keeps a strict, eval-free CSP — no configuration required.
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 

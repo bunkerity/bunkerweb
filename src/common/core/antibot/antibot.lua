@@ -285,23 +285,26 @@ function antibot:header()
 		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
 	elseif self.session_data.type == "capjs" then
 		local capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
-		-- Cap.js needs: no strict-dynamic (workers do dynamic imports from capjs_url),
-		-- wasm-unsafe-eval (workers execute WASM), no trusted types (widget.js uses
-		-- innerHTML). The widget's inline <style> is nonced via window.CAP_CSS_NONCE
-		-- and its inline <script> tags (instrumentation srcdoc iframe + pako fallback)
-		-- are nonced via window.CAP_SCRIPT_NONCE -- both stamped from capjs.html -- so
-		-- both script-src and style-src stay strict (nonce-only, no 'unsafe-inline').
-		-- Requires cap.js widget >= 0.1.48 (script nonce propagation).
-		csp_directives["script-src"] = "'nonce-"
-			.. self.ctx.bw.antibot_nonce_script
-			.. "' "
-			.. capjs_url
-			.. " 'wasm-unsafe-eval'"
 		csp_directives["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'"
-		csp_directives["connect-src"] = capjs_url
-		csp_directives["frame-src"] = capjs_url
-		csp_directives["worker-src"] = "blob: " .. capjs_url
-		csp_directives["require-trusted-types-for"] = nil
+		if ngx.var.arg_capjs_frame == "1" then
+			-- Isolated widget document: confines 'unsafe-eval' (instrumentation runs
+			-- server-supplied JS via eval) and wasm-unsafe-eval here, away from the parent.
+			-- Trusted types off (widget uses innerHTML); inline style/script are nonced.
+			csp_directives["script-src"] = "'nonce-"
+				.. self.ctx.bw.antibot_nonce_script
+				.. "' "
+				.. capjs_url
+				.. " 'wasm-unsafe-eval' 'unsafe-eval'"
+			csp_directives["connect-src"] = capjs_url
+			csp_directives["frame-src"] = capjs_url
+			csp_directives["worker-src"] = "blob: " .. capjs_url
+			csp_directives["frame-ancestors"] = "'self'"
+			csp_directives["require-trusted-types-for"] = nil
+		else
+			-- Parent: strict, eval-free; only embeds the same-origin widget iframe.
+			csp_directives["script-src"] = "'nonce-" .. self.ctx.bw.antibot_nonce_script .. "'"
+			csp_directives["frame-src"] = "'self'"
+		end
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
@@ -627,13 +630,18 @@ function antibot:display_challenge()
 	end
 
 	-- Cap.js case
+	local template_name = self.session_data.type .. ".html"
 	if self.session_data.type == "capjs" then
 		template_vars.capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
 		template_vars.capjs_sitekey = self.variables["ANTIBOT_CAPJS_SITEKEY"]
+		-- Serve the widget in an isolated same-origin iframe (relaxed CSP, see header()).
+		if ngx.var.arg_capjs_frame == "1" then
+			template_name = "capjs_frame.html"
+		end
 	end
 
 	-- Render content
-	render(self.session_data.type .. ".html", template_vars)
+	render(template_name, template_vars)
 
 	return true, "displayed challenge"
 end
