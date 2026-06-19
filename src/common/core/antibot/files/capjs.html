@@ -219,6 +219,12 @@
           transform: rotate(360deg);
         }
       }
+      .capjs-frame {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border: 0;
+      }
     </style>
     {-raw-}
   </head>
@@ -229,7 +235,16 @@
         {-raw-}
         <form class="hidden" method="POST" action="{*antibot_uri*}" id="form">
           <input type="hidden" name="token" id="token" />
+          <input type="hidden" name="next" value="{{next}}" />
         </form>
+        <iframe
+          id="capjs-frame"
+          class="capjs-frame"
+          src="{*antibot_uri*}?capjs_frame=1"
+          title="Verification"
+          aria-hidden="true"
+          tabindex="-1"
+        ></iframe>
         {-raw-}<noscript>
           <p class="noscript">
             JavaScript needs to be enabled to complete this challenge.
@@ -288,51 +303,37 @@
     </footer>
     {-raw-}
     <script nonce="{*nonce_script*}">
-      window.CAP_CUSTOM_WASM_URL = "{*capjs_url*}/assets/cap_wasm_bg.wasm";
-      // Stamp the widget's injected <style> with our style nonce so strict CSP allows it.
-      window.CAP_CSS_NONCE = "{*nonce_style*}";
-      // Stamp the widget's inline <script> tags (instrumentation srcdoc iframe and pako fallback) with our script nonce. Requires cap.js widget >= 0.1.48.
-      window.CAP_SCRIPT_NONCE = "{*nonce_script*}";
-    </script>
-    <script
-      src="{*capjs_url*}/assets/widget.js"
-      crossorigin="anonymous"
-      nonce="{*nonce_script*}"
-    ></script>
-    <script nonce="{*nonce_script*}">
+      // The widget runs in the child iframe (relaxed CSP); this page stays strict and
+      // just relays the token from postMessage, then submits it.
       (function () {
         var status = document.getElementById("capjs-status");
         var statusText = status.querySelector(".cap-status-text");
+        var frame = document.getElementById("capjs-frame");
+        var done = false;
         function showError() {
+          if (done) return;
           var spinner = status.querySelector(".cap-spinner");
           if (spinner) status.removeChild(spinner);
           statusText.className = "cap-error";
           statusText.textContent =
             "Verification failed. Please reload the page and try again.";
         }
-        if (typeof Cap === "undefined") {
-          showError();
-          return;
-        }
-        try {
-          var cap = new Cap({
-            apiEndpoint: "{*capjs_url*}/{*capjs_sitekey*}/",
-          });
-        } catch (e) {
-          showError();
-          return;
-        }
-        cap.addEventListener("progress", function (e) {
-          statusText.textContent =
-            "Verifying\u2026 " + Math.round(e.detail.progress) + "%";
-        });
-        cap
-          .solve()
-          .then(function (solution) {
-            document.getElementById("token").value = solution.token;
+        window.addEventListener("message", function (e) {
+          if (e.origin !== window.location.origin) return;
+          if (!frame || e.source !== frame.contentWindow) return;
+          var d = e.data;
+          if (!d || d.channel !== "bw-capjs") return;
+          if (d.type === "progress") {
+            statusText.textContent =
+              "Verifying\u2026 " + Math.round(d.progress) + "%";
+          } else if (d.type === "token" && typeof d.token === "string") {
+            done = true;
+            document.getElementById("token").value = d.token;
             document.getElementById("form").submit();
-          })
-          .catch(showError);
+          } else if (d.type === "error") {
+            showError();
+          }
+        });
       })();
     </script>
     {-raw-}

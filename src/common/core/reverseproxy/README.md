@@ -90,8 +90,23 @@ Follow these steps to configure and use the Reverse Proxy feature:
 
     | Setting                      | Default | Context   | Multiple | Description                                                                          |
     | ---------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------ |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.     |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled. |
+    | `REVERSE_PROXY_SSL_SNI`                 | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.                                       |
+    | `REVERSE_PROXY_SSL_SNI_NAME`            |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled.                                   |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | no       | **SSL Verify:** Enable or disable verification of the upstream server's SSL certificate.            |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | no       | **Trusted Certificate Priority:** Source of the trusted CA: `file` (path) or `data` (base64/PEM).   |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI). |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                  |
+
+    !!! info "Certificate Verification"
+        When `REVERSE_PROXY_SSL_VERIFY` is set to `yes`, NGINX validates both the upstream certificate chain and its name:
+
+        - **Trusted CA:** supply it either as a file path (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, readable by the scheduler) or as base64/PEM data (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`), selected by `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY`. The scheduler validates it, caches it, and distributes it to every instance, so you configure it once with no per-instance mounting.
+        - **Required:** a trusted certificate is mandatory; NGINX has no implicit system store for upstream verification. To verify a public upstream, point the path at the system CA bundle (e.g. `/etc/ssl/certs/ca-certificates.crt`).
+        - **Name:** checked against the host from `REVERSE_PROXY_HOST` by default. If the backend certificate's CN/SAN differs, set `REVERSE_PROXY_SSL_SNI` to `yes` and `REVERSE_PROXY_SSL_SNI_NAME` to the expected name.
+        - **Fail-safe:** if no valid trusted certificate is available, verification is disabled for that server rather than breaking every upstream connection.
+
+        These settings apply per service: all upstream entries (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) share the same verification configuration.
 
     !!! info "SNI Explained"
         Server Name Indication (SNI) is a TLS extension that allows a client to specify the hostname it is attempting to connect to during the handshake process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
@@ -189,15 +204,15 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                        |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                  |
-    | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location — bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
+    | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location; bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
 
     !!! warning "Security Considerations"
         Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.
 
     !!! warning "Safety recommendation for large uploads"
-        ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — **and only if** — a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
+        ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If, **and only if**, a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
 
-        To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
+        To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); they inspect the uploaded file itself instead of the raw request body.
 
 === "Caching Configuration"
 

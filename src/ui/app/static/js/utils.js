@@ -643,6 +643,23 @@ $(document).ready(() => {
     applyTheme($(this).val(), $(this).data("root-url"), true);
   });
 
+  // On login, submit the user's EXPLICIT theme choice so it persists to the
+  // profile (login.py reads [name='theme']). localStorage only ever holds
+  // explicit toggles -- never OS-resolved themes -- so this write can't clobber
+  // a saved preference; setting it at submit time overrides any OS-resolved
+  // value the anti-FOUC script (base.html) placed in the field on page load.
+  // #login-form only exists on the login page, so this handler is inert elsewhere.
+  $("#login-form").on("submit", function () {
+    let choice = "";
+    try {
+      const s = localStorage.getItem("theme");
+      if (s === "light" || s === "dark") choice = s;
+    } catch (e) {
+      // Storage unavailable (private mode): submit empty -> keep DB theme.
+    }
+    $(this).find("[name='theme']").val(choice);
+  });
+
   // persist gates the localStorage write; the anon initial reconcile must not
   // persist (see above).
   function applyTheme(theme, rootUrl = null, persist = isAuthenticated) {

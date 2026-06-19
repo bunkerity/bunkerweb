@@ -1368,6 +1368,13 @@ float: left;
 font-family: arial;
 padding: 0 8px;
 }
+/*ace_whitespaces_in_selection*/
+.ace_whitespaces_in_selection {
+color: rgba(0,0,0,0.29);
+}
+.ace_dark .ace_whitespaces_in_selection {
+color: rgba(187, 181, 181, 0.5);
+}
 /*incremental-occur-highlighting*/
 .ace_occur-highlight {
 border-radius: 4px;

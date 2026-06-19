@@ -55,12 +55,13 @@
                                     </a>
                                 </div>
                                 <!-- /Logo -->
-                                <form method="POST">
+                                <form method="POST" id="login-form">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden"
                                            name="next"
                                            value="{{ request.values.get('next', '') }}" />
                                     <input type="hidden" name="language" value="en" />
+                                    <input type="hidden" name="theme" value="" />
                                     <div class="mb-6">
                                         <label for="username" class="form-label" data-i18n="form.label.username">Username</label>
                                         <input type="text"

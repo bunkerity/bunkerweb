@@ -233,6 +233,7 @@
         {-raw-}
         <form method="POST" action="{*antibot_uri*}">
           <img src="data:image/jpeg;base64,{*captcha*}" alt="Captcha Image" />
+          <input type="hidden" name="next" value="{{next}}" />
           {-raw-}
           <input
             type="text"
