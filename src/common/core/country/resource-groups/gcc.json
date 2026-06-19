@@ -1,0 +1,30 @@
+{
+  "name": "GCC",
+  "description": "Gulf Cooperation Council",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "BH"
+    },
+    {
+      "kind": "country",
+      "value": "KW"
+    },
+    {
+      "kind": "country",
+      "value": "OM"
+    },
+    {
+      "kind": "country",
+      "value": "QA"
+    },
+    {
+      "kind": "country",
+      "value": "SA"
+    },
+    {
+      "kind": "country",
+      "value": "AE"
+    }
+  ]
+}

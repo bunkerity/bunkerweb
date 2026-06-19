@@ -1,0 +1,34 @@
+{
+  "name": "G7",
+  "description": "Group of Seven",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "CA"
+    },
+    {
+      "kind": "country",
+      "value": "FR"
+    },
+    {
+      "kind": "country",
+      "value": "DE"
+    },
+    {
+      "kind": "country",
+      "value": "IT"
+    },
+    {
+      "kind": "country",
+      "value": "JP"
+    },
+    {
+      "kind": "country",
+      "value": "GB"
+    },
+    {
+      "kind": "country",
+      "value": "US"
+    }
+  ]
+}

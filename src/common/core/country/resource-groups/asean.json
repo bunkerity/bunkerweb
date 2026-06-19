@@ -1,0 +1,46 @@
+{
+  "name": "ASEAN",
+  "description": "Association of Southeast Asian Nations",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "BN"
+    },
+    {
+      "kind": "country",
+      "value": "KH"
+    },
+    {
+      "kind": "country",
+      "value": "ID"
+    },
+    {
+      "kind": "country",
+      "value": "LA"
+    },
+    {
+      "kind": "country",
+      "value": "MY"
+    },
+    {
+      "kind": "country",
+      "value": "MM"
+    },
+    {
+      "kind": "country",
+      "value": "PH"
+    },
+    {
+      "kind": "country",
+      "value": "SG"
+    },
+    {
+      "kind": "country",
+      "value": "TH"
+    },
+    {
+      "kind": "country",
+      "value": "VN"
+    }
+  ]
+}

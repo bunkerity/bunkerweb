@@ -1,0 +1,86 @@
+{
+  "name": "LATAM",
+  "description": "Latin America",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "AR"
+    },
+    {
+      "kind": "country",
+      "value": "BO"
+    },
+    {
+      "kind": "country",
+      "value": "BR"
+    },
+    {
+      "kind": "country",
+      "value": "CL"
+    },
+    {
+      "kind": "country",
+      "value": "CO"
+    },
+    {
+      "kind": "country",
+      "value": "CR"
+    },
+    {
+      "kind": "country",
+      "value": "CU"
+    },
+    {
+      "kind": "country",
+      "value": "DO"
+    },
+    {
+      "kind": "country",
+      "value": "EC"
+    },
+    {
+      "kind": "country",
+      "value": "SV"
+    },
+    {
+      "kind": "country",
+      "value": "GT"
+    },
+    {
+      "kind": "country",
+      "value": "HN"
+    },
+    {
+      "kind": "country",
+      "value": "MX"
+    },
+    {
+      "kind": "country",
+      "value": "NI"
+    },
+    {
+      "kind": "country",
+      "value": "PA"
+    },
+    {
+      "kind": "country",
+      "value": "PY"
+    },
+    {
+      "kind": "country",
+      "value": "PE"
+    },
+    {
+      "kind": "country",
+      "value": "PR"
+    },
+    {
+      "kind": "country",
+      "value": "UY"
+    },
+    {
+      "kind": "country",
+      "value": "VE"
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "name": "EEA",
+  "description": "European Economic Area (EU + Iceland, Liechtenstein, Norway)",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "AT"
+    },
+    {
+      "kind": "country",
+      "value": "BE"
+    },
+    {
+      "kind": "country",
+      "value": "BG"
+    },
+    {
+      "kind": "country",
+      "value": "HR"
+    },
+    {
+      "kind": "country",
+      "value": "CY"
+    },
+    {
+      "kind": "country",
+      "value": "CZ"
+    },
+    {
+      "kind": "country",
+      "value": "DK"
+    },
+    {
+      "kind": "country",
+      "value": "EE"
+    },
+    {
+      "kind": "country",
+      "value": "FI"
+    },
+    {
+      "kind": "country",
+      "value": "FR"
+    },
+    {
+      "kind": "country",
+      "value": "DE"
+    },
+    {
+      "kind": "country",
+      "value": "GR"
+    },
+    {
+      "kind": "country",
+      "value": "HU"
+    },
+    {
+      "kind": "country",
+      "value": "IE"
+    },
+    {
+      "kind": "country",
+      "value": "IT"
+    },
+    {
+      "kind": "country",
+      "value": "LV"
+    },
+    {
+      "kind": "country",
+      "value": "LT"
+    },
+    {
+      "kind": "country",
+      "value": "LU"
+    },
+    {
+      "kind": "country",
+      "value": "MT"
+    },
+    {
+      "kind": "country",
+      "value": "NL"
+    },
+    {
+      "kind": "country",
+      "value": "PL"
+    },
+    {
+      "kind": "country",
+      "value": "PT"
+    },
+    {
+      "kind": "country",
+      "value": "RO"
+    },
+    {
+      "kind": "country",
+      "value": "SK"
+    },
+    {
+      "kind": "country",
+      "value": "SI"
+    },
+    {
+      "kind": "country",
+      "value": "ES"
+    },
+    {
+      "kind": "country",
+      "value": "SE"
+    },
+    {
+      "kind": "country",
+      "value": "IS"
+    },
+    {
+      "kind": "country",
+      "value": "LI"
+    },
+    {
+      "kind": "country",
+      "value": "NO"
+    }
+  ]
+}

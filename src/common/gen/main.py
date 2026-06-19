@@ -17,6 +17,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from logger import getLogger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
+from resource_group_resolver import expand_config_groups  # type: ignore
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -126,6 +127,11 @@ if __name__ == "__main__":
             full_config = db.get_config(methods=True) | {"DATABASE_URI": {"default": "sqlite:////var/lib/bunkerweb/db.sqlite3", "value": db.database_uri}}
             default_config = {setting: data["default"] for setting, data in full_config.items()}
             full_config = {setting: data["value"] for setting, data in full_config.items()}
+
+        # Expand @resource-group tokens in list settings to flat values just before rendering,
+        # so NGINX/Lua only ever see literal values (the @name tokens stay stored in the DB).
+        config = expand_config_groups(config, db, LOGGER)
+        full_config = expand_config_groups(full_config, db, LOGGER)
 
         # Remove old files
         LOGGER.info("Removing old files ...")

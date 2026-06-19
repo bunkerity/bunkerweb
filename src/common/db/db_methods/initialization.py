@@ -6,9 +6,10 @@ from re import DOTALL, error as RegexError, search
 from traceback import format_exc
 from typing import List, Tuple
 
-from model import Base, Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Multiselects, Plugin_pages, Plugins, Selects, Services, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
+from model import Base, Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Multiselects, Plugin_pages, Plugins, ResourceGroup_entries, ResourceGroups, Selects, Services, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
 from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from resource_validation import validate_resource_value  # type: ignore
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import SQLAlchemyError
@@ -47,6 +48,7 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             # Build desired data from default_plugins
             desired = self._it_build_desired_plugins(default_plugins, old["plugins"])
             desired.update(self._it_build_desired_templates(default_plugins, desired["saved_settings"]))
+            desired.update(self._it_build_desired_resource_groups(default_plugins))
 
             # Compute differences between old and desired data
             self._it_diff_plugins(old, desired, to_put, to_update, to_delete)
@@ -59,6 +61,8 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             self._it_diff_template_steps(old, desired, to_put, to_update, to_delete)
             self._it_diff_template_settings(old, desired, to_put, to_update, to_delete)
             self._it_diff_template_configs(old, desired, to_put, to_update, to_delete)
+            self._it_diff_resource_groups(old, desired, to_put, to_update, to_delete)
+            self._it_diff_resource_group_entries(old, desired, to_put, to_update, to_delete)
 
             # APPLY CHANGES
             try:
@@ -181,6 +185,18 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                     Template_custom_configs.checksum,
                 )
             ).all(),
+            "bw_resource_groups": session.execute(
+                select(ResourceGroups.id, ResourceGroups.plugin_id, ResourceGroups.name, ResourceGroups.method, ResourceGroups.description)
+            ).all(),
+            "bw_resource_group_entries": session.execute(
+                select(
+                    ResourceGroup_entries.group_id,
+                    ResourceGroup_entries.kind,
+                    ResourceGroup_entries.value,
+                    ResourceGroup_entries.order,
+                    ResourceGroup_entries.comment,
+                )
+            ).all(),
         }
 
     def _it_index_old_data(self, old_data: dict) -> dict:
@@ -234,6 +250,16 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             if tc.template_id in managed_template_ids:
                 old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id, tc.order)] = tc
 
+        # For resource groups: index only managed/core groups (those with a plugin_id).
+        # User groups (plugin_id=None, method="ui") are never indexed, so the diff pass
+        # never updates or deletes them — that is the immutability/delete guard.
+        managed_rg_ids = {g.id for g in old_data.get("bw_resource_groups", []) if g.plugin_id}
+        old_resource_groups = {(g.plugin_id, g.id): g for g in old_data.get("bw_resource_groups", []) if g.plugin_id}
+        old_resource_group_entries = {}
+        for e in old_data.get("bw_resource_group_entries", []):
+            if e.group_id in managed_rg_ids:
+                old_resource_group_entries[(e.group_id, e.kind, e.value, e.order)] = e.comment
+
         return {
             "plugins": old_plugins,
             "settings": old_settings,
@@ -246,6 +272,8 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             "template_steps": old_template_steps,
             "template_settings": old_template_settings,
             "template_configs": old_template_configs,
+            "resource_groups": old_resource_groups,
+            "resource_group_entries": old_resource_group_entries,
         }
 
     def _it_build_desired_plugins(self, default_plugins: List[dict], old_plugins: dict) -> dict:
@@ -549,6 +577,87 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             "template_settings": desired_template_settings,
             "template_configs": desired_template_configs,
         }
+
+    def _it_build_desired_resource_groups(self, default_plugins: List[dict]) -> dict:
+        """Build desired core resource groups + entries from on-disk ``<plugin>/resource-groups/*.json``.
+
+        Same disk-scan pattern as ``_it_build_desired_templates``. Each JSON file is one
+        group (``id`` = file stem); entries are validated/normalized through the shared
+        ``validate_resource_value`` and de-duplicated on ``(kind, value)``. Groups carry the
+        plugin's ``method`` (``"manual"`` for core) so they are immutable + managed by init.
+        """
+        desired_groups = {}
+        desired_entries = {}
+
+        for plugins in default_plugins:
+            if not isinstance(plugins, list):
+                plugins = [plugins]
+
+            for plugin in plugins:
+                if "id" not in plugin:
+                    base_plugin = {"id": "general", "type": "core"}
+                else:
+                    base_plugin = {"id": plugin["id"], "type": plugin.get("type", "core")}
+
+                if base_plugin["id"] == "letsencrypt_dns":
+                    continue
+
+                plugin_path = (
+                    Path("/", "usr", "share", "bunkerweb", "core", base_plugin["id"])
+                    if base_plugin.get("type", "core") == "core"
+                    else (
+                        Path("/", "etc", "bunkerweb", "plugins", base_plugin["id"])
+                        if base_plugin.get("type", "core") == "external"
+                        else Path("/", "etc", "bunkerweb", "pro", "plugins", base_plugin["id"])
+                    )
+                )
+                groups_path = plugin_path.joinpath("resource-groups")
+                if not groups_path.is_dir():
+                    continue
+
+                for group_file in groups_path.iterdir():
+                    if group_file.is_dir():
+                        continue
+                    try:
+                        group_data = loads(group_file.read_text())
+                    except JSONDecodeError:
+                        self.logger.error(
+                            f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s resource group file "{group_file}" is not valid JSON'
+                        )
+                        continue
+
+                    group_id = group_file.stem
+                    desired_groups[(base_plugin["id"], group_id)] = {
+                        "name": group_data.get("name", group_id),
+                        "description": self._empty_if_none(group_data.get("description", "")),
+                        "method": plugin.get("method", "manual"),
+                    }
+
+                    order = 0
+                    seen = set()
+                    for entry in group_data.get("entries", []):
+                        if not isinstance(entry, dict):
+                            continue
+                        kind = str(entry.get("kind", "")).strip().lower()
+                        raw_value = entry.get("value")
+                        ok, value = validate_resource_value(kind, "" if raw_value is None else str(raw_value))
+                        if not ok:
+                            self.logger.error(
+                                f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s resource group {group_id} has invalid {kind!r} entry {raw_value!r}, skipping'
+                            )
+                            continue
+                        dedupe_key = (kind, value)
+                        if dedupe_key in seen:
+                            continue
+                        seen.add(dedupe_key)
+                        comment_raw = entry.get("comment")
+                        comment = None
+                        if comment_raw is not None:
+                            comment = str(comment_raw).strip() or None
+                        desired_entries[(group_id, kind, value, order)] = comment
+                        order += 1
+
+        return {"resource_groups": desired_groups, "resource_group_entries": desired_entries}
 
     def _it_diff_plugins(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list) -> None:
         """Compute differences for PLUGINS."""
@@ -867,6 +976,80 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             filter_data = {"template_id": template_id, "name": cname, "type": ctype, "step_id": step_id}
             to_delete.append({"type": "template_config", "filter": filter_data})
 
+    def _it_diff_resource_groups(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list) -> None:
+        """Compute differences for RESOURCE GROUPS (managed/core only — see _it_index_old_data)."""
+        old_groups = old["resource_groups"]
+        desired_groups = desired["resource_groups"]
+
+        old_keys = set(old_groups.keys())
+        new_keys = set(desired_groups.keys())
+
+        for gk in new_keys - old_keys:
+            current_time = datetime.now().astimezone()
+            to_put.append(
+                ResourceGroups(
+                    id=gk[1],
+                    plugin_id=gk[0],
+                    name=desired_groups[gk]["name"],
+                    description=desired_groups[gk]["description"],
+                    method=desired_groups[gk]["method"],
+                    creation_date=current_time,
+                    last_update=current_time,
+                )
+            )
+
+        for gk in old_keys & new_keys:
+            old_g = old_groups[gk]
+            new_g = desired_groups[gk]
+            if old_g.name != new_g["name"] or self._empty_if_none(old_g.description) != self._empty_if_none(new_g["description"]):
+                to_update.append(
+                    {
+                        "type": "resource_group",
+                        "filter": {"plugin_id": gk[0], "id": gk[1]},
+                        "data": {
+                            "name": new_g["name"],
+                            "description": new_g["description"],
+                            "method": new_g["method"],
+                            "last_update": datetime.now().astimezone(),
+                        },
+                    }
+                )
+
+        for gk in old_keys - new_keys:
+            to_delete.append({"type": "resource_group", "filter": {"plugin_id": gk[0], "id": gk[1]}})
+
+    def _it_diff_resource_group_entries(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list) -> None:
+        """Compute differences for RESOURCE GROUP ENTRIES (children of managed groups).
+
+        Keyed by ``(group_id, kind, value, order)`` like template settings: a moved/changed
+        entry is a delete+put, and ``_it_apply_deletes`` runs before the bulk insert, so the
+        ``UNIQUE(group_id, order)`` constraint never collides mid-transaction.
+        """
+        old_entries = old["resource_group_entries"]
+        desired_entries = desired["resource_group_entries"]
+
+        old_keys = set(old_entries.keys())
+        new_keys = set(desired_entries.keys())
+
+        for ek in new_keys - old_keys:
+            group_id, kind, value, order = ek
+            to_put.append(ResourceGroup_entries(group_id=group_id, kind=kind, value=value, comment=desired_entries[ek], order=order))
+
+        for ek in old_keys & new_keys:
+            if self._empty_if_none(old_entries[ek]) != self._empty_if_none(desired_entries[ek]):
+                group_id, kind, value, order = ek
+                to_update.append(
+                    {
+                        "type": "resource_group_entry",
+                        "filter": {"group_id": group_id, "kind": kind, "value": value, "order": order},
+                        "data": {"comment": desired_entries[ek]},
+                    }
+                )
+
+        for ek in old_keys - new_keys:
+            group_id, kind, value, order = ek
+            to_delete.append({"type": "resource_group_entry", "filter": {"group_id": group_id, "kind": kind, "value": value, "order": order}})
+
     def _it_apply_deletes(self, session, to_delete: list) -> None:
         """Apply the queued deletes on the given session."""
         for delete_op in to_delete:
@@ -895,6 +1078,10 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                 session.execute(delete(Template_settings).filter_by(**delete_op["filter"]))
             elif t == "template_config":
                 session.execute(delete(Template_custom_configs).filter_by(**delete_op["filter"]))
+            elif t == "resource_group":
+                session.execute(delete(ResourceGroups).filter_by(**delete_op["filter"]))
+            elif t == "resource_group_entry":
+                session.execute(delete(ResourceGroup_entries).filter_by(**delete_op["filter"]))
             elif t == "select":
                 session.execute(delete(Selects).filter_by(**delete_op["filter"]))
             elif t == "multiselect":
@@ -920,6 +1107,10 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                 session.execute(update(Template_settings).filter_by(**update_op["filter"]).values(update_op["data"]))
             elif t == "template_config":
                 session.execute(update(Template_custom_configs).filter_by(**update_op["filter"]).values(update_op["data"]))
+            elif t == "resource_group":
+                session.execute(update(ResourceGroups).filter_by(**update_op["filter"]).values(update_op["data"]))
+            elif t == "resource_group_entry":
+                session.execute(update(ResourceGroup_entries).filter_by(**update_op["filter"]).values(update_op["data"]))
             elif t == "plugin":
                 session.execute(update(Plugins).filter_by(**update_op["filter"]).values(update_op["data"]))
             elif t == "template":

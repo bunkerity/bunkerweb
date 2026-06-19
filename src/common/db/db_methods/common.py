@@ -24,6 +24,8 @@ from model import (  # type: ignore
     Multiselects,
     Plugin_pages,
     Plugins,
+    ResourceGroup_entries,
+    ResourceGroups,
     Selects,
     Settings,
     Template_custom_configs,
@@ -83,6 +85,8 @@ def bulk_add_in_fk_order(session: Any, items: List[Any]) -> None:
         "template_steps": [],
         "template_settings": [],
         "template_configs": [],
+        "resource_groups": [],
+        "resource_group_entries": [],
         "jobs": [],
         "plugin_pages": [],
         "cli_commands": [],
@@ -106,6 +110,10 @@ def bulk_add_in_fk_order(session: Any, items: List[Any]) -> None:
             buckets["template_settings"].append(item)
         elif isinstance(item, Template_custom_configs):
             buckets["template_configs"].append(item)
+        elif isinstance(item, ResourceGroups):
+            buckets["resource_groups"].append(item)
+        elif isinstance(item, ResourceGroup_entries):
+            buckets["resource_group_entries"].append(item)
         elif isinstance(item, Jobs):
             buckets["jobs"].append(item)
         elif isinstance(item, Plugin_pages):
@@ -135,6 +143,11 @@ def bulk_add_in_fk_order(session: Any, items: List[Any]) -> None:
         session.add_all(buckets["template_settings"])
     if buckets["template_configs"]:
         session.add_all(buckets["template_configs"])
+
+    if buckets["resource_groups"]:
+        session.add_all(buckets["resource_groups"])
+    if buckets["resource_group_entries"]:
+        session.add_all(buckets["resource_group_entries"])
 
     if buckets["jobs"]:
         session.add_all(buckets["jobs"])

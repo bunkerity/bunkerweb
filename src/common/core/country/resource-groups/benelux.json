@@ -1,0 +1,18 @@
+{
+  "name": "BENELUX",
+  "description": "Belgium, Netherlands, Luxembourg",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "BE"
+    },
+    {
+      "kind": "country",
+      "value": "NL"
+    },
+    {
+      "kind": "country",
+      "value": "LU"
+    }
+  ]
+}

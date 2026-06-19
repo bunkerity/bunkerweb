@@ -1,0 +1,18 @@
+{
+  "name": "USMCA",
+  "description": "United States, Canada, Mexico",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "US"
+    },
+    {
+      "kind": "country",
+      "value": "CA"
+    },
+    {
+      "kind": "country",
+      "value": "MX"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "FIVE_EYES",
+  "description": "Five Eyes intelligence alliance",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "AU"
+    },
+    {
+      "kind": "country",
+      "value": "CA"
+    },
+    {
+      "kind": "country",
+      "value": "NZ"
+    },
+    {
+      "kind": "country",
+      "value": "GB"
+    },
+    {
+      "kind": "country",
+      "value": "US"
+    }
+  ]
+}

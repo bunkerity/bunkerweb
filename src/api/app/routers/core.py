@@ -14,6 +14,7 @@ from .jobs import router as jobs_router
 from .system import router as system_router
 from .users import router as users_router
 from .templates import router as templates_router
+from .resource_groups import router as resource_groups_router
 from .metadata import router as metadata_router
 
 
@@ -48,4 +49,5 @@ router.include_router(jobs_router)
 router.include_router(system_router)
 router.include_router(users_router)
 router.include_router(templates_router)
+router.include_router(resource_groups_router)
 router.include_router(metadata_router)

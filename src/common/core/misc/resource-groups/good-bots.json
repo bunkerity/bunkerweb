@@ -1,0 +1,63 @@
+{
+  "name": "good-bots",
+  "description": "Well-known legitimate crawlers: reverse-DNS suffixes (use with forward-confirmed rDNS) + crawler ASN. Mirrors the vetted WHITELIST_RDNS/WHITELIST_ASN defaults.",
+  "entries": [
+    {
+      "kind": "rdns",
+      "value": ".googlebot.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".google.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".search.msn.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".crawl.yahoo.net"
+    },
+    {
+      "kind": "rdns",
+      "value": ".yandex.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".yandex.net"
+    },
+    {
+      "kind": "rdns",
+      "value": ".yandex.ru"
+    },
+    {
+      "kind": "rdns",
+      "value": ".baidu.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".baidu.jp"
+    },
+    {
+      "kind": "rdns",
+      "value": ".fwd.linkedin.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".twitter.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".twttr.com"
+    },
+    {
+      "kind": "rdns",
+      "value": ".discord.com"
+    },
+    {
+      "kind": "asn",
+      "value": "32934",
+      "comment": "Meta/Facebook (AS32934)"
+    }
+  ]
+}

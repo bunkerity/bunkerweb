@@ -17,6 +17,7 @@ if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
 from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from resource_group_resolver import value_for_validation  # type: ignore
 
 
 class Configurator:
@@ -346,7 +347,7 @@ class Configurator:
 
             try:
                 regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
-                if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value, regex_flags) is None:
+                if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value_for_validation(real_var, value), regex_flags) is None:
                     return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
             except RegexError:
                 self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
@@ -362,7 +363,7 @@ class Configurator:
 
         try:
             regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
-            if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value, regex_flags) is None:
+            if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value_for_validation(real_var, value), regex_flags) is None:
                 return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
         except RegexError:
             self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")

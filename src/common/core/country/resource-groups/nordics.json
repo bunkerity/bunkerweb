@@ -1,0 +1,26 @@
+{
+  "name": "NORDICS",
+  "description": "Nordic countries",
+  "entries": [
+    {
+      "kind": "country",
+      "value": "DK"
+    },
+    {
+      "kind": "country",
+      "value": "FI"
+    },
+    {
+      "kind": "country",
+      "value": "IS"
+    },
+    {
+      "kind": "country",
+      "value": "NO"
+    },
+    {
+      "kind": "country",
+      "value": "SE"
+    }
+  ]
+}

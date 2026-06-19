@@ -42,6 +42,7 @@ PLUGIN_TYPES_ENUM = Enum("core", "external", "ui", "pro", name="plugin_types_enu
 PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
 INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum")
 INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", "failover", name="instance_status_enum")
+RESOURCE_KINDS_ENUM = Enum("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum")
 
 
 class Base(DeclarativeBase):
@@ -73,6 +74,7 @@ class Plugins(Base):
     pages: Mapped[List["Plugin_pages"]] = relationship("Plugin_pages", back_populates="plugin", cascade="all")
     commands: Mapped[List["Bw_cli_commands"]] = relationship("Bw_cli_commands", back_populates="plugin", cascade="all")
     templates: Mapped[List["Templates"]] = relationship("Templates", back_populates="plugin", cascade="all")
+    resource_groups: Mapped[List["ResourceGroups"]] = relationship("ResourceGroups", back_populates="plugin", cascade="all")
 
 
 class Settings(Base):
@@ -340,6 +342,38 @@ class Template_custom_configs(Base):
     order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     template: Mapped["Templates"] = relationship("Templates", back_populates="custom_configs")
+
+
+class ResourceGroups(Base):
+    __tablename__ = "bw_resource_groups"
+
+    id: Mapped[str] = mapped_column(String(256), primary_key=True)
+    name: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default="")
+    method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False, default="ui")
+    plugin_id: Mapped[Optional[str]] = mapped_column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True)
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_update: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    plugin: Mapped[Optional["Plugins"]] = relationship("Plugins", back_populates="resource_groups")
+    entries: Mapped[List["ResourceGroup_entries"]] = relationship("ResourceGroup_entries", back_populates="group", cascade="all")
+
+
+class ResourceGroup_entries(Base):
+    __tablename__ = "bw_resource_group_entries"
+    # NOTE: ``value`` is intentionally left out of any unique index — it is a (MEDIUM)TEXT column
+    # and MySQL/MariaDB reject TEXT columns in a key without a prefix length. Deduplication on
+    # (kind, value) is enforced in the DB-layer validator instead.
+    __table_args__ = (UniqueConstraint("group_id", "order"),)
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    group_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_resource_groups.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(RESOURCE_KINDS_ENUM, nullable=False)
+    value: Mapped[str] = mapped_column(LargeText, nullable=False)
+    comment: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default="")
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    group: Mapped["ResourceGroups"] = relationship("ResourceGroups", back_populates="entries")
 
 
 class Metadata(Base):

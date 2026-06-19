@@ -43,6 +43,7 @@ from db_methods.plugins import DatabasePluginsMixin
 from db_methods.plugins_update import DatabasePluginsUpdateMixin
 from db_methods.instances import DatabaseInstancesMixin
 from db_methods.templates import DatabaseTemplatesMixin
+from db_methods.resource_groups import DatabaseResourceGroupsMixin
 from db_methods.ui_users import DatabaseUIUsersMixin
 
 from sqlalchemy import create_engine, text
@@ -69,6 +70,7 @@ class Database(
     DatabasePluginsUpdateMixin,
     DatabaseInstancesMixin,
     DatabaseTemplatesMixin,
+    DatabaseResourceGroupsMixin,
     DatabaseUIUsersMixin,
 ):
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")

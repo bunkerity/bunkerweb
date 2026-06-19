@@ -58,6 +58,12 @@ def _load_job_config_env(db, logger) -> dict:
     except Exception as exc:
         logger.warning(f"Could not load config from database for job env: {exc}")
         return {}
+    # Expand @resource-group tokens (e.g. WHITELIST_IP=@office) into flat values so jobs
+    # reading settings via os.getenv() never see an unresolved token. The DB keeps the
+    # @name; only the materialized job env is expanded.
+    from resource_group_resolver import expand_config_groups  # type: ignore
+
+    config = expand_config_groups(config, db, logger)
     for key in _BOOTSTRAP_ENV_KEYS:
         config.pop(key, None)
     return {key: "" if value is None else str(value) for key, value in config.items()}

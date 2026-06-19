@@ -1,0 +1,38 @@
+{
+  "name": "private-ranges",
+  "description": "Private (RFC1918/4193), loopback and link-local IP ranges — non-public/internal networks",
+  "entries": [
+    {
+      "kind": "ip",
+      "value": "10.0.0.0/8"
+    },
+    {
+      "kind": "ip",
+      "value": "172.16.0.0/12"
+    },
+    {
+      "kind": "ip",
+      "value": "192.168.0.0/16"
+    },
+    {
+      "kind": "ip",
+      "value": "127.0.0.0/8"
+    },
+    {
+      "kind": "ip",
+      "value": "169.254.0.0/16"
+    },
+    {
+      "kind": "ip",
+      "value": "::1"
+    },
+    {
+      "kind": "ip",
+      "value": "fc00::/7"
+    },
+    {
+      "kind": "ip",
+      "value": "fe80::/10"
+    }
+  ]
+}
