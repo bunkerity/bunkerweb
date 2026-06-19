@@ -119,7 +119,7 @@ The scheduler imports from several shared packages via `sys.path` manipulation (
 
 ### Testing Considerations
 
-- No unit tests exist for the scheduler; testing is integration-level via `tests/main.py`
+- Unit tests for `JobScheduler` (job validation + dispatch-payload building) live in `tests/unit/scheduler/` (pytest); broader behavior is integration-tested via `tests/main.py`
 - The scheduler is tightly coupled to the database and filesystem — changes should be tested with the full Docker stack
 - Job modules are imported and executed in the worker (`src/worker/executor.py`); errors surface there and are recorded against the job run in the DB by `src/worker/tasks.py:execute_job`. Scheduler-side failures are limited to discovery, validation, and dispatch
 

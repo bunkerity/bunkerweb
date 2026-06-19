@@ -130,7 +130,7 @@ flake8 --max-line-length=160 --ignore=E266,E402,E501,E722,W503 src/api/
 
 ### Testing
 
-No unit tests in `src/api/`. Integration tests run against live Docker environments from the repo root:
+Unit tests for the API's `APIDatabase` users/permissions and `schemas.py` Pydantic validators live in `tests/unit/api/` (pytest, via the repo's `.venv-unit`). Broader behavior is integration-tested against live Docker environments from the repo root:
 
 ```bash
 python3 tests/main.py docker

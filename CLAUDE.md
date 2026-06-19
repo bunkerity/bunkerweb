@@ -181,7 +181,7 @@ Set one of these to `yes`: `AUTOCONF_MODE`, `SWARM_MODE`, `KUBERNETES_MODE`
 
 ### Testing
 
-Tests are **integration-focused only** — they spin up real Docker/Linux environments and hit BunkerWeb with actual HTTP requests. There is no unit-test suite under `tests/`; verify component behavior by running the relevant integration target below.
+BunkerWeb has two test tiers. **Integration tests** spin up real Docker/Linux environments and hit BunkerWeb with actual HTTP requests — verify observable behavior by running the relevant target below. **Unit tests** (pytest, fast, per-method) live under `tests/unit/` and cover the Python layers — DB, API, UI, `gen`, scheduler, worker, letsencrypt — across SQLite/PostgreSQL/MariaDB; see `tests/unit/README.md` for setup (`.venv-unit`) and the engine matrix.
 
 ```bash
 python3 tests/main.py docker              # Docker integration tests

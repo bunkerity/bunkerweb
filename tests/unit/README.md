@@ -56,7 +56,7 @@ Engines that are unconfigured or unreachable are **skipped**, not failed.
 | `fixtures/seed.py` | composable, FK-valid seed builders |
 | `db/` | DB-layer tests — one module per mixin domain |
 | `api/` | `APIDatabase` users/permissions + `schemas.py` Pydantic validators |
-| `ui/` | `UIDatabase` tests + `app/utils` bcrypt helpers (via the `app` package; needs Flask/bcrypt) |
+| `ui/` | `UIDatabase` tests + `app/utils` pure helpers — bcrypt, `get_multiples` multisite expansion, settings filters, and the open-redirect (CWE-601) / CSV-injection (CWE-1236) guards (via the `app` package; needs Flask/bcrypt) |
 | `common/` | pure-logic helpers (`common_utils`) — no DB, run once |
 | `gen/` | `Configurator` validation, `has_permissions`, `Templator` SSL curve ranking |
 | `scheduler/` | `JobScheduler` job validation + dispatch payloads |
@@ -86,7 +86,10 @@ all in a single `pytest` run.
 tar determinism, tar/zip extraction safety), `api/app/schemas.py` Pydantic validators,
 `gen/Configurator.py` (settings/plugin validation + variable filtering), `gen/utils.has_permissions`,
 `gen/Templator.py` SSL ECDH-curve ranking, `scheduler/JobScheduler` job validation + dispatch,
-`worker/executor` path-sandbox guard, `ui/app/utils` bcrypt password helpers.
+`worker/executor` path-sandbox guard, and the `ui/app/utils` pure helpers (bcrypt password
+handling, `get_multiples` numbered-multisite expansion, settings filters, the
+`_sanitize_internal_next` open-redirect guard [CWE-601], and the CSV formula-injection
+escaping [CWE-1236]).
 
 Coverage on the unit-targeted modules runs 75–93% (services 93, config_read 93, custom_configs 92,
 templates 92, api-users 88, api-permissions 87, ui-users 85, ui-preferences 91, ui-rbac 82,

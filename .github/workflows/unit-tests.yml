@@ -1,0 +1,97 @@
+name: Unit tests (pytest)
+
+# Fast, isolated pytest suite under tests/unit/ (complements the Docker integration
+# tests in test-core*.yml). The SQLite job runs on every relevant push/PR; the full
+# multi-engine matrix (SQLite + PostgreSQL + MariaDB) runs nightly / on demand so it
+# never slows PRs. See tests/unit/README.md.
+
+on:
+  push:
+    branches: [master, 1.7]
+    paths:
+      - "src/**"
+      - "tests/unit/**"
+      - ".github/workflows/unit-tests.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/unit/**"
+      - ".github/workflows/unit-tests.yml"
+  schedule:
+    - cron: "0 3 * * *" # nightly 03:00 UTC — runs the full engine matrix
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sqlite:
+    name: Unit tests (SQLite)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tests/unit/requirements.txt
+      - name: Install unit-test dependencies
+        run: pip install -r tests/unit/requirements.txt
+      - name: Run unit tests (SQLite, full suite incl. slow tier)
+        run: pytest tests/unit
+
+  matrix:
+    name: Unit tests (SQLite + PostgreSQL + MariaDB)
+    # Heavy (spins up DB service containers) — keep it off the PR path.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bw
+          POSTGRES_PASSWORD: bw
+          POSTGRES_DB: bw_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U bw -d bw_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_USER: bw
+          MARIADB_PASSWORD: bw
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: bw_test
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tests/unit/requirements.txt
+      - name: Install unit-test dependencies
+        run: pip install -r tests/unit/requirements.txt
+      - name: Run unit tests (all engines)
+        env:
+          BW_TEST_PG_URI: postgresql://bw:bw@127.0.0.1:5433/bw_test
+          BW_TEST_MARIA_URI: mariadb://bw:bw@127.0.0.1:3307/bw_test
+        run: pytest tests/unit --db-engines=sqlite,postgresql,mariadb

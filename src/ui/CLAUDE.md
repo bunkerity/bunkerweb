@@ -33,7 +33,7 @@ flake8 src/ui/                      # Python lint
 prettier --write "src/ui/**/*.{js,css,html,json}"  # Frontend
 ```
 
-No ESLint or Stylelint — only Prettier for JS/CSS. No unit test suite; testing is integration-only via Docker (see root CLAUDE.md).
+No ESLint or Stylelint — only Prettier for JS/CSS. Python unit tests for the UI's pure `app/utils` helpers and `UIDatabase` live in `tests/unit/ui/` (pytest, via the repo's `.venv-unit`); broader behavior is integration-tested via Docker (see root CLAUDE.md).
 
 ## Architecture
 
