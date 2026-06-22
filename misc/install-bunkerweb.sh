@@ -5223,7 +5223,22 @@ install_crowdsec() {
     rm -f "$_csc_install"
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
+            # Stop Ubuntu Pro/ESM from shadowing the upstream CrowdSec engine: the ESM
+            # build is outdated and its hub index lacks the bunkerity/bunkerweb collection.
+            cat > /etc/apt/preferences.d/99-bunkerweb-crowdsec.pref <<'EOF'
+# Exclude the outdated Ubuntu Pro/ESM crowdsec build (esm.ubuntu.com) so apt
+# resolves the upstream CrowdSec repository instead. The ESM engine ships an
+# outdated hub index that does not know the bunkerity/bunkerweb collection.
+# Kept in place so future 'apt upgrade crowdsec'/unattended-upgrades stay upstream.
+Package: crowdsec*
+Pin: origin "esm.ubuntu.com"
+Pin-Priority: -1
+EOF
+            chmod 644 /etc/apt/preferences.d/99-bunkerweb-crowdsec.pref
             run_cmd apt install -y crowdsec
+            # Record which engine/origin apt selected (helps diagnose repo-priority issues).
+            print_status "Resolved CrowdSec package candidate:"
+            apt-cache policy crowdsec 2>/dev/null | sed 's/^/  /' || true
             ;;
         "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y crowdsec
@@ -5262,7 +5277,21 @@ labels:
     echo -e "${YELLOW}--- Step 3: Update hub and install core collections/parsers ---${NC}"
     print_step "Updating hub and installing detection collections/parsers"
     cscli hub update
-    cscli collections install bunkerity/bunkerweb
+    if ! cscli collections install bunkerity/bunkerweb; then
+        print_error "Failed to install the 'bunkerity/bunkerweb' CrowdSec collection."
+        print_error "The installed CrowdSec engine is too old to know this collection."
+        if [ "$DISTRO_FAMILY" = "debian" ] && apt-cache policy crowdsec 2>/dev/null | grep -q 'esm\.ubuntu\.com'; then
+            print_error "The engine was installed from Ubuntu Pro/ESM (esm.ubuntu.com), which ships an outdated build."
+        fi
+        print_warning "To fix it:"
+        print_warning "  1. Remove the current engine:  sudo apt remove --purge crowdsec"
+        print_warning "  2. Make the upstream CrowdSec repo win over ESM (disable Ubuntu Pro/ESM"
+        print_warning "     during install, or keep the apt pin this installer wrote)."
+        print_warning "  3. Reinstall:                  sudo apt update && sudo apt install crowdsec"
+        print_warning "  4. Re-sync and install:        sudo cscli hub update \\"
+        print_warning "                                 && sudo cscli collections install bunkerity/bunkerweb"
+        return 1
+    fi
     cscli parsers install crowdsecurity/geoip-enrich
 
     # AppSec installation if chosen
@@ -7969,7 +7998,11 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
 
     if _bw_phase_pending crowdsec; then
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-            install_crowdsec
+            # CrowdSec is optional; a failure here must not abort the BunkerWeb install.
+            # install_crowdsec prints actionable remediation on its failure paths.
+            if ! install_crowdsec; then
+                print_warning "CrowdSec setup did not complete (see messages above). Continuing with the BunkerWeb install."
+            fi
         fi
         _bw_phase_done crowdsec
     fi
