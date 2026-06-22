@@ -174,6 +174,7 @@ RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc+
 RUN apk add --no-cache "openssl>=3.5.7-r0" # CVE-2026-34182 CVE-2026-45447 CVE-2026-7383 CVE-2026-9076 CVE-2026-45445 CVE-2026-42764 CVE-2026-34183 CVE-2026-34180 CVE-2026-34181 CVE-2026-42767 CVE-2026-42766 CVE-2026-42769 CVE-2026-45446 CVE-2026-42770 CVE-2026-42768
 RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
 RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-48165 CVE-2026-48163 CVE-2026-44168 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44173 CVE-2026-44169
+RUN apk add --no-cache "expat>=2.8.1-r0" # CVE-2026-45186 CVE-2026-41080
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
