@@ -2357,8 +2357,8 @@ sudo ./install-bunkerweb.sh --yes --api
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
-  	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.12~rc3
+	sudo dnf makecache && \
+	sudo -E dnf install -y --allowerasing bunkerweb-1.6.12~rc3
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：

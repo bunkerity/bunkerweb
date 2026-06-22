@@ -3,7 +3,7 @@
   "name": "Mutual TLS",
   "description": "Require client certificates using mutual TLS (mTLS).",
   "version": "1.0",
-  "stream": "yes",
+  "stream": "partial",
   "settings": {
     "USE_MTLS": {
       "context": "multisite",

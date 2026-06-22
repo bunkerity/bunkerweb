@@ -2357,8 +2357,8 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.3 installiert haben, bevor Sie B
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
-  	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.12~rc3
+	sudo dnf makecache && \
+	sudo -E dnf install -y --allowerasing bunkerweb-1.6.12~rc3
     ```
 
     Um ein Upgrade der NGINX- und/oder BunkerWeb-Pakete bei der Ausführung von `dnf upgrade` zu verhindern, können Sie den folgenden Befehl verwenden:
