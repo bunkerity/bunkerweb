@@ -28,16 +28,16 @@ certbot==5.6.0 \
     # via
     #   -r requirements.in
     #   certbot-dns-multi
-certbot-dns-multi==5.2.0 \
-    --hash=sha256:0bc13b77d345cbd1e23aab08d193a61f1b3359a5969f111ec33a9bd09da9267b \
-    --hash=sha256:11a6035aeca32534cb4638d7ad1fce1b69512134285f926bf6dad34e5a83d046 \
-    --hash=sha256:168ea1e25a548eb12ce7d31269514ae69c1a54c182702055db8f639fb3fe6c2f \
-    --hash=sha256:20764f51eae8971feffa289830dce81bde477744132f6e399595e956443a43a3 \
-    --hash=sha256:53b29d579bef1dfaf8356e1292c6b37e9b50b797c6db21e0ae9c2e30d9dbe264 \
-    --hash=sha256:8560ec9e1da55c37294617b2e5eafc108a35adbeaeda3607f455151aead3fb98 \
-    --hash=sha256:9ed80618a8b986e57bb85f5c36b44c8afea7065bbf30061d53dca9c14f31cdcb \
-    --hash=sha256:b7b7fc748841f273295b11a57d44fde46ee934b47aa133365eb41065049980dd \
-    --hash=sha256:d33fffde4ad144fb6cdb836e87b9853542886b5d2169e25ae07ded5d7a36fe92
+certbot-dns-multi==5.2.2 \
+    --hash=sha256:1a4f1bd6119140bcc74379ae383bed267cbb430e388273ff26d77d5c7bdf33bb \
+    --hash=sha256:20e9693365b89c0694c17cfe6d1b954e9a2a03fd5784e453952d5babec21fcdb \
+    --hash=sha256:22ab32a9ee22a12d4dafd0370b979d16c75bf5ae8f2608eba0cb70b49ac9d2f6 \
+    --hash=sha256:23a1a30985d040d96c628180e6768dd05119ad7d3a75ea85dec9385d0fab71e1 \
+    --hash=sha256:2d8b4944225971901d55f38278f0e6701ebf1020bdd79b06cf6567aa71c17afb \
+    --hash=sha256:5f45a8d8c5965ce2dc62b266d3204dd1f554cb9d8f144f6ee6948f6c49592c3f \
+    --hash=sha256:a10a24f41dd3224bbfd37f05018c5ecd089c6db58d2ba82ba129e45e1324006c \
+    --hash=sha256:e323743fc32d7b4d560b17c646cf6c6c3826086f594bbd985d31eeb74bfee3e4 \
+    --hash=sha256:fafc7804a33db50f8b88ef0c5d6c3076ea3ca6c2e89b4fde9a02134162056da0
     # via -r requirements.in
 certifi==2026.6.17 \
     --hash=sha256:024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432 \

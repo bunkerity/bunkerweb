@@ -1,5 +1,5 @@
 celery==5.6.3
 certbot==5.6.0
-certbot-dns-multi==5.2.0
+certbot-dns-multi==5.2.2
 maxminddb==3.1.1
 redis[hiredis]==8.0.0
