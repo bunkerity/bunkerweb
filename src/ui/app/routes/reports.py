@@ -13,10 +13,79 @@ from flask_login import login_required
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
-from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
+from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
+from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGGER, csv_safe, csv_writer
 
 from app.routes.utils import cors_required, parse_search_panes
+
+_PERSIST_TO_DB_CACHE = {"enabled": True, "expires_at": 0.0}
+_PERSIST_TO_DB_TTL_SECONDS = 30.0
+
+
+def _persist_to_db_enabled() -> bool:
+    """Whether reports are persisted to the DB (``METRICS_PERSIST_TO_DB``), cached briefly so we
+    don't fetch the config on every reports query."""
+    now = monotonic()
+    if _PERSIST_TO_DB_CACHE["expires_at"] < now:
+        try:
+            config = BW_CONFIG.get_config(methods=False) if BW_CONFIG else {}
+            _PERSIST_TO_DB_CACHE["enabled"] = config.get("METRICS_PERSIST_TO_DB", "yes") == "yes"
+        except Exception:
+            _PERSIST_TO_DB_CACHE["enabled"] = True
+        _PERSIST_TO_DB_CACHE["expires_at"] = now + _PERSIST_TO_DB_TTL_SECONDS
+    return bool(_PERSIST_TO_DB_CACHE["enabled"])
+
+
+def _legacy_reports(**kwargs):
+    """Legacy per-instance/Redis scrape, used when DB persistence is off or the metrics API is down."""
+    if BW_INSTANCES_UTILS:
+        return BW_INSTANCES_UTILS.get_reports_query(**kwargs)
+    return {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
+
+
+def _query_reports(**kwargs):
+    """Read blocked-request reports.
+
+    With DB persistence enabled (``METRICS_PERSIST_TO_DB``, the default) read from the central API
+    (durable DB-backed store), falling back to the legacy scrape only if the API is unavailable. When
+    persistence is off the DB isn't populated, so go straight to the legacy per-instance/Redis scrape.
+    """
+    if not _persist_to_db_enabled():
+        return _legacy_reports(**kwargs)
+    try:
+        return API_CLIENT.get_metrics_requests(**kwargs)
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.warning(f"Metrics API unavailable ({e}); falling back to instance scrape")
+        return _legacy_reports(**kwargs)
+
+
+REPORTS_EXPORT_PAGE_SIZE = 10000
+REPORTS_EXPORT_MAX_ROWS = 1000000
+
+
+def _fetch_all_reports(*, search="", order_column="date", order_dir="desc", search_panes=""):
+    """Fetch all matching reports for export, paging through ``_query_reports`` so a large export never
+    becomes one unbounded, timeout-prone request (which would silently degrade to a truncated scrape)."""
+    rows = []
+    start = 0
+    while len(rows) < REPORTS_EXPORT_MAX_ROWS:
+        page = _query_reports(
+            start=start,
+            length=REPORTS_EXPORT_PAGE_SIZE,
+            search=search,
+            order_column=order_column,
+            order_dir=order_dir,
+            search_panes=search_panes,
+            count_only=False,
+            include_pane_counts=False,
+        ).get("data", [])
+        rows.extend(page)
+        if len(page) < REPORTS_EXPORT_PAGE_SIZE:
+            break
+        start += REPORTS_EXPORT_PAGE_SIZE
+    return rows
+
 
 reports = Blueprint("reports", __name__)
 REPORTS_FILTERS_CACHE_TTL_SECONDS = 5.0
@@ -174,7 +243,7 @@ def reports_fetch():
     # Use optimized query endpoint from InstancesUtils
     if BW_INSTANCES_UTILS:
         try:
-            result = BW_INSTANCES_UTILS.get_reports_query(
+            result = _query_reports(
                 start=start,
                 length=length,
                 search=search_value,
@@ -311,7 +380,7 @@ def reports_filters():
     pane_counts_backend = {}
     if BW_INSTANCES_UTILS:
         try:
-            result = BW_INSTANCES_UTILS.get_reports_query(
+            result = _query_reports(
                 start=0,
                 length=0,
                 search=search_value,
@@ -326,7 +395,7 @@ def reports_filters():
             # Safety fallback: if count-only pane aggregation unexpectedly returns
             # empty panes, retry through the non-count-only path (historically stable).
             if not pane_counts_has_values(pane_counts_backend):
-                fallback_result = BW_INSTANCES_UTILS.get_reports_query(
+                fallback_result = _query_reports(
                     start=0,
                     length=1,
                     search=search_value,
@@ -394,17 +463,12 @@ def reports_export_csv():
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
-            result = BW_INSTANCES_UTILS.get_reports_query(
-                start=0,
-                length=-1,  # Get all records
+            all_reports = _fetch_all_reports(
                 search=search_value,
                 order_column=order_column,
                 order_dir=order_dir,
                 search_panes=search_panes_str,
-                count_only=False,
-                include_pane_counts=False,
             )
-            all_reports = result.get("data", [])
         else:
             all_reports = []
 
@@ -487,17 +551,12 @@ def reports_export_excel():
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
-            result = BW_INSTANCES_UTILS.get_reports_query(
-                start=0,
-                length=-1,  # Get all records
+            all_reports = _fetch_all_reports(
                 search=search_value,
                 order_column=order_column,
                 order_dir=order_dir,
                 search_panes=search_panes_str,
-                count_only=False,
-                include_pane_counts=False,
             )
-            all_reports = result.get("data", [])
         else:
             all_reports = []
 

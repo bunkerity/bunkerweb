@@ -34,6 +34,33 @@ class ApiClient(BaseApiClient):
     def update_global_settings(self, settings: dict):
         return self._patch("/global_settings", json=settings)
 
+    # ── Metrics / Reports ───────────────────────────────────────────────
+
+    def get_metrics_requests(
+        self,
+        *,
+        start=0,
+        length=10,
+        search="",
+        order_column="date",
+        order_dir="desc",
+        search_panes="",
+        count_only=False,
+        include_pane_counts=True,
+    ):
+        """Query persisted blocked-request reports (DB-backed) from the central API."""
+        params = {
+            "start": start,
+            "length": length,
+            "search": search,
+            "order_column": order_column,
+            "order_dir": order_dir,
+            "search_panes": search_panes,
+            "count_only": "true" if count_only else "false",
+            "include_pane_counts": "true" if include_pane_counts else "false",
+        }
+        return self._get("/metrics/requests", params=params)
+
     # ── Instances ───────────────────────────────────────────────────────
 
     def get_instances(self):

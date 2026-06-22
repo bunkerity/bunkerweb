@@ -45,6 +45,7 @@ from db_methods.instances import DatabaseInstancesMixin
 from db_methods.templates import DatabaseTemplatesMixin
 from db_methods.resource_groups import DatabaseResourceGroupsMixin
 from db_methods.ui_users import DatabaseUIUsersMixin
+from db_methods.metrics import DatabaseMetricsMixin
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import make_url
@@ -72,6 +73,7 @@ class Database(
     DatabaseTemplatesMixin,
     DatabaseResourceGroupsMixin,
     DatabaseUIUsersMixin,
+    DatabaseMetricsMixin,
 ):
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")

@@ -3,7 +3,7 @@
 from datetime import datetime
 from json import dumps, loads
 from typing import Any, ClassVar, List, Optional
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -234,6 +234,37 @@ class Jobs_runs(Base):
     job: Mapped["Jobs"] = relationship("Jobs", back_populates="runs")
 
 
+class Requests(Base):
+    """Persisted blocked-request reports (metrics).
+
+    One row per blocked/detected request, mirroring the per-request record the
+    metrics Lua endpoint exposes. Rows are scraped from instances and deduplicated
+    on ``(instance_hostname, request_id)``. No FK: instance-agnostic / multi-instance.
+    """
+
+    __tablename__ = "bw_metrics_requests"
+    __table_args__ = (
+        UniqueConstraint("instance_hostname", "request_id", name="uq_bw_metrics_requests_instance_request"),
+        Index("ix_bw_metrics_requests_date_server", "date", "server_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    instance_hostname: Mapped[str] = mapped_column(String(256), nullable=False, default="", index=True)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    ip: Mapped[str] = mapped_column(String(39), nullable=False, index=True)
+    country: Mapped[str] = mapped_column(String(16), nullable=False, default="")
+    method: Mapped[str] = mapped_column(String(16), nullable=False)
+    url: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    reason: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
+    server_name: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
+    data: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    security_mode: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class Custom_configs(Base):
     __tablename__ = "bw_custom_configs"
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
@@ -406,7 +437,7 @@ class Metadata(Base):
     failover: Mapped[Optional[bool]] = mapped_column(Boolean, default=None, nullable=True)
     failover_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
     integration: Mapped[str] = mapped_column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version: Mapped[str] = mapped_column(String(32), default="1.6.12~rc1", nullable=False)
+    version: Mapped[str] = mapped_column(String(32), default="1.7.0~beta", nullable=False)
 
 
 ## UI Models

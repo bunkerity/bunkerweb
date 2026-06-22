@@ -67,6 +67,49 @@
       "label": "Save metrics to Redis",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "METRICS_PERSIST_TO_DB": {
+      "context": "global",
+      "default": "yes",
+      "help": "Persist blocked-request reports to the database (durable, queryable) by periodically scraping instances. When disabled, reports remain only in the in-memory/Redis stores.",
+      "id": "metrics-persist-to-db",
+      "label": "Persist reports to database",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "METRICS_RETENTION_DAYS": {
+      "context": "global",
+      "default": "90",
+      "help": "Maximum age (in days) of persisted blocked-request reports before the retention job deletes them.",
+      "id": "metrics-retention-days",
+      "label": "Reports retention (days)",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "METRICS_RETENTION_MAX_ROWS": {
+      "context": "global",
+      "default": "1000000",
+      "help": "Maximum number of persisted blocked-request reports to keep; the retention job deletes the oldest rows beyond this count.",
+      "id": "metrics-retention-max-rows",
+      "label": "Reports retention (max rows)",
+      "regex": "^\\d+$",
+      "type": "number"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "scrape-persist-reports",
+      "file": "scrape-persist-reports.py",
+      "every": "minute",
+      "reload": false,
+      "async": true
+    },
+    {
+      "name": "cleanup-metrics-retention",
+      "file": "cleanup-metrics-retention.py",
+      "every": "day",
+      "reload": false,
+      "async": true
+    }
+  ]
 }
