@@ -53,15 +53,18 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-42,
             fedora-43,
+            fedora-44,
             rhel-8,
             rhel-9,
             rhel-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         include:
           - linux: ubuntu
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: ubuntu-jammy
             package: deb
@@ -69,9 +72,9 @@ jobs:
             package: deb
           - linux: debian-trixie
             package: deb
-          - linux: fedora-42
-            package: rpm
           - linux: fedora-43
+            package: rpm
+          - linux: fedora-44
             package: rpm
           - linux: rhel-8
             package: rpm
@@ -147,11 +150,12 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-42,
             fedora-43,
+            fedora-44,
             el-8,
             el-9,
             el-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         arch: [amd64]
@@ -162,7 +166,7 @@ jobs:
             package_arch: amd64
             separator: _
             suffix: ""
-            version: noble
+            version: resolute
             package: deb
           - linux: debian-bookworm
             package_arch: amd64
@@ -176,17 +180,17 @@ jobs:
             suffix: ""
             version: trixie
             package: deb
-          - linux: fedora-42
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 42
-            package: rpm
           - linux: fedora-43
             package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 43
+            package: rpm
+          - linux: fedora-44
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 44
             package: rpm
           - linux: el-8
             package_arch: x86_64
@@ -206,6 +210,12 @@ jobs:
             suffix: "1."
             version: 10
             package: rpm
+          - linux: ubuntu-noble
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: noble
+            package: deb
           - linux: ubuntu-jammy
             package_arch: amd64
             separator: _
