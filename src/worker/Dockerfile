@@ -88,7 +88,7 @@ COPY --chown=root:worker --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb
 COPY --chown=root:worker --chmod=550 src/worker/healthcheck-worker.sh /usr/share/bunkerweb/helpers/healthcheck-worker.sh
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.12~rc1"
+LABEL version="1.7.0~beta"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="worker"
 

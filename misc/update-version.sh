@@ -69,8 +69,8 @@ done
 shopt -u globstar
 # linux
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/beforeInstall.sh
-# db
-sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/Database.py
+# db (the default version moved from Database.py to the metadata mixin when Database.py was split into db_methods/)
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/db_methods/metadata.py
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/model.py
 # github
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" .github/ISSUE_TEMPLATE/bug_report.yml
@@ -83,6 +83,7 @@ sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION_UNESCAPED\"@g" src/bw/Doc
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION_UNESCAPED\"@g" src/scheduler/Dockerfile
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION_UNESCAPED\"@g" src/ui/Dockerfile
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION_UNESCAPED\"@g" src/autoconf/Dockerfile
+sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION_UNESCAPED\"@g" src/worker/Dockerfile
 # easy-install script
 sed -i "s@DEFAULT_BUNKERWEB_VERSION=.*@DEFAULT_BUNKERWEB_VERSION=\"$NEW_VERSION_UNESCAPED\"@g" misc/install-bunkerweb.sh
 # publiccode.yml

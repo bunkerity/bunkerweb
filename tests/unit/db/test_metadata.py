@@ -26,8 +26,15 @@ class TestInitializeDb:
 
 
 class TestGetVersion:
-    def test_default_when_empty(self, db):
-        assert db.get_version() == "1.6.12~rc1"
+    def test_default_matches_version_file(self, db):
+        # the empty-DB default must track src/VERSION; the version-bump script (misc/update-version.sh)
+        # keeps them in sync, so this guards against the metadata default drifting from the released version.
+        from pathlib import Path
+
+        import model  # noqa: E402 — resolved via conftest sys.path injection
+
+        expected = (Path(model.__file__).resolve().parents[2] / "VERSION").read_text().strip()
+        assert db.get_version() == expected
 
     def test_after_init(self, db):
         db.initialize_db("9.9.9", "Docker")

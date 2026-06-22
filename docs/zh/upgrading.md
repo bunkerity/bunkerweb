@@ -25,16 +25,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.12-rc1
+                        image: bunkerity/bunkerweb:1.7.0-beta
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.12-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.12-rc1
+                        image: bunkerity/bunkerweb-ui:1.7.0-beta
                         ...
                 ```
 
@@ -90,7 +90,7 @@
 
             4.  **拉取新镜像**：
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.12-rc1
+                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-beta
                 ```
 
             5.  **用相同选项重新创建容器**，复用与之前相同的 `/data` 卷、端口和环境变量：
@@ -101,7 +101,7 @@
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.12-rc1
+                bunkerity/bunkerweb-all-in-one:1.7.0-beta
                 ```
 
         === "Docker Compose"
@@ -110,7 +110,7 @@
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.12-rc1
+                        image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
                         ...
                 ```
 
@@ -233,20 +233,20 @@
             示例：
 
             ```bash
-            # 交互式升级到 1.6.12~rc1（会提示备份）
-            sudo ./install-bunkerweb.sh --version 1.6.12~rc1
+            # 交互式升级到 1.7.0~beta（会提示备份）
+            sudo ./install-bunkerweb.sh --version 1.7.0~beta
 
             # 使用自动备份到自定义目录的非交互式升级
-            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~beta --backup-dir /var/backups/bw-2025-01 -y
 
             # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 -y -q
+            sudo ./install-bunkerweb.sh -v 1.7.0~beta -y -q
 
             # 执行一次空运行（计划）而不应用更改
-            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.7.0~beta --dry-run
 
             # 跳过自动备份进行升级（不推荐）
-            sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~beta --no-auto-backup -y
             ```
 
             !!! warning "跳过备份"
@@ -326,7 +326,7 @@
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.12~rc1
+                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
                         ```
 
                         为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -352,7 +352,7 @@
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.12~rc1
+                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
                         ```
 
                         为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -824,16 +824,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.12-rc1
+                        image: bunkerity/bunkerweb:1.7.0-beta
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.12-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.12-rc1
+                        image: bunkerity/bunkerweb-ui:1.7.0-beta
                         ...
                 ```
 
@@ -868,7 +868,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.12~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -894,7 +894,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.12~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：

@@ -9,7 +9,7 @@ x-bw-env:
 services:
   bunkerweb:
     # This is the name that will be used to identify the instance in the Scheduler
-    image: bunkerity/bunkerweb:1.6.12-rc1
+    image: bunkerity/bunkerweb:1.7.0-beta
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -22,7 +22,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
+    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -45,7 +45,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.12-rc1
+    image: bunkerity/bunkerweb-api:1.7.0-beta
     environment:
       <<: *bw-env
       # API_USERNAME: "admin"
@@ -61,7 +61,7 @@ services:
       - bw-mcp
 
   bw-worker: # Celery worker — executes the jobs the scheduler dispatches via the API (blocklists, certbot, backups, etc.)
-    image: bunkerity/bunkerweb-worker:1.6.12-rc1
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
     depends_on:
       - bw-db
       - redis

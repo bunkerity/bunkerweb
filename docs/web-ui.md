@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.12-rc1
+        image: bunkerity/bunkerweb:1.7.0-beta
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
+        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.12-rc1
+        image: bunkerity/bunkerweb-ui:1.7.0-beta
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
