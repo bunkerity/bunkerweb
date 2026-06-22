@@ -86,7 +86,18 @@ def init_worker_db(**kwargs) -> None:
     from Database import Database  # type: ignore
     from logger import setup_logger  # type: ignore
 
-    _worker_db = Database(setup_logger("WORKER"))
+    logger = setup_logger("WORKER")
+    _worker_db = Database(logger)
+
+    # Register plugin-shipped DB models so plugin jobs can query their own tables
+    # (security-gated + checksum-verified for pro/external). Best-effort: a bad
+    # plugin must never crash the worker child.
+    try:
+        from plugin_extensions import register_plugin_models  # type: ignore
+
+        register_plugin_models(logger, db=_worker_db)
+    except Exception as e:
+        logger.error(f"Failed to register plugin DB models in worker: {e}")
 
 
 @worker_process_shutdown.connect

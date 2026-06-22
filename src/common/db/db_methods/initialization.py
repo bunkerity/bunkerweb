@@ -98,6 +98,17 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
         ``MetaData`` is consumed anywhere downstream, so reflecting the whole schema —
         and the retry loop guarding it — is dead weight.
         """
+        # Register plugin-shipped DB models on Base.metadata before create_all so a
+        # plugin's tables are created alongside the core schema (security-gated +
+        # checksum-verified for pro/external). Never let a misbehaving plugin block
+        # core table creation.
+        try:
+            from plugin_extensions import register_plugin_models  # type: ignore
+
+            register_plugin_models(self.logger, db=self)
+        except Exception as e:
+            self.logger.error(f"Failed to register plugin DB models: {e}")
+
         try:
             Base.metadata.create_all(self.sql_engine, checkfirst=True)
         except Exception as e:

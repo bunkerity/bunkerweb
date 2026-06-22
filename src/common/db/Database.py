@@ -360,6 +360,37 @@ class Database(
         with suppress(Exception):
             self.close()
 
+    def ext(self, plugin_id: str):
+        """Return the DB-methods accessor for a plugin's ``db/methods.py`` extension.
+
+        Lazily discovers plugin-shipped db-methods mixins (security-gated + checksum
+        verified for pro/external) once, then binds the matching mixin to this live
+        ``Database`` instance so its query helpers reuse ``_db_session``/``readonly``/
+        retry config. Raises ``KeyError`` when the plugin ships no db-methods extension.
+        """
+        cache = self.__dict__.setdefault("_ext_proxy_cache", {})
+        if plugin_id in cache:
+            return cache[plugin_id]
+
+        if self.__dict__.get("_ext_mixins") is None:
+            try:
+                from plugin_extensions import discover_db_methods  # type: ignore
+
+                self._ext_mixins = discover_db_methods(self.logger, db=self)
+            except Exception as e:
+                self.logger.error(f"Failed to discover plugin DB methods: {e}")
+                self._ext_mixins = {}
+
+        mixin_cls = self._ext_mixins.get(plugin_id)
+        if mixin_cls is None:
+            raise KeyError(f"No DB extension methods registered for plugin '{plugin_id}'")
+
+        from plugin_extensions import make_db_ext  # type: ignore
+
+        proxy = make_db_ext(self, mixin_cls)
+        cache[plugin_id] = proxy
+        return proxy
+
     def _empty_if_none(self, value: Any) -> Any:
         """Return an empty string if the value is None or convert None values in collections"""
         if value is None:

@@ -34,6 +34,10 @@ COPY src/common/api api
 COPY src/common/db db
 COPY src/common/utils utils
 COPY src/common/helpers helpers
+# Core plugins: needed on disk so the API can discover and mount plugin-shipped
+# API/DB extensions (api/router.py, db/models.py) — only plugins declaring an
+# "extensions" block are imported; the rest are inert files.
+COPY src/common/core core
 COPY src/VERSION VERSION
 COPY src/api api
 

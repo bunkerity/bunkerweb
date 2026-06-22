@@ -105,6 +105,13 @@ def create_app() -> FastAPI:
     # Routers with optional dynamic per-endpoint rate limiting
     app.include_router(core_router, dependencies=[limiter_dep_dynamic()])
 
+    # Plugin-shipped API extensions (auto-discovered; auth guard + rate limit injected
+    # at mount time; security-gated + checksum-verified for pro/external plugins).
+    with suppress(Exception):
+        from .routers.plugin_loader import discover_plugin_routers
+
+        discover_plugin_routers(app)
+
     # Error normalization
     @app.exception_handler(HTTPException)
     async def http_exception_handler(_request: Request, exc: HTTPException):
@@ -134,7 +141,8 @@ def create_app() -> FastAPI:
     return app
 
 
-description = """# BunkerWeb API
+description = (
+    """# BunkerWeb API
 
 This API is the control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
 
@@ -180,7 +188,9 @@ Settings can be provided via `/etc/bunkerweb/api.yml`, `/etc/bunkerweb/api.env`,
 - `API_RATE_LIMIT_*`: knobs to enable/shape rate limiting.
 - `API_BISCUIT_TTL_SECONDS`: lifetime of Biscuit tokens in seconds (0 disables expiry; default 3600).
 
-""" + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."  # noqa: E501
+"""
+    + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."
+)  # noqa: E501
 
 tags_metadata = [
     {"name": "core", "description": "Health probes and global utility endpoints"},

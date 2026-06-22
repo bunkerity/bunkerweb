@@ -22,6 +22,24 @@
       "label": "BunkerNet server",
       "regex": "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
       "type": "text"
+    },
+    "USE_BUNKERNET_STATS": {
+      "context": "global",
+      "default": "yes",
+      "help": "Persist BunkerNet effectiveness statistics (contribution, blocklist size, connectivity) to the database.",
+      "id": "use-bunkernet-stats",
+      "label": "BunkerNet effectiveness stats",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "BUNKERNET_STATS_RETENTION_DAYS": {
+      "context": "global",
+      "default": "30",
+      "help": "Maximum age (in days) of persisted BunkerNet effectiveness statistics.",
+      "id": "bunkernet-stats-retention-days",
+      "label": "BunkerNet stats retention (days)",
+      "regex": "^\\d+$",
+      "type": "number"
     }
   },
   "jobs": [
@@ -42,6 +60,31 @@
       "file": "bunkernet-send.py",
       "every": "hour",
       "reload": true
+    },
+    {
+      "name": "bunkernet-stats",
+      "file": "bunkernet-stats.py",
+      "every": "hour",
+      "reload": false,
+      "async": true
+    },
+    {
+      "name": "bunkernet-cleanup-stats",
+      "file": "bunkernet-cleanup-stats.py",
+      "every": "day",
+      "reload": false,
+      "async": true
     }
-  ]
+  ],
+  "extensions": {
+    "api": {
+      "module": "api/router.py",
+      "prefix": "/bunkernet"
+    },
+    "db": {
+      "models": "db/models.py",
+      "methods": "db/methods.py",
+      "table_prefix": "bw_bunkernet_"
+    }
+  }
 }

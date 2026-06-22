@@ -37,6 +37,10 @@ class Configurator:
         self.__setting_id_rx = re_compile(r"^[A-Z0-9_]{1,256}$")
         self.__name_rx = re_compile(r"^[\w.-]{1,128}$")
         self.__job_file_rx = re_compile(r"^[\w./-]{1,256}$")
+        # Plugin API/DB extension manifest validation (1.7): module paths are .py files
+        # inside the plugin dir (no traversal, no leading slash). The table prefix, if
+        # declared, must equal the id-derived ``bw_<sanitized_id>_`` (checked inline).
+        self.__ext_module_rx = re_compile(r"^[\w][\w/-]{0,254}\.py$")
 
         # Pre-compile sets for O(1) membership testing
         self.__mandatory_plugin_keys = frozenset(("id", "name", "description", "version", "stream", "settings"))
@@ -485,7 +489,58 @@ class Configurator:
             elif job.get("async", False) is not True and job.get("async", False) is not False:
                 return (False, f"Invalid async for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
 
+        extensions = plugin.get("extensions")
+        if extensions is not None:
+            ok, msg = self.__validate_plugin_extensions(plugin["id"], extensions)
+            if not ok:
+                return (False, msg)
+
         return True, "ok"
+
+    def __validate_plugin_extensions(self, plugin_id: str, extensions: dict) -> Tuple[bool, str]:
+        """Validate the optional ``extensions`` block (plugin-shipped API/DB code).
+
+        Trust boundary: this Python runs in the API process and defines tables in the
+        central DB, so the declaration is validated strictly — module paths are .py
+        files inside the plugin dir (no traversal), the API prefix is locked to
+        ``/<id>`` so a plugin can't shadow a core router, and table prefixes are
+        bw_-namespaced and tied to the plugin id (schema-poisoning defense)."""
+        if not isinstance(extensions, dict):
+            return (False, f"Invalid extensions for plugin {plugin_id} (Must be an object)")
+
+        api_ext = extensions.get("api")
+        db_ext = extensions.get("db")
+        if api_ext is None and db_ext is None:
+            return (False, f"Invalid extensions for plugin {plugin_id} (Must declare 'api' and/or 'db')")
+
+        if api_ext is not None:
+            if not isinstance(api_ext, dict):
+                return (False, f"Invalid extensions.api for plugin {plugin_id} (Must be an object)")
+            module = api_ext.get("module")
+            if not isinstance(module, str) or ".." in module or not self.__ext_module_rx.match(module):
+                return (False, f"Invalid extensions.api.module for plugin {plugin_id} (Must be a .py file path inside the plugin, no traversal)")
+            prefix = api_ext.get("prefix")
+            if prefix is not None and prefix != f"/{plugin_id}":
+                return (False, f"Invalid extensions.api.prefix for plugin {plugin_id} (Must equal /{plugin_id} to avoid shadowing core routers)")
+
+        if db_ext is not None:
+            if not isinstance(db_ext, dict):
+                return (False, f"Invalid extensions.db for plugin {plugin_id} (Must be an object)")
+            if "models" not in db_ext and "methods" not in db_ext:
+                return (False, f"Invalid extensions.db for plugin {plugin_id} (Must declare at least 'models' or 'methods')")
+            for key in ("models", "methods"):
+                module = db_ext.get(key)
+                if module is None:
+                    continue
+                if not isinstance(module, str) or ".." in module or not self.__ext_module_rx.match(module):
+                    return (False, f"Invalid extensions.db.{key} for plugin {plugin_id} (Must be a .py file path inside the plugin, no traversal)")
+            table_prefix = db_ext.get("table_prefix")
+            if table_prefix is not None:
+                sanitized = plugin_id.replace("-", "_").replace(".", "_")
+                if table_prefix != f"bw_{sanitized}_":
+                    return (False, f"Invalid extensions.db.table_prefix for plugin {plugin_id} (Must equal bw_{sanitized}_)")
+
+        return (True, "ok")
 
     def __get_compiled_regex(self, pattern: str):
         """Get or compile a regex pattern with caching to avoid recompilation."""
