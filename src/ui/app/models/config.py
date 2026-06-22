@@ -8,6 +8,8 @@ from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
+from common_utils import normalize_check_value  # type: ignore
+
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import get_blacklisted_settings, is_editable_method
 
@@ -207,6 +209,13 @@ class Config:
                 report_error(f"Variable {key} is not editable as it is managed by the {config[key]['method']}, ignoring it.")
                 variables.pop(key, None)
                 continue
+
+            # Canonicalize boolean ("check") aliases (true/on/1/...) to yes/no so the
+            # value validates and the value persisted via the API is canonical.
+            if plugins_settings[setting].get("type") == "check":
+                value = normalize_check_value(value)
+                if key in variables:
+                    variables[key] = value
 
             # Validate the variable's value against the regex pattern.
             try:

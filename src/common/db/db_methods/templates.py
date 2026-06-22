@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from model import Global_values, Metadata, Plugins, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, normalize_check_value  # type: ignore
 
 from sqlalchemy import case, delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -272,10 +272,15 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             )
 
         if base_setting_ids:
-            existing_settings = {row[0] for row in session.execute(select(Settings.id).filter(Settings.id.in_(base_setting_ids)))}
-            missing_base_ids = sorted(base_setting_ids - existing_settings)
+            setting_types = {row[0]: row[1] for row in session.execute(select(Settings.id, Settings.type).filter(Settings.id.in_(base_setting_ids)))}
+            missing_base_ids = sorted(base_setting_ids - set(setting_types))
             if missing_base_ids:
                 return f"Unknown settings: {', '.join(missing_base_ids)}", [], [], []
+            # Canonicalize boolean ("check") defaults (true/on/1/...) to yes/no, like every
+            # other settings ingestion boundary, so template defaults are stored canonical.
+            for entity in setting_entities:
+                if setting_types.get(entity["setting_id"]) == "check":
+                    entity["default"] = normalize_check_value(entity["default"])
 
         configs = configs or []
         config_map: Dict[str, Tuple[Dict[str, Any], int]] = {}

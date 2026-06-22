@@ -42,6 +42,31 @@ def dict_to_frozenset(d):
     return d
 
 
+# Canonical truthy/falsy tokens for "check" type settings. Inputs are trimmed and
+# lowercased before lookup. Callers apply this ONLY to type=="check" settings so the
+# stored and consumed value is always the canonical "yes"/"no" the rest of the stack
+# (Lua `== "yes"`, Jinja conditionals, jobs) already expects.
+_CHECK_TRUE_TOKENS = frozenset(("yes", "y", "true", "t", "on", "1", "enable", "enabled"))
+_CHECK_FALSE_TOKENS = frozenset(("no", "n", "false", "f", "off", "0", "disable", "disabled"))
+
+
+def normalize_check_value(value: Any) -> Any:
+    """Canonicalize a truthy/falsy string to "yes"/"no" for check-type settings.
+
+    Matching is case-insensitive and ignores surrounding whitespace. Known tokens map
+    to "yes"/"no"; any other value (including non-strings) is returned unchanged so the
+    setting's ^(yes|no)$ regex still rejects it. Idempotent on canonical input.
+    """
+    if not isinstance(value, str):
+        return value
+    token = value.strip().lower()
+    if token in _CHECK_TRUE_TOKENS:
+        return "yes"
+    if token in _CHECK_FALSE_TOKENS:
+        return "no"
+    return value
+
+
 def get_version() -> str:
     return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
 

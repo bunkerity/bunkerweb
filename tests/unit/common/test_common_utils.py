@@ -20,10 +20,48 @@ from common_utils import (  # type: ignore
     file_hash,
     is_newer_version_available,
     normalize_bunkerweb_version,
+    normalize_check_value,
     plugin_tar_exclude,
     plugin_tar_filter,
     safe_zip_extractall,
 )
+
+
+class TestNormalizeCheckValue:
+    """Boolean ('check' type) value canonicalization to 'yes'/'no'.
+
+    The helper is type-agnostic; callers apply it only to type=='check' settings.
+    Known truthy/falsy tokens map to 'yes'/'no'; anything else passes through
+    unchanged so the setting's ^(yes|no)$ regex still rejects it.
+    """
+
+    @pytest.mark.parametrize(
+        "raw",
+        ["yes", "y", "true", "t", "on", "1", "enable", "enabled", "YES", "True", "ON", "Enabled", "  on  ", "\tTRUE\n"],
+    )
+    def test_truthy_tokens_map_to_yes(self, raw):
+        assert normalize_check_value(raw) == "yes"
+
+    @pytest.mark.parametrize(
+        "raw",
+        ["no", "n", "false", "f", "off", "0", "disable", "disabled", "NO", "False", "OFF", "Disabled", "  off  ", "\tFALSE\n"],
+    )
+    def test_falsy_tokens_map_to_no(self, raw):
+        assert normalize_check_value(raw) == "no"
+
+    @pytest.mark.parametrize("raw", ["maybe", "", "2", "yess", "ye s", "y e s", "enabledd", "auto"])
+    def test_unknown_passes_through_unchanged(self, raw):
+        # Unknown tokens are returned verbatim so the regex validator rejects them.
+        assert normalize_check_value(raw) == raw
+
+    @pytest.mark.parametrize("raw", [None, 1, 0, True, ["yes"], {"a": 1}])
+    def test_non_string_passes_through_unchanged(self, raw):
+        assert normalize_check_value(raw) == raw
+
+    def test_idempotent_on_canonical(self):
+        assert normalize_check_value(normalize_check_value("true")) == "yes"
+        assert normalize_check_value("yes") == "yes"
+        assert normalize_check_value("no") == "no"
 
 
 class TestHashing:

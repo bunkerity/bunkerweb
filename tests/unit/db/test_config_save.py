@@ -19,6 +19,68 @@ def seeded(db):
     return db
 
 
+def _check(setting_id, ctx, *, default="no"):
+    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": "^(yes|no)$", "type": "check"}
+
+
+class TestSaveConfigCheckNormalization:
+    """A1: 'check' values are canonicalized to yes/no when persisted, across the
+    global (non-multisite), multisite-global and per-service storage paths."""
+
+    def test_global_check_canonicalized(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_FLAG": _check("alpha-flag", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_FLAG": "on"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_FLAG"] == "yes"
+
+    def test_multisite_global_and_service_check_canonicalized(self, db):
+        db.init_tables(
+            [
+                make_general_settings(),
+                make_core_plugin("alpha", settings={"ALPHA_FLAG": _check("alpha-flag", "global"), "ALPHA_SVC": _check("alpha-svc", "multisite")}),
+            ]
+        )
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"MULTISITE": "yes", "SERVER_NAME": "app1.example.com", "ALPHA_FLAG": "TRUE", "app1.example.com_ALPHA_SVC": "1"}, "scheduler")
+        cfg = db.get_config()
+        assert cfg["ALPHA_FLAG"] == "yes"
+        assert cfg["app1.example.com_ALPHA_SVC"] == "yes"
+
+    def test_check_idempotent_across_alias_resaves(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_FLAG": _check("alpha-flag", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_FLAG": "yes"}, "scheduler", skip_service_management=True)
+        db.save_config({"ALPHA_FLAG": "on"}, "scheduler", skip_service_management=True)  # alias of the same canonical state
+        assert db.get_config()["ALPHA_FLAG"] == "yes"
+
+    def test_check_update_via_alias_flips_value(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_FLAG": _check("alpha-flag", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_FLAG": "yes"}, "scheduler", skip_service_management=True)
+        db.save_config({"ALPHA_FLAG": "off"}, "scheduler", skip_service_management=True)  # flip to false via alias
+        assert db.get_config()["ALPHA_FLAG"] == "no"
+
+    def test_check_alias_equal_to_default_not_stored(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_FLAG": _check("alpha-flag", "global", default="no")})])
+        db.initialize_db("1.7.0", "Docker")
+        # "off" canonicalizes to "no" == default -> reads back as the default.
+        db.save_config({"ALPHA_FLAG": "off"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_FLAG"] == "no"
+
+    def test_check_canonicalized_via_autoconf_method(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_FLAG": _check("alpha-flag", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_FLAG": "TRUE"}, "autoconf", skip_service_management=True)
+        assert db.get_config()["ALPHA_FLAG"] == "yes"
+
+    def test_text_setting_not_coerced_on_save(self, db):
+        # ALPHA_GLOBAL is text (^.*$): a boolean-looking value must persist verbatim.
+        db.init_tables([make_general_settings(), make_core_plugin("alpha")])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_GLOBAL": "on"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_GLOBAL"] == "on"
+
+
 class TestSaveConfigGlobal:
     def test_global_setting_persisted(self, seeded):
         result = seeded.save_config({"ALPHA_GLOBAL": "hello"}, "scheduler", skip_service_management=True)

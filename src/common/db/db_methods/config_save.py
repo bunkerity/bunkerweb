@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from model import Custom_configs, Global_values, Jobs_cache, Metadata, Plugins, Services, Services_settings, Settings, Template_settings  # type: ignore
 
+from common_utils import normalize_check_value  # type: ignore
+
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
@@ -708,6 +710,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
 
+            if setting["type"] == "check":
+                value = normalize_check_value(value)
+
             if server_name not in db_ids:
                 self.logger.debug(f"Adding service {server_name}")
                 current_time = datetime.now().astimezone()
@@ -804,6 +809,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             if not setting:
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
+
+            if setting["type"] == "check":
+                value = normalize_check_value(value)
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)
@@ -914,6 +922,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
             if not setting:
                 continue
+
+            if setting.type == "check":
+                value = normalize_check_value(value)
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)

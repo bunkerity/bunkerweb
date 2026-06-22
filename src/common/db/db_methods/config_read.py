@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from model import Global_values, Services, Services_settings, Settings, Template_settings  # type: ignore
 
+from common_utils import normalize_check_value  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 
 from sqlalchemy import join, select
@@ -59,6 +60,8 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     return False, "not multiple"
 
                 if value is not None:
+                    if db_setting.type == "check":
+                        value = normalize_check_value(value)
                     try:
                         regex_flags = DOTALL if db_setting.type == "file" else 0
                         if not self._ignore_regex_check and search(db_setting.regex, value_for_validation(db_setting.id, value), regex_flags) is None:

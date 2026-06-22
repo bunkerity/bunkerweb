@@ -16,7 +16,7 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, normalize_check_value  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 
 
@@ -117,7 +117,7 @@ class Configurator:
         else:
             self.__variables = variables
 
-        self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
+        self.__multisite = normalize_check_value(self.__variables.get("MULTISITE", "no")) == "yes"
         self.__servers = self.__map_servers()
 
     def get_settings(self) -> Dict[str, str]:
@@ -298,9 +298,9 @@ class Configurator:
             if variable.startswith(self.__excluded_prefixes) or variable in self.__excluded_vars or "CUSTOM_CONF" in variable:
                 continue
 
-            ret, err = self.__check_var(variable)
+            ret, err, canonical_value = self.__check_var(variable)
             if ret:
-                config[variable] = value
+                config[variable] = canonical_value
             elif variable == "SERVER_NAME":
                 self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value=!r}")
                 exit(1)
@@ -341,38 +341,46 @@ class Configurator:
 
         return config
 
-    def __check_var(self, variable: str) -> Tuple[bool, str]:
+    def __check_var(self, variable: str) -> Tuple[bool, str, str]:
         value = self.__variables[variable]
         # MULTISITE=no
         if not self.__multisite:
             where, real_var = self.__find_var(variable)
             if not where:
-                return False, f"variable name {variable} doesn't exist"
+                return False, f"variable name {variable} doesn't exist", value
+
+            # Canonicalize boolean ("check") aliases (true/on/1/...) to yes/no before
+            # validating and storing, so the regex accepts them and consumers see yes/no.
+            if where[real_var].get("type") == "check":
+                value = normalize_check_value(value)
 
             try:
                 regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
                 if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value_for_validation(real_var, value), regex_flags) is None:
-                    return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
+                    return (False, f"value {value} doesn't match regex {where[real_var]['regex']}", value)
             except RegexError:
                 self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
 
-            return True, "ok"
+            return True, "ok", value
         # MULTISITE=yes
         prefixed, real_var = self.__var_is_prefixed(variable)
         where, real_var = self.__find_var(real_var)
         if not where:
-            return False, f"variable name {variable} doesn't exist"
+            return False, f"variable name {variable} doesn't exist", value
         elif prefixed and where[real_var]["context"] != "multisite":
-            return False, f"context of {variable} isn't multisite"
+            return False, f"context of {variable} isn't multisite", value
+
+        if where[real_var].get("type") == "check":
+            value = normalize_check_value(value)
 
         try:
             regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
             if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value_for_validation(real_var, value), regex_flags) is None:
-                return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
+                return (False, f"value {value} doesn't match regex {where[real_var]['regex']}", value)
         except RegexError:
             self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
 
-        return True, "ok"
+        return True, "ok", value
 
     def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, str]], str]:
         targets = [

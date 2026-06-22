@@ -18,6 +18,35 @@ class TestIsValidSetting:
         assert ok is False
         assert "not matching regex" in msg
 
+    def test_check_accepts_truthy_aliases(self, db):
+        seed_minimal(db)
+        for v in ("true", "True", "on", "1", "y", "enabled"):
+            assert db.is_valid_setting("MULTISITE", value=v) == (True, ""), v
+
+    def test_check_accepts_falsy_aliases(self, db):
+        seed_minimal(db)
+        for v in ("false", "off", "0", "n", "disabled", "OFF"):
+            assert db.is_valid_setting("MULTISITE", value=v) == (True, ""), v
+
+    def test_check_still_rejects_non_boolean(self, db):
+        seed_minimal(db)
+        ok, msg = db.is_valid_setting("MULTISITE", value="maybe")
+        assert ok is False and "not matching regex" in msg
+
+    def test_non_check_setting_value_not_coerced(self, db):
+        seed_minimal(db)
+        # SECURITY_MODE is text (^.*$): a boolean-looking value must validate as plain text.
+        assert db.is_valid_setting("SECURITY_MODE", value="on") == (True, "")
+
+    def test_check_prefixed_alias_via_extra_services(self, db):
+        seed_minimal(db)
+        # USE_REVERSE_PROXY is a multisite check; a prefixed alias resolves + normalizes.
+        assert db.is_valid_setting("app1.example.com_USE_REVERSE_PROXY", value="on", extra_services=["app1.example.com"]) == (True, "")
+
+    def test_check_prefixed_falsy_alias_via_db_service(self, db):
+        seed_minimal(db)  # seeds service app1.example.com -> resolved via the DB services scan
+        assert db.is_valid_setting("app1.example.com_USE_REVERSE_PROXY", value="disabled") == (True, "")
+
     def test_missing(self, db):
         seed_minimal(db)
         assert db.is_valid_setting("DOES_NOT_EXIST") == (False, "missing")

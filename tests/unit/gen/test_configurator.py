@@ -29,6 +29,7 @@ CORE_PLUGIN = {
         "TEST_GLOBAL": {"context": "global", "default": "def", "help": "h", "id": "tg", "label": "x", "regex": "^[a-z]+$", "type": "text"},
         "TEST_MS": {"context": "multisite", "default": "ms", "help": "h", "id": "tm", "label": "x", "regex": "^[a-z]+$", "type": "text"},
         "TEST_MULTI": {"context": "multisite", "default": "", "help": "h", "id": "tmu", "label": "x", "regex": "^[a-z]+$", "type": "text", "multiple": "grp"},
+        "TEST_FLAG": {"context": "multisite", "default": "no", "help": "h", "id": "tf", "label": "x", "regex": "^(yes|no)$", "type": "check"},
     },
 }
 
@@ -95,3 +96,39 @@ class TestGetConfig:
 
     def test_multiple_suffix_accepted(self, cfg_paths):
         assert _cfg(cfg_paths, {"TEST_MULTI_1": "abc"}).get_config()["TEST_MULTI_1"] == "abc"
+
+
+class TestCheckNormalization:
+    """A1: 'check' values are canonicalized to yes/no at the env/file boundary."""
+
+    def test_truthy_alias_canonicalized(self, cfg_paths):
+        assert _cfg(cfg_paths, {"MULTISITE": "true"}).get_config()["MULTISITE"] == "yes"
+
+    @pytest.mark.parametrize("raw,expected", [("on", "yes"), ("1", "yes"), ("YES", "yes"), ("off", "no"), ("0", "no"), ("disabled", "no")])
+    def test_alias_forms(self, cfg_paths, raw, expected):
+        assert _cfg(cfg_paths, {"MULTISITE": raw}).get_config()["MULTISITE"] == expected
+
+    def test_invalid_check_falls_back_to_default(self, cfg_paths):
+        # "maybe" is not a boolean alias -> regex ^(yes|no)$ rejects -> default "no" retained.
+        assert _cfg(cfg_paths, {"MULTISITE": "maybe"}).get_config()["MULTISITE"] == "no"
+
+    def test_text_setting_not_coerced(self, cfg_paths):
+        # TEST_GLOBAL is text (^[a-z]+$): "on" is valid text and must be stored verbatim,
+        # never coerced to "yes".
+        assert _cfg(cfg_paths, {"TEST_GLOBAL": "on"}).get_config()["TEST_GLOBAL"] == "on"
+
+    def test_truthy_multisite_flag_enables_multisite_mode(self, cfg_paths):
+        # MULTISITE=true must enable multisite mode so prefixed per-service check settings
+        # are validated/normalized, not silently dropped to their default.
+        cfg = _cfg(cfg_paths, {"MULTISITE": "true", "SERVER_NAME": "app1", "app1_TEST_FLAG": "on"}).get_config()
+        assert cfg["MULTISITE"] == "yes"
+        assert cfg["app1_TEST_FLAG"] == "yes"
+
+    def test_multisite_prefixed_check_canonicalized(self, cfg_paths):
+        cfg = _cfg(cfg_paths, {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_FLAG": "1"}).get_config()
+        assert cfg["app1_TEST_FLAG"] == "yes"
+
+    def test_multisite_text_not_coerced(self, cfg_paths):
+        # TEST_MS is text (^[a-z]+$): a boolean-looking value stays verbatim per service.
+        cfg = _cfg(cfg_paths, {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_MS": "on"}).get_config()
+        assert cfg["app1_TEST_MS"] == "on"

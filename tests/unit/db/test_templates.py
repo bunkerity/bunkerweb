@@ -41,6 +41,34 @@ class TestCreateTemplate:
         msg = db.create_template("x", name="X", settings={"FAKE": "v"}, steps=[{"title": "S", "settings": ["FAKE"]}])
         assert "Unknown settings" in msg
 
+    def test_check_default_canonicalized(self, db):
+        seed_minimal(db)
+        # USE_REVERSE_PROXY is a check setting; a boolean alias default must be stored
+        # canonical (yes/no) so the template default reaches consumers as yes/no.
+        assert (
+            db.create_template(
+                "low",
+                name="Low",
+                settings={"USE_REVERSE_PROXY": "true"},
+                steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}],
+            )
+            == ""
+        )
+        assert db.get_template_settings("low") == {"USE_REVERSE_PROXY": "yes"}
+
+    def test_non_check_default_not_coerced(self, db):
+        seed_minimal(db)
+        # SECURITY_MODE is text (^.*$): a boolean-looking default stays verbatim.
+        assert db.create_template("t", name="T", settings={"SECURITY_MODE": "on"}, steps=[{"title": "S", "settings": ["SECURITY_MODE"]}]) == ""
+        assert db.get_template_settings("t") == {"SECURITY_MODE": "on"}
+
+    def test_update_template_check_default_canonicalized(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())  # USE_REVERSE_PROXY default "yes"
+        msg = db.update_template("low", name="Low", settings={"USE_REVERSE_PROXY": "off"}, steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}])
+        assert msg == ""
+        assert db.get_template_settings("low") == {"USE_REVERSE_PROXY": "no"}
+
 
 class TestGetTemplateSettings:
     def test_get_template_settings(self, db):
