@@ -19,6 +19,9 @@ jobs:
 
   # Build amd64 + 386 containers images
   build-containers:
+    permissions:
+      contents: read
+      security-events: write # Trivy SARIF upload
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]

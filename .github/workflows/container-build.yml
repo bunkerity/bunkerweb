@@ -127,17 +127,47 @@ jobs:
           tags: local/${{ inputs.IMAGE }}
           cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
-      # Check vulnerabilities with Docker Scout
-      - name: Docker Scout CVE Analysis
+      # Check vulnerabilities with Trivy — SARIF report (non-blocking, feeds the GitHub Security tab)
+      - name: Trivy scan (SARIF)
         if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
-        uses: docker/scout-action@cd72f264beff1cd72735de31148b9d3244a0234a # v1.21.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          command: cves,recommendations
-          image: local/${{ inputs.IMAGE }}
-          only-package-types: apk,golang
-          only-fixed: true
-          exit-code: true
-          summary: true
+          scan-type: image
+          image-ref: local/${{ inputs.IMAGE }}
+          scanners: vuln
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          skip-dirs: /root/.cargo
+          trivyignores: .trivyignore
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: "0"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+      - name: Upload Trivy SARIF report
+        if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ inputs.IMAGE }}-${{ inputs.ARCH }}
+      # Hard gate — fail the build on ANY matching vulnerability
+      - name: Trivy gate
+        if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: local/${{ inputs.IMAGE }}
+          scanners: vuln
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          skip-dirs: /root/.cargo
+          trivyignores: .trivyignore
+          format: table
+          exit-code: "1"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
       # Push image
       - name: Push image
         if: inputs.PUSH == true
