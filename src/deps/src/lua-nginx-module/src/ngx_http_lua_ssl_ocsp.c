@@ -536,14 +536,7 @@ ngx_http_lua_ffi_ssl_set_ocsp_status_resp(ngx_http_request_t *r,
     ngx_memcpy(p, resp, resp_len);
 
     dd("set ocsp resp: resp_len=%d", (int) resp_len);
-
-    /* SSL_set_tlsext_status_ocsp_resp() takes ownership of p only on
-     * success; on failure the caller still owns the buffer. */
-    if (SSL_set_tlsext_status_ocsp_resp(ssl_conn, p, resp_len) != 1) {
-        OPENSSL_free(p);
-        *err = "SSL_set_tlsext_status_ocsp_resp() failed";
-        return NGX_ERROR;
-    }
+    (void) SSL_set_tlsext_status_ocsp_resp(ssl_conn, p, resp_len);
 
     return NGX_OK;
 

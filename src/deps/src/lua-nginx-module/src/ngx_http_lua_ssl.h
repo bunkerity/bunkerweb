@@ -24,7 +24,7 @@ typedef struct {
 
     ngx_str_t                session_id;
 
-#if HAVE_LUA_PROXY_SSL
+#ifdef HAVE_PROXY_SSL_PATCH
     X509_STORE_CTX          *x509_store;
     ngx_pool_t              *pool;
 #endif
@@ -38,7 +38,7 @@ typedef struct {
                                            request ctx data in lua
                                            registry */
 
-#if HAVE_LUA_PROXY_SSL
+#ifdef HAVE_PROXY_SSL_PATCH
     /* same size as count field of ngx_http_request_t */
     unsigned                 original_request_count:16;
 #endif
@@ -48,8 +48,7 @@ typedef struct {
     unsigned                 entered_client_hello_handler:1;
     unsigned                 entered_cert_handler:1;
     unsigned                 entered_sess_fetch_handler:1;
-#if HAVE_LUA_PROXY_SSL
-    unsigned                 entered_proxy_ssl_cert_handler:1;
+#ifdef HAVE_PROXY_SSL_PATCH
     unsigned                 entered_proxy_ssl_verify_handler:1;
 #endif
 } ngx_http_lua_ssl_ctx_t;
