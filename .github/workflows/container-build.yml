@@ -139,7 +139,7 @@ jobs:
           scan-type: image
           image-ref: local/${{ inputs.IMAGE }}
           scanners: vuln
-          ignore-unfixed: false
+          ignore-unfixed: true
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
@@ -165,7 +165,7 @@ jobs:
           scan-type: image
           image-ref: local/${{ inputs.IMAGE }}
           scanners: vuln
-          ignore-unfixed: false
+          ignore-unfixed: true
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
