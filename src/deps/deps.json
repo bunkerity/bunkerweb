@@ -166,9 +166,9 @@
     },
     {
       "id": "lua-resty-string",
-      "name": "lua-resty-string v0.18",
+      "name": "lua-resty-string v0.19",
       "url": "https://github.com/openresty/lua-resty-string.git",
-      "commit": "e10c1cc2ca85ea277a8d759333444f37f77c884c",
+      "commit": "282590f58d4c927226492e0211b974d72b759329",
       "post_install": "rm -r src/deps/src/lua-resty-string/t"
     },
     {

@@ -8,6 +8,7 @@
 - [DEPS] Updated lua-cjson version to v2.1.0.18
 - [DEPS] Updated lua-nginx-module version to v0.10.31
 - [DEPS] Updated lua-resty-signal version to v0.05
+- [DEPS] Updated lua-resty-string version to v0.19
 
 ## v1.6.12~rc3 - 2026/06/18
 
