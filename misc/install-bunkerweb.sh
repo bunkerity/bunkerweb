@@ -128,9 +128,8 @@ declare -A _NGINX_VERSION_BY_BW=(
     # 1.6.12 uses 1.30.3 (= DEFAULT_NGINX_VERSION) via the fallback.
 )
 # Fedora lagged the common pin on these releases only (Fedora repo timing).
-# 1.6.12: Fedora 43/44 still lack 1.30.3 (only Rawhide has it), so they ship 1.30.2.
 declare -A _NGINX_VERSION_BY_BW_FEDORA=(
-    [1.6.2]="1.26.3" [1.6.8]="1.28.1" [1.6.11]="1.30.1" [1.6.12]="1.30.2"
+    [1.6.2]="1.26.3" [1.6.8]="1.28.1" [1.6.11]="1.30.1"
 )
 
 ENABLE_WIZARD=""
