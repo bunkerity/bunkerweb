@@ -63,9 +63,9 @@
     },
     {
       "id": "lua-nginx-module",
-      "name": "lua-nginx-module v0.10.29",
+      "name": "lua-nginx-module v0.10.31",
       "url": "https://github.com/openresty/lua-nginx-module.git",
-      "commit": "a1ec138e98801400832fee6030120777bf9bb435",
+      "commit": "4b21d8f5fd3cc94fd25c530b3a61405af9666d0b",
       "post_install": "rm -r src/deps/src/lua-nginx-module/t"
     },
     {

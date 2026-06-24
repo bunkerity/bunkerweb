@@ -1016,6 +1016,7 @@ ngx_http_lua_reset_ctx(ngx_http_request_t *r, lua_State *L,
     ctx->entered_server_rewrite_phase = 0;
     ctx->entered_rewrite_phase = 0;
     ctx->entered_access_phase = 0;
+    ctx->entered_precontent_phase = 0;
     ctx->entered_content_phase = 0;
 
     ctx->exit_code = 0;
@@ -1424,8 +1425,10 @@ ngx_http_lua_run_thread(lua_State *L, ngx_http_request_t *r,
                         return NGX_AGAIN;
                     }
 
-                    ngx_http_lua_del_thread(r, L, ctx, ctx->cur_co_ctx);
-                    ctx->uthreads--;
+                    if (ctx->cur_co_ctx->co_ref != LUA_NOREF) {
+                        ngx_http_lua_del_thread(r, L, ctx, ctx->cur_co_ctx);
+                        ctx->uthreads--;
+                    }
 
                     if (ctx->uthreads == 0) {
                         if (ngx_http_lua_entry_thread_alive(ctx)) {
@@ -1463,7 +1466,9 @@ user_co_done:
                     lua_xmove(ctx->cur_co_ctx->co, next_co, nrets);
                 }
 
-                if (ctx->cur_co_ctx->is_uthread) {
+                if (ctx->cur_co_ctx->is_uthread
+                    && ctx->cur_co_ctx->co_ref != LUA_NOREF)
+                {
                     ngx_http_lua_del_thread(r, L, ctx, ctx->cur_co_ctx);
                     ctx->uthreads--;
                 }
@@ -1574,8 +1579,10 @@ propagate_error:
                     return NGX_AGAIN;
                 }
 
-                ngx_http_lua_del_thread(r, L, ctx, ctx->cur_co_ctx);
-                ctx->uthreads--;
+                if (ctx->cur_co_ctx->co_ref != LUA_NOREF) {
+                    ngx_http_lua_del_thread(r, L, ctx, ctx->cur_co_ctx);
+                    ctx->uthreads--;
+                }
 
                 if (ctx->uthreads == 0) {
                     if (ngx_http_lua_entry_thread_alive(ctx)) {
@@ -1683,8 +1690,10 @@ no_parent:
 
 done:
 
-#ifdef HAVE_PROXY_SSL_PATCH
-    if (ctx->context == NGX_HTTP_LUA_CONTEXT_PROXY_SSL_VERIFY) {
+#if HAVE_LUA_PROXY_SSL
+    if (ctx->context == NGX_HTTP_LUA_CONTEXT_PROXY_SSL_CERT
+        || ctx->context == NGX_HTTP_LUA_CONTEXT_PROXY_SSL_VERIFY)
+    {
         return NGX_OK;
     }
 #endif
@@ -2444,8 +2453,10 @@ ngx_http_lua_handle_exit(lua_State *L, ngx_http_request_t *r,
         return ctx->exit_code;
     }
 
-#ifdef HAVE_PROXY_SSL_PATCH
-    if (ctx->context == NGX_HTTP_LUA_CONTEXT_PROXY_SSL_VERIFY) {
+#if HAVE_LUA_PROXY_SSL
+    if (ctx->context == NGX_HTTP_LUA_CONTEXT_PROXY_SSL_CERT
+        || ctx->context == NGX_HTTP_LUA_CONTEXT_PROXY_SSL_VERIFY)
+    {
         return ctx->exit_code;
     }
 #endif
@@ -3686,7 +3697,7 @@ ngx_http_lua_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
 {
     ngx_http_lua_ctx_t              *ctx;
 #if (NGX_HTTP_SSL)
-#ifdef HAVE_PROXY_SSL_PATCH
+#if HAVE_LUA_PROXY_SSL
     ngx_http_upstream_t             *u;
     ngx_connection_t                *c;
     ngx_http_lua_ssl_ctx_t          *cctx;
@@ -3699,7 +3710,7 @@ ngx_http_lua_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
     }
 
 #if (NGX_HTTP_SSL)
-#ifdef HAVE_PROXY_SSL_PATCH
+#if HAVE_LUA_PROXY_SSL
     u = r->upstream;
     if (u) {
         c = u->peer.connection;

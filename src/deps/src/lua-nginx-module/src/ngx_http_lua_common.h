@@ -24,6 +24,28 @@
 #include <lauxlib.h>
 
 
+
+#if (NGX_HTTP_SSL)
+/* introduce OPENSSL_IS_BORINGSSL and LIBRESSL_VERSION_NUMBER */
+#include <openssl/ssl.h>
+
+#ifdef HAVE_PROXY_SSL_PATCH
+
+#if defined(LIBRESSL_VERSION_NUMBER)
+#define HAVE_LUA_PROXY_SSL  0
+#elif defined(OPENSSL_IS_BORINGSSL)
+#define  HAVE_LUA_PROXY_SSL 0
+#elif defined(SSL_ERROR_WANT_RETRY_VERIFY) &&                                \
+    OPENSSL_VERSION_NUMBER >= 0x30000020uL
+#define  HAVE_LUA_PROXY_SSL 1
+#else
+#define  HAVE_LUA_PROXY_SSL 0
+#endif
+
+#endif /* HAVE_PROXY_SSL_PATCH */
+#endif /* NGX_HTTP_SSL */
+
+
 #if defined(NDK) && NDK
 #include <ndk.h>
 
@@ -148,11 +170,9 @@ typedef struct {
 #define NGX_HTTP_LUA_CONTEXT_EXIT_WORKER        0x00002000
 #define NGX_HTTP_LUA_CONTEXT_SSL_CLIENT_HELLO   0x00004000
 #define NGX_HTTP_LUA_CONTEXT_SERVER_REWRITE     0x00008000
-
-#ifdef HAVE_PROXY_SSL_PATCH
 #define NGX_HTTP_LUA_CONTEXT_PROXY_SSL_VERIFY   0x00010000
-#endif
-
+#define NGX_HTTP_LUA_CONTEXT_PRECONTENT         0x00020000
+#define NGX_HTTP_LUA_CONTEXT_PROXY_SSL_CERT     0x00040000
 
 #define NGX_HTTP_LUA_FFI_NO_REQ_CTX         -100
 #define NGX_HTTP_LUA_FFI_BAD_CONTEXT        -101
@@ -254,6 +274,7 @@ struct ngx_http_lua_main_conf_s {
 
     ngx_flag_t           postponed_to_rewrite_phase_end;
     ngx_flag_t           postponed_to_access_phase_end;
+    ngx_flag_t           postponed_to_precontent_phase_end;
 
     ngx_http_lua_main_conf_handler_pt    init_handler;
     ngx_str_t                            init_src;
@@ -322,6 +343,7 @@ struct ngx_http_lua_main_conf_s {
     unsigned             requires_shm:1;
     unsigned             requires_capture_log:1;
     unsigned             requires_server_rewrite:1;
+    unsigned             requires_precontent:1;
 };
 
 
@@ -393,7 +415,13 @@ struct ngx_http_lua_loc_conf_s {
     ngx_array_t            *ssl_conf_commands;
 #endif
 
-#ifdef HAVE_PROXY_SSL_PATCH
+#if HAVE_LUA_PROXY_SSL
+    ngx_http_lua_loc_conf_handler_pt       proxy_ssl_cert_handler;
+    ngx_str_t                              proxy_ssl_cert_src;
+    u_char                                *proxy_ssl_cert_src_key;
+    u_char                                *proxy_ssl_cert_chunkname;
+    int                                    proxy_ssl_cert_src_ref;
+
     ngx_http_lua_loc_conf_handler_pt       proxy_ssl_verify_handler;
     ngx_str_t                              proxy_ssl_verify_src;
     u_char                                *proxy_ssl_verify_src_key;
@@ -414,6 +442,7 @@ struct ngx_http_lua_loc_conf_s {
 
     ngx_http_handler_pt     rewrite_handler;
     ngx_http_handler_pt     access_handler;
+    ngx_http_handler_pt     precontent_handler;
     ngx_http_handler_pt     content_handler;
     ngx_http_handler_pt     log_handler;
     ngx_http_handler_pt     header_filter_handler;
@@ -438,13 +467,22 @@ struct ngx_http_lua_loc_conf_s {
     u_char                  *access_src_key; /* cached key for access_src */
     int                      access_src_ref;
 
+    u_char                  *precontent_chunkname;
+    ngx_http_complex_value_t precontent_src;    /*  precontent_by_lua
+                                                inline script/script
+                                                file path */
+
+    u_char                  *precontent_src_key; /* cached key for
+                                                    precontent_src */
+    int                      precontent_src_ref;
+
     u_char                  *content_chunkname;
     ngx_http_complex_value_t content_src;    /*  content_by_lua
                                                 inline script/script
                                                 file path */
 
-    u_char                 *content_src_key; /* cached key for content_src */
-    int                     content_src_ref;
+    u_char                  *content_src_key; /* cached key for content_src */
+    int                      content_src_ref;
 
 
     u_char                      *log_chunkname;
@@ -683,6 +721,7 @@ typedef struct ngx_http_lua_ctx_s {
     unsigned         entered_server_rewrite_phase:1;
     unsigned         entered_rewrite_phase:1;
     unsigned         entered_access_phase:1;
+    unsigned         entered_precontent_phase:1;
     unsigned         entered_content_phase:1;
 
     unsigned         buffering:1; /* HTTP 1.0 response body buffering flag */

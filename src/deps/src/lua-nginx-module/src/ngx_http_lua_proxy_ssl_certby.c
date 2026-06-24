@@ -7,7 +7,7 @@
 #endif
 
 #include "ddebug.h"
-#include "ngx_http_lua_proxy_ssl_verifyby.h"
+#include "ngx_http_lua_proxy_ssl_certby.h"
 
 
 #if HAVE_LUA_PROXY_SSL
@@ -20,14 +20,15 @@
 #include "ngx_http_lua_ssl.h"
 
 
-static void ngx_http_lua_proxy_ssl_verify_done(void *data);
-static void ngx_http_lua_proxy_ssl_verify_aborted(void *data);
-static ngx_int_t ngx_http_lua_proxy_ssl_verify_by_chunk(lua_State *L,
+
+static void ngx_http_lua_proxy_ssl_cert_done(void *data);
+static void ngx_http_lua_proxy_ssl_cert_aborted(void *data);
+static ngx_int_t ngx_http_lua_proxy_ssl_cert_by_chunk(lua_State *L,
     ngx_http_request_t *r);
 
 
 ngx_int_t
-ngx_http_lua_proxy_ssl_verify_set_callback(ngx_conf_t *cf)
+ngx_http_lua_proxy_ssl_cert_set_callback(ngx_conf_t *cf)
 {
     void                      *plcf;
     ngx_http_upstream_conf_t  *ucf;
@@ -43,29 +44,29 @@ ngx_http_lua_proxy_ssl_verify_set_callback(ngx_conf_t *cf)
     ssl = ucf->ssl;
 
     if (!ssl->ctx) {
-        ngx_log_error(NGX_LOG_EMERG, cf->log, 0, "proxy_ssl_verify_by_lua* "
-                      "should be used with proxy_pass https url");
+        ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                      "proxy_ssl_certificate_by_lua* should be used with "
+                      "proxy_pass https url");
 
         return NGX_ERROR;
     }
 
-    SSL_CTX_set_cert_verify_callback(ssl->ctx,
-                                     ngx_http_lua_proxy_ssl_verify_handler,
-                                     NULL);
+    SSL_CTX_set_cert_cb(ssl->ctx, ngx_http_lua_proxy_ssl_cert_handler, NULL);
+
     return NGX_OK;
 }
 
 
 ngx_int_t
-ngx_http_lua_proxy_ssl_verify_handler_file(ngx_http_request_t *r,
+ngx_http_lua_proxy_ssl_cert_handler_file(ngx_http_request_t *r,
     ngx_http_lua_loc_conf_t *llcf, lua_State *L)
 {
     ngx_int_t           rc;
 
     rc = ngx_http_lua_cache_loadfile(r->connection->log, L,
-                                     llcf->proxy_ssl_verify_src.data,
-                                     &llcf->proxy_ssl_verify_src_ref,
-                                     llcf->proxy_ssl_verify_src_key);
+                                     llcf->proxy_ssl_cert_src.data,
+                                     &llcf->proxy_ssl_cert_src_ref,
+                                     llcf->proxy_ssl_cert_src_key);
     if (rc != NGX_OK) {
         return rc;
     }
@@ -73,22 +74,22 @@ ngx_http_lua_proxy_ssl_verify_handler_file(ngx_http_request_t *r,
     /*  make sure we have a valid code chunk */
     ngx_http_lua_assert(lua_isfunction(L, -1));
 
-    return ngx_http_lua_proxy_ssl_verify_by_chunk(L, r);
+    return ngx_http_lua_proxy_ssl_cert_by_chunk(L, r);
 }
 
 
 ngx_int_t
-ngx_http_lua_proxy_ssl_verify_handler_inline(ngx_http_request_t *r,
+ngx_http_lua_proxy_ssl_cert_handler_inline(ngx_http_request_t *r,
     ngx_http_lua_loc_conf_t *llcf, lua_State *L)
 {
     ngx_int_t           rc;
 
     rc = ngx_http_lua_cache_loadbuffer(r->connection->log, L,
-                                       llcf->proxy_ssl_verify_src.data,
-                                       llcf->proxy_ssl_verify_src.len,
-                                       &llcf->proxy_ssl_verify_src_ref,
-                                       llcf->proxy_ssl_verify_src_key,
-                           (const char *) llcf->proxy_ssl_verify_chunkname);
+                                       llcf->proxy_ssl_cert_src.data,
+                                       llcf->proxy_ssl_cert_src.len,
+                                       &llcf->proxy_ssl_cert_src_ref,
+                                       llcf->proxy_ssl_cert_src_key,
+                           (const char *) llcf->proxy_ssl_cert_chunkname);
     if (rc != NGX_OK) {
         return rc;
     }
@@ -96,19 +97,19 @@ ngx_http_lua_proxy_ssl_verify_handler_inline(ngx_http_request_t *r,
     /*  make sure we have a valid code chunk */
     ngx_http_lua_assert(lua_isfunction(L, -1));
 
-    return ngx_http_lua_proxy_ssl_verify_by_chunk(L, r);
+    return ngx_http_lua_proxy_ssl_cert_by_chunk(L, r);
 }
 
 
 char *
-ngx_http_lua_proxy_ssl_verify_by_lua_block(ngx_conf_t *cf, ngx_command_t *cmd,
+ngx_http_lua_proxy_ssl_cert_by_lua_block(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf)
 {
     char        *rv;
     ngx_conf_t   save;
 
     save = *cf;
-    cf->handler = ngx_http_lua_proxy_ssl_verify_by_lua;
+    cf->handler = ngx_http_lua_proxy_ssl_cert_by_lua;
     cf->handler_conf = conf;
 
     rv = ngx_http_lua_conf_lua_block_parse(cf, cmd);
@@ -120,7 +121,7 @@ ngx_http_lua_proxy_ssl_verify_by_lua_block(ngx_conf_t *cf, ngx_command_t *cmd,
 
 
 char *
-ngx_http_lua_proxy_ssl_verify_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
+ngx_http_lua_proxy_ssl_cert_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf)
 {
     size_t                       chunkname_len;
@@ -135,7 +136,7 @@ ngx_http_lua_proxy_ssl_verify_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
         return NGX_CONF_ERROR;
     }
 
-    if (llcf->proxy_ssl_verify_handler) {
+    if (llcf->proxy_ssl_cert_handler) {
         return "is duplicate";
     }
 
@@ -145,10 +146,10 @@ ngx_http_lua_proxy_ssl_verify_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
 
     value = cf->args->elts;
 
-    llcf->proxy_ssl_verify_handler =
+    llcf->proxy_ssl_cert_handler =
         (ngx_http_lua_loc_conf_handler_pt) cmd->post;
 
-    if (cmd->post == ngx_http_lua_proxy_ssl_verify_handler_file) {
+    if (cmd->post == ngx_http_lua_proxy_ssl_cert_handler_file) {
         /* Lua code in an external file */
 
         name = ngx_http_lua_rebase_path(cf->pool, value[1].data,
@@ -163,38 +164,39 @@ ngx_http_lua_proxy_ssl_verify_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
             return NGX_CONF_ERROR;
         }
 
-        llcf->proxy_ssl_verify_src.data = name;
-        llcf->proxy_ssl_verify_src.len = ngx_strlen(name);
+        llcf->proxy_ssl_cert_src.data = name;
+        llcf->proxy_ssl_cert_src.len = ngx_strlen(name);
 
     } else {
         cache_key = ngx_http_lua_gen_chunk_cache_key(cf,
-                                                     "proxy_ssl_verify_by_lua",
-                                                     value[1].data,
-                                                     value[1].len);
+                                                "proxy_ssl_certificate_by_lua",
+                                                value[1].data,
+                                                value[1].len);
         if (cache_key == NULL) {
             return NGX_CONF_ERROR;
         }
 
-        chunkname = ngx_http_lua_gen_chunk_name(cf, "proxy_ssl_verify_by_lua",
-                                          sizeof("proxy_ssl_verify_by_lua") - 1,
-                                          &chunkname_len);
+        chunkname = ngx_http_lua_gen_chunk_name(cf,
+                                                "proxy_ssl_certificate_by_lua",
+                                    sizeof("proxy_ssl_certificate_by_lua") - 1,
+                                    &chunkname_len);
         if (chunkname == NULL) {
             return NGX_CONF_ERROR;
         }
 
         /* Don't eval nginx variables for inline lua code */
-        llcf->proxy_ssl_verify_src = value[1];
-        llcf->proxy_ssl_verify_chunkname = chunkname;
+        llcf->proxy_ssl_cert_src = value[1];
+        llcf->proxy_ssl_cert_chunkname = chunkname;
     }
 
-    llcf->proxy_ssl_verify_src_key = cache_key;
+    llcf->proxy_ssl_cert_src_key = cache_key;
 
     return NGX_CONF_OK;
 }
 
 
 int
-ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store, void *arg)
+ngx_http_lua_proxy_ssl_cert_handler(ngx_ssl_conn_t *ssl_conn, void *data)
 {
     lua_State                       *L;
     ngx_int_t                        rc;
@@ -203,34 +205,30 @@ ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store, void *arg)
     ngx_pool_cleanup_t              *cln;
     ngx_http_lua_loc_conf_t         *llcf;
     ngx_http_lua_ssl_ctx_t          *cctx;
-    ngx_ssl_conn_t                  *ssl_conn;
-
-    ssl_conn = X509_STORE_CTX_get_ex_data(x509_store,
-                                          SSL_get_ex_data_X509_STORE_CTX_idx());
 
     c = ngx_ssl_get_connection(ssl_conn);  /* upstream connection */
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "proxy ssl verify: connection reusable: %ud", c->reusable);
+                   "proxy ssl cert: connection reusable: %ud", c->reusable);
 
     cctx = ngx_http_lua_ssl_get_ctx(c->ssl->connection);
 
-    dd("proxy ssl verify handler, cert-verify-ctx=%p", cctx);
+    dd("proxy ssl cert handler, cert-ctx=%p", cctx);
 
-    if (cctx && cctx->entered_proxy_ssl_verify_handler) {
+    if (cctx && cctx->entered_proxy_ssl_cert_handler) {
         /* not the first time */
 
         if (cctx->done) {
             ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                           "proxy_ssl_verify_by_lua: "
-                           "cert verify callback exit code: %d",
+                           "proxy_ssl_certificate_by_lua: "
+                           "cert cb exit code: %d",
                            cctx->exit_code);
 
-            dd("lua proxy ssl verify done, finally");
+            dd("lua proxy ssl cert done, finally");
             return cctx->exit_code;
         }
 
-        return SSL_set_retry_verify(ssl_conn);
+        return -1;
     }
 
     dd("first time");
@@ -252,11 +250,10 @@ ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store, void *arg)
 
     cctx->connection = c;
     cctx->request = r;
-    cctx->x509_store = x509_store;
     cctx->exit_code = 1;  /* successful by default */
     cctx->original_request_count = r->main->count;
     cctx->done = 0;
-    cctx->entered_proxy_ssl_verify_handler = 1;
+    cctx->entered_proxy_ssl_cert_handler = 1;
     cctx->pool = ngx_create_pool(128, c->log);
     if (cctx->pool == NULL) {
         goto failed;
@@ -272,22 +269,13 @@ ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store, void *arg)
     }
 
     llcf = ngx_http_get_module_loc_conf(r, ngx_http_lua_module);
-    if (llcf->upstream_skip_openssl_default_verify == 0) {
-        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                       "proxy_ssl_verify_by_lua: openssl default verify");
-
-        rc = X509_verify_cert(x509_store);
-        if (rc == 0) {
-            goto failed;
-        }
-    }
 
     /* TODO honor lua_code_cache off */
     L = ngx_http_lua_get_lua_vm(r, NULL);
 
-    c->log->action = "loading proxy ssl verify by lua";
+    c->log->action = "loading proxy ssl certificate by lua";
 
-    rc = llcf->proxy_ssl_verify_handler(r, llcf, L);
+    rc = llcf->proxy_ssl_cert_handler(r, llcf, L);
 
     if (rc >= NGX_OK || rc == NGX_ERROR) {
         cctx->done = 1;
@@ -297,9 +285,9 @@ ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store, void *arg)
         }
 
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                       "proxy_ssl_verify_by_lua: handler return value: %i, "
-                       "cert verify callback exit code: %d", rc,
-                       cctx->exit_code);
+                       "proxy_ssl_certificate_by_lua: "
+                       "handler return value: %i, cert cb exit code: %d",
+                       rc, cctx->exit_code);
 
         c->log->action = "proxy pass SSL handshaking";
         return cctx->exit_code;
@@ -312,7 +300,7 @@ ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store, void *arg)
         goto failed;
     }
 
-    cln->handler = ngx_http_lua_proxy_ssl_verify_done;
+    cln->handler = ngx_http_lua_proxy_ssl_cert_done;
     cln->data = cctx;
 
     if (cctx->cleanup == NULL) {
@@ -325,9 +313,9 @@ ngx_http_lua_proxy_ssl_verify_handler(X509_STORE_CTX *x509_store, void *arg)
         cctx->cleanup = &cln->handler;
     }
 
-    *cctx->cleanup = ngx_http_lua_proxy_ssl_verify_aborted;
+    *cctx->cleanup = ngx_http_lua_proxy_ssl_cert_aborted;
 
-    return SSL_set_retry_verify(ssl_conn);
+    return -1;
 
 failed:
 
@@ -335,17 +323,17 @@ failed:
         ngx_destroy_pool(cctx->pool);
     }
 
-    return 0;  /* verify failure or error */
+    return 0;
 }
 
 
 static void
-ngx_http_lua_proxy_ssl_verify_done(void *data)
+ngx_http_lua_proxy_ssl_cert_done(void *data)
 {
     ngx_connection_t        *c;
     ngx_http_lua_ssl_ctx_t  *cctx = data;
 
-    dd("lua proxy ssl verify done");
+    dd("lua proxy ssl cert done");
 
     if (cctx->aborted) {
         return;
@@ -376,11 +364,11 @@ ngx_http_lua_proxy_ssl_verify_done(void *data)
 
 
 static void
-ngx_http_lua_proxy_ssl_verify_aborted(void *data)
+ngx_http_lua_proxy_ssl_cert_aborted(void *data)
 {
     ngx_http_lua_ssl_ctx_t  *cctx = data;
 
-    dd("lua proxy ssl verify aborted");
+    dd("lua proxy ssl cert aborted");
 
     if (cctx->done) {
         /* completed successfully already */
@@ -388,7 +376,7 @@ ngx_http_lua_proxy_ssl_verify_aborted(void *data)
     }
 
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, cctx->connection->log, 0,
-                   "proxy_ssl_verify_by_lua: cert verify callback aborted");
+                   "proxy_ssl_certificate_by_lua: cert cb aborted");
 
     cctx->aborted = 1;
     cctx->connection->ssl = NULL;
@@ -401,7 +389,7 @@ ngx_http_lua_proxy_ssl_verify_aborted(void *data)
 
 
 static ngx_int_t
-ngx_http_lua_proxy_ssl_verify_by_chunk(lua_State *L, ngx_http_request_t *r)
+ngx_http_lua_proxy_ssl_cert_by_chunk(lua_State *L, ngx_http_request_t *r)
 {
     int                      co_ref;
     ngx_int_t                rc;
@@ -480,7 +468,7 @@ ngx_http_lua_proxy_ssl_verify_by_chunk(lua_State *L, ngx_http_request_t *r)
         ctx->cleanup = &cln->handler;
     }
 
-    ctx->context = NGX_HTTP_LUA_CONTEXT_PROXY_SSL_VERIFY;
+    ctx->context = NGX_HTTP_LUA_CONTEXT_PROXY_SSL_CERT;
 
     rc = ngx_http_lua_run_thread(L, r, ctx, 0);
 
@@ -502,21 +490,12 @@ ngx_http_lua_proxy_ssl_verify_by_chunk(lua_State *L, ngx_http_request_t *r)
 }
 
 
-/*
- * openssl's doc of SSL_CTX_set_cert_verify_callback:
- * In any case a viable verification result value must
- * be reflected in the error member of x509_store_ctx,
- * which can be done using X509_STORE_CTX_set_error.
- */
 int
-ngx_http_lua_ffi_proxy_ssl_set_verify_result(ngx_http_request_t *r,
-    int verify_result, char **err)
+ngx_http_lua_ffi_proxy_ssl_get_tls1_version(ngx_http_request_t *r, char **err)
 {
     ngx_http_upstream_t             *u;
     ngx_ssl_conn_t                  *ssl_conn;
     ngx_connection_t                *c;
-    ngx_http_lua_ssl_ctx_t          *cctx;
-    X509_STORE_CTX                  *x509_store;
 
     u = r->upstream;
     if (u == NULL) {
@@ -536,32 +515,51 @@ ngx_http_lua_ffi_proxy_ssl_set_verify_result(ngx_http_request_t *r,
         return NGX_ERROR;
     }
 
-    dd("get cctx session");
+    dd("tls1 ver: %d", SSL_version(ssl_conn));
 
-    c = ngx_ssl_get_connection(ssl_conn);
+    return SSL_version(ssl_conn);
+}
 
-    cctx = ngx_http_lua_ssl_get_ctx(c->ssl->connection);
-    if (cctx == NULL) {
-        *err = "bad lua context";
+
+int
+ngx_http_lua_ffi_proxy_ssl_clear_certs(ngx_http_request_t *r, char **err)
+{
+    ngx_http_upstream_t             *u;
+    ngx_ssl_conn_t                  *ssl_conn;
+    ngx_connection_t                *c;
+
+    u = r->upstream;
+    if (u == NULL) {
+        *err = "bad request";
         return NGX_ERROR;
     }
 
-    x509_store = cctx->x509_store;
+    c = u->peer.connection;
+    if (c == NULL || c->ssl == NULL) {
+        *err = "bad upstream connection";
+        return NGX_ERROR;
+    }
 
-    X509_STORE_CTX_set_error(x509_store, verify_result);
+    ssl_conn = c->ssl->connection;
+    if (ssl_conn == NULL) {
+        *err = "bad ssl conn";
+        return NGX_ERROR;
+    }
 
+    SSL_certs_clear(ssl_conn);
     return NGX_OK;
 }
 
 
 int
-ngx_http_lua_ffi_proxy_ssl_get_verify_result(ngx_http_request_t *r, char **err)
+ngx_http_lua_ffi_proxy_ssl_set_der_certificate(ngx_http_request_t *r,
+    const char *data, size_t len, char **err)
 {
     ngx_http_upstream_t             *u;
     ngx_ssl_conn_t                  *ssl_conn;
     ngx_connection_t                *c;
-    ngx_http_lua_ssl_ctx_t          *cctx;
-    X509_STORE_CTX                  *x509_store;
+    BIO                             *bio = NULL;
+    X509                            *x509 = NULL;
 
     u = r->upstream;
     if (u == NULL) {
@@ -581,79 +579,252 @@ ngx_http_lua_ffi_proxy_ssl_get_verify_result(ngx_http_request_t *r, char **err)
         return NGX_ERROR;
     }
 
-    dd("get cctx session");
-
-    c = ngx_ssl_get_connection(ssl_conn);
-
-    cctx = ngx_http_lua_ssl_get_ctx(c->ssl->connection);
-    if (cctx == NULL) {
-        *err = "bad lua context";
-        return NGX_ERROR;
+    bio = BIO_new_mem_buf((char *) data, len);
+    if (bio == NULL) {
+        *err = "BIO_new_mem_buf() failed";
+        goto failed;
     }
 
-    x509_store = cctx->x509_store;
+    x509 = d2i_X509_bio(bio, NULL);
+    if (x509 == NULL) {
+        *err = "d2i_X509_bio() failed";
+        goto failed;
+    }
 
-    return X509_STORE_CTX_get_error(x509_store);
+    if (SSL_use_certificate(ssl_conn, x509) == 0) {
+        *err = "SSL_use_certificate() failed";
+        goto failed;
+    }
+
+    X509_free(x509);
+    x509 = NULL;
+
+    /* read rest of the chain */
+
+    while (!BIO_eof(bio)) {
+
+        x509 = d2i_X509_bio(bio, NULL);
+        if (x509 == NULL) {
+            *err = "d2i_X509_bio() failed";
+            goto failed;
+        }
+
+        if (SSL_add0_chain_cert(ssl_conn, x509) == 0) {
+            *err = "SSL_add0_chain_cert() failed";
+            goto failed;
+        }
+    }
+
+    BIO_free(bio);
+
+    *err = NULL;
+    return NGX_OK;
+
+failed:
+
+    if (bio) {
+        BIO_free(bio);
+    }
+
+    if (x509) {
+        X509_free(x509);
+    }
+
+    ERR_clear_error();
+
+    return NGX_ERROR;
 }
 
 
-void
-ngx_http_lua_ffi_proxy_ssl_free_verify_cert(void *cdata)
-{
-    X509  *cert = cdata;
-
-    X509_free(cert);
-}
-
-
-void *
-ngx_http_lua_ffi_proxy_ssl_get_verify_cert(ngx_http_request_t *r, char **err)
+int
+ngx_http_lua_ffi_proxy_ssl_set_der_private_key(ngx_http_request_t *r,
+    const char *data, size_t len, char **err)
 {
     ngx_http_upstream_t             *u;
     ngx_ssl_conn_t                  *ssl_conn;
     ngx_connection_t                *c;
-    ngx_http_lua_ssl_ctx_t          *cctx;
-    X509_STORE_CTX                  *x509_store;
-    X509                            *x509;
+    BIO                             *bio = NULL;
+    EVP_PKEY                        *pkey = NULL;
 
     u = r->upstream;
     if (u == NULL) {
         *err = "bad request";
-        return NULL;
+        return NGX_ERROR;
     }
 
     c = u->peer.connection;
     if (c == NULL || c->ssl == NULL) {
         *err = "bad upstream connection";
-        return NULL;
+        return NGX_ERROR;
     }
 
     ssl_conn = c->ssl->connection;
     if (ssl_conn == NULL) {
         *err = "bad ssl conn";
-        return NULL;
+        return NGX_ERROR;
     }
 
-    dd("get cctx session");
-
-    c = ngx_ssl_get_connection(ssl_conn);
-
-    cctx = ngx_http_lua_ssl_get_ctx(c->ssl->connection);
-    if (cctx == NULL) {
-        *err = "bad lua context";
-        return NULL;
+    bio = BIO_new_mem_buf((char *) data, len);
+    if (bio == NULL) {
+        *err = "BIO_new_mem_buf() failed";
+        goto failed;
     }
 
-    x509_store = cctx->x509_store;
-
-    x509 = X509_STORE_CTX_get0_cert(x509_store);
-
-    if (!X509_up_ref(x509)) {
-        *err = "get verify result failed";
-        return NULL;
+    pkey = d2i_PrivateKey_bio(bio, NULL);
+    if (pkey == NULL) {
+        *err = "d2i_PrivateKey_bio() failed";
+        goto failed;
     }
 
-    return x509;
+    if (SSL_use_PrivateKey(ssl_conn, pkey) == 0) {
+        *err = "SSL_use_PrivateKey() failed";
+        goto failed;
+    }
+
+    EVP_PKEY_free(pkey);
+    BIO_free(bio);
+
+    return NGX_OK;
+
+failed:
+
+    if (pkey) {
+        EVP_PKEY_free(pkey);
+    }
+
+    if (bio) {
+        BIO_free(bio);
+    }
+
+    ERR_clear_error();
+
+    return NGX_ERROR;
+}
+
+
+int
+ngx_http_lua_ffi_proxy_ssl_set_cert(ngx_http_request_t *r,
+    void *cdata, char **err)
+{
+#ifdef OPENSSL_IS_BORINGSSL
+    size_t             i;
+#else
+    int                i;
+#endif
+    ngx_http_upstream_t             *u;
+    ngx_ssl_conn_t                  *ssl_conn;
+    ngx_connection_t                *c;
+    X509                            *x509 = NULL;
+    STACK_OF(X509)                  *chain = cdata;
+
+    u = r->upstream;
+    if (u == NULL) {
+        *err = "bad request";
+        return NGX_ERROR;
+    }
+
+    c = u->peer.connection;
+    if (c == NULL || c->ssl == NULL) {
+        *err = "bad upstream connection";
+        return NGX_ERROR;
+    }
+
+    ssl_conn = c->ssl->connection;
+    if (ssl_conn == NULL) {
+        *err = "bad ssl conn";
+        return NGX_ERROR;
+    }
+
+    if (sk_X509_num(chain) < 1) {
+        *err = "invalid certificate chain";
+        goto failed;
+    }
+
+    x509 = sk_X509_value(chain, 0);
+    if (x509 == NULL) {
+        *err = "sk_X509_value() failed";
+        goto failed;
+    }
+
+    if (SSL_use_certificate(ssl_conn, x509) == 0) {
+        *err = "SSL_use_certificate() failed";
+        goto failed;
+    }
+
+    x509 = NULL;
+
+    /* read rest of the chain */
+
+    for (i = 1; i < sk_X509_num(chain); i++) {
+
+        x509 = sk_X509_value(chain, i);
+        if (x509 == NULL) {
+            *err = "sk_X509_value() failed";
+            goto failed;
+        }
+
+        if (SSL_add1_chain_cert(ssl_conn, x509) == 0) {
+            *err = "SSL_add1_chain_cert() failed";
+            goto failed;
+        }
+    }
+
+    *err = NULL;
+    return NGX_OK;
+
+failed:
+
+    ERR_clear_error();
+
+    return NGX_ERROR;
+}
+
+
+int
+ngx_http_lua_ffi_proxy_ssl_set_priv_key(ngx_http_request_t *r,
+    void *cdata, char **err)
+{
+    ngx_http_upstream_t             *u;
+    ngx_ssl_conn_t                  *ssl_conn;
+    ngx_connection_t                *c;
+    EVP_PKEY                        *pkey = NULL;
+
+    u = r->upstream;
+    if (u == NULL) {
+        *err = "bad request";
+        return NGX_ERROR;
+    }
+
+    c = u->peer.connection;
+    if (c == NULL || c->ssl == NULL) {
+        *err = "bad upstream connection";
+        return NGX_ERROR;
+    }
+
+    ssl_conn = c->ssl->connection;
+    if (ssl_conn == NULL) {
+        *err = "bad ssl conn";
+        return NGX_ERROR;
+    }
+
+    pkey = cdata;
+    if (pkey == NULL) {
+        *err = "invalid private key";
+        goto failed;
+    }
+
+    if (SSL_use_PrivateKey(ssl_conn, pkey) == 0) {
+        *err = "SSL_use_PrivateKey() failed";
+        goto failed;
+    }
+
+    return NGX_OK;
+
+failed:
+
+    ERR_clear_error();
+
+    return NGX_ERROR;
 }
 
 #endif /* HAVE_LUA_PROXY_SSL */
