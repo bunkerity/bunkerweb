@@ -159,9 +159,9 @@
     },
     {
       "id": "lua-resty-signal",
-      "name": "lua-resty-signal v0.04",
+      "name": "lua-resty-signal v0.05",
       "url": "https://github.com/openresty/lua-resty-signal.git",
-      "commit": "737d8ccfaa59c08ad4d32a712611a856775a61c5",
+      "commit": "42319006723c104e47d6922db17459c95e4db224",
       "post_install": "rm -r src/deps/src/lua-resty-signal/t"
     },
     {
