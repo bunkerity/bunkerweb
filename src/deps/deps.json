@@ -255,13 +255,6 @@
       "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {
-      "id": "nginx-1.30.2",
-      "name": "Nginx v1.30.2",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "a92a537860c7b87d3793d9eb41c9cf3ed833b53c",
-      "post_install": "rm -r src/deps/src/nginx-1.30.2/docs"
-    },
-    {
       "id": "nginx-1.28.0",
       "name": "Nginx v1.28.0",
       "url": "https://github.com/nginx/nginx.git",

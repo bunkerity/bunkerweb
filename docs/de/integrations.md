@@ -2340,10 +2340,10 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.3 installiert haben, bevor Sie B
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora stellt bereits NGINX 1.30.2 zur Verfügung, das wir unterstützen
+    Fedora stellt bereits NGINX 1.30.3 zur Verfügung, das wir unterstützen
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.2
+    sudo dnf install -y --allowerasing nginx-1.30.3
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"
