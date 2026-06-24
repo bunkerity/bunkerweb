@@ -42,6 +42,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILD_SUMMARY: "false" # skip the docker/build-push-action job summary; Trivy publishes its own
+      DOCKER_BUILD_RECORD_UPLOAD: "false"
     steps:
       # Prepare
       - name: Checkout source code
@@ -166,11 +169,24 @@ jobs:
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
           ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
-          format: table
+          format: template
+          template: "@.github/trivy/summary.tpl"
+          output: trivy-summary.md
           exit-code: "1"
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+      # Publish the Trivy results to the GitHub Actions run summary
+      - name: Trivy summary
+        if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        run: |
+          {
+            echo "## Trivy — \`$IMAGE\` ($ARCH)"
+            if [ -f trivy-summary.md ]; then cat trivy-summary.md; else echo "_No Trivy summary produced._"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          IMAGE: "${{ inputs.IMAGE }}"
+          ARCH: "${{ inputs.ARCH }}"
       # Push image
       - name: Push image
         if: inputs.PUSH == true
