@@ -515,6 +515,18 @@ local cjson_tests = {
     { "Decode (safe) error generation after new()",
       function(...) return json_safe.new().decode(...) end, { "Oops" },
       true, { nil, "Expected value but found invalid token at character 1" } },
+    { "Set encode_escape_forward_slash on a cjson instance should not affect other instances",
+      function()
+        local j1 = json.new()
+        local r1 = j1.encode("/")
+
+        local j2 = json.new()
+        j2.encode_escape_forward_slash(false)
+        local r2 = j2.encode("/")
+        local r3 = j1.encode("/")
+        return r1, r2, r3
+      end, { },
+      true, { [["\/"]], [["/"]], [["\/"]] } },
 }
 
 print(("==> Testing Lua CJSON version %s\n"):format(json._VERSION))

@@ -5,6 +5,7 @@
 - [LINUX] Updated the NGINX version to v1.30.3 for Fedora 43 and 44 now that it is available in their repositories.
 - [BUGFIX] `linux`: on Ubuntu Pro/ESM hosts the install script now installs the upstream CrowdSec engine instead of the outdated ESM build (1.4.6), whose hub index lacks the `bunkerity/bunkerweb` collection and made the install fail with `unable to find collections 'bunkerity/bunkerweb'`. (Fixes #3659)
 - [DEPS] Updated headers-more-nginx-module version to v0.40
+- [DEPS] Updated lua-cjson version to v2.1.0.18
 
 ## v1.6.12~rc3 - 2026/06/18
 
