@@ -139,6 +139,7 @@ jobs:
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
+          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
           format: sarif
           output: trivy-results.sarif
           exit-code: "0"
@@ -147,6 +148,7 @@ jobs:
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
       - name: Upload Trivy SARIF report
         if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
         uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
         with:
           sarif_file: trivy-results.sarif
@@ -163,6 +165,7 @@ jobs:
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
+          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
           format: table
           exit-code: "1"
         env:

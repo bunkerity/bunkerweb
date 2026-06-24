@@ -13,6 +13,7 @@ jobs:
       contents: read
       security-events: write # Trivy SARIF upload
     strategy:
+      fail-fast: false # keep all legs running so every image uploads its Trivy SARIF even when one gates red
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/amd64, linux/386]
