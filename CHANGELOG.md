@@ -10,6 +10,7 @@
 - [DEPS] Updated lua-resty-signal version to v0.05
 - [DEPS] Updated lua-resty-string version to v0.19
 - [DEPS] Updated lua-upstream-nginx-module version to v0.08
+- [DEPS] Updated LuaJIT version to v2.1-20260620
 
 ## v1.6.12~rc3 - 2026/06/18
 
