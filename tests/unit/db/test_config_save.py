@@ -23,6 +23,27 @@ def _check(setting_id, ctx, *, default="no"):
     return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": "^(yes|no)$", "type": "check"}
 
 
+def _size(setting_id, ctx, *, default="0"):
+    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^\d+([kKmMgG])?$", "type": "size"}
+
+
+def _dur(setting_id, ctx, *, default="0"):
+    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", "type": "duration"}
+
+
+def _list(setting_id, ctx, *, default=""):
+    return {
+        "id": setting_id,
+        "context": ctx,
+        "default": default,
+        "help": "h",
+        "label": "L",
+        "regex": r"^( *([a-z0-9.]+) *)*$",
+        "type": "multivalue",
+        "separator": " ",
+    }
+
+
 class TestSaveConfigCheckNormalization:
     """A1: 'check' values are canonicalized to yes/no when persisted, across the
     global (non-multisite), multisite-global and per-service storage paths."""
@@ -79,6 +100,41 @@ class TestSaveConfigCheckNormalization:
         db.initialize_db("1.7.0", "Docker")
         db.save_config({"ALPHA_GLOBAL": "on"}, "scheduler", skip_service_management=True)
         assert db.get_config()["ALPHA_GLOBAL"] == "on"
+
+
+class TestSaveConfigUnitNormalization:
+    """B2/B1: size/duration values stored in canonical NGINX form, list items trimmed,
+    across the global storage path."""
+
+    def test_size_canonicalized(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_SIZE": _size("alpha-size", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_SIZE": "64M"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_SIZE"] == "64m"
+
+    def test_duration_compound_canonicalized(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_DUR": _dur("alpha-dur", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_DUR": "1h 30m"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_DUR"] == "1h30m"
+
+    def test_duration_human_alias_canonicalized(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_DUR": _dur("alpha-dur", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_DUR": "5min"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_DUR"] == "5m"
+
+    def test_list_items_trimmed(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_LIST": _list("alpha-list", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_LIST": " 10.0.0.1  10.0.0.2 "}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_LIST"] == "10.0.0.1 10.0.0.2"
+
+    def test_per_service_size_canonicalized(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_SVC_SIZE": _size("alpha-svc-size", "multisite")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"MULTISITE": "yes", "SERVER_NAME": "app1.example.com", "app1.example.com_ALPHA_SVC_SIZE": "16 K"}, "scheduler")
+        assert db.get_config()["app1.example.com_ALPHA_SVC_SIZE"] == "16k"
 
 
 class TestSaveConfigGlobal:

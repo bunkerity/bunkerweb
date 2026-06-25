@@ -4,6 +4,8 @@ The multisite brain: prefixing, suffix expansion, per-service override precedenc
 the global -> per-service default propagation. Uses ``seed_multisite``.
 """
 
+import pytest
+
 from fixtures.seed import add_setting, seed_minimal, seed_multisite
 
 
@@ -76,6 +78,39 @@ class TestIsValidSetting:
         seed_minimal(db)
         db._ignore_regex_check = True
         assert db.is_valid_setting("MULTISITE", value="totally-invalid") == (True, "")
+
+    def test_size_accepts_aliases(self, db):
+        seed_minimal(db)
+        add_setting(db, "MEM_SIZE", type="size", regex=r"^\d+([kKmMgG])?$", default="0")
+        for v in ("64m", "64M", "64 m", "1mb", "131072", "0"):
+            assert db.is_valid_setting("MEM_SIZE", value=v) == (True, ""), v
+
+    def test_size_rejects_fraction(self, db):
+        seed_minimal(db)
+        add_setting(db, "MEM_SIZE", type="size", regex=r"^\d+([kKmMgG])?$", default="0")
+        ok, _ = db.is_valid_setting("MEM_SIZE", value="1.5g")
+        assert ok is False
+
+    def test_duration_accepts_aliases_and_compound(self, db):
+        seed_minimal(db)
+        add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
+        for v in ("30s", "30sec", "5min", "6month", "1h30m", "1d12h", "60", "500ms"):
+            assert db.is_valid_setting("MY_TIMEOUT", value=v) == (True, ""), v
+
+    def test_duration_rejects_garbage(self, db):
+        seed_minimal(db)
+        add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
+        ok, _ = db.is_valid_setting("MY_TIMEOUT", value="30x")
+        assert ok is False
+
+    @pytest.mark.parametrize("bad", ["30m1h", "1h1h", "1h1d"])
+    def test_duration_rejects_order_invalid_compound(self, db, bad):
+        # The permissive regex matches these, but NGINX rejects order-invalid units.
+        # is_valid_setting must reject via the authoritative parser.
+        seed_minimal(db)
+        add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
+        ok, _ = db.is_valid_setting("MY_TIMEOUT", value=bad)
+        assert ok is False
 
     def test_service_prefix_via_extra_services(self, db):
         seed_minimal(db)

@@ -8,7 +8,8 @@ from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
-from common_utils import normalize_check_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value  # type: ignore
+from unit_parser import normalize_unit  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import get_blacklisted_settings, is_editable_method
@@ -210,12 +211,30 @@ class Config:
                 variables.pop(key, None)
                 continue
 
-            # Canonicalize boolean ("check") aliases (true/on/1/...) to yes/no so the
-            # value validates and the value persisted via the API is canonical.
-            if plugins_settings[setting].get("type") == "check":
+            # Canonicalize the value to its stored form (boolean aliases -> yes/no,
+            # size/duration -> NGINX unit form, list items trimmed) so it validates and
+            # the value persisted via the API is canonical.
+            stype = plugins_settings[setting].get("type")
+            normalized = True
+            if stype == "check":
                 value = normalize_check_value(value)
-                if key in variables:
-                    variables[key] = value
+            elif stype in ("size", "duration"):
+                # The parser is authoritative for size/duration (the regex cannot encode
+                # NGINX's unit-order rule), so an unparseable value is rejected here.
+                canonical = normalize_unit(stype, value)
+                if canonical is None:
+                    if not self.__ignore_regex_check:
+                        report_error(f"Variable {key} is not valid.")
+                        variables.pop(key, None)
+                        continue
+                else:
+                    value = canonical
+            elif stype in ("multiselect", "multivalue"):
+                value = normalize_list_value(value, plugins_settings[setting].get("separator", " "))
+            else:
+                normalized = False
+            if normalized and key in variables:
+                variables[key] = value
 
             # Validate the variable's value against the regex pattern.
             try:

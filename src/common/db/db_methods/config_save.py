@@ -9,7 +9,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from model import Custom_configs, Global_values, Jobs_cache, Metadata, Plugins, Services, Services_settings, Settings, Template_settings  # type: ignore
 
-from common_utils import normalize_check_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value  # type: ignore
+from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -102,6 +103,21 @@ def _check_value(ctx: _SaveConfigContext, key: str, value: str, setting: dict, t
         return False
 
     return _is_default_value(ctx, value, key, setting, template_default, suffix, is_global)
+
+
+def _canonicalize_stored_value(setting_type: Optional[str], value: Any, separator: Optional[str] = " ") -> Any:
+    """Canonicalize a value to its stored form by setting type (mirrors
+    ``Configurator.__canonicalize_value``): check -> yes/no, size/duration -> NGINX unit
+    form, multivalue/multiselect -> trimmed items. Invalid size/duration values are left
+    unchanged so the stored value stays whatever was provided. Other types untouched."""
+    if setting_type == "check":
+        return normalize_check_value(value)
+    if setting_type in ("size", "duration"):
+        canonical = normalize_unit(setting_type, value)
+        return canonical if canonical is not None else value
+    if setting_type in ("multiselect", "multivalue"):
+        return normalize_list_value(value, separator or " ")
+    return value
 
 
 class DatabaseConfigSaveMixin(DatabaseMixinBase):
@@ -641,8 +657,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         """save_config phase: collect the settings/service-settings/template lookup dicts used by the
         multisite worker threads, storing them on ``ctx`` (read-only afterwards)."""
         # Collect necessary data before threading
-        settings_data = session.execute(select(Settings.id, Settings.default, Settings.plugin_id, Settings.type)).all()
-        ctx.settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type} for s in settings_data}
+        settings_data = session.execute(select(Settings.id, Settings.default, Settings.plugin_id, Settings.type, Settings.separator)).all()
+        ctx.settings_dict = {
+            s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type, "separator": s.separator} for s in settings_data
+        }
 
         # Collect existing service settings
         existing_service_settings = session.execute(
@@ -710,8 +728,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
 
-            if setting["type"] == "check":
-                value = normalize_check_value(value)
+            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"))
 
             if server_name not in db_ids:
                 self.logger.debug(f"Adding service {server_name}")
@@ -810,8 +827,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
 
-            if setting["type"] == "check":
-                value = normalize_check_value(value)
+            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"))
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)
@@ -918,13 +934,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 suffix = int(key.split("_")[-1])
                 key = key[: -len(str(suffix)) - 1]
 
-            setting = session.execute(select(Settings.default, Settings.plugin_id, Settings.type).filter_by(id=key).limit(1)).first()
+            setting = session.execute(select(Settings.default, Settings.plugin_id, Settings.type, Settings.separator).filter_by(id=key).limit(1)).first()
 
             if not setting:
                 continue
 
-            if setting.type == "check":
-                value = normalize_check_value(value)
+            value = _canonicalize_stored_value(setting.type, value, setting.separator)
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)

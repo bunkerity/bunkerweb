@@ -150,8 +150,8 @@
       "help": "Timeout when connecting to the proxied resource.",
       "id": "reverse-proxy-connect-timeout",
       "label": "Reverse proxy connect timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+      "type": "duration",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_READ_TIMEOUT": {
@@ -160,8 +160,8 @@
       "help": "Timeout when reading from the proxied resource.",
       "id": "reverse-proxy-read-timeout",
       "label": "Reverse proxy read timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+      "type": "duration",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_SEND_TIMEOUT": {
@@ -170,8 +170,8 @@
       "help": "Timeout when sending to the proxied resource.",
       "id": "reverse-proxy-send-timeout",
       "label": "Reverse proxy send timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+      "type": "duration",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_SSL_SNI": {

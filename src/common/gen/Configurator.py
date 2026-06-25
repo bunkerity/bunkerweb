@@ -11,13 +11,14 @@ from os.path import join
 from pathlib import Path
 from re import DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash, create_plugin_tar_gz, normalize_check_value  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, normalize_check_value, normalize_list_value  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
+from unit_parser import normalize_unit  # type: ignore
 
 
 class Configurator:
@@ -48,7 +49,7 @@ class Configurator:
         self.__mandatory_job_keys = frozenset(("name", "file", "every", "reload"))
         self.__valid_stream_values = frozenset(("yes", "no", "partial"))
         self.__valid_contexts = frozenset(("global", "multisite"))
-        self.__valid_setting_types = frozenset(("password", "text", "number", "file", "check", "select", "multiselect", "multivalue"))
+        self.__valid_setting_types = frozenset(("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", "size", "duration"))
         self.__valid_job_every_values = frozenset(("once", "minute", "hour", "day", "week"))
 
         # Pre-compile regex patterns cache
@@ -349,10 +350,11 @@ class Configurator:
             if not where:
                 return False, f"variable name {variable} doesn't exist", value
 
-            # Canonicalize boolean ("check") aliases (true/on/1/...) to yes/no before
-            # validating and storing, so the regex accepts them and consumers see yes/no.
-            if where[real_var].get("type") == "check":
-                value = normalize_check_value(value)
+            # Canonicalize the value to its stored form (boolean aliases -> yes/no,
+            # size/duration -> NGINX unit form, list items trimmed) before the regex.
+            ok, value = self.__normalize_value(where[real_var], value)
+            if not ok and not self.__ignore_regex_check:
+                return (False, f"value {value} isn't a valid {where[real_var]['type']}", value)
 
             try:
                 regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
@@ -370,8 +372,9 @@ class Configurator:
         elif prefixed and where[real_var]["context"] != "multisite":
             return False, f"context of {variable} isn't multisite", value
 
-        if where[real_var].get("type") == "check":
-            value = normalize_check_value(value)
+        ok, value = self.__normalize_value(where[real_var], value)
+        if not ok and not self.__ignore_regex_check:
+            return (False, f"value {value} isn't a valid {where[real_var]['type']}", value)
 
         try:
             regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
@@ -381,6 +384,27 @@ class Configurator:
             self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
 
         return True, "ok", value
+
+    def __normalize_value(self, setting_schema: Dict[str, Any], value: Any) -> Tuple[bool, Any]:
+        """Canonicalize a value to its stored form before regex validation, by type, and
+        report validity. Returns ``(ok, value)``:
+        - check -> (True, yes/no); list -> (True, trimmed items); other -> (True, value)
+          (their content is still gated by the regex afterwards).
+        - size/duration -> the parser is AUTHORITATIVE: a valid value returns
+          ``(True, canonical NGINX form)``; an invalid one returns ``(False, value)``.
+          The regex cannot encode NGINX's unit-order rule, so it must not be the fallback
+          gate for these types."""
+        stype = setting_schema.get("type")
+        if stype == "check":
+            return True, normalize_check_value(value)
+        if stype in ("size", "duration"):
+            canonical = normalize_unit(stype, value)
+            if canonical is None:
+                return False, value
+            return True, canonical
+        if stype in ("multiselect", "multivalue"):
+            return True, normalize_list_value(value, setting_schema.get("separator", " "))
+        return True, value
 
     def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, str]], str]:
         targets = [
@@ -440,7 +464,7 @@ class Configurator:
             elif data["type"] not in self.__valid_setting_types:
                 return (
                     False,
-                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, number, file, check, select, multiselect or multivalue)",
+                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, number, file, check, select, multiselect, multivalue, size or duration)",
                 )
 
             if "multiple" in data:

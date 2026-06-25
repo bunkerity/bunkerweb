@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from model import Global_values, Services, Services_settings, Settings, Template_settings  # type: ignore
 
-from common_utils import normalize_check_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value  # type: ignore
+from unit_parser import normalize_unit  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 
 from sqlalchemy import join, select
@@ -62,6 +63,17 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                 if value is not None:
                     if db_setting.type == "check":
                         value = normalize_check_value(value)
+                    elif db_setting.type in ("size", "duration"):
+                        # The parser is authoritative for size/duration: the regex cannot
+                        # encode NGINX's unit-order rule, so an unparseable value is invalid.
+                        canonical = normalize_unit(db_setting.type, value)
+                        if canonical is None:
+                            if not self._ignore_regex_check:
+                                return False, f"not a valid {db_setting.type}"
+                        else:
+                            value = canonical
+                    elif db_setting.type in ("multiselect", "multivalue"):
+                        value = normalize_list_value(value, db_setting.separator or " ")
                     try:
                         regex_flags = DOTALL if db_setting.type == "file" else 0
                         if not self._ignore_regex_check and search(db_setting.regex, value_for_validation(db_setting.id, value), regex_flags) is None:

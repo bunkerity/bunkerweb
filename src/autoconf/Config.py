@@ -6,7 +6,8 @@ from time import sleep
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from api_client import ApiUnavailableError  # type: ignore
-from common_utils import normalize_check_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value  # type: ignore
+from unit_parser import normalize_unit  # type: ignore
 from logger import getLogger  # type: ignore
 
 
@@ -89,11 +90,20 @@ class Config:
                         self.__logger.warning(f"Variable {variable}: {value} is not a valid autoconf setting ({err}), ignoring it")
                         continue
 
-                # Canonicalize boolean ("check") aliases so the stored value matches the
-                # DB's yes/no — otherwise apply()'s env diff vs self.__config would differ
-                # every cycle (perpetual reconfigure loop).
-                if self._settings.get(variable, {}).get("type") == "check":
+                # Canonicalize the value to its stored form (boolean aliases -> yes/no,
+                # size/duration -> NGINX unit form, list items trimmed) so it matches the
+                # value the DB persists — otherwise apply()'s env diff vs self.__config
+                # would differ every cycle (perpetual reconfigure loop).
+                schema = self._settings.get(variable, {})
+                stype = schema.get("type")
+                if stype == "check":
                     value = normalize_check_value(value)
+                elif stype in ("size", "duration"):
+                    canonical = normalize_unit(stype, value)
+                    if canonical is not None:
+                        value = canonical
+                elif stype in ("multiselect", "multivalue"):
+                    value = normalize_list_value(value, schema.get("separator", " "))
 
                 if is_global or variable.startswith(f"{server_name}_"):
                     if variable == "SERVER_NAME":

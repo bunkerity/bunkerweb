@@ -88,8 +88,8 @@
     "help": "Timeout for a graceful shutdown of worker processes. After this delay, old workers are forcefully terminated during a reload to prevent memory growth.",
     "id": "worker-shutdown-timeout",
     "label": "Worker shutdown timeout",
-    "regex": "^\\d+(ms?|[shdwMy])?$",
-    "type": "text"
+    "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+    "type": "duration"
   },
   "DNS_RESOLVERS": {
     "context": "global",
@@ -106,8 +106,8 @@
     "help": "Timeout for reading the client request body.",
     "id": "client-body-timeout",
     "label": "Client body timeout",
-    "regex": "^\\d+(ms?|[shdwMy])?$",
-    "type": "text"
+    "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+    "type": "duration"
   },
   "CLIENT_HEADER_TIMEOUT": {
     "context": "global",
@@ -115,8 +115,8 @@
     "help": "Timeout for reading the client request header.",
     "id": "client-header-timeout",
     "label": "Client header timeout",
-    "regex": "^\\d+(ms?|[shdwMy])?$",
-    "type": "text"
+    "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+    "type": "duration"
   },
   "KEEPALIVE_TIMEOUT": {
     "context": "global",
@@ -124,8 +124,8 @@
     "help": "Timeout for keep-alive client connections.",
     "id": "keepalive-timeout",
     "label": "Keepalive timeout",
-    "regex": "^\\d+(ms?|[shdwMy])?$",
-    "type": "text"
+    "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+    "type": "duration"
   },
   "SEND_TIMEOUT": {
     "context": "global",
@@ -133,8 +133,8 @@
     "help": "Timeout for transmitting a response to the client.",
     "id": "send-timeout",
     "label": "Send timeout",
-    "regex": "^\\d+(ms?|[shdwMy])?$",
-    "type": "text"
+    "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+    "type": "duration"
   },
   "WORKERLOCK_MEMORY_SIZE": {
     "context": "global",
@@ -142,8 +142,8 @@
     "help": "Size of lua_shared_dict for initialization workers",
     "id": "workerlock-memory-size",
     "label": "Initialization Workerlock memory size",
-    "regex": "^\\d+(?:[kKmMgG])?$",
-    "type": "text"
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
   },
   "INTERNALSTORE_MEMORY_SIZE": {
     "context": "global",
@@ -151,8 +151,8 @@
     "help": "Size of the internal internalstore.",
     "id": "internalstore-memory-size",
     "label": "Internalstore memory size",
-    "regex": "^\\d+(?:[kKmMgG])?$",
-    "type": "text"
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
   },
   "DATASTORE_MEMORY_SIZE": {
     "context": "global",
@@ -160,8 +160,8 @@
     "help": "Size of the internal datastore.",
     "id": "datastore-memory-size",
     "label": "Datastore memory size",
-    "regex": "^\\d+(?:[kKmMgG])?$",
-    "type": "text"
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
   },
   "DATASTORE_LRU_SIZE": {
     "context": "global",
@@ -178,8 +178,8 @@
     "help": "Size of the internal cachestore.",
     "id": "cachestore-memory-size",
     "label": "Cachestore memory size",
-    "regex": "^\\d+(?:[kKmMgG])?$",
-    "type": "text"
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
   },
   "CACHESTORE_IPC_MEMORY_SIZE": {
     "context": "global",
@@ -187,8 +187,8 @@
     "help": "Size of the internal cachestore (ipc).",
     "id": "cachestore-ipc-memory-size",
     "label": "Cachestore ipc memory size",
-    "regex": "^\\d+(?:[kKmMgG])?$",
-    "type": "text"
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
   },
   "CACHESTORE_MISS_MEMORY_SIZE": {
     "context": "global",
@@ -196,8 +196,8 @@
     "help": "Size of the internal cachestore (miss).",
     "id": "cachestore-miss-memory-size",
     "label": "Cachestore miss memory size",
-    "regex": "^\\d+(?:[kKmMgG])?$",
-    "type": "text"
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
   },
   "CACHESTORE_LOCKS_MEMORY_SIZE": {
     "context": "global",
@@ -205,8 +205,8 @@
     "help": "Size of the internal cachestore (locks).",
     "id": "cachestore-locks-memory-size",
     "label": "Cachestore locks memory size",
-    "regex": "^\\d+(?:[kKmMgG])?$",
-    "type": "text"
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
   },
   "USE_API": {
     "context": "global",

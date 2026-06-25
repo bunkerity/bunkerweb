@@ -27,6 +27,9 @@ def _config(plugins_settings, *, ignore_regex=False):
 
 _CHECK = {"USE_X": {"type": "check", "regex": "^(yes|no)$", "context": "global"}}
 _TEXT = {"TXT": {"type": "text", "regex": "^.*$", "context": "global"}}
+_SIZE = {"SZ": {"type": "size", "regex": r"^\d+([kKmMgG])?$", "context": "global"}}
+_DUR = {"DUR": {"type": "duration", "regex": r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", "context": "global"}}
+_LIST = {"LST": {"type": "multivalue", "regex": r"^( *([a-z0-9.]+) *)*$", "context": "global", "separator": " "}}
 
 
 @pytest.fixture(autouse=True)
@@ -60,3 +63,38 @@ class TestCheckVariablesNormalization:
         cfg = _config(_TEXT)
         out = cfg.check_variables({"TXT": "on"}, config={}, to_check={"TXT": "on"}, global_config=True, new=True, threaded=True)
         assert out["TXT"] == "on"
+
+
+class TestUnitAndListNormalization:
+    @pytest.mark.parametrize("raw,canon", [("64M", "64m"), ("64 m", "64m"), ("1mb", "1m")])
+    def test_size_canonicalized_and_written_back(self, raw, canon):
+        cfg = _config(_SIZE)
+        variables = {"SZ": raw}
+        out = cfg.check_variables(variables, config={}, to_check={"SZ": raw}, global_config=True, new=True, threaded=True)
+        assert out["SZ"] == canon
+        assert variables["SZ"] == canon  # written back for the API payload
+
+    @pytest.mark.parametrize("raw,canon", [("30sec", "30s"), ("5min", "5m"), ("1h 30m", "1h30m"), ("6month", "6M")])
+    def test_duration_canonicalized(self, raw, canon):
+        cfg = _config(_DUR)
+        out = cfg.check_variables({"DUR": raw}, config={}, to_check={"DUR": raw}, global_config=True, new=True, threaded=True)
+        assert out["DUR"] == canon
+
+    def test_invalid_unit_removed(self):
+        cfg = _config(_DUR)
+        out = cfg.check_variables({"DUR": "30x"}, config={}, to_check={"DUR": "30x"}, global_config=True, new=True, threaded=True)
+        assert "DUR" not in out  # parser rejects -> dropped
+
+    @pytest.mark.parametrize("bad", ["30m1h", "1h1h", "1h1d"])
+    def test_order_invalid_compound_removed(self, bad):
+        # Permissive regex would match; the authoritative parser rejects order-invalid units.
+        cfg = _config(_DUR)
+        out = cfg.check_variables({"DUR": bad}, config={}, to_check={"DUR": bad}, global_config=True, new=True, threaded=True)
+        assert "DUR" not in out
+
+    def test_list_items_trimmed(self):
+        cfg = _config(_LIST)
+        variables = {"LST": " 10.0.0.1  10.0.0.2 "}
+        out = cfg.check_variables(variables, config={}, to_check={"LST": " 10.0.0.1  10.0.0.2 "}, global_config=True, new=True, threaded=True)
+        assert out["LST"] == "10.0.0.1 10.0.0.2"
+        assert variables["LST"] == "10.0.0.1 10.0.0.2"

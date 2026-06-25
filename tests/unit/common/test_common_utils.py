@@ -21,6 +21,7 @@ from common_utils import (  # type: ignore
     is_newer_version_available,
     normalize_bunkerweb_version,
     normalize_check_value,
+    normalize_list_value,
     plugin_tar_exclude,
     plugin_tar_filter,
     safe_zip_extractall,
@@ -62,6 +63,41 @@ class TestNormalizeCheckValue:
         assert normalize_check_value(normalize_check_value("true")) == "yes"
         assert normalize_check_value("yes") == "yes"
         assert normalize_check_value("no") == "no"
+
+
+class TestNormalizeListValue:
+    """multivalue/multiselect storage canonicalization (B1): trim items, drop empties,
+    rejoin with a single separator. Only cleans the stored form — no acceptance change."""
+
+    @pytest.mark.parametrize(
+        "raw,canon",
+        [
+            (" 10.0.0.1 10.0.0.2 ", "10.0.0.1 10.0.0.2"),
+            ("10.0.0.1  10.0.0.2", "10.0.0.1 10.0.0.2"),  # collapse the empty from the double space
+            ("  a   b   c  ", "a b c"),
+            ("single", "single"),
+            ("", ""),
+            ("   ", ""),  # only separators -> empty list
+            ("a b c", "a b c"),  # already canonical
+        ],
+    )
+    def test_space_separated(self, raw, canon):
+        assert normalize_list_value(raw, " ") == canon
+
+    def test_custom_separator(self):
+        # split on ',', strip each item, drop the trailing empty, rejoin with bare ','.
+        assert normalize_list_value("a , b ,c,", ",") == "a,b,c"
+
+    @pytest.mark.parametrize("raw", [None, 1, ["a"], {"x": 1}])
+    def test_non_string_passes_through(self, raw):
+        assert normalize_list_value(raw, " ") == raw
+
+    def test_empty_separator_passthrough(self):
+        assert normalize_list_value("a  b", "") == "a  b"
+
+    def test_idempotent(self):
+        once = normalize_list_value(" a  b ", " ")
+        assert normalize_list_value(once, " ") == once
 
 
 class TestHashing:

@@ -79,8 +79,8 @@
       "help": "Timeout when connecting to the gRPC upstream.",
       "id": "grpc-connect-timeout",
       "label": "gRPC connect timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+      "type": "duration",
       "multiple": "grpc"
     },
     "GRPC_READ_TIMEOUT": {
@@ -89,8 +89,8 @@
       "help": "Timeout when reading from the gRPC upstream.",
       "id": "grpc-read-timeout",
       "label": "gRPC read timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+      "type": "duration",
       "multiple": "grpc"
     },
     "GRPC_SEND_TIMEOUT": {
@@ -99,8 +99,8 @@
       "help": "Timeout when sending to the gRPC upstream.",
       "id": "grpc-send-timeout",
       "label": "gRPC send timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+      "type": "duration",
       "multiple": "grpc"
     },
     "GRPC_SOCKET_KEEPALIVE": {
@@ -148,8 +148,8 @@
       "help": "Time limit for passing a request to the next gRPC upstream server.",
       "id": "grpc-next-upstream-timeout",
       "label": "gRPC next upstream timeout",
-      "regex": "^(\\d+(ms?|[shdwMy]))?$",
-      "type": "text",
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d*$",
+      "type": "duration",
       "multiple": "grpc"
     },
     "GRPC_NEXT_UPSTREAM_TRIES": {

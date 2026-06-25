@@ -39,8 +39,8 @@
       "help": "Maximum body size (0 for infinite).",
       "id": "max-client-size",
       "label": "Maximum body size",
-      "regex": "^[0-9]+[kKmMgG]?$",
-      "type": "text"
+      "regex": "^\\d+([kKmMgG])?$",
+      "type": "size"
     },
     "MAX_HEADERS": {
       "context": "global",
@@ -147,8 +147,8 @@
       "help": "Open file cache valid time",
       "id": "open-file-cache-valid",
       "label": "Open file cache valid time",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text"
+      "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+      "type": "duration"
     },
     "EXTERNAL_PLUGIN_URLS": {
       "context": "global",

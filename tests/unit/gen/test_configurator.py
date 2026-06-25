@@ -30,6 +30,26 @@ CORE_PLUGIN = {
         "TEST_MS": {"context": "multisite", "default": "ms", "help": "h", "id": "tm", "label": "x", "regex": "^[a-z]+$", "type": "text"},
         "TEST_MULTI": {"context": "multisite", "default": "", "help": "h", "id": "tmu", "label": "x", "regex": "^[a-z]+$", "type": "text", "multiple": "grp"},
         "TEST_FLAG": {"context": "multisite", "default": "no", "help": "h", "id": "tf", "label": "x", "regex": "^(yes|no)$", "type": "check"},
+        "TEST_SIZE": {"context": "global", "default": "64m", "help": "h", "id": "ts", "label": "x", "regex": "^\\d+([kKmMgG])?$", "type": "size"},
+        "TEST_DUR": {
+            "context": "global",
+            "default": "30s",
+            "help": "h",
+            "id": "td",
+            "label": "x",
+            "regex": "^(\\d+(ms|s|m|h|d|w|M|y))+$|^\\d+$",
+            "type": "duration",
+        },
+        "TEST_LIST": {
+            "context": "global",
+            "default": "",
+            "help": "h",
+            "id": "tl",
+            "label": "x",
+            "regex": "^( *([a-z0-9.]+) *)*$",
+            "type": "multivalue",
+            "separator": " ",
+        },
     },
 }
 
@@ -132,3 +152,49 @@ class TestCheckNormalization:
         # TEST_MS is text (^[a-z]+$): a boolean-looking value stays verbatim per service.
         cfg = _cfg(cfg_paths, {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_MS": "on"}).get_config()
         assert cfg["app1_TEST_MS"] == "on"
+
+
+class TestUnitNormalization:
+    """B2: size/duration values are canonicalized to NGINX form at the boundary, and the
+    parser accepts compound durations the old single-group regex rejected."""
+
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [("64M", "64m"), ("64 m", "64m"), ("1KB", "1k"), ("131072", "131072"), ("2g", "2g")],
+    )
+    def test_size_canonicalized(self, cfg_paths, raw, expected):
+        assert _cfg(cfg_paths, {"TEST_SIZE": raw}).get_config()["TEST_SIZE"] == expected
+
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [("30sec", "30s"), ("5min", "5m"), ("2hr", "2h"), ("6month", "6M"), ("30 s", "30s"), ("1h30m", "1h30m"), ("1d12h", "1d12h")],
+    )
+    def test_duration_canonicalized(self, cfg_paths, raw, expected):
+        assert _cfg(cfg_paths, {"TEST_DUR": raw}).get_config()["TEST_DUR"] == expected
+
+    def test_compound_duration_accepted(self, cfg_paths):
+        # The old per-plugin regex ^\d+(ms?|[shdwMy])$ rejected compound times; now accepted.
+        assert _cfg(cfg_paths, {"TEST_DUR": "1h30m15s"}).get_config()["TEST_DUR"] == "1h30m15s"
+
+    def test_invalid_unit_falls_back_to_default(self, cfg_paths):
+        # Not a valid duration -> parser returns None -> regex rejects -> default retained.
+        assert _cfg(cfg_paths, {"TEST_DUR": "30x"}).get_config()["TEST_DUR"] == "30s"
+        assert _cfg(cfg_paths, {"TEST_SIZE": "1.5g"}).get_config()["TEST_SIZE"] == "64m"
+
+    @pytest.mark.parametrize("bad", ["30m1h", "1h1h", "1h1d", "1m1m1m"])
+    def test_order_invalid_compound_rejected_at_boundary(self, cfg_paths, bad):
+        # The permissive regex would match these, but NGINX rejects them. The parser is
+        # authoritative at the seam: order-invalid -> rejected -> default retained (NOT stored).
+        assert _cfg(cfg_paths, {"TEST_DUR": bad}).get_config()["TEST_DUR"] == "30s"
+
+
+class TestListNormalization:
+    """B1: multivalue/multiselect items are trimmed, empties dropped, separator canonical."""
+
+    def test_trim_and_collapse(self, cfg_paths):
+        cfg = _cfg(cfg_paths, {"TEST_LIST": " 10.0.0.1  10.0.0.2 "}).get_config()
+        assert cfg["TEST_LIST"] == "10.0.0.1 10.0.0.2"
+
+    def test_already_canonical_unchanged(self, cfg_paths):
+        cfg = _cfg(cfg_paths, {"TEST_LIST": "a b c"}).get_config()
+        assert cfg["TEST_LIST"] == "a b c"

@@ -1,6 +1,6 @@
 """DatabaseTemplatesMixin — service template create/get/delete + validation."""
 
-from fixtures.seed import add_global_value, seed_minimal
+from fixtures.seed import add_global_value, add_setting, seed_minimal
 
 
 def _minimal_template_args():
@@ -61,6 +61,18 @@ class TestCreateTemplate:
         # SECURITY_MODE is text (^.*$): a boolean-looking default stays verbatim.
         assert db.create_template("t", name="T", settings={"SECURITY_MODE": "on"}, steps=[{"title": "S", "settings": ["SECURITY_MODE"]}]) == ""
         assert db.get_template_settings("t") == {"SECURITY_MODE": "on"}
+
+    def test_size_default_canonicalized(self, db):
+        seed_minimal(db)
+        add_setting(db, "MEM_SIZE", type="size", regex=r"^\d+([kKmMgG])?$", default="0")
+        assert db.create_template("t", name="T", settings={"MEM_SIZE": "64M"}, steps=[{"title": "S", "settings": ["MEM_SIZE"]}]) == ""
+        assert db.get_template_settings("t") == {"MEM_SIZE": "64m"}
+
+    def test_duration_default_canonicalized(self, db):
+        seed_minimal(db)
+        add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
+        assert db.create_template("t", name="T", settings={"MY_TIMEOUT": "5min"}, steps=[{"title": "S", "settings": ["MY_TIMEOUT"]}]) == ""
+        assert db.get_template_settings("t") == {"MY_TIMEOUT": "5m"}
 
     def test_update_template_check_default_canonicalized(self, db):
         seed_minimal(db)

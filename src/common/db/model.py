@@ -12,7 +12,7 @@ from sqlalchemy.schema import UniqueConstraint
 LargeText = Text().with_variant(MEDIUMTEXT, "mysql").with_variant(MEDIUMTEXT, "mariadb")
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
-SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", name="settings_types_enum")
+SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", "size", "duration", name="settings_types_enum")
 METHODS_ENUM = Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(

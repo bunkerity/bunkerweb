@@ -67,6 +67,22 @@ def normalize_check_value(value: Any) -> Any:
     return value
 
 
+def normalize_list_value(value: Any, separator: str = " ") -> Any:
+    """Canonicalize a multivalue/multiselect string for storage.
+
+    Split on ``separator``, strip each item, drop empty items, and rejoin with a single
+    ``separator``. Non-strings (and an empty separator) are returned unchanged. This only
+    cleans the stored form — it mirrors what list consumers already compute (the schema
+    regexes already tolerate surrounding spaces, and consumers strip per item), so it
+    changes no acceptance decision (e.g. " 10.0.0.1  10.0.0.2 " -> "10.0.0.1 10.0.0.2").
+    Idempotent on canonical input.
+    """
+    if not isinstance(value, str) or not separator:
+        return value
+    items = [item.strip() for item in value.split(separator)]
+    return separator.join(item for item in items if item)
+
+
 def get_version() -> str:
     return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
 

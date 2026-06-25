@@ -112,8 +112,8 @@
       "help": "SecRequestBodyNoFilesLimit directive of ModSecurity.",
       "id": "modsecurity-req-body-no-files-limit",
       "label": "SecRequestBodyNoFilesLimit",
-      "regex": "^[0-9]+[kKmMgG]?$",
-      "type": "text"
+      "regex": "^\\d+([kKmMgG])?$",
+      "type": "size"
     },
     "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
       "context": "multisite",
@@ -121,8 +121,8 @@
       "help": "SecRequestBodyLimit directive of ModSecurity. Maximum request body size that ModSecurity will inspect (supports k/m/g suffixes, e.g. 10m). Requests exceeding this limit are handled according to SecRequestBodyLimitAction (Reject by default). When empty, derived from MAX_CLIENT_SIZE. Set 0 for no limit (not recommended — may cause out-of-memory kills). NGINX enforces MAX_CLIENT_SIZE before ModSecurity, so setting this higher than MAX_CLIENT_SIZE has no effect.",
       "id": "modsecurity-sec-request-body-limit",
       "label": "SecRequestBodyLimit",
-      "regex": "^([0-9]+[kKmMgG]?)?$",
-      "type": "text"
+      "regex": "^(\\d+[kKmMgG]?)?$",
+      "type": "size"
     },
     "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
       "context": "multisite",

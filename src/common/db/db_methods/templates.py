@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from model import Global_values, Metadata, Plugins, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
-from common_utils import bytes_hash, normalize_check_value  # type: ignore
+from common_utils import bytes_hash, normalize_check_value, normalize_list_value  # type: ignore
+from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import case, delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -272,15 +273,29 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             )
 
         if base_setting_ids:
-            setting_types = {row[0]: row[1] for row in session.execute(select(Settings.id, Settings.type).filter(Settings.id.in_(base_setting_ids)))}
-            missing_base_ids = sorted(base_setting_ids - set(setting_types))
+            setting_meta = {
+                row[0]: (row[1], row[2])
+                for row in session.execute(select(Settings.id, Settings.type, Settings.separator).filter(Settings.id.in_(base_setting_ids)))
+            }
+            missing_base_ids = sorted(base_setting_ids - set(setting_meta))
             if missing_base_ids:
                 return f"Unknown settings: {', '.join(missing_base_ids)}", [], [], []
-            # Canonicalize boolean ("check") defaults (true/on/1/...) to yes/no, like every
-            # other settings ingestion boundary, so template defaults are stored canonical.
+            # Canonicalize defaults to their stored form (boolean aliases -> yes/no,
+            # size/duration -> NGINX unit form, list items trimmed), like every other
+            # settings ingestion boundary, so template defaults are stored canonical.
             for entity in setting_entities:
-                if setting_types.get(entity["setting_id"]) == "check":
+                meta = setting_meta.get(entity["setting_id"])
+                if not meta:
+                    continue
+                stype, separator = meta
+                if stype == "check":
                     entity["default"] = normalize_check_value(entity["default"])
+                elif stype in ("size", "duration"):
+                    canonical = normalize_unit(stype, entity["default"])
+                    if canonical is not None:
+                        entity["default"] = canonical
+                elif stype in ("multiselect", "multivalue"):
+                    entity["default"] = normalize_list_value(entity["default"], separator or " ")
 
         configs = configs or []
         config_map: Dict[str, Tuple[Dict[str, Any], int]] = {}
