@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.12-rc2
+    image: bunkerity/bunkerweb:1.6.12
     container_name: bunkerweb
     ports:
       - "80:8080/tcp"
@@ -14,7 +14,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.12-rc2
+    image: bunkerity/bunkerweb-scheduler:1.6.12
     container_name: bw-scheduler
     depends_on:
       - bunkerweb
@@ -53,7 +53,7 @@ services:
       app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
       app1.example.com_INTERCEPTED_ERROR_CODES: "400 403 404 405 413 429 500 501 502 503 504"
       app1.example.com_REVERSE_PROXY_AUTH_REQUEST: "/outpost.goauthentik.io/auth/nginx"
-      app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://app1.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "$$scheme://$$host/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri"
       app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_entitlements $$upstream_http_x_authentik_entitlements;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid"
       app1.example.com_REVERSE_PROXY_HEADERS_CLIENT: "Set-Cookie $$auth_cookie"
       app1.example.com_REVERSE_PROXY_HEADERS: "X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-entitlements $$authentik_entitlements;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid"
@@ -61,7 +61,7 @@ services:
       app2.example.com_REVERSE_PROXY_HOST: "http://app2:8080"
       app2.example.com_INTERCEPTED_ERROR_CODES: "400 403 404 405 413 429 500 501 502 503 504"
       app2.example.com_REVERSE_PROXY_AUTH_REQUEST: "/outpost.goauthentik.io/auth/nginx"
-      app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://app2.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "$$scheme://$$host/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri"
       app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_entitlements $$upstream_http_x_authentik_entitlements;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid"
       app2.example.com_REVERSE_PROXY_HEADERS_CLIENT: "Set-Cookie $$auth_cookie"
       app2.example.com_REVERSE_PROXY_HEADERS: "X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-entitlements $$authentik_entitlements;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid"

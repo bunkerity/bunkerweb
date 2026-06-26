@@ -1,4 +1,4 @@
-FROM nginx:1.30.3-alpine-slim@sha256:ef20a491d1110a62f42dd421d14d20f0e90d1f9edd98ca739c30e737751b31e1 AS builder
+FROM nginx:1.30.3-alpine-slim@sha256:d5b51cfc7d55fc7a7bcf4d1d577b9c3738331df56d68f0b1d8ac9795b9470a5a AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre2-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev cargo lmdb-dev libfuzzy2-dev pkgconfig ca-certificates coreutils libc-dev
@@ -69,7 +69,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.30.3-alpine-slim@sha256:ef20a491d1110a62f42dd421d14d20f0e90d1f9edd98ca739c30e737751b31e1
+FROM nginx:1.30.3-alpine-slim@sha256:d5b51cfc7d55fc7a7bcf4d1d577b9c3738331df56d68f0b1d8ac9795b9470a5a
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -78,8 +78,7 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl tzdata brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "openssl>=3.5.7-r0" # CVE-2026-34182 CVE-2026-45447 CVE-2026-7383 CVE-2026-9076 CVE-2026-45445 CVE-2026-42764 CVE-2026-34183 CVE-2026-34180 CVE-2026-34181 CVE-2026-42767 CVE-2026-42766 CVE-2026-42769 CVE-2026-45446 CVE-2026-42770 CVE-2026-42768
-RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
+# There are no CVEs for the following packages
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -109,7 +108,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.12~rc2"
+LABEL version="1.6.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

@@ -577,6 +577,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
         - Configure CORS on the Cap.js sitekey to allow the protected origin.
         - Set both `ANTIBOT_CAPJS_FRONTEND_URL` and `ANTIBOT_CAPJS_BACKEND_URL` to origins only: scheme, host, and optional port, with no path.
         - Use the Cap.js widget **0.1.48 or later**. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed `srcdoc` iframe's inline script does not propagate the nonce. If you self-host `tiago2/cap`, pin a recent tag (e.g. `tiago2/cap:3.1.2` or newer) or set `WIDGET_VERSION` to `0.1.48` or later.
+        - Cap.js **instrumentation challenges** (on by default) run server-supplied JavaScript via `eval`, which a nonce cannot authorize. BunkerWeb runs the widget in an isolated same-origin iframe that carries the needed `'unsafe-eval'`, so the main challenge page keeps a strict, eval-free CSP — no configuration required.
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
@@ -1373,7 +1374,7 @@ If you aren’t already familiar with CrowdSec Console integration, [CrowdSec](h
 
 Through our partnership with CrowdSec, you can enroll your BunkerWeb instances into your [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration). This means that attacks blocked by BunkerWeb will be visible in your CrowdSec Console alongside attacks blocked by CrowdSec Security Engines, giving you a unified view of threats.
 
-Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the [CrowdSec plugin for BunkerWeb](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec) to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.
+Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the [CrowdSec plugin for BunkerWeb](https://docs.bunkerweb.io/latest/features/#crowdsec) to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.
 
 **Step #1: Create your CrowdSec Console account**
 
@@ -1870,7 +1871,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.12-rc2
+        image: bunkerity/bunkerweb:1.6.12
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1887,7 +1888,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.12-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.12
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -4269,7 +4270,7 @@ BunkerWeb monitoring pro system. This plugin is a prerequisite for some other pl
 
 ## Mutual TLS
 
-STREAM support :white_check_mark:
+STREAM support :warning:
 
 The Mutual TLS (mTLS) plugin protects sensitive applications by requiring visiting clients to present certificates issued by authorities you trust. With it enabled, BunkerWeb authenticates callers before their requests reach your services, keeping internal tools and partner integrations locked down.
 
@@ -5148,10 +5149,25 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Certificate Validation:** Control how backend server certificates are validated
         - **SNI Support:** Specify Server Name Indication for backends that host multiple sites
 
-    | Setting                      | Default | Context   | Multiple | Description                                                                          |
-    | ---------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------ |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.     |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled. |
+    | Setting                                          | Default | Context   | Multiple | Description                                                                                                        |
+    | ------------------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.                                   |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled.                               |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`    | multisite | no       | **SSL Verify:** Enable or disable verification of the upstream server's SSL certificate.                           |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Trusted Certificate Priority:** Source of the trusted CA: `file` (path) or `data` (base64/PEM).                  |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |         | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |         | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI).             |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`     | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                                 |
+
+    !!! info "Certificate Verification"
+        When `REVERSE_PROXY_SSL_VERIFY` is set to `yes`, NGINX validates both the upstream certificate chain and its name:
+
+        - **Trusted CA:** supply it either as a file path (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, readable by the scheduler) or as base64/PEM data (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`), selected by `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY`. The scheduler validates it, caches it, and distributes it to every instance, so you configure it once with no per-instance mounting.
+        - **Required:** a trusted certificate is mandatory; NGINX has no implicit system store for upstream verification. To verify a public upstream, point the path at the system CA bundle (e.g. `/etc/ssl/certs/ca-certificates.crt`).
+        - **Name:** checked against the host from `REVERSE_PROXY_HOST` by default. If the backend certificate's CN/SAN differs, set `REVERSE_PROXY_SSL_SNI` to `yes` and `REVERSE_PROXY_SSL_SNI_NAME` to the expected name.
+        - **Fail-safe:** if no valid trusted certificate is available, verification is disabled for that server rather than breaking every upstream connection.
+
+        These settings apply per service: all upstream entries (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) share the same verification configuration.
 
     !!! info "SNI Explained"
         Server Name Indication (SNI) is a TLS extension that allows a client to specify the hostname it is attempting to connect to during the handshake process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
@@ -5245,19 +5261,19 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Performance Optimization:** Fine-tune request handling for specific use cases
         - **Flexibility:** Adapt to unique application requirements with specialized configurations
 
-    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                         |
-    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                        |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                  |
-    | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location — bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                        |
+    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                       |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                 |
+    | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location; bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
 
     !!! warning "Security Considerations"
         Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.
 
     !!! warning "Safety recommendation for large uploads"
-        ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — **and only if** — a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
+        ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If, **and only if**, a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
 
-        To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
+        To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); they inspect the uploaded file itself instead of the raw request body.
 
 === "Caching Configuration"
 

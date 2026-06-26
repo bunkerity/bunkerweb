@@ -1,4 +1,4 @@
-FROM nginx:1.30.3-alpine-slim@sha256:ef20a491d1110a62f42dd421d14d20f0e90d1f9edd98ca739c30e737751b31e1  AS builder
+FROM nginx:1.30.3-alpine-slim@sha256:d5b51cfc7d55fc7a7bcf4d1d577b9c3738331df56d68f0b1d8ac9795b9470a5a  AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -162,7 +162,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.3-alpine-slim@sha256:ef20a491d1110a62f42dd421d14d20f0e90d1f9edd98ca739c30e737751b31e1
+FROM nginx:1.30.3-alpine-slim@sha256:d5b51cfc7d55fc7a7bcf4d1d577b9c3738331df56d68f0b1d8ac9795b9470a5a
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -171,9 +171,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "openssl>=3.5.7-r0" # CVE-2026-34182 CVE-2026-45447 CVE-2026-7383 CVE-2026-9076 CVE-2026-45445 CVE-2026-42764 CVE-2026-34183 CVE-2026-34180 CVE-2026-34181 CVE-2026-42767 CVE-2026-42766 CVE-2026-42769 CVE-2026-45446 CVE-2026-42770 CVE-2026-42768
-RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
-RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-48165 CVE-2026-48163 CVE-2026-44168 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44173 CVE-2026-44169
+# There are no CVEs for the following packages
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -240,7 +238,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.12~rc2"
+LABEL version="1.6.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

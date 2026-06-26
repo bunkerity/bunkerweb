@@ -17,9 +17,9 @@
     },
     {
       "id": "headers-more-nginx-module",
-      "name": "headers-more-nginx-module v0.39",
+      "name": "headers-more-nginx-module v0.40",
       "url": "https://github.com/openresty/headers-more-nginx-module.git",
-      "commit": "2b1debde426783b8f42246149d3638644a6347cb",
+      "commit": "0bf283ff92017acd616814b0e5153e0ccf93e2c9",
       "post_install": "rm -r src/deps/src/headers-more-nginx-module/t"
     },
     {
@@ -44,9 +44,9 @@
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.17",
+      "name": "lua-cjson v2.1.0.18",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "617164a0fe3bb647128178f9caefb304b8573bb6"
+      "commit": "fa418dcac3de13c9fe2ddc997bd53e92d793f0bc"
     },
     {
       "id": "lua-ffi-zlib",
@@ -159,16 +159,16 @@
     },
     {
       "id": "lua-resty-signal",
-      "name": "lua-resty-signal v0.04",
+      "name": "lua-resty-signal v0.05",
       "url": "https://github.com/openresty/lua-resty-signal.git",
-      "commit": "737d8ccfaa59c08ad4d32a712611a856775a61c5",
+      "commit": "42319006723c104e47d6922db17459c95e4db224",
       "post_install": "rm -r src/deps/src/lua-resty-signal/t"
     },
     {
       "id": "lua-resty-string",
-      "name": "lua-resty-string v0.18",
+      "name": "lua-resty-string v0.19",
       "url": "https://github.com/openresty/lua-resty-string.git",
-      "commit": "e10c1cc2ca85ea277a8d759333444f37f77c884c",
+      "commit": "282590f58d4c927226492e0211b974d72b759329",
       "post_install": "rm -r src/deps/src/lua-resty-string/t"
     },
     {
@@ -186,16 +186,16 @@
     },
     {
       "id": "lua-upstream-nginx-module",
-      "name": "lua-upstream-nginx-module v0.07",
+      "name": "lua-upstream-nginx-module v0.08",
       "url": "https://github.com/openresty/lua-upstream-nginx-module.git",
-      "commit": "a84fbbb3d3b07684c232f642eccbc5334bafcbfe",
+      "commit": "ad49f606989f91a514a7568eb45deb2642dd3e86",
       "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t"
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260606",
+      "name": "LuaJIT v2.1-20260620",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "a08100e7598451d4fd3a89a9826980f7c64117e7",
+      "commit": "b411bec3ce550ef9968fc83bca094455cf812c1f",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -253,13 +253,6 @@
       "url": "https://github.com/nginx/nginx.git",
       "commit": "47c3628d23efaa1bfb1a32afbe9e3d013f860c2c",
       "post_install": "rm -r src/deps/src/nginx/docs"
-    },
-    {
-      "id": "nginx-1.30.2",
-      "name": "Nginx v1.30.2",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "a92a537860c7b87d3793d9eb41c9cf3ed833b53c",
-      "post_install": "rm -r src/deps/src/nginx-1.30.2/docs"
     },
     {
       "id": "nginx-1.28.0",

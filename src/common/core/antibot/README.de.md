@@ -257,6 +257,7 @@ Beispiele:
         - Konfigurieren Sie CORS für den Cap.js-Site-Schlüssel, damit der geschützte Origin erlaubt ist.
         - Setzen Sie `ANTIBOT_CAPJS_FRONTEND_URL` und `ANTIBOT_CAPJS_BACKEND_URL` nur auf den Origin: Schema, Host und optionaler Port, ohne Pfad.
         - Verwenden Sie das Cap.js-Widget **0.1.48 oder neuer**. BunkerWeb liefert eine strikte, nonce-basierte CSP aus; ältere Widgets brechen Instrumentierungs-Challenges, weil das eingebettete `<script>` im isolierten `srcdoc`-iframe den Nonce nicht weitergibt. Wenn Sie `tiago2/cap` selbst hosten, pinnen Sie ein aktuelles Tag (z. B. `tiago2/cap:3.1.2` oder neuer) oder setzen Sie `WIDGET_VERSION` auf `0.1.48` oder neuer.
+        - Cap.js-**Instrumentierungs-Challenges** (standardmäßig aktiv) führen vom Server geliefertes JavaScript über `eval` aus, das ein Nonce nicht autorisieren kann. BunkerWeb führt das Widget in einem isolierten, gleichdomänigen iframe aus, das das nötige `'unsafe-eval'` trägt, sodass die Haupt-Challenge-Seite eine strikte, eval-freie CSP behält — keine Konfiguration erforderlich.
 
     Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
