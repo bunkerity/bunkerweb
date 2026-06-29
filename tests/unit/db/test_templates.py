@@ -1,6 +1,6 @@
 """DatabaseTemplatesMixin — service template create/get/delete + validation."""
 
-from fixtures.seed import add_global_value, add_setting, seed_minimal
+from fixtures.seed import add_global_value, add_select_setting, add_setting, seed_minimal
 
 
 def _minimal_template_args():
@@ -73,6 +73,32 @@ class TestCreateTemplate:
         add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
         assert db.create_template("t", name="T", settings={"MY_TIMEOUT": "5min"}, steps=[{"title": "S", "settings": ["MY_TIMEOUT"]}]) == ""
         assert db.get_template_settings("t") == {"MY_TIMEOUT": "5m"}
+
+    def test_number_default_trimmed(self, db):
+        # A2: a number default with surrounding whitespace is stored trimmed.
+        seed_minimal(db)
+        add_setting(db, "TEST_PORT", type="number", regex=r"^\d+$", default="0")
+        assert db.create_template("t", name="T", settings={"TEST_PORT": "8080 "}, steps=[{"title": "S", "settings": ["TEST_PORT"]}]) == ""
+        assert db.get_template_settings("t") == {"TEST_PORT": "8080"}
+
+    def test_text_default_not_trimmed(self, db):
+        # SECURITY_MODE is text (^.*$): surrounding whitespace stays verbatim (excluded from trim).
+        seed_minimal(db)
+        assert db.create_template("t", name="T", settings={"SECURITY_MODE": "  on  "}, steps=[{"title": "S", "settings": ["SECURITY_MODE"]}]) == ""
+        assert db.get_template_settings("t") == {"SECURITY_MODE": "  on  "}
+
+    def test_opt_in_select_default_canonicalized(self, db):
+        # A3: a case_insensitive select's template default is stored in the declared option casing.
+        seed_minimal(db)
+        add_select_setting(db, "CIPHERS", ["modern", "intermediate", "old"], default="modern", case_insensitive=True)
+        assert db.create_template("t", name="T", settings={"CIPHERS": "Modern"}, steps=[{"title": "S", "settings": ["CIPHERS"]}]) == ""
+        assert db.get_template_settings("t") == {"CIPHERS": "modern"}
+
+    def test_opt_out_select_default_not_canonicalized(self, db):
+        seed_minimal(db)
+        add_select_setting(db, "SEC_ENGINE", ["On", "Off"], default="On", case_insensitive=False)
+        assert db.create_template("t", name="T", settings={"SEC_ENGINE": "On"}, steps=[{"title": "S", "settings": ["SEC_ENGINE"]}]) == ""
+        assert db.get_template_settings("t") == {"SEC_ENGINE": "On"}
 
     def test_update_template_check_default_canonicalized(self, db):
         seed_minimal(db)

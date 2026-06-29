@@ -50,6 +50,41 @@ CORE_PLUGIN = {
             "type": "multivalue",
             "separator": " ",
         },
+        "TEST_NUM": {"context": "global", "default": "0", "help": "h", "id": "tn", "label": "x", "regex": "^\\d+$", "type": "number"},
+        "TEST_NUM_MS": {"context": "multisite", "default": "0", "help": "h", "id": "tnm", "label": "x", "regex": "^\\d+$", "type": "number"},
+        "TEST_SELECT": {
+            "context": "global",
+            "default": "opt1",
+            "help": "h",
+            "id": "tse",
+            "label": "x",
+            "regex": "^(opt1|opt2)$",
+            "type": "select",
+            "select": ["opt1", "opt2"],
+        },
+        "TEST_CISELECT": {
+            "context": "global",
+            "default": "modern",
+            "help": "h",
+            "id": "tcse",
+            "label": "x",
+            "regex": "^(modern|intermediate|old)$",
+            "type": "select",
+            "select": ["modern", "intermediate", "old"],
+            "case_insensitive": True,
+        },
+        "TEST_CIMULTI": {
+            "context": "global",
+            "default": "",
+            "help": "h",
+            "id": "tcmu",
+            "label": "x",
+            "regex": "^( *(alpha|beta) *)*$",
+            "type": "multiselect",
+            "separator": " ",
+            "multiselect": [{"id": "alpha", "label": "Alpha", "value": "alpha"}, {"id": "beta", "label": "Beta", "value": "beta"}],
+            "case_insensitive": True,
+        },
     },
 }
 
@@ -198,3 +233,47 @@ class TestListNormalization:
     def test_already_canonical_unchanged(self, cfg_paths):
         cfg = _cfg(cfg_paths, {"TEST_LIST": "a b c"}).get_config()
         assert cfg["TEST_LIST"] == "a b c"
+
+
+class TestScalarTrim:
+    """A2: surrounding whitespace stripped for number/select at the env boundary; excluded
+    types (text) keep whitespace and stay gated by their own regex."""
+
+    def test_number_trimmed(self, cfg_paths):
+        assert _cfg(cfg_paths, {"TEST_NUM": "8080 "}).get_config()["TEST_NUM"] == "8080"
+
+    def test_select_trimmed(self, cfg_paths):
+        assert _cfg(cfg_paths, {"TEST_SELECT": " opt1 "}).get_config()["TEST_SELECT"] == "opt1"
+
+    def test_all_whitespace_number_falls_back_to_default(self, cfg_paths):
+        # "   " -> "" after trim -> fails ^\d+$ -> default retained (same as today).
+        assert _cfg(cfg_paths, {"TEST_NUM": "   "}).get_config()["TEST_NUM"] == "0"
+
+    def test_text_not_trimmed_into_validity(self, cfg_paths):
+        # TEST_GLOBAL is text (^[a-z]+$): " abc " keeps its spaces -> fails regex -> default.
+        # Proves text is excluded from trim (not silently trimmed to "abc").
+        assert _cfg(cfg_paths, {"TEST_GLOBAL": " abc "}).get_config()["TEST_GLOBAL"] == "def"
+
+    def test_multisite_prefixed_number_trimmed(self, cfg_paths):
+        cfg = _cfg(cfg_paths, {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_NUM_MS": "8080 "}).get_config()
+        assert cfg["app1_TEST_NUM_MS"] == "8080"
+
+
+class TestSelectCaseInsensitive:
+    """A3: opt-in select/multiselect canonicalize a value to the declared option casing; the
+    case-sensitive regex then passes on the canonical form. Opt-out selects stay case-sensitive."""
+
+    @pytest.mark.parametrize("raw,expected", [("Modern", "modern"), ("INTERMEDIATE", "intermediate"), ("old", "old")])
+    def test_opt_in_select_canonicalized(self, cfg_paths, raw, expected):
+        assert _cfg(cfg_paths, {"TEST_CISELECT": raw}).get_config()["TEST_CISELECT"] == expected
+
+    def test_opt_in_select_no_match_falls_back(self, cfg_paths):
+        # "moderns" maps to no option -> verbatim -> regex rejects -> default retained.
+        assert _cfg(cfg_paths, {"TEST_CISELECT": "moderns"}).get_config()["TEST_CISELECT"] == "modern"
+
+    def test_opt_out_select_case_sensitive(self, cfg_paths):
+        # TEST_SELECT has no case_insensitive flag: "OPT1" != "opt1" -> regex rejects -> default.
+        assert _cfg(cfg_paths, {"TEST_SELECT": "OPT1"}).get_config()["TEST_SELECT"] == "opt1"
+
+    def test_opt_in_multiselect_per_item_canonicalized(self, cfg_paths):
+        assert _cfg(cfg_paths, {"TEST_CIMULTI": "ALPHA Beta"}).get_config()["TEST_CIMULTI"] == "alpha beta"

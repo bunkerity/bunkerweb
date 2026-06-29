@@ -6,7 +6,7 @@ from time import sleep
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from api_client import ApiUnavailableError  # type: ignore
-from common_utils import normalize_check_value, normalize_list_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -96,14 +96,21 @@ class Config:
                 # would differ every cycle (perpetual reconfigure loop).
                 schema = self._settings.get(variable, {})
                 stype = schema.get("type")
+                value = trim_scalar_value(stype, value)
                 if stype == "check":
                     value = normalize_check_value(value)
                 elif stype in ("size", "duration"):
                     canonical = normalize_unit(stype, value)
                     if canonical is not None:
                         value = canonical
+                elif stype == "select":
+                    value = normalize_select_value(value, schema.get("select", []), case_insensitive=schema.get("case_insensitive", False))
                 elif stype in ("multiselect", "multivalue"):
-                    value = normalize_list_value(value, schema.get("separator", " "))
+                    separator = schema.get("separator", " ")
+                    value = normalize_list_value(value, separator)
+                    if stype == "multiselect":
+                        options = [o.get("value", "") for o in schema.get("multiselect", []) if isinstance(o, dict)]
+                        value = normalize_select_value(value, options, multi=True, separator=separator, case_insensitive=schema.get("case_insensitive", False))
 
                 if is_global or variable.startswith(f"{server_name}_"):
                     if variable == "SERVER_NAME":

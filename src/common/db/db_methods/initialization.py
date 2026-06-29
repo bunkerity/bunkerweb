@@ -161,6 +161,7 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                     Settings.separator,
                     Settings.accept,
                     Settings.order,
+                    Settings.case_insensitive,
                 )
             ).all(),
             "bw_selects": session.execute(select(Selects.setting_id, Selects.value, Selects.order)).all(),

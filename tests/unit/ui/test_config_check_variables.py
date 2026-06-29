@@ -30,6 +30,19 @@ _TEXT = {"TXT": {"type": "text", "regex": "^.*$", "context": "global"}}
 _SIZE = {"SZ": {"type": "size", "regex": r"^\d+([kKmMgG])?$", "context": "global"}}
 _DUR = {"DUR": {"type": "duration", "regex": r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", "context": "global"}}
 _LIST = {"LST": {"type": "multivalue", "regex": r"^( *([a-z0-9.]+) *)*$", "context": "global", "separator": " "}}
+_NUM = {"NUM": {"type": "number", "regex": r"^\d+$", "context": "global"}}
+_SELECT = {"SEL": {"type": "select", "regex": r"^(opt1|opt2)$", "context": "global", "select": ["opt1", "opt2"]}}
+_CISELECT = {"SEL": {"type": "select", "regex": r"^(modern|old)$", "context": "global", "select": ["modern", "old"], "case_insensitive": True}}
+_CIMULTI = {
+    "MS": {
+        "type": "multiselect",
+        "regex": r"^( *(alpha|beta) *)*$",
+        "context": "global",
+        "separator": " ",
+        "multiselect": [{"id": "alpha", "label": "A", "value": "alpha"}, {"id": "beta", "label": "B", "value": "beta"}],
+        "case_insensitive": True,
+    }
+}
 
 
 @pytest.fixture(autouse=True)
@@ -98,3 +111,66 @@ class TestUnitAndListNormalization:
         out = cfg.check_variables(variables, config={}, to_check={"LST": " 10.0.0.1  10.0.0.2 "}, global_config=True, new=True, threaded=True)
         assert out["LST"] == "10.0.0.1 10.0.0.2"
         assert variables["LST"] == "10.0.0.1 10.0.0.2"
+
+
+class TestScalarTrim:
+    """A2: number/select values are trimmed AND written back to `variables` (the API payload).
+    The write-back was previously gated on the canonicalized-types flag, so scalar trims would
+    validate but persist the untrimmed original — these guard that fix."""
+
+    def test_number_trimmed_and_written_back(self):
+        cfg = _config(_NUM)
+        variables = {"NUM": "8080 "}
+        out = cfg.check_variables(variables, config={}, to_check={"NUM": "8080 "}, global_config=True, new=True, threaded=True)
+        assert out["NUM"] == "8080"
+        assert variables["NUM"] == "8080"  # written back, not the untrimmed original
+
+    def test_select_trimmed_and_written_back(self):
+        cfg = _config(_SELECT)
+        variables = {"SEL": " opt1 "}
+        out = cfg.check_variables(variables, config={}, to_check={"SEL": " opt1 "}, global_config=True, new=True, threaded=True)
+        assert out["SEL"] == "opt1"
+        assert variables["SEL"] == "opt1"
+
+    def test_all_whitespace_number_removed(self):
+        cfg = _config(_NUM)
+        out = cfg.check_variables({"NUM": "   "}, config={}, to_check={"NUM": "   "}, global_config=True, new=True, threaded=True)
+        assert "NUM" not in out  # empty-after-trim fails ^\d+$ -> dropped
+
+    def test_text_keeps_surrounding_whitespace(self):
+        # text is excluded from trim: the value keeps its whitespace and (with ^.*$) validates.
+        cfg = _config(_TEXT)
+        variables = {"TXT": "  hi  "}
+        out = cfg.check_variables(variables, config={}, to_check={"TXT": "  hi  "}, global_config=True, new=True, threaded=True)
+        assert out["TXT"] == "  hi  "
+        assert variables["TXT"] == "  hi  "
+
+
+class TestSelectCaseInsensitive:
+    """A3: opt-in select/multiselect canonicalize to the declared option casing AND write the
+    canonical value back to `variables` (the API payload)."""
+
+    @pytest.mark.parametrize("raw,canon", [("Modern", "modern"), ("OLD", "old")])
+    def test_opt_in_select_canonicalized_and_written_back(self, raw, canon):
+        cfg = _config(_CISELECT)
+        variables = {"SEL": raw}
+        out = cfg.check_variables(variables, config={}, to_check={"SEL": raw}, global_config=True, new=True, threaded=True)
+        assert out["SEL"] == canon
+        assert variables["SEL"] == canon
+
+    def test_opt_in_select_no_match_removed(self):
+        cfg = _config(_CISELECT)
+        out = cfg.check_variables({"SEL": "moderns"}, config={}, to_check={"SEL": "moderns"}, global_config=True, new=True, threaded=True)
+        assert "SEL" not in out  # no option match -> regex rejects -> dropped
+
+    def test_opt_out_select_case_sensitive_removed(self):
+        cfg = _config(_SELECT)  # no case_insensitive flag
+        out = cfg.check_variables({"SEL": "OPT1"}, config={}, to_check={"SEL": "OPT1"}, global_config=True, new=True, threaded=True)
+        assert "SEL" not in out  # "OPT1" != "opt1" -> rejected
+
+    def test_opt_in_multiselect_per_item(self):
+        cfg = _config(_CIMULTI)
+        variables = {"MS": "ALPHA Beta"}
+        out = cfg.check_variables(variables, config={}, to_check={"MS": "ALPHA Beta"}, global_config=True, new=True, threaded=True)
+        assert out["MS"] == "alpha beta"
+        assert variables["MS"] == "alpha beta"

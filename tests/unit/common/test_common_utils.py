@@ -22,9 +22,11 @@ from common_utils import (  # type: ignore
     normalize_bunkerweb_version,
     normalize_check_value,
     normalize_list_value,
+    normalize_select_value,
     plugin_tar_exclude,
     plugin_tar_filter,
     safe_zip_extractall,
+    trim_scalar_value,
 )
 
 
@@ -98,6 +100,87 @@ class TestNormalizeListValue:
     def test_idempotent(self):
         once = normalize_list_value(" a  b ", " ")
         assert normalize_list_value(once, " ") == once
+
+
+class TestTrimScalarValue:
+    """A2: surrounding whitespace stripped from scalar values at ingestion, except for the
+    NO_TRIM_TYPES (password/file/text where whitespace can be meaningful), non-strings, and
+    unknown/empty types. check/size/duration/list strip internally — net-new effect on
+    number/select."""
+
+    @pytest.mark.parametrize("stype", ["number", "select"])
+    @pytest.mark.parametrize("raw,canon", [(" 8080 ", "8080"), ("\topt1\n", "opt1"), ("x", "x")])
+    def test_scalar_types_trimmed(self, stype, raw, canon):
+        assert trim_scalar_value(stype, raw) == canon
+
+    @pytest.mark.parametrize("stype", ["password", "file", "text"])
+    def test_excluded_types_not_trimmed(self, stype):
+        # Surrounding whitespace can be semantically meaningful for these types.
+        assert trim_scalar_value(stype, "  secret  ") == "  secret  "
+
+    @pytest.mark.parametrize("stype,raw,canon", [("check", " on ", "on"), ("size", " 64m ", "64m"), ("duration", " 30s ", "30s")])
+    def test_already_stripping_types_redundant_but_correct(self, stype, raw, canon):
+        # Their own helpers re-strip downstream; trimming here is harmless and outcome-preserving.
+        assert trim_scalar_value(stype, raw) == canon
+
+    @pytest.mark.parametrize("raw", [None, 1, 0, True, ["x"], {"a": 1}])
+    def test_non_string_passes_through(self, raw):
+        assert trim_scalar_value("number", raw) == raw
+
+    @pytest.mark.parametrize("stype", [None, ""])
+    def test_unknown_or_empty_type_not_trimmed(self, stype):
+        # An unresolved schema (no type) must never be wrongly trimmed.
+        assert trim_scalar_value(stype, "  x  ") == "  x  "
+
+    def test_empty_after_trim(self):
+        assert trim_scalar_value("number", "   ") == ""
+
+    def test_idempotent(self):
+        assert trim_scalar_value("number", trim_scalar_value("number", " 8 ")) == "8"
+
+
+class TestNormalizeSelectValue:
+    """A3: opt-in case-insensitive select/multiselect — casefold a value to the declared
+    option casing. No-op unless case_insensitive; no-match returns the original (regex rejects)."""
+
+    OPTS = ["modern", "intermediate", "old"]
+
+    @pytest.mark.parametrize("raw,canon", [("Modern", "modern"), ("MODERN", "modern"), ("OLD", "old"), ("modern", "modern")])
+    def test_single_casefolded(self, raw, canon):
+        assert normalize_select_value(raw, self.OPTS, case_insensitive=True) == canon
+
+    def test_single_no_match_returns_original(self):
+        # "Modernn" matches no option -> returned verbatim so the schema regex rejects it.
+        assert normalize_select_value("Modernn", self.OPTS, case_insensitive=True) == "Modernn"
+
+    def test_opt_out_is_noop(self):
+        assert normalize_select_value("Modern", self.OPTS, case_insensitive=False) == "Modern"
+
+    def test_empty_options_is_noop(self):
+        assert normalize_select_value("Modern", [], case_insensitive=True) == "Modern"
+
+    @pytest.mark.parametrize("raw", [None, 1, ["modern"], {"a": 1}])
+    def test_non_string_passes_through(self, raw):
+        assert normalize_select_value(raw, self.OPTS, case_insensitive=True) == raw
+
+    def test_multi_per_item(self):
+        # multiselect: each token mapped independently, rejoined with the separator.
+        assert normalize_select_value("MODERN OLD", self.OPTS, multi=True, separator=" ", case_insensitive=True) == "modern old"
+
+    def test_multi_mixed_match_and_miss(self):
+        assert normalize_select_value("Modern nope", self.OPTS, multi=True, separator=" ", case_insensitive=True) == "modern nope"
+
+    def test_multi_empty_separator_returns_unchanged(self):
+        # Can't tokenize an empty-separator multiselect (e.g. MODSECURITY_SEC_AUDIT_LOG_PARTS).
+        assert normalize_select_value("BCFH", ["b", "c"], multi=True, separator="", case_insensitive=True) == "BCFH"
+
+    def test_casefold_collision_first_wins(self):
+        # Deterministic on a lossy option set: the first declaration wins.
+        assert normalize_select_value("a", ["A", "a"], case_insensitive=True) == "A"
+
+    def test_idempotent(self):
+        once = normalize_select_value("Modern", self.OPTS, case_insensitive=True)
+        assert normalize_select_value(once, self.OPTS, case_insensitive=True) == once
 
 
 class TestHashing:

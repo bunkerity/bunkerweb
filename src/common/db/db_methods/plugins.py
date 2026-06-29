@@ -162,8 +162,10 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                         setting_data["multiple"] = setting.multiple
                     if setting.type == "select":
                         setting_data["select"] = selects_map.get(setting.id, [])
+                        setting_data["case_insensitive"] = setting.case_insensitive
                     elif setting.type == "multiselect":
                         setting_data["multiselect"] = multiselects_map.get(setting.id, [])
+                        setting_data["case_insensitive"] = setting.case_insensitive
                         sep_value = getattr(setting, "separator", None)
                         setting_data["separator"] = sep_value if sep_value is not None else " "
                     elif setting.type == "multivalue":

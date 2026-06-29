@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash, create_plugin_tar_gz, normalize_check_value, normalize_list_value  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
@@ -395,6 +395,7 @@ class Configurator:
           The regex cannot encode NGINX's unit-order rule, so it must not be the fallback
           gate for these types."""
         stype = setting_schema.get("type")
+        value = trim_scalar_value(stype, value)
         if stype == "check":
             return True, normalize_check_value(value)
         if stype in ("size", "duration"):
@@ -402,8 +403,16 @@ class Configurator:
             if canonical is None:
                 return False, value
             return True, canonical
+        case_insensitive = setting_schema.get("case_insensitive", False)
+        if stype == "select":
+            return True, normalize_select_value(value, setting_schema.get("select", []), case_insensitive=case_insensitive)
         if stype in ("multiselect", "multivalue"):
-            return True, normalize_list_value(value, setting_schema.get("separator", " "))
+            separator = setting_schema.get("separator", " ")
+            value = normalize_list_value(value, separator)
+            if stype == "multiselect":
+                options = [o.get("value", "") for o in setting_schema.get("multiselect", []) if isinstance(o, dict)]
+                value = normalize_select_value(value, options, multi=True, separator=separator, case_insensitive=case_insensitive)
+            return True, value
         return True, value
 
     def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, str]], str]:
@@ -502,6 +511,24 @@ class Configurator:
             for select in data.get("select", []):
                 if len(select) > 256:
                     return (False, f"Invalid select value {select} for setting {setting} in plugin {plugin['id']} (Max 256 characters)")
+
+            if "case_insensitive" in data:
+                if not isinstance(data["case_insensitive"], bool):
+                    return (False, f"Invalid case_insensitive for setting {setting} in plugin {plugin['id']} (Must be a boolean)")
+                if data["case_insensitive"]:
+                    if data["type"] not in ("select", "multiselect"):
+                        return (False, f"Invalid case_insensitive for setting {setting} in plugin {plugin['id']} (Only select/multiselect support it)")
+                    if data["type"] == "multiselect" and not data.get("separator"):
+                        return (
+                            False,
+                            f"Invalid case_insensitive for multiselect setting {setting} in plugin {plugin['id']} (Empty separator can't be tokenized)",
+                        )
+                    options = (
+                        data.get("select", []) if data["type"] == "select" else [o.get("value", "") for o in data.get("multiselect", []) if isinstance(o, dict)]
+                    )
+                    folded = [str(o).casefold() for o in options]
+                    if len(folded) != len(set(folded)):
+                        return (False, f"Invalid case_insensitive for setting {setting} in plugin {plugin['id']} (Options collide case-insensitively)")
 
         for job in plugin.get("jobs", []):
             if not all(key in job.keys() for key in self.__mandatory_job_keys):

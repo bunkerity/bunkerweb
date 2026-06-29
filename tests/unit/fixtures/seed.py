@@ -18,9 +18,11 @@ from model import (  # type: ignore
     Global_values,
     Jobs,
     Jobs_cache,
+    Multiselects,
     Plugin_pages,
     Plugins,
     RolesUsers,
+    Selects,
     Services,
     Services_settings,
     Settings,
@@ -147,6 +149,38 @@ def add_setting(db, setting_id, *, plugin_id="general", context="global", type="
                 default=default,
             )
         )
+
+
+def add_select_setting(
+    db, setting_id, options, *, plugin_id="general", context="global", regex=None, default="", case_insensitive=False, multiselect=False
+) -> None:
+    """Insert a select/multiselect Settings row (with its A3 ``case_insensitive`` flag) plus
+    its option rows in bw_selects / bw_multiselects, so is_valid_setting / save_config see
+    the canonical option list via the relationships."""
+    stype = "multiselect" if multiselect else "select"
+    if regex is None:
+        regex = "^(" + "|".join(o for o in options if o) + ")?$"
+    with session(db) as s:
+        s.add(
+            Settings(
+                id=setting_id,
+                name=setting_id,
+                plugin_id=plugin_id,
+                context=context,
+                help="h",
+                regex=regex,
+                type=stype,
+                default=default,
+                separator=" ",
+                case_insensitive=case_insensitive,
+            )
+        )
+        s.flush()
+        for order, opt in enumerate(options, start=1):
+            if multiselect:
+                s.add(Multiselects(setting_id=setting_id, option_id=opt or f"opt{order}", label=opt, value=opt, order=order))
+            else:
+                s.add(Selects(setting_id=setting_id, value=opt, order=order))
 
 
 def seed_multisite(db) -> dict:

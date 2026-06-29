@@ -8,7 +8,7 @@ from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
-from common_utils import normalize_check_value, normalize_list_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -211,11 +211,12 @@ class Config:
                 variables.pop(key, None)
                 continue
 
-            # Canonicalize the value to its stored form (boolean aliases -> yes/no,
+            # Canonicalize the value to its stored form (trim, boolean aliases -> yes/no,
             # size/duration -> NGINX unit form, list items trimmed) so it validates and
-            # the value persisted via the API is canonical.
+            # the value persisted via the API is canonical. Trim/canonicalization are
+            # no-ops on the excluded types, so writing the value back is always safe.
             stype = plugins_settings[setting].get("type")
-            normalized = True
+            value = trim_scalar_value(stype, value)
             if stype == "check":
                 value = normalize_check_value(value)
             elif stype in ("size", "duration"):
@@ -229,11 +230,19 @@ class Config:
                         continue
                 else:
                     value = canonical
+            elif stype == "select":
+                value = normalize_select_value(
+                    value, plugins_settings[setting].get("select", []), case_insensitive=plugins_settings[setting].get("case_insensitive", False)
+                )
             elif stype in ("multiselect", "multivalue"):
-                value = normalize_list_value(value, plugins_settings[setting].get("separator", " "))
-            else:
-                normalized = False
-            if normalized and key in variables:
+                separator = plugins_settings[setting].get("separator", " ")
+                value = normalize_list_value(value, separator)
+                if stype == "multiselect":
+                    options = [o.get("value", "") for o in plugins_settings[setting].get("multiselect", []) if isinstance(o, dict)]
+                    value = normalize_select_value(
+                        value, options, multi=True, separator=separator, case_insensitive=plugins_settings[setting].get("case_insensitive", False)
+                    )
+            if key in variables:
                 variables[key] = value
 
             # Validate the variable's value against the regex pattern.

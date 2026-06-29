@@ -3,7 +3,7 @@
 from datetime import datetime
 from json import dumps, loads
 from typing import Any, ClassVar, List, Optional
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText, false
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -93,6 +93,11 @@ class Settings(Base):
     separator: Mapped[Optional[str]] = mapped_column(String(10), default=" ", nullable=True)
     accept: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    # A3 opt-in (per setting, default off): when True, select/multiselect option matching is
+    # case-insensitive and the value is canonicalized to the declared option casing. Most
+    # selects are case-sensitive by nature (ModSecurity On/DetectionOnly, headers, TLS), so
+    # this stays False unless a plugin.json explicitly sets it.
+    case_insensitive: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false(), nullable=False)
 
     selects: Mapped[List["Selects"]] = relationship("Selects", back_populates="setting", cascade="all")
     multiselects: Mapped[List["Multiselects"]] = relationship("Multiselects", back_populates="setting", cascade="all")

@@ -61,6 +61,77 @@ class TestValidExtensions:
         assert ok
 
 
+def _validate_setting(tmp_path, setting):
+    c = _configurator(tmp_path)
+    plugin = dict(BASE, settings={"MYSETTING": setting})
+    return c._Configurator__validate_plugin(plugin)
+
+
+def _select_setting(**over):
+    base = {
+        "context": "global",
+        "default": "modern",
+        "help": "h",
+        "id": "ms",
+        "label": "x",
+        "regex": "^(modern|old)$",
+        "type": "select",
+        "select": ["modern", "old"],
+    }
+    base.update(over)
+    return base
+
+
+def _multiselect_setting(**over):
+    base = {
+        "context": "global",
+        "default": "",
+        "help": "h",
+        "id": "mm",
+        "label": "x",
+        "regex": "^.*$",
+        "type": "multiselect",
+        "separator": "",
+        "multiselect": [{"id": "b", "label": "B", "value": "b"}],
+    }
+    base.update(over)
+    return base
+
+
+class TestCaseInsensitiveValidation:
+    """A3: the per-setting ``case_insensitive`` flag is validated by __validate_plugin."""
+
+    def test_true_on_select_is_valid(self, tmp_path):
+        ok, _ = _validate_setting(tmp_path, _select_setting(case_insensitive=True))
+        assert ok
+
+    def test_false_on_non_select_is_valid(self, tmp_path):
+        # A disabled flag on a non-select type is a harmless no-op.
+        ok, _ = _validate_setting(
+            tmp_path,
+            {"context": "global", "default": "0", "help": "h", "id": "n", "label": "x", "regex": r"^\d+$", "type": "number", "case_insensitive": False},
+        )
+        assert ok
+
+    def test_non_boolean_rejected(self, tmp_path):
+        ok, msg = _validate_setting(tmp_path, _select_setting(case_insensitive="yes"))
+        assert not ok and "boolean" in msg
+
+    def test_true_on_non_select_rejected(self, tmp_path):
+        ok, msg = _validate_setting(
+            tmp_path, {"context": "global", "default": "0", "help": "h", "id": "n", "label": "x", "regex": r"^\d+$", "type": "number", "case_insensitive": True}
+        )
+        assert not ok and "Only select/multiselect" in msg
+
+    def test_true_on_empty_separator_multiselect_rejected(self, tmp_path):
+        ok, msg = _validate_setting(tmp_path, _multiselect_setting(case_insensitive=True))
+        assert not ok and "Empty separator" in msg
+
+    def test_true_on_casefold_colliding_options_rejected(self, tmp_path):
+        ok, msg = _validate_setting(tmp_path, _select_setting(select=["A", "a"], regex="^(A|a)$", case_insensitive=True))
+        assert not ok and "collide" in msg
+
+
 class TestRejectedExtensions:
     def test_empty_block(self, tmp_path):
         ok, _ = _validate(tmp_path, {})

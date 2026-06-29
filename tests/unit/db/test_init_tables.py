@@ -7,7 +7,7 @@ end-to-end on every engine: create -> idempotent re-run -> update -> prune. Mark
 
 import pytest
 
-from fixtures.seed import make_core_plugin
+from fixtures.seed import make_core_plugin, session
 
 pytestmark = pytest.mark.slow
 
@@ -41,3 +41,31 @@ class TestInitTables:
     def test_jobs_created(self, db):
         db.init_tables([make_core_plugin("alpha", jobs=[{"name": "alphajob", "file": "alphajob.py", "every": "hour", "reload": False}])])
         assert "alphajob" in db.get_jobs()
+
+    def test_case_insensitive_fetched_by_init_diff(self, db):
+        # A3 regression: the bw_settings diff (_it_fetch_old_data) must fetch
+        # Settings.case_insensitive. A missing fetch made the diff read old=None != desired=True
+        # for a core select that opts in, emitting a redundant bw_settings UPDATE every scheduler
+        # boot. (Pre-fix this assertion raises AttributeError — the column isn't on the row.)
+        settings = {
+            "CIPLUG_PICK": {
+                "id": "ciplug-pick",
+                "context": "global",
+                "default": "modern",
+                "help": "h",
+                "label": "L",
+                "regex": "^(modern|old)$",
+                "type": "select",
+                "select": ["modern", "old"],
+                "case_insensitive": True,
+            }
+        }
+        assert db.init_tables([make_core_plugin("ciplug", settings=settings)]) == (True, "")
+        # the flag round-trips through the serializer...
+        sd = next(p for p in db.get_plugins() if p["id"] == "ciplug")["settings"]["CIPLUG_PICK"]
+        assert sd["case_insensitive"] is True
+        # ...and the init-diff fetch now exposes it, so the row diff compares True == True.
+        with session(db) as s:
+            old = db._it_fetch_old_data(s)
+        row = next(r for r in old["bw_settings"] if r.id == "CIPLUG_PICK")
+        assert row.case_insensitive is True

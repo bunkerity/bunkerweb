@@ -44,6 +44,28 @@ def _list(setting_id, ctx, *, default=""):
     }
 
 
+def _num(setting_id, ctx, *, default="0"):
+    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^\d+$", "type": "number"}
+
+
+def _text(setting_id, ctx, *, default=""):
+    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^.*$", "type": "text"}
+
+
+def _select(setting_id, ctx, options, *, default="", case_insensitive=False):
+    return {
+        "id": setting_id,
+        "context": ctx,
+        "default": default,
+        "help": "h",
+        "label": "L",
+        "regex": "^(" + "|".join(o for o in options if o) + ")?$",
+        "type": "select",
+        "select": options,
+        "case_insensitive": case_insensitive,
+    }
+
+
 class TestSaveConfigCheckNormalization:
     """A1: 'check' values are canonicalized to yes/no when persisted, across the
     global (non-multisite), multisite-global and per-service storage paths."""
@@ -135,6 +157,67 @@ class TestSaveConfigUnitNormalization:
         db.initialize_db("1.7.0", "Docker")
         db.save_config({"MULTISITE": "yes", "SERVER_NAME": "app1.example.com", "app1.example.com_ALPHA_SVC_SIZE": "16 K"}, "scheduler")
         assert db.get_config()["app1.example.com_ALPHA_SVC_SIZE"] == "16k"
+
+
+class TestSaveConfigScalarTrim:
+    """A2: scalar number/select values are stored trimmed; text is stored verbatim (excluded)."""
+
+    def test_number_stored_trimmed(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_NUM": _num("alpha-num", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_NUM": "8080 "}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_NUM"] == "8080"
+
+    def test_number_trim_idempotent_resave(self, db):
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_NUM": _num("alpha-num", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_NUM": "8080"}, "scheduler", skip_service_management=True)
+        db.save_config({"ALPHA_NUM": " 8080 "}, "scheduler", skip_service_management=True)  # same canonical state
+        assert db.get_config()["ALPHA_NUM"] == "8080"
+
+    def test_text_stored_verbatim(self, db):
+        # text is excluded from trim: surrounding whitespace is preserved on the stored value.
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings={"ALPHA_TXT": _text("alpha-txt", "global")})])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_TXT": "  hi  "}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_TXT"] == "  hi  "
+
+
+class TestSaveConfigSelectCaseInsensitive:
+    """A3: opt-in selects are stored canonical (declared option casing) across the global
+    (non-multisite) and per-service paths; opt-out selects are stored verbatim."""
+
+    def test_opt_in_select_stored_canonical(self, db):
+        # Global (non-multisite) path -> the inline option load in _sc_apply_non_multisite_config.
+        settings = {"ALPHA_PICK": _select("alpha-pick", "global", ["modern", "intermediate", "old"], default="modern", case_insensitive=True)}
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_PICK": "INTERMEDIATE"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_PICK"] == "intermediate"
+
+    def test_opt_out_select_stored_verbatim(self, db):
+        settings = {"ALPHA_PICK": _select("alpha-pick", "global", ["On", "Off"], default="On", case_insensitive=False)}
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+        # Opt-out: no canonicalization. save_config stores what it's given (validation is elsewhere).
+        db.save_config({"ALPHA_PICK": "on"}, "scheduler", skip_service_management=True)
+        assert db.get_config()["ALPHA_PICK"] == "on"
+
+    def test_opt_in_idempotent_across_case_resaves(self, db):
+        settings = {"ALPHA_PICK": _select("alpha-pick", "global", ["modern", "old"], default="modern", case_insensitive=True)}
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"ALPHA_PICK": "old"}, "scheduler", skip_service_management=True)
+        db.save_config({"ALPHA_PICK": "OLD"}, "scheduler", skip_service_management=True)  # same canonical state
+        assert db.get_config()["ALPHA_PICK"] == "old"
+
+    def test_per_service_select_canonical(self, db):
+        # Multisite path -> the ctx.settings_dict option map in _sc_process_service.
+        settings = {"ALPHA_SVC_PICK": _select("alpha-svc-pick", "multisite", ["modern", "old"], default="modern", case_insensitive=True)}
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+        db.save_config({"MULTISITE": "yes", "SERVER_NAME": "app1.example.com", "app1.example.com_ALPHA_SVC_PICK": "MODERN"}, "scheduler")
+        assert db.get_config()["app1.example.com_ALPHA_SVC_PICK"] == "modern"
 
 
 class TestSaveConfigGlobal:

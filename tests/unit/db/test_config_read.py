@@ -6,7 +6,7 @@ the global -> per-service default propagation. Uses ``seed_multisite``.
 
 import pytest
 
-from fixtures.seed import add_setting, seed_minimal, seed_multisite
+from fixtures.seed import add_select_setting, add_setting, seed_minimal, seed_multisite
 
 
 class TestIsValidSetting:
@@ -121,6 +121,47 @@ class TestIsValidSetting:
         # A global setting addressed with a known service prefix resolves via the DB
         # services scan, which flips multisite=True -> 'not multisite'.
         assert db.is_valid_setting("app1.example.com_MULTISITE") == (False, "not multisite")
+
+    def test_number_value_trimmed_before_regex(self, db):
+        # A2: a number with surrounding whitespace validates after trim (was rejected before).
+        seed_minimal(db)
+        add_setting(db, "TEST_PORT", type="number", regex=r"^\d+$", default="0")
+        assert db.is_valid_setting("TEST_PORT", value="8080 ") == (True, "")
+        assert db.is_valid_setting("TEST_PORT", value="  ")[0] is False  # empty-after-trim still rejected
+
+    def test_select_value_trimmed_before_regex(self, db):
+        seed_minimal(db)
+        add_setting(db, "TEST_PICK", type="select", regex=r"^(a|b)$", default="a")
+        assert db.is_valid_setting("TEST_PICK", value=" a ") == (True, "")
+
+    def test_text_value_not_trimmed(self, db):
+        # SECURITY_MODE is text (^.*$): surrounding whitespace is meaningful and accepted.
+        # NOTE: is_valid_setting returns only (ok, msg) and ^.*$ matches either way, so this
+        # only guards the validity decision. The verbatim-STORE guarantee (text excluded from
+        # trim) is covered by test_config_save.test_text_stored_verbatim + test_templates.
+        seed_minimal(db)
+        assert db.is_valid_setting("SECURITY_MODE", value="  on  ") == (True, "")
+
+    def test_opt_in_select_accepts_any_case(self, db):
+        # A3: a case_insensitive select canonicalizes "Modern" -> "modern" before the
+        # case-sensitive regex, so it validates.
+        seed_minimal(db)
+        add_select_setting(db, "CIPHERS", ["modern", "intermediate", "old"], default="modern", case_insensitive=True)
+        for v in ("modern", "Modern", "MODERN", "OLD"):
+            assert db.is_valid_setting("CIPHERS", value=v) == (True, ""), v
+        assert db.is_valid_setting("CIPHERS", value="moderns")[0] is False  # no option match -> rejected
+
+    def test_opt_out_select_is_case_sensitive(self, db):
+        # Default (no flag): ModSecurity-style On/Off select stays case-sensitive.
+        seed_minimal(db)
+        add_select_setting(db, "SEC_ENGINE", ["On", "DetectionOnly", "Off"], default="On", case_insensitive=False)
+        assert db.is_valid_setting("SEC_ENGINE", value="On") == (True, "")
+        assert db.is_valid_setting("SEC_ENGINE", value="on")[0] is False  # case-sensitive -> rejected
+
+    def test_opt_in_multiselect_per_item(self, db):
+        seed_minimal(db)
+        add_select_setting(db, "PARTS", ["alpha", "beta"], regex=r"^( *(alpha|beta) *)*$", default="", case_insensitive=True, multiselect=True)
+        assert db.is_valid_setting("PARTS", value="ALPHA Beta") == (True, "")
 
 
 class TestGetConfig:

@@ -3,9 +3,9 @@ from contextlib import suppress
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from model import Global_values, Metadata, Plugins, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
+from model import Global_values, Metadata, Multiselects, Plugins, Selects, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
-from common_utils import bytes_hash, normalize_check_value, normalize_list_value  # type: ignore
+from common_utils import bytes_hash, normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import case, delete, select, update
@@ -274,28 +274,51 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
 
         if base_setting_ids:
             setting_meta = {
-                row[0]: (row[1], row[2])
-                for row in session.execute(select(Settings.id, Settings.type, Settings.separator).filter(Settings.id.in_(base_setting_ids)))
+                row[0]: (row[1], row[2], row[3])
+                for row in session.execute(
+                    select(Settings.id, Settings.type, Settings.separator, Settings.case_insensitive).filter(Settings.id.in_(base_setting_ids))
+                )
             }
             missing_base_ids = sorted(base_setting_ids - set(setting_meta))
             if missing_base_ids:
                 return f"Unknown settings: {', '.join(missing_base_ids)}", [], [], []
+            select_options: Dict[str, List[str]] = {}
+            for row in session.execute(select(Selects.setting_id, Selects.value).filter(Selects.setting_id.in_(base_setting_ids)).order_by(Selects.order)):
+                select_options.setdefault(row.setting_id, []).append(row.value or "")
+            for row in session.execute(
+                select(Multiselects.setting_id, Multiselects.value).filter(Multiselects.setting_id.in_(base_setting_ids)).order_by(Multiselects.order)
+            ):
+                select_options.setdefault(row.setting_id, []).append(row.value or "")
             # Canonicalize defaults to their stored form (boolean aliases -> yes/no,
-            # size/duration -> NGINX unit form, list items trimmed), like every other
-            # settings ingestion boundary, so template defaults are stored canonical.
+            # size/duration -> NGINX unit form, list items trimmed, select casefolded when
+            # opt-in), like every other settings ingestion boundary, so template defaults
+            # are stored canonical.
             for entity in setting_entities:
                 meta = setting_meta.get(entity["setting_id"])
                 if not meta:
                     continue
-                stype, separator = meta
+                stype, separator, case_insensitive = meta
+                entity["default"] = trim_scalar_value(stype, entity["default"])
                 if stype == "check":
                     entity["default"] = normalize_check_value(entity["default"])
                 elif stype in ("size", "duration"):
                     canonical = normalize_unit(stype, entity["default"])
                     if canonical is not None:
                         entity["default"] = canonical
+                elif stype == "select":
+                    entity["default"] = normalize_select_value(
+                        entity["default"], select_options.get(entity["setting_id"], []), case_insensitive=case_insensitive
+                    )
                 elif stype in ("multiselect", "multivalue"):
                     entity["default"] = normalize_list_value(entity["default"], separator or " ")
+                    if stype == "multiselect":
+                        entity["default"] = normalize_select_value(
+                            entity["default"],
+                            select_options.get(entity["setting_id"], []),
+                            multi=True,
+                            separator=separator or " ",
+                            case_insensitive=case_insensitive,
+                        )
 
         configs = configs or []
         config_map: Dict[str, Tuple[Dict[str, Any], int]] = {}

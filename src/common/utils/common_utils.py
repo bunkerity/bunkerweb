@@ -83,6 +83,51 @@ def normalize_list_value(value: Any, separator: str = " ") -> Any:
     return separator.join(item for item in items if item)
 
 
+# Setting types where leading/trailing whitespace can be semantically meaningful and
+# therefore MUST NOT be trimmed at ingestion: free-form/regex text, file bodies, and
+# secrets. Every other scalar type (number, select, check, size, duration, lists) is
+# safe to trim — check/size/duration/list helpers already strip internally, so the
+# net-new effect is on number/select (and any future scalar type).
+NO_TRIM_TYPES = frozenset(("password", "file", "text"))
+
+
+def trim_scalar_value(setting_type: Any, value: Any) -> Any:
+    """Strip surrounding whitespace from a scalar setting value before type canonicalization.
+
+    No-op for non-strings, for the NO_TRIM_TYPES exclusion set, and for an unknown/empty type
+    (so a value whose schema wasn't resolved is never wrongly trimmed). Idempotent:
+    ``trim(trim(v)) == trim(v)``.
+    """
+    if isinstance(value, str) and setting_type and setting_type not in NO_TRIM_TYPES:
+        return value.strip()
+    return value
+
+
+def normalize_select_value(value: Any, options, *, multi: bool = False, separator: str = " ", case_insensitive: bool = False) -> Any:
+    """Casefold-map a select/multiselect value to its declared option casing (A3, opt-in).
+
+    No-op unless ``case_insensitive`` is set and ``value`` is a string and ``options`` is
+    non-empty. ``options`` is the flat list of canonical option strings (the stored values).
+    A token matching an option case-insensitively is rewritten to that option's casing; a
+    token with no match is returned unchanged so the schema regex still rejects it. For
+    ``multi`` the value is split on ``separator`` (empty separator -> returned unchanged,
+    can't tokenize), each item mapped, then rejoined. Expects ``multi`` input already cleaned
+    by ``normalize_list_value`` (trimmed items). Idempotent on canonical input.
+    """
+    if not case_insensitive or not isinstance(value, str) or not options:
+        return value
+    canon = {}
+    for opt in options:
+        key = str(opt).casefold()
+        if key not in canon:  # first declaration wins on a casefold collision
+            canon[key] = opt
+    if not multi:
+        return canon.get(value.casefold(), value)
+    if not separator:
+        return value
+    return separator.join(canon.get(item.casefold(), item) for item in value.split(separator))
+
+
 def get_version() -> str:
     return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
 

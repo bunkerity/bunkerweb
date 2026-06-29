@@ -7,9 +7,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from model import Custom_configs, Global_values, Jobs_cache, Metadata, Plugins, Services, Services_settings, Settings, Template_settings  # type: ignore
+from model import Custom_configs, Global_values, Jobs_cache, Metadata, Multiselects, Plugins, Selects, Services, Services_settings, Settings, Template_settings  # type: ignore
 
-from common_utils import normalize_check_value, normalize_list_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import delete, select, update
@@ -105,18 +105,27 @@ def _check_value(ctx: _SaveConfigContext, key: str, value: str, setting: dict, t
     return _is_default_value(ctx, value, key, setting, template_default, suffix, is_global)
 
 
-def _canonicalize_stored_value(setting_type: Optional[str], value: Any, separator: Optional[str] = " ") -> Any:
+def _canonicalize_stored_value(
+    setting_type: Optional[str], value: Any, separator: Optional[str] = " ", options: Optional[List[str]] = None, case_insensitive: bool = False
+) -> Any:
     """Canonicalize a value to its stored form by setting type (mirrors
-    ``Configurator.__canonicalize_value``): check -> yes/no, size/duration -> NGINX unit
-    form, multivalue/multiselect -> trimmed items. Invalid size/duration values are left
-    unchanged so the stored value stays whatever was provided. Other types untouched."""
+    ``Configurator.__normalize_value``): trim -> check yes/no -> size/duration NGINX unit
+    form -> select/multiselect casefold to declared option casing (when ``case_insensitive``)
+    -> multivalue/multiselect trimmed items. Invalid size/duration values are left unchanged
+    so the stored value stays whatever was provided. Other types untouched."""
+    value = trim_scalar_value(setting_type, value)
     if setting_type == "check":
         return normalize_check_value(value)
     if setting_type in ("size", "duration"):
         canonical = normalize_unit(setting_type, value)
         return canonical if canonical is not None else value
+    if setting_type == "select":
+        return normalize_select_value(value, options or [], case_insensitive=case_insensitive)
     if setting_type in ("multiselect", "multivalue"):
-        return normalize_list_value(value, separator or " ")
+        value = normalize_list_value(value, separator or " ")
+        if setting_type == "multiselect":
+            value = normalize_select_value(value, options or [], multi=True, separator=separator or " ", case_insensitive=case_insensitive)
+        return value
     return value
 
 
@@ -653,13 +662,40 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
         return service_configs, global_config
 
+    @staticmethod
+    def _sc_load_select_options(session, setting_ids: Optional[Set[str]] = None) -> Dict[str, List[str]]:
+        """Map setting_id -> flat list of canonical option values (select + multiselect),
+        used to casefold-canonicalize case-insensitive selects on store (A3)."""
+        options: Dict[str, List[str]] = {}
+        sel_q = select(Selects.setting_id, Selects.value).order_by(Selects.order)
+        msel_q = select(Multiselects.setting_id, Multiselects.value).order_by(Multiselects.order)
+        if setting_ids is not None:
+            sel_q = sel_q.filter(Selects.setting_id.in_(setting_ids))
+            msel_q = msel_q.filter(Multiselects.setting_id.in_(setting_ids))
+        for row in session.execute(sel_q):
+            options.setdefault(row.setting_id, []).append(row.value or "")
+        for row in session.execute(msel_q):
+            options.setdefault(row.setting_id, []).append(row.value or "")
+        return options
+
     def _sc_collect_multisite_data(self, session, ctx: _SaveConfigContext) -> None:
         """save_config phase: collect the settings/service-settings/template lookup dicts used by the
         multisite worker threads, storing them on ``ctx`` (read-only afterwards)."""
         # Collect necessary data before threading
-        settings_data = session.execute(select(Settings.id, Settings.default, Settings.plugin_id, Settings.type, Settings.separator)).all()
+        settings_data = session.execute(
+            select(Settings.id, Settings.default, Settings.plugin_id, Settings.type, Settings.separator, Settings.case_insensitive)
+        ).all()
+        select_options = self._sc_load_select_options(session)
         ctx.settings_dict = {
-            s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type, "separator": s.separator} for s in settings_data
+            s.id: {
+                "default": self._empty_if_none(s.default),
+                "plugin_id": s.plugin_id,
+                "type": s.type,
+                "separator": s.separator,
+                "case_insensitive": s.case_insensitive,
+                "options": select_options.get(s.id),
+            }
+            for s in settings_data
         }
 
         # Collect existing service settings
@@ -728,7 +764,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
 
-            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"))
+            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"), setting.get("options"), setting.get("case_insensitive", False))
 
             if server_name not in db_ids:
                 self.logger.debug(f"Adding service {server_name}")
@@ -827,7 +863,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
 
-            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"))
+            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"), setting.get("options"), setting.get("case_insensitive", False))
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)
@@ -934,12 +970,18 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 suffix = int(key.split("_")[-1])
                 key = key[: -len(str(suffix)) - 1]
 
-            setting = session.execute(select(Settings.default, Settings.plugin_id, Settings.type, Settings.separator).filter_by(id=key).limit(1)).first()
+            setting = session.execute(
+                select(Settings.default, Settings.plugin_id, Settings.type, Settings.separator, Settings.case_insensitive).filter_by(id=key).limit(1)
+            ).first()
 
             if not setting:
                 continue
 
-            value = _canonicalize_stored_value(setting.type, value, setting.separator)
+            options = None
+            if setting.type in ("select", "multiselect"):
+                options = self._sc_load_select_options(session, {key}).get(key)
+
+            value = _canonicalize_stored_value(setting.type, value, setting.separator, options, setting.case_insensitive)
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)

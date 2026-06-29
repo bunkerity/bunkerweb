@@ -343,6 +343,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                     Settings.separator,
                     Settings.accept,
                     Settings.order,
+                    Settings.case_insensitive,
                 )
                 .filter_by(id=setting)
                 .limit(1)
@@ -398,6 +399,9 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
                 if value.get("accept") != db_setting.accept:
                     updates[Settings.accept] = value.get("accept")
+
+                if value.get("case_insensitive", False) != db_setting.case_insensitive:
+                    updates[Settings.case_insensitive] = value.get("case_insensitive", False)
 
                 if order != db_setting.order:
                     updates[Settings.order] = order
