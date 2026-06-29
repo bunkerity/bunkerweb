@@ -49,7 +49,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     export URL="$(jq -r .url re2.json)" && \
     export COMMIT="$(jq -r .commit re2.json)" && \
     bash install-re2.sh && \
-    go install github.com/mikefarah/yq/v4@v4.44.3
+    go install github.com/mikefarah/yq/v4@v4.50.1
 
 COPY src/all-in-one/deps/crowdsec.json crowdsec.json
 COPY --chmod=644 src/all-in-one/scripts/install-crowdsec.sh install-crowdsec.sh
