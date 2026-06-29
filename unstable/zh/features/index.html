@@ -5096,6 +5096,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>在 Cap.js 站点密钥上配置 CORS，以允许受保护的来源。</li>
 <li>将 <code>ANTIBOT_CAPJS_FRONTEND_URL</code> 和 <code>ANTIBOT_CAPJS_BACKEND_URL</code> 都设置为仅 origin：scheme、host 和可选端口，不包含路径。</li>
 <li>请使用 Cap.js 小组件 <strong>0.1.48 或更高版本</strong>。BunkerWeb 下发严格的基于 nonce 的 CSP；较旧的小组件会破坏 instrumentation 挑战，因为隔离 <code>srcdoc</code> iframe 内注入的内联 <code>&lt;script&gt;</code> 不会传递 nonce。如果您自托管 <code>tiago2/cap</code>，请固定到较新的标签（如 <code>tiago2/cap:3.1.2</code> 或更高），或将 <code>WIDGET_VERSION</code> 设置为 <code>0.1.48</code> 或更高。</li>
+<li>Cap.js <strong>instrumentation 挑战</strong>（默认开启）通过 <code>eval</code> 执行服务器提供的 JavaScript，nonce 无法对其授权。BunkerWeb 在同源隔离 iframe 中运行小组件，由该 iframe 携带所需的 <code>'unsafe-eval'</code>，因此主挑战页面保持严格的、无 <code>eval</code> 的 CSP——无需任何配置。</li>
 </ul>
 </div>
 <p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
@@ -6266,7 +6267,7 @@ TrustedMonitor/\d+\.\d+
 <h3 id="crowdsec">CrowdSec 控制台集成</h3>
 <p>如果您还不熟悉 CrowdSec 控制台集成，<a href="https://www.crowdsec.net/?utm_campaign=bunkerweb&amp;utm_source=doc">CrowdSec</a> 利用众包情报来对抗网络威胁。可以把它想象成“网络安全界的 Waze”——当一台服务器受到攻击时，全球其他系统都会收到警报，并受到保护，免受同一攻击者的侵害。您可以在<a href="https://www.crowdsec.net/about?utm_campaign=bunkerweb&amp;utm_source=blog">这里</a>了解更多信息。</p>
 <p>通过我们与 CrowdSec 的合作，您可以将您的 BunkerWeb 实例注册到您的 <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec 控制台</a>。这意味着由 BunkerWeb 阻止的攻击将与由 CrowdSec 安全引擎阻止的攻击一起显示在您的 CrowdSec 控制台中，为您提供统一的威胁视图。</p>
-<p>重要的是，此集成无需安装 CrowdSec（尽管我们强烈建议您使用 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">BunkerWeb 的 CrowdSec 插件</a>来进一步增强您的 Web 服务的安全性）。此外，您可以将您的 CrowdSec 安全引擎注册到同一个控制台帐户，以实现更大的协同作用。</p>
+<p>重要的是，此集成无需安装 CrowdSec（尽管我们强烈建议您使用 <a href="https://docs.bunkerweb.io/latest/features/#crowdsec">BunkerWeb 的 CrowdSec 插件</a>来进一步增强您的 Web 服务的安全性）。此外，您可以将您的 CrowdSec 安全引擎注册到同一个控制台帐户，以实现更大的协同作用。</p>
 <p><strong>步骤 1：创建您的 CrowdSec 控制台帐户</strong></p>
 <p>前往 <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec 控制台</a>注册，如果您还没有帐户的话。完成后，记下在“安全引擎”下点击“添加安全引擎”后找到的注册密钥：</p>
 <figure>
@@ -11074,7 +11075,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="mutual-tls">Mutual TLS</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Mutual TLS（mTLS）插件可在关键站点上强制执行客户端证书认证，确保只有受信任实体才能访问敏感资源。启用后，BunkerWeb 会在请求进入业务前完成身份鉴别，从而保护内部工具与合作伙伴集成。</p>
 <p>BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手。未满足规则的客户端会被拦截，通过验证的连接则可以将证书细节传递给后端应用，以便执行更精细的授权控制。</p>
 <p><strong>工作原理：</strong></p>
@@ -12798,8 +12799,54 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td>否</td>
 <td><strong>SSL SNI 名称：</strong> 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。</td>
 </tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_VERIFY</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>SSL 验证：</strong> 启用或禁用对上游服务器 SSL 证书的验证。</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>受信任证书优先级：</strong> 受信任 CA 的来源：<code>file</code>（路径）或 <code>data</code>（base64/PEM）。</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>SSL 受信任证书路径：</strong> 用于验证上游的 PEM CA 包路径（需调度器可读）。</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>SSL 受信任证书数据：</strong> 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_VERIFY_DEPTH</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>SSL 验证深度：</strong> 上游服务器证书链中的验证深度。</td>
+</tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">证书验证</p>
+<p>当 <code>REVERSE_PROXY_SSL_VERIFY</code> 设置为 <code>yes</code> 时，NGINX 会同时验证上游证书链及其名称：</p>
+<ul>
+<li><strong>受信任 CA：</strong> 以文件路径（<code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE</code>，需调度器可读）或 base64/PEM 数据（<code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA</code>）提供，由 <code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY</code> 选择。调度器会验证、缓存并将其分发到每个实例，因此只需配置一次，无需逐实例挂载。</li>
+<li><strong>必需：</strong> 必须提供受信任证书；NGINX 对上游验证没有隐式的系统存储。要验证公共上游，请将路径指向系统 CA 包（例如 <code>/etc/ssl/certs/ca-certificates.crt</code>）。</li>
+<li><strong>名称：</strong> 默认针对从 <code>REVERSE_PROXY_HOST</code> 获取的主机进行检查。如果后端证书的 CN/SAN 不同，请将 <code>REVERSE_PROXY_SSL_SNI</code> 设置为 <code>yes</code>，并将 <code>REVERSE_PROXY_SSL_SNI_NAME</code> 设置为预期名称。</li>
+<li><strong>故障安全：</strong> 如果没有可用的有效受信任证书，则会为该服务器禁用验证，而不是中断每个上游连接。</li>
+</ul>
+<p>这些设置按服务生效：一个服务的所有上游条目（<code>REVERSE_PROXY_HOST</code>、<code>REVERSE_PROXY_HOST_1</code>、……）共享相同的验证配置。</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">SNI 解释</p>
 <p>服务器名称指示 (SNI) 是 TLS 的一个扩展，它允许客户端在握手过程中指定它试图连接的主机名。这使服务器能够在同一个 IP 地址和端口上呈现多个证书，从而允许从单个 IP 地址提供多个安全 (HTTPS) 网站，而无需所有这些网站都使用相同的证书。</p>
@@ -13019,8 +13066,8 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 </div>
 <div class="admonition warning">
 <p class="admonition-title">大文件上传的安全建议</p>
-<p>ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果——<strong>并且仅当</strong>——某个反向代理 URL <em>专门</em> 用于文件上传（例如专用的 <code>/upload</code> 端点），请在该 URL 上设置 <code>REVERSE_PROXY_MODSECURITY_N: "no"</code>。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。</p>
-<p>为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> 或 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a>——它们检查上传文件本身，而不是原始请求体。</p>
+<p>ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果<strong>（并且仅当）</strong>某个反向代理 URL <em>专门</em> 用于文件上传（例如专用的 <code>/upload</code> 端点），请在该 URL 上设置 <code>REVERSE_PROXY_MODSECURITY_N: "no"</code>。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。</p>
+<p>为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> 或 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a>，它们检查上传文件本身，而不是原始请求体。</p>
 </div>
 </div>
 <div class="tabbed-block">

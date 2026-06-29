@@ -5084,6 +5084,7 @@ Para la nueva versión, cree una clave de reCAPTCHA en su proyecto de Google Clo
 <li>Configure CORS en la clave de sitio de Cap.js para permitir el origen protegido.</li>
 <li>Defina <code>ANTIBOT_CAPJS_FRONTEND_URL</code> y <code>ANTIBOT_CAPJS_BACKEND_URL</code> solo como orígenes: esquema, host y puerto opcional, sin ruta.</li>
 <li>Use el widget de Cap.js <strong>0.1.48 o posterior</strong>. BunkerWeb sirve una CSP estricta basada en nonce; los widgets anteriores rompen los desafíos de instrumentación porque el <code>&lt;script&gt;</code> inline del iframe <code>srcdoc</code> aislado no propaga el nonce. Si autoaloja <code>tiago2/cap</code>, fije una etiqueta reciente (p. ej. <code>tiago2/cap:3.1.2</code> o posterior) o establezca <code>WIDGET_VERSION</code> en <code>0.1.48</code> o posterior.</li>
+<li>Los <strong>desafíos de instrumentación</strong> de Cap.js (activados por defecto) ejecutan JavaScript proporcionado por el servidor mediante <code>eval</code>, que un nonce no puede autorizar. BunkerWeb ejecuta el widget en un iframe aislado del mismo origen que incluye el <code>'unsafe-eval'</code> necesario, de modo que la página de desafío principal mantiene una CSP estricta y sin <code>eval</code> — sin configuración necesaria.</li>
 </ul>
 </div>
 <p>Consulte los <a href="#configuraciones-comunes">Ajustes comunes</a> para opciones de configuración adicionales.</p>
@@ -6254,7 +6255,7 @@ TrustedMonitor/\d+\.\d+
 <h3 id="integracion-con-la-consola-de-crowdsec">Integración con la Consola de CrowdSec</h3>
 <p>Si aún no está familiarizado con la integración de la Consola de CrowdSec, <a href="https://www.crowdsec.net/?utm_campaign=bunkerweb&amp;utm_source=doc">CrowdSec</a> aprovecha la inteligencia colectiva para combatir las ciberamenazas. Piense en ello como el "Waze de la ciberseguridad": cuando un servidor es atacado, otros sistemas en todo el mundo son alertados y protegidos de los mismos atacantes. Puede obtener más información al respecto <a href="https://www.crowdsec.net/about?utm_campaign=bunkerweb&amp;utm_source=blog">aquí</a>.</p>
 <p>A través de nuestra asociación con CrowdSec, puede inscribir sus instancias de BunkerWeb en su <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">Consola de CrowdSec</a>. Esto significa que los ataques bloqueados por BunkerWeb serán visibles en su Consola de CrowdSec junto con los ataques bloqueados por los Motores de Seguridad de CrowdSec, brindándole una vista unificada de las amenazas.</p>
-<p>Es importante destacar que no es necesario instalar CrowdSec para esta integración (aunque recomendamos encarecidamente probarlo con el <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">complemento de CrowdSec para BunkerWeb</a> para mejorar aún más la seguridad de sus servicios web). Además, puede inscribir sus Motores de Seguridad de CrowdSec en la misma cuenta de la Consola para una sinergia aún mayor.</p>
+<p>Es importante destacar que no es necesario instalar CrowdSec para esta integración (aunque recomendamos encarecidamente probarlo con el <a href="https://docs.bunkerweb.io/latest/features/#crowdsec">complemento de CrowdSec para BunkerWeb</a> para mejorar aún más la seguridad de sus servicios web). Además, puede inscribir sus Motores de Seguridad de CrowdSec en la misma cuenta de la Consola para una sinergia aún mayor.</p>
 <p><strong>Paso #1: Cree su cuenta en la Consola de CrowdSec</strong></p>
 <p>Vaya a la <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">Consola de CrowdSec</a> y regístrese si aún no tiene una cuenta. Una vez hecho esto, anote la clave de inscripción que se encuentra en "Security Engines" después de hacer clic en "Add Security Engine":</p>
 <figure>
@@ -11071,7 +11072,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="mutual-tls">Mutual TLS</h2>
-<p>Compatibilidad con STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>Compatibilidad con STREAM <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>El plugin Mutual TLS (mTLS) protege las aplicaciones sensibles exigiendo que los clientes presenten certificados emitidos por autoridades en las que confía. Con la función activada, BunkerWeb autentica cada llamada antes de que llegue a sus servicios, lo que mantiene blindadas herramientas internas e integraciones con socios.</p>
 <p>BunkerWeb evalúa cada handshake TLS con base en el paquete de CA y en la política que configure. Los clientes que no cumplen las reglas se bloquean, mientras que las conexiones válidas pueden reenviar los detalles del certificado a las aplicaciones de backend para aplicar autorizaciones más precisas.</p>
 <p><strong>Cómo funciona:</strong></p>
@@ -12801,9 +12802,54 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
 <td>no</td>
 <td><strong>Nombre de SSL SNI:</strong> Establece el nombre de host de SNI que se enviará al upstream cuando SSL SNI esté habilitado.</td>
 </tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_VERIFY</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>SSL Verify:</strong> Habilita o deshabilita la verificación del certificado SSL del servidor upstream.</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Prioridad del certificado de confianza:</strong> Origen de la CA de confianza: <code>file</code> (ruta) o <code>data</code> (base64/PEM).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Ruta del certificado de confianza SSL:</strong> Ruta a un paquete de CA en PEM (legible por el planificador) usado para verificar el upstream.</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Datos del certificado de confianza SSL:</strong> CA de confianza directamente como base64 o PEM (p. ej. mediante la interfaz web).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_VERIFY_DEPTH</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Profundidad de Verificación SSL:</strong> Profundidad de verificación en la cadena de certificados del servidor upstream.</td>
+</tr>
 </tbody>
 </table>
-<pre><code>!!! info "SNI Explicado"
+<pre><code>!!! info "Verificación de Certificados"
+    Cuando `REVERSE_PROXY_SSL_VERIFY` se establece en `yes`, NGINX valida tanto la cadena de certificados del upstream como su nombre:
+
+    - **CA de confianza:** proporciónela como ruta de archivo (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, legible por el planificador) o como datos base64/PEM (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`), según `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY`. El planificador la valida, la almacena en caché y la distribuye a cada instancia, por lo que solo la configura una vez, sin montaje por instancia.
+    - **Obligatorio:** se requiere un certificado de confianza; NGINX no tiene un almacén del sistema implícito para la verificación del upstream. Para verificar un upstream público, apunte la ruta al paquete de CA del sistema (p. ej. `/etc/ssl/certs/ca-certificates.crt`).
+    - **Nombre:** se comprueba por defecto contra el host de `REVERSE_PROXY_HOST`. Si el CN/SAN del certificado del backend difiere, establezca `REVERSE_PROXY_SSL_SNI` en `yes` y `REVERSE_PROXY_SSL_SNI_NAME` con el nombre esperado.
+    - **A prueba de fallos:** si no hay un certificado de confianza válido disponible, la verificación se deshabilita para ese servidor en lugar de romper cada conexión upstream.
+
+    Estos ajustes se aplican por servicio: todas las entradas de upstream (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) comparten la misma configuración de verificación.
+
+!!! info "SNI Explicado"
     La Indicación del Nombre del Servidor (SNI) es una extensión de TLS que permite a un cliente especificar el nombre de host al que intenta conectarse durante el proceso de handshake. Esto permite a los servidores presentar múltiples certificados en la misma dirección IP y puerto, lo que permite que múltiples sitios web seguros (HTTPS) se sirvan desde una única dirección IP sin requerir que todos esos sitios usen el mismo certificado.
 </code></pre>
 <div class="tabbed-set tabbed-alternate" data-tabs="49:1"><input checked="checked" id="__tabbed_49_1" name="__tabbed_49" type="radio" /><div class="tabbed-labels"><label for="__tabbed_49_1">Soporte de Protocolo</label></div>
@@ -13031,7 +13077,7 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
     Tenga cuidado al incluir fragmentos de configuración personalizados, ya que pueden anular la configuración de seguridad de BunkerWeb o introducir vulnerabilidades si no se configuran correctamente.
 
 !!! warning "Recomendación de seguridad para cargas grandes"
-    ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si — **y solo si** — una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
+    ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si, **y solo si**, una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
 
     Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
 </code></pre>

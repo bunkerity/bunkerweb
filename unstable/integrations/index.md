@@ -2436,10 +2436,10 @@ Please ensure that you have **NGINX 1.30.3 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora already provides NGINX 1.30.2 that we support
+    Fedora already provides NGINX 1.30.3 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.2
+    sudo dnf install -y --allowerasing nginx-1.30.3
     ```
 
     !!! example "Disable the setup wizard"
@@ -2453,8 +2453,8 @@ Please ensure that you have **NGINX 1.30.3 installed before installing BunkerWeb
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
-  	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-testing
+	sudo dnf makecache && \
+	sudo -E dnf install -y --allowerasing bunkerweb-testing
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:

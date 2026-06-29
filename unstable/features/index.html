@@ -5094,6 +5094,7 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 <li>Configure CORS on the Cap.js sitekey to allow the protected origin.</li>
 <li>Set both <code>ANTIBOT_CAPJS_FRONTEND_URL</code> and <code>ANTIBOT_CAPJS_BACKEND_URL</code> to origins only: scheme, host, and optional port, with no path.</li>
 <li>Use the Cap.js widget <strong>0.1.48 or later</strong>. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed <code>srcdoc</code> iframe's inline script does not propagate the nonce. If you self-host <code>tiago2/cap</code>, pin a recent tag (e.g. <code>tiago2/cap:3.1.2</code> or newer) or set <code>WIDGET_VERSION</code> to <code>0.1.48</code> or later.</li>
+<li>Cap.js <strong>instrumentation challenges</strong> (on by default) run server-supplied JavaScript via <code>eval</code>, which a nonce cannot authorize. BunkerWeb runs the widget in an isolated same-origin iframe that carries the needed <code>'unsafe-eval'</code>, so the main challenge page keeps a strict, eval-free CSP — no configuration required.</li>
 </ul>
 </div>
 <p>Refer to the <a href="#common-settings">Common Settings</a> for additional configuration options.</p>
@@ -6264,7 +6265,7 @@ TrustedMonitor/\d+\.\d+
 <h3 id="crowdsec-console-integration">CrowdSec Console integration</h3>
 <p>If you aren’t already familiar with CrowdSec Console integration, <a href="https://www.crowdsec.net/?utm_campaign=bunkerweb&amp;utm_source=doc">CrowdSec</a> leverages crowdsourced intelligence to combat cyber threats. Think of it as the "Waze of cybersecurity"—when one server is attacked, other systems worldwide are alerted and protected from the same attackers. You can learn more about it <a href="https://www.crowdsec.net/about?utm_campaign=bunkerweb&amp;utm_source=blog">here</a>.</p>
 <p>Through our partnership with CrowdSec, you can enroll your BunkerWeb instances into your <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec Console</a>. This means that attacks blocked by BunkerWeb will be visible in your CrowdSec Console alongside attacks blocked by CrowdSec Security Engines, giving you a unified view of threats.</p>
-<p>Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">CrowdSec plugin for BunkerWeb</a> to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.</p>
+<p>Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the <a href="https://docs.bunkerweb.io/latest/features/#crowdsec">CrowdSec plugin for BunkerWeb</a> to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.</p>
 <p><strong>Step #1: Create your CrowdSec Console account</strong></p>
 <p>Go to the <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec Console</a> and register if you don’t already have an account. Once done, note the enroll key found under "Security Engines" after clicking on "Add Security Engine":</p>
 <figure>
@@ -11072,7 +11073,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="mutual-tls">Mutual TLS</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Mutual TLS (mTLS) plugin protects sensitive applications by requiring visiting clients to present certificates issued by authorities you trust. With it enabled, BunkerWeb authenticates callers before their requests reach your services, keeping internal tools and partner integrations locked down.</p>
 <p>BunkerWeb evaluates each handshake against the CA bundle and policy you configure. Clients that fail the verification rules are stopped, while compliant connections can optionally pass certificate details to upstream applications for deeper authorization decisions.</p>
 <p><strong>How it works:</strong></p>
@@ -12798,8 +12799,54 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td>no</td>
 <td><strong>SSL SNI Name:</strong> Sets the SNI hostname to send to upstream when SSL SNI is enabled.</td>
 </tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_VERIFY</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>SSL Verify:</strong> Enable or disable verification of the upstream server's SSL certificate.</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Trusted Certificate Priority:</strong> Source of the trusted CA: <code>file</code> (path) or <code>data</code> (base64/PEM).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>SSL Trusted Certificate Path:</strong> Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream.</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>SSL Trusted Certificate Data:</strong> Trusted CA supplied directly as base64 or PEM (e.g. via the web UI).</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_SSL_VERIFY_DEPTH</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>SSL Verify Depth:</strong> Verification depth in the upstream server certificate chain.</td>
+</tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Certificate Verification</p>
+<p>When <code>REVERSE_PROXY_SSL_VERIFY</code> is set to <code>yes</code>, NGINX validates both the upstream certificate chain and its name:</p>
+<ul>
+<li><strong>Trusted CA:</strong> supply it either as a file path (<code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE</code>, readable by the scheduler) or as base64/PEM data (<code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA</code>), selected by <code>REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY</code>. The scheduler validates it, caches it, and distributes it to every instance, so you configure it once with no per-instance mounting.</li>
+<li><strong>Required:</strong> a trusted certificate is mandatory; NGINX has no implicit system store for upstream verification. To verify a public upstream, point the path at the system CA bundle (e.g. <code>/etc/ssl/certs/ca-certificates.crt</code>).</li>
+<li><strong>Name:</strong> checked against the host from <code>REVERSE_PROXY_HOST</code> by default. If the backend certificate's CN/SAN differs, set <code>REVERSE_PROXY_SSL_SNI</code> to <code>yes</code> and <code>REVERSE_PROXY_SSL_SNI_NAME</code> to the expected name.</li>
+<li><strong>Fail-safe:</strong> if no valid trusted certificate is available, verification is disabled for that server rather than breaking every upstream connection.</li>
+</ul>
+<p>These settings apply per service: all upstream entries (<code>REVERSE_PROXY_HOST</code>, <code>REVERSE_PROXY_HOST_1</code>, ...) share the same verification configuration.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">SNI Explained</p>
 <p>Server Name Indication (SNI) is a TLS extension that allows a client to specify the hostname it is attempting to connect to during the handshake process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.</p>
@@ -13009,7 +13056,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>ModSecurity (per location):</strong> Set to <code>no</code> to emit <code>modsecurity off;</code> in this location — bypasses the WAF on large-upload endpoints to avoid OOM (see note below).</td>
+<td><strong>ModSecurity (per location):</strong> Set to <code>no</code> to emit <code>modsecurity off;</code> in this location; bypasses the WAF on large-upload endpoints to avoid OOM (see note below).</td>
 </tr>
 </tbody>
 </table>
@@ -13019,8 +13066,8 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Safety recommendation for large uploads</p>
-<p>ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — <strong>and only if</strong> — a reverse-proxy URL is used <em>exclusively</em> for file uploads (e.g. a dedicated <code>/upload</code> endpoint), set <code>REVERSE_PROXY_MODSECURITY_N: "no"</code> on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.</p>
-<p>To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> or <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a> — they inspect the uploaded file itself instead of the raw request body.</p>
+<p>ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If, <strong>and only if</strong>, a reverse-proxy URL is used <em>exclusively</em> for file uploads (e.g. a dedicated <code>/upload</code> endpoint), set <code>REVERSE_PROXY_MODSECURITY_N: "no"</code> on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.</p>
+<p>To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> or <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a>; they inspect the uploaded file itself instead of the raw request body.</p>
 </div>
 </div>
 <div class="tabbed-block">
