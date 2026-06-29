@@ -105,6 +105,33 @@ DEFAULT_BUNKERWEB_VERSION="1.7.0~beta"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
+
+# NGINX bundled with the default BunkerWeb version; also the fallback for any
+# BunkerWeb version absent from the dictionary below (pre-1.6, the current-default
+# line, or newer-than-this-script). KEEP IN SYNC with src/linux/Dockerfile-*.
+DEFAULT_NGINX_VERSION="1.30.3"
+
+# BunkerWeb release (X.Y.Z) -> NGINX version its packages were compiled against.
+# Each BunkerWeb Linux package ships NGINX dynamic modules built for one specific
+# NGINX version; installing a mismatched NGINX makes the modules fail to load.
+# resolve_nginx_version() strips pre-release suffixes (~rcN/-rcN) so a release
+# candidate resolves to its X.Y.Z line. Only releases whose NGINX differs from
+# DEFAULT_NGINX_VERSION are listed; releases on the current pin resolve via the
+# fallback. When the default NGINX bumps, add the releases that were on the old
+# default back here as explicit entries. KEEP IN SYNC with src/linux/Dockerfile-*.
+declare -A _NGINX_VERSION_BY_BW=(
+    [1.6.0]="1.26.3" [1.6.1]="1.26.3"
+    [1.6.2]="1.28.0" [1.6.3]="1.28.0" [1.6.4]="1.28.0" [1.6.5]="1.28.0" [1.6.6]="1.28.0"
+    [1.6.7]="1.28.1" [1.6.8]="1.28.2" [1.6.9]="1.28.2"
+    [1.6.10]="1.30.1"
+    [1.6.11]="1.30.2"
+    # 1.6.12 uses 1.30.3 (= DEFAULT_NGINX_VERSION) via the fallback.
+)
+# Fedora lagged the common pin on these releases only (Fedora repo timing).
+declare -A _NGINX_VERSION_BY_BW_FEDORA=(
+    [1.6.2]="1.26.3" [1.6.8]="1.28.1" [1.6.11]="1.30.1"
+)
+
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
 FORCE_TYPE_CHANGE="no"
@@ -166,6 +193,9 @@ RESOLVED_SERVER_IP=""
 DNS_RESOLVERS_INPUT=""
 API_LISTEN_HTTPS_INPUT=""
 UPGRADE_SCENARIO="no"
+# Canonical host-package install marker — written by the BunkerWeb package, never
+# by Docker mode. Its presence means "a native Linux install already exists here".
+_BW_VERSION_FILE="/usr/share/bunkerweb/VERSION"
 BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
 SYSTEM_ARCH=""
@@ -2915,6 +2945,15 @@ ask_docker_preferences() {
 # unsupported for host packages can still be used for a Docker deployment.
 ask_deployment_platform() {
     [ "$DOCKER_MODE" = "yes" ] && return 0          # --docker already chose it
+    # A host-package install is unambiguously Linux (Docker mode never writes host
+    # packages). On a reinstall/upgrade, don't re-ask Linux-vs-Docker — keep the
+    # Linux deployment already present; check_existing_installation() then drives
+    # the upgrade / already-installed path.
+    if [ -f "$_BW_VERSION_FILE" ]; then
+        [ "$INTERACTIVE_MODE" = "yes" ] && \
+            print_status "Existing Linux installation detected — keeping the Linux deployment."
+        return 0
+    fi
     [ "$INTERACTIVE_MODE" != "yes" ] && return 0    # non-interactive: --docker, else Linux
     local _platform=""
     echo
@@ -4104,8 +4143,24 @@ This is required for the BunkerWeb Scheduler to connect to your database."
     fi
 }
 
+# Echo the base NGINX version (no distro suffix) that BunkerWeb $BUNKERWEB_VERSION
+# was built against, applying the Fedora exceptions. Versions not in the dictionary
+# (current-default line, pre-1.6, or newer-than-this-script) fall back to
+# $DEFAULT_NGINX_VERSION. Safe under `set -e` (ends in printf).
+resolve_nginx_version() {
+    local _bw="${BUNKERWEB_VERSION#v}"   # tolerate a leading 'v'
+    _bw="${_bw%%[~-]*}"                  # 1.6.12~rc2 -> 1.6.12 ; 1.6.10-rc5 -> 1.6.10
+    local _base="${_NGINX_VERSION_BY_BW[$_bw]:-$DEFAULT_NGINX_VERSION}"
+    if [ "$DISTRO_ID" = "fedora" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA[$_bw]:-}" ]; then
+        _base="${_NGINX_VERSION_BY_BW_FEDORA[$_bw]}"
+    fi
+    printf '%s' "$_base"
+}
+
 check_supported_os() {
     local major_version
+    local _nginx_base
+    _nginx_base="$(resolve_nginx_version)"
     case "$DISTRO_ID" in
         "debian")
             if [[ "$DISTRO_VERSION" != "12" && "$DISTRO_VERSION" != "13" ]]; then
@@ -4117,7 +4172,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
+            NGINX_VERSION="${_nginx_base}-1~$DISTRO_CODENAME"
             ;;
         "ubuntu")
             if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" && "$DISTRO_VERSION" != "26.04" ]]; then
@@ -4129,7 +4184,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
+            NGINX_VERSION="${_nginx_base}-1~$DISTRO_CODENAME"
             ;;
         "fedora")
             if [[ "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
@@ -4141,7 +4196,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.2"
+            NGINX_VERSION="$_nginx_base"
             ;;
         "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
@@ -4154,7 +4209,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.2"
+            NGINX_VERSION="$_nginx_base"
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
@@ -4914,6 +4969,16 @@ configure_full_config() {
     fi
 }
 
+# Hard-fail when the resolved NGINX version is not installable from the configured
+# repositories. Installing a mismatched NGINX would silently break BunkerWeb's
+# bundled dynamic modules, so refuse rather than degrade.
+_nginx_version_unavailable() {
+    print_error "NGINX $NGINX_VERSION (required by BunkerWeb $BUNKERWEB_VERSION) is not available in this distribution's package repositories."
+    print_error "BunkerWeb $BUNKERWEB_VERSION is likely too old for $DISTRO_ID $DISTRO_VERSION, whose repo only ships a newer NGINX. Its bundled NGINX modules will not load against a mismatched NGINX."
+    print_error "Fix: install a recent BunkerWeb version (omit --version for the bundled default $DEFAULT_BUNKERWEB_VERSION), or use the Docker deployment, which bundles the matching NGINX."
+    exit 1
+}
+
 install_nginx_debian() {
     print_step "Installing NGINX on Debian/Ubuntu"
 
@@ -4950,6 +5015,11 @@ install_nginx_debian() {
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/$DISTRO_ID $DISTRO_CODENAME nginx" > /etc/apt/sources.list.d/nginx.list
 
     run_cmd apt update
+    # Refuse to proceed if the exact pinned version isn't in the nginx.org pool
+    # (very old versions get pruned) rather than letting apt error out cryptically.
+    # madison columns are ' | '-separated, so anchor with surrounding spaces to
+    # match the version field exactly (no substring collision, e.g. 1.28.0 vs 1.28.01).
+    apt-cache madison nginx 2>/dev/null | grep -qF " $NGINX_VERSION " || _nginx_version_unavailable
     run_cmd apt install -y "nginx=$NGINX_VERSION"
 
     # Hold to prevent upgrades.
@@ -4966,6 +5036,9 @@ install_nginx_fedora() {
     if ! dnf info "nginx-$NGINX_VERSION" >/dev/null 2>&1; then
         print_status "Enabling updates-testing repository"
         run_cmd dnf config-manager setopt updates-testing.enabled=1
+        # Fedora repos carry only the current NGINX, so an older pin can be
+        # genuinely absent even with updates-testing — refuse rather than guess.
+        dnf info "nginx-$NGINX_VERSION" >/dev/null 2>&1 || _nginx_version_unavailable
     fi
 
     run_cmd dnf install -y "nginx-$NGINX_VERSION"
@@ -5004,6 +5077,8 @@ EOF
     dnf -y module disable nginx >/dev/null 2>&1 || true
     dnf remove -y nginx nginx-mod-stream nginx-mod-http-image-filter nginx-mod-http-perl nginx-mod-http-xslt-filter nginx-mod-mail 2>/dev/null || true
 
+    # Refuse if the pinned version isn't resolvable from the nginx.org repo metadata.
+    dnf info "nginx-$NGINX_VERSION" >/dev/null 2>&1 || _nginx_version_unavailable
     run_cmd dnf install -y "nginx-$NGINX_VERSION"
     run_cmd dnf versionlock add nginx
 
@@ -5147,7 +5222,22 @@ install_crowdsec() {
     rm -f "$_csc_install"
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
+            # Stop Ubuntu Pro/ESM from shadowing the upstream CrowdSec engine: the ESM
+            # build is outdated and its hub index lacks the bunkerity/bunkerweb collection.
+            cat > /etc/apt/preferences.d/99-bunkerweb-crowdsec.pref <<'EOF'
+# Exclude the outdated Ubuntu Pro/ESM crowdsec build (esm.ubuntu.com) so apt
+# resolves the upstream CrowdSec repository instead. The ESM engine ships an
+# outdated hub index that does not know the bunkerity/bunkerweb collection.
+# Kept in place so future 'apt upgrade crowdsec'/unattended-upgrades stay upstream.
+Package: crowdsec*
+Pin: origin "esm.ubuntu.com"
+Pin-Priority: -1
+EOF
+            chmod 644 /etc/apt/preferences.d/99-bunkerweb-crowdsec.pref
             run_cmd apt install -y crowdsec
+            # Record which engine/origin apt selected (helps diagnose repo-priority issues).
+            print_status "Resolved CrowdSec package candidate:"
+            apt-cache policy crowdsec 2>/dev/null | sed 's/^/  /' || true
             ;;
         "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y crowdsec
@@ -5186,7 +5276,21 @@ labels:
     echo -e "${YELLOW}--- Step 3: Update hub and install core collections/parsers ---${NC}"
     print_step "Updating hub and installing detection collections/parsers"
     cscli hub update
-    cscli collections install bunkerity/bunkerweb
+    if ! cscli collections install bunkerity/bunkerweb; then
+        print_error "Failed to install the 'bunkerity/bunkerweb' CrowdSec collection."
+        print_error "The installed CrowdSec engine is too old to know this collection."
+        if [ "$DISTRO_FAMILY" = "debian" ] && apt-cache policy crowdsec 2>/dev/null | grep -q 'esm\.ubuntu\.com'; then
+            print_error "The engine was installed from Ubuntu Pro/ESM (esm.ubuntu.com), which ships an outdated build."
+        fi
+        print_warning "To fix it:"
+        print_warning "  1. Remove the current engine:  sudo apt remove --purge crowdsec"
+        print_warning "  2. Make the upstream CrowdSec repo win over ESM (disable Ubuntu Pro/ESM"
+        print_warning "     during install, or keep the apt pin this installer wrote)."
+        print_warning "  3. Reinstall:                  sudo apt update && sudo apt install crowdsec"
+        print_warning "  4. Re-sync and install:        sudo cscli hub update \\"
+        print_warning "                                 && sudo cscli collections install bunkerity/bunkerweb"
+        return 1
+    fi
     cscli parsers install crowdsecurity/geoip-enrich
 
     # AppSec installation if chosen
@@ -7277,6 +7381,7 @@ if [ "$DRY_RUN" = "yes" ]; then
     detect_os
     check_supported_os
     echo "Installation type: ${INSTALL_TYPE:-full}"
+    echo "NGINX version: $NGINX_VERSION"
     # Wizard label per mode (manager off, worker/scheduler/api n/a).
     case "${INSTALL_TYPE:-full}" in
         manager)               echo "Setup wizard: disabled (manager mode)" ;;
@@ -7892,7 +7997,11 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
 
     if _bw_phase_pending crowdsec; then
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-            install_crowdsec
+            # CrowdSec is optional; a failure here must not abort the BunkerWeb install.
+            # install_crowdsec prints actionable remediation on its failure paths.
+            if ! install_crowdsec; then
+                print_warning "CrowdSec setup did not complete (see messages above). Continuing with the BunkerWeb install."
+            fi
         fi
         _bw_phase_done crowdsec
     fi
