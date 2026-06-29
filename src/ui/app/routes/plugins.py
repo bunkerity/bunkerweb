@@ -17,6 +17,7 @@ from zipfile import BadZipFile, ZipFile
 from flask import Blueprint, Response, current_app, g, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from werkzeug.routing import BuildError
 from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall  # type: ignore
@@ -170,6 +171,9 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
     try:
         action_file = tmp_dir.joinpath("actions.py")
         if not action_file.is_file():
+            if function_name == "pre_render":
+                # Mirror the missing pre_render method case: a plugin without an actions file is not a pre-render error
+                return {"status": "ok", "code": 200, "message": "The plugin does not have an action file"}
             return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
 
         sys_path.append(tmp_dir.as_posix())
@@ -600,6 +604,24 @@ def custom_plugin_page(plugin: str):
 
             tmp_page_dir = tmp_page_dir.joinpath("ui")
             LOGGER.debug(f"Plugin {plugin} page extracted successfully")
+
+        # Blueprint-only plugins have neither an actions file nor an embedded template:
+        # send the user to their dedicated page when it is registered instead of
+        # rendering an empty (previously misleading) embedded page
+        if not (tmp_page_dir / "template.html").is_file() and not (tmp_page_dir / "actions.py").is_file():
+            # Only ever delete DB-blob extractions, never a permanent plugin directory
+            if str(tmp_page_dir).startswith(str(TMP_DIR)):
+                rmtree(tmp_page_dir.parent, ignore_errors=True)
+
+            try:
+                return redirect(url_for(f"{plugin}.{plugin}_page"))
+            except BuildError:
+                try:
+                    return redirect(url_for(plugin))
+                except BuildError:
+                    return render_template(
+                        "plugin_page.html", plugin_page="", plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render={}, no_page=True
+                    )
 
         # Execute pre-render action if exists
         pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)

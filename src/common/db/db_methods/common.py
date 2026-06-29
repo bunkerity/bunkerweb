@@ -231,7 +231,7 @@ class DatabaseMixinBase:
             ...
 
         @staticmethod
-        def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
+        def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str], *, allow_scheduler_override: bool = False) -> bool:
             """Implemented on Database (Database.py)."""
             ...
 

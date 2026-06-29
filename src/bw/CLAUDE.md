@@ -6,7 +6,7 @@ See also the [root CLAUDE.md](../../CLAUDE.md) for project-wide architecture, bu
 
 ## Component Overview
 
-`src/bw/` is the BunkerWeb core NGINX container — the reverse proxy runtime that processes HTTP/Stream requests through a Lua plugin pipeline. It packages the Lua runtime, entrypoint script, loading page, and static assets (GeoIP databases, root CA) into a Docker image based on `nginx:1.30.2` (Debian/glibc — migrated off Alpine because the certbot-dns-multi Go/CGO bridge cannot load on musl).
+`src/bw/` is the BunkerWeb core NGINX container — the reverse proxy runtime that processes HTTP/Stream requests through a Lua plugin pipeline. It packages the Lua runtime, entrypoint script, loading page, and static assets (GeoIP databases, root CA) into a Docker image based on `nginx:1.30.3` (Debian/glibc — migrated off Alpine because the certbot-dns-multi Go/CGO bridge cannot load on musl).
 
 This component has no Python code of its own. It depends on `src/common/` (core plugins, confs, gen, helpers, utils, settings.json) and `src/deps/` (compiled NGINX modules, Python deps for config generation).
 
@@ -20,7 +20,7 @@ docker build -f src/bw/Dockerfile -t bunkerweb:dev .
 docker build -f src/bw/Dockerfile -t bunkerweb:dev --build-arg SKIP_MINIFY=yes .
 ```
 
-The Dockerfile is a multi-stage build: stage 1 compiles NGINX deps from `src/deps/`, stage 2 copies artifacts into the Debian-based `nginx:1.30.2` runtime image. The final image runs as `nginx:nginx` (non-root).
+The Dockerfile is a multi-stage build: stage 1 compiles NGINX deps from `src/deps/`, stage 2 copies artifacts into the Debian-based `nginx:1.30.3` runtime image. The final image runs as `nginx:nginx` (non-root).
 
 ## Linting & Formatting
 

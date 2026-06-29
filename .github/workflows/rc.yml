@@ -9,7 +9,11 @@ on:
 jobs:
   # Build amd64 + 386 containers images
   build-containers:
+    permissions:
+      contents: read
+      security-events: write # Trivy SARIF upload
     strategy:
+      fail-fast: false # keep all legs running so every image uploads its Trivy SARIF even when one gates red
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/amd64, linux/386]
@@ -164,7 +168,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"

@@ -6,7 +6,7 @@
 {% endblock %}
 {% block page %}
     <!-- Content -->
-    <div class="bg-light-subtle">
+    <div class="theme-bg-surface">
         <div class="login-background">
             <input type="hidden" id="ui_user" value="{{ 'yes' if ui_user else 'no' }}" />
             <input type="hidden"
@@ -16,7 +16,7 @@
                    id="csrf_token"
                    name="csrf_token"
                    value="{{ csrf_token() }}" />
-            <input type="hidden" name="theme" value="light" />
+            <input type="hidden" name="theme" value="{{ theme }}" />
             <div class="container-xxl">
                 <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1050;">
                     <!-- prettier-ignore -->
@@ -24,7 +24,7 @@
                         <!-- Language Selector -->
                         <div class="me-3">{% include "language-selector.html" %}</div>
                         <!-- Theme Toggle -->
-                        <div class="toggle-container d-flex align-items-center bg-white p-2 rounded-pill shadow-lg me-3">
+                        <div class="toggle-container d-flex align-items-center theme-toggle-pill p-2 rounded-pill shadow-lg me-3">
                             <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                                    for="dark-mode-toggle"
                                    data-i18n="theme.light">Light</label>

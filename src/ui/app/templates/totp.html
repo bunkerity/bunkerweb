@@ -9,7 +9,7 @@
     <!-- Dark Mode Toggle - Enhanced Floating Button -->
     <div class="theme-toggle position-fixed top-0 end-0 p-6"
          style="z-index: 1030">
-        <div class="toggle-container d-flex align-items-center bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-3 rounded-pill shadow-lg">
+        <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
             <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                    for="dark-mode-toggle"
                    data-i18n="theme.light">Light</label>
@@ -27,7 +27,7 @@
         </div>
     </div>
     <!-- /Dark Mode Toggle -->
-    <div class="bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle">
+    <div class="theme-bg-surface">
         <div class="login-background">
             <div class="container-xxl">
                 <div class="authentication-wrapper authentication-basic container-p-y">
@@ -45,8 +45,11 @@
                                        rel="noopener"
                                        class="app-brand-link gap-2">
                                         <span class="app-brand-logo login w-75">
-                                            <img class="img-fluid"
-                                                 src="{% if theme == 'light' %}{{ url_for('static', filename='img/logo-menu.png') }}{% else %}{{ url_for('static', filename='img/logo-menu-white.png') }}{% endif %}"
+                                            <img class="img-fluid bw-logo-light"
+                                                 src="{{ url_for('static', filename='img/logo-menu.png') }}"
+                                                 alt="BunkerWeb logo">
+                                            <img class="img-fluid bw-logo-dark"
+                                                 src="{{ url_for('static', filename='img/logo-menu-white.png') }}"
                                                  alt="BunkerWeb logo">
                                         </span>
                                     </a>

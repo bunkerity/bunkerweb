@@ -18,6 +18,19 @@
   "aria": {
     "label": {
       "close": "Schließen",
+      "copy": "Protokolle kopieren",
+      "download_log": "Diese Protokolldatei herunterladen",
+      "follow": "Folgen",
+      "select_file": "Datei auswählen",
+      "select_page": "Seite auswählen",
+      "issue_count": "Anzahl der Fehler und Warnungen",
+      "level_filter": "Protokollzeilen nach Ebene filtern",
+      "local_time": "Zeitstempel in lokaler Zeit anzeigen",
+      "collapse_multiline": "Mehrzeilige Einträge einklappen",
+      "next_issue": "Nächster Fehler oder nächste Warnung",
+      "prev_issue": "Vorheriger Fehler oder vorherige Warnung",
+      "search_logs": "Protokolle durchsuchen",
+      "toggle_wrap": "Zeilenumbruch umschalten",
       "configs_dropzone": "Eine Exportdatei für benutzerdefinierte Konfigurationen auswählen oder hier ablegen",
       "raw_configuration": "Rohkonfiguration",
       "services_dropzone": "Eine Dienste-Exportdatei auswählen oder hier ablegen"
@@ -131,6 +144,10 @@
     "run_selected_jobs": "Ausgewählte Aufgaben ausführen",
     "save": "Speichern",
     "save_changes": "Änderungen speichern",
+    "local_time": "Lokale Zeit",
+    "collapse_multiline": "Einklappen",
+    "search": "Suchen",
+    "wrap": "Umbruch",
     "select_file": "Datei auswählen",
     "select_page": "Seite auswählen",
     "service": "Dienst",
@@ -610,6 +627,8 @@
     "easter_egg": "Wenn du das liest, bist du neugierig 👀",
     "error": "Fehler",
     "message": "Info",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "Sie haben mehr Dienste, als Ihre PRO-Lizenz erlaubt. Aktualisieren Sie Ihre Lizenz oder versetzen Sie einige Dienste in den Entwurfsmodus, um Ihre PRO-Lizenz freizuschalten.",
     "time": {
       "just_now": "gerade eben"
     },
@@ -762,11 +781,25 @@
     "upgrade": "Upgraden?"
   },
   "logs": {
-    "eventsource_failed": "EventSource-Verbindung fehlgeschlagen",
-    "parse_error": "Fehler beim Parsen der Stream-Daten: {{error}}",
-    "stream_error": "Stream-Fehler: {{message}}",
-    "stream_init": "Stream initialisiert, Dateigröße: {{size}}",
-    "stream_initialized": "Stream mit Aktualisierung initialisiert, Dateigröße: {{size}}",
+    "annotation_error": "Fehler",
+    "annotation_warning": "Warnung",
+    "filter_levels": "Ebenen",
+    "letsencrypt_logs": "Let's Encrypt-Protokolle",
+    "main_logs": "Hauptprotokolle",
+    "new_lines_sr": "{{count}} neue Protokollzeilen",
+    "issue_summary": "{{errors}} Fehler, {{warnings}} Warnung(en)",
+    "level_critical": "Kritisch",
+    "level_debug": "Debug",
+    "level_error": "Fehler",
+    "level_info": "Info",
+    "level_notice": "Hinweis",
+    "level_warning": "Warnung",
+    "lines_all": "Alle",
+    "lines_label": "Zeilen",
+    "meta": "{{size}} · {{lines}} Zeilen · geändert {{when}}",
+    "new_lines": "neue Zeilen",
+    "showing_all": "{{total}} Zeilen",
+    "showing_some": "{{shown}} von {{total}} angezeigt",
     "trimmed_notice": "--- {{count}} ältere Log-Zeilen wurden aus Performancegründen entfernt ---"
   },
   "modal": {
@@ -909,7 +942,10 @@
       "status": {
         "deactivated": "Plugin ist deaktiviert; daher sind keine Informationen verfügbar.",
         "metrics_deactivated": "Metrik-Plugin ist nicht aktiviert; daher sind keine Informationen verfügbar.",
-        "not_available": "Plugin-Seite ist während der Beta-Phase noch nicht verfügbar."
+        "not_available": "Plugin-Seite ist während der Beta-Phase noch nicht verfügbar.",
+        "pre_render_error": "Pre-Rendering-Fehler",
+        "no_content": "Dieses Plugin stellt keine eingebettete Seite bereit.",
+        "dedicated_page_unavailable": "Dieses Plugin wird auf einer eigenen Seite verwaltet, die noch nicht geladen ist. Starten Sie die Web-UI neu, um darauf zuzugreifen."
       }
     },
     "type": {
@@ -1569,6 +1605,16 @@
     "real_ip_recursive": "Führt eine rekursive Suche im Header-Container der IP-Adresse durch.",
     "remove_ban_entry": "Diesen Sperreintrag aus der Liste entfernen.",
     "reset_template_settings": "Alle Einstellungen in der aktuellen Vorlagenansicht auf ihre Standardwerte zurücksetzen.",
+    "download_log": "Diese Protokolldatei herunterladen",
+    "issue_count": "Fehler und Warnungen in dieser Ansicht",
+    "local_time": "Zeitstempel in Ihrer lokalen Zeit anzeigen",
+    "collapse_multiline": "Mehrzeilige Einträge einklappen (Tracebacks, Payloads)",
+    "collapse_raw_values": "Mehrzeilige Werte einklappen (Zertifikate, Schlüssel)",
+    "next_issue": "Zum nächsten Fehler oder zur nächsten Warnung springen",
+    "prev_issue": "Zum vorherigen Fehler oder zur vorherigen Warnung springen",
+    "search_logs": "Protokolle durchsuchen (Ctrl+F)",
+    "toggle_level": "{{level}}-Zeilen ein-/ausblenden",
+    "toggle_wrap": "Zeilenumbruch umschalten",
     "select_file_to_follow": "Wählen Sie eine Datei aus, um den Folgemodus zu aktivieren",
     "server_name": "Der primäre Domainname oder Servername für diesen Dienst.",
     "stream_support": {

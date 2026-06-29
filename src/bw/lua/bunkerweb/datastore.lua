@@ -45,6 +45,22 @@ local function parse_count(value)
 	return num
 end
 
+-- Migrate every live entry from the old LRU into a freshly-sized one, preserving
+-- per-entry user_flags. The only entries present at resize time are the permanent
+-- bootstrap keys (variables/plugins/plugin_*/plugins_order) written during
+-- init_by_lua before any request-time TTL cache exists, so re-inserting with
+-- ttl=nil keeps them permanent. get_keys/get are direct lrucache calls (no
+-- datastore re-entry), so the lru_configuring guard is unaffected.
+local function migrate_lru(old_lru, new_lru)
+	for _, key in ipairs(old_lru:get_keys(0)) do
+		local value, _, flags = old_lru:get(key)
+		if value ~= nil then
+			new_lru:set(key, value, nil, flags)
+		end
+	end
+	return new_lru
+end
+
 local lru_configured = false
 local lru_configuring = false
 local function ensure_lru_sized()
@@ -68,7 +84,10 @@ local function ensure_lru_sized()
 	end
 	lru_configured = true
 	local size = parse_count(value)
-	if not size or size < 1 or size == DEFAULT_DATASTORE_LRU then
+	-- Only ever grow the shared bootstrap LRU. A size at or below the default could
+	-- LRU-evict the init-time bootstrap entries (variables/plugins/...) and deadlock
+	-- startup (bug #3618), so sizes <= default keep the safe default-sized cache.
+	if not size or size <= DEFAULT_DATASTORE_LRU then
 		return
 	end
 	local new_lru, err = lrucache.new(size)
@@ -76,7 +95,9 @@ local function ensure_lru_sized()
 		logger:log(ERR, "failed to resize datastore LRU to " .. size .. " : " .. err)
 		return
 	end
-	lru = new_lru
+	-- Carry existing entries over before swapping so init-time bootstrap data
+	-- (written into the old LRU during init_by_lua) survives the resize.
+	lru = lru and migrate_lru(lru, new_lru) or new_lru
 end
 
 function datastore:initialize(dict)
@@ -162,7 +183,7 @@ function datastore:keys(worker)
 		if not lru then
 			return false, "lru is not instantiated"
 		end
-		return lru:keys(0)
+		return lru:get_keys(0)
 	end
 	return self.dict:get_keys(0)
 end
@@ -188,7 +209,7 @@ function datastore:delete_all(pattern, worker)
 		if not lru then
 			return false, "lru is not instantiated"
 		end
-		keys = lru:keys(0)
+		keys = lru:get_keys(0)
 	else
 		keys = self.dict:get_keys(0)
 	end

@@ -40,18 +40,21 @@
           (function () {
             try {
               var serverTheme = {{ theme | tojson }};
-              var stored = null;
-              try { stored = localStorage.getItem("theme"); } catch (e) {}
-              var desired = stored;
-              if (desired !== "light" && desired !== "dark") {
-                desired = (window.matchMedia &&
-                  window.matchMedia("(prefers-color-scheme: dark)").matches)
-                  ? "dark" : "light";
+              var mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+              function readStored() {
+                try {
+                  var s = localStorage.getItem("theme");
+                  return s === "light" || s === "dark" ? s : null;
+                } catch (e) {
+                  return null;
+                }
               }
-              window.__bwResolvedTheme = desired;
-              if (desired !== serverTheme) {
+              function osTheme() {
+                return mq && mq.matches ? "dark" : "light";
+              }
+              function apply(theme) {
                 var html = document.documentElement;
-                if (desired === "dark") {
+                if (theme === "dark") {
                   html.classList.remove("light-style");
                   html.classList.add("dark-style", "dark");
                   html.setAttribute("data-bs-theme", "dark");
@@ -60,6 +63,21 @@
                   html.classList.add("light-style");
                   html.removeAttribute("data-bs-theme");
                 }
+                window.__bwResolvedTheme = theme;
+                var toggle = document.getElementById("dark-mode-toggle");
+                if (toggle) toggle.checked = theme === "dark";
+                var field = document.querySelector("input[name='theme']");
+                if (field) field.value = theme;
+              }
+              var desired = readStored() || osTheme();
+              window.__bwResolvedTheme = desired;
+              if (desired !== serverTheme) apply(desired);
+              // Live OS tracking: only while the visitor has no explicit stored choice.
+              if (mq && typeof mq.addEventListener === "function") {
+                mq.addEventListener("change", function () {
+                  if (readStored()) return; // explicit choice wins
+                  apply(osTheme());
+                });
               }
             } catch (e) {}
           })();
@@ -127,7 +145,8 @@
             {% endif %}
         {% endfor %}
     </head>
-    <body data-page-title="{{ page_title_fallback if page_title_fallback else 'BunkerWeb UI' }}">
+    <body data-page-title="{{ page_title_fallback if page_title_fallback else 'BunkerWeb UI' }}"
+          data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}">
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="db-read-only" value="{{ db_readonly }}" />
@@ -161,8 +180,6 @@
         <script src="{{ url_for('static', filename='js/config.js') }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"
-                nonce="{{ script_nonce }}"></script>
-        <script src="{{ url_for('static', filename='libs/popper/popper.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/bootstrap/bootstrap.bundle.min.js') }}"
                 nonce="{{ script_nonce }}"></script>

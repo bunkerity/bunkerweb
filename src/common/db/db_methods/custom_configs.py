@@ -126,7 +126,10 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
                         custom_conf.checksum = custom_config["checksum"]
                     if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
                         custom_conf.is_draft = custom_config["is_draft"]
-                elif self._methods_are_compatible(method, custom_conf.method):
+                # Scheduler-method custom configs only ever originate from explicit
+                # CUSTOM_CONF_* environment variables, so the scheduler override is
+                # legitimate here (no default-filled pass exists for custom configs).
+                elif self._methods_are_compatible(method, custom_conf.method, allow_scheduler_override=True):
                     should_update_data = custom_config["checksum"] != custom_conf.checksum
                     if should_update_data:
                         custom_conf.data = custom_config["data"]

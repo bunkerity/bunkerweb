@@ -11,7 +11,7 @@ local kdf_macro = require "resty.openssl.include.evp.kdf"
 local ctx_lib = require "resty.openssl.ctx"
 local format_error = require("resty.openssl.err").format_error
 local version_text = require("resty.openssl.version").version_text
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local nkeys = require "resty.openssl.auxiliary.compat".nkeys
 local log_warn = require "resty.openssl.auxiliary.compat".log_warn
@@ -165,7 +165,7 @@ function _M.derive(options)
   end
 
   local md
-  if OPENSSL_3X then
+  if OPENSSL_3_UP then
     md = C.EVP_MD_fetch(ctx_lib.get_libctx(), options.md or 'sha1', options.properties)
   else
     md = C.EVP_get_digestbyname(options.md or 'sha1')
@@ -251,7 +251,7 @@ function _M.derive(options)
         return nil, format_error("kdf.derive: EVP_PKEY_CTX_set_hkdf_mode")
       end
       if options.hkdf_mode == _M.HKDEF_MODE_EXTRACT_ONLY then
-        local md_size = OPENSSL_3X and C.EVP_MD_get_size(md) or C.EVP_MD_size(md)
+        local md_size = OPENSSL_3_UP and C.EVP_MD_get_size(md) or C.EVP_MD_size(md)
         if options.outlen ~= md_size then
           options.outlen = md_size
           log_warn("hkdf_mode EXTRACT_ONLY outputs fixed length of ", md_size,
@@ -273,7 +273,7 @@ function _M.derive(options)
   return ffi_str(buf, options.outlen)
 end
 
-if not OPENSSL_3X then
+if not OPENSSL_3_UP then
   return _M
 end
 

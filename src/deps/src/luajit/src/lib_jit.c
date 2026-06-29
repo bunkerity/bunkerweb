@@ -406,11 +406,12 @@ LJLIB_CF(jit_util_tracek)
   return 0;
 }
 
-/* local snap = jit.util.tracesnap(tr, sn) */
+/* local snap = jit.util.tracesnap(tr, sn[, getpos]) */
 LJLIB_CF(jit_util_tracesnap)
 {
   GCtrace *T = jit_checktrace(L);
   SnapNo sn = (SnapNo)lj_lib_checkint(L, 2);
+  int getpos = (L->base+2 < L->top && tvistruecond(L->base+2));
   if (T && sn < T->nsnap) {
     SnapShot *snap = &T->snap[sn];
     SnapEntry *map = &T->snapmap[snap->mapofs];
@@ -423,6 +424,12 @@ LJLIB_CF(jit_util_tracesnap)
     for (n = 0; n < nent; n++)
       setintV(lj_tab_setint(L, t, (int32_t)(n+2)), (int32_t)map[n]);
     setintV(lj_tab_setint(L, t, (int32_t)(nent+2)), (int32_t)SNAP(255, 0, 0));
+    if (getpos) {
+      const BCIns *pc = snap_pc(&map[nent]), *startpc = pc;
+      while (bc_op(*startpc) < BC_FUNCF) startpc--;
+      setintV(L->top++, (int)(pc - startpc));
+      return 2;
+    }
     return 1;
   }
   return 0;
@@ -793,7 +800,7 @@ static void jit_init(lua_State *L)
 #if LJ_TARGET_UNALIGNED
   G(L)->tmptv.u64 = U64x(0000504d,4d500000);
 #endif
-  lj_dispatch_update(G(L));
+  lj_dispatch_update(G(L), 0);
 #if LJ_TARGET_UNALIGNED
   /* If you get a crash below then your toolchain indicates unaligned
   ** accesses are OK, but your kernel disagrees. I.e. fix your toolchain.

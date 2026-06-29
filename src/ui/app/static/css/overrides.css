@@ -245,6 +245,13 @@ button.list-group-item-secondary.active {
   color: #8b9197 !important;
 }
 
+/* Bootstrap 5.3 utility missing from the bundled core.css build: without it the
+   toast timestamps ("just now") inherit the header's category color (e.g. danger
+   red) instead of rendering muted */
+.text-body-secondary {
+  color: #8b9197 !important;
+}
+
 .raw-template-editor {
   min-height: 420px;
 }
@@ -2791,8 +2798,8 @@ span.cursor-pointer ~ .reset-setting {
 ******************************************************************************/
 
 .dark-style body {
-  color: #fff;
-  background-color: #0d2f45;
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
   color-scheme: dark;
 }
 
@@ -2807,6 +2814,76 @@ span.cursor-pointer ~ .reset-setting {
   --bs-body-color-rgb: 255, 255, 255;
   --dt-row-selected: 31, 31, 31;
   --bs-breadcrumb-item-active-color: #fff;
+  --bw-dark-surface: #0c283a;
+  color-scheme: dark;
+
+  /* Core surfaces & text */
+  --bs-body-bg: #0d2f45;
+  --bs-body-bg-rgb: 13, 47, 69;
+  --bs-body-color: #fff;
+  --bs-emphasis-color: #fff;
+  --bs-emphasis-color-rgb: 255, 255, 255;
+  --bs-heading-color: #fff;
+  --bs-secondary-color: rgba(255, 255, 255, 0.7);
+  --bs-secondary-color-rgb: 255, 255, 255;
+  --bs-secondary-bg: #0c283a;
+  --bs-secondary-bg-rgb: 12, 40, 58;
+  --bs-tertiary-color: rgba(255, 255, 255, 0.55);
+  --bs-tertiary-color-rgb: 255, 255, 255;
+  --bs-tertiary-bg: #0a2233;
+  --bs-tertiary-bg-rgb: 10, 34, 51;
+
+  /* Borders */
+  --bs-border-color: rgba(255, 255, 255, 0.18);
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.15);
+
+  /* Links */
+  --bs-link-hover-color: #2eac68;
+  --bs-link-hover-color-rgb: 46, 172, 104;
+
+  /* Semantic emphasis / subtle families (dark-derived, navy-tinted) */
+  --bs-secondary-text-emphasis: #9caeb7;
+  --bs-success-text-emphasis: #74d6a2;
+  --bs-info-text-emphasis: #6fb6db;
+  --bs-warning-text-emphasis: #e0c074;
+  --bs-danger-text-emphasis: #e88f96;
+  --bs-light-text-emphasis: #e6edf1;
+  --bs-dark-text-emphasis: #9caeb7;
+  --bs-primary-bg-subtle: #11212c;
+  --bs-secondary-bg-subtle: #14242c;
+  --bs-success-bg-subtle: #0e2a1c;
+  --bs-info-bg-subtle: #0c2533;
+  --bs-warning-bg-subtle: #2e2410;
+  --bs-danger-bg-subtle: #2e1416;
+  --bs-light-bg-subtle: #14242c;
+  --bs-dark-bg-subtle: #0a1e2b;
+  --bs-primary-border-subtle: #1d3a4d;
+  --bs-secondary-border-subtle: #2a4753;
+  --bs-success-border-subtle: #1c553a;
+  --bs-info-border-subtle: #1c5577;
+  --bs-warning-border-subtle: #6a541c;
+  --bs-danger-border-subtle: #6a1c22;
+  --bs-light-border-subtle: #2a4753;
+  --bs-dark-border-subtle: #18313f;
+
+  /* Form validation */
+  --bs-form-valid-color: #74d6a2;
+  --bs-form-valid-border-color: #2eac68;
+  --bs-form-invalid-color: #e88f96;
+  --bs-form-invalid-border-color: #dc3545;
+}
+
+/* core's `.text-dark` (near-black) on a now-dark `*-subtle` pill is invisible
+   (e.g. help "?" badges). Restore contrast in dark only; solid
+   `bg-warning.text-dark` is intentionally excluded. */
+.dark-style .bg-primary-subtle.text-dark,
+.dark-style .bg-secondary-subtle.text-dark,
+.dark-style .bg-success-subtle.text-dark,
+.dark-style .bg-info-subtle.text-dark,
+.dark-style .bg-warning-subtle.text-dark,
+.dark-style .bg-danger-subtle.text-dark,
+.dark-style .bg-light-subtle.text-dark {
+  color: var(--bs-emphasis-color) !important;
 }
 
 .dark-style .list-group {
@@ -2826,7 +2903,21 @@ span.cursor-pointer ~ .reset-setting {
 }
 
 .dark-style .dropdown-menu {
-  --bs-dropdown-bg: #0c283a;
+  --bs-dropdown-bg: var(--bw-dark-surface);
+}
+
+/* Flash toasts: the bundled core.css paints .bg-dark toasts with Sneat's
+   semi-transparent purple (rgba(43, 44, 64, 0.85)), which clashes with the
+   navy dark theme and lets the page content bleed through the message.
+   Use the same opaque surface as the dark dropdowns instead. */
+.dark-style .toast.bg-dark,
+.dark-style .bs-toast.bg-dark {
+  background-color: var(--bw-dark-surface) !important;
+}
+
+.dark-style .toast.bg-dark .toast-header .btn-close,
+.dark-style .bs-toast.bg-dark .toast-header .btn-close {
+  background-color: var(--bw-dark-surface) !important;
 }
 
 .dark-style div.dt-button-collection,
@@ -3009,6 +3100,10 @@ div.dt-button-background {
 }
 
 .dark-style .text-muted {
+  color: #9caeb7 !important;
+}
+
+.dark-style .text-body-secondary {
   color: #9caeb7 !important;
 }
 
@@ -3518,14 +3613,16 @@ code.bad-behavior-event__value {
   background-color: var(--bs-gray-800);
 }
 
+/* WCAG 1.4.11: these +/x buttons' border is their only shape cue;
+   var(--bs-border-color) (.18 = 1.77:1) fails 3:1 on the navy surface. */
 .dark-style .multivalue-input-group .btn-outline-success {
   color: var(--bs-success);
-  border-color: var(--bs-border-color);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .dark-style .multivalue-input-group .btn-outline-danger {
   color: var(--bs-danger);
-  border-color: var(--bs-border-color);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .dark-style .pro-alert .alert-link {

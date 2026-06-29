@@ -1,7 +1,7 @@
-FROM nginx:1.30.2@sha256:540858b3a92eed95cbcae475698c12f619b4a6afa122485f439e4d7227cbeb38 AS builder
+FROM nginx:1.30.3@sha256:5825bde471b86b270298e80ba1f0f3e515a73da1a17a982632f1c262689f1144 AS builder
 
 # glibc base (was Alpine): certbot-dns-multi's Go/CGO bridge cannot load on musl, so the image set
-# is standardizing on glibc. nginx:1.30.2 is the official Debian image: nginx + the nginx user are
+# is standardizing on glibc. nginx:1.30.3 is the official Debian image: nginx + the nginx user are
 # prebuilt (--with-compat, so the BunkerWeb dynamic modules compiled by install.sh load), no
 # separate nginx build needed.
 
@@ -78,7 +78,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.30.2@sha256:540858b3a92eed95cbcae475698c12f619b4a6afa122485f439e4d7227cbeb38
+FROM nginx:1.30.3@sha256:5825bde471b86b270298e80ba1f0f3e515a73da1a17a982632f1c262689f1144
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

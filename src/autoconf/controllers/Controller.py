@@ -2,6 +2,7 @@
 
 from abc import abstractmethod
 from os import getenv
+from threading import Thread
 from time import sleep
 from traceback import format_exc
 
@@ -22,6 +23,14 @@ class Controller(Config):
         self._logger = getLogger(f"{self._type.upper()}-CONTROLLER")
         self._namespaces = None
         self._first_start = True
+
+        # Periodic re-check interval (seconds) for the settings recheck worker. <= 0 disables it.
+        recheck_interval = getenv("AUTOCONF_SETTINGS_RECHECK_INTERVAL", "300").strip()
+        if not recheck_interval.lstrip("-").isdigit():
+            self._logger.warning(f"Invalid AUTOCONF_SETTINGS_RECHECK_INTERVAL value {recheck_interval!r}, defaulting to 300")
+            recheck_interval = "300"
+        self._settings_recheck_interval = int(recheck_interval)
+
         namespaces = getenv("NAMESPACES")
         if namespaces:
             self._namespaces = namespaces.strip().split()
@@ -105,7 +114,7 @@ class Controller(Config):
         raise NotImplementedError
 
     @abstractmethod
-    def apply_config(self):
+    def apply_config(self, force: bool = False):
         raise NotImplementedError
 
     def initial_apply(self) -> bool:
@@ -133,6 +142,55 @@ class Controller(Config):
         else:
             self._logger.error("Initial autoconf apply failed, scheduler may start with stale configuration")
         return success
+
+    def _start_settings_recheck_worker(self):
+        """Start the background settings recheck worker (no-op if disabled via interval <= 0)."""
+        if self._settings_recheck_interval <= 0:
+            self._logger.info("Settings recheck worker disabled (AUTOCONF_SETTINGS_RECHECK_INTERVAL <= 0)")
+            return
+        self._logger.info(f"Starting settings recheck worker (every {self._settings_recheck_interval}s)")
+        Thread(target=self._settings_recheck_worker, daemon=True).start()
+
+    def _settings_recheck_worker(self):
+        """Periodically re-apply the current labels when the set of valid settings changed.
+
+        AUTOCONF only reacts to orchestrator events, so a PRO license becoming valid (or any other
+        out-of-band settings change) would otherwise never trigger a re-evaluation of labels that
+        were dropped while invalid. This worker fills that gap. It is cheap in steady state: each
+        tick is a single get_plugins() read plus a set comparison; the orchestrator queries and the
+        forced apply only run when the settings set actually changed.
+        """
+        while True:
+            sleep(self._settings_recheck_interval)
+            try:
+                with self._internal_lock:
+                    if self.have_to_wait():
+                        continue
+                    self._update_settings()
+                    if not self.settings_changed():
+                        continue
+
+                    self._logger.info("Available settings changed (e.g. PRO license now valid), re-checking autoconf labels...")
+                    self._instances = self.get_instances()
+                    self._services = self.get_services()
+                    configs_result = self.get_configs()
+                    # Kubernetes returns (extra_config, configs); others return configs.
+                    if isinstance(configs_result, tuple) and len(configs_result) == 2:
+                        self._extra_config, self._configs = configs_result
+                    else:
+                        self._configs = configs_result
+
+                    # Re-check: the scheduler may have started applying since the first check above.
+                    if self.have_to_wait():
+                        continue
+
+                    if self.apply_config(force=True):
+                        self._set_autoconf_load_db()
+                        self._logger.info("Successfully re-applied autoconf configuration after settings change 🚀")
+                    else:
+                        self._logger.error("Error while re-applying autoconf configuration after settings change")
+            except BaseException:
+                self._logger.error(f"Exception in settings recheck worker:\n{format_exc()}")
 
     @abstractmethod
     def process_events(self):

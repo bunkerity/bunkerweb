@@ -429,13 +429,16 @@ class Database(
         return f"{cfg_type}/{cfg_name}.conf"
 
     @staticmethod
-    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
+    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str], *, allow_scheduler_override: bool = False) -> bool:
         """
         Compatibility rules for overwriting a setting's existing method:
         - autoconf wins over everything (and only autoconf overwrites autoconf).
         - ui and api are interchangeable.
-        - scheduler (env-var origin) overwrites ui/api so config-as-code stays
-          authoritative; the reverse stays blocked to protect in-session UI edits.
+        - scheduler (env-var origin) overwrites ui/api only when the caller asserts the
+          setting was explicitly declared in the environment (allow_scheduler_override),
+          so config-as-code stays authoritative without default-filled scheduler passes
+          wiping UI/API customizations; the reverse stays blocked to protect in-session
+          UI edits.
         """
         if new_method is None:
             return True
@@ -448,7 +451,7 @@ class Database(
         if {new_method, current_method} <= {"ui", "api"}:
             return True
         if new_method == "scheduler" and current_method in ("ui", "api"):
-            return True
+            return allow_scheduler_override
         return new_method == current_method
 
     def _is_transient_connection_error(self, error: BaseException) -> bool:

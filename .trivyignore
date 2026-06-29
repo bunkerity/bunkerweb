@@ -1,0 +1,10 @@
+# Trivy ignore file — accepted-risk CVE allowlist.
+#
+# The CI image gate (.github/workflows/container-build.yml) fails on any
+# vulnerability of severity UNKNOWN..CRITICAL that has a fix available
+# (unfixed vulnerabilities are ignored — ignore-unfixed).
+# Add a CVE ID below ONLY with a one-line justification. Every entry here is an
+# explicitly accepted risk and should be revisited when upstream ships a fix.
+#
+# Format (one per line):
+#   CVE-YYYY-NNNNN  # why it's accepted / upstream status

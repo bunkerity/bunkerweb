@@ -11,7 +11,7 @@ from os.path import join
 from pathlib import Path
 from re import DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
@@ -120,6 +120,10 @@ class Configurator:
 
         self.__multisite = normalize_check_value(self.__variables.get("MULTISITE", "no")) == "yes"
         self.__servers = self.__map_servers()
+
+        # Raw variables/environ keys that passed __check_var during the last get_config()
+        # call (service-prefixed and suffixed forms included, default fills excluded).
+        self.explicit_keys: Set[str] = set()
 
     def get_settings(self) -> Dict[str, str]:
         return self.__settings.copy()
@@ -294,6 +298,7 @@ class Configurator:
                 config[setting] = template_settings.get(setting, data["default"])
 
         # Override with variables
+        self.explicit_keys = set()
         for variable, value in self.__variables.items():
             # Use optimized exclusion checks
             if variable.startswith(self.__excluded_prefixes) or variable in self.__excluded_vars or "CUSTOM_CONF" in variable:
@@ -302,6 +307,7 @@ class Configurator:
             ret, err, canonical_value = self.__check_var(variable)
             if ret:
                 config[variable] = canonical_value
+                self.explicit_keys.add(variable)
             elif variable == "SERVER_NAME":
                 self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value=!r}")
                 exit(1)

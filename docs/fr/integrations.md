@@ -2236,7 +2236,7 @@ En fonction de vos choix lors de l'installation :
 
 ### Installation à l'aide du gestionnaire de paquets
 
-Veuillez vous assurer que **NGINX 1.30.2 est installé avant d'installer BunkerWeb**. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du [dépôt officiel NGINX](https://nginx.org/en/linux_packages.html). La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.
+Veuillez vous assurer que **NGINX 1.30.3 est installé avant d'installer BunkerWeb**. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du [dépôt officiel NGINX](https://nginx.org/en/linux_packages.html). La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.
 
 === "Debian Bookworm/Trixie"
 
@@ -2251,11 +2251,11 @@ Veuillez vous assurer que **NGINX 1.30.2 est installé avant d'installer BunkerW
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Vous devriez maintenant pouvoir installer NGINX 1.30.2 :
+    Vous devriez maintenant pouvoir installer NGINX 1.30.3 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "Version testing/dev"
@@ -2299,11 +2299,11 @@ Veuillez vous assurer que **NGINX 1.30.2 est installé avant d'installer BunkerW
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Vous devriez maintenant pouvoir installer NGINX 1.30.2 :
+    Vous devriez maintenant pouvoir installer NGINX 1.30.3 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "Version testing/dev"
@@ -2343,10 +2343,10 @@ Veuillez vous assurer que **NGINX 1.30.2 est installé avant d'installer BunkerW
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora fournit déjà NGINX 1.30.2, que nous prenons en charge
+    Fedora fournit déjà NGINX 1.30.3, que nous prenons en charge
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.2
+    sudo dnf install -y --allowerasing nginx-1.30.3
     ```
 
     !!! example "Désactiver l'assistant d'installation"
@@ -2393,10 +2393,10 @@ Veuillez vous assurer que **NGINX 1.30.2 est installé avant d'installer BunkerW
     module_hotfixes=true
     ```
 
-    Vous devriez maintenant pouvoir installer NGINX 1.30.2 :
+    Vous devriez maintenant pouvoir installer NGINX 1.30.3 :
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.2
+    sudo dnf install --allowerasing nginx-1.30.3
     ```
 
     !!! example "Désactiver l'assistant d'installation"
@@ -2808,6 +2808,26 @@ et surveille également d'autres objets Kubernetes, tels que [ConfigMap](https:/
 Pour une configuration optimale, il est recommandé de définir BunkerWeb en tant que **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**, ce qui garantit qu'un pod est créé sur tous les nœuds, tandis que l'**autoconf et le scheduler** sont définis comme  un **seul déploiement[ répliqué](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
 
 Compte tenu de la présence de plusieurs instances BunkerWeb, il est nécessaire d'établir un magasin de données partagé implémenté en tant que [ service Redis](https://redis.io/) ou [Valkey](https://valkey.io/). Ce service sera utilisé par les instances pour mettre en cache et partager des données entre elles. Vous trouverez de plus amples informations sur les paramètres Redis/Valkey [ici](features.md#redis).
+
+!!! info "Où placer les paramètres Redis (configuration pilotée par le scheduler)"
+    Sur Kubernetes, c’est le **scheduler** qui lit les paramètres et génère la configuration qu’il
+    pousse vers les instances BunkerWeb ; les instances ne lisent pas les paramètres Redis depuis leur
+    propre environnement de pod. Avec le chart Helm, configurez Redis sous `settings.redis` — y compris
+    Redis Sentinel via `settings.redis.redisSentinelHosts` et `settings.redis.redisSentinelMaster`
+    (chart ≥ v1.0.21) — ou sur `scheduler.extraEnvs` pour tout paramètre sans clé dédiée. Avec
+    Sentinel, `REDIS_HOST` n’est **pas** nécessaire (le master est résolu via les Sentinels). Les
+    définir uniquement sur `bunkerweb.extraEnvs` n’a aucun effet.
+
+    ```yaml
+    redis:
+      enabled: false        # cluster Redis/Sentinel externe
+    settings:
+      redis:
+        useRedis: "yes"
+        redisSentinelHosts: "redis-node-01.redis:26379 redis-node-02.redis:26379 redis-node-03.redis:26379"
+        redisSentinelMaster: "mymaster"
+        # redisPassword / redisSentinelPassword si votre master/sentinels exigent une auth
+    ```
 
 !!! info "Backend de base de données"
     Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) du dépôt.

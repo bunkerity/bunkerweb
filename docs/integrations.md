@@ -2349,7 +2349,7 @@ Depending on your installation type:
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.30.3 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian Bookworm/Trixie"
 
@@ -2364,11 +2364,11 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.2:
+    You should now be able to install NGINX 1.30.3:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2412,11 +2412,11 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.2:
+    You should now be able to install NGINX 1.30.3:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2456,10 +2456,10 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora already provides NGINX 1.30.2 that we support
+    Fedora already provides NGINX 1.30.3 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.2
+    sudo dnf install -y --allowerasing nginx-1.30.3
     ```
 
     !!! example "Disable the setup wizard"
@@ -2506,10 +2506,10 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.30.2:
+    You should now be able to install NGINX 1.30.3:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.2
+    sudo dnf install --allowerasing nginx-1.30.3
     ```
 
     !!! example "Disable the setup wizard"
@@ -2925,6 +2925,26 @@ Given the presence of multiple BunkerWeb instances,
 it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service.
 This service will be utilized by the instances to cache and share data among themselves.
 Further information about the Redis/Valkey settings can be found [here](features.md#redis).
+
+!!! info "Where Redis settings go (scheduler-driven config)"
+    On Kubernetes the **scheduler** is the component that reads settings and generates the
+    configuration it pushes to the BunkerWeb instances; the instances do not read Redis settings from
+    their own pod environment. With the Helm chart, configure Redis under `settings.redis` — including
+    Redis Sentinel via `settings.redis.redisSentinelHosts` and `settings.redis.redisSentinelMaster`
+    (chart ≥ v1.0.21) — or on `scheduler.extraEnvs` for any setting without a dedicated key. When
+    using Sentinel you do **not** need `REDIS_HOST` (the master is resolved through the Sentinels).
+    Setting these only on `bunkerweb.extraEnvs` has no effect.
+
+    ```yaml
+    redis:
+      enabled: false        # external Redis/Sentinel cluster
+    settings:
+      redis:
+        useRedis: "yes"
+        redisSentinelHosts: "redis-node-01.redis:26379 redis-node-02.redis:26379 redis-node-03.redis:26379"
+        redisSentinelMaster: "mymaster"
+        # redisPassword / redisSentinelPassword if your master/sentinels require auth
+    ```
 
 !!! info "Database backend"
     Please be aware that our instructions assume you are using MariaDB as the default database backend,

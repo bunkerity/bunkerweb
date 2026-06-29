@@ -19,6 +19,8 @@ class DockerController(Controller):
         super().__init__("docker", api_client=api_client)
         self.__client = DockerClient(base_url=docker_host)
         self.__internal_lock = Lock()
+        # Protected alias so the base-class settings recheck worker shares the same lock object.
+        self._internal_lock = self.__internal_lock
         self.__pending_apply = False
         self.__last_event_time = 0.0
         self.__debounce_delay = 2  # seconds
@@ -193,8 +195,8 @@ class DockerController(Controller):
                 configs[result.group(1).lower().replace("_", "-")][f"{server_name}/{result.group(2)}"] = value
         return configs
 
-    def apply_config(self) -> bool:
-        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
+    def apply_config(self, force: bool = False) -> bool:
+        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, force=force)
 
     # Container lifecycle actions that may require a re-deploy.
     __RELEVANT_EVENT_ACTIONS = frozenset(
@@ -262,6 +264,7 @@ class DockerController(Controller):
 
     def process_events(self):
         self._set_autoconf_loaded()
+        self._start_settings_recheck_worker()
         self._logger.info("Listening for Docker events ...")
         locked = False
         error = False

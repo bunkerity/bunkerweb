@@ -453,7 +453,7 @@ class BiscuitGuard:
 
             client_ip = request.client.host if request.client else "0.0.0.0"
             if api_config.check_private_ip or not ip_address(client_ip).is_private:
-                az.add_check(Check(f'check if client_ip("{client_ip}")'))
+                az.add_check(Check("check if client_ip({client_ip})", {"client_ip": client_ip}))
                 self._logger.debug(f"Biscuit phase1: enforce client_ip={client_ip} (check_private_ip={api_config.check_private_ip})")
             else:
                 self._logger.debug(f"Biscuit phase1: skip client_ip check for private IP {client_ip}")
@@ -475,18 +475,19 @@ class BiscuitGuard:
 
             # Always add operation fact for observability
             operation = OPERATION_BY_METHOD.get(request.method.upper(), "read")
-            az.add_fact(Fact(f'operation("{operation}")'))
+            az.add_fact(Fact("operation({operation})", {"operation": operation}))
             self._logger.debug(f"Biscuit phase2: operation={operation}")
 
-            # Derive fine-grained context
+            # Derive fine-grained context. The request path is attacker-controlled, so it
+            # is bound as a parameter to prevent Datalog fact injection into the authorizer.
             rtype, req_perm = _resolve_resource_and_perm(path, request.method)
             if rtype and req_perm:
-                az.add_fact(Fact(f'resource("{path}")'))
-                az.add_fact(Fact(f'resource_type("{rtype}")'))
-                az.add_fact(Fact(f'required_perm("{req_perm}")'))
+                az.add_fact(Fact("resource({resource})", {"resource": path}))
+                az.add_fact(Fact("resource_type({resource_type})", {"resource_type": rtype}))
+                az.add_fact(Fact("required_perm({required_perm})", {"required_perm": req_perm}))
                 rid = _extract_resource_id(path, rtype)
                 if rid is not None:
-                    az.add_fact(Fact(f'resource_id("{rid}")'))
+                    az.add_fact(Fact("resource_id({resource_id})", {"resource_id": str(rid)}))
                 self._logger.debug(f"Biscuit phase2: rtype={rtype}, required_perm={req_perm}, resource_id={rid if rid is not None else '*none*'}")
 
                 # Enforce fine-grained authorization

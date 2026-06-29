@@ -604,43 +604,65 @@ $(document).ready(() => {
       });
   }, 1000);
 
-  // The server renders the authoritative theme inline on <html> and on every
-  // theme-dependent element (logos, avatars, bg classes, toggle state). #theme
-  // mirrors that value. For logged-in users it is the DB preference (the
-  // cross-device source of truth); for anonymous pages the head pre-paint script
-  // resolves the preferred theme into window.__bwResolvedTheme.
-  //
-  // Treat the server value as the source of truth and only repaint when the
-  // desired theme genuinely differs from what was already painted -> logged-in
-  // is a pure no-op = zero flicker, and localStorage can no longer override it.
+  // Server renders the authoritative theme on <html> and #theme; anon pages get
+  // it resolved into window.__bwResolvedTheme by the head script. Repaint only
+  // when it differs from what was painted -> logged-in is a no-op (zero flicker).
   const serverTheme = ($("#theme").val() || "light").trim();
   const desiredTheme =
     typeof window.__bwResolvedTheme === "string"
       ? window.__bwResolvedTheme
       : serverTheme;
 
-  try {
-    localStorage.setItem("theme", desiredTheme); // keep cache in sync with server
-  } catch (e) {
-    // Storage unavailable (private mode / disabled): non-fatal, theme is still
-    // applied below. Must not abort the rest of this ready() handler.
+  const isAuthenticated = $("body").attr("data-authenticated") === "true";
+
+  if (isAuthenticated) {
+    try {
+      localStorage.setItem("theme", desiredTheme); // sync cache with DB
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
   }
+  // Anon pages: only an explicit toggle may persist; an OS-resolved write here
+  // would masquerade as a choice and freeze live OS tracking (base.html).
 
   if (desiredTheme !== serverTheme) {
-    // <html> was already corrected pre-paint by the head script (anon pages);
-    // this reconciles only the body-level assets (logo, avatar, bg, icon, toggle).
+    // <html> already fixed pre-paint; reconcile body assets only.
     applyTheme(desiredTheme);
   }
 
-  // Toggle theme on change
+  // Explicit user choice -> always persist, even on anon pages.
   $("#dark-mode-toggle").on("change", function () {
     const darkMode = $(this).prop("checked");
     const theme = darkMode ? "dark" : "light";
-    applyTheme(theme, $(this).data("root-url"));
+    applyTheme(theme, $(this).data("root-url"), true);
   });
 
-  // Function to apply the theme
-  function applyTheme(theme, rootUrl = null) {
+  // Profile page theme <select>: live-apply on change so the control and the
+  // rendered theme never disagree (persists like the navbar toggle).
+  $("#theme-toggle").on("change", function () {
+    applyTheme($(this).val(), $(this).data("root-url"), true);
+  });
+
+  // On login, submit the user's EXPLICIT theme choice so it persists to the
+  // profile (login.py reads [name='theme']). localStorage only ever holds
+  // explicit toggles -- never OS-resolved themes -- so this write can't clobber
+  // a saved preference; setting it at submit time overrides any OS-resolved
+  // value the anti-FOUC script (base.html) placed in the field on page load.
+  // #login-form only exists on the login page, so this handler is inert elsewhere.
+  $("#login-form").on("submit", function () {
+    let choice = "";
+    try {
+      const s = localStorage.getItem("theme");
+      if (s === "light" || s === "dark") choice = s;
+    } catch (e) {
+      // Storage unavailable (private mode): submit empty -> keep DB theme.
+    }
+    $(this).find("[name='theme']").val(choice);
+  });
+
+  // persist gates the localStorage write; the anon initial reconcile must not
+  // persist (see above).
+  function applyTheme(theme, rootUrl = null, persist = isAuthenticated) {
     $themeSelector = $("#theme-toggle");
 
     if (theme === "dark") {
@@ -659,7 +681,9 @@ $(document).ready(() => {
         .removeClass("bg-light-subtle");
       $(".dark-mode-toggle-icon").removeClass("bx-sun").addClass("bx-moon");
       $("#dark-mode-toggle").prop("checked", true);
-      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo-white").val());
+      $("[alt='BunkerWeb logo']")
+        .not(".bw-logo-light, .bw-logo-dark")
+        .attr("src", $("#bw-logo-white").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
       $themeSelector.find("option[value='dark']").prop("selected", true);
     } else {
@@ -678,7 +702,9 @@ $(document).ready(() => {
         .removeClass("bg-dark-subtle");
       $(".dark-mode-toggle-icon").removeClass("bx-moon").addClass("bx-sun");
       $("#dark-mode-toggle").prop("checked", false);
-      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo").val());
+      $("[alt='BunkerWeb logo']")
+        .not(".bw-logo-light, .bw-logo-dark")
+        .attr("src", $("#bw-logo").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url").val());
       $themeSelector.find("option[value='light']").prop("selected", true);
     }
@@ -686,7 +712,13 @@ $(document).ready(() => {
     // Update input values
     $("#theme").val(theme);
     $("[name='theme']").val(theme);
-    localStorage.setItem("theme", theme); // Save user preference
+    if (persist) {
+      try {
+        localStorage.setItem("theme", theme); // Save user preference
+      } catch (e) {
+        // Storage unavailable (private mode / disabled): non-fatal.
+      }
+    }
 
     if (!rootUrl || window.location.pathname.includes("/setup") || dbReadOnly)
       return;

@@ -691,6 +691,7 @@ class KubernetesController(Controller):
 
     def process_events(self):
         self._set_autoconf_loaded()
+        self._start_settings_recheck_worker()
         self._logger.info("Listening for Kubernetes events ...")
         watchers = self._get_watchers()
         threads = [Thread(target=self._watch, args=(watch_type, watcher)) for watch_type, watcher in watchers.items()]
@@ -926,8 +927,8 @@ class KubernetesController(Controller):
 
         self._patch_controller_status(ips)
 
-    def apply_config(self) -> bool:
-        result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config)
+    def apply_config(self, force: bool = False) -> bool:
+        result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config, force=force)
         if result:
             self._maybe_patch_status()
         return result

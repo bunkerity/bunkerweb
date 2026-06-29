@@ -2233,7 +2233,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 ### 使用软件包管理器安装
 
-请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.30.2**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
+请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.30.3**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
 
 === "Debian Bookworm/Trixie"
 
@@ -2248,11 +2248,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.2：
+    您现在应该能够安装 NGINX 1.30.3：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2296,11 +2296,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.2：
+    您现在应该能够安装 NGINX 1.30.3：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.3-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2340,10 +2340,10 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.30.2
+    Fedora 已经提供了我们支持的 NGINX 1.30.3
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.2
+    sudo dnf install -y --allowerasing nginx-1.30.3
     ```
 
     !!! example "禁用设置向导"
@@ -2390,10 +2390,10 @@ sudo ./install-bunkerweb.sh --yes --api
     module_hotfixes=true
     ```
 
-    您现在应该能够安装 NGINX 1.30.2：
+    您现在应该能够安装 NGINX 1.30.3：
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.2
+    sudo dnf install --allowerasing nginx-1.30.3
     ```
 
     !!! example "禁用设置向导"
@@ -2805,6 +2805,24 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 为了获得最佳设置，建议将 BunkerWeb 定义为一个 **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**，这样可以确保在所有节点上都创建一个 pod，而将 **autoconf 和 scheduler** 定义为**单个副本的 [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**。
 
 鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见[此处](features.md#redis)。
+
+!!! info "Redis 设置应放在哪里（由 scheduler 驱动的配置）"
+    在 Kubernetes 上，由 **scheduler** 读取设置并生成配置，再推送到 BunkerWeb 实例；实例不会从自身的
+    Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 `settings.redis` 下配置 Redis——包括通过
+    `settings.redis.redisSentinelHosts` 和 `settings.redis.redisSentinelMaster` 配置 Redis Sentinel
+    （chart ≥ v1.0.21）——或对没有专用键的任何设置使用 `scheduler.extraEnvs`。使用 Sentinel 时**无需**
+    `REDIS_HOST`（主节点通过 Sentinels 解析）。仅在 `bunkerweb.extraEnvs` 上设置它们将不起作用。
+
+    ```yaml
+    redis:
+      enabled: false        # 外部 Redis/Sentinel 集群
+    settings:
+      redis:
+        useRedis: "yes"
+        redisSentinelHosts: "redis-node-01.redis:26379 redis-node-02.redis:26379 redis-node-03.redis:26379"
+        redisSentinelMaster: "mymaster"
+        # 如主节点/哨兵需要鉴权，请设置 redisPassword / redisSentinelPassword
+    ```
 
 !!! info "数据库后端"
     请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations)中的 docker-compose 文件。

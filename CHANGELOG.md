@@ -1,8 +1,59 @@
 # Changelog
 
-## v1.6.12~rc2 - 2026/??/??
+## v1.6.12 - 2026/06/??
 
+- [LINUX] Updated the NGINX version to v1.30.3 for Fedora 43 and 44 now that it is available in their repositories.
+- [BUGFIX] `linux`: on Ubuntu Pro/ESM hosts the install script now installs the upstream CrowdSec engine instead of the outdated ESM build (1.4.6), whose hub index lacks the `bunkerity/bunkerweb` collection and made the install fail with `unable to find collections 'bunkerity/bunkerweb'`. (Fixes #3659)
+- [DEPS] Updated headers-more-nginx-module version to v0.40
+- [DEPS] Updated lua-cjson version to v2.1.0.18
+- [DEPS] Updated lua-resty-signal version to v0.05
+- [DEPS] Updated lua-resty-string version to v0.19
+- [DEPS] Updated lua-upstream-nginx-module version to v0.08
+- [DEPS] Updated LuaJIT version to v2.1-20260620
+
+## v1.6.12~rc3 - 2026/06/18
+
+- [SECURITY] `nginx`: update nginx to 1.30.3 (except for Fedora, which stays on 1.30.2 until it is available in its repositories) to fix CVE-2026-42055 — a heap buffer overflow in `ngx_http_proxy_v2_module`/`ngx_http_grpc_module` — and CVE-2026-48142 — a heap buffer overread in `ngx_http_charset_module`.
+- [FEATURE] `antibot`: `ANTIBOT_IGNORE_URI` can now match full request URIs including query strings. (Fixes #3374)
+- [SECURITY] `antibot`: validate the post-challenge redirect target as a same-origin relative path (closes an open redirect via crafted `Referer`/request URI), keep the original query string out of the redirect URL, and reject malformed challenge submissions instead of erroring.
+- [BUGFIX] `antibot`: solving the challenge now returns to the originally requested URL instead of `/` on Chrome. (Fixes #3650)
+- [BUGFIX] `api`: a malformed `API_ALLOWED_HOSTS` wildcard (e.g. `foo.*.com`) no longer bricks the API on every request — the patterns are now validated at startup and a bad entry is logged and skipped, instead of tripping Starlette's `TrustedHostMiddleware` assertion lazily on the first request (which the `add_middleware` `try`/`except` could not catch) or being silently accepted under `python -O`.
+- [BUGFIX] `letsencrypt`: stale-ACME-account recovery now works under `LETS_ENCRYPT_CONCURRENT_REQUESTS=yes` — the JWS-rejection purge targeted the per-service temporary scratch dir (discarded on the failed run, merged back only on success) instead of the canonical account store, so a server-pruned account was restored on every retry and issuance kept failing identically. It now purges `DATA_PATH/accounts`.
+- [BUGFIX] `letsencrypt` (UI): deleting a certificate no longer fails with a 500 (leaving the cache row stale so the cert reappears on the next scheduler sync) when an *unrelated* orphaned certificate is present in the cache — the delete now bypasses the global consistency gate like the Heal flow, since removing one certificate cannot introduce a new orphan reference (the scheduler-side gate still guards against runtime poisoning).
+- [BUGFIX] `datastore`: setting `DATASTORE_LRU_SIZE` to any value other than the default (`1k`) no longer bricks every BunkerWeb worker API with HTTP 444 (a full scheduler↔worker bootstrap deadlock). The lazy per-worker LRU resize replaced the cache with a fresh empty instance mid-`init_by_lua`, discarding the bootstrap variables (including `API_WHITELIST_IP`) and plugin metadata it had just stored, so the API rejected every IP. The resize now migrates existing entries into the new cache and only ever grows above the default. (Fixes #3618)
+- [FEATURE] `reverseproxy`: verify the upstream HTTPS certificate with `REVERSE_PROXY_SSL_VERIFY`, `REVERSE_PROXY_SSL_VERIFY_DEPTH`, and a trusted CA as a path or base64/PEM data (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, `_DATA`, `_PRIORITY`), for HTTP and stream. The scheduler caches the CA and distributes it to every instance; fails safe to `off` when no CA is available. (Fixes #574)
+- [FEATURE] `ui`: overhaul the logs viewer — per-format syntax highlighting (BunkerWeb, certbot and NGINX access logs), severity filter chips with counts, in-page search and next/previous error navigation, live-tail with pause and a "new lines" cue, download/copy, an opt-in local-time toggle, and collapsible multi-line entries (tracebacks and config dumps fold to a labelled `⋯ N lines` / `Traceback (N lines)` pill). Hiding a severity hides the whole multi-line entry, and the toolbar reflows into a tidy, touch-friendly layout on mobile.
+- [BUGFIX] `ui`: editing a service or global config in RAW mode no longer shatters multi-line "file" settings (PEM certificates and keys such as `CUSTOM_SSL_CERT_DATA`) into bogus variables. The RAW parser now reassembles multi-line values instead of splitting every line as `KEY=VALUE`, which previously produced a flood of "Variable not valid" errors and silently dropped the certificate, even when only an unrelated setting was edited. (Fixes #3651)
+- [FEATURE] `ui`: the RAW config editor can now fold multi-line file settings (certificates and keys) under their `KEY=` header into a labelled `⋯ N lines` pill, with a collapse/expand-all toolbar toggle.
+- [DEPS] `ui`: update jQuery to v4.0.0.
+- [DEPS] `ui`: update Bootstrap to v5.3.8 and drop the redundant standalone Popper.js (it is already bundled in `bootstrap.bundle.min.js`).
+- [DEPS] `ui`: update DataTables (and bundled extensions) to v2.3.8.
+- [DEPS] `ui`: update Ace editor to v1.44.0.
+- [DEPS] `ui`: update ApexCharts.js to v5.15.0.
+- [DEPS] `ui`: update DOMPurify to v3.4.11.
+- [DEPS] `ui`: update i18next to v26.3.1 and i18next-http-backend to v4.0.0.
+- [DEPS] `ui`: update Perfect Scrollbar to v1.5.6.
+- [DEPS] `ui`: update lottie-player to v2.0.12, canvas-confetti to v1.9.4, and ipaddr.js to v2.4.0.
+- [DEPS] update build tooling — cssnano to v8.0.2 and domino to v2.1.7; remove the unused root `jquery` dependency.
+
+## v1.6.12~rc2 - 2026/06/16
+
+- [SECURITY] `api`: build the Biscuit auth token through the parameter API so the Host header, client IP and username are bound as typed terms and cannot inject signed Datalog facts (token issuance and verification); a malicious `Host` header is now an inert `domain` string rather than escapable Datalog. Adds an opt-in `API_ALLOWED_HOSTS` TrustedHost allowlist.
+- [SECURITY] `ui`: fix session fixation on login (CWE-384) — `session.clear()` ran before the session-id regeneration, and `flask-session` only rotates a non-empty session, so the id never changed across the authentication boundary and a pre-planted session id could be reused post-login. The id is now rotated on every login (the new state is seeded before regeneration).
+- [SECURITY] `ui`: fix an open redirect via the post-login `next` parameter (CWE-601) — `/..//host` (and `/.//host`, `/\host`, and percent-encoded variants) normalized to a protocol-relative URL in the browser and navigated cross-origin. `_sanitize_internal_next` now rejects protocol-relative, backslash, scheme and `.`/`..` path-segment values on both the raw and once-decoded forms, and `loading.js`/`unauthorized.js` collapse leading slashes and enforce same-origin before navigating.
+- [SECURITY] `ui`: a password change now revokes the user's other active sessions (previously only the current session was ended), so a parallel or stolen session cannot outlive the credential it was authenticated with.
+- [SECURITY] `ui`: cache routes no longer bypass Biscuit authorization — `POST /cache/delete` is now evaluated as a write operation, so a non-admin (`reader`) role can no longer purge the job cache (read access to cache views is unchanged).
+- [SECURITY] `ui`: validate the instance hostname as a real IPv4/IPv6 literal (stdlib `ipaddress`) or DNS hostname instead of a permissive character blocklist that accepted `;`, `@`, `%` and other metacharacters; ban scope is clamped to `global`/`service`.
+- [BUGFIX] `ui`: bound `REVOKED_SESSIONS` growth — the revoked-session set is now a TTL-pruned map (retained only for the maximum session lifetime) and is persisted across workers from the password-change/wipe paths, instead of an ever-growing list.
+- [BUGFIX] `database`: fix 1.6.12~rc1 regression that reset UI/API-saved settings to defaults on scheduler restart — the scheduler now overrides `method=ui`/`api` rows only for settings explicitly declared in `variables.env` / the container environment (per-service via the service-prefixed key). Affected installs can restore lost settings with `bwcli plugin backup restore`.
 - [BUGFIX] `ssl`: `SSL_ECDH_CURVE=auto` no longer emits `X25519` on FIPS OpenSSL (NGINX failed to start with `group 'X25519' cannot be set`, blocking the Setup Wizard). Auto-detection now probes the same `SSL_CTX_set1_groups_list` call NGINX makes, falls back to FIPS-approved `prime256v1:secp384r1`, and the internal API listener honors `SSL_ECDH_CURVE` instead of a hardcoded curve.
+- [BUGFIX] `autoconf`: re-check service labels when the set of valid settings changes (e.g. a valid PRO license installs PRO plugins, or an external plugin is added) — labels referencing a not-yet-valid setting were dropped and never re-applied until an unrelated label change or restart. A background worker now re-applies on settings change (interval via `AUTOCONF_SETTINGS_RECHECK_INTERVAL`, default `300`s, `0` disables).
+- [BUGFIX] `logger`: an unreachable `LOG_SYSLOG_ADDRESS` no longer crash-loops the scheduler and UI — building the `SysLogHandler` is now guarded, so a syslog host that does not resolve or refuses the connection (Python 3.14 resolves DNS eagerly in the handler constructor) logs a warning and falls back to stderr instead of raising out of module import and killing every BunkerWeb Python process.
+- [DEPS] Updated LuaJIT version to v2.1-20260606
+- [DEPS] Updated lua-resty-openssl version to v1.8.0
+- [CONTRIBUTION] Thank you [Cleverguns](https://github.com/Cleverguns) for your contribution regarding the `Filipino (Tagalog)` translation of the web UI. (#3607)
+- [CONTRIBUTION] Thank you [ray910408](https://github.com/ray910408) for your contribution regarding the refresh of the `src/deps` npm build-tool dependencies. (#3623)
+- [CONTRIBUTION] Thank you [immanuwell](https://github.com/immanuwell) for your contribution regarding parsing the `DEBUG` environment variable as a boolean in the `Gunicorn` configuration (UI and API), so a string value no longer always enables debug logging. (#3589)
 
 ## v1.6.12~rc1 - 2026/06/03
 

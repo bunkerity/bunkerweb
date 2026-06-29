@@ -45,6 +45,10 @@ class ApiConfig(YamlBaseSettings):
     API_WHITELIST_ENABLED: bool | str = "yes"
     API_WHITELIST_IPS: str = "127.0.0.0/8 ::1/128 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
 
+    # Host header allowlist (defense-in-depth). Space/comma separated list of allowed
+    # Host values (wildcards like "*.example.com" supported). Empty = disabled/permissive.
+    API_ALLOWED_HOSTS: str = ""
+
     # Rate limiting
     API_RATE_LIMIT_ENABLED: bool | str = "yes"
     API_RATE_LIMIT: Optional[str] = "100r/m"
@@ -93,6 +97,16 @@ class ApiConfig(YamlBaseSettings):
     def whitelist_enabled(self) -> bool:
         v = str(self.API_WHITELIST_ENABLED).strip().lower()
         return v in ("1", "true", "yes", "on")
+
+    @property
+    def allowed_hosts(self) -> list:
+        """Parsed Host allowlist (defense-in-depth). Empty list = disabled/permissive."""
+        from re import split as _split
+
+        raw = self.API_ALLOWED_HOSTS.strip()
+        if not raw:
+            return []
+        return [h for h in _split(r"[\s,]+", raw) if h]
 
     @property
     def biscuit_ttl_seconds(self) -> int:

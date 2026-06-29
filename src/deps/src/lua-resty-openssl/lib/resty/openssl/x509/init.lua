@@ -21,7 +21,7 @@ local ctypes = require "resty.openssl.auxiliary.ctypes"
 local ctx_lib = require "resty.openssl.ctx"
 local format_error = require("resty.openssl.err").format_error
 local version = require("resty.openssl.version")
-local OPENSSL_3X = version.OPENSSL_3X
+local OPENSSL_3_UP = version.OPENSSL_3_UP
 
 -- accessors provides an openssl version neutral interface to lua layer
 -- it doesn't handle any error, expect that to be implemented in
@@ -72,7 +72,7 @@ function _M.new(cert, fmt, properties)
   local ctx
   if not cert then
     -- routine for create a new cert
-    if OPENSSL_3X then
+    if OPENSSL_3_UP then
       ctx = C.X509_new_ex(ctx_lib.get_libctx(), properties)
     else
       ctx = C.X509_new()
@@ -290,7 +290,7 @@ local function digest(self, cfunc, typ, properties)
   ffi_gc(ctx, C.EVP_MD_CTX_free)
 
   local algo
-  if OPENSSL_3X then
+  if OPENSSL_3_UP then
     algo = C.EVP_MD_fetch(ctx_lib.get_libctx(), typ or 'sha1', properties)
   else
     algo = C.EVP_get_digestbyname(typ or 'sha1')
@@ -299,7 +299,7 @@ local function digest(self, cfunc, typ, properties)
     return nil, string.format("x509:digest: invalid digest type \"%s\"", typ)
   end
 
-  local md_size = OPENSSL_3X and C.EVP_MD_get_size(algo) or C.EVP_MD_size(algo)
+  local md_size = OPENSSL_3_UP and C.EVP_MD_get_size(algo) or C.EVP_MD_size(algo)
   if not digest_buf or digest_buf_size < md_size then
     digest_buf = ctypes.uchar_array(md_size)
     digest_buf_size = md_size

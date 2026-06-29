@@ -18,6 +18,19 @@
   "aria": {
     "label": {
       "close": "بند کریں",
+      "copy": "لاگز کاپی کریں",
+      "download_log": "یہ لاگ فائل ڈاؤن لوڈ کریں",
+      "follow": "فالو کریں",
+      "select_file": "فائل منتخب کریں",
+      "select_page": "صفحہ منتخب کریں",
+      "issue_count": "خرابیوں اور انتباہات کی تعداد",
+      "level_filter": "لاگ لائنوں کو سطح کے لحاظ سے فلٹر کریں",
+      "local_time": "ٹائم اسٹیمپس مقامی وقت میں دکھائیں",
+      "collapse_multiline": "کئی لائنوں والی اندراجات سمیٹیں",
+      "next_issue": "اگلی خرابی یا انتباہ",
+      "prev_issue": "پچھلی خرابی یا انتباہ",
+      "search_logs": "لاگز میں تلاش کریں",
+      "toggle_wrap": "لائن ریپنگ ٹوگل کریں",
       "configs_dropzone": "کسٹم کنفیگریشنز کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں",
       "raw_configuration": "خام کنفیگریشن",
       "services_dropzone": "خدمات کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں"
@@ -131,6 +144,10 @@
     "run_selected_jobs": "منتخب ٹاسکس چلائیں",
     "save": "محفوظ کریں",
     "save_changes": "تبدیلیاں محفوظ کریں",
+    "local_time": "مقامی وقت",
+    "collapse_multiline": "سمیٹیں",
+    "search": "تلاش",
+    "wrap": "ریپ",
     "select_file": "فائل منتخب کریں",
     "select_page": "صفحہ منتخب کریں",
     "service": "سروس",
@@ -610,6 +627,8 @@
     "easter_egg": "اگر آپ یہ پڑھ رہے ہیں، تو اس کا مطلب ہے کہ آپ متجسس ہیں 👀",
     "error": "خرابی",
     "message": "معلومات",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "آپ کے پاس آپ کے PRO لائسنس کی اجازت سے زیادہ خدمات ہیں۔ اپنا لائسنس اپ گریڈ کریں یا کچھ خدمات کو ڈرافٹ موڈ میں منتقل کر کے اپنا PRO لائسنس انلاک کریں۔",
     "time": {
       "just_now": "ابھی ابھی"
     },
@@ -762,11 +781,25 @@
     "upgrade": "اپ گریڈ کریں؟"
   },
   "logs": {
-    "eventsource_failed": "EventSource کنکشن ناکام ہوگیا",
-    "parse_error": "سٹریم ڈیٹا پارس کرنے میں ناکام: {{error}}",
-    "stream_error": "سٹریم کی خرابی: {{message}}",
-    "stream_init": "سٹریم شروع ہوگیا، فائل کا سائز: {{size}}",
-    "stream_initialized": "سٹریم ریفریش کے ساتھ شروع ہوگیا، فائل کا سائز: {{size}}",
+    "annotation_error": "خرابی",
+    "annotation_warning": "انتباہ",
+    "filter_levels": "سطحیں",
+    "letsencrypt_logs": "Let's Encrypt لاگز",
+    "main_logs": "مرکزی لاگز",
+    "new_lines_sr": "{{count}} نئی لاگ لائنیں",
+    "issue_summary": "{{errors}} خرابیاں، {{warnings}} انتباہات",
+    "level_critical": "نہایت اہم",
+    "level_debug": "ڈیبگ",
+    "level_error": "خرابی",
+    "level_info": "معلومات",
+    "level_notice": "نوٹس",
+    "level_warning": "انتباہ",
+    "lines_all": "سب",
+    "lines_label": "لائنیں",
+    "meta": "{{size}} · {{lines}} لائنیں · ترمیم {{when}}",
+    "new_lines": "نئی لائنیں",
+    "showing_all": "{{total}} لائنیں",
+    "showing_some": "{{total}} میں سے {{shown}} دکھائی جا رہی ہیں",
     "trimmed_notice": "--- کارکردگی کے لیے {{count}} پرانی لاگ لائنیں ہٹا دی گئیں ---"
   },
   "modal": {
@@ -909,7 +942,10 @@
       "status": {
         "deactivated": "پلگ ان غیر فعال ہے؛ لہذا، کوئی معلومات دستیاب نہیں ہے۔",
         "metrics_deactivated": "میٹرکس پلگ ان فعال نہیں ہے؛ لہذا، کوئی معلومات دستیاب نہیں ہے۔",
-        "not_available": "پلگ ان صفحہ بیٹا مرحلے کے دوران ابھی تک دستیاب نہیں ہے۔"
+        "not_available": "پلگ ان صفحہ بیٹا مرحلے کے دوران ابھی تک دستیاب نہیں ہے۔",
+        "pre_render_error": "پری رینڈرنگ کی خرابی",
+        "no_content": "یہ پلگ ان کوئی ایمبیڈڈ صفحہ فراہم نہیں کرتا۔",
+        "dedicated_page_unavailable": "یہ پلگ ان ایک مخصوص صفحے پر منظم ہوتا ہے جو ابھی لوڈ نہیں ہوا۔ اس تک رسائی کے لیے ویب UI دوبارہ شروع کریں۔"
       }
     },
     "type": {
@@ -1569,6 +1605,16 @@
     "real_ip_recursive": "IP ایڈریس ہیڈر کنٹینر میں ایک بازگشتی تلاش انجام دیں۔",
     "remove_ban_entry": "فہرست سے یہ پابندی اندراج ہٹائیں۔",
     "reset_template_settings": "موجودہ ٹیمپلیٹ ویو میں تمام سیٹنگز کو ان کی ڈیفالٹ قدروں پر ری سیٹ کریں۔",
+    "download_log": "یہ لاگ فائل ڈاؤن لوڈ کریں",
+    "issue_count": "اس منظر میں خرابیاں اور انتباہات",
+    "local_time": "ٹائم اسٹیمپس اپنے مقامی وقت میں دکھائیں",
+    "collapse_multiline": "کئی لائنوں والی اندراجات سمیٹیں (tracebacks، payloads)",
+    "collapse_raw_values": "کئی لائنوں والی قدریں سمیٹیں (سرٹیفکیٹس، کلیدیں)",
+    "next_issue": "اگلی خرابی یا انتباہ پر جائیں",
+    "prev_issue": "پچھلی خرابی یا انتباہ پر جائیں",
+    "search_logs": "لاگز میں تلاش کریں (Ctrl+F)",
+    "toggle_level": "{{level}} لائنیں دکھائیں / چھپائیں",
+    "toggle_wrap": "لائن ریپنگ ٹوگل کریں",
     "select_file_to_follow": "فالو موڈ فعال کرنے کے لیے فائل منتخب کریں",
     "server_name": "اس سروس کے لیے بنیادی ڈومین نام یا سرور کا نام۔",
     "stream_support": {

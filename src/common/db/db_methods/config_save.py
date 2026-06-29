@@ -42,6 +42,27 @@ class _SaveConfigContext:
     settings_dict: Dict[str, dict] = field(default_factory=dict)
     existing_service_settings_dict: Dict[Tuple[str, str, int], dict] = field(default_factory=dict)
     templates: Dict[Any, Dict[Tuple[str, int], Any]] = field(default_factory=dict)
+    # Raw environment/variables keys explicitly declared by the caller (e.g.
+    # Configurator.explicit_keys), service-prefixed and suffixed forms included. Only
+    # consulted when method == "scheduler": a scheduler pass may overwrite a ui/api-owned
+    # row only for keys in this set. Empty means the scheduler never touches ui/api rows
+    # (the incoming config is treated as default-filled, not user-declared).
+    explicit_keys: frozenset = field(default_factory=frozenset)
+
+
+def _scheduler_can_override(ctx: _SaveConfigContext, full_key: str, incoming_value: Any) -> bool:
+    """Whether a scheduler-method pass may overwrite a ui/api-owned row for ``full_key``.
+
+    Only keys explicitly declared in the environment (``ctx.explicit_keys``) qualify, so a
+    default-filled scheduler pass never clobbers UI/API customizations. The Linux dummy
+    variables.env ships ``SERVER_NAME=`` — an explicitly-declared but EMPTY SERVER_NAME must
+    not clobber a ui/api-owned service list.
+    """
+    if full_key not in ctx.explicit_keys:
+        return False
+    if full_key == "SERVER_NAME" and not str(incoming_value).strip():
+        return False
+    return True
 
 
 def _get_setting_file_name(
@@ -141,10 +162,19 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         *,
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
+        explicit_keys: Optional[Set[str]] = None,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
         Args:
+            explicit_keys: Raw environment/variables keys explicitly declared by the
+                           caller (e.g. Configurator.explicit_keys), service-prefixed
+                           and suffixed forms included. Only consulted when
+                           method == "scheduler": a scheduler pass may overwrite a
+                           ui/api-owned row only for keys in this set. None or empty
+                           means the scheduler never touches ui/api-owned rows (the
+                           incoming config is treated as default-filled, not
+                           user-declared).
             skip_service_management: When True, the entire service-management block is
                                      skipped — service settings cleanup, the SERVER_NAME
                                      reconciliation that adds/draftifies/deletes Services
@@ -169,7 +199,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
 
-        ctx = _SaveConfigContext(config=config, db_config=db_config, method=method, normalized_file_names=normalized_file_names)
+        ctx = _SaveConfigContext(
+            config=config,
+            db_config=db_config,
+            method=method,
+            normalized_file_names=normalized_file_names,
+            explicit_keys=frozenset(explicit_keys or ()),
+        )
 
         with self._db_session() as session:
             if self.readonly:
@@ -779,9 +815,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             service_setting = ctx.existing_service_settings_dict.get((server_name, key, suffix))
             current_file_name = service_setting["file_name"] if service_setting else ""
             value_changed = bool(service_setting and service_setting["value"] != value)
-            should_update_value = (value_changed and self._methods_are_compatible(ctx.method, service_setting["method"])) or (
-                bool(service_setting) and ctx.method == "autoconf" and service_setting["method"] != "autoconf"
-            )
+            should_update_value = (
+                value_changed
+                and self._methods_are_compatible(
+                    ctx.method,
+                    service_setting["method"],
+                    allow_scheduler_override=_scheduler_can_override(ctx, f"{server_name}_{original_key}", value),
+                )
+            ) or (bool(service_setting) and ctx.method == "autoconf" and service_setting["method"] != "autoconf")
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting["type"], original_key, value_changed, current_file_name)
 
             template_setting_default = None
@@ -870,9 +911,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             ).first()
             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
             value_changed = bool(global_value and global_value.value != value)
-            should_update_value = (value_changed and self._methods_are_compatible(ctx.method, global_value.method)) or (
-                bool(global_value) and ctx.method == "autoconf" and global_value.method != "autoconf"
-            )
+            should_update_value = (
+                value_changed
+                and self._methods_are_compatible(
+                    ctx.method, global_value.method, allow_scheduler_override=_scheduler_can_override(ctx, original_key, value)
+                )
+            ) or (bool(global_value) and ctx.method == "autoconf" and global_value.method != "autoconf")
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting["type"], original_key, value_changed, current_file_name)
 
             template_setting_default = None
@@ -988,7 +1032,11 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             ).first()
             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
             value_changed = bool(global_value and global_value.value != value)
-            should_update_value = bool(global_value and self._methods_are_compatible(ctx.method, global_value.method) and value_changed)
+            should_update_value = bool(
+                global_value
+                and self._methods_are_compatible(ctx.method, global_value.method, allow_scheduler_override=_scheduler_can_override(ctx, original_key, value))
+                and value_changed
+            )
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting.type, original_key, value_changed, current_file_name)
 
             template_setting = None

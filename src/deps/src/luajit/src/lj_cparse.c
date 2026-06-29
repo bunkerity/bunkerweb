@@ -1309,14 +1309,16 @@ static void cp_struct_layout(CPState *cp, CTypeID sid, CTInfo sattr)
 	align = ctype_align(attr);
       if (cp->packstack[cp->curpack] < align)
 	align = cp->packstack[cp->curpack];
-      if (align > maxalign) maxalign = align;
+      bsz = ctype_bitcsz(ct->info);  /* Bitfield size (temp.). */
+      if (align > maxalign && bsz) maxalign = align;
       amask = (8u << align) - 1;
 
-      bsz = ctype_bitcsz(ct->info);  /* Bitfield size (temp.). */
       if (bsz == CTBSZ_FIELD || !ctype_isfield(ct->info)) {
 	bsz = csz;  /* Regular fields or subtypes always fill the container. */
 	bofs = (bofs + amask) & ~amask;  /* Start new aligned field. */
 	ct->size = (bofs >> 3);  /* Store field offset. */
+	if (ctype_isfield(ct->info))
+	  ct->info = CTINFO(CT_FIELD, ctype_cid(ct->info)) + CTALIGN(align);
       } else {  /* Bitfield. */
 	if (bsz == 0 || (attr & CTFP_ALIGNED) ||
 	    (!((attr|sattr) & CTFP_PACKED) && (bofs & amask) + bsz > csz))
@@ -1324,7 +1326,8 @@ static void cp_struct_layout(CPState *cp, CTypeID sid, CTInfo sattr)
 
 	/* Prefer regular field over bitfield. */
 	if (bsz == csz && (bofs & amask) == 0) {
-	  ct->info = CTINFO(CT_FIELD, ctype_cid(ct->info));
+	  ct->info = CTINFO(CT_FIELD, ctype_cid(ct->info)) +
+		     CTALIGN(lj_fls(sz));
 	  ct->size = (bofs >> 3);  /* Store field offset. */
 	} else {
 	  if (csz > amask+1 && bsz <= amask+1)

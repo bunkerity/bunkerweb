@@ -57,6 +57,8 @@ def login_page():
             session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False
             session["flash_messages"] = []
+            current_app.session_interface.regenerate(session)  # now non-empty -> sid actually rotates
+            session.modified = True
 
             try:
                 session["session_id"] = API_CLIENT.mark_user_login(ui_user.username, session["ip"], session["user_agent"])
@@ -116,7 +118,7 @@ def login_page():
 
             try:
                 safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
-            except Exception:
+            except ValueError:
                 safe_next = url_for("home.home_page")
 
             return redirect(url_for("loading", next=safe_next))

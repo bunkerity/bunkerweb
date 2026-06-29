@@ -54,7 +54,7 @@ metadata:
     # Drop 401 from intercepted codes so Authentik's 401 reaches the signin redirect.
     bunkerweb.io/INTERCEPTED_ERROR_CODES: "400 403 404 405 413 429 500 501 502 503 504"
     bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_1: "/outpost.goauthentik.io/auth/nginx"
-    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_1: "https://app1.example.com/outpost.goauthentik.io/start?rd=$scheme%3A%2F%2F$host$request_uri"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_1: "$scheme://$host/outpost.goauthentik.io/start?rd=$scheme%3A%2F%2F$host$request_uri"
     bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SET_1: "$auth_cookie $upstream_http_set_cookie;$authentik_username $upstream_http_x_authentik_username;$authentik_groups $upstream_http_x_authentik_groups;$authentik_entitlements $upstream_http_x_authentik_entitlements;$authentik_email $upstream_http_x_authentik_email;$authentik_name $upstream_http_x_authentik_name;$authentik_uid $upstream_http_x_authentik_uid"
     bunkerweb.io/REVERSE_PROXY_HEADERS_CLIENT_1: "Set-Cookie $auth_cookie"
     bunkerweb.io/REVERSE_PROXY_HEADERS_1: "X-authentik-username $authentik_username;X-authentik-groups $authentik_groups;X-authentik-entitlements $authentik_entitlements;X-authentik-email $authentik_email;X-authentik-name $authentik_name;X-authentik-uid $authentik_uid"
@@ -79,7 +79,7 @@ metadata:
   annotations:
     bunkerweb.io/INTERCEPTED_ERROR_CODES: "400 403 404 405 413 429 500 501 502 503 504"
     bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_1: "/outpost.goauthentik.io/auth/nginx"
-    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_1: "https://app2.example.com/outpost.goauthentik.io/start?rd=$scheme%3A%2F%2F$host$request_uri"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_1: "$scheme://$host/outpost.goauthentik.io/start?rd=$scheme%3A%2F%2F$host$request_uri"
     bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SET_1: "$auth_cookie $upstream_http_set_cookie;$authentik_username $upstream_http_x_authentik_username;$authentik_groups $upstream_http_x_authentik_groups;$authentik_entitlements $upstream_http_x_authentik_entitlements;$authentik_email $upstream_http_x_authentik_email;$authentik_name $upstream_http_x_authentik_name;$authentik_uid $upstream_http_x_authentik_uid"
     bunkerweb.io/REVERSE_PROXY_HEADERS_CLIENT_1: "Set-Cookie $auth_cookie"
     bunkerweb.io/REVERSE_PROXY_HEADERS_1: "X-authentik-username $authentik_username;X-authentik-groups $authentik_groups;X-authentik-entitlements $authentik_entitlements;X-authentik-email $authentik_email;X-authentik-name $authentik_name;X-authentik-uid $authentik_uid"

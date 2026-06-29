@@ -29,9 +29,12 @@ class TestMethodsAreCompatible:
             ("api", "autoconf", False),
             ("ui", "api", True),  # ui/api interchangeable
             ("api", "ui", True),
-            ("scheduler", "ui", True),  # config-as-code overwrites in-session UI/API
-            ("scheduler", "api", True),
-            ("ui", "scheduler", False),  # ...but not the reverse
+            # scheduler (env-var origin) no longer unconditionally overwrites ui/api: a
+            # default-filled scheduler pass must NOT clobber in-session UI/API edits. The
+            # override is gated behind allow_scheduler_override (see test_scheduler_override).
+            ("scheduler", "ui", False),
+            ("scheduler", "api", False),
+            ("ui", "scheduler", False),  # ...and the reverse stays blocked
             ("api", "scheduler", False),
             ("scheduler", "scheduler", True),  # equality fallback
             ("manual", "ui", False),
@@ -40,6 +43,25 @@ class TestMethodsAreCompatible:
     )
     def test_matrix(self, new, current, expected):
         assert Database._methods_are_compatible(new, current) is expected
+
+    @pytest.mark.parametrize(
+        "new,current,allow,expected",
+        [
+            # allow_scheduler_override only unlocks the scheduler->ui/api transition; it is
+            # consulted exclusively for that case (config-as-code reasserting an explicitly
+            # declared env key over an in-session UI/API edit).
+            ("scheduler", "ui", True, True),
+            ("scheduler", "api", True, True),
+            ("scheduler", "ui", False, False),
+            ("scheduler", "api", False, False),
+            # It must not loosen any other rule.
+            ("ui", "scheduler", True, False),
+            ("ui", "api", True, True),
+            ("scheduler", "scheduler", False, True),
+        ],
+    )
+    def test_scheduler_override(self, new, current, allow, expected):
+        assert Database._methods_are_compatible(new, current, allow_scheduler_override=allow) is expected
 
 
 class TestSplitSettingKey:
