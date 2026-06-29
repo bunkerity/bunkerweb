@@ -178,6 +178,9 @@ RUN apt-get update && \
     libmariadb3 mariadb-client postgresql-client sqlite3 redis-server && \
     rm -rf /var/lib/apt/lists/*
 
+# Fix CVEs
+RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-55200 CVE-2026-55199 CVE-2026-7598 CVE-2025-15661
+
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
 # Install updated python requirements to fix CVEs (--ignore-installed: don't try to uninstall the

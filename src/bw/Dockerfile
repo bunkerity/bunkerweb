@@ -88,6 +88,9 @@ RUN apt-get update && \
   apt-get install -y --no-install-recommends openssl libpcre2-8-0 bash python3 libyajl2 libgeoip1 libxml2 libgd3 curl ca-certificates tzdata libbrotli1 liblmdb0 libfuzzy2 && \
   rm -rf /var/lib/apt/lists/*
 
+# Fix CVEs
+RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-55200 CVE-2026-55199 CVE-2026-7598 CVE-2025-15661
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 

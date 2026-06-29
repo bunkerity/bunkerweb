@@ -53,6 +53,9 @@ RUN apt-get update && \
   groupadd -g 101 scheduler && \
   useradd -u 101 -g scheduler -d /usr/share/bunkerweb/scheduler -s /usr/sbin/nologin -M scheduler
 
+# Fix CVEs
+RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-55200 CVE-2026-55199 CVE-2026-7598 CVE-2025-15661
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
