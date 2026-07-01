@@ -86,5 +86,48 @@
       "SecRule REQUEST_FILENAME \"@endsWith /wp-login.php\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveById=123\"",
       "SecRule ARGS_NAMES \"@contains whee\" \"id:1,phase:3,t:none,nolog,pass,tag:'CRS2'\""
     ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveById syntax check (Issue 3565)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml",
+        "Content-Length": "0"
+      },
+      "uri": "/wp-login.php?whee=something&pwd=lhebs",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "parser_error": "Line: 1. Column: 113. Expecting an action, got:  ctl:ruleRemoveById,123"
+    },
+    "rules": [
+      "SecRule REQUEST_FILENAME \"@endsWith /wp-login.php\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveById,123\"",
+      "SecRule ARGS_NAMES \"@contains whee\" \"id:1,phase:3,t:none,nolog,pass,tag:'CRS2'\""
+    ]
   }
 ]

@@ -235,9 +235,9 @@
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.15",
+      "name": "ModSecurity v3.0.16",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
-      "commit": "0fb4aff98b4980cf6426697d5605c424e3d5bb60",
+      "commit": "7ea9fefbe0ba409d8733b4d682c8c4c059cd028d",
       "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
     },
     {

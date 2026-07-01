@@ -1,7 +1,7 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
  * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
- *
+ *               2024 - 2026 OWASP (https://owasp.org)
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
@@ -674,7 +674,7 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
 
         if (m_reserve[0] != 0) {
             d.assign(&(m_reserve[1]), m_reserve[0]);
-            d.assign(m_buf, MULTIPART_BUF_SIZE - m_bufleft);
+            d.append(m_buf, MULTIPART_BUF_SIZE - m_bufleft);
 
             m_mpp->m_length += d.size();
         } else {

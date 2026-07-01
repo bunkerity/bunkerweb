@@ -34,7 +34,9 @@ static inline bool encode(std::string &value) {
     bool changed = false;
     std::string::size_type count = 0;
     auto bytes_left = input_len;
-    unsigned char unicode[8];
+    char unicode[8] = {0}; /* 5 or 6 bytes for OLD standard unicode character and 1 byte for null terminator */
+                           /* 4 bytes are enough for standard UTF8 + '\0' */
+                           /* result can be only signed char array, so no need to cast later */
 
     /* RFC3629 states that UTF-8 are encoded using sequences of 1 to 4 octets. */
     /* Max size per character should fit in 4 bytes */
@@ -81,10 +83,7 @@ static inline bool encode(std::string &value) {
                     d = ((c & 0x1F) << 6) | (*(utf + 1) & 0x3F);
                     *data++ = '%';
                     *data++ = 'u';
-                    snprintf(reinterpret_cast<char *>(unicode),
-                             sizeof(reinterpret_cast<char *>(unicode)),
-                             "%x", d);
-                    length = strlen(reinterpret_cast<char *>(unicode));
+                    length = snprintf(unicode, sizeof(unicode), "%x", d);
 
                     switch (length) {
                         case 1:
@@ -104,7 +103,7 @@ static inline bool encode(std::string &value) {
                             break;
                     }
 
-                    for (std::string::size_type j = 0; j < length; j++) {
+                    for (int j = 0; j < length; j++) {
                         *data++ = unicode[j];
                     }
 
@@ -133,10 +132,7 @@ static inline bool encode(std::string &value) {
                         | (*(utf + 2) & 0x3F);
                     *data++ = '%';
                     *data++ = 'u';
-                    snprintf(reinterpret_cast<char *>(unicode),
-                             sizeof(reinterpret_cast<char *>(unicode)),
-                             "%x", d);
-                    length = strlen(reinterpret_cast<char *>(unicode));
+                    length = snprintf(unicode, sizeof(unicode), "%x", d);
 
                     switch (length)  {
                         case 1:
@@ -156,7 +152,7 @@ static inline bool encode(std::string &value) {
                             break;
                     }
 
-                    for (std::string::size_type j = 0; j < length; j++) {
+                    for (int j = 0; j < length; j++) {
                         *data++ = unicode[j];
                     }
 
@@ -195,10 +191,7 @@ static inline bool encode(std::string &value) {
                         | (*(utf + 3) & 0x3F);
                     *data++ = '%';
                     *data++ = 'u';
-                    snprintf(reinterpret_cast<char *>(unicode),
-                             sizeof(reinterpret_cast<char *>(unicode)),
-                             "%x", d);
-                    length = strlen(reinterpret_cast<char *>(unicode));
+                    length = snprintf(unicode, sizeof(unicode), "%x", d);
 
                     switch (length)  {
                         case 1:
@@ -218,7 +211,7 @@ static inline bool encode(std::string &value) {
                             break;
                     }
 
-                    for (std::string::size_type j = 0; j < length; j++) {
+                    for (int j = 0; j < length; j++) {
                         *data++ = unicode[j];
                     }
 

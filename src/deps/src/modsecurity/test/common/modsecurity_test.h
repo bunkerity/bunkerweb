@@ -34,7 +34,7 @@ template <class T> class ModSecurityTest :
     ModSecurityTest() = default;
 
     std::string header();
-    void cmd_options(int, char **);
+    void cmd_options(int argc, char** argv);
     void load_tests();
     void load_tests(const std::string &path);
     bool load_test_json(const std::string &file);

@@ -54,4 +54,8 @@ multithread_CPPFLAGS = \
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
+EXTRA_DIST = \
+	basic_rules.conf \
+	inspectfile_rules.conf \
+	inspectfile_helper.sh
 

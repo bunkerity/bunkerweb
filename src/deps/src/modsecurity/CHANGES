@@ -1,3 +1,19 @@
+v3.0.16 - 2026-Jun-29
+---------------------
+
+  - [fix: wrong behavior in utf8toUnicode on i386 architecture]
+    [PR from private repo - @airween; fixed CVE-2026-52761]
+  - [fix: multipart/form-data request body parser invalidly handles `\r` and `\n` characters]
+    [PR from private repo - @sondt99, @dungNHVhust, @hnakamura, @airween; fixed CVE-2026-52747]
+  - fix(lexer): rejection of '@' in ctl:ruleRemoveTarget actions
+    [PR #3566, #3589 - @Jitterx69, @airween]
+  - fix: cppcheck warnings with version 2.21.0
+    [PR #3577 - @airween]
+  - ci: pin Windows version in workflow
+    [PR #3570 - @airween]
+  - Alternative fix for @inspectFile: improved fork safety with multi-threaded tests (PR #3489)
+    [PR #3552 - @Easton97-Jens]
+
 v3.0.15 - 2026-Apr-28
 ---------------------
 
