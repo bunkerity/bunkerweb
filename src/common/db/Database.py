@@ -2386,6 +2386,7 @@ class Database:
         changed: Optional[bool] = True,
         *,
         disable_cleanup: bool = False,
+        allow_empty: bool = False,
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
@@ -2409,7 +2410,7 @@ class Database:
                 # actions delete rows individually through the UI/API, so by the time
                 # an empty payload reaches save_custom_configs there is nothing left
                 # to wipe and this guard is a no-op.
-                if method in ("ui", "api") and not custom_configs:
+                if method in ("ui", "api") and not custom_configs and not allow_empty:
                     existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
                     if existing_count > 0:
                         self.logger.warning(

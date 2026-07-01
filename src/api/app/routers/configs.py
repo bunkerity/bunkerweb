@@ -411,7 +411,7 @@ def delete_configs(req: ConfigsDeleteRequest) -> JSONResponse:
         return JSONResponse(status_code=404, content={"status": "error", "message": "No deletable UI/API configs found among selection", "skipped": skipped})
 
     for method, keep in keep_by_method.items():
-        err = db.save_custom_configs(keep, method)
+        err = db.save_custom_configs(keep, method, allow_empty=True)
         if err:
             return JSONResponse(status_code=500, content={"status": "error", "message": err, "skipped": skipped})
 

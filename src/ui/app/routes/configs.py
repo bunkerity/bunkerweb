@@ -414,7 +414,7 @@ def configs_delete():
             return
 
         for method, configs_for_method in remaining_configs_by_method.items():
-            error = DB.save_custom_configs(configs_for_method, method)
+            error = DB.save_custom_configs(configs_for_method, method, allow_empty=True)
             if error:
                 DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
