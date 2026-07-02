@@ -1347,7 +1347,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Verwenden Sie die veröffentlichten Images und das Layout aus dem <a href="../quickstart-guide/#__tabbed_1_3">Quickstart-Guide</a>. Stack starten, dann den Wizard im Browser abschließen.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.11-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.12-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>Öffnen Sie den Scheduler-Host (z. B. <code>https://www.example.com/changeme</code>) und führen Sie den <code>/setup</code>-Wizard aus, um UI, Scheduler und Instanz zu konfigurieren.</p>
 </div>
@@ -1360,7 +1360,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1371,7 +1371,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
@@ -1391,7 +1391,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1461,6 +1461,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <h2 id="authentifizierung-und-sessions">Authentifizierung und Sessions</h2>
 <ul>
 <li>Admin-Konto: per Wizard oder über <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>. Passwort muss Klein-, Großbuchstaben, Zahl und Sonderzeichen enthalten. <code>OVERRIDE_ADMIN_CREDS=yes</code> erzwingt Neu-Initialisierung auch bei bestehendem Konto.</li>
+<li>Passwortlängenbegrenzung: bcrypt verwendet nur die ersten <strong>72 Bytes</strong> eines Secrets; Passwörter sind daher überall, wo sie gesetzt werden (Setup-Assistent, Profilseite, <code>ADMIN_PASSWORD</code> / <code>API_PASSWORD</code>), auf 72 Bytes begrenzt. Ein längerer Wert wird mit einer erklärenden Fehlermeldung oder einem Logeintrag abgelehnt, statt stillschweigend abgeschnitten zu werden. Beachten Sie, dass Nicht-ASCII-Zeichen (Akzente, Emoji) jeweils mehrere Bytes belegen; eine aus solchen Zeichen bestehende "72-Zeichen"-Passphrase kann daher die Grenze überschreiten. Vorgehashte bcrypt-Werte sind ausgenommen (der Hash kodiert die Grenze bereits).</li>
 <li>Rollen: <code>admin</code>, <code>writer</code> und <code>reader</code> werden automatisch angelegt; Konten liegen in der Datenbank.</li>
 <li>Secrets: <code>FLASK_SECRET</code> liegt in <code>/var/lib/bunkerweb/.flask_secret</code>; Biscuit-Keys daneben, optional per <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code>.</li>
 <li>
@@ -1472,6 +1473,17 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 - <code>PROXY_NUMBERS</code> setzen, wenn mehrere Proxies <code>X-Forwarded-*</code> anhängen.</p>
 </li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Vorgehashtes Admin-Passwort</p>
+<p><code>ADMIN_PASSWORD</code> akzeptiert einen <strong>bcrypt-Hash</strong> (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) und speichert ihn unverändert, sodass der Klartext aus Env-Dateien und Secrets bleibt. Die Stärke-Richtlinie entfällt (Sie verantworten das Quell-Passwort); ein Kostenfaktor unter <code>10</code> wird <strong>abgelehnt</strong>; <code>10</code>–<code>11</code> erzeugt eine Warnung (<code>12</code>+ empfohlen). Nur env-Erstellung und <code>OVERRIDE_ADMIN_CREDS</code>; Wizard und Profilseite brauchen weiter Klartext.</p>
+<p>Hash generieren:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
+</code></pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Ein falscher Hash sperrt Sie aus</p>
+<p>Verwenden Sie einen Hash nur, wenn Sie dessen Klartext kennen. Ein gültiger, aber falscher Hash bei der Erst-Erstellung ist nicht umkehrbar und ein Neustart behebt das nicht. Wiederherstellung über ein anderes <code>ADMIN_PASSWORD</code> mit <code>OVERRIDE_ADMIN_CREDS=yes</code>.</p>
+</div>
 <h2 id="konfigurationsquellen-und-prioritat">Konfigurationsquellen und Priorität</h2>
 <ol>
 <li>Umgebungsvariablen (inkl. Docker/Compose <code>environment:</code>)</li>
@@ -1573,8 +1585,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <tbody>
 <tr>
 <td><code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code></td>
-<td>Admin-Konto initial befüllen (Passwortrichtlinie)</td>
-<td>Strings</td>
+<td>Admin-Konto initial befüllen (Passwortrichtlinie; <code>ADMIN_PASSWORD</code> akzeptiert auch einen bcrypt-Hash, unverändert gespeichert)</td>
+<td>Strings / bcrypt-Hash</td>
 <td>unset</td>
 </tr>
 <tr>

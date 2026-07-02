@@ -2973,7 +2973,7 @@ openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span cla
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.11
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.12
 </code></pre></div>
 <p>Par défaut, le conteneur expose :</p>
 <ul>
@@ -2985,7 +2985,7 @@ openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span cla
 <p>Un volume nommé (ou un bind mount) est nécessaire pour conserver la base SQLite, le cache et les sauvegardes stockés sous <code>/data</code> dans le conteneur :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.12</span>
 <span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-aio</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
@@ -3046,12 +3046,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">API_PASSWORD</span><span class="o">=</span>StrongP@ssw0rd<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">8888</span>:8888/tcp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.11
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.12
 </code></pre></div>
 <p>Configuration recommandée (derrière BunkerWeb) — ne publiez pas <code>8888</code> ; utilisez plutôt un proxy inverse :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.12</span>
 <span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-aio</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
@@ -3120,7 +3120,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.11
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.12
 </code></pre></div>
 <ul>
 <li>
@@ -3195,7 +3195,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.11
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.12
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Comment ça marche en interne</p>
@@ -3212,7 +3212,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.11
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.12
 </code></pre></div>
 <p>Notes :
 - La liste est appliquée après l'installation/mise à jour des éléments requis ; seuls les analyseurs indiqués sont supprimés.
@@ -3235,7 +3235,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.11
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.12
 </code></pre></div>
 <ul>
 <li><strong>L'enregistrement local</strong> est ignoré lorsque n' <code>CROWDSEC_API</code> est pas <code>127.0.0.1</code> ou <code>localhost</code>.</li>
@@ -3264,10 +3264,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </ul>
 <p>En accédant à ces images prédéfinies à partir de Docker Hub, vous pouvez rapidement extraire et exécuter BunkerWeb dans votre environnement Docker, éliminant ainsi le besoin de processus de configuration ou d'installation étendus. Cette approche simplifiée vous permet de vous concentrer sur l'exploitation des capacités de BunkerWeb sans complexités inutiles.</p>
 <p>Que vous effectuiez des tests, développiez des applications ou déployiez BunkerWeb en production, l'option de conteneurisation Docker offre flexibilité et facilité d'utilisation. L'adoption de cette méthode vous permet de tirer pleinement parti des fonctionnalités de BunkerWeb tout en tirant parti des avantages de la technologie Docker.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.11
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.12
 </code></pre></div>
 <p>Les images Docker sont également disponibles sur <a href="https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb">les packages GitHub</a> et peuvent être téléchargées à l'aide de l'adresse du <code>ghcr.io</code> dépôt :</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/bunkerity/bunkerweb:1.6.11
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/bunkerity/bunkerweb:1.6.12
 </code></pre></div>
 <p>Les concepts clés de l'intégration Docker sont les suivants :</p>
 <ul>
@@ -3277,14 +3277,14 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </ul>
 <div class="admonition info">
 <p class="admonition-title">Backend de base de données</p>
-<p>Veuillez noter que nos instructions supposent que vous utilisez SQLite comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, d'autres backends de base de données sont également pris en charge. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
+<p>Veuillez noter que nos instructions supposent que vous utilisez SQLite comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, d'autres backends de base de données sont également pris en charge. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.12/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
 </div>
 <h3 id="variables-denvironnement">Variables d'environnement</h3>
 <p>Les paramètres sont transmis au Scheduler à l'aide de variables d'environnement Docker :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SETTING=value</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ANOTHER_SETTING=another value</span>
@@ -3319,7 +3319,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p>Cela garantit que les paramètres sensibles sont tenus à l'écart de l'environnement et des journaux.</p>
 <h3 id="programmateur">Programmateur</h3>
 <p>Le <a href="../concepts/#scheduler">Scheduler</a> s'exécute dans son propre conteneur, qui est également disponible sur Docker Hub :</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.11
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.12
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Paramètres BunkerWeb</p>
@@ -3336,7 +3336,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Paramètres API pour le conteneur BunkerWeb</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
@@ -3345,7 +3345,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Paramètres API pour le conteneur Scheduler</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
@@ -3361,7 +3361,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
 <span class="nn">...</span>
@@ -3443,6 +3443,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td>Ignorer la validation regex des paramètres (partagé avec autoconf)</td>
 <td><code>yes</code> ou <code>no</code></td>
 <td><code>no</code></td>
+</tr>
+<tr>
+<td><code>SCHEDULER_MAX_WORKERS</code></td>
+<td>Nombre maximal de threads dans l'exécuteur de jobs du Scheduler. Chaque thread peut détenir une connexion DB, ce qui borne la pression sur le pool côté Scheduler. Un avertissement est émis au démarrage si la valeur résolue dépasse <code>DATABASE_POOL_SIZE</code> + <code>DATABASE_POOL_MAX_OVERFLOW</code>.</td>
+<td>Entier positif</td>
+<td><code>min(8, max(2, cpu_count*2))</code></td>
 </tr>
 <tr>
 <td><code>TZ</code></td>
@@ -3627,7 +3633,7 @@ sudo sysctl net.ipv4.ip_unprivileged_port_start=1
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -3640,7 +3646,7 @@ sudo sysctl net.ipv4.ip_unprivileged_port_start=1
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># This setting is mandatory to specify the BunkerWeb instance</span>
@@ -3670,7 +3676,7 @@ sudo sysctl net.ipv4.ip_unprivileged_port_start=1
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -3683,7 +3689,7 @@ sudo sysctl net.ipv4.ip_unprivileged_port_start=1
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -3730,16 +3736,17 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 13 "Trixie"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 42, 43 et 44</li>
-<li>Red Hat Enterprise Linux (RHEL) 8, 9 et 10</li>
+<li>Ubuntu 26.04 "Resolute Raccoon"</li>
+<li>Fedora 43 et 44</li>
+<li>Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux et AlmaLinux 8, 9 et 10</li>
 </ul>
 <h3 id="script-dinstallation-facile">Script d'installation facile</h3>
 <p>Pour une expérience d'installation simplifiée, BunkerWeb fournit un script d'installation facile qui gère automatiquement l'ensemble du processus d'installation, y compris l'installation de NGINX, la configuration du référentiel et la configuration du service.</p>
 <h4 id="demarrage-rapide">Démarrage rapide</h4>
 <p>Pour commencer, téléchargez le script d'installation et sa somme de contrôle, puis vérifiez l'intégrité du script avant de l'exécuter.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.11/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.11/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.12/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.12/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -3814,7 +3821,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tbody>
 <tr>
 <td><code>-v, --version VERSION</code></td>
-<td>Spécifie la version de BunkerWeb à installer (par exemple, <code>1.6.11</code>).</td>
+<td>Spécifie la version de BunkerWeb à installer (par exemple, <code>1.6.12</code>).</td>
 </tr>
 <tr>
 <td><code>-w, --enable-wizard</code></td>
@@ -4010,7 +4017,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--worker<span class="w"> </span>--no-wizard
 
 <span class="c1"># Install a specific version</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.11
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.12
 
 <span class="c1"># Manager setup with remote worker instances (instances required)</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--manager<span class="w"> </span>--instances<span class="w"> </span><span class="s2">&quot;192.168.1.10 192.168.1.11&quot;</span>
@@ -4105,7 +4112,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>Redémarrez le Scheduler : <code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
 <h3 id="installation-a-laide-du-gestionnaire-de-paquets">Installation à l'aide du gestionnaire de paquets</h3>
-<p>Veuillez vous assurer que <strong>NGINX 1.30.2 est installé avant d'installer BunkerWeb</strong>. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du <a href="https://nginx.org/en/linux_packages.html">dépôt officiel NGINX</a>. La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.</p>
+<p>Veuillez vous assurer que <strong>NGINX 1.30.3 est installé avant d'installer BunkerWeb</strong>. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du <a href="https://nginx.org/en/linux_packages.html">dépôt officiel NGINX</a>. La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4117,9 +4124,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>Vous devriez maintenant pouvoir installer NGINX 1.30.2 :</p>
+<p>Vous devriez maintenant pouvoir installer NGINX 1.30.3 :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.2-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.3-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Version testing/dev</p>
@@ -4133,10 +4140,10 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Et enfin, installez BunkerWeb 1.6.11 :</p>
+<p>Et enfin, installez BunkerWeb 1.6.12 :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.11
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.12
 </code></pre></div>
 <p>Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de <code>apt upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -4151,9 +4158,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>Vous devriez maintenant pouvoir installer NGINX 1.30.2 :</p>
+<p>Vous devriez maintenant pouvoir installer NGINX 1.30.3 :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.2-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.3-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Version testing/dev</p>
@@ -4167,10 +4174,10 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Et enfin, installez BunkerWeb 1.6.11 :</p>
+<p>Et enfin, installez BunkerWeb 1.6.12 :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.11
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.12
 </code></pre></div>
 <p>Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de <code>apt upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -4183,8 +4190,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora fournit déjà NGINX 1.30.1, que nous prenons en charge</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.1
+<p>Fedora fournit déjà NGINX 1.30.3, que nous prenons en charge</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.3
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Désactiver l'assistant d'installation</p>
@@ -4192,10 +4199,10 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Et enfin, installez BunkerWeb 1.6.11 :</p>
+<p>Et enfin, installez BunkerWeb 1.6.12 :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.11
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.12
 </code></pre></div>
 <p>Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de <code>dnf upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -4220,8 +4227,8 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
-<p>Vous devriez maintenant pouvoir installer NGINX 1.30.2 :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.2
+<p>Vous devriez maintenant pouvoir installer NGINX 1.30.3 :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.3
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Désactiver l'assistant d'installation</p>
@@ -4229,10 +4236,10 @@ module_hotfixes=true
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Enfin, installez BunkerWeb 1.6.11 :</p>
+<p>Enfin, installez BunkerWeb 1.6.12 :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.11
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.12
 </code></pre></div>
 <p>Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de <code>dnf upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -4296,7 +4303,7 @@ MY_SETTING_2=value2
 </div>
 <div class="admonition info">
 <p class="admonition-title">Backend de base de données</p>
-<p>Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
+<p>Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.12/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
 </div>
 <p>Pour activer les mises à jour automatiques de la configuration, incluez un conteneur supplémentaire appelé <code>bw-autoconf</code> dans la pile. Ce conteneur héberge le service autoconf, qui gère les modifications de configuration dynamiques pour BunkerWeb.</p>
 <p>Pour prendre en charge cette fonctionnalité, utilisez un "vrai" backend de base de données dédié (par exemple, MariaDB, MySQL ou PostgreSQL) pour le stockage de configuration synchronisé. En intégrant <code>bw-autoconf</code> un backend de base de données approprié, vous établissez l'infrastructure pour une gestion automatisée de la configuration sans faille dans BunkerWeb.</p>
@@ -4307,7 +4314,7 @@ MY_SETTING_2=value2
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -4322,7 +4329,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># We don&#39;t need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service</span>
@@ -4337,7 +4344,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.12</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
@@ -4702,7 +4709,7 @@ MY_SETTING_2=value2
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">AUTOCONF_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">AUTOCONF_DISABLE_CLEANUP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># garder les services supprimés en brouillon</span>
@@ -4731,13 +4738,13 @@ MY_SETTING_2=value2
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.NAMESPACE=my-namespace&quot;</span><span class="w"> </span><span class="c1"># Définir l&#39;espace de noms pour l&#39;instance BunkerWeb afin que le service autoconf puisse la détecter</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace&quot;</span><span class="w"> </span><span class="c1"># Écouter uniquement ces espaces de noms</span>
@@ -4781,8 +4788,27 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <p>Pour une configuration optimale, il est recommandé de définir BunkerWeb en tant que <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong>, ce qui garantit qu'un pod est créé sur tous les nœuds, tandis que l'<strong>autoconf et le scheduler</strong> sont définis comme  un <strong>seul déploiement<a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"> répliqué</a></strong>.</p>
 <p>Compte tenu de la présence de plusieurs instances BunkerWeb, il est nécessaire d'établir un magasin de données partagé implémenté en tant que <a href="https://redis.io/"> service Redis</a> ou <a href="https://valkey.io/">Valkey</a>. Ce service sera utilisé par les instances pour mettre en cache et partager des données entre elles. Vous trouverez de plus amples informations sur les paramètres Redis/Valkey <a href="../features/#redis">ici</a>.</p>
 <div class="admonition info">
+<p class="admonition-title">Où placer les paramètres Redis (configuration pilotée par le scheduler)</p>
+<p>Sur Kubernetes, c’est le <strong>scheduler</strong> qui lit les paramètres et génère la configuration qu’il
+pousse vers les instances BunkerWeb ; les instances ne lisent pas les paramètres Redis depuis leur
+propre environnement de pod. Avec le chart Helm, configurez Redis sous <code>settings.redis</code> — y compris
+Redis Sentinel via <code>settings.redis.redisSentinelHosts</code> et <code>settings.redis.redisSentinelMaster</code>
+(chart ≥ v1.0.21) — ou sur <code>scheduler.extraEnvs</code> pour tout paramètre sans clé dédiée. Avec
+Sentinel, <code>REDIS_HOST</code> n’est <strong>pas</strong> nécessaire (le master est résolu via les Sentinels). Les
+définir uniquement sur <code>bunkerweb.extraEnvs</code> n’a aucun effet.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">redis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">        </span><span class="c1"># cluster Redis/Sentinel externe</span>
+<span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">useRedis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelHosts</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis-node-01.redis:26379</span><span class="nv"> </span><span class="s">redis-node-02.redis:26379</span><span class="nv"> </span><span class="s">redis-node-03.redis:26379&quot;</span>
+<span class="w">    </span><span class="nt">redisSentinelMaster</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
+<span class="w">    </span><span class="c1"># redisPassword / redisSentinelPassword si votre master/sentinels exigent une auth</span>
+</code></pre></div>
+</div>
+<div class="admonition info">
 <p class="admonition-title">Backend de base de données</p>
-<p>Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
+<p>Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.12/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
 <p>La configuration des backends de base de données en cluster est hors du périmètre de cette documentation.</p>
 </div>
 <p>Assurez-vous que les services autoconf ont accès à l'API Kubernetes. Il est recommandé d'utiliser l' <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">autorisation RBAC</a> à cette fin.</p>
@@ -4875,7 +4901,7 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <p>Activez le controller dans <code>values.yaml</code> :
 <div class="highlight"><pre><span></span><code><span class="nt">controller</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.11&quot;</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.12&quot;</span>
 </code></pre></div></p>
 </li>
 <li>
@@ -4960,7 +4986,7 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <h6 id="option-b-configuration-manuelle-avec-bunkerweb_instances">Option B : Configuration Manuelle avec <code>BUNKERWEB_INSTANCES</code></h6>
 <p>Dans votre fichier <code>values.yaml</code> du chart BunkerWeb, configurez la variable d'environnement <code>BUNKERWEB_INSTANCES</code> avec les URLs de tous vos services headless :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.11&quot;</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.12&quot;</span>
 <span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUNKERWEB_INSTANCES</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000</span><span class="nv"> </span><span class="s">http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000&quot;</span>
@@ -4996,7 +5022,7 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 
 <span class="w">        </span><span class="c1"># Sidecar BunkerWeb</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w">  </span><span class="c1"># Port HTTP exposé</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span><span class="w">  </span><span class="c1"># API interne (obligatoire)</span>
@@ -5252,7 +5278,7 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 ✅ <strong>Utilisez des secrets Kubernetes</strong> pour les configurations sensibles
 ✅ <strong>Vérifiez les logs</strong> du scheduler et des sidecars régulièrement</p>
 <h4 id="fichiers-yaml-complets">Fichiers YAML complets</h4>
-<p>Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations">dossier misc/integrations</a> du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.</p>
+<p>Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.12/misc/integrations">dossier misc/integrations</a> du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.</p>
 <h3 id="ressources-dentree">Ressources d'entrée</h3>
 <p>Une fois que la pile Kubernetes de BunkerWeb est correctement configurée et opérationnelle (reportez-vous aux journaux autoconf pour plus d'informations), vous pouvez procéder au déploiement d'applications Web au sein du cluster et déclarer votre ressource d'entrée.</p>
 <p>Il est important de noter que les paramètres BunkerWeb doivent être spécifiés en tant qu'annotations pour la ressource Ingress. Pour la partie domaine, veuillez utiliser la valeur spéciale <strong><code>bunkerweb.io</code></strong>. En incluant les annotations appropriées, vous pouvez configurer BunkerWeb en conséquence pour la ressource Ingress.</p>
@@ -5389,7 +5415,7 @@ Vous pouvez limiter les annotations du Gateway à un nom de serveur avec <code>b
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.11</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.12</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span>
@@ -5525,11 +5551,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="c1"># BunkerWeb settings</span>
 <span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.11</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.12</span>
 
 <span class="c1"># Scheduler settings</span>
 <span class="nt">scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.11</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.12</span>
 <span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Enable real IP module to get real IP of clients</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span>
@@ -5537,11 +5563,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="c1"># Controller settings</span>
 <span class="nt">controller</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.11</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.12</span>
 
 <span class="c1"># UI settings</span>
 <span class="nt">ui</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.11</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.12</span>
 </code></pre></div>
 <p>Installez BunkerWeb avec des valeurs personnalisées :</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>--namespace<span class="w"> </span>bunkerweb<span class="w"> </span>--create-namespace<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb/bunkerweb
@@ -6210,7 +6236,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p>En ce qui concerne le volume de la base de données, la documentation ne spécifie pas d'approche spécifique. Le choix d'un dossier partagé ou d'un pilote spécifique pour le volume de base de données dépend de votre cas d'utilisation unique et est laissé à la disposition du lecteur.</p>
 <div class="admonition info">
 <p class="admonition-title">Backend de base de données</p>
-<p>Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
+<p>Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le <code>DATABASE_URI</code> paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.12/misc/integrations">dossier misc/integrations</a> du dépôt.</p>
 <p>La configuration des backends de base de données en cluster est hors du périmètre de cette documentation.</p>
 </div>
 <p>Voici le passe-partout de la pile que vous pouvez déployer à l'aide de <code>docker stack deploy</code>:</p>
@@ -6221,7 +6247,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
@@ -6250,7 +6276,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span><span class="w"> </span><span class="c1"># Mandatory label for the autoconf service to identify the BunkerWeb instance</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># We don&#39;t need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service</span>
@@ -6271,7 +6297,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">worker&quot;</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">SWARM_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
@@ -6414,7 +6440,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">deploy</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span>
@@ -6426,7 +6452,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.NAMESPACE=my-namespace&quot;</span><span class="w"> </span><span class="c1"># Set the namespace for the BunkerWeb instance</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.11</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.12</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">NAMESPACES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace&quot;</span><span class="w"> </span><span class="c1"># Only listen to these namespaces</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>

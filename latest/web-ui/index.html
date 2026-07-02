@@ -1358,7 +1358,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.12</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1373,7 +1373,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -1397,7 +1397,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.11</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.12</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1484,6 +1484,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <h2 id="authentication-and-sessions">Authentication and sessions</h2>
 <ul>
 <li>Admin account: create via setup wizard or <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>. Passwords must include lowercase, uppercase, digit, and special chars. <code>OVERRIDE_ADMIN_CREDS=yes</code> forces reseeding even if an account exists.</li>
+<li>Password length limit: bcrypt only uses the first <strong>72 bytes</strong> of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, <code>ADMIN_PASSWORD</code> / <code>API_PASSWORD</code>). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).</li>
 <li>Roles: <code>admin</code>, <code>writer</code>, and <code>reader</code> are created automatically; accounts live in the database.</li>
 <li>
 <p>Secrets: <code>FLASK_SECRET</code> is stored at <code>/var/lib/bunkerweb/.flask_secret</code>; Biscuit keys live next to it and can be provided via <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code>.</p>
@@ -1494,6 +1495,17 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 - Remember to set <code>PROXY_NUMBERS</code> if multiple proxies append <code>X-Forwarded-*</code> headers.</p>
 </li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Pre-hashed admin password</p>
+<p><code>ADMIN_PASSWORD</code> accepts a <strong>bcrypt hash</strong> (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password), but a cost factor below <code>10</code> is <strong>rejected</strong>; <code>10</code>–<code>11</code> logs a warning (<code>12</code>+ recommended). Env create and <code>OVERRIDE_ADMIN_CREDS</code> only; the wizard and profile page still need plaintext.</p>
+<p>Generate a hash:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
+</code></pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">A wrong hash locks you out</p>
+<p>Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different <code>ADMIN_PASSWORD</code> plus <code>OVERRIDE_ADMIN_CREDS=yes</code>.</p>
+</div>
 <h2 id="configuration-sources-and-precedence">Configuration sources and precedence</h2>
 <ol>
 <li>Environment variables (including Docker/Compose <code>environment:</code>)</li>
@@ -1595,8 +1607,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <tbody>
 <tr>
 <td><code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code></td>
-<td>Seed admin account (password policy enforced)</td>
-<td>Strings</td>
+<td>Seed admin account (password policy enforced; <code>ADMIN_PASSWORD</code> also accepts a bcrypt hash, stored as-is)</td>
+<td>Strings / bcrypt hash</td>
 <td>unset</td>
 </tr>
 <tr>
