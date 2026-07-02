@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 
-from base64 import b64decode
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from json import dumps, loads
-from os import environ, getenv, sep
+from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from re import MULTILINE, match, search
+from re import MULTILINE, search
 from select import select
+from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from time import monotonic, sleep
 from threading import Event, Lock, Thread
 from traceback import format_exc
-from typing import Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 from certbot_concurrency import (
     CertbotPaths,
     ensure_accounts,
@@ -29,45 +29,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from pydantic import ValidationError
 from requests import get
 
 from common_utils import bytes_hash, effective_cpu_count, file_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
 
-from letsencrypt_providers import (
-    BunnyNetProvider,
-    ClouDNSProvider,
-    CloudflareProvider,
-    DesecProvider,
-    DigitalOceanProvider,
-    DomainOffensiveProvider,
-    DnsimpleProvider,
-    DnsMadeEasyProvider,
-    DomeneshopProvider,
-    DuckDnsProvider,
-    DynuProvider,
-    GandiProvider,
-    GehirnProvider,
-    GoDaddyProvider,
-    GoogleProvider,
-    HetznerProvider,
-    InfomaniakProvider,
-    IonosProvider,
-    LinodeProvider,
-    LuaDnsProvider,
-    NjallaProvider,
-    NSOneProvider,
-    OvhProvider,
-    Provider,
-    PowerdnsProvider,
-    Rfc2136Provider,
-    Route53Provider,
-    SakuraCloudProvider,
-    ScalewayProvider,
-    TransIPProvider,
-)
 from letsencrypt_utils import (
     CERTBOT_BIN,
     DEPS_PATH,
@@ -76,10 +43,14 @@ from letsencrypt_utils import (
     LETSENCRYPT_JOBS_PATH as JOBS_PATH,
     LETSENCRYPT_LOGS_DIR as LOGS_DIR,
     LETSENCRYPT_WORK_DIR as WORK_DIR,
+    PROVIDERS,
     certbot_log_backup_flags,
     ZEROSSL_BOT_SCRIPT,
     build_certbot_env,
+    extract_provider,
     get_expected_acme_directory,
+    le_cache_write_lock,
+    letsencrypt_cache_consistent,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
 )
@@ -180,38 +151,6 @@ def save_zerossl_api_key_hashes(hashes: Dict[str, str]) -> None:
         LOGGER.warning(f"Failed to persist ZeroSSL API key hashes to {ZEROSSL_API_KEY_HASHES_PATH}: {e}")
 
 
-PROVIDERS: Dict[str, Type[Provider]] = {
-    "bunny": BunnyNetProvider,
-    "cloudns": ClouDNSProvider,
-    "cloudflare": CloudflareProvider,
-    "desec": DesecProvider,
-    "digitalocean": DigitalOceanProvider,
-    "domainoffensive": DomainOffensiveProvider,
-    "domeneshop": DomeneshopProvider,
-    "dnsimple": DnsimpleProvider,
-    "dnsmadeeasy": DnsMadeEasyProvider,
-    "duckdns": DuckDnsProvider,
-    "dynu": DynuProvider,
-    "gandi": GandiProvider,
-    "gehirn": GehirnProvider,
-    "godaddy": GoDaddyProvider,
-    "google": GoogleProvider,
-    "hetzner": HetznerProvider,
-    "infomaniak": InfomaniakProvider,
-    "ionos": IonosProvider,
-    "linode": LinodeProvider,
-    "luadns": LuaDnsProvider,
-    "njalla": NjallaProvider,
-    "nsone": NSOneProvider,
-    "ovh": OvhProvider,
-    "pdns": PowerdnsProvider,
-    "rfc2136": Rfc2136Provider,
-    "route53": Route53Provider,
-    "sakuracloud": SakuraCloudProvider,
-    "scaleway": ScalewayProvider,
-    "transip": TransIPProvider,
-}
-
 status = 0
 
 PSL_URL = "https://publicsuffix.org/list/public_suffix_list.dat"
@@ -294,60 +233,6 @@ def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) 
             LOGGER.error(f"Domain {domain} is blacklisted by Public Suffix List, refusing certificate request for {service_name}.")
             return True
     return False
-
-
-def extract_provider(service: str, authenticator: str = "", decode_base64: bool = True) -> Optional[Provider]:
-    credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
-    credential_items = {}
-
-    # Collect all credential items
-    for env_key, env_value in environ.items():
-        if not env_value or not env_key.startswith(credential_key):
-            continue
-
-        if " " not in env_value:
-            credential_items["json_data"] = env_value
-            continue
-
-        key, value = env_value.split(" ", 1)
-        credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-
-    # Handle JSON data
-    if "json_data" in credential_items:
-        value = credential_items.pop("json_data")
-        if decode_base64 and not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-            try:
-                decoded = b64decode(value).decode("utf-8")
-                json_data = loads(decoded)
-                if isinstance(json_data, dict):
-                    credential_items = {
-                        k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                        for k, v in json_data.items()
-                    }
-            except BaseException:
-                LOGGER.debug(format_exc())
-
-    # Process base64 encoded credentials (except for rfc2136)
-    if decode_base64 and credential_items:
-        for key, value in credential_items.items():
-            if authenticator != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                try:
-                    decoded = b64decode(value).decode("utf-8")
-                    if decoded != value:
-                        credential_items[key] = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                except BaseException:
-                    LOGGER.debug(format_exc())
-
-    if not credential_items:
-        LOGGER.warning(f"[Service: {service}] DNS challenge selected but no DNS credentials are configured, skipping generation.")
-        return None
-
-    try:
-        return PROVIDERS[authenticator](**credential_items)
-    except ValidationError as ve:
-        LOGGER.debug(format_exc())
-        LOGGER.error(f"[Service: {service}] Error while validating credentials, skipping generation: {ve}")
-        return None
 
 
 def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, bool, int, Dict[str, str]]]]:
@@ -491,7 +376,8 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
                 )
             activated = False
         else:
-            provider = extract_provider(service, authenticator, decode_base64)
+            credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+            provider = extract_provider(service, credential_key, authenticator, decode_base64, LOGGER)
             if not provider:
                 activated = False
     else:
@@ -680,6 +566,24 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     return process.returncode
 
 
+def _purge_stale_account(accounts_root: Path, account_id: str) -> None:
+    """Remove the on-disk ACME account dir whose server-side record was pruned.
+
+    Walks for the `<account_id>/regr.json` under accounts_root (CA-agnostic:
+    LE 2-level, ZeroSSL 3-level) and rmtree's its parent. Best-effort — failures
+    are logged, not raised, so the retry still proceeds.
+    """
+    if not account_id or not accounts_root.is_dir():
+        return
+    try:
+        for regr in accounts_root.rglob("regr.json"):
+            if regr.parent.name == account_id:
+                LOGGER.warning(f"Purging stale ACME account {account_id} (server reports it no longer exists) so the next attempt re-registers.")
+                rmtree(regr.parent, ignore_errors=True)
+    except OSError as e:
+        LOGGER.error(f"Failed to purge stale account {account_id}: {e}")
+
+
 def certbot_new(
     service: str,
     config: Dict[str, Union[str, bool, int, Dict[str, str]]],
@@ -724,8 +628,20 @@ def certbot_new(
     else:
         command.append("--register-unsafely-without-email")
 
+    # Always scope account lookup to the target ACME server's URL.
+    # Without this, an LE account id can be passed as `--account` to a ZeroSSL
+    # certbot certonly invocation (and vice versa) — certbot then constructs the
+    # account directory from its own --server path and fails with AccountNotFound.
+    acme_server_url = str(config.get("acme_server_url") or "")
+    account_id = ""
+
     if config.get("acme_server") == "letsencrypt":
-        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        account_id = select_account_id(
+            paths.config_dir.joinpath("accounts"),
+            bool(config["staging"]),
+            str(config.get("email") or ""),
+            server_url=acme_server_url,
+        )
         if account_id:
             command.extend(["--account", account_id])
     else:
@@ -744,7 +660,12 @@ def certbot_new(
         if zerossl_api_key:
             cmd_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
 
-        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        account_id = select_account_id(
+            paths.config_dir.joinpath("accounts"),
+            bool(config["staging"]),
+            str(config.get("email") or ""),
+            server_url=acme_server_url,
+        )
         if account_id:
             command.extend(["--account", account_id])
 
@@ -801,6 +722,13 @@ def certbot_new(
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
+    # Watch certbot output for a stale-account JWS rejection. When the ACME server
+    # has pruned the account we hold on disk (common on LE staging), it answers
+    # `Unable to validate JWS :: Account "<url>" not found`. certbot does NOT
+    # re-register when `--account` is pinned, so every retry would reuse the dead
+    # account and fail identically. Detect it, then drop the stale account dir so
+    # the next attempt (select_account_id → None) registers a fresh account.
+    stale_account_detected = False
     deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
         if monotonic() > deadline:
@@ -812,8 +740,17 @@ def certbot_new(
             rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
                 for line in process.stderr:
-                    LOGGER_CERTBOT.info(line.strip())
+                    stripped = line.strip()
+                    LOGGER_CERTBOT.info(stripped)
+                    if "Account" in stripped and "not found" in stripped and ("validate JWS" in stripped or "acme/acct" in stripped):
+                        stale_account_detected = True
                     break
+
+    if stale_account_detected and account_id:
+        # Purge the canonical store, not paths.config_dir: in concurrent mode config_dir is a
+        # throwaway scratch (merged only on success), so purging it leaves DATA_PATH untouched
+        # and the stale account is restored next run. Non-concurrent: config_dir == DATA_PATH.
+        _purge_stale_account(DATA_PATH.joinpath("accounts"), account_id)
 
     return process.returncode
 
@@ -1156,11 +1093,27 @@ try:
         elif not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem")):
             LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
         else:
-            cached, err = JOB.cache_dir(DATA_PATH)
-            if not cached:
-                LOGGER.error(f"Error while saving data to db cache : {err}")
+            # Refuse to re-cache when renewal/ references account IDs that are missing from accounts/.
+            # That snapshot would self-propagate certbot AccountNotFound errors across every renew.
+            consistent, reason = letsencrypt_cache_consistent(DATA_PATH)
+            if not consistent:
+                LOGGER.error(
+                    "Skipping db cache update to avoid persisting an inconsistent Let's Encrypt state "
+                    f"({reason}). The DB cache row is left untouched; investigate accounts/ recovery before the next renew."
+                )
+                # If certbot itself succeeded, the fresh certs are already on disk — signal a reload
+                # (ret=1) so nginx picks them up. Persistence failure is logged separately above; do
+                # not escalate to status=2 here, otherwise JobScheduler suppresses the reload.
+                if status == 0:
+                    status = 1
             else:
-                LOGGER.info("Successfully saved data to db cache")
+                # Serialize against the UI heal/delete flow, which writes the same DB cache row.
+                with le_cache_write_lock():
+                    cached, err = JOB.cache_dir(DATA_PATH)
+                if not cached:
+                    LOGGER.error(f"Error while saving data to db cache : {err}")
+                else:
+                    LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:
     status = e.code
 except BaseException as e:

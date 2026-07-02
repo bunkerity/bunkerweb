@@ -32,7 +32,7 @@ namespace modsecurity_test {
 
 class RegressionTest {
  public:
-    static std::unique_ptr<RegressionTest> from_yajl_node(const yajl_val &);
+    static std::unique_ptr<RegressionTest> from_yajl_node(const yajl_val &node);
 
     static std::string print();
     std::string filename;
@@ -42,8 +42,8 @@ class RegressionTest {
     std::string rules;
 
     std::string url;
-    int enabled;
-    int version_min;
+    int enabled = 0;
+    int version_min = 0;
     std::optional<int> version_max;
     std::optional<int> github_issue;
 
@@ -60,8 +60,8 @@ class RegressionTest {
 
     std::string clientIp;
     std::string serverIp;
-    int clientPort;
-    int serverPort;
+    int clientPort = 0;
+    int serverPort = 0;
     std::string hostname;
 
     std::string method;
@@ -75,7 +75,7 @@ class RegressionTest {
     static inline std::vector<std::pair<std::string, std::string>>
         yajl_array_to_map(const yajl_val &node);
 
-    int http_code;
+    int http_code = 0;
     std::string redirect_url;
 
     // fields for formatting JSON
@@ -96,7 +96,7 @@ private:
 
 class RegressionTests {
  public:
-    static std::unique_ptr<RegressionTests> from_yajl_node(const yajl_val &);
+    static std::unique_ptr<RegressionTests> from_yajl_node(const yajl_val &node);
     void update_content_lengths();
     std::string toJSON() const;
 

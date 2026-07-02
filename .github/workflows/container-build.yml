@@ -45,7 +45,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
         run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
@@ -76,22 +76,22 @@ jobs:
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Setup Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
         if: startsWith(inputs.CACHE_SUFFIX, 'arm') == false
       - name: Setup Buildx (ARM)
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
         if: startsWith(inputs.CACHE_SUFFIX, 'arm')
         with:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7
       - name: Login to Docker Hub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
         if: inputs.PUSH == true
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -99,13 +99,13 @@ jobs:
       # Compute metadata
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -115,10 +115,12 @@ jobs:
           cache-from: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
           cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
+        env:
+          DOCKER_BUILD_SUMMARY: "false" # skip the docker/build-push-action job summary; Trivy publishes its own
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -127,17 +129,65 @@ jobs:
           tags: local/${{ inputs.IMAGE }}
           cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
-      # Check vulnerabilities with Docker Scout
-      - name: Docker Scout CVE Analysis
+        env:
+          DOCKER_BUILD_SUMMARY: "false" # skip the docker/build-push-action job summary; Trivy publishes its own
+      # Check vulnerabilities with Trivy — SARIF report (non-blocking, feeds the GitHub Security tab)
+      - name: Trivy scan (SARIF)
         if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
-        uses: docker/scout-action@bacf462e8d090c09660de30a6ccc718035f961e3 # v1.20.4
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          command: cves,recommendations
-          image: local/${{ inputs.IMAGE }}
-          only-package-types: apk,golang
-          only-fixed: true
-          exit-code: true
-          summary: true
+          scan-type: image
+          image-ref: local/${{ inputs.IMAGE }}
+          scanners: vuln
+          ignore-unfixed: true
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          skip-dirs: /root/.cargo
+          trivyignores: .trivyignore
+          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: "0"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+      - name: Upload Trivy SARIF report
+        if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ inputs.IMAGE }}-${{ inputs.ARCH }}
+      # Hard gate — fail the build on ANY matching vulnerability
+      - name: Trivy gate
+        if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: local/${{ inputs.IMAGE }}
+          scanners: vuln
+          ignore-unfixed: true
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          skip-dirs: /root/.cargo
+          trivyignores: .trivyignore
+          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
+          format: template
+          template: "@.github/trivy/summary.tpl"
+          output: trivy-summary.md
+          exit-code: "1"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+      # Publish the Trivy results to the GitHub Actions run summary
+      - name: Trivy summary
+        if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        run: |
+          {
+            echo "## Trivy — \`$IMAGE\` ($ARCH)"
+            if [ -f trivy-summary.md ]; then cat trivy-summary.md; else echo "_No Trivy summary produced._"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          IMAGE: "${{ inputs.IMAGE }}"
+          ARCH: "${{ inputs.ARCH }}"
       # Push image
       - name: Push image
         if: inputs.PUSH == true

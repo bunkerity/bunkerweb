@@ -4,6 +4,7 @@ from flask_login import current_user, login_required
 from app.dependencies import DB
 from app.models.totp import totp as TOTP
 from app.routes.utils import flash, handle_error, verify_data_in_form
+from app.utils import _sanitize_internal_next
 
 totp = Blueprint("totp", __name__)
 
@@ -22,7 +23,11 @@ def totp_page():
             DB.use_ui_user_recovery_code(current_user.get_id(), recovery_code)
 
         session["totp_validated"] = True
-        redirect(url_for("loading", next=request.form.get("next") or url_for("home.home_page"), message="Validating TOTP token."))
+        try:
+            safe_next = _sanitize_internal_next(request.form.get("next"), url_for("home.home_page"))
+        except ValueError:
+            safe_next = url_for("home.home_page")
+        return redirect(url_for("loading", next=safe_next, message="Validating TOTP token."))
 
     if not bool(current_user.totp_secret) or session.get("totp_validated", False):
         return redirect(url_for("home.home_page"))

@@ -664,7 +664,7 @@ static int trace_abort(jit_State *J)
   } else if (e == LJ_TRERR_MCODEAL) {
     if (!J->mcarea) {  /* Disable JIT compiler if first mcode alloc fails. */
       J->flags &= ~JIT_F_ON;
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
     }
     lj_trace_flushall(L);
   }
@@ -695,7 +695,7 @@ static TValue *trace_state(lua_State *L, lua_CFunction dummy, void *ud)
     case LJ_TRACE_START:
       J->state = LJ_TRACE_RECORD;  /* trace_start() may change state. */
       trace_start(J);
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
       if (J->state != LJ_TRACE_RECORD_1ST)
 	break;
       /* fallthrough */
@@ -753,7 +753,7 @@ static TValue *trace_state(lua_State *L, lua_CFunction dummy, void *ud)
       trace_stop(J);
       setvmstate(J2G(J), INTERP);
       J->state = LJ_TRACE_IDLE;
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
       return NULL;
 
     default:  /* Trace aborted asynchronously. */
@@ -765,7 +765,7 @@ static TValue *trace_state(lua_State *L, lua_CFunction dummy, void *ud)
 	goto retry;
       setvmstate(J2G(J), INTERP);
       J->state = LJ_TRACE_IDLE;
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
       return NULL;
     }
   } while (J->state > LJ_TRACE_RECORD);

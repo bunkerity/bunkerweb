@@ -1,4 +1,4 @@
-FROM nginx:1.30.2-alpine-slim@sha256:2c605dbeab79a6b2a63340474fe58119d0ef95bdc4b1f41df0aa689659b3d13b  AS builder
+FROM nginx:1.30.3-alpine-slim@sha256:d5b51cfc7d55fc7a7bcf4d1d577b9c3738331df56d68f0b1d8ac9795b9470a5a  AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -49,7 +49,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     export URL="$(jq -r .url re2.json)" && \
     export COMMIT="$(jq -r .commit re2.json)" && \
     bash install-re2.sh && \
-    go install github.com/mikefarah/yq/v4@v4.44.3
+    go install github.com/mikefarah/yq/v4@v4.50.1
 
 COPY src/all-in-one/deps/crowdsec.json crowdsec.json
 COPY --chmod=644 src/all-in-one/scripts/install-crowdsec.sh install-crowdsec.sh
@@ -75,11 +75,10 @@ COPY src/api/requirements.txt /tmp/req/requirements-api.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
-COPY src/common/db/requirements.386.txt /tmp/req/requirements-db.386.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
+    if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
     pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -163,7 +162,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.2-alpine-slim@sha256:2c605dbeab79a6b2a63340474fe58119d0ef95bdc4b1f41df0aa689659b3d13b
+FROM nginx:1.30.3-alpine-slim@sha256:d5b51cfc7d55fc7a7bcf4d1d577b9c3738331df56d68f0b1d8ac9795b9470a5a
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -172,7 +171,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "libpng>=1.6.58-r1" "mariadb-client>=11.4.11-r0"
+RUN apk add --no-cache "libexpat>=2.8.2-r0" # CVE-2026-50219 CVE-2026-56132 CVE-2026-56403 CVE-2026-56404	CVE-2026-56405 CVE-2026-56406 CVE-2026-56410 CVE-2026-56411 CVE-2026-56412 CVE-2026-56131 CVE-2026-56407 CVE-2026-56408 CVE-2026-56409
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -239,7 +238,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.11"
+LABEL version="1.6.12"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

@@ -1,13 +1,13 @@
-bcrypt<5.0.0
-biscuit-python==0.4.0
-cryptography==48.0.0
+bcrypt==5.0.0
+https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
+cryptography==49.0.0
 email-validator==2.3.0
-fastapi==0.136.1
-gunicorn[gthread,http2]==25.1.0
+fastapi==0.138.1
+gunicorn[gthread,http2]==26.0.0
 pydantic==2.13.4
-pydantic_settings==2.14.1
-python-multipart==0.0.29
+pydantic_settings==2.14.2
+python-multipart==0.0.32
 PyYAML==6.0.3
-regex==2026.5.9
-slowapi==0.1.9
-uvicorn[standard]==0.47.0
+regex==2026.6.28
+slowapi==0.1.10
+uvicorn[standard]==0.49.0

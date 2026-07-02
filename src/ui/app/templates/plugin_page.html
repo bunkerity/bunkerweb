@@ -62,16 +62,25 @@
                 </p>
             </div>
         </div>
+    {% elif no_page %}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="text-center text-primary">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                   data-i18n="plugin.page.status.dedicated_page_unavailable">
+                    This plugin is managed on a dedicated page that isn't loaded yet. Restart the web UI to access it.
+                </p>
+            </div>
+        </div>
     {% elif plugin_page and "Plugin page uses old template" not in plugin_page %}
         {{
-        plugin_page|safe }} {% elif pre_render.get("status", False) and
-        pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {})
-        or pre_render.get("data") is not mapping %}
+        plugin_page|safe }} {% elif pre_render.get("status") == "ko" or
+        (pre_render.get("data") is mapping and "error" in pre_render.get("data")) %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
-                    (Pre rendering error) {{ pre_render.get('data', {'error': 'No log to
-                     show'}).get("error", "No log to show") }}
+                    <span data-i18n="plugin.page.status.pre_render_error">Pre-rendering error</span>
+                    {% set pre_render_detail = pre_render.get("data", {}).get("error") if pre_render.get("data") is mapping else none %}
+                    {% if pre_render_detail or pre_render.get("message") %}: {{ pre_render_detail or pre_render.get("message") }}{% endif %}
                 </p>
             </div>
         </div>
@@ -96,9 +105,13 @@
                                 <div class="card-body position-relative pb-0">
                                     <div class="d-flex align-items-center justify-content-center h-100">
                                         <div class="text-center mt-2">
-                                            <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-lg fw-bold">
+                                            <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-lg fw-bold mb-0">
                                                 {{ 'Active' if up else 'Inactive' }}
                                             </p>
+                                            {% set ping_subtitle = value.get("subtitle") %}
+                                            {% if ping_subtitle %}
+                                                <p class="card-text small mb-0 text-{{ value.get('subtitle_color', 'muted') }}">{{ ping_subtitle }}</p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -118,7 +131,16 @@
                                     {% if key.startswith("info_") %}
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">
-                                                <p class="card-text mb-1">{{ value.get("value") }}</p>
+                                                {% if value.get("secret") %}
+                                                    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                                                        <p class="card-text mb-0 courier-prime secret-field" data-secret="{{ value.get('value') }}">••••••••••••</p>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary p-1 lh-1 secret-toggle" aria-label="Toggle visibility" title="Toggle visibility">
+                                                            <i class="bx bx-show bx-xs"></i>
+                                                        </button>
+                                                    </div>
+                                                {% else %}
+                                                    <p class="card-text mb-1">{{ value.get("value") }}</p>
+                                                {% endif %}
                                                 {% set description = value.get("description") %}
                                                 {% if description
                                                     %}
@@ -221,8 +243,8 @@
             <div class="d-flex align-items-center justify-content-center">
                 <div class="text-center text-primary">
                     <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-                       data-i18n="plugin.page.status.not_available">
-                        Plugin page not yet available during the beta phase.
+                       data-i18n="plugin.page.status.no_content">
+                        This plugin does not provide an embedded page.
                     </p>
                 </div>
             </div>

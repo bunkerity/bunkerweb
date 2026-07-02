@@ -16,11 +16,23 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 
-from common_utils import effective_cpu_count, handle_docker_secrets  # type: ignore
+from common_utils import effective_cpu_count, getenv_bool, handle_docker_secrets  # type: ignore
 from logger import getLogger, log_types  # type: ignore
 
 from app.models.api_database import APIDatabase
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash
+from app.utils import (
+    BISCUIT_PRIVATE_KEY_FILE,
+    BISCUIT_PUBLIC_KEY_FILE,
+    MAX_PASSWORD_BYTES,
+    MIN_BCRYPT_COST,
+    RECOMMENDED_BCRYPT_COST,
+    USER_PASSWORD_RX,
+    bcrypt_cost,
+    check_password,
+    gen_password_hash,
+    is_bcrypt_hash,
+    password_exceeds_bcrypt_limit,
+)
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_UI_DIR = TMP_DIR.joinpath("api")
@@ -120,7 +132,7 @@ max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h3,h2,h1"
 
-DEBUG = getenv("DEBUG", False)
+DEBUG = getenv_bool("DEBUG")
 
 loglevel = "debug" if DEBUG else LOG_LEVEL.lower()
 
@@ -312,7 +324,12 @@ def on_starting(server):
                     updated = True
 
                 if env_api_password and not check_password(env_api_password, API_USER["password"]):
-                    if not USER_PASSWORD_RX.match(env_api_password):
+                    if password_exceeds_bcrypt_limit(env_api_password):
+                        LOGGER.warning(
+                            f"The api password is {len(env_api_password.encode('utf-8'))} bytes, over bcrypt's "
+                            f"{MAX_PASSWORD_BYTES}-byte limit. It will not be updated."
+                        )
+                    elif not USER_PASSWORD_RX.match(env_api_password):
                         LOGGER.warning(
                             "The api password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character. It will not be updated."
                         )
@@ -340,6 +357,12 @@ def on_starting(server):
         if not DEBUG:
             if len(user_name) > 256:
                 LOGGER.error("The api username is too long. It must be less than 256 characters.")
+                exit(1)
+            elif password_exceeds_bcrypt_limit(env_api_password):
+                LOGGER.error(
+                    f"The api password is {len(env_api_password.encode('utf-8'))} bytes, over bcrypt's "
+                    f"{MAX_PASSWORD_BYTES}-byte limit. Shorten it (accented/emoji characters count as several bytes each)."
+                )
                 exit(1)
             elif not USER_PASSWORD_RX.match(env_api_password):
                 LOGGER.error(
@@ -432,9 +455,27 @@ def on_starting(server):
                         # Accept either plaintext password or bcrypt hash
                         plain = udata.get("password")
                         hashed = udata.get("password_hash") or udata.get("password_bcrypt")
+                        # A supplied pre-hashed credential must be a real bcrypt hash whose cost
+                        # clears the policy floor; otherwise it is ignored (an attacker who controls
+                        # the ACL bootstrap file must not be able to install a near-plaintext hash).
                         if isinstance(hashed, str) and hashed:
-                            pwd_hash = hashed.encode("utf-8")
-                        elif isinstance(plain, str) and plain:
+                            if not is_bcrypt_hash(hashed):
+                                LOGGER.error(f"password_hash for API user {uname} is not a valid bcrypt hash; ignoring it.")
+                            else:
+                                cost = bcrypt_cost(hashed)
+                                if cost < MIN_BCRYPT_COST:
+                                    LOGGER.error(
+                                        f"password_hash for API user {uname} uses cost factor {cost}, below the minimum {MIN_BCRYPT_COST}; ignoring it."
+                                    )
+                                else:
+                                    if cost < RECOMMENDED_BCRYPT_COST:
+                                        LOGGER.warning(
+                                            f"password_hash for API user {uname} uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
+                                            "Consider re-hashing with a higher cost for stronger protection against offline cracking."
+                                        )
+                                    pwd_hash = hashed.encode("utf-8")
+                        if pwd_hash is None and isinstance(plain, str) and plain:
+                            # No usable hash (absent, malformed, or below the cost floor) -> fall back to plaintext.
                             if not DEBUG and not USER_PASSWORD_RX.match(plain):
                                 LOGGER.warning(f"Skipping weak password for user {uname}; generating a random one instead")
                                 plain = token_hex(24)

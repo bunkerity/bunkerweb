@@ -26,7 +26,12 @@ namespace ctl {
 
 
 bool RuleRemoveByTag::init(std::string *error) {
-    std::string what(m_parser_payload, 16, m_parser_payload.size() - 16);
+    size_t pos = m_parser_payload.find("=");
+    if (pos == std::string::npos) {
+        error->assign(m_parser_payload + " is not a valid tag");
+        return false;
+    }
+    std::string what = m_parser_payload.substr(pos + 1);
     m_tag = what;
 
     return true;

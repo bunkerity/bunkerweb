@@ -85,6 +85,15 @@ filterwarnings("ignore", category=SAWarning, message="DELETE statement on table 
 T = TypeVar("T")
 
 
+# DATABASE_POOL_* env-var defaults. Exported so callers (e.g. JobScheduler.py) reuse the
+# same fallback values and stay aligned if these change.
+DEFAULT_POOL_SIZE = 40
+DEFAULT_POOL_MAX_OVERFLOW = 20
+DEFAULT_POOL_TIMEOUT = 5
+DEFAULT_POOL_RECYCLE = 1800
+DEFAULT_POOL_PRE_PING = True
+
+
 def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
     @wraps(func)
     def wrapper(self: "Database", *args, **kwargs) -> T:
@@ -236,39 +245,39 @@ class Database:
             _exit(1)
 
         # Pool size
-        pool_size = getenv("DATABASE_POOL_SIZE", "40")
+        pool_size = getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE))
         if pool_size.isdigit() and int(pool_size) >= 0:
             pool_size = int(pool_size)
         else:
-            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value (40)")
-            pool_size = 40
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value ({DEFAULT_POOL_SIZE})")
+            pool_size = DEFAULT_POOL_SIZE
 
         # Max overflow
-        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", "20")
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", str(DEFAULT_POOL_MAX_OVERFLOW))
         try:
             max_overflow = int(max_overflow)
         except ValueError:
-            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value (20)")
-            max_overflow = 20
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value ({DEFAULT_POOL_MAX_OVERFLOW})")
+            max_overflow = DEFAULT_POOL_MAX_OVERFLOW
 
         # Pool timeout
-        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", "5")
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", str(DEFAULT_POOL_TIMEOUT))
         if pool_timeout.isdigit() and int(pool_timeout) >= 0:
             pool_timeout = int(pool_timeout)
         else:
-            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value (5)")
-            pool_timeout = 5
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value ({DEFAULT_POOL_TIMEOUT})")
+            pool_timeout = DEFAULT_POOL_TIMEOUT
 
         # Pool recycle
-        pool_recycle = getenv("DATABASE_POOL_RECYCLE", "1800")
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", str(DEFAULT_POOL_RECYCLE))
         try:
             pool_recycle = int(pool_recycle)
         except ValueError:
-            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value (1800)")
-            pool_recycle = 1800
+            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value ({DEFAULT_POOL_RECYCLE})")
+            pool_recycle = DEFAULT_POOL_RECYCLE
 
         # Pool pre-ping
-        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes" if DEFAULT_POOL_PRE_PING else "no").lower() in ("yes", "true", "1")
 
         self.logger.debug(
             f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
@@ -430,11 +439,16 @@ class Database:
         return f"{cfg_type}/{cfg_name}.conf"
 
     @staticmethod
-    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
+    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str], *, allow_scheduler_override: bool = False) -> bool:
         """
-        Determine whether two configuration methods should be considered compatible for updates.
-
-        UI and API updates are treated as interchangeable, while autoconf keeps its special behavior.
+        Compatibility rules for overwriting a setting's existing method:
+        - autoconf wins over everything (and only autoconf overwrites autoconf).
+        - ui and api are interchangeable.
+        - scheduler (env-var origin) overwrites ui/api only when the caller asserts the
+          setting was explicitly declared in the environment (allow_scheduler_override),
+          so config-as-code stays authoritative without default-filled scheduler passes
+          wiping UI/API customizations; the reverse stays blocked to protect in-session
+          UI edits.
         """
         if new_method is None:
             return True
@@ -446,6 +460,8 @@ class Database:
             return new_method == "autoconf"
         if {new_method, current_method} <= {"ui", "api"}:
             return True
+        if new_method == "scheduler" and current_method in ("ui", "api"):
+            return allow_scheduler_override
         return new_method == current_method
 
     def _is_transient_connection_error(self, error: BaseException) -> bool:
@@ -647,7 +663,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.11"
+                return "1.6.12"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -681,7 +697,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.11",
+            "version": "1.6.12",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1616,6 +1632,7 @@ class Database:
         *,
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
+        explicit_keys: Optional[Set[str]] = None,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1630,6 +1647,14 @@ class Database:
                                      misleading: it does not restrict input to global
                                      settings, it only disables the service-management
                                      side-effects.
+            explicit_keys: Raw environment/variables keys explicitly declared by the
+                           caller (e.g. Configurator.explicit_keys), service-prefixed
+                           and suffixed forms included. Only consulted when
+                           method == "scheduler": a scheduler pass may overwrite or
+                           delete-to-default a ui/api-owned row only for keys in this
+                           set. None or empty means the scheduler never touches
+                           ui/api-owned rows (the incoming config is treated as
+                           default-filled, not user-declared).
         """
         to_put = []
         to_update = []
@@ -1643,6 +1668,17 @@ class Database:
             db_config = self.get_non_default_settings(with_drafts=True)
 
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
+
+        explicit_env_keys = frozenset(explicit_keys or ())
+
+        def scheduler_can_override(full_key: str, incoming_value: Any) -> bool:
+            if full_key not in explicit_env_keys:
+                return False
+            # The Linux dummy variables.env ships "SERVER_NAME=" — an explicitly-declared
+            # but EMPTY SERVER_NAME must not clobber a ui/api-owned service list.
+            if full_key == "SERVER_NAME" and not str(incoming_value).strip():
+                return False
+            return True
 
         def get_setting_file_name(setting_type: str, original_key: str, value_changed: bool, current_file_name: str = "") -> Tuple[Optional[str], bool]:
             if setting_type != "file":
@@ -1970,6 +2006,13 @@ class Database:
                     global_config = {}
 
                     services_set = set(services)
+                    # Supplement with DB-resident, non-draft services so that
+                    # multisite-prefixed keys for services created out-of-band
+                    # (UI/API/autoconf) aren't mis-classified as global settings
+                    # when the caller's SERVER_NAME payload hasn't yet been rebuilt
+                    # to include them. Mirrors the DB-supplement done in
+                    # Configurator.get_config() (with_drafts=False).
+                    services_set.update(sid for sid, meta in db_ids.items() if not meta.get("is_draft"))
 
                     for key, value in config.items():
                         matched = False
@@ -2058,9 +2101,14 @@ class Database:
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
                             current_file_name = service_setting["file_name"] if service_setting else ""
                             value_changed = bool(service_setting and service_setting["value"] != value)
-                            should_update_value = (value_changed and self._methods_are_compatible(method, service_setting["method"])) or (
-                                bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
-                            )
+                            should_update_value = (
+                                value_changed
+                                and self._methods_are_compatible(
+                                    method,
+                                    service_setting["method"],
+                                    allow_scheduler_override=scheduler_can_override(f"{server_name}_{original_key}", value),
+                                )
+                            ) or (bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf")
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2147,9 +2195,12 @@ class Database:
                             )
                             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                             value_changed = bool(global_value and global_value.value != value)
-                            should_update_value = (value_changed and self._methods_are_compatible(method, global_value.method)) or (
-                                bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
-                            )
+                            should_update_value = (
+                                value_changed
+                                and self._methods_are_compatible(
+                                    method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
+                                )
+                            ) or (bool(global_value) and method == "autoconf" and global_value.method != "autoconf")
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2273,7 +2324,11 @@ class Database:
                         )
                         current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                         value_changed = bool(global_value and global_value.value != value)
-                        should_update_value = bool(global_value and self._methods_are_compatible(method, global_value.method) and value_changed)
+                        should_update_value = bool(
+                            global_value
+                            and self._methods_are_compatible(method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value))
+                            and value_changed
+                        )
                         target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
                         template_setting = None
@@ -2475,7 +2530,10 @@ class Database:
                         custom_conf.checksum = custom_config["checksum"]
                     if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
                         custom_conf.is_draft = custom_config["is_draft"]
-                elif self._methods_are_compatible(method, custom_conf.method):
+                # Scheduler-method custom configs only ever originate from explicit
+                # CUSTOM_CONF_* environment variables, so the scheduler override is
+                # legitimate here (no default-filled pass exists for custom configs).
+                elif self._methods_are_compatible(method, custom_conf.method, allow_scheduler_override=True):
                     should_update_data = custom_config["checksum"] != custom_conf.checksum
                     if should_update_data:
                         custom_conf.data = custom_config["data"]
@@ -3432,6 +3490,17 @@ class Database:
                 db_ids = [plugin.id for plugin in db_plugins]
                 ids = [plugin["id"] for plugin in plugins]
                 missing_ids = [plugin for plugin in db_ids if plugin not in ids]
+
+                # Never cascade-delete a pro plugin just because it's absent from the incoming list
+                # (a transient disk/glob gap during re-ingest); that wipes UI-set values via
+                # Plugins -> Settings -> Global_values. Pro removal only happens via only_clear_metadata.
+                if missing_ids and _type == "pro" and not only_clear_metadata:
+                    self.logger.warning(
+                        f"Refusing to cascade-delete {len(missing_ids)} pro plugin(s) absent from the incoming list "
+                        f"(likely a transient disk/glob gap); preserving their settings and user values. "
+                        f"missing={sorted(missing_ids)}"
+                    )
+                    missing_ids = []
 
                 if missing_ids:
                     # Data-loss guard: refuse the destructive plugin-wide cascade (Settings +

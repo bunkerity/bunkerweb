@@ -92,5 +92,48 @@
       "SecRule ARGS \"@contains test\" \"id:2,pass,t:trim\"",
       "SecRule ARGS \"@contains test\" \"id:3,pass,t:trim,tag:whee\""
     ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing ctl:ruleRemoveByTag syntax check",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
+      },
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "parser_error": "Line: 1. Column: 54. Expecting an action, got:  ctl:ruleRemoveByTag,whee"
+    },
+    "rules": [
+      "SecRule ARGS:key \".\" \"id:4,ctl:ruleRemoveByTag,whee\""
+    ]
   }
 ]

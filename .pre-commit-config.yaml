@@ -18,7 +18,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: c6755bb741b6481d6b3d3bb563c83fa060db96c9 # frozen: 26.3.1
+    rev: 87928e6d6761a4a6d22250e1fee5601b3998086e # frozen: 26.5.1
     hooks:
       - id: black
         name: Black Python Formatter
@@ -34,7 +34,7 @@ repos:
         files: \.(js|ts|jsx|tsx|css|less|html|json|markdown|md|yaml|yml)$
 
   - repo: https://github.com/JohnnyMorganz/StyLua
-    rev: 631f02492a9477bc9cf9d8a1db2d471767fbe005 # frozen: v2.4.1
+    rev: a6433cd8ed974a1dd769d41a46b5008858e58e94 # frozen: v2.5.2
     hooks:
       - id: stylua-github
         exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)

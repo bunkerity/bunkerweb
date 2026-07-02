@@ -73,37 +73,33 @@ if "syslog" in env_log_types:
             socktype = SOCK_STREAM
             address = syslog_address[6:]  # Remove "tcp://"
 
-        # Check if it's a network address (host:port) or socket path
+        # Resolve the handler address: network (host, port) or Unix socket path
         if ":" in address and not address.startswith("/"):
             host, port = address.rsplit(":", 1)
+            handler_address = (host, int(port))
+        elif not address.startswith("/"):
+            # No port given and it's a hostname (not a socket path): default to UDP port 514
+            if socktype is None:
+                socktype = SOCK_DGRAM  # Default to UDP
+            handler_address = (address, 514)
+        else:
+            handler_address = address
+
+        # Building the handler can fail if the syslog target is unreachable or its hostname
+        # does not resolve (Python 3.14's SysLogHandler resolves DNS eagerly in __init__).
+        # Degrade gracefully to the stderr fallback below instead of crashing the process.
+        try:
             log_types["syslog"] = {
-                "handler": SysLogHandler(address=(host, int(port)), socktype=socktype),
-                "address": (host, int(port)),
+                "handler": SysLogHandler(address=handler_address, socktype=socktype),
+                "address": handler_address,
                 "socktype": socktype,
             }
-        else:
-            # If no port is given and it's a hostname (not a socket path), default to UDP port 514
-            if not address.startswith("/"):
-                host = address
-                default_port = 514
-                if socktype is None:
-                    socktype = SOCK_DGRAM  # Default to UDP
-                log_types["syslog"] = {
-                    "handler": SysLogHandler(address=(host, default_port), socktype=socktype),
-                    "address": (host, default_port),
-                    "socktype": socktype,
-                }
-            else:
-                log_types["syslog"] = {
-                    "handler": SysLogHandler(address=address, socktype=socktype),
-                    "address": address,
-                    "socktype": socktype,
-                }
-
-        # Set syslog ident for service differentiation
-        syslog_ident = getenv("LOG_SYSLOG_TAG", "app")
-        log_types["syslog"]["ident"] = f"{syslog_ident}: "
-        log_types["syslog"]["handler"].ident = f"{syslog_ident}: "
+            # Set syslog ident for service differentiation
+            syslog_ident = getenv("LOG_SYSLOG_TAG", "app")
+            log_types["syslog"]["ident"] = f"{syslog_ident}: "
+            log_types["syslog"]["handler"].ident = f"{syslog_ident}: "
+        except OSError as e:
+            warnings.append(f"Failed to set up syslog logging to '{syslog_address}': {e}. Logs will not be sent to syslog.")
     else:
         warnings.append(f"The syslog address '{syslog_address}' is invalid. Logs will not be sent to syslog.")
 

@@ -1730,10 +1730,9 @@ static void build_subroutines(BuildCtx *ctx)
   |  mov dword [BASE-4], LJ_TISNUM
   |  mov dword [BASE-8], RD
   |.else
-  |  movsd xmm0, qword [BASE+8]
-  |  sseconst_1 xmm1, RBa
-  |  addsd xmm0, xmm1
-  |  cvttsd2si RD, xmm0
+  |  cvttsd2si RD, qword [BASE+8]
+  |  add RD, 1
+  |  cvtsi2sd xmm0, RD
   |  movsd qword [BASE-8], xmm0
   |.endif
   |  mov TAB:RB, [BASE]

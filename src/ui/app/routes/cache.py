@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 from app.dependencies import BW_CONFIG, DB
 from app.utils import LOGGER, get_printable_content
 
-
 cache = Blueprint("cache", __name__)
 
 SHOWN_FILE_TYPES = ("text/plain", "text/html", "text/css", "text/javascript", "application/json", "application/xml")

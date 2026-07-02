@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 
 from ..utils import get_api_db
 
-
 router = APIRouter(tags=["core"])  # Utils-only (ping, health)
 from .auth import router as auth_router
 from .instances import router as instances_router

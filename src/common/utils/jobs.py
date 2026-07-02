@@ -184,21 +184,18 @@ class Job:
 
         with LOCK:
             if not manual and self.job_path.is_dir():
-                for file in list(self.job_path.rglob("*")):
+                # Deepest first: unlink stale non-cached files, then drop only now-empty dirs —
+                # never rmtree the job_path root (its children are freshly restored cache dirs).
+                for file in sorted(self.job_path.rglob("*"), key=lambda p: len(p.parts), reverse=True):
                     if file.as_posix().startswith(tuple(ignored_dirs)):
                         continue
 
                     self.logger.debug(f"Checking if {file} should be removed")
-                    if file not in plugin_cache_files and file.is_file():
+                    if file.is_file() and file not in plugin_cache_files:
                         self.logger.debug(f"Removing non-cached file {file}")
                         file.unlink(missing_ok=True)
-                        if file.parent.is_dir():
-                            self.logger.debug(f"Removing directory {file.parent}")
-                            rmtree(file.parent, ignore_errors=True)
-                            if file.parent == self.job_path:
-                                break
-                    elif file.is_dir():
-                        self.logger.debug(f"Removing directory {file}")
+                    elif file.is_dir() and file != self.job_path and not any(file.iterdir()):
+                        self.logger.debug(f"Removing empty directory {file}")
                         rmtree(file, ignore_errors=True)
 
         return ret

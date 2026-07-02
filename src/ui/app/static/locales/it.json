@@ -18,6 +18,19 @@
   "aria": {
     "label": {
       "close": "Chiudi",
+      "copy": "Copia log",
+      "download_log": "Scarica questo file di log",
+      "follow": "Segui",
+      "select_file": "Seleziona file",
+      "select_page": "Seleziona pagina",
+      "issue_count": "Conteggio di errori e avvisi",
+      "level_filter": "Filtra le righe di log per livello",
+      "local_time": "Mostra timestamp nell'ora locale",
+      "collapse_multiline": "Comprimi voci multilinea",
+      "next_issue": "Errore o avviso successivo",
+      "prev_issue": "Errore o avviso precedente",
+      "search_logs": "Cerca nei log",
+      "toggle_wrap": "Attiva/disattiva ritorno a capo",
       "configs_dropzone": "Seleziona un file di esportazione delle configurazioni personalizzate o rilascialo qui",
       "raw_configuration": "Configurazione Grezza",
       "services_dropzone": "Seleziona un file di esportazione dei servizi o rilascialo qui"
@@ -131,6 +144,10 @@
     "run_selected_jobs": "Esegui Processi Selezionati",
     "save": "Salva",
     "save_changes": "Salva Modifiche",
+    "local_time": "Ora locale",
+    "collapse_multiline": "Comprimi",
+    "search": "Cerca",
+    "wrap": "A capo",
     "select_file": "Seleziona File",
     "select_page": "Seleziona Pagina",
     "service": "Servizio",
@@ -610,6 +627,8 @@
     "easter_egg": "Se stai leggendo questo, significa che sei curioso 👀",
     "error": "Errore",
     "message": "Info",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "Hai più servizi di quanti consentiti dalla tua licenza PRO. Aggiorna la tua licenza o sposta alcuni servizi in modalità Bozza per sbloccare la tua licenza PRO.",
     "time": {
       "just_now": "adesso"
     },
@@ -762,11 +781,25 @@
     "upgrade": "Aggiornare?"
   },
   "logs": {
-    "eventsource_failed": "Connessione EventSource fallita",
-    "parse_error": "Errore nell'analisi dei dati del flusso: {{error}}",
-    "stream_error": "Errore del flusso: {{message}}",
-    "stream_init": "Flusso inizializzato, dimensione file: {{size}}",
-    "stream_initialized": "Flusso inizializzato con aggiornamento, dimensione file: {{size}}",
+    "annotation_error": "Errore",
+    "annotation_warning": "Avviso",
+    "filter_levels": "Livelli",
+    "letsencrypt_logs": "Log di Let's Encrypt",
+    "main_logs": "Log principali",
+    "new_lines_sr": "{{count}} nuove righe di log",
+    "issue_summary": "{{errors}} errore/i, {{warnings}} avviso/i",
+    "level_critical": "Critico",
+    "level_debug": "Debug",
+    "level_error": "Errore",
+    "level_info": "Info",
+    "level_notice": "Avviso",
+    "level_warning": "Avvertenza",
+    "lines_all": "Tutte",
+    "lines_label": "Righe",
+    "meta": "{{size}} · {{lines}} righe · modificato {{when}}",
+    "new_lines": "nuove righe",
+    "showing_all": "{{total}} righe",
+    "showing_some": "mostrate {{shown}} di {{total}}",
     "trimmed_notice": "--- {{count}} righe di log più vecchie sono state rimosse per le prestazioni ---"
   },
   "modal": {
@@ -909,7 +942,10 @@
       "status": {
         "deactivated": "Il plugin è disattivato; pertanto, nessuna informazione è disponibile.",
         "metrics_deactivated": "Il plugin delle metriche non è attivato; pertanto, nessuna informazione è disponibile.",
-        "not_available": "La pagina del plugin non è ancora disponibile durante la fase beta."
+        "not_available": "La pagina del plugin non è ancora disponibile durante la fase beta.",
+        "pre_render_error": "Errore di pre-rendering",
+        "no_content": "Questo plugin non fornisce una pagina integrata.",
+        "dedicated_page_unavailable": "Questo plugin è gestito in una pagina dedicata non ancora caricata. Riavvia l'interfaccia web per accedervi."
       }
     },
     "type": {
@@ -1569,6 +1605,16 @@
     "real_ip_recursive": "Esegui una ricerca ricorsiva nel contenitore dell'intestazione dell'indirizzo IP.",
     "remove_ban_entry": "Rimuovi questa voce di blocco dalla lista.",
     "reset_template_settings": "Ripristina tutte le impostazioni nella vista del modello corrente ai loro valori predefiniti.",
+    "download_log": "Scarica questo file di log",
+    "issue_count": "Errori e avvisi in questa vista",
+    "local_time": "Mostra timestamp nella tua ora locale",
+    "collapse_multiline": "Comprimi voci multilinea (traceback, payload)",
+    "collapse_raw_values": "Comprimi valori multilinea (certificati, chiavi)",
+    "next_issue": "Vai al prossimo errore o avviso",
+    "prev_issue": "Vai all'errore o avviso precedente",
+    "search_logs": "Cerca nei log (Ctrl+F)",
+    "toggle_level": "Mostra / nascondi righe {{level}}",
+    "toggle_wrap": "Attiva/disattiva ritorno a capo",
     "select_file_to_follow": "Seleziona un file per abilitare la modalità seguimento",
     "server_name": "Il nome di dominio primario o nome del server per questo servizio.",
     "stream_support": {

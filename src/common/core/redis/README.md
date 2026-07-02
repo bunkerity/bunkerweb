@@ -23,20 +23,20 @@ Follow these steps to configure and use the Redis plugin:
 | Setting                   | Default    | Context | Multiple | Description                                                                                      |
 | ------------------------- | ---------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
 | `USE_REDIS`               | `no`       | global  | no       | **Enable Redis:** Set to `yes` to enable Redis/Valkey integration for cluster mode.              |
-| `REDIS_HOST`              |            | global  | no       | **Redis/Valkey Server:** IP address or hostname of the Redis/Valkey server.                      |
+| `REDIS_HOST`              |            | global  | no       | **Redis/Valkey Server:** IP address or hostname of the Redis/Valkey server. Not required when `REDIS_SENTINEL_HOSTS` is set (the master is resolved through the Sentinels). |
 | `REDIS_PORT`              | `6379`     | global  | no       | **Redis/Valkey Port:** Port number of the Redis/Valkey server.                                   |
 | `REDIS_DATABASE`          | `0`        | global  | no       | **Redis/Valkey Database:** Database number to use on the Redis/Valkey server (0-15).             |
 | `REDIS_SSL`               | `no`       | global  | no       | **Redis/Valkey SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis/Valkey connection. |
 | `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.   |
-| `REDIS_TIMEOUT`           | `5`        | global  | no       | **Redis/Valkey Timeout:** Connection timeout in seconds for Redis/Valkey operations.             |
+| `REDIS_TIMEOUT`           | `1000`     | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. |
 | `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                |
 | `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                             |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).                |
 | `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                               |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                               |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
-| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | no       | **Keepalive Idle:** Time (in seconds) between TCP keepalive probes for idle connections.         |
-| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool.                 |
+| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. |
+| `REDIS_KEEPALIVE_POOL`    | `10`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool.                 |
 
 !!! tip "High Availability with Redis Sentinel"
     For production environments requiring high availability, configure Redis Sentinel settings. This provides automatic failover capabilities if the primary Redis server becomes unavailable.
@@ -87,6 +87,7 @@ Follow these steps to configure and use the Redis plugin:
 
     ```yaml
     USE_REDIS: "yes"
+    # REDIS_HOST is not needed: the master is resolved through the Sentinels
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
     REDIS_SENTINEL_MASTER: "mymaster"
     REDIS_SENTINEL_PASSWORD: "sentinel-password"
@@ -103,10 +104,18 @@ Follow these steps to configure and use the Redis plugin:
     REDIS_PORT: "6379"
     REDIS_PASSWORD: "your-strong-password"
     REDIS_DATABASE: "3"
-    REDIS_TIMEOUT: "3"
-    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_TIMEOUT: "3000"
+    REDIS_KEEPALIVE_IDLE: "60000"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+!!! info "Redis on Kubernetes (scheduler-driven config)"
+    On Kubernetes the **scheduler** reads the settings and pushes the generated configuration to the
+    BunkerWeb instances — the instances do not read these Redis settings from their own pod
+    environment. With the official Helm chart, configure Redis under `settings.redis`, including
+    Sentinel via `settings.redis.redisSentinelHosts` and `settings.redis.redisSentinelMaster`
+    (chart ≥ v1.0.21). For any setting without a dedicated chart key, use `scheduler.extraEnvs`.
+    Setting these only on `bunkerweb.extraEnvs` has **no effect**.
 
 ### Redis Best Practices
 

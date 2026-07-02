@@ -4,7 +4,7 @@ local C = ffi.C
 require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.evp.md"
 local evp = require("resty.openssl.include.evp")
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   EVP_PKEY *EVP_PKEY_new(void);
@@ -92,7 +92,7 @@ ffi.cdef [[
 
 local _M = {}
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   require "resty.openssl.include.provider"
 
   ffi.cdef [[

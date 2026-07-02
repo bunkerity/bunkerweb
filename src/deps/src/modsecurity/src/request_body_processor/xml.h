@@ -60,7 +60,7 @@ class XMLNodes {
         // need to stop parsing if the number of arguments reached the limit
         xmlParserCtxtPtr  parsing_ctx_arg;
 
-        explicit XMLNodes (Transaction *);
+        explicit XMLNodes(Transaction *transaction);
         ~XMLNodes();
 };
 
@@ -69,7 +69,7 @@ struct xml_data {
     xmlParserCtxtPtr parsing_ctx;
     xmlDocPtr doc;
 
-    unsigned int well_formed;
+    unsigned int well_formed = 0;
 
     /* error reporting and XML array flag */
     std::string               xml_error;

@@ -25,16 +25,18 @@ def login_page():
 
         ui_user = DB.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
-            # Regenerate the session to mitigate session fixation
-            session.clear()  # Clear the current session
-            current_app.session_interface.regenerate(session)  # Regenerate the session ID
-
-            # log the user in
+            # Rotate the session id to prevent session fixation (CWE-384). flask_session's
+            # regenerate() only rotates a *non-empty* session (it guards on `if session:`),
+            # so seed the new authenticated state first, then rotate -- otherwise clearing
+            # first leaves the session falsy and the rotation silently no-ops.
+            session.clear()  # drop any anonymous (attacker-plantable) session contents
             session["creation_date"] = datetime.now().astimezone()
             session["ip"] = request.remote_addr
             session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False
             session["flash_messages"] = []
+            current_app.session_interface.regenerate(session)  # now non-empty -> sid actually rotates
+            session.modified = True
 
             ret = DB.mark_ui_user_login(ui_user.username, session["creation_date"], session["ip"], session["user_agent"])
             if isinstance(ret, str):
@@ -65,13 +67,17 @@ def login_page():
             except Exception as e:
                 LOGGER.error(f"Failed to create Biscuit token: {e}")
 
+            # Persist the theme the user explicitly chose on the login page (or
+            # carried over from the setup wizard). Falls back to the saved value
+            # when absent or invalid, so an OS-resolved theme never clobbers it.
+            submitted_theme = request.form.get("theme", "")
             user_data = {
                 "username": current_user.get_id(),
                 "password": current_user.password.encode("utf-8"),
                 "email": current_user.email,
                 "totp_secret": current_user.totp_secret,
                 "method": current_user.method,
-                "theme": request.form.get("theme", "light"),
+                "theme": submitted_theme if submitted_theme in ("dark", "light") else current_user.theme,
                 "language": request.form.get("language", "en"),
             }
 
@@ -95,7 +101,7 @@ def login_page():
 
             try:
                 safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
-            except Exception:
+            except ValueError:
                 safe_next = url_for("home.home_page")
 
             return redirect(url_for("loading", next=safe_next))

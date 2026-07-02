@@ -105,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.11/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.12/examples) directory of the repository.
 
 ## Custom configurations {#custom-configurations}
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.11/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.12/examples) directory of the repository.
 
 ## Database
 
@@ -163,12 +163,12 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 ### Database compatibility matrix
 
-| Integration        | PostgreSQL                                   | MariaDB             | MySQL              | SQLite      |
-| :----------------- | :------------------------------------------- | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`)   | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Linux packages** | See notes below                              | See notes below     | See notes below    | ✅ Supported |
+| Integration        | PostgreSQL                                | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :---------------------------------------- | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below                           | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
     - **PostgreSQL**: Alpine packages now ship with the `v18` client, so `v18` and earlier are supported out of the box; the all-in-one image still embeds `v17`, so `v18` is unsupported there.

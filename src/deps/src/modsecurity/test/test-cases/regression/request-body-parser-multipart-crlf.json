@@ -52,13 +52,69 @@
       ]
     },
     "expected": {
-      "debug_log": "Adding request argument \\(BODY\\): name \"b\", value \"22.12.22.3\"",
+      "debug_log": "Adding request argument \\(BODY\\): name \"b\", value \"2\r\n2.1\r\n2.2\r\n2.3\"",
       "http_code": 403
     },
     "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "multipart parser - check \\r and \\n in multipart part",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "144",
+        "Content-Type": "multipart/form-data; boundary=00000000; charset=UTF-8",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--00000000\r\n",
+        "Content-Disposition: form-data; name=\"namea\"\r\n",
+        "\r\n",
+        "111\r\n",
+        "--00000000\r\n",
+        "Content-Disposition: form-data; name=\"nameb\"\r\n",
+        "\r\n",
+        "22\r\n2\r\n",
+        "--00000000--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Invalid parameter after boundary in C-T \\(tolerated\\).*Added data",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule ARGS:nameb \"@streq 22\r\n2\" \"phase:2,deny,id:500096\""
     ]
   }
 ]

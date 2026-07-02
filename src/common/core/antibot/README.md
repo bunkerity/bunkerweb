@@ -38,7 +38,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 | Setting                     | Default | Context   | Multiple | Description                                                                                                                            |
 | --------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge.                                    |
+| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
 | `ANTIBOT_IGNORE_IP`         |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                            |
 | `ANTIBOT_IGNORE_RDNS`       |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                           |
 | `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                          |
@@ -58,6 +58,9 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   This will exclude all URIs starting with `/api/`, `/webhook/`, or `/assets/` from the antibot challenge.
+
+- `ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&c=d$"`
+  This will exclude the exact `/index.php?a=b&c=d` request from the antibot challenge.
 
 - `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
   This will exclude the internal network `192.168.1.0/24` and the specific IP `10.0.0.1` from the antibot challenge.
@@ -253,6 +256,8 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
         - Use HTTPS for `ANTIBOT_CAPJS_FRONTEND_URL` in production. The browser worker requires `crypto.subtle` in a secure context, and HTTPS prevents MITM changes to the widget.
         - Configure CORS on the Cap.js sitekey to allow the protected origin.
         - Set both `ANTIBOT_CAPJS_FRONTEND_URL` and `ANTIBOT_CAPJS_BACKEND_URL` to origins only: scheme, host, and optional port, with no path.
+        - Use the Cap.js widget **0.1.48 or later**. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed `srcdoc` iframe's inline script does not propagate the nonce. If you self-host `tiago2/cap`, pin a recent tag (e.g. `tiago2/cap:3.1.2` or newer) or set `WIDGET_VERSION` to `0.1.48` or later.
+        - Cap.js **instrumentation challenges** (on by default) run server-supplied JavaScript via `eval`, which a nonce cannot authorize. BunkerWeb runs the widget in an isolated same-origin iframe that carries the needed `'unsafe-eval'`, so the main challenge page keeps a strict, eval-free CSP — no configuration required.
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 

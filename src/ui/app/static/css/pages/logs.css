@@ -1,0 +1,324 @@
+/*
+ * Syntax coloring for the BunkerWeb logs viewer (ACE custom mode
+ * "ace/mode/bunkerweb_log", see js/pages/ace-mode-bunkerweb_log.js).
+ *
+ * Rules are scoped under the ACE theme container class (.ace-cloud9-day /
+ * .ace-cloud9-night) rather than html[data-bs-theme], because ACE swaps its own
+ * theme class on the dark-mode toggle. The cloud9 theme CSS is injected at
+ * runtime by JS; this file is loaded after it and its class-stacked selectors
+ * (0,3,0) out-specify the theme's own token rules (0,2,0) so they always win.
+ *
+ * Colors mirror the BunkerWeb brand + Bootstrap semantic palette. They are
+ * declared once per theme as custom properties (--bwl-*) and referenced by the
+ * shared rules below, so a color is tuned in exactly one place per theme. Bare
+ * --bs-danger/-warning/-info are NOT redefined in dark mode and would be
+ * illegible on #181818, hence theme-specific values here.
+ *
+ * Every value meets WCAG AA (or AA-large for incidental/de-emphasized tokens)
+ * against its background. ERROR / WARNING lines collapse every non-level field
+ * to a single log.row.error|warning scope so the whole line tints (scope named
+ * "row", NOT "line" — ace_line is ACE's reserved per-line renderer class, and
+ * reusing it on token spans would let renderer CSS leak onto them). The LEVEL
+ * word keeps its own bold scope as the primary, colorblind-safe (non-hue) cue,
+ * and HTTP status keeps the literal status number as a non-color signal.
+ */
+
+/* ----- Per-theme color tokens (single source of truth) ----- */
+.ace-cloud9-day {
+  --bwl-ts: #5a6b75; /* timestamp        5.35 AA   */
+  --bwl-logger: #0b354a; /* logger / host    12.5 AA   */
+  --bwl-muted: #737b83; /* pid / reqid      4.15 AA-lg */
+  --bwl-muted2: #6c757d; /* user / bytes     4.53 AA   */
+  --bwl-ip: #35728e; /* ip               5.14 AA   */
+  --bwl-method: #0b5577; /* http method      7.87 AA   */
+  --bwl-url: #0b5577; /* url              7.87 AA   */
+  --bwl-string: #4c8868; /* quoted string    4.04 AA-lg */
+  --bwl-info: #0b6b82; /* INFO / 3xx       5.90 AA   */
+  --bwl-debug: #6c757d; /* DEBUG            4.53 AA   */
+  --bwl-error: #d32f2f; /* ERROR / 5xx      4.81 AA   */
+  --bwl-warn: #a86600; /* WARNING / 4xx    4.45 AA-lg */
+  --bwl-ok: #2e7d32; /* 2xx              4.95 AA   */
+}
+.ace-cloud9-night {
+  --bwl-ts: #8aa0ad; /* 6.52 AA  */
+  --bwl-logger: #2eac68; /* 6.10 AA  */
+  --bwl-muted: #808a94; /* 5.06 AA  */
+  --bwl-muted2: #9aa4ad; /* 7.01 AA  */
+  --bwl-ip: #7fb0c4; /* 7.53 AA  */
+  --bwl-method: #6fb6db; /* 7.94 AA  */
+  --bwl-url: #9cc6dc; /* 9.74 AA  */
+  --bwl-string: #8fcaa8; /* 9.45 AA  */
+  --bwl-info: #5fd4f0; /* 10.3 AA  */
+  --bwl-debug: #9aa4ad; /* 7.01 AA  */
+  --bwl-error: #ff6b5e; /* 6.36 AA  */
+  --bwl-warn: #ffc14d; /* 11.0 AA  */
+  --bwl-ok: #71dd37; /* 10.2 AA  */
+}
+
+/* ----- Shared token rules (day + night grouped, value via var) ----- */
+.ace-cloud9-day .ace_log.ace_timestamp,
+.ace-cloud9-night .ace_log.ace_timestamp {
+  color: var(--bwl-ts);
+}
+.ace-cloud9-day .ace_log.ace_logger,
+.ace-cloud9-day .ace_log.ace_host,
+.ace-cloud9-night .ace_log.ace_logger,
+.ace-cloud9-night .ace_log.ace_host {
+  color: var(--bwl-logger);
+}
+.ace-cloud9-day .ace_log.ace_pid,
+.ace-cloud9-day .ace_log.ace_reqid,
+.ace-cloud9-night .ace_log.ace_pid,
+.ace-cloud9-night .ace_log.ace_reqid {
+  color: var(--bwl-muted);
+}
+.ace-cloud9-day .ace_log.ace_user,
+.ace-cloud9-day .ace_log.ace_number,
+.ace-cloud9-night .ace_log.ace_user,
+.ace-cloud9-night .ace_log.ace_number {
+  color: var(--bwl-muted2);
+}
+.ace-cloud9-day .ace_log.ace_ip,
+.ace-cloud9-night .ace_log.ace_ip {
+  color: var(--bwl-ip);
+}
+.ace-cloud9-day .ace_log.ace_http.ace_method,
+.ace-cloud9-night .ace_log.ace_http.ace_method {
+  color: var(--bwl-method);
+  font-weight: 600;
+}
+.ace-cloud9-day .ace_log.ace_url,
+.ace-cloud9-night .ace_log.ace_url {
+  color: var(--bwl-url);
+}
+.ace-cloud9-day .ace_log.ace_quoted,
+.ace-cloud9-night .ace_log.ace_quoted {
+  color: var(--bwl-string);
+}
+
+/* Levels — keyword stays bold as the non-hue cue */
+.ace-cloud9-day .ace_log.ace_level,
+.ace-cloud9-night .ace_log.ace_level {
+  font-weight: 600;
+}
+.ace-cloud9-day .ace_log.ace_level.ace_info,
+.ace-cloud9-night .ace_log.ace_level.ace_info {
+  color: var(--bwl-info);
+}
+.ace-cloud9-day .ace_log.ace_level.ace_debug,
+.ace-cloud9-night .ace_log.ace_level.ace_debug {
+  color: var(--bwl-debug);
+}
+.ace-cloud9-day .ace_log.ace_level.ace_error,
+.ace-cloud9-night .ace_log.ace_level.ace_error {
+  color: var(--bwl-error);
+  font-weight: 700;
+}
+.ace-cloud9-day .ace_log.ace_level.ace_warning,
+.ace-cloud9-night .ace_log.ace_level.ace_warning {
+  color: var(--bwl-warn);
+  font-weight: 700;
+}
+
+/* Whole-line ERROR / WARNING tint */
+.ace-cloud9-day .ace_log.ace_row.ace_error,
+.ace-cloud9-night .ace_log.ace_row.ace_error {
+  color: var(--bwl-error);
+}
+.ace-cloud9-day .ace_log.ace_row.ace_warning,
+.ace-cloud9-night .ace_log.ace_row.ace_warning {
+  color: var(--bwl-warn);
+}
+
+/* HTTP status classes — number itself is the non-color cue */
+.ace-cloud9-day .ace_log.ace_status,
+.ace-cloud9-night .ace_log.ace_status {
+  color: var(--bwl-muted2);
+  font-weight: 600;
+}
+.ace-cloud9-day .ace_log.ace_status.ace_2xx,
+.ace-cloud9-night .ace_log.ace_status.ace_2xx {
+  color: var(--bwl-ok);
+}
+.ace-cloud9-day .ace_log.ace_status.ace_3xx,
+.ace-cloud9-night .ace_log.ace_status.ace_3xx {
+  color: var(--bwl-info);
+}
+.ace-cloud9-day .ace_log.ace_status.ace_4xx,
+.ace-cloud9-night .ace_log.ace_status.ace_4xx {
+  color: var(--bwl-warn);
+}
+.ace-cloud9-day .ace_log.ace_status.ace_5xx,
+.ace-cloud9-night .ace_log.ace_status.ace_5xx {
+  color: var(--bwl-error);
+}
+
+/* Non-printable / control bytes (binary content): flag faintly so the operator
+   sees there is binary noise without it hijacking the view. Background marks the
+   run; the chars themselves stay de-emphasized. */
+.ace-cloud9-day .ace_log.ace_control {
+  color: #8a1c12;
+  background: rgba(211, 47, 47, 0.1);
+  border-radius: 2px;
+}
+.ace-cloud9-night .ace_log.ace_control {
+  color: #ffb4a8;
+  background: rgba(255, 107, 94, 0.16);
+  border-radius: 2px;
+}
+
+/* Cursor row:col indicator (ext-statusbar target) overlaid on the editor's
+   bottom-right. Faint translucent chip; never intercepts editor interaction. */
+.logs-statusbar {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 0.5rem;
+  z-index: 4;
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.25rem;
+  pointer-events: none;
+  background: rgba(127, 127, 127, 0.16);
+  font-variant-numeric: tabular-nums;
+}
+.logs-statusbar:empty {
+  display: none;
+}
+
+/* Level filter chips: colored when on, struck-through and muted when off. */
+.logs-chip {
+  line-height: 1.25;
+}
+.logs-chip-count {
+  font-variant-numeric: tabular-nums;
+}
+.logs-chip-off {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+/* "N new lines" pill shown during follow when the user has scrolled up. */
+.logs-new-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 6;
+  border-radius: 2rem;
+}
+
+/* Empty state shown when no log file is selected. */
+.logs-empty {
+  z-index: 5;
+  max-width: 32rem;
+  pointer-events: none;
+}
+
+/* Selected file name shown on the file-picker button — truncate long names. */
+.logs-file-label {
+  display: inline-block;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Collapsed multi-line entry: a small chip at the end of the header line
+   (gutter chevron is ACE-native). The header row keeps its severity tint. */
+.ace-cloud9-day .ace_fold,
+.ace-cloud9-night .ace_fold {
+  background: rgba(127, 127, 127, 0.18);
+  border: 1px solid rgba(127, 127, 127, 0.32);
+  border-radius: 0.75rem;
+  padding: 0 0.45rem;
+  margin-left: 0.4rem;
+  color: inherit;
+  box-shadow: none;
+  font-size: 0.85em;
+  vertical-align: baseline;
+}
+.ace-cloud9-day .ace_fold:hover,
+.ace-cloud9-night .ace_fold:hover {
+  background: rgba(127, 127, 127, 0.28);
+}
+
+/* ---------------------------------------------------------------------------
+ * Mobile toolbar (< md). The desktop toolbar is a single horizontal row; on a
+ * phone that wrapped into a centered / right-floated scatter. Here it reflows
+ * into tidy stacked rows — a full-width file picker, one evenly-spaced
+ * left-aligned action row, and comfortable 40px tap targets — inspired by the
+ * Stitch "Mobile Optimized" concept. Desktop (>= md) is untouched.
+ * ------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+  .logs-toolbar {
+    gap: 0.5rem;
+  }
+
+  /* Primary control: file picker spans the row (label left, caret right) and
+     shows the open file name even on mobile so you always see what's open. */
+  .logs-toolbar-files {
+    width: 100%;
+  }
+  .logs-toolbar-files > .dropdown.btn-group {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .logs-toolbar-files > .dropdown.btn-group > .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 40px;
+  }
+  /* icon + file name pack to the left; the caret floats to the right edge */
+  .logs-toolbar-files > .dropdown.btn-group > .dropdown-toggle::after {
+    margin-left: auto;
+  }
+  .logs-toolbar-files .logs-file-text {
+    display: inline !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .logs-toolbar-files .logs-file-label {
+    max-width: 60vw;
+  }
+
+  /* Actions: one tidy, left-aligned, wrapping row with uniform spacing.
+     Neutralise the desktop ad-hoc ms-2/me-2/my-1 margins so the flex gap is the
+     only spacing, and give every control a 40px touch target. */
+  .logs-toolbar-actions {
+    width: 100%;
+    justify-content: flex-start !important;
+    gap: 0.4rem;
+  }
+  .logs-toolbar-actions .ms-2,
+  .logs-toolbar-actions .me-2 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .logs-toolbar-actions > .my-1,
+  .logs-toolbar-actions > .btn-group {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  .logs-toolbar-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  /* Filter row: left-align the options group (Lines / Local time / Collapse)
+     under the chips instead of pushing it to the right edge, and bring its
+     small buttons up to the same 40px touch target. */
+  .logs-filterbar-opts {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+  .logs-filterbar-opts .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+}

@@ -149,6 +149,10 @@ def process_revision_directives(context_, revision, directives):
         upgrade_sql = f"UPDATE bw_metadata SET version = '{new_version}' WHERE id = 1"
         if script.upgrade_ops is not None:
             script.upgrade_ops.ops.insert(0, _VersionUpdateOp(upgrade_sql, "# Update the version in bw_metadata"))
+            # Clear last_pro_check so the next scheduler run re-fetches version-specific Pro plugins.
+            # Upgrade only (not downgrade).
+            pro_recheck_sql = "UPDATE bw_metadata SET last_pro_check = NULL WHERE id = 1"
+            script.upgrade_ops.ops.insert(1, _VersionUpdateOp(pro_recheck_sql, "# Force a Pro plugins re-check after the version change"))
         old_version = _previous_version()
         if old_version and script.downgrade_ops is not None:
             downgrade_sql = f"UPDATE bw_metadata SET version = '{old_version}' WHERE id = 1"

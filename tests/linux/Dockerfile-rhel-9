@@ -1,6 +1,6 @@
-FROM redhat/ubi9-init:9.8@sha256:4e1a8534f98765e216854113d55c994eed232799bda17c0e488db5c04fe9cf05
+FROM redhat/ubi9-init:9.8@sha256:a461bbf308a2a22af8586ada2e6c5ce5a2c23216c933169fbf606a1c7935b977
 
-ENV NGINX_VERSION=1.30.2
+ENV NGINX_VERSION=1.30.3
 
 # Copy rocky repo
 COPY src/linux/rocky-9.repo /etc/yum.repos.d/rocky.repo

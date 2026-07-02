@@ -1,17 +1,17 @@
-bcrypt<5.0.0
-biscuit-python==0.4.0
+bcrypt==5.0.0
+https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
 certbot==5.6.0
 defusedcsv==3.0.0
 Flask==3.1.3
 Flask-Login==0.6.3
 Flask-Session[cachelib]==0.8.0
 Flask-WTF==1.3.0
-gunicorn[gthread,http2]==25.1.0
+gunicorn[gthread,http2]==26.0.0
 libpass==1.9.3
 openpyxl==3.1.5
 pillow==12.2.0
 psutil==7.2.2
 python_dateutil==2.9.0.post0
 qrcode==8.2
-regex==2026.5.9
+regex==2026.6.28
 user_agents==2.2.0

@@ -87,6 +87,65 @@ local function is_static_like(uri)
 	return STATIC_EXTENSIONS[ext:lower()] == true
 end
 
+-- Accept only a same-origin relative redirect target; nil otherwise.
+local function is_safe_relative_path(p, antibot_uri)
+	if not p or type(p) ~= "string" or p == "" then
+		return nil
+	end
+	if p:sub(1, 1) ~= "/" then
+		return nil
+	end
+	-- Block protocol-relative "//host" and "/\host"
+	if p:sub(1, 2) == "//" or p:sub(1, 2) == "/\\" then
+		return nil
+	end
+	-- Block embedded scheme and control bytes (CRLF/NUL/...)
+	if p:find("://", 1, true) then
+		return nil
+	end
+	if p:find("[%z\1-\31\127]") then
+		return nil
+	end
+	-- No self-referential loop to the challenge
+	local path = p:match("^[^?]+") or p
+	if path == antibot_uri then
+		return nil
+	end
+	return p
+end
+
+-- Normalize a POST/GET arg to a plain string: take the first value of a repeated
+-- arg (table) and reject any non-string shape (e.g. boolean from a bare flag), so
+-- a malformed field can never crash a string op downstream.
+local function first_value(v)
+	if type(v) == "table" then
+		v = v[1]
+	end
+	if type(v) ~= "string" then
+		return nil
+	end
+	return v
+end
+
+-- Drop the query so the URL-borne "next" never leaks secrets; full URI stays in the session.
+local function path_only(p)
+	if not p then
+		return nil
+	end
+	return p:match("^[^?]+") or p
+end
+
+local function get_uri_cache_ele(ctx)
+	local uri = ctx.bw.uri
+	local request_uri = ctx.bw.request_uri
+	if request_uri and request_uri ~= "" and request_uri ~= uri then
+		local hash = sha256:new()
+		hash:update(request_uri)
+		return "uri#" .. to_hex(hash:final())
+	end
+	return "uri" .. uri
+end
+
 local function get_http_client()
 	local httpc, err = http_new()
 	if not httpc then
@@ -155,7 +214,12 @@ function antibot:header()
 
 	-- Don't go further if client resolved the challenge
 	if self.session_data.resolved then
-		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+		return self:ret(
+			true,
+			"client already resolved the challenge",
+			nil,
+			is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"]) or "/"
+		)
 	end
 
 	-- Don't go further if content is not being displayed (e.g. HEAD requests)
@@ -169,6 +233,9 @@ function antibot:header()
 	end
 
 	local hdr = ngx.header
+
+	-- Per-request CSP nonces and per-session challenge state must not be cached by browsers or intermediaries.
+	hdr["Cache-Control"] = "no-store"
 
 	-- Override CSP header
 	local csp_directives = {
@@ -218,18 +285,26 @@ function antibot:header()
 		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
 	elseif self.session_data.type == "capjs" then
 		local capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
-		-- Cap.js needs: no strict-dynamic (workers do dynamic imports from capjs_url),
-		-- 'unsafe-inline' on script-src (the sandboxed instrumentation iframe's srcdoc
-		-- cannot carry a nonce; per CSP3, adding 'unsafe-inline' implies dropping the
-		-- nonce), wasm-unsafe-eval (workers execute WASM), no trusted types (widget.js
-		-- uses innerHTML). The widget's inline <style> is nonced via window.CAP_CSS_NONCE
-		-- (see capjs.html), so style-src stays strict.
-		csp_directives["script-src"] = "'unsafe-inline' " .. capjs_url .. " 'wasm-unsafe-eval'"
 		csp_directives["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'"
-		csp_directives["connect-src"] = capjs_url
-		csp_directives["frame-src"] = capjs_url
-		csp_directives["worker-src"] = "blob: " .. capjs_url
-		csp_directives["require-trusted-types-for"] = nil
+		if ngx.var.arg_capjs_frame == "1" then
+			-- Isolated widget document: confines 'unsafe-eval' (instrumentation runs
+			-- server-supplied JS via eval) and wasm-unsafe-eval here, away from the parent.
+			-- Trusted types off (widget uses innerHTML); inline style/script are nonced.
+			csp_directives["script-src"] = "'nonce-"
+				.. self.ctx.bw.antibot_nonce_script
+				.. "' "
+				.. capjs_url
+				.. " 'wasm-unsafe-eval' 'unsafe-eval'"
+			csp_directives["connect-src"] = capjs_url
+			csp_directives["frame-src"] = capjs_url
+			csp_directives["worker-src"] = "blob: " .. capjs_url
+			csp_directives["frame-ancestors"] = "'self'"
+			csp_directives["require-trusted-types-for"] = nil
+		else
+			-- Parent: strict, eval-free; only embeds the same-origin widget iframe.
+			csp_directives["script-src"] = "'nonce-" .. self.ctx.bw.antibot_nonce_script .. "'"
+			csp_directives["frame-src"] = "'self'"
+		end
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
@@ -263,7 +338,7 @@ function antibot:access()
 		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
 	end
 	if self.ctx.bw.uri then
-		checks["URI"] = "uri" .. self.ctx.bw.uri
+		checks["URI"] = self:kind_to_ele("URI")
 	end
 	local already_cached = {
 		["IP"] = false,
@@ -323,7 +398,12 @@ function antibot:access()
 	-- Don't go further if client resolved the challenge
 	if self.session_data.resolved then
 		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
-			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+			return self:ret(
+				true,
+				"client already resolved the challenge",
+				nil,
+				is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"]) or "/"
+			)
 		end
 		return self:ret(true, "client already resolved the challenge")
 	end
@@ -333,12 +413,25 @@ function antibot:access()
 
 	-- Redirect to challenge page
 	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
-		return self:ret(true, "redirecting client to the challenge uri", nil, self.variables["ANTIBOT_URI"])
+		local target = self.variables["ANTIBOT_URI"]
+		-- Carry the destination (path only) in the URL so it survives a cookie race.
+		local nxt = path_only(is_safe_relative_path(self:get_original_uri(), target))
+		if nxt and nxt ~= "/" then
+			target = target .. "?next=" .. ngx.escape_uri(nxt)
+		end
+		-- This 302 sets the session cookie; keep caches from storing it.
+		ngx.header["Cache-Control"] = "no-store"
+		return self:ret(true, "redirecting client to the challenge uri", nil, target)
 	end
 
 	-- Cookie case : don't display challenge page
 	if self.session_data.resolved then
-		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+		return self:ret(
+			true,
+			"client already resolved the challenge",
+			nil,
+			is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"]) or "/"
+		)
 	end
 
 	-- Display challenge needed
@@ -442,6 +535,19 @@ end
 
 function antibot:prepare_challenge()
 	if not self.session_data.prepared then
+		-- Only real navigations may seed original_uri (speculative sub-resource hits
+		-- would poison it to "/"). The challenge endpoint and the transparent "cookie"
+		-- type are exempt.
+		if
+			self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"]
+			and self.variables["USE_ANTIBOT"] ~= "cookie"
+			and not self:is_navigation_request()
+		then
+			-- uri is decoded (may hold CR/LF); strip control bytes to avoid log injection.
+			local safe_uri = (self.ctx.bw.uri or "?"):gsub("[%z\1-\31\127]", "?")
+			self.logger:log(INFO, "skipping challenge prepare for non-navigation request : " .. safe_uri)
+			return
+		end
 		local original_uri = self:get_original_uri()
 		-- Set all session data at once instead of multiple individual assignments
 		local now_time = now()
@@ -483,6 +589,8 @@ function antibot:display_challenge()
 		antibot_uri = self.variables["ANTIBOT_URI"],
 		nonce_script = self.ctx.bw.antibot_nonce_script,
 		nonce_style = self.ctx.bw.antibot_nonce_style,
+		-- Hidden "next" field (path only); query is restored from the session on solve.
+		next = path_only(is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"])) or "/",
 	}
 
 	-- Javascript case
@@ -522,13 +630,18 @@ function antibot:display_challenge()
 	end
 
 	-- Cap.js case
+	local template_name = self.session_data.type .. ".html"
 	if self.session_data.type == "capjs" then
 		template_vars.capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
 		template_vars.capjs_sitekey = self.variables["ANTIBOT_CAPJS_SITEKEY"]
+		-- Serve the widget in an isolated same-origin iframe (relaxed CSP, see header()).
+		if ngx.var.arg_capjs_frame == "1" then
+			template_name = "capjs_frame.html"
+		end
 	end
 
 	-- Render content
-	render(self.session_data.type .. ".html", template_vars)
+	render(template_name, template_vars)
 
 	return true, "displayed challenge"
 end
@@ -549,9 +662,11 @@ function antibot:check_challenge()
 	-- Javascript case
 	if self.session_data.type == "javascript" then
 		read_body()
-		local args, err = get_post_args(1)
-		if err == "truncated" or not args or not args["challenge"] then
-			return nil, "missing challenge arg"
+		local args, err = get_post_args(8)
+		args = args or {}
+		args["challenge"] = first_value(args["challenge"])
+		if err == "truncated" or not args["challenge"] then
+			return false, "missing or invalid challenge arg"
 		end
 		local hash = sha256:new()
 		hash:update(self.session_data.random .. args["challenge"])
@@ -563,15 +678,17 @@ function antibot:check_challenge()
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
 		self:set_session_data()
-		return true, "resolved", self.session_data.original_uri
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	-- Captcha case
 	if self.session_data.type == "captcha" then
 		read_body()
-		local args, err = get_post_args(1)
-		if err == "truncated" or not args or not args["captcha"] then
-			return nil, "missing challenge arg", nil
+		local args, err = get_post_args(8)
+		args = args or {}
+		args["captcha"] = first_value(args["captcha"])
+		if err == "truncated" or not args["captcha"] then
+			return false, "missing or invalid challenge arg", nil
 		end
 		if self.session_data.captcha ~= args["captcha"] then
 			return false, "wrong value, expected " .. self.session_data.captcha, nil
@@ -579,15 +696,17 @@ function antibot:check_challenge()
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
 		self:set_session_data()
-		return true, "resolved", self.session_data.original_uri
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	-- reCAPTCHA case
 	if self.session_data.type == "recaptcha" then
 		read_body()
-		local args, err = get_post_args(1)
-		if err == "truncated" or not args or not args["token"] then
-			return nil, "missing challenge arg", nil
+		local args, err = get_post_args(8)
+		args = args or {}
+		args["token"] = first_value(args["token"])
+		if err == "truncated" or not args["token"] then
+			return false, "missing or invalid challenge arg", nil
 		end
 		local httpc, err = get_http_client()
 		if not httpc then
@@ -674,15 +793,17 @@ function antibot:check_challenge()
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
 		self:set_session_data()
-		return true, "resolved", self.session_data.original_uri
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	-- hCaptcha case
 	if self.session_data.type == "hcaptcha" then
 		read_body()
-		local args, err = get_post_args(1)
-		if err == "truncated" or not args or not args["token"] then
-			return nil, "missing challenge arg", nil
+		local args, err = get_post_args(8)
+		args = args or {}
+		args["token"] = first_value(args["token"])
+		if err == "truncated" or not args["token"] then
+			return false, "missing or invalid challenge arg", nil
 		end
 		local httpc, err = get_http_client()
 		if not httpc then
@@ -714,15 +835,17 @@ function antibot:check_challenge()
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
 		self:set_session_data()
-		return true, "resolved", self.session_data.original_uri
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	-- Turnstile case
 	if self.session_data.type == "turnstile" then
 		read_body()
-		local args, err = get_post_args(1)
-		if err == "truncated" or not args or not args["token"] then
-			return nil, "missing challenge arg", nil
+		local args, err = get_post_args(8)
+		args = args or {}
+		args["token"] = first_value(args["token"])
+		if err == "truncated" or not args["token"] then
+			return false, "missing or invalid challenge arg", nil
 		end
 		local httpc, err = get_http_client()
 		if not httpc then
@@ -754,15 +877,17 @@ function antibot:check_challenge()
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
 		self:set_session_data()
-		return true, "resolved", self.session_data.original_uri
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	-- mCaptcha case
 	if self.session_data.type == "mcaptcha" then
 		read_body()
-		local args, err = get_post_args(1)
-		if err == "truncated" or not args or not args["mcaptcha__token"] then
-			return nil, "missing challenge arg", nil
+		local args, err = get_post_args(8)
+		args = args or {}
+		args["mcaptcha__token"] = first_value(args["mcaptcha__token"])
+		if err == "truncated" or not args["mcaptcha__token"] then
+			return false, "missing or invalid challenge arg", nil
 		end
 		local httpc, err = get_http_client()
 		if not httpc then
@@ -795,15 +920,17 @@ function antibot:check_challenge()
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
 		self:set_session_data()
-		return true, "resolved", self.session_data.original_uri
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	-- Cap.js case
 	if self.session_data.type == "capjs" then
 		read_body()
-		local args, err = get_post_args(1)
-		if err == "truncated" or not args or not args["token"] then
-			return nil, "missing challenge arg", nil
+		local args, err = get_post_args(8)
+		args = args or {}
+		args["token"] = first_value(args["token"])
+		if err == "truncated" or not args["token"] then
+			return false, "missing or invalid challenge arg", nil
 		end
 		local httpc, err = get_http_client()
 		if not httpc then
@@ -839,10 +966,25 @@ function antibot:check_challenge()
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
 		self:set_session_data()
-		return true, "resolved", self.session_data.original_uri
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	return nil, "unknown", nil
+end
+
+-- True for a top-level document navigation (vs a speculative sub-resource fetch).
+function antibot:is_navigation_request()
+	local mode = ngx.var.http_sec_fetch_mode
+	local dest = ngx.var.http_sec_fetch_dest
+	if mode or dest then
+		return mode == "navigate" or dest == "document"
+	end
+	-- No Sec-Fetch metadata: fall back to the Accept header.
+	local accept = self.ctx.bw.http_accept or ngx.var.http_accept
+	if accept and accept:find("text/html", 1, true) then
+		return true
+	end
+	return false
 end
 
 function antibot:get_referer_path()
@@ -868,21 +1010,50 @@ end
 function antibot:get_original_uri()
 	local antibot_uri = self.variables["ANTIBOT_URI"]
 	if self.ctx.bw.uri == antibot_uri then
-		return "/"
+		-- Prepared at the challenge endpoint: recover the target from the ?next= hint.
+		local args = ngx.req.get_uri_args()
+		local next_arg = args and args["next"]
+		if type(next_arg) == "table" then
+			next_arg = next_arg[1]
+		end
+		return is_safe_relative_path(next_arg, antibot_uri) or "/"
 	end
 	local request_uri = self.ctx.bw.request_uri or "/"
 	local uri_path = self.ctx.bw.uri or request_uri
 
+	-- Validate at the source so a poisoned request URI / Referer never reaches a redirect.
 	if not is_static_like(uri_path) then
-		return request_uri
+		return is_safe_relative_path(request_uri, antibot_uri) or "/"
 	end
 
 	local referer_path = self:get_referer_path()
-	if referer_path and referer_path ~= antibot_uri and not is_static_like(referer_path) then
-		return referer_path
+	if referer_path and not is_static_like(referer_path) then
+		return is_safe_relative_path(referer_path, antibot_uri) or "/"
 	end
 
 	return "/"
+end
+
+-- Post-solve target: prefer the POSTed "next", restoring the query from the session.
+function antibot:resolve_redirect_target(args)
+	local antibot_uri = self.variables["ANTIBOT_URI"]
+	local session_full = is_safe_relative_path(self.session_data.original_uri, antibot_uri)
+	local posted
+	if args and args["next"] then
+		posted = args["next"]
+		if type(posted) == "table" then
+			posted = posted[1]
+		end
+		posted = path_only(is_safe_relative_path(posted, antibot_uri))
+	end
+	if posted then
+		-- Same path as the session: restore its query; otherwise use the path only.
+		if session_full and path_only(session_full) == posted then
+			return session_full
+		end
+		return posted
+	end
+	return session_full or "/"
 end
 
 function antibot:kind_to_ele(kind)
@@ -891,7 +1062,7 @@ function antibot:kind_to_ele(kind)
 	elseif kind == "UA" then
 		return "ua" .. self.ctx.bw.http_user_agent
 	elseif kind == "URI" then
-		return "uri" .. self.ctx.bw.uri
+		return get_uri_cache_ele(self.ctx)
 	elseif kind == "COUNTRY" then
 		return "country" .. self.ctx.bw.remote_addr
 	end
@@ -1015,8 +1186,13 @@ end
 
 function antibot:is_ignored_uri()
 	-- Check if URI is in ignore list
+	local uri = self.ctx.bw.uri
+	local request_uri = self.ctx.bw.request_uri
 	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-		if regex_match(self.ctx.bw.uri, ignore_uri) then
+		if regex_match(uri, ignore_uri) then
+			return true, "URI " .. ignore_uri
+		end
+		if request_uri and request_uri ~= uri and regex_match(request_uri, ignore_uri) then
 			return true, "URI " .. ignore_uri
 		end
 	end

@@ -52,50 +52,67 @@ def _collect_all_bans():
     bans_list = []
     if redis_client:
         try:
-            for key in redis_client.scan_iter("bans_ip_*"):
-                key_str = key.decode("utf-8", "replace")
-                ip = key_str.replace("bans_ip_", "")
-                data = redis_client.get(key)
-                if not data:
-                    continue
-                exp = redis_client.ttl(key)
-                raw_value = data.decode("utf-8", "replace")
-                try:
-                    ban_data = loads(raw_value)
-                except (JSONDecodeError, ValueError) as e:
-                    LOGGER.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
-                    ban_data = {"reason": raw_value, "service": "unknown", "date": 0, "country": "unknown", "ban_scope": "global", "permanent": False}
+            # Collect keys first, then pipeline GET+TTL for all of them. This
+            # turns 2 round-trips per ban (get + ttl) into ~2 round-trips total.
+            # Results come back flat: [data0, ttl0, data1, ttl1, ...].
+            global_keys = list(redis_client.scan_iter("bans_ip_*"))
+            if global_keys:
+                pipe = redis_client.pipeline(transaction=False)
+                for key in global_keys:
+                    pipe.get(key)
+                    pipe.ttl(key)
+                results = pipe.execute()
+                for idx, key in enumerate(global_keys):
+                    data = results[2 * idx]
+                    exp = results[2 * idx + 1]
+                    if not data:
+                        continue
+                    key_str = key.decode("utf-8", "replace")
+                    ip = key_str.replace("bans_ip_", "")
+                    raw_value = data.decode("utf-8", "replace")
+                    try:
+                        ban_data = loads(raw_value)
+                    except (JSONDecodeError, ValueError) as e:
+                        LOGGER.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
+                        ban_data = {"reason": raw_value, "service": "unknown", "date": 0, "country": "unknown", "ban_scope": "global", "permanent": False}
 
-                ban_data["ban_scope"] = "global"
-                ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
+                    ban_data["ban_scope"] = "global"
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
-                if ban_data.get("permanent", False):
-                    exp = 0
+                    if ban_data.get("permanent", False):
+                        exp = 0
 
-                bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
+                    bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
 
-            for key in redis_client.scan_iter("bans_service_*_ip_*"):
-                key_str = key.decode("utf-8", "replace")
-                service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
-                data = redis_client.get(key)
-                if not data:
-                    continue
-                exp = redis_client.ttl(key)
-                raw_value = data.decode("utf-8", "replace")
-                try:
-                    ban_data = loads(raw_value)
-                except (JSONDecodeError, ValueError) as e:
-                    LOGGER.warning(f"Failed to decode ban data for {ip} on service {service}, using raw value as reason: {e}")
-                    ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": "service", "permanent": False}
+            service_keys = list(redis_client.scan_iter("bans_service_*_ip_*"))
+            if service_keys:
+                pipe = redis_client.pipeline(transaction=False)
+                for key in service_keys:
+                    pipe.get(key)
+                    pipe.ttl(key)
+                results = pipe.execute()
+                for idx, key in enumerate(service_keys):
+                    data = results[2 * idx]
+                    exp = results[2 * idx + 1]
+                    if not data:
+                        continue
+                    key_str = key.decode("utf-8", "replace")
+                    service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
+                    raw_value = data.decode("utf-8", "replace")
+                    try:
+                        ban_data = loads(raw_value)
+                    except (JSONDecodeError, ValueError) as e:
+                        LOGGER.warning(f"Failed to decode ban data for {ip} on service {service}, using raw value as reason: {e}")
+                        ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": "service", "permanent": False}
 
-                ban_data["ban_scope"] = "service"
-                ban_data["service"] = service
-                ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
+                    ban_data["ban_scope"] = "service"
+                    ban_data["service"] = service
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
-                if ban_data.get("permanent", False):
-                    exp = 0
+                    if ban_data.get("permanent", False):
+                        exp = 0
 
-                bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
+                    bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Couldn't get bans from redis: {e}")
@@ -629,6 +646,8 @@ def bans_ban():
         ip = ban.get("ip", "")
         reason = ban.get("reason", "ui")
         ban_scope = ban.get("ban_scope", "global")
+        if ban_scope not in ("global", "service"):  # only two valid scopes; clamp anything else
+            ban_scope = "global"
         service = ban.get("service", "")
 
         # Validate IP address

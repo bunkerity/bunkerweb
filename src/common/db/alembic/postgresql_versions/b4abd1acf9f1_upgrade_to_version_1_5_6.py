@@ -11,7 +11,6 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
 revision: str = "b4abd1acf9f1"
 down_revision: Union[str, None] = "7deca2941c74"
@@ -27,17 +26,13 @@ def upgrade():
 
     # Drop the foreign key constraint dynamically
     conn = op.get_bind()
-    result = conn.execute(
-        sa.text(
-            """
+    result = conn.execute(sa.text("""
         SELECT conname
         FROM pg_constraint
         WHERE conrelid = 'bw_jobs_cache'::regclass
           AND confrelid = 'bw_jobs'::regclass
           AND conname LIKE '%_job_name%'
-        """
-        )
-    ).fetchone()
+        """)).fetchone()
 
     if result:
         constraint_name = result[0]
@@ -45,16 +40,12 @@ def upgrade():
             batch_op.drop_constraint(constraint_name, type_="foreignkey")
 
     # Drop index dynamically if it exists
-    index_result = conn.execute(
-        sa.text(
-            """
+    index_result = conn.execute(sa.text("""
         SELECT indexname
         FROM pg_indexes
         WHERE tablename = 'bw_jobs_cache'
           AND indexname = 'job_name'
-        """
-        )
-    ).fetchone()
+        """)).fetchone()
 
     if index_result:
         with op.batch_alter_table("bw_jobs_cache") as batch_op:
@@ -81,22 +72,18 @@ def upgrade():
     op.add_column("bw_plugins", sa.Column("type", sa.Enum("core", "external", "pro", name="plugin_types_enum"), nullable=False, server_default="core"))
 
     # Alter the `stream` column with explicit casting
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE bw_plugins
         ALTER COLUMN stream TYPE stream_types_enum
         USING stream::text::stream_types_enum
-        """
-    )
+        """)
 
     # Migrate data: Set 'type' to 'external' where 'external' was true
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugins
         SET type = 'external'
         WHERE external = true
-    """
-    )
+    """)
 
     op.drop_column("bw_plugins", "external")
 
@@ -105,23 +92,18 @@ def upgrade():
 
     # Drop indices dynamically if they exist
     for table, index_name in (("bw_jobs", "name"), ("bw_settings", "name")):
-        index_exists = conn.execute(
-            sa.text(
-                f"""
+        index_exists = conn.execute(sa.text(f"""
                 SELECT indexname
                 FROM pg_indexes
                 WHERE tablename = '{table}'
                   AND indexname = '{index_name}'
-                """
-            )
-        ).fetchone()
+                """)).fetchone()
 
         if index_exists:
             op.drop_index(index_name, table_name=table)
 
     # Update all new columns and version in a single statement
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_metadata
         SET is_pro = false,
             pro_status = 'invalid',
@@ -130,8 +112,7 @@ def upgrade():
             pro_plugins_changed = false,
             version = '1.5.6'
         WHERE id = 1
-    """
-    )
+    """)
 
 
 def downgrade():
@@ -149,24 +130,20 @@ def downgrade():
     op.add_column("bw_plugins", sa.Column("external", sa.Boolean(), autoincrement=False, nullable=False))
 
     # Migrate data: Set 'external' to true where 'type' was 'external'
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugins
         SET external = true
         WHERE type = 'external'
-    """
-    )
+    """)
 
     op.drop_column("bw_plugins", "type")
 
     # Revert the `stream` column back to VARCHAR
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE bw_plugins
         ALTER COLUMN stream TYPE VARCHAR(16)
         USING stream::text
-        """
-    )
+        """)
 
     op.alter_column(
         "bw_plugins", "stream", existing_type=sa.Enum("no", "yes", "partial", name="stream_types_enum"), type_=sa.VARCHAR(length=16), existing_nullable=False
@@ -184,20 +161,12 @@ def downgrade():
     op.execute("DROP TYPE IF EXISTS stream_types_enum")
 
     # Recreate foreign key dynamically
-    result = (
-        op.get_bind()
-        .execute(
-            sa.text(
-                """
+    result = op.get_bind().execute(sa.text("""
         SELECT conname
         FROM pg_constraint
         WHERE conrelid = 'bw_jobs_cache'::regclass
           AND conname = 'fk_bw_jobs_cache_job_name'
-        """
-            )
-        )
-        .fetchone()
-    )
+        """)).fetchone()
 
     if result:
         with op.batch_alter_table("bw_jobs_cache") as batch_op:

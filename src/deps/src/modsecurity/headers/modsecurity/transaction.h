@@ -405,7 +405,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     size_t getRequestBodyLength();
 
 #ifndef NO_LOGS
-    void debug(int, const std::string &) const;
+    void debug(int level, const std::string& message) const;
 #endif
     void serverLog(const RuleMessage &rm);
 

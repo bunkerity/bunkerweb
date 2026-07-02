@@ -13,7 +13,7 @@ from flask_login import current_user
 # from app.models.totp import totp as TOTP
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import LOGGER, USER_PASSWORD_RX, gen_password_hash, _sanitize_internal_next
+from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, gen_password_hash, password_exceeds_bcrypt_limit, _sanitize_internal_next
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
@@ -143,6 +143,16 @@ def setup_page():
             elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
                 return handle_error(
                     "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
+                    "setup",
+                )
+            elif password_exceeds_bcrypt_limit(request.form["admin_password"]):
+                LOGGER.warning(
+                    f"Rejected admin password during setup: it is {len(request.form['admin_password'].encode('utf-8'))} bytes, "
+                    f"over bcrypt's {MAX_PASSWORD_BYTES}-byte limit."
+                )
+                return handle_error(
+                    f"The admin password is too long. It must not exceed {MAX_PASSWORD_BYTES} bytes (bcrypt's hard limit); "
+                    "accented or emoji characters count as several bytes each.",
                     "setup",
                 )
 

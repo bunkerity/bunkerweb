@@ -32,6 +32,24 @@ local http_new = http.new
 local match = string.match
 local table_insert = table.insert
 
+local INSTANCE_ID_PATH = "/var/cache/bunkerweb/bunkernet/instance.id"
+
+-- Read the BunkerNet instance ID from disk, returning nil if the file is
+-- missing or empty (an empty file would otherwise poison the internalstore
+-- with a truthy "" value).
+local function read_instance_id_from_disk()
+	local f = open(INSTANCE_ID_PATH, "r")
+	if not f then
+		return nil
+	end
+	local id = f:read("*all"):gsub("[\r\n]", "")
+	f:close()
+	if id == "" then
+		return nil
+	end
+	return id
+end
+
 function bunkernet:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "bunkernet", ctx)
@@ -94,14 +112,11 @@ function bunkernet:init()
 		return self:ret(true, "no service uses BunkerNet, skipping init")
 	end
 	-- Check if instance ID is present
-	local f, err = open("/var/cache/bunkerweb/bunkernet/instance.id", "r")
-	if not f then
-		self.logger:log(WARN, "instance ID not found, skipping instance id initialization: " .. tostring(err))
+	local id = read_instance_id_from_disk()
+	if not id then
+		self.logger:log(WARN, "instance ID not found or empty, skipping instance id initialization")
 		return self:ret(true, "instance ID not found")
 	end
-	-- Retrieve instance ID
-	local id = f:read("*all"):gsub("[\r\n]", "")
-	f:close()
 	-- Store ID in internalstore
 	local ok, err = self.internalstore:set("plugin_bunkernet_id", id, nil, true)
 	if not ok then
@@ -264,6 +279,9 @@ function bunkernet:request(method, url, data)
 	if not httpc then
 		return false, "can't instantiate http object : " .. err
 	end
+	-- Bound every API call so a slow/unreachable BunkerNet API can't stall the
+	-- UI ping or init_worker (matches the 5s timeout used in jobs/bunkernet.py).
+	httpc:set_timeout(5000)
 
 	local os_data = {
 		name = "Linux",
@@ -365,7 +383,17 @@ function bunkernet:api()
 		if not id and err_id ~= "not found" then
 			return self:ret(true, "error while getting bunkernet id : " .. err_id, HTTP_INTERNAL_SERVER_ERROR)
 		elseif not id then
-			return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
+			-- internalstore is only populated at init(); if the instance.id file
+			-- landed on disk after the last reload, self-heal by reading it now
+			-- so the status doesn't stay stuck until the next config reload.
+			id = read_instance_id_from_disk()
+			if not id then
+				return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
+			end
+			local ok_set, err_set = self.internalstore:set("plugin_bunkernet_id", id, nil, true)
+			if not ok_set then
+				self.logger:log(WARN, "can't save recovered instance ID to the internalstore : " .. err_set)
+			end
 		end
 
 		self.bunkernet_id = id

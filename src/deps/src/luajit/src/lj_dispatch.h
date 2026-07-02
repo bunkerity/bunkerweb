@@ -132,7 +132,7 @@ LJ_FUNC void lj_dispatch_init(GG_State *GG);
 #if LJ_HASJIT
 LJ_FUNC void lj_dispatch_init_hotcount(global_State *g);
 #endif
-LJ_FUNC void lj_dispatch_update(global_State *g);
+LJ_FUNC void LJ_FASTCALL lj_dispatch_update(global_State *g, int nolock);
 
 /* Instruction dispatch callback for hooks or when recording. */
 LJ_FUNCA void LJ_FASTCALL lj_dispatch_ins(lua_State *L, const BCIns *pc);
