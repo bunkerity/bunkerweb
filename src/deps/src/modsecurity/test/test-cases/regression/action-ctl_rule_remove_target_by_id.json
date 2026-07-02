@@ -219,5 +219,209 @@
       "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:1,phase:1,pass,t:none,ctl:ruleRemoveTargetById=2;REQUEST_HEADERS:referer\"",
       "SecRule REQUEST_HEADERS:Referer \"@contains attack\" \"id:2,phase:1,deny,t:none,log\""
     ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetById syntax I (Issue 3565)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/index.html?@foo=attack",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {},
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "parser_error": "Line: 2. Column: 47. 1 is not a valid 'ID;VARIABLE'"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@endsWith /index.html\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetById=1,ARGS\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,t:none,status:403,block,deny\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetById syntax II (Issue 3565)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/index.html?@foo=attack",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {},
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "parser_error": "Line: 2. Column: 120. Expecting an action, got:  ctl:ruleRemoveTargetById,1,ARGS"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@endsWith /index.html\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetById,1,ARGS\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,t:none,status:403,block,deny\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetById with @ character (Issue 3565)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/index.html?@foo=attack",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {},
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@endsWith /index.html\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetById=1;ARGS:@foo\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,t:none,status:403,block,deny\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetById with = character",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*"
+      },
+      "uri": "/index.html?foo%3Dbar=attack",
+      "method": "GET"
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:9002100,phase:2,pass,ctl:ruleRemoveTargetById=1;ARGS:foo=bar\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,status:403,block,deny\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetById with ( and ) characters",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*"
+      },
+      "uri": "/index.html?foo(bar)=attack",
+      "method": "GET"
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:9002100,phase:2,pass,ctl:ruleRemoveTargetById=1;ARGS:foo(bar)\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,status:403,block,deny\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetById with ' character",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*"
+      },
+      "uri": "/index.html?foo'bar=attack",
+      "method": "GET"
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:9002100,phase:2,pass,ctl:ruleRemoveTargetById=1;ARGS:foo'bar\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,status:403,block,deny\""
+    ]
   }
 ]

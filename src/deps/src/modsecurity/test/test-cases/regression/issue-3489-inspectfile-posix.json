@@ -2,7 +2,7 @@
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "Testing ctl:ruleRemoveByTag (1/2)",
+    "title": "Issue 3489: @inspectFile executes external helper without shell (match)",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -16,9 +16,10 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "0"
+        "Content-Length": "0",
+        "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri": "/?key=value&key=other_value",
+      "uri": "/whee?res=match",
       "method": "GET",
       "body": [
         ""
@@ -26,9 +27,6 @@
     },
     "response": {
       "headers": {
-        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type": "text/html",
         "Content-Length": "8"
       },
       "body": [
@@ -36,20 +34,18 @@
       ]
     },
     "expected": {
-      "debug_log": "Skipped rule id '2'. Skipped due to a ruleRemoveByTag action.",
+      "debug_log": "Rule returned 1.",
       "http_code": 200
     },
     "rules": [
-      "SecRule ARGS:key \".\" \"id:4,ctl:ruleRemoveByTag=tag123\"",
-      "SecRule ARGS \"@contains test1\" \"id:1,pass,t:trim\"",
-      "SecRule ARGS \"@contains test2\" \"id:2,pass,t:trim,tag:tag123\"",
-      "SecRule ARGS \"@contains test3\" \"id:3,pass,t:trim\""
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/inspectfile-posix-helper.sh\" \"id:348901,phase:2,pass,t:none\""
     ]
   },
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "Testing ctl:ruleRemoveByTag (2/2)",
+    "title": "Issue 3489: @inspectFile executes external helper without shell (no match)",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -63,9 +59,10 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "0"
+        "Content-Length": "0",
+        "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri": "/?key=value&key=other_value",
+      "uri": "/whee?res=nomatch",
       "method": "GET",
       "body": [
         ""
@@ -73,9 +70,6 @@
     },
     "response": {
       "headers": {
-        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type": "text/html",
         "Content-Length": "8"
       },
       "body": [
@@ -83,20 +77,18 @@
       ]
     },
     "expected": {
-      "debug_log": "Skipped rule id '3'. Skipped due to a ruleRemoveByTag action.",
+      "debug_log": "Rule returned 0.",
       "http_code": 200
     },
     "rules": [
-      "SecRule ARGS:key \".\" \"id:4,ctl:ruleRemoveByTag=whee\"",
-      "SecRule ARGS \"@contains test\" \"id:1,pass,t:trim\"",
-      "SecRule ARGS \"@contains test\" \"id:2,pass,t:trim\"",
-      "SecRule ARGS \"@contains test\" \"id:3,pass,t:trim,tag:whee\""
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/inspectfile-posix-helper.sh\" \"id:348902,phase:2,pass,t:none\""
     ]
   },
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "Testing ctl:ruleRemoveByTag syntax check",
+    "title": "Issue 3489: @inspectFile handles exec failure as no match",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -110,9 +102,10 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "0"
+        "Content-Length": "0",
+        "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri": "/?key=value&key=other_value",
+      "uri": "/whee?res=match",
       "method": "GET",
       "body": [
         ""
@@ -120,9 +113,6 @@
     },
     "response": {
       "headers": {
-        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type": "text/html",
         "Content-Length": "8"
       },
       "body": [
@@ -130,10 +120,12 @@
       ]
     },
     "expected": {
-      "parser_error": "Line: 1. Column: 54. Expecting an action, got:  ctl:ruleRemoveByTag,whee"
+      "debug_log": "Rule returned 0.",
+      "http_code": 200
     },
     "rules": [
-      "SecRule ARGS:key \".\" \"id:4,ctl:ruleRemoveByTag,whee\""
+      "SecRuleEngine On",
+      "SecRule ARGS:res \"@inspectFile test-cases/data/inspectfile-not-executable.txt\" \"id:348903,phase:2,pass,t:none\""
     ]
   }
 ]

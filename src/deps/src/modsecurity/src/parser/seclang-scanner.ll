@@ -457,7 +457,7 @@ FREE_TEXT_COMMA_QUOTE                   [^,\"\\n\\r]+
 NEW_LINE_FREE_TEXT                      [^, \t\"\n\r]+
 NOT !
 FREE_TEXT                               ([^\"]|([^\\]\\\"))+
-REMOVE_RULE_BY                          [0-9A-Za-z_\/\.\-\*\:\;\]\[\$]+
+REMOVE_RULE_BY                          [a-zA-Z0-9_\-\.\*\/\:\;\$@\=\(\)\[\]\']+
 
 VAR_FREE_TEXT_QUOTE                     ([^\']|([^\\]\\\'))+
 VAR_FREE_TEXT_SPACE                     [^ \t\"]+

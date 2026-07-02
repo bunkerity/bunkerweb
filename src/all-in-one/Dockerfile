@@ -49,7 +49,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     export URL="$(jq -r .url re2.json)" && \
     export COMMIT="$(jq -r .commit re2.json)" && \
     bash install-re2.sh && \
-    go install github.com/mikefarah/yq/v4@v4.44.3
+    go install github.com/mikefarah/yq/v4@v4.50.1
 
 COPY src/all-in-one/deps/crowdsec.json crowdsec.json
 COPY --chmod=644 src/all-in-one/scripts/install-crowdsec.sh install-crowdsec.sh
@@ -171,7 +171,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libexpat>=2.8.2-r0" # CVE-2026-50219 CVE-2026-56132 CVE-2026-56403 CVE-2026-56404	CVE-2026-56405 CVE-2026-56406 CVE-2026-56410 CVE-2026-56411 CVE-2026-56412 CVE-2026-56131 CVE-2026-56407 CVE-2026-56408 CVE-2026-56409
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
