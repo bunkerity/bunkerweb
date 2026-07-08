@@ -1325,6 +1325,7 @@ def before_request():
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
+            user_admin=current_user.admin,
             theme=theme_value,
             language=language_value,
             supported_languages=SUPPORTED_LANGUAGES,
