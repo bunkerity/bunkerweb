@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+# nginx module build configuration script.
+#
+# This file is dot-sourced by nginx's auto/configure using POSIX sh.  It must
+# be written in strict POSIX sh — no bash-specific syntax (arrays, [[ … ]],
+# process substitution, etc.).  The shebang documents the intended interpreter
+# but has no effect on how configure invokes the script.
+#
+# Convention:
+#   $NGX_AUTOCONF_ERR is nginx's internal build diagnostic log (objs/autoconf.err).
+#   Third-party modules must NOT write to it; that file is reserved for the
+#   nginx build system.  User-facing messages go to stdout.
+#
+
+# ------------------------------------------------------------------
+# Propagate upstream protocol availability into the module's #define
+# guards so that the C source can use #if (NGX_HTTP_PROXY) etc.
+# ------------------------------------------------------------------
+if [ "$HTTP_PROXY" = "YES" ]; then
+    have=NGX_HTTP_PROXY . auto/have
+fi
+
+if [ "$HTTP_FASTCGI" = "YES" ]; then
+    have=NGX_HTTP_FASTCGI . auto/have
+fi
+
+if [ "$HTTP_SCGI" = "YES" ]; then
+    have=NGX_HTTP_SCGI . auto/have
+fi
+
+if [ "$HTTP_UWSGI" = "YES" ]; then
+    have=NGX_HTTP_UWSGI . auto/have
+fi
+
+# ------------------------------------------------------------------
+# Module identity and sources
+# ------------------------------------------------------------------
+ngx_addon_name=ngx_http_cache_purge_module
+CACHE_PURGE_SRCS="$ngx_addon_dir/ngx_cache_purge_module.c"
+
+# ------------------------------------------------------------------
+# Register the module with nginx's build system.
+#
+# nginx >= 1.9.11 exports $ngx_module_link and uses auto/module for
+# both static (LINK=ADDON) and dynamic (LINK=DYNAMIC) builds.
+# Older versions require manual population of HTTP_MODULES and
+# NGX_ADDON_SRCS.
+# ------------------------------------------------------------------
+if [ -n "$ngx_module_link" ]; then
+    ngx_module_type=HTTP
+    ngx_module_name="$ngx_addon_name"
+    ngx_module_srcs="$CACHE_PURGE_SRCS"
+    ngx_module_deps=""
+    ngx_module_libs=""
+    . auto/module
+else
+    HTTP_MODULES="$HTTP_MODULES $ngx_addon_name"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $CACHE_PURGE_SRCS"
+fi
+
+# Mark the module as present (used by other modules that may depend on it).
+have=NGX_CACHE_PURGE_MODULE . auto/have
+
+echo "  + ngx_cache_purge module added"

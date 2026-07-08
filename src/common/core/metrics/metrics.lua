@@ -46,6 +46,19 @@ local table_remove = table.remove
 
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 
+-- Bounded set of nginx $upstream_cache_status values counted per served request
+-- (reverseproxy proxy_cache). Distinct axis from the blocked-request facets above;
+-- keeps the cache-status counter cardinality fixed and skips nil/unknown statuses.
+local CACHE_STATUS_VALUES = {
+	HIT = true,
+	MISS = true,
+	BYPASS = true,
+	EXPIRED = true,
+	STALE = true,
+	UPDATING = true,
+	REVALIDATED = true,
+}
+
 -- Parse a count value with optional SI shorthand suffix: "100", "1k", "10K", "1m", "5M".
 -- k/K = x1000, m/M = x1_000_000. Returns the integer count, or nil if value is missing
 -- or unparsable.
@@ -368,6 +381,17 @@ function metrics:log(bypass_checks)
 
 		-- Update worker cache
 		lru:set("requests", requests)
+	end
+	-- Count proxy_cache hit/miss for served requests. Distinct axis from the
+	-- blocked-request facets above (never touches the `requests` list): reads the
+	-- reverseproxy plugin's $upstream_cache_status (also emitted as the
+	-- X-Proxy-Cache header) and increments a bounded per-status counter. nil status
+	-- (non-cached requests) is skipped. Exposed via GET /metrics/reverseproxy.
+	local cache_status = ngx.var.upstream_cache_status
+	if cache_status and CACHE_STATUS_VALUES[cache_status] then
+		local lru_key = "reverseproxy_counter_cache_status_" .. cache_status
+		local counter = lru:get(lru_key)
+		lru:set(lru_key, (counter or 0) + 1)
 	end
 	-- Get metrics from plugins
 	local all_metrics = self.ctx.bw.metrics

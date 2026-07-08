@@ -588,6 +588,166 @@ api.global.GET["^/variables$"] = function(self)
 	return self:response(HTTP_OK, "success", variables)
 end
 
+-- Web cache (proxy_cache) management -----------------------------------------
+-- Shared on-disk cache zone for the reverseproxy plugin (keys_zone=proxycache).
+local PROXY_CACHE_DIR = "/var/tmp/bunkerweb/proxy_cache"
+
+-- Rebuild the nginx proxy_cache key string for a URL by expanding the
+-- URL-derivable nginx variables of PROXY_CACHE_KEY (default $scheme$host$request_uri).
+-- Non-URL-derivable variables ($cookie_*, $http_*, ...) cannot be reproduced
+-- from a URL alone, so we error out rather than purge the wrong entry.
+local function reconstruct_cache_key(url, key_template)
+	key_template = key_template or "$scheme$host$request_uri"
+	local scheme, host, uri = url:match("^(https?)://([^/]+)(.*)$")
+	if not scheme then
+		return nil, "invalid url: " .. tostring(url)
+	end
+	if uri == "" then
+		uri = "/"
+	end
+	host = host:gsub(":%d+$", ""):lower()
+	local path = uri:match("^([^?]*)") or uri
+	local args = uri:match("%?(.*)$") or ""
+	local subst = {
+		["$scheme"] = scheme,
+		["$host"] = host,
+		["$http_host"] = host,
+		["$request_uri"] = uri,
+		["$uri"] = path,
+		["$args"] = args,
+		["$query_string"] = args,
+	}
+	local unknown
+	local key = key_template:gsub("%$[%w_]+", function(var)
+		if subst[var] == nil then
+			unknown = var
+			return var
+		end
+		return subst[var]
+	end)
+	if unknown then
+		return nil, "PROXY_CACHE_KEY uses non-URL-derivable variable " .. unknown
+	end
+	return key
+end
+
+api.global.POST["^/proxy%-cache/purge$"] = function(self)
+	read_body()
+	local data = get_body_data()
+	if not data then
+		local data_file = get_body_file()
+		if data_file then
+			local file, err = open(data_file)
+			if not file then
+				return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
+			end
+			data = file:read("*a")
+			file:close()
+		end
+	end
+	local ok, body = pcall(decode, data)
+	if not ok or type(body) ~= "table" then
+		return self:response(HTTP_BAD_REQUEST, "error", "can't decode JSON body")
+	end
+
+	local scope = body.scope or "url"
+
+	-- Purge everything: no native "purge all" exists for a dedicated location
+	-- (module purge_all needs a proxy_pass cache location), so clear the shared
+	-- zone directory directly. nginx tolerates missing files (-> MISS/refetch)
+	-- and reconciles the keys_zone index lazily; no reload needed.
+	if scope == "all" then
+		local count = 0
+		local counter = io.popen("find " .. PROXY_CACHE_DIR .. " -type f 2>/dev/null | wc -l")
+		if counter then
+			count = tonumber((counter:read("*a") or ""):match("%d+")) or 0
+			counter:close()
+		end
+		execute("find " .. PROXY_CACHE_DIR .. " -mindepth 1 -type f -delete 2>/dev/null")
+		return self:response(HTTP_OK, "success", { scope = "all", purged = count })
+	end
+
+	if scope ~= "url" then
+		return self:response(HTTP_BAD_REQUEST, "error", "invalid scope (use 'all' or 'url')")
+	end
+
+	if type(body.urls) ~= "table" or #body.urls == 0 then
+		return self:response(HTTP_BAD_REQUEST, "error", "scope 'url' requires a non-empty 'urls' array")
+	end
+
+	-- Purge each URL by its exact cache key via the native proxy_cache_purge
+	-- directive in the internal /proxy-cache/purge location (index-aware).
+	local purged, not_found, errors = 0, 0, {}
+	for _, item in ipairs(body.urls) do
+		local url = type(item) == "table" and item.url or item
+		local key_template = type(item) == "table" and item.key or nil
+		if type(url) ~= "string" then
+			errors[#errors + 1] = "invalid url entry"
+		else
+			local key, kerr = reconstruct_cache_key(url, key_template)
+			if not key then
+				errors[#errors + 1] = kerr
+			else
+				ngx_req.set_header("X-BW-Purge-Key", key)
+				local res = ngx.location.capture("/proxy-cache/purge")
+				if res and res.status == HTTP_OK then
+					purged = purged + 1
+				elseif res and res.status == HTTP_NOT_FOUND then
+					not_found = not_found + 1
+				else
+					errors[#errors + 1] = "purge failed for "
+						.. url
+						.. " (status "
+						.. tostring(res and res.status or "nil")
+						.. ")"
+				end
+			end
+		end
+	end
+
+	if #errors > 0 then
+		return self:response(
+			HTTP_INTERNAL_SERVER_ERROR,
+			"error",
+			{ purged = purged, not_found = not_found, errors = errors }
+		)
+	end
+	return self:response(HTTP_OK, "success", { purged = purged, not_found = not_found })
+end
+
+api.global.GET["^/proxy%-cache/status$"] = function(self)
+	-- Per-instance view of the shared proxy_cache zone: is it present on disk,
+	-- how many entries and how many bytes. USE_PROXY_CACHE is multisite, so
+	-- "enabled" here means the zone directory exists (nginx creates it when any
+	-- service enables the cache).
+	local enabled, file_count, size_bytes = false, 0, 0
+	local handle = io.popen(
+		"if [ -d '"
+			.. PROXY_CACHE_DIR
+			.. "' ]; then printf 'yes %s %s' "
+			.. "\"$(find '"
+			.. PROXY_CACHE_DIR
+			.. "' -type f 2>/dev/null | wc -l | tr -d ' ')\" "
+			.. "\"$(du -sb '"
+			.. PROXY_CACHE_DIR
+			.. "' 2>/dev/null | cut -f1)\"; else printf 'no 0 0'; fi"
+	)
+	if handle then
+		local out = handle:read("*a") or ""
+		handle:close()
+		local present, count, size = out:match("^(%S+)%s+(%S+)%s+(%S+)")
+		enabled = present == "yes"
+		file_count = tonumber(count) or 0
+		size_bytes = tonumber(size) or 0
+	end
+	return self:response(HTTP_OK, "success", {
+		enabled = enabled,
+		path = PROXY_CACHE_DIR,
+		file_count = file_count,
+		size_bytes = size_bytes,
+	})
+end
+
 function api:is_allowed_ip()
 	if is_ip_in_networks(self.ctx.bw.remote_addr, self.ips) then
 		return true, "ok"

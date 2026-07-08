@@ -275,6 +275,13 @@
       "post_install": "rm src/deps/src/ngx_brotli/.gitmodules && rm -r src/deps/src/ngx_brotli/deps/brotli"
     },
     {
+      "id": "ngx_cache_purge",
+      "name": "ngx_cache_purge v3.0.2",
+      "url": "https://github.com/nginx-modules/ngx_cache_purge.git",
+      "commit": "523e66368922601dff10b71cceb868ff5db6ebf1",
+      "post_install": "rm -rf src/deps/src/ngx_cache_purge/t"
+    },
+    {
       "id": "ngx_devel_kit",
       "name": "Nginx devel kit v0.3.4",
       "url": "https://github.com/vision5/ngx_devel_kit.git",

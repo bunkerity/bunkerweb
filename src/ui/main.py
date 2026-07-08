@@ -64,6 +64,7 @@ from app.lang_config import SUPPORTED_LANGUAGES
 from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
+from app.routes.web_cache import web_cache
 from app.routes.configs import configs
 from app.routes.global_settings import global_settings
 from app.routes.home import home
@@ -96,6 +97,7 @@ BLUEPRINTS = (
     global_settings,
     pro,
     cache,
+    web_cache,
     logs,
     login,
     configs,

@@ -1,0 +1,50 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <!--
+      STUB / PLUMBING ONLY — the visual design of this page is intentionally
+      deferred to a later Claude frontend-design pass. It renders the raw web
+      (proxy) cache status + hit/miss metrics and offers purge controls so the
+      end-to-end wiring (UI -> API -> instances) can be exercised today.
+    -->
+    <div class="card p-4 min-vh-70">
+        <div class="d-flex align-items-center mb-4">
+            <i class="bx bx-cloud bx-sm me-2"></i>
+            <h5 class="mb-0">Web cache (reverse proxy)</h5>
+        </div>
+
+        <!-- Purge controls -->
+        <div class="mb-4">
+            <h6 data-i18n="web_cache.purge">Purge</h6>
+            <div class="d-flex flex-wrap align-items-start gap-3">
+                <form method="POST" action="/web-cache/purge">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="scope" value="all" />
+                    <button type="submit" class="btn btn-danger">Purge all</button>
+                </form>
+                <form method="POST" action="/web-cache/purge" class="d-flex gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="scope" value="url" />
+                    <input type="url"
+                           name="url"
+                           class="form-control"
+                           style="min-width: 20rem"
+                           placeholder="https://www.example.com/asset.js"
+                           required />
+                    <button type="submit" class="btn btn-warning">Purge URL</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Per-instance status -->
+        <div class="mb-4">
+            <h6 data-i18n="web_cache.status">Status (per instance)</h6>
+            <pre class="border rounded p-3 mb-0"><code>{{ web_cache_status | tojson(indent=2) }}</code></pre>
+        </div>
+
+        <!-- Hit/miss metrics -->
+        <div>
+            <h6 data-i18n="web_cache.metrics">Hit / miss metrics (per instance)</h6>
+            <pre class="border rounded p-3 mb-0"><code>{{ web_cache_metrics | tojson(indent=2) }}</code></pre>
+        </div>
+    </div>
+{% endblock %}

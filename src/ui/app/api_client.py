@@ -131,6 +131,20 @@ class ApiClient(BaseApiClient):
         path = f"/cache/{service or 'global'}/{plugin}/{job}/{filename}"
         return self._delete(path)
 
+    # ── Web cache (proxy_cache) ─────────────────────────────────────────
+
+    def get_web_cache_status(self):
+        return self._get("/web-cache/status")
+
+    def get_web_cache_metrics(self):
+        return self._get("/web-cache/metrics")
+
+    def purge_web_cache(self, scope="all", urls=None):
+        payload = {"scope": scope}
+        if urls:
+            payload["urls"] = urls
+        return self._post("/web-cache/purge", json=payload)
+
     # ── Jobs ────────────────────────────────────────────────────────────
 
     def get_jobs(self):

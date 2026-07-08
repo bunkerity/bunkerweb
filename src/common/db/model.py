@@ -616,6 +616,9 @@ API_PERMISSION_ENUM = Enum(
     # Cache permissions
     "cache_read",
     "cache_delete",
+    # Web cache (proxy_cache) permissions
+    "web_cache_read",
+    "web_cache_purge",
     # Ban permissions
     "ban_created",
     "ban_read",
@@ -634,6 +637,7 @@ API_RESOURCE_ENUM = Enum(
     "configs",
     "plugins",
     "cache",
+    "web_cache",
     "bans",
     "jobs",
     name="api_resource_enum",

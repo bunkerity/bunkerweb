@@ -267,6 +267,25 @@ def _resolve_cache(path_normalized: str, method_u: str) -> tuple[Optional[str], 
     return rtype, None
 
 
+def _resolve_web_cache(path_normalized: str, method_u: str) -> tuple[Optional[str], Optional[str]]:
+    """Resolve web-cache (proxy_cache) endpoints to fine-grained permissions.
+
+    Supported endpoints (current router):
+    - GET  /web-cache/status   -> web_cache_read
+    - GET  /web-cache/metrics  -> web_cache_read
+    - POST /web-cache/purge    -> web_cache_purge
+
+    resource_type is "web_cache" (underscore, matching API_RESOURCE_ENUM) even
+    though the URL path uses a hyphen ("/web-cache").
+    """
+    rtype = "web_cache"
+    if method_u in {"GET", "OPTIONS"}:
+        return rtype, "web_cache_read"
+    if method_u == "POST":
+        return rtype, "web_cache_purge"
+    return rtype, None
+
+
 def _resolve_jobs(path_normalized: str, method_u: str) -> tuple[Optional[str], Optional[str]]:
     """Resolve jobs endpoints to fine-grained permissions.
 
@@ -342,6 +361,9 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     # Cache special cases
     if first == "cache":
         return _resolve_cache(p, method_u)
+    # Web cache special cases (canonicalize hyphenated URL segment to the enum value)
+    if first in {"web-cache", "web_cache"}:
+        return _resolve_web_cache(p, method_u)
 
     # Generic mapping based on first segment
     rtype = first

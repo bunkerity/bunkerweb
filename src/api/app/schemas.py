@@ -250,6 +250,33 @@ class CacheFilesDeleteRequest(BaseModel):
     cache_files: List[CacheFileKey] = Field(..., min_length=1)
 
 
+# Web cache (proxy_cache) management
+class WebCachePurgeUrl(BaseModel):
+    url: str = Field(..., description="Absolute URL whose cached response should be purged")
+    key: Optional[str] = Field(None, description="Custom PROXY_CACHE_KEY template if the service overrides the default")
+
+    @field_validator("url")
+    @classmethod
+    def _non_empty_url(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("url must be a non-empty string")
+        return v
+
+
+class WebCachePurgeRequest(BaseModel):
+    scope: Literal["all", "url"] = Field("url", description='"all" clears the whole proxy cache; "url" purges specific URLs')
+    urls: Optional[List[WebCachePurgeUrl]] = Field(None, description="URLs to purge when scope is 'url'")
+    service: Optional[str] = Field(None, description="Reserved for future per-service purge (currently informational)")
+
+    @field_validator("urls")
+    @classmethod
+    def _require_urls_for_url_scope(cls, v, info):
+        if info.data.get("scope", "url") == "url" and not v:
+            raise ValueError("scope 'url' requires a non-empty 'urls' list")
+        return v
+
+
 # Jobs
 class JobItem(BaseModel):
     plugin: str
