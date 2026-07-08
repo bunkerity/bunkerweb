@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.12 - 2026/06/??
+## v1.6.13~rc1 - 2026/07/??
+
+- [FEATURE] `antibot`: add `ANTIBOT_SUCCESS_URI` to redirect clients to a fixed URI after they solve the challenge instead of the page they originally requested (leave empty to keep returning to the original page). (Fixes #3704)
+
+## v1.6.12 - 2026/07/02
 
 - [LINUX] Updated the NGINX version to v1.30.3 for Fedora 43 and 44 now that it is available in their repositories.
 - [BUGFIX] `linux`: on Ubuntu Pro/ESM hosts the install script now installs the upstream CrowdSec engine instead of the outdated ESM build (1.4.6), whose hub index lacks the `bunkerity/bunkerweb` collection and made the install fail with `unable to find collections 'bunkerity/bunkerweb'`. (Fixes #3659)

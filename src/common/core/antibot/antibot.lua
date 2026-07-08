@@ -212,7 +212,9 @@ function antibot:header()
 		return self:ret(false, "can't get session data", HTTP_INTERNAL_SERVER_ERROR)
 	end
 
-	-- Don't go further if client resolved the challenge
+	-- Don't go further if client resolved the challenge. The header_filter phase
+	-- cannot issue a redirect (access() already did); this arg is informational
+	-- only, so keep it side-effect-free and don't run get_success_uri() here.
 	if self.session_data.resolved then
 		return self:ret(
 			true,
@@ -402,7 +404,9 @@ function antibot:access()
 				true,
 				"client already resolved the challenge",
 				nil,
-				is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"]) or "/"
+				self:get_success_uri()
+					or is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"])
+					or "/"
 			)
 		end
 		return self:ret(true, "client already resolved the challenge")
@@ -430,7 +434,9 @@ function antibot:access()
 			true,
 			"client already resolved the challenge",
 			nil,
-			is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"]) or "/"
+			self:get_success_uri()
+				or is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"])
+				or "/"
 		)
 	end
 
@@ -1034,9 +1040,37 @@ function antibot:get_original_uri()
 	return "/"
 end
 
--- Post-solve target: prefer the POSTed "next", restoring the query from the session.
+-- Optional fixed post-solve destination. When ANTIBOT_SUCCESS_URI holds a safe
+-- same-origin relative path, every solved / already-resolved redirect lands there
+-- instead of the originally requested page. Empty keeps the original-URI behavior.
+-- Validated through the same open-redirect guard as every other redirect target,
+-- so a bad value fails closed to nil (falls back to the original behavior).
+function antibot:get_success_uri()
+	local success_uri = self.variables["ANTIBOT_SUCCESS_URI"]
+	if not success_uri or success_uri == "" then
+		return nil
+	end
+	local safe = is_safe_relative_path(success_uri, self.variables["ANTIBOT_URI"])
+	if not safe then
+		-- Set but unusable (protocol-relative, embedded scheme, control bytes, or equal
+		-- to ANTIBOT_URI): fall back to the original destination and tell the operator why.
+		-- The raw value is not echoed to avoid log injection from an already-suspect string.
+		self.logger:log(
+			ngx.WARN,
+			"ignoring unsafe ANTIBOT_SUCCESS_URI, redirecting to the original destination instead"
+		)
+	end
+	return safe
+end
+
+-- Post-solve target: honor a configured success URI, else prefer the POSTed
+-- "next", restoring the query from the session.
 function antibot:resolve_redirect_target(args)
 	local antibot_uri = self.variables["ANTIBOT_URI"]
+	local forced = self:get_success_uri()
+	if forced then
+		return forced
+	end
 	local session_full = is_safe_relative_path(self.session_data.original_uri, antibot_uri)
 	local posted
 	if args and args["next"] then

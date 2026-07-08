@@ -31,6 +31,7 @@
 | `ANTIBOT_URI`          | `/challenge` | multisite | 否   | **挑战 URL：** 用户将被重定向到以完成挑战的 URL。确保此 URL 未用于您网站上的任何其他内容。  |
 | `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | 否   | **挑战时间限制：** 用户完成挑战的最长时间（以秒为单位）。此时间过后，将生成新的挑战。       |
 | `ANTIBOT_TIME_VALID`   | `86400`      | multisite | 否   | **挑战有效期：** 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。 |
+| `ANTIBOT_SUCCESS_URI`  |              | multisite | 否   | **成功后重定向 URL：** 用户成功解决挑战后重定向到的固定 URL，而不是他们最初请求的页面。留空则将用户返回其原始目标页面。 |
 
 ### 从挑战中排除流量
 

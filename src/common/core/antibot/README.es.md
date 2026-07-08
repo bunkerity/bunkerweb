@@ -31,6 +31,7 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 | `ANTIBOT_URI`          | `/challenge`      | multisite | no       | **URL del desafío:** La URL a la que se redirigirá a los usuarios para completar el desafío. Asegúrese de que esta URL no se utilice para nada más en su sitio.        |
 | `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío. |
 | `ANTIBOT_TIME_VALID`   | `86400`           | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío.      |
+| `ANTIBOT_SUCCESS_URI`  |                   | multisite | no       | **URL de redirección tras el éxito:** Una URL fija a la que redirigir a los usuarios después de que resuelvan correctamente el desafío, en lugar de la página que solicitaron originalmente. Déjelo vacío para devolver a los usuarios a su destino original.      |
 
 ### Excluir tráfico de los desafíos
 
