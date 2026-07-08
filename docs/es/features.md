@@ -385,6 +385,10 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
   Esto excluirá del desafío antibot la red interna `192.168.1.0/24` y la IP específica `10.0.0.1`.
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Esto excluirá del desafío antibot las solicitudes de hosts con DNS inverso que terminen en `googlebot.com` o `bingbot.com`.
+
+!!! info "DNS inverso con confirmación directa (FCrDNS)"
+    Los sufijos de `ANTIBOT_IGNORE_RDNS` se confirman de forma directa: el nombre de host PTR coincidente se resuelve de nuevo a una IP y el desafío solo se omite cuando coincide con la IP del cliente. Un PTR que no puede confirmarse de forma directa se trata como una posible suplantación y el desafío se sigue aplicando. Esto evita que un atacante que controla su propio registro PTR lo configure con un sufijo ignorado (por ejemplo `.googlebot.com`) para omitir el desafío.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Esto excluirá del desafío antibot las solicitudes de los ASN 15169 (Google) y 8075 (Microsoft).
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
@@ -1097,6 +1101,9 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | no       | **URL de la Lista de Omisión de rDNS:** Lista de URL que contienen sufijos de DNS inverso a omitir.                          |
 
     El ajuste por defecto de `BLACKLIST_RDNS` incluye dominios de escáneres comunes como **Shodan** y **Censys**. Estos son a menudo utilizados por investigadores de seguridad y escáneres para identificar sitios vulnerables.
+
+    !!! info "DNS inverso con confirmación directa (FCrDNS)"
+        Los sufijos de `BLACKLIST_IGNORE_RDNS` se confirman de forma directa: el nombre de host PTR coincidente se vuelve a resolver a una IP y la omisión solo se aplica cuando coincide con la IP del cliente. Un PTR que no se puede confirmar de forma directa se trata como una posible suplantación y no se concede la omisión. Esto evita que un atacante que controle su propio registro PTR lo establezca en un sufijo ignorado (por ejemplo `.googlebot.com`) para saltarse las comprobaciones de la lista negra de rDNS.
 
 === "ASN"
     **Qué hace esto:** Bloquea a los visitantes de proveedores de red específicos. Los ASN son como los códigos postales de Internet: identifican a qué proveedor u organización pertenece una IP.
@@ -2558,6 +2565,9 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_RDNS`        |                   | multisite | no       | **Lista Gris de rDNS:** Lista de sufijos de DNS inverso para incluir en la lista gris, separados por espacios.                            |
     | `GREYLIST_RDNS_GLOBAL` | `yes`             | multisite | no       | **Solo rDNS Global:** Realiza comprobaciones de la lista gris de rDNS solo en direcciones IP globales cuando se establece en `yes`.       |
     | `GREYLIST_RDNS_URLS`   |                   | multisite | no       | **URLs de Lista Gris de rDNS:** Lista de URLs que contienen sufijos de DNS inverso para incluir en la lista gris, separadas por espacios. |
+
+    !!! info "DNS inverso confirmado hacia delante (FCrDNS)"
+        Los sufijos de `GREYLIST_RDNS` se confirman hacia delante: el nombre de host PTR coincidente se resuelve de nuevo a una IP y la concesión de la lista gris solo se aplica cuando coincide con la IP del cliente. Un PTR que no se puede confirmar hacia delante se trata como una posible suplantación y no se concede el acceso. Esto evita que un atacante que controle su propio registro PTR lo establezca en un sufijo incluido en la lista gris para obtener acceso.
 
 === "ASN"
     **Qué hace esto:** Incluye en la lista gris a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.

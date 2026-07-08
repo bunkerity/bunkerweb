@@ -29,6 +29,7 @@ local http_new = http.new
 local decode = cjson.decode
 local encode = cjson.encode
 local get_rdns = utils.get_rdns
+local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local get_country = utils.get_country
 local regex_match = utils.regex_match
@@ -1187,13 +1188,16 @@ function antibot:is_ignored_ip()
 		-- luacheck: ignore 421
 		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
 		if rdns_list then
-			-- Check if rDNS is in ignore list
-			for _, rdns in ipairs(rdns_list) do
-				for _, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
-						return true, "rDNS " .. suffix
-					end
-				end
+			-- Check if rDNS is in ignore list (forward-confirmed before ignoring)
+			local rdns_suffix = rdns_forward_confirmed(
+				rdns_list,
+				self.lists["IGNORE_RDNS"],
+				self.ctx,
+				self.ctx.bw.remote_addr,
+				self.logger
+			)
+			if rdns_suffix then
+				return true, "rDNS " .. rdns_suffix
 			end
 		else
 			self.logger:log(ERR, "error while getting rdns : " .. err)

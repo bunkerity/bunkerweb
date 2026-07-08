@@ -389,6 +389,9 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   This will exclude requests from hosts with reverse DNS ending with `googlebot.com` or `bingbot.com` from the antibot challenge.
 
+!!! info "Forward-confirmed reverse DNS (FCrDNS)"
+    `ANTIBOT_IGNORE_RDNS` suffixes are forward-confirmed: the matching PTR hostname is resolved back to an IP and the challenge is skipped only when it matches the client IP. A PTR that cannot be forward-confirmed is treated as a possible spoof and the challenge is still enforced. This prevents an attacker who controls their own PTR record from setting it to an ignored suffix (for example `.googlebot.com`) to bypass the challenge.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   This will exclude requests from ASN 15169 (Google) and ASN 8075 (Microsoft) from the antibot challenge.
 
@@ -1102,6 +1105,9 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | no       | **rDNS Ignore List URLs:** List of URLs containing reverse DNS suffixes to ignore.                   |
 
     The default `BLACKLIST_RDNS` setting includes common scanner domains like **Shodan** and **Censys**. These are often used by security researchers and scanners to identify vulnerable sites.
+
+    !!! info "Forward-confirmed reverse DNS (FCrDNS)"
+        `BLACKLIST_IGNORE_RDNS` suffixes are forward-confirmed: the matching PTR hostname is resolved back to an IP and the bypass only applies when it matches the client IP. A PTR that cannot be forward-confirmed is treated as a possible spoof and the bypass is not granted. This prevents an attacker who controls their own PTR record from setting it to an ignored suffix (for example `.googlebot.com`) to skip rDNS blacklist checks.
 
 === "ASN"
     **What this does:** Blocks visitors from specific network providers. ASNs are like ZIP codes for the Internet—they identify which provider or organization an IP belongs to.
@@ -2572,6 +2578,9 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_RDNS`        |         | multisite | no       | **rDNS Greylist:** List of reverse DNS suffixes to greylist, separated by spaces.                      |
     | `GREYLIST_RDNS_GLOBAL` | `yes`   | multisite | no       | **rDNS Global Only:** Only perform rDNS greylist checks on global IP addresses when set to `yes`.      |
     | `GREYLIST_RDNS_URLS`   |         | multisite | no       | **rDNS Greylist URLs:** List of URLs containing reverse DNS suffixes to greylist, separated by spaces. |
+
+    !!! info "Forward-confirmed reverse DNS (FCrDNS)"
+        `GREYLIST_RDNS` suffixes are forward-confirmed: the matching PTR hostname is resolved back to an IP and the greylist grant only applies when it matches the client IP. A PTR that cannot be forward-confirmed is treated as a possible spoof and access is not granted. This prevents an attacker who controls their own PTR record from setting it to a greylisted suffix to gain access.
 
 === "ASN"
     **What this does:** Greylist visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.

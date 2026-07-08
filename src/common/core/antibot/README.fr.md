@@ -69,6 +69,9 @@ Exemples :
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Exclut les requêtes provenant d’hôtes dont le DNS inversé se termine par `googlebot.com` ou `bingbot.com`.
 
+!!! info "DNS inversé à confirmation directe (FCrDNS)"
+    Les suffixes `ANTIBOT_IGNORE_RDNS` font l’objet d’une confirmation directe : le nom d’hôte PTR correspondant est résolu de nouveau vers une IP et le défi n’est ignoré que lorsque celle-ci correspond à l’IP du client. Un PTR qui ne peut pas être confirmé de cette façon est considéré comme une usurpation possible et le défi reste appliqué. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe ignoré (par exemple `.googlebot.com`) pour contourner le défi.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Exclut les requêtes des ASN 15169 (Google) et 8075 (Microsoft).
 

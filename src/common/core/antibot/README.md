@@ -69,6 +69,9 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   This will exclude requests from hosts with reverse DNS ending with `googlebot.com` or `bingbot.com` from the antibot challenge.
 
+!!! info "Forward-confirmed reverse DNS (FCrDNS)"
+    `ANTIBOT_IGNORE_RDNS` suffixes are forward-confirmed: the matching PTR hostname is resolved back to an IP and the challenge is skipped only when it matches the client IP. A PTR that cannot be forward-confirmed is treated as a possible spoof and the challenge is still enforced. This prevents an attacker who controls their own PTR record from setting it to an ignored suffix (for example `.googlebot.com`) to bypass the challenge.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   This will exclude requests from ASN 15169 (Google) and ASN 8075 (Microsoft) from the antibot challenge.
 

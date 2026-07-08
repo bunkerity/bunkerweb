@@ -390,6 +390,9 @@ Beispiele:
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Schließt Anfragen von Hosts aus, deren Reverse-DNS auf `googlebot.com` oder `bingbot.com` endet.
 
+!!! info "Vorwärts-bestätigtes Reverse-DNS (FCrDNS)"
+    `ANTIBOT_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der passende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Herausforderung wird nur dann übersprungen, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Herausforderung wird weiterhin erzwungen. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die Herausforderung zu umgehen.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Schließt Anfragen von den ASNs 15169 (Google) und 8075 (Microsoft) aus.
 
@@ -1089,6 +1092,9 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | `BLACKLIST_IGNORE_RDNS_URLS` |                         | Multisite | Nein     | **rDNS-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende Reverse-DNS-Suffixe enthalten.           |
 
     Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
+
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        Die `BLACKLIST_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der übereinstimmende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Umgehung wird nur angewendet, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Umgehung wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die rDNS-Blacklist-Überprüfungen zu umgehen.
 
 === "ASN"
     **Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
@@ -2516,6 +2522,9 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | `GREYLIST_RDNS`        |          | multisite | nein     | **rDNS-Greylist:** Liste von Reverse-DNS-Suffixen, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.                         |
     | `GREYLIST_RDNS_GLOBAL` | `yes`    | multisite | nein     | **Nur globales rDNS:** Führt rDNS-Greylist-Prüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt.                                    |
     | `GREYLIST_RDNS_URLS`   |          | multisite | nein     | **rDNS-Greylist-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
+
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        `GREYLIST_RDNS`-Suffixe werden forward-bestätigt: Der übereinstimmende PTR-Hostname wird zu einer IP zurückaufgelöst, und die Greylist-Freigabe gilt nur, wenn dieser mit der Client-IP übereinstimmt. Ein PTR, der nicht forward-bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und der Zugriff wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein auf die Greylist gesetztes Suffix setzt, um Zugriff zu erlangen.
 
 === "ASN"
     **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.

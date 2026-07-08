@@ -389,6 +389,9 @@ Exemples :
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Exclut les requêtes provenant d’hôtes dont le DNS inversé se termine par `googlebot.com` ou `bingbot.com`.
 
+!!! info "DNS inversé à confirmation directe (FCrDNS)"
+    Les suffixes `ANTIBOT_IGNORE_RDNS` font l’objet d’une confirmation directe : le nom d’hôte PTR correspondant est résolu de nouveau vers une IP et le défi n’est ignoré que lorsque celle-ci correspond à l’IP du client. Un PTR qui ne peut pas être confirmé de cette façon est considéré comme une usurpation possible et le défi reste appliqué. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe ignoré (par exemple `.googlebot.com`) pour contourner le défi.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Exclut les requêtes des ASN 15169 (Google) et 8075 (Microsoft).
 
@@ -1070,6 +1073,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | non      | **URL de listes d’ignorance rDNS :** Liste d’URL contenant des suffixes de DNS inversé à ignorer.                              |
 
     Le paramètre par défaut `BLACKLIST_RDNS` inclut des domaines de scanners courants comme **Shodan** et **Censys**. Ils sont souvent utilisés par des chercheurs en sécurité et des scanners pour identifier des sites vulnérables.
+
+    !!! info "DNS inversé confirmé (FCrDNS)"
+        Les suffixes `BLACKLIST_IGNORE_RDNS` sont confirmés par résolution directe : le nom d’hôte PTR correspondant est résolu à nouveau en une IP et le contournement ne s’applique que lorsqu’elle correspond à l’IP du client. Un PTR qui ne peut pas être confirmé par résolution directe est considéré comme une possible usurpation et le contournement n’est pas accordé. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe ignoré (par exemple `.googlebot.com`) pour contourner les vérifications de la liste noire rDNS.
 
 === "ASN"
     **Ce que ça fait :** Bloque les visiteurs provenant de fournisseurs de réseaux spécifiques. Les ASN sont comme des codes postaux pour Internet—ils identifient à quel fournisseur ou organisation une IP appartient.
@@ -2478,6 +2484,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
     | `GREYLIST_RDNS`        |        | multisite | non      | **Greylist rDNS :** Liste de suffixes DNS inversés à placer en greylist, séparés par des espaces.                                   |
     | `GREYLIST_RDNS_GLOBAL` | `yes`  | multisite | non      | **rDNS global seulement :** Effectue les contrôles de greylist rDNS uniquement sur les adresses IP globales lorsque défini à `yes`. |
     | `GREYLIST_RDNS_URLS`   |        | multisite | non      | **URL de greylist rDNS :** Liste d'URL contenant des suffixes DNS inversés à placer en greylist, séparées par des espaces.          |
+
+    !!! info "DNS inverse confirmé par résolution directe (FCrDNS)"
+        Les suffixes `GREYLIST_RDNS` sont confirmés par résolution directe : le nom d'hôte PTR correspondant est résolu à nouveau vers une IP et l'accès accordé par la greylist ne s'applique que lorsque cette IP correspond à l'IP du client. Un enregistrement PTR qui ne peut pas être confirmé par résolution directe est considéré comme une possible usurpation et l'accès n'est pas accordé. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe en greylist afin d'obtenir l'accès.
 
 === "ASN"
     **Ce que cela fait :** Place les visiteurs de fournisseurs réseau précis en greylist à l'aide des numéros de système autonome. Les ASN identifient le fournisseur ou l'organisation auquel appartient une IP.

@@ -69,6 +69,9 @@ Beispiele:
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Schließt Anfragen von Hosts aus, deren Reverse-DNS auf `googlebot.com` oder `bingbot.com` endet.
 
+!!! info "Vorwärts-bestätigtes Reverse-DNS (FCrDNS)"
+    `ANTIBOT_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der passende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Herausforderung wird nur dann übersprungen, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Herausforderung wird weiterhin erzwungen. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die Herausforderung zu umgehen.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Schließt Anfragen von den ASNs 15169 (Google) und 8075 (Microsoft) aus.
 

@@ -2,6 +2,7 @@
 
 ## v1.6.13~rc1 - 2026/07/??
 
+- [SECURITY] `blacklist`, `greylist`, `antibot`: forward-confirm reverse DNS (FCrDNS) before honoring an `IGNORE_RDNS`/`GREYLIST_RDNS` suffix match, so an attacker who sets their own PTR to a trusted suffix (e.g. `.googlebot.com`) can no longer bypass the block, gain greylist access, or skip the challenge without controlling the domain. (Fixes GHSA-q54j-5484-pvjm)
 - [FEATURE] `antibot`: add `ANTIBOT_SUCCESS_URI` to redirect clients to a fixed URI after they solve the challenge instead of the page they originally requested (leave empty to keep returning to the original page). (Fixes #3704)
 
 ## v1.6.12 - 2026/07/02
