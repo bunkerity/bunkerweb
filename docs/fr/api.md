@@ -190,6 +190,16 @@ Choisissez la saveur adaptée à votre environnement.
 - `resource_id` est généralement le deuxième composant de chemin (ex. `/services/{id}`) ; "*" donne un accès global.
 - Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Chaque utilisateur prend un `password` en clair ou un `password_hash`/`password_bcrypt` pré-haché (voir l'astuce ci-dessous).
 
+!!! danger "These write permissions are admin-equivalent"
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+
+    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `services`: `service_create`, `service_update`, `service_convert`
+    - `plugins`: `plugin_create`
+    - `global_settings`: `global_settings_update`
+
+    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+
 !!! tip "Mots de passe de bootstrap pré-hachés"
     Remplacez le `password` en clair d'un utilisateur par un **hash bcrypt** via `password_hash` (ou `password_bcrypt`) afin que les identifiants ne figurent jamais en clair dans le fichier. Le hash doit être un hash bcrypt valide (`$2a$`/`$2b$`/`$2y$`) dont le coût est d'au moins `10` (`12`+ recommandé). Un hash mal formé ou trop faible est **ignoré** : le chargeur se rabat sur le `password` en clair de l'utilisateur s'il est présent ; sinon, un nouvel utilisateur reçoit un mot de passe aléatoire sécurisé que vous ne connaîtrez pas, et un utilisateur existant conserve le sien. Un `password` en clair fait l'objet d'un contrôle de robustesse (8 caractères ou plus avec majuscule/minuscule/chiffre/caractère spécial). La variable d'environnement `API_PASSWORD` de l'admin accepte uniquement du texte en clair — le pré-hachage s'applique à ces utilisateurs de l'ACL.
 
