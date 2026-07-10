@@ -19,6 +19,24 @@ but only API model fields are used/stored.
 from Database import Database  # type: ignore
 from model import API_RESOURCE_ENUM, API_PERMISSION_ENUM, API_users, API_permissions  # type: ignore
 
+# Write permissions whose payload is rendered verbatim into raw nginx / OpenResty Lua
+# configuration (custom configs, service variables, uploaded plugins, global settings)
+# that runs on the BunkerWeb workers/scheduler. Holding any of these is therefore
+# equivalent to full administrative (code-execution) access, so they must never be
+# granted to a party that is not trusted as an admin.
+ADMIN_EQUIVALENT_PERMISSIONS = frozenset(
+    {
+        "config_create",
+        "config_update",
+        "config_delete",
+        "service_create",
+        "service_update",
+        "service_convert",
+        "plugin_create",
+        "global_config_update",
+    }
+)
+
 
 class APIDatabase(Database):
     def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, pool: Optional[bool] = None, log: bool = True, **kwargs) -> None:
@@ -137,6 +155,14 @@ class APIDatabase(Database):
             user = session.query(API_users).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
+
+            if granted and permission in ADMIN_EQUIVALENT_PERMISSIONS and not user.admin:
+                self.logger.warning(
+                    f"Granting admin-equivalent permission {permission!r} to non-admin API user {username!r} "
+                    f"(resource {resource_type}/{resource_id or '*'}): this permission is code-execution-capable "
+                    "— it can write configuration that is rendered into raw nginx/OpenResty Lua. "
+                    "Only grant it to a party you trust as an administrator."
+                )
 
             now = datetime.now().astimezone()
             record = (

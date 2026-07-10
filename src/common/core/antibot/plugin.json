@@ -52,6 +52,15 @@
       "regex": "^[0-9]+$",
       "type": "text"
     },
+    "ANTIBOT_SUCCESS_URI": {
+      "context": "multisite",
+      "default": "",
+      "help": "Fixed URI to redirect clients to after they solve the challenge, instead of the page they originally requested. Leave empty to return to the originally requested page.",
+      "id": "antibot-success-uri",
+      "label": "Success redirect URL",
+      "regex": "^(\\/([\\w\\].~:?#\\[@!$\\&'\\(\\)*+,;=\\-][\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*)?)?$",
+      "type": "text"
+    },
     "ANTIBOT_CAPTCHA_ALPHABET": {
       "context": "multisite",
       "default": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",

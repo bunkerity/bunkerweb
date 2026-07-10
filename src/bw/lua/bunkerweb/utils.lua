@@ -687,6 +687,39 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool)
 	return ips, encode(res_errors) .. " " .. encode(ans_errors)
 end
 
+-- Forward-confirmed reverse DNS (FCrDNS) suffix check.
+-- For each PTR in rdns_list, if it ends with any suffix in suffix_list, the name is forward-resolved
+-- (A/AAAA via get_ips) and each result compared to remote_addr. Returns (matched_suffix, matched_rdns)
+-- only when a suffix match is forward-confirmed; returns nil otherwise.
+-- Fail-closed: a suffix match that cannot be confirmed (resolver error, or empty/non-matching forward
+-- result) returns nil and is logged as a possible spoof. An empty get_ips table needs no special case:
+-- the inner loop runs zero times, so no match occurs and execution falls to the spoof branch.
+utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr, plugin_logger)
+	if not rdns_list or not suffix_list then
+		return nil
+	end
+	for _, rdns in ipairs(rdns_list) do
+		for _, suffix in ipairs(suffix_list) do
+			if rdns:sub(-#suffix) == suffix then
+				local ip_list, err = utils.get_ips(rdns, nil, ctx, true)
+				if ip_list then
+					for _, ip in ipairs(ip_list) do
+						if ip == remote_addr then
+							return suffix, rdns
+						end
+					end
+					if plugin_logger then
+						plugin_logger:log(WARN, "IP " .. remote_addr .. " may spoof reverse DNS " .. rdns)
+					end
+				elseif plugin_logger then
+					plugin_logger:log(ERR, "error while getting rdns (forward check) : " .. err)
+				end
+			end
+		end
+	end
+	return nil
+end
+
 utils.get_country = function(ip)
 	-- Check if mmdb is loaded
 	if not mmdb.country_db then

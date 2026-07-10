@@ -99,13 +99,13 @@ jobs:
       # Compute metadata
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -120,7 +120,7 @@ jobs:
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -143,7 +143,7 @@ jobs:
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
-          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
+          ignore-policy: .trivyignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
           format: sarif
           output: trivy-results.sarif
           exit-code: "0"
@@ -169,7 +169,7 @@ jobs:
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
-          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
+          ignore-policy: .trivyignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
           format: template
           template: "@.github/trivy/summary.tpl"
           output: trivy-summary.md

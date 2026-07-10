@@ -527,6 +527,8 @@ def on_starting(server):
                                                 if not isinstance(pname, str):
                                                     continue
                                                 if bool(granted):
+                                                    # grant_api_permission() logs a warning when an admin-equivalent
+                                                    # (code-execution-capable) write scope is granted to a non-admin user.
                                                     err = DB.grant_api_permission(uname, pname, resource_type=rtype, resource_id=rid_norm, granted=True)
                                                     if err:
                                                         LOGGER.warning(f"Couldn't grant {uname}:{pname} on {rtype}/{rid_norm or '*'}: {err}")
