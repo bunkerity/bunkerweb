@@ -79,6 +79,7 @@ RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl 
 
 # Fix CVEs
 RUN apk add --no-cache "libexpat>=2.8.2-r0" # CVE-2026-50219 CVE-2026-56132 CVE-2026-56403 CVE-2026-56404	CVE-2026-56405 CVE-2026-56406 CVE-2026-56410 CVE-2026-56411 CVE-2026-56412 CVE-2026-56131 CVE-2026-56407 CVE-2026-56408 CVE-2026-56409
+RUN apk add --no-cache "c-ares>=1.34.8-r0" # CVE-2026-33630
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
