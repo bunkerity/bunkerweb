@@ -1415,6 +1415,17 @@
 <li><code>resource_id</code> 通常是第二个路径段（如 <code>/services/{id}</code>）；"*" 表示全局访问。</li>
 <li>通过 <code>API_ACL_BOOTSTRAP_FILE</code> 或挂载的 <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> 启动非管理员用户和权限。每个用户可使用明文 <code>password</code> 或预先哈希的 <code>password_hash</code>/<code>password_bcrypt</code>（参见下面的提示）。</li>
 </ul>
+<div class="admonition danger">
+<p class="admonition-title">These write permissions are admin-equivalent</p>
+<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:</p>
+<ul>
+<li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
+<li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
+<li><code>plugins</code>: <code>plugin_create</code></li>
+<li><code>global_settings</code>: <code>global_settings_update</code></li>
+</ul>
+<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">预先哈希的启动密码</p>
 <p>通过 <code>password_hash</code>（或 <code>password_bcrypt</code>）将用户的明文 <code>password</code> 替换为 <strong>bcrypt 哈希</strong>，这样凭据就不会以明文形式留在文件中。该哈希必须是有效的 bcrypt 哈希（<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>），且其成本因子至少为 <code>10</code>（建议 <code>12</code>+）。格式错误或强度过弱的哈希将<strong>被忽略</strong>：加载器会回退到该用户的明文 <code>password</code>（若存在）；否则，新用户会获得一个你无法得知的安全随机密码，而已存在的用户则保留其当前密码。明文 <code>password</code> 会进行强度校验（至少 8 个字符，包含大写、小写、数字和特殊字符）。管理员的 <code>API_PASSWORD</code> 环境变量仅接受明文——预先哈希仅适用于这些 ACL 用户。</p>

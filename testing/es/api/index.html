@@ -1415,6 +1415,17 @@
 <li><code>resource_id</code> suele ser el segundo componente del path (ej. <code>/services/{id}</code>); "*" da acceso global.</li>
 <li>Inicializa usuarios no admin y permisos con <code>API_ACL_BOOTSTRAP_FILE</code> o un <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> montado. Cada usuario admite una <code>password</code> en texto plano o un <code>password_hash</code>/<code>password_bcrypt</code> pre-hasheado (ver el consejo a continuación).</li>
 </ul>
+<div class="admonition danger">
+<p class="admonition-title">These write permissions are admin-equivalent</p>
+<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:</p>
+<ul>
+<li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
+<li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
+<li><code>plugins</code>: <code>plugin_create</code></li>
+<li><code>global_settings</code>: <code>global_settings_update</code></li>
+</ul>
+<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Contraseñas de arranque pre-hasheadas</p>
 <p>Reemplaza la <code>password</code> en texto plano de un usuario por un <strong>hash bcrypt</strong> mediante <code>password_hash</code> (o <code>password_bcrypt</code>) para que las credenciales nunca queden en el archivo como texto plano. El hash debe ser un hash bcrypt válido (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) cuyo factor de coste sea al menos <code>10</code> (se recomienda <code>12</code>+). Un hash malformado o demasiado débil se <strong>ignora</strong>: el cargador recurre a la <code>password</code> en texto plano del usuario si existe; de lo contrario, un usuario nuevo recibe una contraseña aleatoria segura que no conocerás, y un usuario existente conserva la suya actual. Una <code>password</code> en texto plano se somete a una comprobación de robustez (8+ caracteres con mayúsculas/minúsculas/dígito/carácter especial). La variable de entorno <code>API_PASSWORD</code> del admin solo acepta texto plano — el pre-hasheo se aplica a estos usuarios de la ACL.</p>

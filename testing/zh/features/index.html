@@ -4291,7 +4291,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td>Target zone for DNS-01 CNAME delegation. Passed as --dns-<provider>-domain-alias to certbot and applied to every challenge for the cert, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME <code>_acme-challenge.&lt;domain&gt;</code> -&gt; <code>_acme-challenge.&lt;target&gt;</code> (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53).</td>
+<td>Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME <code>_acme-challenge.&lt;domain&gt;</code> -&gt; <code>_acme-challenge.&lt;target&gt;</code> (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53).</td>
 </tr>
 <tr>
 <td><code>ACME_KEY_TYPE</code></td>
@@ -4333,7 +4333,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>no</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Request wildcard certificate (requires DNS-01 challenge).</td>
+<td>Request wildcard certificate (requires DNS-01 challenge). The base domain is the parent of each server name, so www.example.com yields example.com and *.example.com.</td>
+</tr>
+<tr>
+<td><code>ACME_DISABLE_PUBLIC_SUFFIXES</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Refuse certificate requests for domains matching the Public Suffix List (recommended, default: yes).</td>
 </tr>
 <tr>
 <td><code>ACME_MUST_STAPLE</code></td>
@@ -4582,6 +4589,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td>否</td>
 <td><strong>挑战有效期：</strong> 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。</td>
 </tr>
+<tr>
+<td><code>ANTIBOT_SUCCESS_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>成功后重定向 URL：</strong> 用户成功解决挑战后重定向到的固定 URL，而不是他们最初请求的页面。留空则将用户返回其原始目标页面。</td>
+</tr>
 </tbody>
 </table>
 <h3 id="_7">从挑战中排除流量</h3>
@@ -4684,6 +4698,12 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <p><code>ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"</code>
   这将从 antibot 挑战中排除来自反向 DNS 以 <code>googlebot.com</code> 或 <code>bingbot.com</code> 结尾的主机的请求。</p>
 </li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">正向确认的反向 DNS (FCrDNS)</p>
+<p><code>ANTIBOT_IGNORE_RDNS</code> 后缀会经过正向确认：将匹配的 PTR 主机名重新解析回一个 IP，只有当它与客户端 IP 匹配时才会绕过挑战。无法通过正向确认的 PTR 会被视为可能的伪造，此时挑战仍将被执行。这可以防止控制自己 PTR 记录的攻击者将其设置为被忽略的后缀（例如 <code>.googlebot.com</code>）来绕过挑战。</p>
+</div>
+<ul>
 <li>
 <p><code>ANTIBOT_IGNORE_ASN: "15169 8075"</code>
   这将从 antibot 挑战中排除来自 ASN 15169 (Google) 和 ASN 8075 (Microsoft) 的请求。</p>
@@ -5866,6 +5886,10 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tbody>
 </table>
 <p>默认的 <code>BLACKLIST_RDNS</code> 设置包括常见的扫描器域名，如 <strong>Shodan</strong> 和 <strong>Censys</strong>。这些通常被安全研究人员和扫描器用来识别易受攻击的网站。</p>
+<div class="admonition info">
+<p class="admonition-title">正向确认反向 DNS (FCrDNS)</p>
+<p><code>BLACKLIST_IGNORE_RDNS</code> 后缀会经过正向确认：匹配的 PTR 主机名会被解析回一个 IP，只有当它与客户端 IP 匹配时，该绕过才会生效。无法通过正向确认的 PTR 会被视为可能的伪造，因此不会授予绕过。这可以防止控制自己 PTR 记录的攻击者将其设置为被忽略的后缀（例如 <code>.googlebot.com</code>）来跳过 rDNS 黑名单检查。</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p><strong>这是做什么的：</strong> 阻止来自特定网络提供商的访问者。ASN 就像互联网的邮政编码——它们标识一个 IP 属于哪个提供商或组织。</p>
@@ -7999,6 +8023,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">正向确认的反向 DNS (FCrDNS)</p>
+<p><code>GREYLIST_RDNS</code> 后缀会经过正向确认：匹配的 PTR 主机名会被解析回一个 IP，只有当该 IP 与客户端 IP 匹配时，才会授予灰名单访问权限。无法通过正向确认的 PTR 会被视为可能的伪造，访问不会被授予。这可以防止控制自己 PTR 记录的攻击者将其设置为已列入灰名单的后缀来获得访问权限。</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p><strong>这是做什么的：</strong> 使用自治系统号将来自特定网络提供商的访问者列入灰名单。ASN 标识一个 IP 属于哪个提供商或组织。</p>
@@ -8607,7 +8635,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>KEEP_UPSTREAM_HEADERS</code></td>
-<td><code>Content-Security-Policy Permissions-Policy X-Frame-Options</code></td>
+<td><code>Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options</code></td>
 <td>multisite</td>
 <td>否</td>
 <td><strong>保留标头：</strong> 保留选定的上游标头，在保持安全性的同时帮助旧版集成。</td>
@@ -8620,6 +8648,7 @@ TrustedMonitor/\d+\.\d+
 <li>定期审查和更新您的安全标头，以与不断发展的安全标准保持一致。</li>
 <li>使用像 <a href="https://observatory.mozilla.org/">Mozilla Observatory</a> 这样的工具来验证您的标头配置。</li>
 <li>在强制执行 CSP 之前，在 <code>Report-Only</code> 模式下进行测试，以避免破坏功能。</li>
+<li>在 <code>Report-Only</code> 模式下，上游发送的 <code>Content-Security-Policy</code> 或 <code>Content-Security-Policy-Report-Only</code> 标头默认会被保留（<code>KEEP_UPSTREAM_HEADERS</code>）；从该设置中移除相应的标头名称，BunkerWeb 自身的策略才会生效。</li>
 </ul>
 </div>
 </div>
@@ -9568,6 +9597,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>endpoint</code><br><code>api_key</code><br><code>server_id</code> (default: <code>localhost</code>)<br><code>disable_notify</code> (default: <code>false</code>)</td>
 <td></td>
 <td><a href="https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md">Documentation</a></td>
+</tr>
+<tr>
+<td><code>porkbun</code></td>
+<td>Porkbun</td>
+<td><code>api_key</code><br><code>secret_api_key</code></td>
+<td></td>
+<td><a href="https://github.com/infinityofspace/certbot_dns_porkbun/blob/main/Readme.md">文档</a></td>
 </tr>
 <tr>
 <td><code>rfc2136</code></td>

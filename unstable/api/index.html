@@ -1244,6 +1244,7 @@
 <ul>
 <li>Network: keep traffic internal; bind to loopback or an internal interface and restrict source IPs with <code>API_WHITELIST_IPS</code> (enabled by default).</li>
 <li>Auth present: set <code>API_USERNAME</code>/<code>API_PASSWORD</code> (admin) and, if needed, <code>API_ACL_BOOTSTRAP_FILE</code> for extra users/ACLs; keep an override <code>API_TOKEN</code> only for break-glass use.</li>
+<li>ACL scopes: config, service, plugin, and global-settings <strong>write</strong> permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. See <a href="#permissions-and-acl">Permissions and ACL</a>.</li>
 <li>Path hiding: when reverse-proxying, pick an unguessable <code>API_ROOT_PATH</code> and mirror it on the proxy.</li>
 <li>Rate limiting: leave it on unless another layer enforces equivalent limits; <code>/auth</code> is always rate limited.</li>
 <li>TLS: terminate TLS at the proxy or set <code>API_SSL_ENABLED=yes</code> with cert/key paths.</li>
@@ -1415,6 +1416,17 @@
 <li><code>resource_id</code> is usually the second path component (e.g. <code>/services/{id}</code>); <code>"*"</code> grants global access.</li>
 <li>Bootstrap non-admin users and grants with <code>API_ACL_BOOTSTRAP_FILE</code> or a mounted <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code>. Each user takes a plaintext <code>password</code> or a pre-hashed <code>password_hash</code>/<code>password_bcrypt</code> (see tip below).</li>
 </ul>
+<div class="admonition danger">
+<p class="admonition-title">These write permissions are admin-equivalent</p>
+<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:</p>
+<ul>
+<li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
+<li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
+<li><code>plugins</code>: <code>plugin_create</code></li>
+<li><code>global_settings</code>: <code>global_settings_update</code></li>
+</ul>
+<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Pre-hashed bootstrap passwords</p>
 <p>Replace a user's plaintext <code>password</code> with a <strong>bcrypt hash</strong> via <code>password_hash</code> (or <code>password_bcrypt</code>) so credentials never sit in the file as plaintext. The hash must be a valid bcrypt hash (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) whose cost factor is at least <code>10</code> (<code>12</code>+ recommended). A malformed or too-weak hash is <strong>ignored</strong>: the loader falls back to the user's plaintext <code>password</code> if present; otherwise a new user gets a secure random password you won't know, and an existing user keeps its current one. A plaintext <code>password</code> is strength-checked (8+ chars with upper/lower/digit/special). The admin <code>API_PASSWORD</code> env var accepts plaintext only — pre-hashing applies to these ACL users.</p>
@@ -1441,6 +1453,10 @@
 <span class="p">}</span>
 </code></pre></div>
 </details>
+<div class="admonition warning">
+<p class="admonition-title">The example above grants an admin-equivalent scope</p>
+<p><code>config_update</code> is a code-execution-capable permission (see the danger note above), so this <code>ci</code> user is as powerful as an admin for configuration writes — only issue such a token to automation you fully trust. For a read-only integration, drop <code>config_update</code> and keep just the <code>*_read</code> scopes.</p>
+</div>
 <h2 id="rate-limiting">Rate limiting</h2>
 <p>Enabled by default with two strings: <code>API_RATE_LIMIT</code> (global, default <code>100r/m</code>) and <code>API_RATE_LIMIT_AUTH</code> (default <code>10r/m</code> or <code>off</code>). Rates accept NGINX-style notation (<code>3r/s</code>, <code>40r/m</code>, <code>200r/h</code>) or verbose forms (<code>100/minute</code>, <code>200 per 30 minutes</code>). Configure via:</p>
 <ul>

@@ -1415,6 +1415,17 @@
 <li><code>resource_id</code> est généralement le deuxième composant de chemin (ex. <code>/services/{id}</code>) ; "*" donne un accès global.</li>
 <li>Bootstrap des utilisateurs non admin et des permissions via <code>API_ACL_BOOTSTRAP_FILE</code> ou un <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> monté. Chaque utilisateur prend un <code>password</code> en clair ou un <code>password_hash</code>/<code>password_bcrypt</code> pré-haché (voir l'astuce ci-dessous).</li>
 </ul>
+<div class="admonition danger">
+<p class="admonition-title">These write permissions are admin-equivalent</p>
+<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:</p>
+<ul>
+<li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
+<li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
+<li><code>plugins</code>: <code>plugin_create</code></li>
+<li><code>global_settings</code>: <code>global_settings_update</code></li>
+</ul>
+<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Mots de passe de bootstrap pré-hachés</p>
 <p>Remplacez le <code>password</code> en clair d'un utilisateur par un <strong>hash bcrypt</strong> via <code>password_hash</code> (ou <code>password_bcrypt</code>) afin que les identifiants ne figurent jamais en clair dans le fichier. Le hash doit être un hash bcrypt valide (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) dont le coût est d'au moins <code>10</code> (<code>12</code>+ recommandé). Un hash mal formé ou trop faible est <strong>ignoré</strong> : le chargeur se rabat sur le <code>password</code> en clair de l'utilisateur s'il est présent ; sinon, un nouvel utilisateur reçoit un mot de passe aléatoire sécurisé que vous ne connaîtrez pas, et un utilisateur existant conserve le sien. Un <code>password</code> en clair fait l'objet d'un contrôle de robustesse (8 caractères ou plus avec majuscule/minuscule/chiffre/caractère spécial). La variable d'environnement <code>API_PASSWORD</code> de l'admin accepte uniquement du texte en clair — le pré-hachage s'applique à ces utilisateurs de l'ACL.</p>

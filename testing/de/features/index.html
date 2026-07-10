@@ -4289,7 +4289,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Target zone for DNS-01 CNAME delegation. Passed as --dns-<provider>-domain-alias to certbot and applied to every challenge for the cert, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME <code>_acme-challenge.&lt;domain&gt;</code> -&gt; <code>_acme-challenge.&lt;target&gt;</code> (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53).</td>
+<td>Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME <code>_acme-challenge.&lt;domain&gt;</code> -&gt; <code>_acme-challenge.&lt;target&gt;</code> (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53).</td>
 </tr>
 <tr>
 <td><code>ACME_KEY_TYPE</code></td>
@@ -4331,7 +4331,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>no</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Request wildcard certificate (requires DNS-01 challenge).</td>
+<td>Request wildcard certificate (requires DNS-01 challenge). The base domain is the parent of each server name, so www.example.com yields example.com and *.example.com.</td>
+</tr>
+<tr>
+<td><code>ACME_DISABLE_PUBLIC_SUFFIXES</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Refuse certificate requests for domains matching the Public Suffix List (recommended, default: yes).</td>
 </tr>
 <tr>
 <td><code>ACME_MUST_STAPLE</code></td>
@@ -4580,6 +4587,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td style="text-align: left;">nein</td>
 <td style="text-align: left;">Herausforderungs-Gültigkeit: Dauer (in Sekunden), für die eine erfolgreiche Herausforderung gültig bleibt. Nach dieser Zeit wird eine neue Herausforderung erforderlich sein.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>ANTIBOT_SUCCESS_URI</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">nein</td>
+<td style="text-align: left;">Erfolgs-Weiterleitungs-URL: Eine feste URL, zu der Benutzer nach erfolgreichem Lösen der Herausforderung weitergeleitet werden, anstatt zur ursprünglich angeforderten Seite. Leer lassen, um Benutzer zu ihrem ursprünglichen Ziel zurückzuleiten.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="ausschlieen-von-traffic-von-herausforderungen">Ausschließen von Traffic von Herausforderungen</h3>
@@ -4682,6 +4696,12 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <p><code>ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"</code>
   Schließt Anfragen von Hosts aus, deren Reverse-DNS auf <code>googlebot.com</code> oder <code>bingbot.com</code> endet.</p>
 </li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Vorwärts-bestätigtes Reverse-DNS (FCrDNS)</p>
+<p><code>ANTIBOT_IGNORE_RDNS</code>-Suffixe werden vorwärts bestätigt: Der passende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Herausforderung wird nur dann übersprungen, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Herausforderung wird weiterhin erzwungen. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel <code>.googlebot.com</code>) setzt, um die Herausforderung zu umgehen.</p>
+</div>
+<ul>
 <li>
 <p><code>ANTIBOT_IGNORE_ASN: "15169 8075"</code>
   Schließt Anfragen von den ASNs 15169 (Google) und 8075 (Microsoft) aus.</p>
@@ -5857,6 +5877,10 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tbody>
 </table>
 <p>Der Standardparameter <code>BLACKLIST_RDNS</code> enthält Domänen gängiger Scanner wie <strong>Shodan</strong> und <strong>Censys</strong>. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.</p>
+<div class="admonition info">
+<p class="admonition-title">Forward-bestätigtes Reverse DNS (FCrDNS)</p>
+<p>Die <code>BLACKLIST_IGNORE_RDNS</code>-Suffixe werden vorwärts bestätigt: Der übereinstimmende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Umgehung wird nur angewendet, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Umgehung wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel <code>.googlebot.com</code>) setzt, um die rDNS-Blacklist-Überprüfungen zu umgehen.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p><strong>Was es bewirkt:</strong> Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.</p>
@@ -7937,6 +7961,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Forward-bestätigtes Reverse DNS (FCrDNS)</p>
+<p><code>GREYLIST_RDNS</code>-Suffixe werden forward-bestätigt: Der übereinstimmende PTR-Hostname wird zu einer IP zurückaufgelöst, und die Greylist-Freigabe gilt nur, wenn dieser mit der Client-IP übereinstimmt. Ein PTR, der nicht forward-bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und der Zugriff wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein auf die Greylist gesetztes Suffix setzt, um Zugriff zu erlangen.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.</p>
@@ -8540,7 +8568,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>KEEP_UPSTREAM_HEADERS</code></td>
-<td><code>Content-Security-Policy Permissions-Policy X-Frame-Options</code></td>
+<td><code>Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options</code></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>Header beibehalten:</strong> Behält ausgewählte Upstream-Header bei, was die Integration von Altsystemen erleichtert und gleichzeitig die Sicherheit aufrechterhält.</td>
@@ -8553,6 +8581,7 @@ TrustedMonitor/\d+\.\d+
 <li>Überprüfen und aktualisieren Sie Ihre Sicherheits-Header regelmäßig, um sie an die sich entwickelnden Sicherheitsstandards anzupassen.</li>
 <li>Verwenden Sie Tools wie das <a href="https://observatory.mozilla.org/">Mozilla Observatory</a>, um Ihre Header-Konfiguration zu validieren.</li>
 <li>Testen Sie CSP im <code>Report-Only</code>-Modus, bevor Sie es erzwingen, um zu vermeiden, dass die Funktionalität beeinträchtigt wird.</li>
+<li>Im <code>Report-Only</code>-Modus wird ein vom Upstream gesendeter <code>Content-Security-Policy</code>- oder <code>Content-Security-Policy-Report-Only</code>-Header standardmäßig beibehalten (<code>KEEP_UPSTREAM_HEADERS</code>); entfernen Sie den Header-Namen aus dieser Einstellung, damit die eigene Richtlinie von BunkerWeb Vorrang hat.</li>
 </ul>
 </div>
 </div>
@@ -9501,6 +9530,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>endpoint</code><br><code>api_key</code><br><code>server_id</code> (default: <code>localhost</code>)<br><code>disable_notify</code> (default: <code>false</code>)</td>
 <td></td>
 <td><a href="https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md">Documentation</a></td>
+</tr>
+<tr>
+<td><code>porkbun</code></td>
+<td>Porkbun</td>
+<td><code>api_key</code><br><code>secret_api_key</code></td>
+<td></td>
+<td><a href="https://github.com/infinityofspace/certbot_dns_porkbun/blob/main/Readme.md">Dokumentation</a></td>
 </tr>
 <tr>
 <td><code>rfc2136</code></td>
