@@ -143,7 +143,7 @@ jobs:
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
-          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
+          ignore-policy: .trivyignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
           format: sarif
           output: trivy-results.sarif
           exit-code: "0"
@@ -169,7 +169,7 @@ jobs:
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
-          ignore-policy: .trivyignore.rego # ignore Python (pkg:pypi/*) findings — tracked separately via pip/dependabot
+          ignore-policy: .trivyignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
           format: template
           template: "@.github/trivy/summary.tpl"
           output: trivy-summary.md
