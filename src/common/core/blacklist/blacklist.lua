@@ -12,6 +12,7 @@ local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
 local get_rdns = utils.get_rdns
+local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
 local get_variable = utils.get_variable
@@ -305,16 +306,14 @@ function blacklist:is_blacklisted_ip()
 		-- luacheck: ignore 421
 		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
 		if rdns_list then
-			-- Check if rDNS is in ignore list
-			local ignore = false
-			for _, rdns in ipairs(rdns_list) do
-				for _, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
-						ignore = true
-						break
-					end
-				end
-			end
+			-- Check if rDNS is in ignore list (forward-confirmed before honoring the bypass, fail-closed)
+			local ignore = rdns_forward_confirmed(
+				rdns_list,
+				self.lists["IGNORE_RDNS"],
+				self.ctx,
+				self.ctx.bw.remote_addr,
+				self.logger
+			) ~= nil
 			-- Check if rDNS is in blacklist
 			if not ignore then
 				for _, rdns in ipairs(rdns_list) do

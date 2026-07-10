@@ -18,6 +18,7 @@ The BunkerWeb API is the control plane for managing instances, services, bans, p
 
 - Network: keep traffic internal; bind to loopback or an internal interface and restrict source IPs with `API_WHITELIST_IPS` (enabled by default).
 - Auth present: set `API_USERNAME`/`API_PASSWORD` (admin) and, if needed, `API_ACL_BOOTSTRAP_FILE` for extra users/ACLs; keep an override `API_TOKEN` only for break-glass use.
+- ACL scopes: config, service, plugin, and global-settings **write** permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. See [Permissions and ACL](#permissions-and-acl).
 - Path hiding: when reverse-proxying, pick an unguessable `API_ROOT_PATH` and mirror it on the proxy.
 - Rate limiting: leave it on unless another layer enforces equivalent limits; `/auth` is always rate limited.
 - TLS: terminate TLS at the proxy or set `API_SSL_ENABLED=yes` with cert/key paths.
@@ -41,7 +42,7 @@ Choose the flavor that matches your environment.
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.12-rc3
+        image: bunkerity/bunkerweb:1.6.13-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +55,7 @@ Choose the flavor that matches your environment.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.12-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -76,7 +77,7 @@ Choose the flavor that matches your environment.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.12-rc3
+        image: bunkerity/bunkerweb-api:1.6.13-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +144,7 @@ Choose the flavor that matches your environment.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.12-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.13-rc1
     ```
 
 === "Linux"
@@ -190,6 +191,16 @@ Choose the flavor that matches your environment.
 - `resource_id` is usually the second path component (e.g. `/services/{id}`); `"*"` grants global access.
 - Bootstrap non-admin users and grants with `API_ACL_BOOTSTRAP_FILE` or a mounted `/var/lib/bunkerweb/api_acl_bootstrap.json`. Each user takes a plaintext `password` or a pre-hashed `password_hash`/`password_bcrypt` (see tip below).
 
+!!! danger "These write permissions are admin-equivalent"
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+
+    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `services`: `service_create`, `service_update`, `service_convert`
+    - `plugins`: `plugin_create`
+    - `global_settings`: `global_settings_update`
+
+    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+
 !!! tip "Pre-hashed bootstrap passwords"
     Replace a user's plaintext `password` with a **bcrypt hash** via `password_hash` (or `password_bcrypt`) so credentials never sit in the file as plaintext. The hash must be a valid bcrypt hash (`$2a$`/`$2b$`/`$2y$`) whose cost factor is at least `10` (`12`+ recommended). A malformed or too-weak hash is **ignored**: the loader falls back to the user's plaintext `password` if present; otherwise a new user gets a secure random password you won't know, and an existing user keeps its current one. A plaintext `password` is strength-checked (8+ chars with upper/lower/digit/special). The admin `API_PASSWORD` env var accepts plaintext only — pre-hashing applies to these ACL users.
 
@@ -220,6 +231,9 @@ Choose the flavor that matches your environment.
       }
     }
     ```
+
+!!! warning "The example above grants an admin-equivalent scope"
+    `config_update` is a code-execution-capable permission (see the danger note above), so this `ci` user is as powerful as an admin for configuration writes — only issue such a token to automation you fully trust. For a read-only integration, drop `config_update` and keep just the `*_read` scopes.
 
 ## Rate limiting
 

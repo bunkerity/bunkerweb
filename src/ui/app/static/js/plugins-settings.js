@@ -595,7 +595,7 @@ $(document).ready(() => {
     }
   };
 
-  const resetTemplateConfig = (templateId = currentTemplate) => {
+  const resetTemplateConfig = (templateId = currentTemplate, options = {}) => {
     const normalizedTemplate = normalizeTemplateId(templateId);
     if (!normalizedTemplate) return;
 
@@ -604,16 +604,34 @@ $(document).ready(() => {
     templateContainer
       .find(".global-override-badge")
       .addClass("visually-hidden");
+    const isNewService = window.location.pathname.endsWith("/new");
     const useTemplateDefaults =
-      window.location.pathname.endsWith("/new") ||
-      normalizedTemplate !== usedTemplate;
+      isNewService || normalizedTemplate !== usedTemplate;
+    // When auto-applying a different template to an EXISTING service (template
+    // switch), keep fields the user customized (value differs from the setting
+    // default) instead of wiping them to the new template's default. The
+    // explicit "Reset template configuration" button passes no flag, so it
+    // still performs a full reset. New services have nothing to preserve.
+    const preserveCustomizations =
+      !!options.preserveCustomizations && useTemplateDefaults && !isNewService;
+    const resolveTemplateValue = ($field, fieldId) => {
+      const original = $field.data("original");
+      const customized =
+        preserveCustomizations &&
+        original !== undefined &&
+        String(original) !== String($field.data("default"));
+      if (useTemplateDefaults && !customized) {
+        return $(`#${fieldId}-template`).val();
+      }
+      // jQuery .data() coerces numeric-looking values to numbers; the
+      // multiselect/multivalue blocks call .split() on this, so keep a string.
+      return original === undefined ? undefined : String(original);
+    };
 
     templateContainer.find("input, select").each(function () {
       const $field = $(this);
       const type = $field.attr("type");
-      const templateValue = useTemplateDefaults
-        ? $(`#${this.id}-template`).val()
-        : $field.data("original");
+      const templateValue = resolveTemplateValue($field, this.id);
 
       if ($field.hasClass("plugin-setting-file-upload")) {
         $field.val("");
@@ -663,9 +681,7 @@ $(document).ready(() => {
       .each(function () {
         const $input = $(this);
         if ($input.prop("disabled")) return;
-        const templateValue = useTemplateDefaults
-          ? $(`#${this.id}-template`).val()
-          : $input.data("original");
+        const templateValue = resolveTemplateValue($input, this.id);
         if (templateValue === undefined) return;
 
         $input.val(templateValue).trigger("input");
@@ -682,20 +698,27 @@ $(document).ready(() => {
           const $checkbox = $(this);
           $checkbox.prop("checked", selectedValues.includes($checkbox.val()));
         });
-        const selectedCount = selectedValues.filter((v) => v).length;
+        // Sync badge/footer from the actually-checked boxes (not the parsed
+        // token count) and set data-i18n-options so applyTranslations keeps it.
+        // The hidden value set above is preserved (no recompute from boxes).
+        const checkedCount = $dropdown.find(".form-check-input:checked").length;
         $dropdown
           .find("[data-selected-count]")
-          .text(`${selectedCount} selected`);
-        $dropdown.find("[data-selected-badge]").text(selectedCount);
+          .text(
+            t("template.editor.multiselect_summary", {
+              count: checkedCount,
+              defaultValue: `${checkedCount} selected`,
+            }),
+          )
+          .attr("data-i18n-options", JSON.stringify({ count: checkedCount }));
+        $dropdown.find("[data-selected-badge]").text(checkedCount);
       });
 
     // Reset multivalue fields (hidden input + visible text inputs)
     templateContainer.find(".multivalue-hidden-input").each(function () {
       const $input = $(this);
       if ($input.prop("disabled")) return;
-      const templateValue = useTemplateDefaults
-        ? $(`#${this.id}-template`).val()
-        : $input.data("original");
+      const templateValue = resolveTemplateValue($input, this.id);
       if (templateValue === undefined) return;
 
       const $container = $input.closest(".multivalue-container");
@@ -736,8 +759,19 @@ $(document).ready(() => {
 
     templateContainer.find(".ace-editor").each(function () {
       const editor = ace.edit(this);
-      const editorDefaultElem = $(`#${this.id}-default`).val();
-      const editorValue = editorDefaultElem ? editorDefaultElem.trim() : "";
+      const editorDefault = ($(`#${this.id}-default`).val() || "").trim();
+      const $valueEl = $(`#${this.id}-value`);
+      // Saved custom-config content (falls back to the template default when the
+      // value element is absent, preserving the old reset-to-default behavior).
+      const editorSaved = $valueEl.length
+        ? ($valueEl.val() || "").trim()
+        : editorDefault;
+      // Mirror the scalar customized test: keep a custom-config the user edited
+      // away from this template's default instead of wiping it on switch.
+      const customized =
+        preserveCustomizations && editorSaved !== editorDefault;
+      const editorValue =
+        useTemplateDefaults && !customized ? editorDefault : editorSaved;
       editor.setValue(editorValue);
       editor.session.setValue(editorValue);
       editor.gotoLine(0);
@@ -869,14 +903,16 @@ $(document).ready(() => {
         setCurrentTemplate(nextTemplateId, { clearType: true });
 
       if (!isInit) {
-        resetTemplateConfig(previousTemplate);
-        // On existing services, apply the new template's defaults
-        // so the user sees what the switched-to template provides
+        resetTemplateConfig(previousTemplate, { preserveCustomizations: true });
+        // On existing services, apply the new template's defaults to fields the
+        // user left at the setting default, while keeping customized values
         if (
           !window.location.pathname.endsWith("/new") &&
           currentTemplate !== usedTemplate
         ) {
-          resetTemplateConfig(currentTemplate);
+          resetTemplateConfig(currentTemplate, {
+            preserveCustomizations: true,
+          });
         }
       }
     }
@@ -2398,9 +2434,7 @@ $(document).ready(() => {
                 const checkboxVal = $checkbox.val();
                 $checkbox.prop("checked", selectedValues.includes(checkboxVal));
               });
-              const selectedCount = selectedValues.filter((v) => v).length;
-              const $label = $dropdown.find(".multiselect-toggle label");
-              $label.text(`(${selectedCount} selected)`);
+              updateMultiselectDisplay($dropdown);
             } else {
               // Handle simple text-like inputs and textareas
               $input.val(settingValue).trigger("input");
@@ -3191,9 +3225,7 @@ $(document).ready(() => {
         const checkboxVal = $checkbox.val();
         $checkbox.prop("checked", selectedValues.includes(checkboxVal));
       });
-      const selectedCount = selectedValues.filter((v) => v).length;
-      const $label = $dropdown.find(".multiselect-toggle label");
-      $label.text(`(${selectedCount} selected)`);
+      updateMultiselectDisplay($dropdown);
     } else {
       $settingField.val(valueToSet).trigger("input");
     }

@@ -78,6 +78,9 @@ Follow these steps to configure and use the Blacklist feature:
 
     The default `BLACKLIST_RDNS` setting includes common scanner domains like **Shodan** and **Censys**. These are often used by security researchers and scanners to identify vulnerable sites.
 
+    !!! info "Forward-confirmed reverse DNS (FCrDNS)"
+        `BLACKLIST_IGNORE_RDNS` suffixes are forward-confirmed: the matching PTR hostname is resolved back to an IP and the bypass only applies when it matches the client IP. A PTR that cannot be forward-confirmed is treated as a possible spoof and the bypass is not granted. This prevents an attacker who controls their own PTR record from setting it to an ignored suffix (for example `.googlebot.com`) to skip rDNS blacklist checks.
+
 === "ASN"
     **What this does:** Blocks visitors from specific network providers. ASNs are like ZIP codes for the Internet—they identify which provider or organization an IP belongs to.
 

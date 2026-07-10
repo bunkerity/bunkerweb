@@ -231,6 +231,7 @@ LJLIB_CF(os_date)
 LJLIB_CF(os_time)
 {
   time_t t;
+  errno = 0;
   if (lua_isnoneornil(L, 1)) {  /* called without args? */
     t = time(NULL);  /* get current time */
   } else {
@@ -246,7 +247,7 @@ LJLIB_CF(os_time)
     ts.tm_isdst = getboolfield(L, "isdst");
     t = mktime(&ts);
   }
-  if (t == (time_t)(-1))
+  if (t == (time_t)(-1) && errno != 0)
     lua_pushnil(L);
   else
     lua_pushnumber(L, (lua_Number)t);

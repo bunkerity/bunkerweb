@@ -391,7 +391,7 @@ void ModSecurity::setServerLogCb(ModSecLogCb cb) {
 }
 
 
-void ModSecurity::setServerLogCb(ModSecLogCb cb, int properties) {
+void ModSecurity::setServerLogCb(ModSecLogCb cb, int properties) { // cppcheck-suppress funcArgNamesDifferentUnnamed - this is a false positive
     m_logCb = (ModSecLogCb) cb;
     m_logProperties = properties;
 }

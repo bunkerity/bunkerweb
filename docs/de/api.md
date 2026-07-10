@@ -41,7 +41,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     services:
       bunkerweb:
         # Name, unter dem die Instanz im Scheduler erscheint
-        image: bunkerity/bunkerweb:1.6.12-rc3
+        image: bunkerity/bunkerweb:1.6.13-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.12-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Instanznamen korrekt setzen
@@ -76,7 +76,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.12-rc3
+        image: bunkerity/bunkerweb-api:1.6.13-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.12-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.13-rc1
     ```
 
 === "Linux"
@@ -189,6 +189,16 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
   - `jobs`: `job_read`, `job_run`
 - `resource_id` ist meist die zweite Pfadkomponente (z. B. `/services/{id}`); "*" gewährt globalen Zugriff.
 - Nicht-Admin-Nutzer und Grants per `API_ACL_BOOTSTRAP_FILE` oder gemounteter `/var/lib/bunkerweb/api_acl_bootstrap.json` bootstrappen. Jeder Nutzer akzeptiert ein Klartext-`password` oder ein vorab gehashtes `password_hash`/`password_bcrypt` (siehe Tipp unten).
+
+!!! danger "These write permissions are admin-equivalent"
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+
+    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `services`: `service_create`, `service_update`, `service_convert`
+    - `plugins`: `plugin_create`
+    - `global_settings`: `global_settings_update`
+
+    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
 
 !!! tip "Vorab gehashte Bootstrap-Passwörter"
     Ersetzen Sie das Klartext-`password` eines Nutzers durch einen **bcrypt-Hash** via `password_hash` (oder `password_bcrypt`), damit Anmeldedaten niemals als Klartext in der Datei stehen. Der Hash muss ein gültiger bcrypt-Hash (`$2a$`/`$2b$`/`$2y$`) sein, dessen Kostenfaktor mindestens `10` beträgt (`12`+ empfohlen). Ein fehlerhafter oder zu schwacher Hash wird **ignoriert**: Der Loader greift auf das Klartext-`password` des Nutzers zurück, falls vorhanden; andernfalls erhält ein neuer Nutzer ein sicheres Zufallspasswort, das Sie nicht kennen, und ein bestehender Nutzer behält sein aktuelles. Ein Klartext-`password` wird auf seine Stärke geprüft (8+ Zeichen mit Groß-/Kleinbuchstaben, Ziffer und Sonderzeichen). Die admin-Umgebungsvariable `API_PASSWORD` akzeptiert nur Klartext — das Vorab-Hashing gilt für diese ACL-Nutzer.

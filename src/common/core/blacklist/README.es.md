@@ -78,6 +78,9 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 
     El ajuste por defecto de `BLACKLIST_RDNS` incluye dominios de escáneres comunes como **Shodan** y **Censys**. Estos son a menudo utilizados por investigadores de seguridad y escáneres para identificar sitios vulnerables.
 
+    !!! info "DNS inverso con confirmación directa (FCrDNS)"
+        Los sufijos de `BLACKLIST_IGNORE_RDNS` se confirman de forma directa: el nombre de host PTR coincidente se vuelve a resolver a una IP y la omisión solo se aplica cuando coincide con la IP del cliente. Un PTR que no se puede confirmar de forma directa se trata como una posible suplantación y no se concede la omisión. Esto evita que un atacante que controle su propio registro PTR lo establezca en un sufijo ignorado (por ejemplo `.googlebot.com`) para saltarse las comprobaciones de la lista negra de rDNS.
+
 === "ASN"
     **Qué hace esto:** Bloquea a los visitantes de proveedores de red específicos. Los ASN son como los códigos postales de Internet: identifican a qué proveedor u organización pertenece una IP.
 

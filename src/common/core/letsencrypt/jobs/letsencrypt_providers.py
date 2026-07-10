@@ -560,6 +560,25 @@ class PowerdnsProvider(Provider):
         return ["-a", "dns-pdns"]
 
 
+class PorkbunProvider(Provider):
+    """Porkbun DNS provider."""
+
+    dns_porkbun_key: str
+    dns_porkbun_secret: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_porkbun_key": ("dns_porkbun_key", "porkbun_key", "api_key", "key"),
+            "dns_porkbun_secret": ("dns_porkbun_secret", "porkbun_secret", "secret_api_key", "secret", "api_secret"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-porkbun"]
+
+
 class Rfc2136Provider(Provider):
     """RFC 2136 DNS provider."""
 

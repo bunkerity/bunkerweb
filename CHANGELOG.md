@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.6.13~rc1 - 2026/07/??
+
+- [SECURITY] `blacklist`, `greylist`, `antibot`: forward-confirm reverse DNS (FCrDNS) before honoring an `IGNORE_RDNS`/`GREYLIST_RDNS` suffix match, so an attacker who sets their own PTR to a trusted suffix (e.g. `.googlebot.com`) can no longer bypass the block, gain greylist access, or skip the challenge without controlling the domain. (Fixes GHSA-q54j-5484-pvjm) Thanks to @kule500 for the report.
+- [SECURITY] `letsencrypt`: validate the ACME challenge `token` against the base64url charset so a `../` payload can no longer write, overwrite, or delete files outside the challenge directory as the `nginx` user through the internal API. (Fixes GHSA-79fm-4xj6-pp5g) Thanks to @xyptonize and @kule500 for the report.
+- [SECURITY] `api`: document that the config, service, plugin, and global-settings write permissions granted through the fine-grained API ACL are admin-equivalent — their payload is rendered verbatim into raw NGINX/OpenResty Lua configuration, so a scoped non-admin token holding one can execute code as the BunkerWeb process user — and log a warning when such a permission is granted to a non-admin API user. (Refs GHSA-5xh4-hfr2-jm9m, GHSA-4xv6-4mw6-34m7, GHSA-cc8g-89qq-j9vm)
+- [FEATURE] `antibot`: add `ANTIBOT_SUCCESS_URI` to redirect clients to a fixed URI after they solve the challenge instead of the page they originally requested (leave empty to keep returning to the original page). (Fixes #3704)
+- [BUGFIX] `headers`: `KEEP_UPSTREAM_HEADERS` now honors `Content-Security-Policy-Report-Only`, which it silently ignored, and keeps it by default — an upstream report-only header is no longer overwritten when `CONTENT_SECURITY_POLICY_REPORT_ONLY=yes`.
+
+## v1.6.12 - 2026/07/02
+
+- [LINUX] Updated the NGINX version to v1.30.3 for Fedora 43 and 44 now that it is available in their repositories.
+- [BUGFIX] `linux`: on Ubuntu Pro/ESM hosts the install script now installs the upstream CrowdSec engine instead of the outdated ESM build (1.4.6), whose hub index lacks the `bunkerity/bunkerweb` collection and made the install fail with `unable to find collections 'bunkerity/bunkerweb'`. (Fixes #3659)
+- [DEPS] Updated headers-more-nginx-module version to v0.40
+- [DEPS] Updated lua-cjson version to v2.1.0.18
+- [DEPS] Updated lua-resty-signal version to v0.05
+- [DEPS] Updated lua-resty-string version to v0.19
+- [DEPS] Updated lua-upstream-nginx-module version to v0.08
+- [DEPS] Updated LuaJIT version to v2.1-20260701
+- [DEPS] Updated Modsecurity version to v3.0.16
+
 ## v1.6.12~rc3 - 2026/06/18
 
 - [SECURITY] `nginx`: update nginx to 1.30.3 (except for Fedora, which stays on 1.30.2 until it is available in its repositories) to fix CVE-2026-42055 — a heap buffer overflow in `ngx_http_proxy_v2_module`/`ngx_http_grpc_module` — and CVE-2026-48142 — a heap buffer overread in `ngx_http_charset_module`.
