@@ -44,13 +44,13 @@ beautifulsoup4==4.15.0 \
     --hash=sha256:288e3ca7d54b06f2ac191970bc275c1939cb46d450b255bf6718b04aa37ab4f7 \
     --hash=sha256:d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9
     # via dns-lexicon
-boto3==1.43.42 \
-    --hash=sha256:c34a36c9181998dd9b663095b0b0f5f5bc97f3b6846d6a63b31529462091047a \
-    --hash=sha256:f5a7fa503fd902dbd305d52a4571971149acb2c19f02508188f283e244e121e4
+boto3==1.43.45 \
+    --hash=sha256:65e0ae541a9948ac41b706d5c7165d96ebf155812562b6518b862be027ee7347 \
+    --hash=sha256:bb076647526c491ce75cab896543afcda5b81c97d3f8e8da08a033fc1ddb7429
     # via certbot-dns-route53
-botocore==1.43.42 \
-    --hash=sha256:62aa017eb5bb9791b1bc655571fa1548611e508f35e13e636d3939e1be3745f0 \
-    --hash=sha256:d813d5d5707db5f1c73b5d65f6b172c49f38375b23b30c593966fef56f8b5e40
+botocore==1.43.45 \
+    --hash=sha256:a04871d814124e65daf429fb99640def23b8c4d3edc6438603b31f11116d7a67 \
+    --hash=sha256:a2da80ff3caa2873769b9a32ae5f1fb18b3571ab63a981896639955611ca01e6
     # via
     #   boto3
     #   s3transfer
@@ -698,9 +698,9 @@ pkb-client==2.3.1 \
     --hash=sha256:9ca1063e2ba99655192e715f17ab91a5a94a86e0422bbe42e0f8ff9abacf8b47 \
     --hash=sha256:b862be904fd2bfad82dc7ddf2373c5b44474c4f2acac87772344976c116c5520
     # via certbot-dns-porkbun
-proto-plus==1.28.0 \
-    --hash=sha256:38e5696342835b08fc116f30a25665b29531cda9d5d5643e9b81fc312385abd9 \
-    --hash=sha256:a630604310899e73c59ec302e5765c058d412b2f090b9c79c8822589f14955b8
+proto-plus==1.28.1 \
+    --hash=sha256:6660f5f1970874bdcfc3088b435188a36a37bd3596668f7d726417c4ae8cfbed \
+    --hash=sha256:832e68e7fe064cf90ab153b6e5eb935b27891bb89aaeb68b115e9b702f6cb168
     # via google-api-core
 protobuf==7.35.1 \
     --hash=sha256:11d6b0ec246892d85215b0a13ca6e0233cf5284b68f0ac02646427f4ff88a799 \
@@ -715,9 +715,9 @@ protobuf==7.35.1 \
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-pyasn1==0.6.3 \
-    --hash=sha256:697a8ecd6d98891189184ca1fa05d1bb00e2f84b5977c481452050549c8a72cf \
-    --hash=sha256:a80184d120f0864a52a073acc6fc642847d0be408e7c7252f31390c0f4eadcde
+pyasn1==0.6.4 \
+    --hash=sha256:9c447d8431c947fe4c8febc4ed9e760bc29011a5b01e5c74b67025bd9fb8ce81 \
+    --hash=sha256:deda9277cfd454080ec40b207fb6df82206a3a2688735233cdcd8d3d565f088b
     # via pyasn1-modules
 pyasn1-modules==0.4.2 \
     --hash=sha256:29253a9207ce32b64c3ac6600edc75368f98473906e8fd1043bd6b5b1de2c14a \
