@@ -117,14 +117,29 @@ class Configurator:
         # with a digit, e.g. 1nteresting.io).  Users write _1nteresting.io_USE_...
         # and we strip the single leading underscore here before any other processing.
         stripped: Dict[str, str] = {}
+        stripped_origins: Dict[str, str] = {}  # new_key -> original key that set the current value
         for k, v in self.__variables.items():
             new_key = k.removeprefix("_")
             if not new_key:
                 # Skip bare "_" or similar empty-after-strip keys
                 continue
             if new_key in stripped:
-                self.__logger.warning(f"Variable collision after stripping leading underscore: both {k!r} and {new_key!r} exist, keeping last value")
+                prev_key = stripped_origins[new_key]
+                # Deterministic tie-break: the explicit (non-underscore) key wins over the
+                # underscore-prefixed form, independent of dict iteration order, so the same
+                # input always yields the same output. In a collision exactly one of the two
+                # keys equals new_key (the explicit form); the other is "_" + new_key.
+                explicit_wins = k == new_key
+                winner = k if explicit_wins else prev_key
+                self.__logger.warning(
+                    f"Variable collision after stripping leading underscore: {prev_key!r} and {k!r} both map to {new_key!r}, keeping {winner!r}"
+                )
+                if explicit_wins:
+                    stripped[new_key] = v
+                    stripped_origins[new_key] = k
+                continue
             stripped[new_key] = v
+            stripped_origins[new_key] = k
         self.__variables = stripped
 
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
