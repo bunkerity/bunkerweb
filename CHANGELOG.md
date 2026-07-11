@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.13~rc1 - 2026/07/??
+## v1.6.13~rc2 - 2026/07/??
+
+- [BUGFIX] `authbasic`: fix `access()` erroring on every successful basic-auth login — it wrote to `$auth_user`, an nginx variable never declared anywhere (its `confs/` templates were removed in an earlier refactor), and to `$remote_user`, a core nginx variable with no set handler (`variable "remote_user" not changeable`) that always self-populates from the client's `Authorization` header. Both dead writes are removed; `$remote_user` still reflects the authenticated user with no write needed.
+
+## v1.6.13~rc1 - 2026/07/11
 
 - [SECURITY] `blacklist`, `greylist`, `antibot`: forward-confirm reverse DNS (FCrDNS) before honoring an `IGNORE_RDNS`/`GREYLIST_RDNS` suffix match, so an attacker who sets their own PTR to a trusted suffix (e.g. `.googlebot.com`) can no longer bypass the block, gain greylist access, or skip the challenge without controlling the domain. (Fixes GHSA-q54j-5484-pvjm) Thanks to @kule500 for the report.
 - [SECURITY] `letsencrypt`: validate the ACME challenge `token` against the base64url charset so a `../` payload can no longer write, overwrite, or delete files outside the challenge directory as the `nginx` user through the internal API. (Fixes GHSA-79fm-4xj6-pp5g) Thanks to @xyptonize and @kule500 for the report.
