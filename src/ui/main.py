@@ -1213,7 +1213,7 @@ def before_request():
                 return redirect(url_for("login.login_page"))
 
             # Case not login page, keep on 2FA before any other access
-            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
+            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
                 if not request.path.endswith("/login"):
                     raw_next = request.values.get("next")
                     try:

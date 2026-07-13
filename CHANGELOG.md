@@ -2,6 +2,7 @@
 
 ## v1.6.13~rc2 - 2026/07/??
 
+- [SECURITY] `ui`: enforce TOTP validation using the exact verification endpoint instead of a `/totp` path substring, preventing password-only sessions from reaching `/profile/totp-refresh` and rotating recovery codes before completing the second factor. (Fixes GHSA-j63f-j59c-q626) Thanks to @de3erve-hunter for the report.
 - [BUGFIX] `authbasic`: fix `access()` erroring on every successful basic-auth login — it wrote to `$auth_user`, an nginx variable never declared anywhere (its `confs/` templates were removed in an earlier refactor), and to `$remote_user`, a core nginx variable with no set handler (`variable "remote_user" not changeable`) that always self-populates from the client's `Authorization` header. Both dead writes are removed; `$remote_user` still reflects the authenticated user with no write needed.
 
 ## v1.6.13~rc1 - 2026/07/11
