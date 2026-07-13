@@ -1,18 +1,38 @@
 from contextlib import suppress
 from gzip import GzipFile
 from hashlib import new as new_hash
+from ipaddress import ip_address
 from io import BytesIO
 from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
 from os.path import join as path_join, normpath
 from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
+from re import compile as re_compile
 from tarfile import open as tar_open
 from typing import Dict, List, Optional, Union, Any
 from math import ceil
 import logging
 
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
+# Underscores are accepted because Docker/internal DNS commonly uses them in container names.
+_HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
+
+
+def has_url_userinfo(value: Any) -> bool:
+    """Return whether a hostname or URL contains a userinfo delimiter."""
+    return isinstance(value, str) and "@" in value
+
+
+def is_valid_host(host: Any) -> bool:
+    """Validate a parsed IPv4/IPv6 literal or DNS-style hostname without scheme or port."""
+    if not isinstance(host, str) or not host or len(host) > 253 or has_url_userinfo(host):
+        return False
+    with suppress(ValueError):
+        ip_address(host)
+        return True
+    hostname = host.removesuffix(".")
+    return bool(hostname) and len(hostname) <= 253 and all(_HOSTNAME_LABEL_RX.fullmatch(label) for label in hostname.split("."))
 
 
 def getenv_bool(name: str, default: str = "no") -> bool:

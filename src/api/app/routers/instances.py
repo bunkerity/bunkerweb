@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List, Tuple
-import re
 from urllib.parse import urlsplit
 
+from common_utils import is_valid_host  # type: ignore
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller, get_api_for_hostname
 from ..schemas import InstanceCreateRequest, InstancesDeleteRequest, InstanceUpdateRequest
@@ -85,25 +85,11 @@ def stop_one(hostname: str, api=Depends(get_api_for_hostname)) -> JSONResponse:
 
 
 # -------------------- CRUD over BunkerWeb instances --------------------
-_DOMAIN_RE = re.compile(r"^(?!.*\\.\\.)[^\\s\/:]{1,256}$")
-
-
 def _normalize_hostname_and_port(hostname: str, port: Optional[int]) -> Tuple[str, Optional[int]]:
-    # Robustly parse scheme/host/port
-    try:
-        parsed = urlsplit(hostname)
-        host = (parsed.hostname or hostname).lower()
-        eff_port = parsed.port or port
-        return host, eff_port
-    except Exception:
-        host = hostname.replace("http://", "").replace("https://", "").lower()
-        if ":" in host:
-            h, p = host.split(":", 1)
-            try:
-                return h, int(p)
-            except ValueError:
-                return h, port
-        return host, port
+    if is_valid_host(hostname):
+        return hostname.lower(), port
+    parsed = urlsplit(hostname if "://" in hostname else f"//{hostname}")
+    return (parsed.hostname or "").lower(), parsed.port or port
 
 
 def _validate_port(port: Optional[int]) -> Optional[int]:
@@ -143,9 +129,11 @@ def create_instance(req: InstanceCreateRequest) -> JSONResponse:
     name = req.name or "manual instance"
     method = req.method or "api"
     parsed = urlsplit(req.hostname)
+    if "://" in req.hostname and parsed.scheme not in ("http", "https"):
+        return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid hostname: only HTTP(S) URLs are supported"})
     hostname, port = _normalize_hostname_and_port(req.hostname, req.port)
 
-    if not _DOMAIN_RE.match(hostname):
+    if not is_valid_host(hostname):
         return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid hostname: {hostname}"})
 
     server_name = req.server_name or api_config.internal_api_host_header

@@ -49,7 +49,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -4784,6 +4784,9 @@ class Database:
         https_port: int = 5443,
     ) -> str:
         """Add instance."""
+        if not is_valid_host(hostname):
+            return f"Invalid instance hostname: {hostname}"
+
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -4879,6 +4882,11 @@ class Database:
 
     def update_instances(self, instances: List[Dict[str, Any]], method: str, changed: Optional[bool] = True) -> str:
         """Update instances."""
+        for instance in instances:
+            hostname = instance.get("hostname")
+            if hostname is not None and not is_valid_host(hostname):
+                return f"Invalid instance hostname: {hostname}"
+
         to_put = []
         with self._db_session() as session:
             if self.readonly:
