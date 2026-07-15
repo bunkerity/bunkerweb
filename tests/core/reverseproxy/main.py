@@ -38,6 +38,7 @@ try:
     firefox_options.add_argument("--headless")
 
     USE_REVERSE_PROXY = getenv("USE_REVERSE_PROXY", "no") == "yes"
+    USE_PROXY_CACHE = getenv("USE_PROXY_CACHE", "no") == "yes"
     REVERSE_PROXY_INTERCEPT_ERRORS = getenv("REVERSE_PROXY_INTERCEPT_ERRORS", "yes") == "yes"
     REVERSE_PROXY_WS = getenv("REVERSE_PROXY_WS", "no") == "yes"
     REVERSE_PROXY_KEEPALIVE = getenv("REVERSE_PROXY_KEEPALIVE", "no") == "yes"
@@ -159,6 +160,48 @@ try:
                     exit(1)
 
                 print("✅ The authentication endpoint was accessed", flush=True)
+
+            if USE_PROXY_CACHE:
+                cache_url = "http://www.example.com/admin"
+                cache_statuses = []
+                for _ in range(5):
+                    resp = session.get(cache_url, headers={"Host": "www.example.com"}, verify=False, allow_redirects=True)
+                    cache_statuses.append(resp.headers.get("X-Proxy-Cache", ""))
+                    if cache_statuses[-1] == "HIT":
+                        break
+
+                if "HIT" not in cache_statuses:
+                    print(f"❌ The reverse proxy cache did not produce a HIT ({cache_statuses}), exiting ...", flush=True)
+                    exit(1)
+
+                cached_url = resp.url
+
+                api_headers = {"Host": "bwapi"}
+                resp = session.get("http://www.example.com:5000/proxy-cache/status", headers=api_headers)
+                if resp.status_code != 200:
+                    print(f"❌ The reverse proxy cache status endpoint returned {resp.status_code}, exiting ...", flush=True)
+                    exit(1)
+                cache_status = resp.json().get("data", {})
+                if not cache_status.get("enabled") or cache_status.get("file_count", 0) < 1 or cache_status.get("size_bytes", 0) < 1:
+                    print(f"❌ The reverse proxy cache status is invalid ({cache_status}), exiting ...", flush=True)
+                    exit(1)
+
+                resp = session.post(
+                    "http://www.example.com:5000/proxy-cache/purge",
+                    headers=api_headers,
+                    json={"scope": "url", "urls": [{"url": cached_url}]},
+                )
+                purge_result = resp.json().get("data", {}) if resp.status_code == 200 else {}
+                if resp.status_code != 200 or purge_result.get("purged") != 1:
+                    print(f"❌ The reverse proxy cache purge failed ({resp.status_code}: {resp.text}), exiting ...", flush=True)
+                    exit(1)
+
+                resp = session.get(cache_url, headers={"Host": "www.example.com"}, verify=False, allow_redirects=True)
+                if resp.headers.get("X-Proxy-Cache") != "MISS":
+                    print(f"❌ The purged URL did not return a cache MISS ({resp.headers.get('X-Proxy-Cache')}), exiting ...", flush=True)
+                    exit(1)
+
+                print("✅ The reverse proxy cache status and native URL purge are behaving as expected", flush=True)
 
     print("✅ All tests passed", flush=True)
 except SystemExit as e:

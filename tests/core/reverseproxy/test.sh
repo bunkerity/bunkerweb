@@ -33,6 +33,7 @@ else
     sudo systemctl stop bunkerweb
     echo "LIMIT_REQ_RATE=20r/s" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_REVERSE_PROXY=no" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "USE_PROXY_CACHE=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_PROXY_INTERCEPT_ERRORS=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_PROXY_HOST=http://127.0.0.1:8080" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_PROXY_URL=/" | sudo tee -a /etc/bunkerweb/variables.env
@@ -54,6 +55,7 @@ cleanup_stack () {
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_REVERSE_PROXY: "yes"@USE_REVERSE_PROXY: "no"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_PROXY_CACHE: "yes"@USE_PROXY_CACHE: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_INTERCEPT_ERRORS: "no"@REVERSE_PROXY_INTERCEPT_ERRORS: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_WS: "yes"@REVERSE_PROXY_WS: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_HEADERS: ".*"@REVERSE_PROXY_HEADERS: ""@' {} \;
@@ -64,12 +66,13 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_AUTH_REQUEST_SET: ".*"@REVERSE_PROXY_AUTH_REQUEST_SET: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_CUSTOM_HOST: ".*"@REVERSE_PROXY_CUSTOM_HOST: ""@' {} \;
         else
-            x=13
+            x=14
             while [ $x -gt 0 ] ; do
                 sudo sed -i '$ d' /etc/bunkerweb/variables.env
                 x=$((x-1))
             done
             unset USE_REVERSE_PROXY
+            unset USE_PROXY_CACHE
             unset REVERSE_PROXY_INTERCEPT_ERRORS
             unset REVERSE_PROXY_WS
             unset REVERSE_PROXY_HEADERS
@@ -107,7 +110,7 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
-for test in "deactivated" "activated" "websocket_keepalive" "tweaked" # TODO: auth_signin
+for test in "deactivated" "activated" "websocket_keepalive" "cache" "tweaked" # TODO: auth_signin
 do
     if [ "$test" = "deactivated" ] ; then
         echo "↪️ Running tests without reverseproxy ..."
@@ -130,9 +133,24 @@ do
             export REVERSE_PROXY_WS="yes"
             export REVERSE_PROXY_KEEPALIVE="yes"
         fi
+    elif [ "$test" = "cache" ] ; then
+        echo "↪️ Running tests with reverse proxy cache activated ..."
+        if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_WS: "yes"@REVERSE_PROXY_WS: "no"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_KEEPALIVE: "yes"@REVERSE_PROXY_KEEPALIVE: "no"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_PROXY_CACHE: "no"@USE_PROXY_CACHE: "yes"@' {} \;
+        else
+            sudo sed -i 's@REVERSE_PROXY_WS=yes$@REVERSE_PROXY_WS=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REVERSE_PROXY_KEEPALIVE=yes$@REVERSE_PROXY_KEEPALIVE=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@USE_PROXY_CACHE=no$@USE_PROXY_CACHE=yes@' /etc/bunkerweb/variables.env
+            unset REVERSE_PROXY_WS
+            unset REVERSE_PROXY_KEEPALIVE
+            export USE_PROXY_CACHE="yes"
+        fi
     elif [ "$test" = "tweaked" ] ; then
         echo "↪️ Running tests with tweaked reverseproxy settings ..."
         if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_PROXY_CACHE: "yes"@USE_PROXY_CACHE: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_WS: "yes"@REVERSE_PROXY_WS: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_KEEPALIVE: "yes"@REVERSE_PROXY_KEEPALIVE: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_INTERCEPT_ERRORS: "yes"@REVERSE_PROXY_INTERCEPT_ERRORS: "no"@' {} \;
@@ -141,6 +159,7 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_AUTH_REQUEST: ".*"@REVERSE_PROXY_AUTH_REQUEST: "/auth"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_CUSTOM_HOST: ".*"@REVERSE_PROXY_CUSTOM_HOST: "test.example.com"@' {} \;
         else
+            sudo sed -i 's@USE_PROXY_CACHE=yes$@USE_PROXY_CACHE=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REVERSE_PROXY_WS=yes$@REVERSE_PROXY_WS=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REVERSE_PROXY_KEEPALIVE=yes$@REVERSE_PROXY_KEEPALIVE=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REVERSE_PROXY_INTERCEPT_ERRORS=yes$@REVERSE_PROXY_INTERCEPT_ERRORS=no@' /etc/bunkerweb/variables.env
@@ -150,6 +169,7 @@ do
             sudo sed -i 's@REVERSE_PROXY_CUSTOM_HOST=.*$@REVERSE_PROXY_CUSTOM_HOST=test.example.com@' /etc/bunkerweb/variables.env
             unset REVERSE_PROXY_WS
             unset REVERSE_PROXY_KEEPALIVE
+            unset USE_PROXY_CACHE
             export REVERSE_PROXY_INTERCEPT_ERRORS="no"
             export REVERSE_PROXY_HEADERS="Test test;Test2 test2"
             export REVERSE_PROXY_HEADERS_CLIENT="Test test;Test2 test2"

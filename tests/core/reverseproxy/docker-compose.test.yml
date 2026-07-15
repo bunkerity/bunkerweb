@@ -6,6 +6,7 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       USE_REVERSE_PROXY: "no"
+      USE_PROXY_CACHE: "no"
       REVERSE_PROXY_INTERCEPT_ERRORS: "yes"
       REVERSE_PROXY_HOST: "http://reverseproxy-api:8080"
       REVERSE_PROXY_URL: "/"

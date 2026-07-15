@@ -676,7 +676,7 @@ api.global.POST["^/proxy%-cache/purge$"] = function(self)
 	end
 
 	-- Purge each URL by its exact cache key via the native proxy_cache_purge
-	-- directive in the internal /proxy-cache/purge location (index-aware).
+	-- directive in the internal /_proxy-cache/purge location (index-aware).
 	local purged, not_found, errors = 0, 0, {}
 	for _, item in ipairs(body.urls) do
 		local url = type(item) == "table" and item.url or item
@@ -689,7 +689,7 @@ api.global.POST["^/proxy%-cache/purge$"] = function(self)
 				errors[#errors + 1] = kerr
 			else
 				ngx_req.set_header("X-BW-Purge-Key", key)
-				local res = ngx.location.capture("/proxy-cache/purge")
+				local res = ngx.location.capture("/_proxy-cache/purge")
 				if res and res.status == HTTP_OK then
 					purged = purged + 1
 				elseif res and res.status == HTTP_NOT_FOUND then
@@ -764,11 +764,11 @@ function api:do_api_call()
 				if status ~= HTTP_OK then
 					ret = false
 				end
-				if #resp["msg"] == 0 then
-					resp["msg"] = ""
-				elseif type(resp["msg"]) == "table" then
+				if type(resp["msg"]) == "table" then
 					resp["data"] = resp["msg"]
 					resp["msg"] = resp["status"]
+				elseif #resp["msg"] == 0 then
+					resp["msg"] = ""
 				end
 				return ret, resp["msg"], status, encode(resp)
 			end
