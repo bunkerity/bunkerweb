@@ -3324,19 +3324,22 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 - **Anzahl der Verbindungen pro IP-Adresse** (STREAM-Unterstützung :white_check_mark:)
 - **Anzahl der Anfragen pro IP-Adresse und URL innerhalb eines bestimmten Zeitraums** (STREAM-Unterstützung :x:)
+- **Aggregierte (globale) Anfragerate pro Dienst, über alle Clients und URLs hinweg** (STREAM-Unterstützung :x:)
 
 ### Wie es funktioniert
 
 1.  **Ratenbegrenzung:** Verfolgt die Anzahl der Anfragen von jeder Client-IP-Adresse an bestimmte URLs. Wenn ein Client die konfigurierte Ratenbegrenzung überschreitet, werden nachfolgende Anfragen vorübergehend abgelehnt.
-2.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
-3.  In beiden Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
+2.  **Globale Ratenbegrenzung:** Verfolgt die Gesamtzahl der Anfragen an einen Dienst unabhängig von Client-IP oder URL und schützt die Kapazität des Ursprungs-/Backend-Servers vor aggregierten Verkehrsspitzen. Dies ist unabhängig von der Begrenzung pro IP/URL und wird vor dieser ausgewertet.
+3.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
+4.  In allen Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
 
 ### Schritte zur Verwendung
 
 1.  **Anforderungsratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ`, um die Anforderungsratenbegrenzung zu aktivieren und URL-Muster zusammen mit ihren entsprechenden Ratenbegrenzungen zu definieren.
-2.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
-3.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
-4.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
+2.  **Globale Ratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ_GLOBAL`, um die gesamte aggregierte Anfragerate für einen Dienst zu begrenzen, unabhängig von Client-IP oder URL — nützlich, wenn der Schutz der Ursprungskapazität wichtiger ist als Fairness pro Client.
+3.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
+4.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
+5.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
 
 ### Konfigurationseinstellungen
 
@@ -3357,6 +3360,16 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
         - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
 
         Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
+
+=== "Globale Ratenbegrenzung"
+
+    | Einstellung             | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
+    | ----------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | nein     | **Globale Ratenbegrenzung aktivieren:** Auf `yes` setzen, um die gesamte aggregierte Anfragerate für den Dienst zu begrenzen (alle Clients, alle URLs). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | nein     | **Globale Ratenbegrenzung:** Maximale aggregierte Anfragerate im Format `Nr/t`, gleiche Syntax wie `LIMIT_REQ_RATE`.                                    |
+
+    !!! tip "Wann globale Ratenbegrenzung verwenden"
+        Die Begrenzung pro IP/URL schützt vor einem einzelnen missbräuchlichen Client. Die globale Ratenbegrenzung schützt den Ursprungsserver selbst: Sie begrenzt den gesamten Durchsatz zu einem Dienst, unabhängig davon, wer anfragt. Verwenden Sie sie, wenn Ihr Backend eine bekannte Kapazitätsgrenze hat (z. B. einen Datenbank-Verbindungspool oder eine langsame Drittanbieter-API), die vor jeder Verkehrsspitze geschützt werden muss, ob legitim oder nicht. Sie wird vor den Regeln pro IP/URL geprüft und ist somit die erste Verteidigungslinie unter Last.
 
 === "Verbindungsbegrenzung"
 
@@ -4206,13 +4219,11 @@ STREAM-Unterstützung :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-| Einstellung                    | Standardwert | Kontext | Mehrfach | Beschreibung                                                                                                                                                     |
-| ------------------------------ | ------------ | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MONITORING`               | `yes`        | global  | nein     | Enable monitoring of BunkerWeb.                                                                                                                                  |
-| `MONITORING_METRICS_DICT_SIZE` | `10M`        | global  | nein     | Size of the dict to store monitoring metrics.                                                                                                                    |
-| `MONITORING_IGNORE_URLS`       |              | global  | nein     | List of URLs to ignore when monitoring separated with spaces (e.g. /health)                                                                                      |
-| `MONITORING_TOP_N_DECAY_HOURS` | `6`          | global  | nein     | How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer. |
-| `MONITORING_TOP_N_TRACK_MAX`   | `5000`       | global  | nein     | Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.                   |
+| Einstellung                    | Standardwert | Kontext | Mehrfach | Beschreibung                                                                |
+| ------------------------------ | ------------ | ------- | -------- | --------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`        | global  | nein     | Enable monitoring of BunkerWeb.                                             |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`        | global  | nein     | Size of the dict to store monitoring metrics.                               |
+| `MONITORING_IGNORE_URLS`       |              | global  | nein     | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
 
 ## Mutual TLS
 

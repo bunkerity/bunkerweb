@@ -5,6 +5,7 @@
 - [SECURITY] `instances`: validate registered destinations as IPv4/IPv6 literals or DNS hostnames at every input and outbound-client boundary, reject URL userinfo such as `A@B`, and allow only HTTP(S) endpoint schemes. (Refs GHSA-rwch-jhxx-cx5f) Thanks to @adilkhan7546 for the report.
 - [SECURITY] `ui`: enforce TOTP validation using the exact verification endpoint instead of a `/totp` path substring, preventing password-only sessions from reaching `/profile/totp-refresh` and rotating recovery codes before completing the second factor. (Fixes GHSA-j63f-j59c-q626) Thanks to @de3erve-hunter for the report.
 - [BUGFIX] `authbasic`: fix `access()` erroring on every successful basic-auth login — it wrote to `$auth_user`, an nginx variable never declared anywhere (its `confs/` templates were removed in an earlier refactor), and to `$remote_user`, a core nginx variable with no set handler (`variable "remote_user" not changeable`) that always self-populates from the client's `Authorization` header. Both dead writes are removed; `$remote_user` still reflects the authenticated user with no write needed.
+- [FEATURE] `limit`: add `USE_LIMIT_REQ_GLOBAL` / `LIMIT_REQ_GLOBAL_RATE` to cap the total aggregate request rate for a service — all clients and URLs combined — protecting origin/backend capacity independently of the existing per-IP/per-URL limit, which it is checked before. Off by default.
 
 ## v1.6.13~rc1 - 2026/07/11
 
