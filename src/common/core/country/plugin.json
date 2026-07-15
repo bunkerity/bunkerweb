@@ -342,6 +342,15 @@
         { "id": "ZW", "label": "Zimbabwe (ZW)", "value": "ZW" }
       ]
     },
+    "COUNTRY_IGNORE_URI": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of PCRE regex patterns (separated by spaces) for URIs that should be excluded from country checks. Patterns are checked against the path and the full request URI with query string.",
+      "id": "country-ignore-uri",
+      "label": "Ignored URI",
+      "regex": "^.*$",
+      "type": "multivalue"
+    },
     "WHITELIST_COUNTRY": {
       "context": "multisite",
       "default": "",

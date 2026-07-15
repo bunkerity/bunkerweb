@@ -1629,10 +1629,11 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                                |
-| ------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |        | multisite | non      | Liste blanche : codes pays et/ou tokens de groupe, séparés par des espaces. Seuls ces pays sont autorisés. |
-| `BLACKLIST_COUNTRY` |        | multisite | non      | Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.           |
+| Paramètre            | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                              |
+| -------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WHITELIST_COUNTRY`  |        | multisite | non      | Liste blanche : codes pays et/ou tokens de groupe, séparés par des espaces. Seuls ces pays sont autorisés.                                                                                                               |
+| `BLACKLIST_COUNTRY`  |        | multisite | non      | Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.                                                                                                                         |
+| `COUNTRY_IGNORE_URI` |        | multisite | non      | URI ignorée : liste de motifs regex PCRE, séparés par des espaces, pour les URI à exclure de la vérification du pays. Les motifs sont vérifiés sur le chemin et sur l'URI de requête complète avec la chaîne de requête. |
 
 ### Groupes de pays pris en charge
 
