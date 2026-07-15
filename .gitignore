@@ -26,3 +26,4 @@ src/ui/static
 src/ui/templates
 .DS_Store
 .playwright-mcp/
+.claude/

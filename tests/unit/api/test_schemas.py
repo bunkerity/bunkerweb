@@ -95,3 +95,17 @@ class TestGlobalSettingsUpdate:
     def test_rejects_nested(self):
         with pytest.raises(ValidationError):
             schemas.GlobalSettingsUpdate({"A": {"nested": 1}})
+
+
+class TestWebCachePurgeRequest:
+    def test_all_scope_needs_no_urls(self):
+        assert schemas.WebCachePurgeRequest(scope="all").model_dump(exclude_none=True) == {"scope": "all"}
+
+    @pytest.mark.parametrize("payload", [{}, {"scope": "url"}, {"scope": "url", "urls": []}])
+    def test_url_scope_requires_urls(self, payload):
+        with pytest.raises(ValidationError, match="requires a non-empty 'urls' list"):
+            schemas.WebCachePurgeRequest(**payload)
+
+    def test_url_is_trimmed(self):
+        request = schemas.WebCachePurgeRequest(scope="url", urls=[{"url": " https://example.com/asset.js "}])
+        assert request.model_dump(exclude_none=True) == {"scope": "url", "urls": [{"url": "https://example.com/asset.js"}]}

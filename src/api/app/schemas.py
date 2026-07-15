@@ -1,5 +1,5 @@
 from ipaddress import ip_address
-from pydantic import BaseModel, ConfigDict, Field, field_validator, RootModel, BeforeValidator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, RootModel, BeforeValidator
 from typing import Optional, List, Dict, Union, Literal, Annotated, Any
 from re import compile as re_compile
 
@@ -269,12 +269,11 @@ class WebCachePurgeRequest(BaseModel):
     urls: Optional[List[WebCachePurgeUrl]] = Field(None, description="URLs to purge when scope is 'url'")
     service: Optional[str] = Field(None, description="Reserved for future per-service purge (currently informational)")
 
-    @field_validator("urls")
-    @classmethod
-    def _require_urls_for_url_scope(cls, v, info):
-        if info.data.get("scope", "url") == "url" and not v:
+    @model_validator(mode="after")
+    def _require_urls_for_url_scope(self):
+        if self.scope == "url" and not self.urls:
             raise ValueError("scope 'url' requires a non-empty 'urls' list")
-        return v
+        return self
 
 
 # Jobs
