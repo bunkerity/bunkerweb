@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Optional
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, patch
 
 import schemas  # type: ignore
 
@@ -48,20 +48,12 @@ def _load_router():
     names["bw_web_cache.auth"].__path__ = []
     names["bw_web_cache.auth.guard"].guard = object()
     names["bw_web_cache.deps"].get_instances_api_caller = object()
-    previous = {name: sys.modules.get(name) for name in names}
-    sys.modules.update(names)
-    try:
+    with patch.dict(sys.modules, names):
         path = ROOT / "src" / "api" / "app" / "routers" / "web_cache.py"
         spec = importlib.util.spec_from_file_location("bw_web_cache.routers.web_cache", path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
-    finally:
-        for name, module in previous.items():
-            if module is None:
-                sys.modules.pop(name, None)
-            else:
-                sys.modules[name] = module
 
 
 ROUTER = _load_router()

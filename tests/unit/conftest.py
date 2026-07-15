@@ -2,7 +2,7 @@
 
 Responsibilities:
   * inject the ``src/common/db`` (+utils/api) directories onto ``sys.path`` before
-    any test imports ``Database``/``model`` (bare-import layout — see ``_paths``);
+    any test imports ``Database``/``model`` (bare-import layout);
   * expose a ``--db-engines`` option (default ``sqlite``) and parametrize the ``db``
     fixture across the selected engines (SQLite / PostgreSQL / MariaDB);
   * build a ready, schema-reset ``Database`` per test with per-test isolation;
@@ -21,9 +21,18 @@ _HERE = Path(__file__).resolve().parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
 
-from _paths import DB_LAYER_PATHS, inject  # noqa: E402
-
-inject(DB_LAYER_PATHS)
+_REPO_ROOT = _HERE.parents[1]
+for _path in reversed(
+    (
+        _REPO_ROOT / "src" / "common" / "db",
+        _REPO_ROOT / "src" / "common" / "utils",
+        _REPO_ROOT / "src" / "common" / "api",
+    )
+):
+    _path_str = str(_path)
+    if _path_str in sys.path:
+        sys.path.remove(_path_str)
+    sys.path.insert(0, _path_str)
 
 from fixtures.engines import reset_schema  # noqa: E402
 from fixtures.db_factory import resolve_uri  # noqa: E402

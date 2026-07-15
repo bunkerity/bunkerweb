@@ -16,7 +16,6 @@ PyMySQL==1.2.0
 # (~/dev/bunkerweb-tests). pytest-randomly surfaces inter-test state leakage.
 pytest==8.4.2
 pytest-cov==6.0.0
-pytest-mock==3.14.0
 pytest-randomly==3.16.0
 regex==2026.5.9
 requests==2.34.2

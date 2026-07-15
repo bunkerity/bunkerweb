@@ -4,7 +4,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -35,20 +35,12 @@ def _load_app():
     signals.worker_process_shutdown = _Signal()
     kombu.Queue = lambda name: name
     modules = {"celery": celery, "celery.signals": signals, "kombu": kombu}
-    previous = {name: sys.modules.get(name) for name in modules}
-    sys.modules.update(modules)
-    try:
+    with patch.dict(sys.modules, modules):
         path = ROOT / "src" / "worker" / "app.py"
         spec = importlib.util.spec_from_file_location("bw_worker_app", path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
-    finally:
-        for name, module in previous.items():
-            if module is None:
-                sys.modules.pop(name, None)
-            else:
-                sys.modules[name] = module
 
 
 APP = _load_app()

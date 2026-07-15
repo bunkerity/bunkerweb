@@ -5,7 +5,7 @@ import sys
 from contextlib import nullcontext
 from pathlib import Path
 from types import ModuleType
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -13,19 +13,12 @@ ROOT = Path(__file__).resolve().parents[3]
 def _load_config():
     api_client = ModuleType("api_client")
     api_client.ApiUnavailableError = RuntimeError
-    previous = sys.modules.get("api_client")
-    sys.modules["api_client"] = api_client
-    try:
+    with patch.dict(sys.modules, {"api_client": api_client}):
         path = ROOT / "src" / "autoconf" / "Config.py"
         spec = importlib.util.spec_from_file_location("bw_autoconf_config", path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module.Config
-    finally:
-        if previous is None:
-            sys.modules.pop("api_client", None)
-        else:
-            sys.modules["api_client"] = previous
 
 
 Config = _load_config()

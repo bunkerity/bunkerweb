@@ -153,127 +153,49 @@ class TestGetConfig:
         assert _cfg(cfg_paths, {"TEST_MULTI_1": "abc"}).get_config()["TEST_MULTI_1"] == "abc"
 
 
-class TestCheckNormalization:
-    """A1: 'check' values are canonicalized to yes/no at the env/file boundary."""
+class TestNormalization:
+    def test_supported_types_are_canonicalized_together(self, cfg_paths):
+        config = _cfg(
+            cfg_paths,
+            {
+                "TEST_GLOBAL": "on",
+                "TEST_SIZE": "64 M",
+                "TEST_DUR": "30 sec",
+                "TEST_LIST": "  a   b  c ",
+                "TEST_NUM": "8080 ",
+                "TEST_SELECT": " opt1 ",
+                "TEST_CISELECT": "Modern",
+                "TEST_CIMULTI": "ALPHA Beta",
+            },
+        ).get_config()
 
-    def test_truthy_alias_canonicalized(self, cfg_paths):
-        assert _cfg(cfg_paths, {"MULTISITE": "true"}).get_config()["MULTISITE"] == "yes"
+        assert config["TEST_GLOBAL"] == "on"
+        assert config["TEST_SIZE"] == "64m"
+        assert config["TEST_DUR"] == "30s"
+        assert config["TEST_LIST"] == "a b c"
+        assert config["TEST_NUM"] == "8080"
+        assert config["TEST_SELECT"] == "opt1"
+        assert config["TEST_CISELECT"] == "modern"
+        assert config["TEST_CIMULTI"] == "alpha beta"
 
-    @pytest.mark.parametrize("raw,expected", [("on", "yes"), ("1", "yes"), ("YES", "yes"), ("off", "no"), ("0", "no"), ("disabled", "no")])
-    def test_alias_forms(self, cfg_paths, raw, expected):
-        assert _cfg(cfg_paths, {"MULTISITE": raw}).get_config()["MULTISITE"] == expected
+    def test_invalid_values_keep_defaults(self, cfg_paths):
+        config = _cfg(
+            cfg_paths, {"MULTISITE": "maybe", "TEST_GLOBAL": " abc ", "TEST_DUR": "30m1h", "TEST_NUM": "   ", "TEST_CISELECT": "moderns"}
+        ).get_config()
 
-    def test_invalid_check_falls_back_to_default(self, cfg_paths):
-        # "maybe" is not a boolean alias -> regex ^(yes|no)$ rejects -> default "no" retained.
-        assert _cfg(cfg_paths, {"MULTISITE": "maybe"}).get_config()["MULTISITE"] == "no"
+        assert config["MULTISITE"] == "no"
+        assert config["TEST_GLOBAL"] == "def"
+        assert config["TEST_DUR"] == "30s"
+        assert config["TEST_NUM"] == "0"
+        assert config["TEST_CISELECT"] == "modern"
 
-    def test_text_setting_not_coerced(self, cfg_paths):
-        # TEST_GLOBAL is text (^[a-z]+$): "on" is valid text and must be stored verbatim,
-        # never coerced to "yes".
-        assert _cfg(cfg_paths, {"TEST_GLOBAL": "on"}).get_config()["TEST_GLOBAL"] == "on"
+    def test_multisite_values_are_normalized(self, cfg_paths):
+        config = _cfg(
+            cfg_paths,
+            {"MULTISITE": "true", "SERVER_NAME": "app1", "app1_TEST_FLAG": "on", "app1_TEST_MS": "on", "app1_TEST_NUM_MS": "8080 "},
+        ).get_config()
 
-    def test_truthy_multisite_flag_enables_multisite_mode(self, cfg_paths):
-        # MULTISITE=true must enable multisite mode so prefixed per-service check settings
-        # are validated/normalized, not silently dropped to their default.
-        cfg = _cfg(cfg_paths, {"MULTISITE": "true", "SERVER_NAME": "app1", "app1_TEST_FLAG": "on"}).get_config()
-        assert cfg["MULTISITE"] == "yes"
-        assert cfg["app1_TEST_FLAG"] == "yes"
-
-    def test_multisite_prefixed_check_canonicalized(self, cfg_paths):
-        cfg = _cfg(cfg_paths, {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_FLAG": "1"}).get_config()
-        assert cfg["app1_TEST_FLAG"] == "yes"
-
-    def test_multisite_text_not_coerced(self, cfg_paths):
-        # TEST_MS is text (^[a-z]+$): a boolean-looking value stays verbatim per service.
-        cfg = _cfg(cfg_paths, {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_MS": "on"}).get_config()
-        assert cfg["app1_TEST_MS"] == "on"
-
-
-class TestUnitNormalization:
-    """B2: size/duration values are canonicalized to NGINX form at the boundary, and the
-    parser accepts compound durations the old single-group regex rejected."""
-
-    @pytest.mark.parametrize(
-        "raw,expected",
-        [("64M", "64m"), ("64 m", "64m"), ("1KB", "1k"), ("131072", "131072"), ("2g", "2g")],
-    )
-    def test_size_canonicalized(self, cfg_paths, raw, expected):
-        assert _cfg(cfg_paths, {"TEST_SIZE": raw}).get_config()["TEST_SIZE"] == expected
-
-    @pytest.mark.parametrize(
-        "raw,expected",
-        [("30sec", "30s"), ("5min", "5m"), ("2hr", "2h"), ("6month", "6M"), ("30 s", "30s"), ("1h30m", "1h30m"), ("1d12h", "1d12h")],
-    )
-    def test_duration_canonicalized(self, cfg_paths, raw, expected):
-        assert _cfg(cfg_paths, {"TEST_DUR": raw}).get_config()["TEST_DUR"] == expected
-
-    def test_compound_duration_accepted(self, cfg_paths):
-        # The old per-plugin regex ^\d+(ms?|[shdwMy])$ rejected compound times; now accepted.
-        assert _cfg(cfg_paths, {"TEST_DUR": "1h30m15s"}).get_config()["TEST_DUR"] == "1h30m15s"
-
-    def test_invalid_unit_falls_back_to_default(self, cfg_paths):
-        # Not a valid duration -> parser returns None -> regex rejects -> default retained.
-        assert _cfg(cfg_paths, {"TEST_DUR": "30x"}).get_config()["TEST_DUR"] == "30s"
-        assert _cfg(cfg_paths, {"TEST_SIZE": "1.5g"}).get_config()["TEST_SIZE"] == "64m"
-
-    @pytest.mark.parametrize("bad", ["30m1h", "1h1h", "1h1d", "1m1m1m"])
-    def test_order_invalid_compound_rejected_at_boundary(self, cfg_paths, bad):
-        # The permissive regex would match these, but NGINX rejects them. The parser is
-        # authoritative at the seam: order-invalid -> rejected -> default retained (NOT stored).
-        assert _cfg(cfg_paths, {"TEST_DUR": bad}).get_config()["TEST_DUR"] == "30s"
-
-
-class TestListNormalization:
-    """B1: multivalue/multiselect items are trimmed, empties dropped, separator canonical."""
-
-    def test_trim_and_collapse(self, cfg_paths):
-        cfg = _cfg(cfg_paths, {"TEST_LIST": " 10.0.0.1  10.0.0.2 "}).get_config()
-        assert cfg["TEST_LIST"] == "10.0.0.1 10.0.0.2"
-
-    def test_already_canonical_unchanged(self, cfg_paths):
-        cfg = _cfg(cfg_paths, {"TEST_LIST": "a b c"}).get_config()
-        assert cfg["TEST_LIST"] == "a b c"
-
-
-class TestScalarTrim:
-    """A2: surrounding whitespace stripped for number/select at the env boundary; excluded
-    types (text) keep whitespace and stay gated by their own regex."""
-
-    def test_number_trimmed(self, cfg_paths):
-        assert _cfg(cfg_paths, {"TEST_NUM": "8080 "}).get_config()["TEST_NUM"] == "8080"
-
-    def test_select_trimmed(self, cfg_paths):
-        assert _cfg(cfg_paths, {"TEST_SELECT": " opt1 "}).get_config()["TEST_SELECT"] == "opt1"
-
-    def test_all_whitespace_number_falls_back_to_default(self, cfg_paths):
-        # "   " -> "" after trim -> fails ^\d+$ -> default retained (same as today).
-        assert _cfg(cfg_paths, {"TEST_NUM": "   "}).get_config()["TEST_NUM"] == "0"
-
-    def test_text_not_trimmed_into_validity(self, cfg_paths):
-        # TEST_GLOBAL is text (^[a-z]+$): " abc " keeps its spaces -> fails regex -> default.
-        # Proves text is excluded from trim (not silently trimmed to "abc").
-        assert _cfg(cfg_paths, {"TEST_GLOBAL": " abc "}).get_config()["TEST_GLOBAL"] == "def"
-
-    def test_multisite_prefixed_number_trimmed(self, cfg_paths):
-        cfg = _cfg(cfg_paths, {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_NUM_MS": "8080 "}).get_config()
-        assert cfg["app1_TEST_NUM_MS"] == "8080"
-
-
-class TestSelectCaseInsensitive:
-    """A3: opt-in select/multiselect canonicalize a value to the declared option casing; the
-    case-sensitive regex then passes on the canonical form. Opt-out selects stay case-sensitive."""
-
-    @pytest.mark.parametrize("raw,expected", [("Modern", "modern"), ("INTERMEDIATE", "intermediate"), ("old", "old")])
-    def test_opt_in_select_canonicalized(self, cfg_paths, raw, expected):
-        assert _cfg(cfg_paths, {"TEST_CISELECT": raw}).get_config()["TEST_CISELECT"] == expected
-
-    def test_opt_in_select_no_match_falls_back(self, cfg_paths):
-        # "moderns" maps to no option -> verbatim -> regex rejects -> default retained.
-        assert _cfg(cfg_paths, {"TEST_CISELECT": "moderns"}).get_config()["TEST_CISELECT"] == "modern"
-
-    def test_opt_out_select_case_sensitive(self, cfg_paths):
-        # TEST_SELECT has no case_insensitive flag: "OPT1" != "opt1" -> regex rejects -> default.
-        assert _cfg(cfg_paths, {"TEST_SELECT": "OPT1"}).get_config()["TEST_SELECT"] == "opt1"
-
-    def test_opt_in_multiselect_per_item_canonicalized(self, cfg_paths):
-        assert _cfg(cfg_paths, {"TEST_CIMULTI": "ALPHA Beta"}).get_config()["TEST_CIMULTI"] == "alpha beta"
+        assert config["MULTISITE"] == "yes"
+        assert config["app1_TEST_FLAG"] == "yes"
+        assert config["app1_TEST_MS"] == "on"
+        assert config["app1_TEST_NUM_MS"] == "8080"

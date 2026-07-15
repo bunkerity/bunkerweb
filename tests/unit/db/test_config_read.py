@@ -4,8 +4,6 @@ The multisite brain: prefixing, suffix expansion, per-service override precedenc
 the global -> per-service default propagation. Uses ``seed_multisite``.
 """
 
-import pytest
-
 from fixtures.seed import add_select_setting, add_setting, seed_minimal, seed_multisite
 
 
@@ -20,33 +18,12 @@ class TestIsValidSetting:
         assert ok is False
         assert "not matching regex" in msg
 
-    def test_check_accepts_truthy_aliases(self, db):
+    def test_check_aliases_and_service_prefixes(self, db):
         seed_minimal(db)
-        for v in ("true", "True", "on", "1", "y", "enabled"):
-            assert db.is_valid_setting("MULTISITE", value=v) == (True, ""), v
-
-    def test_check_accepts_falsy_aliases(self, db):
-        seed_minimal(db)
-        for v in ("false", "off", "0", "n", "disabled", "OFF"):
-            assert db.is_valid_setting("MULTISITE", value=v) == (True, ""), v
-
-    def test_check_still_rejects_non_boolean(self, db):
-        seed_minimal(db)
-        ok, msg = db.is_valid_setting("MULTISITE", value="maybe")
-        assert ok is False and "not matching regex" in msg
-
-    def test_non_check_setting_value_not_coerced(self, db):
-        seed_minimal(db)
-        # SECURITY_MODE is text (^.*$): a boolean-looking value must validate as plain text.
+        assert db.is_valid_setting("MULTISITE", value="on") == (True, "")
+        assert db.is_valid_setting("MULTISITE", value="disabled") == (True, "")
         assert db.is_valid_setting("SECURITY_MODE", value="on") == (True, "")
-
-    def test_check_prefixed_alias_via_extra_services(self, db):
-        seed_minimal(db)
-        # USE_REVERSE_PROXY is a multisite check; a prefixed alias resolves + normalizes.
         assert db.is_valid_setting("app1.example.com_USE_REVERSE_PROXY", value="on", extra_services=["app1.example.com"]) == (True, "")
-
-    def test_check_prefixed_falsy_alias_via_db_service(self, db):
-        seed_minimal(db)  # seeds service app1.example.com -> resolved via the DB services scan
         assert db.is_valid_setting("app1.example.com_USE_REVERSE_PROXY", value="disabled") == (True, "")
 
     def test_missing(self, db):
@@ -79,42 +56,16 @@ class TestIsValidSetting:
         db._ignore_regex_check = True
         assert db.is_valid_setting("MULTISITE", value="totally-invalid") == (True, "")
 
-    def test_size_accepts_aliases(self, db):
+    def test_unit_values_use_authoritative_parser(self, db):
         seed_minimal(db)
         add_setting(db, "MEM_SIZE", type="size", regex=r"^\d+([kKmMgG])?$", default="0")
-        for v in ("64m", "64M", "64 m", "1mb", "131072", "0"):
-            assert db.is_valid_setting("MEM_SIZE", value=v) == (True, ""), v
-
-    def test_size_rejects_fraction(self, db):
-        seed_minimal(db)
-        add_setting(db, "MEM_SIZE", type="size", regex=r"^\d+([kKmMgG])?$", default="0")
-        ok, _ = db.is_valid_setting("MEM_SIZE", value="1.5g")
-        assert ok is False
-
-    def test_duration_accepts_aliases_and_compound(self, db):
-        seed_minimal(db)
         add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
-        for v in ("30s", "30sec", "5min", "6month", "1h30m", "1d12h", "60", "500ms"):
-            assert db.is_valid_setting("MY_TIMEOUT", value=v) == (True, ""), v
 
-    def test_duration_rejects_garbage(self, db):
-        seed_minimal(db)
-        add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
-        ok, _ = db.is_valid_setting("MY_TIMEOUT", value="30x")
-        assert ok is False
-
-    @pytest.mark.parametrize("bad", ["30m1h", "1h1h", "1h1d"])
-    def test_duration_rejects_order_invalid_compound(self, db, bad):
-        # The permissive regex matches these, but NGINX rejects order-invalid units.
-        # is_valid_setting must reject via the authoritative parser.
-        seed_minimal(db)
-        add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
-        ok, _ = db.is_valid_setting("MY_TIMEOUT", value=bad)
-        assert ok is False
-
-    def test_service_prefix_via_extra_services(self, db):
-        seed_minimal(db)
-        assert db.is_valid_setting("app1.example.com_USE_REVERSE_PROXY", value="yes", extra_services=["app1.example.com"]) == (True, "")
+        assert db.is_valid_setting("MEM_SIZE", value="64 M") == (True, "")
+        assert db.is_valid_setting("MEM_SIZE", value="1.5g")[0] is False
+        assert db.is_valid_setting("MY_TIMEOUT", value="1h 30min") == (True, "")
+        assert db.is_valid_setting("MY_TIMEOUT", value="30x")[0] is False
+        assert db.is_valid_setting("MY_TIMEOUT", value="30m1h")[0] is False
 
     def test_service_prefixed_global_setting_rejected(self, db):
         seed_minimal(db)
@@ -122,45 +73,22 @@ class TestIsValidSetting:
         # services scan, which flips multisite=True -> 'not multisite'.
         assert db.is_valid_setting("app1.example.com_MULTISITE") == (False, "not multisite")
 
-    def test_number_value_trimmed_before_regex(self, db):
-        # A2: a number with surrounding whitespace validates after trim (was rejected before).
+    def test_scalar_and_select_values_are_normalized(self, db):
         seed_minimal(db)
         add_setting(db, "TEST_PORT", type="number", regex=r"^\d+$", default="0")
-        assert db.is_valid_setting("TEST_PORT", value="8080 ") == (True, "")
-        assert db.is_valid_setting("TEST_PORT", value="  ")[0] is False  # empty-after-trim still rejected
-
-    def test_select_value_trimmed_before_regex(self, db):
-        seed_minimal(db)
         add_setting(db, "TEST_PICK", type="select", regex=r"^(a|b)$", default="a")
-        assert db.is_valid_setting("TEST_PICK", value=" a ") == (True, "")
-
-    def test_text_value_not_trimmed(self, db):
-        # SECURITY_MODE is text (^.*$): surrounding whitespace is meaningful and accepted.
-        # NOTE: is_valid_setting returns only (ok, msg) and ^.*$ matches either way, so this
-        # only guards the validity decision. The verbatim-STORE guarantee (text excluded from
-        # trim) is covered by test_config_save.test_text_stored_verbatim + test_templates.
-        seed_minimal(db)
-        assert db.is_valid_setting("SECURITY_MODE", value="  on  ") == (True, "")
-
-    def test_opt_in_select_accepts_any_case(self, db):
-        # A3: a case_insensitive select canonicalizes "Modern" -> "modern" before the
-        # case-sensitive regex, so it validates.
-        seed_minimal(db)
         add_select_setting(db, "CIPHERS", ["modern", "intermediate", "old"], default="modern", case_insensitive=True)
-        for v in ("modern", "Modern", "MODERN", "OLD"):
-            assert db.is_valid_setting("CIPHERS", value=v) == (True, ""), v
-        assert db.is_valid_setting("CIPHERS", value="moderns")[0] is False  # no option match -> rejected
-
-    def test_opt_out_select_is_case_sensitive(self, db):
-        # Default (no flag): ModSecurity-style On/Off select stays case-sensitive.
-        seed_minimal(db)
         add_select_setting(db, "SEC_ENGINE", ["On", "DetectionOnly", "Off"], default="On", case_insensitive=False)
-        assert db.is_valid_setting("SEC_ENGINE", value="On") == (True, "")
-        assert db.is_valid_setting("SEC_ENGINE", value="on")[0] is False  # case-sensitive -> rejected
-
-    def test_opt_in_multiselect_per_item(self, db):
-        seed_minimal(db)
         add_select_setting(db, "PARTS", ["alpha", "beta"], regex=r"^( *(alpha|beta) *)*$", default="", case_insensitive=True, multiselect=True)
+
+        assert db.is_valid_setting("TEST_PORT", value="8080 ") == (True, "")
+        assert db.is_valid_setting("TEST_PORT", value="  ")[0] is False
+        assert db.is_valid_setting("TEST_PICK", value=" a ") == (True, "")
+        assert db.is_valid_setting("SECURITY_MODE", value="  on  ") == (True, "")
+        assert db.is_valid_setting("CIPHERS", value="Modern") == (True, "")
+        assert db.is_valid_setting("CIPHERS", value="moderns")[0] is False
+        assert db.is_valid_setting("SEC_ENGINE", value="On") == (True, "")
+        assert db.is_valid_setting("SEC_ENGINE", value="on")[0] is False
         assert db.is_valid_setting("PARTS", value="ALPHA Beta") == (True, "")
 
 

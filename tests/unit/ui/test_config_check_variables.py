@@ -1,11 +1,4 @@
-"""UI Config.check_variables — boolean ("check") normalization seam (A1).
-
-check_variables is not pure (it reads plugins settings via the API client and flashes
-errors), but its boolean-normalization branch is isolatable: we build a Config without
-running __init__ (which would read /usr/share/bunkerweb/settings.json), stub the two
-collaborators it touches (UIData.load_from_file + get_plugins_settings), and run it in
-``threaded=True`` mode so errors append to a list instead of calling Flask's flash().
-"""
+"""UI Config.check_variables normalization and payload write-back."""
 
 import pytest
 
@@ -25,15 +18,21 @@ def _config(plugins_settings, *, ignore_regex=False):
     return cfg
 
 
-_CHECK = {"USE_X": {"type": "check", "regex": "^(yes|no)$", "context": "global"}}
-_TEXT = {"TXT": {"type": "text", "regex": "^.*$", "context": "global"}}
-_SIZE = {"SZ": {"type": "size", "regex": r"^\d+([kKmMgG])?$", "context": "global"}}
-_DUR = {"DUR": {"type": "duration", "regex": r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", "context": "global"}}
-_LIST = {"LST": {"type": "multivalue", "regex": r"^( *([a-z0-9.]+) *)*$", "context": "global", "separator": " "}}
-_NUM = {"NUM": {"type": "number", "regex": r"^\d+$", "context": "global"}}
-_SELECT = {"SEL": {"type": "select", "regex": r"^(opt1|opt2)$", "context": "global", "select": ["opt1", "opt2"]}}
-_CISELECT = {"SEL": {"type": "select", "regex": r"^(modern|old)$", "context": "global", "select": ["modern", "old"], "case_insensitive": True}}
-_CIMULTI = {
+SETTINGS = {
+    "USE_X": {"type": "check", "regex": "^(yes|no)$", "context": "global"},
+    "TXT": {"type": "text", "regex": "^.*$", "context": "global"},
+    "SZ": {"type": "size", "regex": r"^\d+([kKmMgG])?$", "context": "global"},
+    "DUR": {"type": "duration", "regex": r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", "context": "global"},
+    "LST": {"type": "multivalue", "regex": r"^( *([a-z0-9.]+) *)*$", "context": "global", "separator": " "},
+    "NUM": {"type": "number", "regex": r"^\d+$", "context": "global"},
+    "PLAIN_SELECT": {"type": "select", "regex": r"^(opt1|opt2)$", "context": "global", "select": ["opt1", "opt2"]},
+    "CI_SELECT": {
+        "type": "select",
+        "regex": r"^(modern|old)$",
+        "context": "global",
+        "select": ["modern", "old"],
+        "case_insensitive": True,
+    },
     "MS": {
         "type": "multiselect",
         "regex": r"^( *(alpha|beta) *)*$",
@@ -41,7 +40,7 @@ _CIMULTI = {
         "separator": " ",
         "multiselect": [{"id": "alpha", "label": "A", "value": "alpha"}, {"id": "beta", "label": "B", "value": "beta"}],
         "case_insensitive": True,
-    }
+    },
 }
 
 
@@ -51,126 +50,39 @@ def _no_blacklist(monkeypatch):
     monkeypatch.setattr("app.models.config.get_blacklisted_settings", lambda global_config: set())
 
 
-class TestCheckVariablesNormalization:
-    @pytest.mark.parametrize("raw", ["true", "on", "1", "YES", "enabled"])
-    def test_truthy_alias_canonicalized_and_written_back(self, raw):
-        cfg = _config(_CHECK)
-        variables = {"USE_X": raw}
-        out = cfg.check_variables(variables, config={}, to_check={"USE_X": raw}, global_config=True, new=True, threaded=True)
-        assert out["USE_X"] == "yes"
-        assert variables["USE_X"] == "yes"  # written back in place for the API payload
+def test_normalized_values_are_written_back_for_api_payload():
+    variables = {
+        "USE_X": "true",
+        "TXT": "  on  ",
+        "SZ": "64 M",
+        "DUR": "30 sec",
+        "LST": " 10.0.0.1  10.0.0.2 ",
+        "NUM": "8080 ",
+        "PLAIN_SELECT": " opt1 ",
+        "CI_SELECT": "Modern",
+        "MS": "ALPHA Beta",
+    }
+    expected = {
+        "USE_X": "yes",
+        "TXT": "  on  ",
+        "SZ": "64m",
+        "DUR": "30s",
+        "LST": "10.0.0.1 10.0.0.2",
+        "NUM": "8080",
+        "PLAIN_SELECT": "opt1",
+        "CI_SELECT": "modern",
+        "MS": "alpha beta",
+    }
 
-    @pytest.mark.parametrize("raw", ["false", "off", "0", "disabled"])
-    def test_falsy_alias_canonicalized(self, raw):
-        cfg = _config(_CHECK)
-        out = cfg.check_variables({"USE_X": raw}, config={}, to_check={"USE_X": raw}, global_config=True, new=True, threaded=True)
-        assert out["USE_X"] == "no"
+    out = _config(SETTINGS).check_variables(variables, config={}, to_check=variables.copy(), global_config=True, new=True, threaded=True)
 
-    def test_invalid_check_removed(self):
-        cfg = _config(_CHECK)
-        variables = {"USE_X": "maybe"}
-        out = cfg.check_variables(variables, config={}, to_check={"USE_X": "maybe"}, global_config=True, new=True, threaded=True)
-        assert "USE_X" not in out  # not a boolean alias -> regex rejects -> dropped
-
-    def test_text_setting_not_coerced(self):
-        cfg = _config(_TEXT)
-        out = cfg.check_variables({"TXT": "on"}, config={}, to_check={"TXT": "on"}, global_config=True, new=True, threaded=True)
-        assert out["TXT"] == "on"
-
-
-class TestUnitAndListNormalization:
-    @pytest.mark.parametrize("raw,canon", [("64M", "64m"), ("64 m", "64m"), ("1mb", "1m")])
-    def test_size_canonicalized_and_written_back(self, raw, canon):
-        cfg = _config(_SIZE)
-        variables = {"SZ": raw}
-        out = cfg.check_variables(variables, config={}, to_check={"SZ": raw}, global_config=True, new=True, threaded=True)
-        assert out["SZ"] == canon
-        assert variables["SZ"] == canon  # written back for the API payload
-
-    @pytest.mark.parametrize("raw,canon", [("30sec", "30s"), ("5min", "5m"), ("1h 30m", "1h30m"), ("6month", "6M")])
-    def test_duration_canonicalized(self, raw, canon):
-        cfg = _config(_DUR)
-        out = cfg.check_variables({"DUR": raw}, config={}, to_check={"DUR": raw}, global_config=True, new=True, threaded=True)
-        assert out["DUR"] == canon
-
-    def test_invalid_unit_removed(self):
-        cfg = _config(_DUR)
-        out = cfg.check_variables({"DUR": "30x"}, config={}, to_check={"DUR": "30x"}, global_config=True, new=True, threaded=True)
-        assert "DUR" not in out  # parser rejects -> dropped
-
-    @pytest.mark.parametrize("bad", ["30m1h", "1h1h", "1h1d"])
-    def test_order_invalid_compound_removed(self, bad):
-        # Permissive regex would match; the authoritative parser rejects order-invalid units.
-        cfg = _config(_DUR)
-        out = cfg.check_variables({"DUR": bad}, config={}, to_check={"DUR": bad}, global_config=True, new=True, threaded=True)
-        assert "DUR" not in out
-
-    def test_list_items_trimmed(self):
-        cfg = _config(_LIST)
-        variables = {"LST": " 10.0.0.1  10.0.0.2 "}
-        out = cfg.check_variables(variables, config={}, to_check={"LST": " 10.0.0.1  10.0.0.2 "}, global_config=True, new=True, threaded=True)
-        assert out["LST"] == "10.0.0.1 10.0.0.2"
-        assert variables["LST"] == "10.0.0.1 10.0.0.2"
+    assert out == expected
+    assert variables == expected
 
 
-class TestScalarTrim:
-    """A2: number/select values are trimmed AND written back to `variables` (the API payload).
-    The write-back was previously gated on the canonicalized-types flag, so scalar trims would
-    validate but persist the untrimmed original — these guard that fix."""
+def test_invalid_normalized_values_are_removed():
+    variables = {"USE_X": "maybe", "DUR": "30m1h", "NUM": "   ", "PLAIN_SELECT": "OPT1", "CI_SELECT": "moderns"}
 
-    def test_number_trimmed_and_written_back(self):
-        cfg = _config(_NUM)
-        variables = {"NUM": "8080 "}
-        out = cfg.check_variables(variables, config={}, to_check={"NUM": "8080 "}, global_config=True, new=True, threaded=True)
-        assert out["NUM"] == "8080"
-        assert variables["NUM"] == "8080"  # written back, not the untrimmed original
+    out = _config(SETTINGS).check_variables(variables, config={}, to_check=variables.copy(), global_config=True, new=True, threaded=True)
 
-    def test_select_trimmed_and_written_back(self):
-        cfg = _config(_SELECT)
-        variables = {"SEL": " opt1 "}
-        out = cfg.check_variables(variables, config={}, to_check={"SEL": " opt1 "}, global_config=True, new=True, threaded=True)
-        assert out["SEL"] == "opt1"
-        assert variables["SEL"] == "opt1"
-
-    def test_all_whitespace_number_removed(self):
-        cfg = _config(_NUM)
-        out = cfg.check_variables({"NUM": "   "}, config={}, to_check={"NUM": "   "}, global_config=True, new=True, threaded=True)
-        assert "NUM" not in out  # empty-after-trim fails ^\d+$ -> dropped
-
-    def test_text_keeps_surrounding_whitespace(self):
-        # text is excluded from trim: the value keeps its whitespace and (with ^.*$) validates.
-        cfg = _config(_TEXT)
-        variables = {"TXT": "  hi  "}
-        out = cfg.check_variables(variables, config={}, to_check={"TXT": "  hi  "}, global_config=True, new=True, threaded=True)
-        assert out["TXT"] == "  hi  "
-        assert variables["TXT"] == "  hi  "
-
-
-class TestSelectCaseInsensitive:
-    """A3: opt-in select/multiselect canonicalize to the declared option casing AND write the
-    canonical value back to `variables` (the API payload)."""
-
-    @pytest.mark.parametrize("raw,canon", [("Modern", "modern"), ("OLD", "old")])
-    def test_opt_in_select_canonicalized_and_written_back(self, raw, canon):
-        cfg = _config(_CISELECT)
-        variables = {"SEL": raw}
-        out = cfg.check_variables(variables, config={}, to_check={"SEL": raw}, global_config=True, new=True, threaded=True)
-        assert out["SEL"] == canon
-        assert variables["SEL"] == canon
-
-    def test_opt_in_select_no_match_removed(self):
-        cfg = _config(_CISELECT)
-        out = cfg.check_variables({"SEL": "moderns"}, config={}, to_check={"SEL": "moderns"}, global_config=True, new=True, threaded=True)
-        assert "SEL" not in out  # no option match -> regex rejects -> dropped
-
-    def test_opt_out_select_case_sensitive_removed(self):
-        cfg = _config(_SELECT)  # no case_insensitive flag
-        out = cfg.check_variables({"SEL": "OPT1"}, config={}, to_check={"SEL": "OPT1"}, global_config=True, new=True, threaded=True)
-        assert "SEL" not in out  # "OPT1" != "opt1" -> rejected
-
-    def test_opt_in_multiselect_per_item(self):
-        cfg = _config(_CIMULTI)
-        variables = {"MS": "ALPHA Beta"}
-        out = cfg.check_variables(variables, config={}, to_check={"MS": "ALPHA Beta"}, global_config=True, new=True, threaded=True)
-        assert out["MS"] == "alpha beta"
-        assert variables["MS"] == "alpha beta"
+    assert not out

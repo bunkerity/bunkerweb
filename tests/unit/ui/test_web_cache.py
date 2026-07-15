@@ -4,7 +4,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, patch
 
 import pytest
 from flask import Flask
@@ -31,19 +31,9 @@ def web_cache_route():
     route_path = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "routes" / "web_cache.py"
     spec = importlib.util.spec_from_file_location(module_name, route_path)
     module = importlib.util.module_from_spec(spec)
-    previous_dependencies = sys.modules.get("app.dependencies")
-    sys.modules["app.dependencies"] = dependencies
-    sys.modules[module_name] = module
-    try:
+    with patch.dict(sys.modules, {"app.dependencies": dependencies, module_name: module}):
         spec.loader.exec_module(module)
-    finally:
-        if previous_dependencies is None:
-            sys.modules.pop("app.dependencies", None)
-        else:
-            sys.modules["app.dependencies"] = previous_dependencies
-
-    yield module, client
-    sys.modules.pop(module_name, None)
+        yield module, client
 
 
 @pytest.fixture
