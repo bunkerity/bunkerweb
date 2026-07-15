@@ -19,10 +19,10 @@ Siga estos pasos para configurar y utilizar la función de País:
 
 ### Ajustes de configuración
 
-| Ajuste              | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                             |
-| ------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |                   | multisite | no       | **Lista Blanca de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Solo se permiten estos países. |
-| `BLACKLIST_COUNTRY` |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Estos países están bloqueados.  |
+| Ajuste               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                               |
+| -------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`  |                   | multisite | no       | **Lista Blanca de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Solo se permiten estos países.                                                                                                                           |
+| `BLACKLIST_COUNTRY`  |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Estos países están bloqueados.                                                                                                                            |
 | `COUNTRY_IGNORE_URI` |                   | multisite | no       | **URI ignorada:** Lista de patrones de expresiones regulares PCRE separados por espacios para las URI que deben excluirse de la comprobación de país. Los patrones se comprueban contra la ruta y la URI de solicitud completa con la cadena de consulta. |
 
 ### Grupos de países compatibles
