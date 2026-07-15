@@ -26,6 +26,14 @@ Fast loop — SQLite only (the default):
 .venv-unit/bin/pytest
 ```
 
+Direct 1.7 application changed-line gate (first-parent feature commits, sync merges and
+Alembic migration scripts excluded; migrations have upgrade/downgrade smoke tests):
+
+```bash
+.venv-unit/bin/pytest tests/unit --cov=src/common --cov=src/api --cov=src/ui --cov=src/autoconf --cov=src/scheduler --cov=src/worker --cov-branch --cov-report=json:coverage.json --cov-report=
+.venv-unit/bin/python tests/unit/check_changed_coverage.py coverage.json --fail-under 80
+```
+
 Pure-logic helpers only (no DB at all, instant):
 
 ```bash
@@ -48,19 +56,19 @@ Engines that are unconfigured or unreachable are **skipped**, not failed.
 
 ## Layout
 
-| Path | Purpose |
-| --- | --- |
-| `conftest.py` | `sys.path` injection, `--db-engines` option, the `db` fixture |
-| `_paths.py` | the `src` directories injected onto `sys.path` |
-| `fixtures/engines.py` | per-engine URI build / reachability probe / schema reset |
-| `fixtures/seed.py` | composable, FK-valid seed builders |
-| `db/` | DB-layer tests — one module per mixin domain |
-| `api/` | `APIDatabase` users/permissions + `schemas.py` Pydantic validators |
-| `ui/` | `UIDatabase` tests + `app/utils` pure helpers — bcrypt, `get_multiples` multisite expansion, settings filters, and the open-redirect (CWE-601) / CSV-injection (CWE-1236) guards (via the `app` package; needs Flask/bcrypt) |
-| `common/` | pure-logic helpers (`common_utils`) — no DB, run once |
-| `gen/` | `Configurator` validation, `has_permissions`, `Templator` SSL curve ranking |
-| `scheduler/` | `JobScheduler` job validation + dispatch payloads |
-| `worker/` | `executor` job-path sandbox guard |
+| Path                  | Purpose                                                                                                                                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `conftest.py`         | `sys.path` injection, `--db-engines` option, the `db` fixture                                                                                                                                                                |
+| `_paths.py`           | the `src` directories injected onto `sys.path`                                                                                                                                                                               |
+| `fixtures/engines.py` | per-engine URI build / reachability probe / schema reset                                                                                                                                                                     |
+| `fixtures/seed.py`    | composable, FK-valid seed builders                                                                                                                                                                                           |
+| `db/`                 | DB-layer tests — one module per mixin domain                                                                                                                                                                                 |
+| `api/`                | `APIDatabase` users/permissions + `schemas.py` Pydantic validators                                                                                                                                                           |
+| `ui/`                 | `UIDatabase` tests + `app/utils` pure helpers — bcrypt, `get_multiples` multisite expansion, settings filters, and the open-redirect (CWE-601) / CSV-injection (CWE-1236) guards (via the `app` package; needs Flask/bcrypt) |
+| `common/`             | pure-logic helpers (`common_utils`) — no DB, run once                                                                                                                                                                        |
+| `gen/`                | `Configurator` validation, `has_permissions`, `Templator` SSL curve ranking                                                                                                                                                  |
+| `scheduler/`          | `JobScheduler` job validation + dispatch payloads                                                                                                                                                                            |
+| `worker/`             | `executor` job-path sandbox guard                                                                                                                                                                                            |
 
 ## Conventions
 

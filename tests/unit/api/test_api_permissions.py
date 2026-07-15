@@ -30,7 +30,15 @@ class TestCheckApiPermission:
 
     def test_global_grant_satisfies_specific_check(self, adb):
         adb.grant_api_permission("alice", "service_read", resource_type="services", resource_id=None)
-        assert adb.check_api_permission("alice", "service_read", resource_type="services", resource_id="anything") is True
+        assert (
+            adb.check_api_permission(
+                "alice",
+                "service_read",
+                resource_type="services",
+                resource_id="anything",
+            )
+            is True
+        )
 
     def test_resource_type_none_matches_any_grant(self, adb):
         adb.grant_api_permission("alice", "service_read", resource_type="services")
@@ -38,11 +46,22 @@ class TestCheckApiPermission:
         assert adb.check_api_permission("alice", "config_read") is False
 
     def test_denied_grant_excluded(self, adb):
-        adb.grant_api_permission("alice", "service_read", resource_type="services", resource_id="svc1", granted=False)
+        adb.grant_api_permission(
+            "alice",
+            "service_read",
+            resource_type="services",
+            resource_id="svc1",
+            granted=False,
+        )
         assert adb.check_api_permission("alice", "service_read", resource_type="services", resource_id="svc1") is False
 
 
 class TestGrantRevoke:
+    def test_web_cache_permissions(self, adb):
+        assert adb.grant_api_permission("alice", "web_cache_read", resource_type="web_cache") == ""
+        assert adb.check_api_permission("alice", "web_cache_read", resource_type="web_cache") is True
+        assert adb.check_api_permission("alice", "web_cache_purge", resource_type="web_cache") is False
+
     def test_invalid_resource_type(self, adb):
         assert "Invalid resource_type" in adb.grant_api_permission("alice", "service_read", resource_type="bogus")
 
@@ -55,7 +74,16 @@ class TestGrantRevoke:
     def test_grant_is_idempotent_update(self, adb):
         assert adb.grant_api_permission("alice", "service_read", resource_type="services", resource_id="svc1") == ""
         # re-granting the same (user, rtype, rid, perm) updates the row instead of duplicating
-        assert adb.grant_api_permission("alice", "service_read", resource_type="services", resource_id="svc1", granted=False) == ""
+        assert (
+            adb.grant_api_permission(
+                "alice",
+                "service_read",
+                resource_type="services",
+                resource_id="svc1",
+                granted=False,
+            )
+            == ""
+        )
         perms = adb.get_api_permissions("alice", include_denied=True)
         assert len(perms) == 1
         assert perms[0].granted is False
@@ -67,7 +95,16 @@ class TestGrantRevoke:
         assert len(adb.get_api_permissions("alice", include_denied=True)) == 1
         assert adb.check_api_permission("alice", "service_read", resource_type="services", resource_id="svc1") is False
         # hard delete removes the row
-        assert adb.revoke_api_permission("alice", "service_read", resource_type="services", resource_id="svc1", hard_delete=True) == ""
+        assert (
+            adb.revoke_api_permission(
+                "alice",
+                "service_read",
+                resource_type="services",
+                resource_id="svc1",
+                hard_delete=True,
+            )
+            == ""
+        )
         assert len(adb.get_api_permissions("alice", include_denied=True)) == 0
 
     def test_revoke_nonexistent_is_noop(self, adb):
@@ -77,7 +114,13 @@ class TestGrantRevoke:
 class TestGetApiPermissions:
     def test_list_excludes_denied_by_default(self, adb):
         adb.grant_api_permission("alice", "service_read", resource_type="services", resource_id="a")
-        adb.grant_api_permission("alice", "service_update", resource_type="services", resource_id="b", granted=False)
+        adb.grant_api_permission(
+            "alice",
+            "service_update",
+            resource_type="services",
+            resource_id="b",
+            granted=False,
+        )
         assert len(adb.get_api_permissions("alice")) == 1
         assert len(adb.get_api_permissions("alice", include_denied=True)) == 2
 

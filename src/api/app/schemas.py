@@ -1,7 +1,16 @@
 from ipaddress import ip_address
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, RootModel, BeforeValidator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+    RootModel,
+    BeforeValidator,
+)
 from typing import Optional, List, Dict, Union, Literal, Annotated, Any
 from re import compile as re_compile
+from urllib.parse import urlsplit
 
 # Shared helpers for Configs
 NAME_RX = re_compile(r"^[\w_-]{1,255}$")
@@ -253,7 +262,10 @@ class CacheFilesDeleteRequest(BaseModel):
 # Web cache (proxy_cache) management
 class WebCachePurgeUrl(BaseModel):
     url: str = Field(..., description="Absolute URL whose cached response should be purged")
-    key: Optional[str] = Field(None, description="Custom PROXY_CACHE_KEY template if the service overrides the default")
+    key: Optional[str] = Field(
+        None,
+        description="Custom PROXY_CACHE_KEY template if the service overrides the default",
+    )
 
     @field_validator("url")
     @classmethod
@@ -261,13 +273,25 @@ class WebCachePurgeUrl(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("url must be a non-empty string")
+        try:
+            parsed = urlsplit(v)
+        except ValueError as exc:
+            raise ValueError("url must be an absolute HTTP(S) URL") from exc
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+            raise ValueError("url must be an absolute HTTP(S) URL")
         return v
 
 
 class WebCachePurgeRequest(BaseModel):
-    scope: Literal["all", "url"] = Field("url", description='"all" clears the whole proxy cache; "url" purges specific URLs')
+    scope: Literal["all", "url"] = Field(
+        "url",
+        description='"all" clears the whole proxy cache; "url" purges specific URLs',
+    )
     urls: Optional[List[WebCachePurgeUrl]] = Field(None, description="URLs to purge when scope is 'url'")
-    service: Optional[str] = Field(None, description="Reserved for future per-service purge (currently informational)")
+    service: Optional[str] = Field(
+        None,
+        description="Reserved for future per-service purge (currently informational)",
+    )
 
     @model_validator(mode="after")
     def _require_urls_for_url_scope(self):
@@ -331,7 +355,10 @@ class SaveConfigRequest(BaseModel):
     config: Dict[str, str] = Field(..., description="Full config environment dict")
     method: str = Field(..., description="Source method (e.g. 'autoconf')")
     changed: bool = Field(False, description="Whether to immediately signal changes")
-    disable_cleanup: bool = Field(False, description="Whether to cleanup or convert to draft any existing services not in the provided config dict")
+    disable_cleanup: bool = Field(
+        False,
+        description="Whether to cleanup or convert to draft any existing services not in the provided config dict",
+    )
 
     @field_validator("method")
     @classmethod
@@ -354,7 +381,10 @@ class BulkSaveCustomConfigsRequest(BaseModel):
     custom_configs: List[Dict[str, Any]] = Field(..., description="List of custom config dicts")
     method: str = Field(..., description="Source method (e.g. 'autoconf')")
     changed: bool = Field(False, description="Whether to signal custom config changes")
-    disable_cleanup: bool = Field(False, description="Whether to cleanup or convert to draft any existing configs not in the list")
+    disable_cleanup: bool = Field(
+        False,
+        description="Whether to cleanup or convert to draft any existing configs not in the list",
+    )
 
     @field_validator("method")
     @classmethod

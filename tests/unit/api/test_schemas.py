@@ -72,7 +72,14 @@ class TestPatternsAndAliases:
             schemas.InstanceStatusRequest(status="bogus")
 
     def test_dispatch_job_async_alias(self):
-        j = schemas.DispatchJobItem(name="job", plugin_id="pl", file="job.py", path="/x", every="hour", **{"async": True})
+        j = schemas.DispatchJobItem(
+            name="job",
+            plugin_id="pl",
+            file="job.py",
+            path="/x",
+            every="hour",
+            **{"async": True},
+        )
         assert j.run_async is True
 
     def test_dispatch_job_bad_file_pattern(self):
@@ -108,4 +115,15 @@ class TestWebCachePurgeRequest:
 
     def test_url_is_trimmed(self):
         request = schemas.WebCachePurgeRequest(scope="url", urls=[{"url": " https://example.com/asset.js "}])
-        assert request.model_dump(exclude_none=True) == {"scope": "url", "urls": [{"url": "https://example.com/asset.js"}]}
+        assert request.model_dump(exclude_none=True) == {
+            "scope": "url",
+            "urls": [{"url": "https://example.com/asset.js"}],
+        }
+
+    @pytest.mark.parametrize(
+        "url",
+        ["/asset.js", "example.com/asset.js", "ftp://example.com/asset.js", "http://"],
+    )
+    def test_url_must_be_absolute_http(self, url):
+        with pytest.raises(ValidationError, match=r"absolute HTTP\(S\) URL"):
+            schemas.WebCachePurgeRequest(scope="url", urls=[{"url": url}])
