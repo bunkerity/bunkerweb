@@ -371,34 +371,13 @@ def configs_delete():
         return handle_error("Invalid configs parameter on /configs/delete.", "configs", True)
     DATA.load_from_file()
 
-    def delete_configs(configs: Dict[str, str]):
+    def delete_configs(configs: List[Dict[str, str]]):
         wait_applying()
 
-        db_configs = DB.get_custom_configs(with_drafts=True)
-        configs_to_delete = set()
-        non_editable_configs = set()
-        remaining_configs_by_method: Dict[str, List[Dict[str, str]]] = {"ui": [], "api": []}
-
-        for db_config in db_configs:
-            key = f"{(db_config['service_id'] + '/') if db_config['service_id'] else ''}{db_config['type']}/{db_config['name']}"
-            keep = True
-            for config in configs:
-                # Normalize service comparison: treat "global" string as None
-                config_service = config["service"] if config["service"] != "global" else None
-                if db_config["name"] == config["name"] and db_config["service_id"] == config_service and db_config["type"] == config["type"]:
-                    config_method = db_config.get("method")
-                    if config_method not in remaining_configs_by_method:
-                        non_editable_configs.add(key)
-                        continue
-                    configs_to_delete.add(key)
-                    keep = False
-                    break
-            if db_config.get("template") or not keep:
-                continue
-            config_without_template = {k: v for k, v in db_config.items() if k != "template"}
-            config_method = config_without_template.get("method")
-            if config_method in remaining_configs_by_method:
-                remaining_configs_by_method[config_method].append(config_without_template)
+        keys = {(config["service"], config["type"], config["name"]) for config in configs}
+        error, deleted_keys, protected_keys = DB.delete_custom_configs(keys)
+        configs_to_delete = {f"{(service_id + '/') if service_id else ''}{config_type}/{name}" for service_id, config_type, name in deleted_keys}
+        non_editable_configs = {f"{(service_id + '/') if service_id else ''}{config_type}/{name}" for service_id, config_type, name in protected_keys}
 
         for non_editable_config in non_editable_configs:
             DATA["TO_FLASH"].append(
@@ -408,18 +387,18 @@ def configs_delete():
                 }
             )
 
+        if error:
+            DATA["TO_FLASH"].append({"content": f"An error occurred while deleting the custom configs: {error}", "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
         if not configs_to_delete:
             DATA["TO_FLASH"].append({"content": "All selected custom configs could not be found or are not UI/API custom configs.", "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
-        for method, configs_for_method in remaining_configs_by_method.items():
-            error = DB.save_custom_configs(configs_for_method, method)
-            if error:
-                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
-                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-                return
-        DATA["TO_FLASH"].append({"content": f"Deleted config{'s' if len(configs_to_delete) > 1 else ''}: {', '.join(configs_to_delete)}", "type": "success"})
+        DATA["TO_FLASH"].append(
+            {"content": f"Deleted config{'s' if len(configs_to_delete) > 1 else ''}: {', '.join(sorted(configs_to_delete))}", "type": "success"}
+        )
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})

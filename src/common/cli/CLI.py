@@ -146,14 +146,8 @@ class CLI(ApiCaller):
                 try:
                     # Centralized builder handles scheme/port/host
                     self.apis.append(API.from_instance(db_instance))
-                except Exception:
-                    # Fallback to HTTP if any field is missing/malformed
-                    self.apis.append(
-                        API(
-                            f"http://{db_instance.get('hostname', '127.0.0.1')}:{db_instance.get('port', 5000)}",
-                            db_instance.get("server_name", "bwapi"),
-                        )
-                    )
+                except ValueError as e:
+                    self.__logger.warning(f"Skipping invalid instance {db_instance.get('hostname', '<missing>')}: {e}")
         else:
             # Build single local API endpoint from environment variables
             server_name = self.__get_variable("API_SERVER_NAME", "bwapi") or "bwapi"

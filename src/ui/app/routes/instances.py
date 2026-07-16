@@ -1,12 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
 from typing import Literal
-from urllib.parse import urlsplit
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
+from common_utils import parse_host  # type: ignore
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB
-from app.utils import flash, is_ui_api_method, is_valid_host
+from app.utils import flash, is_ui_api_method
 
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
@@ -53,16 +53,12 @@ def instances_new():
 
     # Parse provided hostname, optional scheme and port (robustly)
     raw_input = request.form["hostname"].strip()
-    # Allow parsing host[:port] by prefixing // when no scheme is provided
-    to_parse = raw_input if "://" in raw_input else f"//{raw_input}"
-    parts = urlsplit(to_parse)
-    explicit_scheme = bool(parts.scheme)
-    scheme_https = parts.scheme.lower() == "https"
-    hostname = (parts.hostname or "").lower()
-    provided_port = parts.port  # int | None
-
-    if not is_valid_host(hostname):
-        return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain or IP address.", "instances", True)
+    try:
+        scheme, hostname, provided_port = parse_host(raw_input)
+    except ValueError as e:
+        return handle_error(f"{e}.", "instances", True)
+    explicit_scheme = bool(scheme)
+    scheme_https = scheme == "https"
 
     # Derive defaults
     default_http_port = str(db_config.get("API_HTTP_PORT", "5000"))

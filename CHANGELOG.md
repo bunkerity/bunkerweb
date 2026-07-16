@@ -1,6 +1,24 @@
 # Changelog
 
-## v1.6.12 - 2026/06/??
+## v1.6.13 - 2026/07/??
+
+- [SECURITY] `nginx`: update nginx to 1.30.4 (except for Fedora, which stays on 1.30.3 until it is available in its repositories) to fix CVE-2026-42533, a heap buffer overflow in the `map` directive's regex matching; CVE-2026-60005, uninitialized memory access in the `slice` directive/background cache update that can disclose worker-process memory or crash a worker; and CVE-2026-56434, a use-after-free in `ngx_http_ssi_filter_module`.
+- [SECURITY] `instances`: validate registered destinations as IPv4/IPv6 literals or IDNA-normalized DNS hostnames at every input and outbound-client boundary; preserve trailing-dot FQDNs; reject URL userinfo, paths, queries, fragments, malformed ports, and non-HTTP(S) schemes with a validation error instead of an internal server error. (Refs GHSA-rwch-jhxx-cx5f) Thanks to @adilkhan7546 for the report.
+- [SECURITY] `ui`: enforce TOTP validation using the exact verification endpoint instead of a `/totp` path substring, preventing password-only sessions from reaching `/profile/totp-refresh` and rotating recovery codes before completing the second factor. (Fixes GHSA-j63f-j59c-q626) Thanks to @de3erve-hunter for the report.
+- [BUGFIX] `ui`, `api`: delete custom configurations by exact key so removing the last UI/API-managed config no longer requires a method-wide replacement that can race with concurrent updates.
+- [BUGFIX] `authbasic`: fix `access()` erroring on every successful basic-auth login — it wrote to `$auth_user`, an nginx variable never declared anywhere (its `confs/` templates were removed in an earlier refactor), and to `$remote_user`, a core nginx variable with no set handler (`variable "remote_user" not changeable`) that always self-populates from the client's `Authorization` header. Both dead writes are removed; `$remote_user` still reflects the authenticated user with no write needed.
+- [FEATURE] `limit`: add `USE_LIMIT_REQ_GLOBAL` / `LIMIT_REQ_GLOBAL_RATE` to cap the total aggregate request rate for a service — all clients and URLs combined — protecting origin/backend capacity independently of the existing per-IP/per-URL limit, which it is checked before. Off by default.
+- [FEATURE] `country`: add `COUNTRY_IGNORE_URI` to skip whitelist/blacklist country checks for URIs matching a PCRE regex list, checked against the path and full request URI with query string (mirrors `ANTIBOT_IGNORE_URI`).
+
+## v1.6.13~rc1 - 2026/07/11
+
+- [SECURITY] `blacklist`, `greylist`, `antibot`: forward-confirm reverse DNS (FCrDNS) before honoring an `IGNORE_RDNS`/`GREYLIST_RDNS` suffix match, so an attacker who sets their own PTR to a trusted suffix (e.g. `.googlebot.com`) can no longer bypass the block, gain greylist access, or skip the challenge without controlling the domain. (Fixes GHSA-q54j-5484-pvjm) Thanks to @kule500 for the report.
+- [SECURITY] `letsencrypt`: validate the ACME challenge `token` against the base64url charset so a `../` payload can no longer write, overwrite, or delete files outside the challenge directory as the `nginx` user through the internal API. (Fixes GHSA-79fm-4xj6-pp5g) Thanks to @xyptonize and @kule500 for the report.
+- [SECURITY] `api`: document that the config, service, plugin, and global-settings write permissions granted through the fine-grained API ACL are admin-equivalent — their payload is rendered verbatim into raw NGINX/OpenResty Lua configuration, so a scoped non-admin token holding one can execute code as the BunkerWeb process user — and log a warning when such a permission is granted to a non-admin API user. (Refs GHSA-5xh4-hfr2-jm9m, GHSA-4xv6-4mw6-34m7, GHSA-cc8g-89qq-j9vm)
+- [FEATURE] `antibot`: add `ANTIBOT_SUCCESS_URI` to redirect clients to a fixed URI after they solve the challenge instead of the page they originally requested (leave empty to keep returning to the original page). (Fixes #3704)
+- [BUGFIX] `headers`: `KEEP_UPSTREAM_HEADERS` now honors `Content-Security-Policy-Report-Only`, which it silently ignored, and keeps it by default — an upstream report-only header is no longer overwritten when `CONTENT_SECURITY_POLICY_REPORT_ONLY=yes`.
+
+## v1.6.12 - 2026/07/02
 
 - [LINUX] Updated the NGINX version to v1.30.3 for Fedora 43 and 44 now that it is available in their repositories.
 - [BUGFIX] `linux`: on Ubuntu Pro/ESM hosts the install script now installs the upstream CrowdSec engine instead of the outdated ESM build (1.4.6), whose hub index lacks the `bunkerity/bunkerweb` collection and made the install fail with `unable to find collections 'bunkerity/bunkerweb'`. (Fixes #3659)

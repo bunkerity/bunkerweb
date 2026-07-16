@@ -49,7 +49,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -663,7 +663,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.12"
+                return "1.6.13"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -697,7 +697,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.12",
+            "version": "1.6.13",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -2419,6 +2419,46 @@ class Database:
                 return str(e)
 
         return changed_plugins
+
+    def delete_custom_configs(
+        self, keys: Set[Tuple[Optional[str], str, str]]
+    ) -> Tuple[str, Set[Tuple[Optional[str], str, str]], Set[Tuple[Optional[str], str, str]]]:
+        """Delete exact UI/API custom config keys."""
+        normalized_keys = {
+            (None if service_id in (None, "", "global") else service_id, config_type.strip().replace("-", "_").lower(), name)
+            for service_id, config_type, name in keys
+        }
+        deleted_keys: Set[Tuple[Optional[str], str, str]] = set()
+        protected_keys: Set[Tuple[Optional[str], str, str]] = set()
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved", deleted_keys, protected_keys
+
+            try:
+                for key in normalized_keys:
+                    service_id, config_type, name = key
+                    filters = {"service_id": service_id, "type": config_type, "name": name}
+                    deleted = (
+                        session.query(Custom_configs).filter_by(**filters).filter(Custom_configs.method.in_(("ui", "api"))).delete(synchronize_session=False)
+                    )
+                    if deleted:
+                        deleted_keys.add(key)
+                    elif session.query(Custom_configs.id).filter_by(**filters).first():
+                        protected_keys.add(key)
+
+                if deleted_keys:
+                    metadata = session.get(Metadata, 1)
+                    if metadata is not None:
+                        metadata.custom_configs_changed = True
+                        metadata.last_custom_configs_change = datetime.now().astimezone()
+
+                session.commit()
+            except BaseException as e:
+                session.rollback()
+                return str(e), set(), set()
+
+        return "", deleted_keys, protected_keys
 
     def save_custom_configs(
         self,
@@ -4784,6 +4824,9 @@ class Database:
         https_port: int = 5443,
     ) -> str:
         """Add instance."""
+        if not is_valid_host(hostname):
+            return f"Invalid instance hostname: {hostname}"
+
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -4879,6 +4922,11 @@ class Database:
 
     def update_instances(self, instances: List[Dict[str, Any]], method: str, changed: Optional[bool] = True) -> str:
         """Update instances."""
+        for instance in instances:
+            hostname = instance.get("hostname")
+            if hostname is not None and not is_valid_host(hostname):
+                return f"Invalid instance hostname: {hostname}"
+
         to_put = []
         with self._db_session() as session:
             if self.readonly:

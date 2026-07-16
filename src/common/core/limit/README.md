@@ -2,19 +2,22 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 
 - **Number of connections per IP address** (STREAM support :white_check_mark:)
 - **Number of requests per IP address and URL within a specific time period** (STREAM support :x:)
+- **Aggregate (global) request rate per service, across all clients and URLs combined** (STREAM support :x:)
 
 ### How it Works
 
 1. **Rate Limiting:** Tracks the number of requests from each client IP address to specific URLs. If a client exceeds the configured rate limit, subsequent requests are temporarily denied.
-2. **Connection Limiting:** Monitors and restricts the number of concurrent connections from each client IP address. Different connection limits can be applied based on the protocol used (HTTP/1, HTTP/2, HTTP/3, or stream).
-3. In both cases, clients that exceed the defined limits receive an HTTP status code **"429 - Too Many Requests"**, which helps prevent server overload.
+2. **Global Rate Limiting:** Tracks the total number of requests to a service regardless of client IP or URL, protecting origin/backend capacity from aggregate traffic spikes. This is independent from and evaluated before per-IP/per-URL rate limiting.
+3. **Connection Limiting:** Monitors and restricts the number of concurrent connections from each client IP address. Different connection limits can be applied based on the protocol used (HTTP/1, HTTP/2, HTTP/3, or stream).
+4. In all cases, clients that exceed the defined limits receive an HTTP status code **"429 - Too Many Requests"**, which helps prevent server overload.
 
 ### Steps to Use
 
 1. **Enable Request Rate Limiting:** Use `USE_LIMIT_REQ` to enable request rate limiting and define URL patterns along with their corresponding rate limits.
-2. **Enable Connection Limiting:** Use `USE_LIMIT_CONN` to enable connection limiting and set the maximum number of concurrent connections for different protocols.
-3. **Apply Granular Control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
-4. **Monitor Effectiveness:** Use the [web UI](web-ui.md) to view statistics on limited requests and connections.
+2. **Enable Global Rate Limiting:** Use `USE_LIMIT_REQ_GLOBAL` to cap the total aggregate request rate for a service, independent of client IP or URL, when protecting origin capacity matters more than per-client fairness.
+3. **Enable Connection Limiting:** Use `USE_LIMIT_CONN` to enable connection limiting and set the maximum number of concurrent connections for different protocols.
+4. **Apply Granular Control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
+5. **Monitor Effectiveness:** Use the [web UI](web-ui.md) to view statistics on limited requests and connections.
 
 ### Configuration Settings
 
@@ -35,6 +38,16 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
         - `t` is the time unit: `s` (second), `m` (minute), `h` (hour), or `d` (day)
 
         For example, `5r/m` means that 5 requests per minute are allowed from each IP address.
+
+=== "Global Rate Limiting"
+
+    | Setting                 | Default   | Context   | Multiple | Description                                                                                                                    |
+    | ----------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | no       | **Enable Global Rate Limiting:** Set to `yes` to cap the total aggregate request rate for the service (all clients, all URLs). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | no       | **Global Rate Limit:** Maximum aggregate request rate in the format `Nr/t`, same syntax as `LIMIT_REQ_RATE`.                   |
+
+    !!! tip "When to use global rate limiting"
+        Per-IP/per-URL rate limiting protects against a single abusive client. Global rate limiting protects the origin server itself: it caps total throughput to a service regardless of who's asking. Use it when your backend has a known capacity ceiling (e.g. a database connection pool, a slow third-party API) that you need to shield from any traffic spike, legitimate or not. It's checked before per-IP/per-URL rules, so it's the first line of defense under load.
 
 === "Connection Limiting"
 

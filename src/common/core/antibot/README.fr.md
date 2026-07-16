@@ -31,6 +31,7 @@ Les paramètres suivants sont partagés par tous les mécanismes de défi :
 | `ANTIBOT_URI`          | `/challenge`      | multisite | non      | URL du défi : l’URL vers laquelle les utilisateurs sont redirigés pour compléter le défi. Veillez à ce que cette URL ne soit pas utilisée pour autre chose. |
 | `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | non      | Délai du défi : temps maximum (en secondes) pour compléter le défi. Au‑delà, un nouveau défi est généré.                                                    |
 | `ANTIBOT_TIME_VALID`   | `86400`           | multisite | non      | Validité du défi : durée (en secondes) pendant laquelle un défi réussi reste valide. Passé ce délai, un nouveau défi sera requis.                           |
+| `ANTIBOT_SUCCESS_URI`  |                   | multisite | non      | URL de redirection après succès : une URL fixe vers laquelle rediriger les utilisateurs après qu’ils ont résolu le défi, au lieu de la page initialement demandée. Laissez vide pour renvoyer les utilisateurs vers leur destination d’origine.                           |
 
 ### Exclure du trafic des défis
 
@@ -67,6 +68,9 @@ Exemples :
 
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Exclut les requêtes provenant d’hôtes dont le DNS inversé se termine par `googlebot.com` ou `bingbot.com`.
+
+!!! info "DNS inversé à confirmation directe (FCrDNS)"
+    Les suffixes `ANTIBOT_IGNORE_RDNS` font l’objet d’une confirmation directe : le nom d’hôte PTR correspondant est résolu de nouveau vers une IP et le défi n’est ignoré que lorsque celle-ci correspond à l’IP du client. Un PTR qui ne peut pas être confirmé de cette façon est considéré comme une usurpation possible et le défi reste appliqué. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe ignoré (par exemple `.googlebot.com`) pour contourner le défi.
 
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Exclut les requêtes des ASN 15169 (Google) et 8075 (Microsoft).

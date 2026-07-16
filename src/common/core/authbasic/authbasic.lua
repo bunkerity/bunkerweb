@@ -422,8 +422,6 @@ function authbasic:access()
 			username = result,
 			success = true,
 		})
-		ngx.var.auth_user = result
-		ngx.var.remote_user = result
 		return self:ret(true, "authenticated user " .. result)
 	end
 

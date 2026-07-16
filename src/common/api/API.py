@@ -10,6 +10,7 @@ from requests.exceptions import ConnectionError
 from urllib3 import disable_warnings  # new
 from urllib3.exceptions import InsecureRequestWarning  # new
 
+from common_utils import parse_host  # type: ignore
 from logger import getLogger  # type: ignore
 
 # Suppress urllib3 InsecureRequestWarning when verify=False (default: enabled)
@@ -29,8 +30,14 @@ class API:
     """
 
     def __init__(self, endpoint: str, host: Optional[str] = None, token: Optional[str] = None):
-        # Normalize endpoint trailing slash
-        self.__endpoint = endpoint if endpoint.endswith("/") else endpoint + "/"
+        try:
+            scheme, hostname, port = parse_host(endpoint)
+        except ValueError as e:
+            raise ValueError("Invalid API endpoint: expected an HTTP(S) URL without user information") from e
+        if not scheme:
+            raise ValueError("Invalid API endpoint: expected an HTTP(S) URL without user information")
+        rendered_host = f"[{hostname}]" if ":" in hostname else hostname
+        self.__endpoint = f"{scheme}://{rendered_host}{f':{port}' if port is not None else ''}/"
         # Host header (defaults to API_SERVER_NAME)
         self.__host = host or getenv("API_SERVER_NAME", "bwapi")
         # Optional API token: if not provided, fallback to env var
@@ -127,24 +134,22 @@ class API:
         - If a full URL is provided, preserve its scheme and port (use defaults if missing port).
         - Otherwise, choose scheme based on listen_https (default: http) and use provided/default ports.
         """
-        with suppress(Exception):
-            parsed = urlsplit(hostname_or_url)
-            if parsed.scheme in ("http", "https") and parsed.hostname:
-                scheme = parsed.scheme
-                host = parsed.hostname
-                if parsed.port:
-                    eff_port = parsed.port
-                else:
-                    eff_port = cls.__default_https_port() if scheme == "https" else cls.__default_http_port()
-                return f"{scheme}://{host}:{eff_port}"
+        scheme, hostname, eff_port = parse_host(hostname_or_url)
+        scheme = scheme or ("https" if listen_https else "http")
 
-        host = hostname_or_url.replace("http://", "").replace("https://", "")
-        scheme = "https" if listen_https else "http"
-        eff_port = (
-            (https_port if https_port is not None else cls.__default_https_port())
-            if scheme == "https"
-            else (port if port is not None else cls.__default_http_port())
-        )
+        if eff_port is None:
+            eff_port = (
+                (https_port if https_port is not None else cls.__default_https_port())
+                if scheme == "https"
+                else (port if port is not None else cls.__default_http_port())
+            )
+        try:
+            eff_port = int(eff_port)
+        except (TypeError, ValueError) as e:
+            raise ValueError("Invalid API port: expected an integer") from e
+        if not 1 <= eff_port <= 65535:
+            raise ValueError("Invalid API port: expected a value between 1 and 65535")
+        host = f"[{hostname}]" if ":" in hostname else hostname
         return f"{scheme}://{host}:{eff_port}"
 
     @classmethod

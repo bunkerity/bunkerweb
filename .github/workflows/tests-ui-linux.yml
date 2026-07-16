@@ -49,7 +49,7 @@ jobs:
             sudo chmod +x /usr/local/bin/geckodriver
             rm -f geckodriver.tar.gz
       - name: Login to ghcr
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -76,7 +76,7 @@ jobs:
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo -E apt install -y nginx=1.30.3-1~noble
+          sudo -E apt install -y nginx=1.30.4-1~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.5'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg

@@ -1213,7 +1213,7 @@ def before_request():
                 return redirect(url_for("login.login_page"))
 
             # Case not login page, keep on 2FA before any other access
-            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
+            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
                 if not request.path.endswith("/login"):
                     raw_next = request.values.get("next")
                     try:
@@ -1325,6 +1325,7 @@ def before_request():
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
+            user_admin=current_user.admin,
             theme=theme_value,
             language=language_value,
             supported_languages=SUPPORTED_LANGUAGES,

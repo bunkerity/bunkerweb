@@ -41,7 +41,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     services:
       bunkerweb:
         # 调度器识别实例的名称
-        image: bunkerity/bunkerweb:1.6.12
+        image: bunkerity/bunkerweb:1.6.13
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.12
+        image: bunkerity/bunkerweb-scheduler:1.6.13
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保填写正确的实例名
@@ -76,7 +76,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.12
+        image: bunkerity/bunkerweb-api:1.6.13
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.12
+      bunkerity/bunkerweb-all-in-one:1.6.13
     ```
 
 === "Linux"
@@ -189,6 +189,16 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `jobs`: `job_read`, `job_run`
 - `resource_id` 通常是第二个路径段（如 `/services/{id}`）；"*" 表示全局访问。
 - 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。每个用户可使用明文 `password` 或预先哈希的 `password_hash`/`password_bcrypt`（参见下面的提示）。
+
+!!! danger "These write permissions are admin-equivalent"
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+
+    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `services`: `service_create`, `service_update`, `service_convert`
+    - `plugins`: `plugin_create`
+    - `global_settings`: `global_settings_update`
+
+    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
 
 !!! tip "预先哈希的启动密码"
     通过 `password_hash`（或 `password_bcrypt`）将用户的明文 `password` 替换为 **bcrypt 哈希**，这样凭据就不会以明文形式留在文件中。该哈希必须是有效的 bcrypt 哈希（`$2a$`/`$2b$`/`$2y$`），且其成本因子至少为 `10`（建议 `12`+）。格式错误或强度过弱的哈希将**被忽略**：加载器会回退到该用户的明文 `password`（若存在）；否则，新用户会获得一个你无法得知的安全随机密码，而已存在的用户则保留其当前密码。明文 `password` 会进行强度校验（至少 8 个字符，包含大写、小写、数字和特殊字符）。管理员的 `API_PASSWORD` 环境变量仅接受明文——预先哈希仅适用于这些 ACL 用户。
