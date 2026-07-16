@@ -74,6 +74,16 @@ function limit:initialize(ctx)
 				self.rules[k] = v
 			end
 		end
+		-- Get global (aggregate, per-service) rate, if any
+		local all_global_rules, err = self.internalstore:get("plugin_limit_global_rules", true)
+		if not all_global_rules then
+			self.logger:log(ERR, err)
+			return
+		end
+		self.global_rate = all_global_rules.global
+		if all_global_rules[self.ctx.bw.server_name] then
+			self.global_rate = all_global_rules[self.ctx.bw.server_name]
+		end
 	end
 end
 
@@ -84,12 +94,19 @@ function limit:is_needed()
 	end
 	-- Request phases (no default)
 	if self.is_request and (self.ctx.bw.server_name ~= "_") then
-		return self.variables["USE_LIMIT_REQ"] == "yes"
+		return self.variables["USE_LIMIT_REQ"] == "yes" or self.variables["USE_LIMIT_REQ_GLOBAL"] == "yes"
 	end
 	-- Other cases : at least one service uses it
 	local is_needed, err = has_variable("USE_LIMIT_REQ", "yes")
 	if is_needed == nil then
 		self.logger:log(ngx.ERR, "can't check USE_LIMIT_REQ variable : " .. err)
+	end
+	if not is_needed then
+		local is_needed_global, err_global = has_variable("USE_LIMIT_REQ_GLOBAL", "yes")
+		if is_needed_global == nil then
+			self.logger:log(ngx.ERR, "can't check USE_LIMIT_REQ_GLOBAL variable : " .. err_global)
+		end
+		is_needed = is_needed_global
 	end
 	return is_needed
 end
@@ -100,12 +117,19 @@ function limit:init()
 		return self:ret(true, "no service uses limit for requests, skipping init")
 	end
 	-- Get variables
-	local variables, err = get_multiple_variables({ "USE_LIMIT_REQ", "LIMIT_REQ_URL", "LIMIT_REQ_RATE" })
+	local variables, err = get_multiple_variables({
+		"USE_LIMIT_REQ",
+		"LIMIT_REQ_URL",
+		"LIMIT_REQ_RATE",
+		"USE_LIMIT_REQ_GLOBAL",
+		"LIMIT_REQ_GLOBAL_RATE",
+	})
 	if variables == nil then
 		return self:ret(false, err)
 	end
 	-- Store URLs and rates
 	local data = {}
+	local global_data = {}
 	local i = 0
 	for srv, vars in pairs(variables) do
 		if vars["USE_LIMIT_REQ"] == "yes" then
@@ -121,10 +145,17 @@ function limit:init()
 				end
 			end
 		end
+		if vars["USE_LIMIT_REQ_GLOBAL"] == "yes" then
+			global_data[srv] = vars["LIMIT_REQ_GLOBAL_RATE"]
+		end
 	end
 	local ok, err = self.internalstore:set("plugin_limit_rules", data, nil, true)
 	if not ok then
 		return self:ret(false, err)
+	end
+	local ok_global, err_global = self.internalstore:set("plugin_limit_global_rules", global_data, nil, true)
+	if not ok_global then
+		return self:ret(false, err_global)
 	end
 	return self:ret(true, "successfully loaded " .. tostring(i) .. " limit rules for requests")
 end
@@ -138,6 +169,48 @@ function limit:access()
 	if not self:is_needed() then
 		return self:ret(true, "limit request not enabled")
 	end
+
+	local addr = self.ctx.bw.remote_addr
+
+	-- Check global (aggregate, all clients and URLs) rate first : cheap O(1) circuit-breaker
+	if self.global_rate then
+		local global_rate_max, global_rate_time = self.global_rate:match("(%d+)r/(.)")
+		global_rate_max = tonumber(global_rate_max)
+		local limited, err, current_rate = self:limit_req_global(global_rate_max, global_rate_time)
+		if limited == nil then
+			return self:ret(false, err)
+		end
+		if limited then
+			self:set_metric("counters", "limited_global", 1)
+			local security_mode = get_security_mode(self.ctx)
+			local msg
+			if security_mode == "block" then
+				msg = string.format(
+					"client IP %s is limited by global rate limit (current rate = %sr/%s and max rate = %s)",
+					addr,
+					current_rate,
+					global_rate_time,
+					self.global_rate
+				)
+			else
+				msg = string.format(
+					"detected client IP %s would be limited by global rate limit (current rate = %sr/%s and max rate = %s)",
+					addr,
+					current_rate,
+					global_rate_time,
+					self.global_rate
+				)
+			end
+			local data = {
+				scope = "global",
+				current_rate = current_rate,
+				rate_time = global_rate_time,
+				rate = self.global_rate,
+			}
+			return self:ret(true, msg, HTTP_TOO_MANY_REQUESTS, nil, data)
+		end
+	end
+
 	-- Check if URI is limited
 	local uri = self.ctx.bw.uri
 	local rate = self.rules["/"]
@@ -157,8 +230,6 @@ function limit:access()
 	if limited == nil then
 		return self:ret(false, err)
 	end
-
-	local addr = self.ctx.bw.remote_addr
 
 	if limited then
 		self:set_metric("counters", "limited_uri_" .. uri, 1)
@@ -337,6 +408,103 @@ function limit:limit_req_redis(rate_max, rate_time)
 	-- Return timestamps
 	self.clusterstore:close()
 	return timestamps, "success"
+end
+
+local function limit_global_delay(rate_time)
+	if rate_time == "s" then
+		return 1
+	elseif rate_time == "m" then
+		return 60
+	elseif rate_time == "h" then
+		return 3600
+	elseif rate_time == "d" then
+		return 86400
+	end
+	return 1
+end
+
+-- Global (aggregate, per-service) rate limit : fixed-window counter, not the timestamp
+-- log used above. The log is O(n) per request (n = rate_max) which is fine at the
+-- existing low per-IP defaults but too costly at the hundreds/thousands of req/s a
+-- global cap runs at. A fixed-window counter is O(1) per request.
+-- ponytail: fixed window allows ~2x rate right at a window boundary; upgrade to a
+-- sliding-window counter if precise smoothing is ever needed.
+function limit:limit_req_global(rate_max, rate_time)
+	local count = nil
+	if self.use_redis then
+		local redis_count, err = self:limit_req_global_redis(rate_time)
+		if redis_count == nil then
+			self.logger:log(ERR, "limit_req_global_redis failed, falling back to local : " .. err)
+		else
+			count = redis_count
+		end
+	end
+	if count == nil then
+		local local_count, err = self:limit_req_global_local(rate_time)
+		if local_count == nil then
+			return nil, "limit_req_global_local failed : " .. err
+		end
+		count = local_count
+	end
+	if count > rate_max then
+		return true, "success - limited", count
+	end
+	return false, "success - not limited", count
+end
+
+function limit:limit_req_global_local(rate_time)
+	local delay = limit_global_delay(rate_time)
+	local window = math.floor(time(date("!*t")) / delay)
+	local key = "plugin_limit_global_" .. self.ctx.bw.server_name .. "_" .. tostring(window)
+	local value, err = self.datastore:get(key)
+	if not value and err ~= "not found" then
+		return nil, err
+	end
+	local count = 1
+	if value then
+		count = tonumber(value) + 1
+	end
+	-- luacheck: ignore 421
+	local ok, err = self.datastore:set_with_retries(key, tostring(count), delay)
+	if not ok then
+		return nil, err
+	end
+	return count, "success"
+end
+
+function limit:limit_req_global_redis(rate_time)
+	local redis_script = [[
+		local delay = tonumber(ARGV[1])
+		local count = redis.pcall("INCR", KEYS[1])
+		if type(count) == "table" and count["err"] ~= nil then
+			redis.log(redis.LOG_WARNING, "limit global INCR error : " .. count["err"])
+			return count
+		end
+		if count == 1 then
+			local ret_expire = redis.pcall("EXPIRE", KEYS[1], delay)
+			if type(ret_expire) == "table" and ret_expire["err"] ~= nil then
+				redis.log(redis.LOG_WARNING, "limit global EXPIRE error : " .. ret_expire["err"])
+				return ret_expire
+			end
+		end
+		return count
+	]]
+	-- Connect
+	local ok, err = self.clusterstore:connect()
+	if not ok then
+		return nil, err
+	end
+	local delay = limit_global_delay(rate_time)
+	local window = math.floor(time(date("!*t")) / delay)
+	local key = "plugin_limit_global_" .. self.ctx.bw.server_name .. "_" .. tostring(window)
+	-- Execute script
+	local count, err = self.clusterstore:call("eval", redis_script, 1, key, delay)
+	if not count then
+		self.clusterstore:close()
+		return nil, err
+	end
+	self.clusterstore:close()
+	return count, "success"
 end
 
 return limit

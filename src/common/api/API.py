@@ -10,6 +10,7 @@ from requests.exceptions import ConnectionError
 from urllib3 import disable_warnings  # new
 from urllib3.exceptions import InsecureRequestWarning  # new
 
+from common_utils import has_url_userinfo, is_valid_host  # type: ignore
 from logger import getLogger  # type: ignore
 
 # Suppress urllib3 InsecureRequestWarning when verify=False (default: enabled)
@@ -29,6 +30,9 @@ class API:
     """
 
     def __init__(self, endpoint: str, host: Optional[str] = None, token: Optional[str] = None):
+        parsed_endpoint = urlsplit(endpoint if "://" in endpoint else f"//{endpoint}")
+        if has_url_userinfo(endpoint) or parsed_endpoint.scheme not in ("http", "https") or not is_valid_host(parsed_endpoint.hostname):
+            raise ValueError("Invalid API endpoint: expected an HTTP(S) URL without user information")
         # Normalize endpoint trailing slash
         self.__endpoint = endpoint if endpoint.endswith("/") else endpoint + "/"
         # Host header (defaults to API_SERVER_NAME)
@@ -127,24 +131,31 @@ class API:
         - If a full URL is provided, preserve its scheme and port (use defaults if missing port).
         - Otherwise, choose scheme based on listen_https (default: http) and use provided/default ports.
         """
-        with suppress(Exception):
-            parsed = urlsplit(hostname_or_url)
-            if parsed.scheme in ("http", "https") and parsed.hostname:
-                scheme = parsed.scheme
-                host = parsed.hostname
-                if parsed.port:
-                    eff_port = parsed.port
-                else:
-                    eff_port = cls.__default_https_port() if scheme == "https" else cls.__default_http_port()
-                return f"{scheme}://{host}:{eff_port}"
+        if not isinstance(hostname_or_url, str) or not hostname_or_url or has_url_userinfo(hostname_or_url):
+            raise ValueError("Invalid API hostname: URL user information is not allowed")
 
-        host = hostname_or_url.replace("http://", "").replace("https://", "")
-        scheme = "https" if listen_https else "http"
-        eff_port = (
-            (https_port if https_port is not None else cls.__default_https_port())
-            if scheme == "https"
-            else (port if port is not None else cls.__default_http_port())
-        )
+        has_scheme = "://" in hostname_or_url
+        if not has_scheme and is_valid_host(hostname_or_url):
+            hostname = hostname_or_url
+            scheme = "https" if listen_https else "http"
+            eff_port = None
+        else:
+            parsed = urlsplit(hostname_or_url if has_scheme else f"//{hostname_or_url}")
+            if has_scheme and parsed.scheme not in ("http", "https"):
+                raise ValueError("Invalid API hostname: only HTTP(S) URLs are supported")
+            if not is_valid_host(parsed.hostname):
+                raise ValueError(f"Invalid API hostname: {parsed.hostname or hostname_or_url}")
+            hostname = parsed.hostname
+            scheme = parsed.scheme if has_scheme else ("https" if listen_https else "http")
+            eff_port = parsed.port
+
+        if eff_port is None:
+            eff_port = (
+                (https_port if https_port is not None else cls.__default_https_port())
+                if scheme == "https"
+                else (port if port is not None else cls.__default_http_port())
+            )
+        host = f"[{hostname}]" if ":" in hostname else hostname
         return f"{scheme}://{host}:{eff_port}"
 
     @classmethod

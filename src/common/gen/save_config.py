@@ -13,7 +13,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import get_integration, get_version  # type: ignore
+from common_utils import get_integration, get_version, is_valid_host  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from Configurator import Configurator
@@ -168,8 +168,8 @@ if __name__ == "__main__":
         apis = []
         hostnames = set()
         for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split():
-            match = BUNKERWEB_STATIC_INSTANCES_RX.search(bw_instance)
-            if match:
+            match = BUNKERWEB_STATIC_INSTANCES_RX.fullmatch(bw_instance)
+            if match and is_valid_host(match.group("hostname")):
                 if match.group("hostname") in hostnames:
                     LOGGER.warning(f"Duplicate BunkerWeb instance hostname {match.group('hostname')}, skipping it")
 
