@@ -6788,6 +6788,13 @@ TrustedMonitor/\d+\.\d+
 <td>no</td>
 <td><strong>Country Blacklist:</strong> List of country codes and/or country-group tokens separated by spaces. These countries are blocked.</td>
 </tr>
+<tr>
+<td><code>COUNTRY_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Ignored URI:</strong> List of URI regex patterns separated by spaces that should bypass country checks. Patterns are checked against the path and the full request URI with query string.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="supported-country-groups">Supported Country Groups</h3>
@@ -9711,22 +9718,25 @@ TrustedMonitor/\d+\.\d+
 <ul>
 <li><strong>Number of connections per IP address</strong> (STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" />)</li>
 <li><strong>Number of requests per IP address and URL within a specific time period</strong> (STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
+<li><strong>Aggregate (global) request rate per service, across all clients and URLs combined</strong> (STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
 </ul>
 <h3 id="how-it-works_1">How it Works</h3>
 <ol>
 <li><strong>Rate Limiting:</strong> Tracks the number of requests from each client IP address to specific URLs. If a client exceeds the configured rate limit, subsequent requests are temporarily denied.</li>
+<li><strong>Global Rate Limiting:</strong> Tracks the total number of requests to a service regardless of client IP or URL, protecting origin/backend capacity from aggregate traffic spikes. This is independent from and evaluated before per-IP/per-URL rate limiting.</li>
 <li><strong>Connection Limiting:</strong> Monitors and restricts the number of concurrent connections from each client IP address. Different connection limits can be applied based on the protocol used (HTTP/1, HTTP/2, HTTP/3, or stream).</li>
-<li>In both cases, clients that exceed the defined limits receive an HTTP status code <strong>"429 - Too Many Requests"</strong>, which helps prevent server overload.</li>
+<li>In all cases, clients that exceed the defined limits receive an HTTP status code <strong>"429 - Too Many Requests"</strong>, which helps prevent server overload.</li>
 </ol>
 <h3 id="steps-to-use">Steps to Use</h3>
 <ol>
 <li><strong>Enable Request Rate Limiting:</strong> Use <code>USE_LIMIT_REQ</code> to enable request rate limiting and define URL patterns along with their corresponding rate limits.</li>
+<li><strong>Enable Global Rate Limiting:</strong> Use <code>USE_LIMIT_REQ_GLOBAL</code> to cap the total aggregate request rate for a service, independent of client IP or URL, when protecting origin capacity matters more than per-client fairness.</li>
 <li><strong>Enable Connection Limiting:</strong> Use <code>USE_LIMIT_CONN</code> to enable connection limiting and set the maximum number of concurrent connections for different protocols.</li>
 <li><strong>Apply Granular Control:</strong> Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.</li>
 <li><strong>Monitor Effectiveness:</strong> Use the <a href="../web-ui/">web UI</a> to view statistics on limited requests and connections.</li>
 </ol>
 <h3 id="configuration-settings_19">Configuration Settings</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Request Rate Limiting</label><label for="__tabbed_28_2">Connection Limiting</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Request Rate Limiting</label><label for="__tabbed_28_2">Global Rate Limiting</label><label for="__tabbed_28_3">Connection Limiting</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -9773,6 +9783,39 @@ TrustedMonitor/\d+\.\d+
 <li><code>t</code> is the time unit: <code>s</code> (second), <code>m</code> (minute), <code>h</code> (hour), or <code>d</code> (day)</li>
 </ul>
 <p>For example, <code>5r/m</code> means that 5 requests per minute are allowed from each IP address.</p>
+</div>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_LIMIT_REQ_GLOBAL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Enable Global Rate Limiting:</strong> Set to <code>yes</code> to cap the total aggregate request rate for the service (all clients, all URLs).</td>
+</tr>
+<tr>
+<td><code>LIMIT_REQ_GLOBAL_RATE</code></td>
+<td><code>1000r/s</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Global Rate Limit:</strong> Maximum aggregate request rate in the format <code>Nr/t</code>, same syntax as <code>LIMIT_REQ_RATE</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">When to use global rate limiting</p>
+<p>Per-IP/per-URL rate limiting protects against a single abusive client. Global rate limiting protects the origin server itself: it caps total throughput to a service regardless of who's asking. Use it when your backend has a known capacity ceiling (e.g. a database connection pool, a slow third-party API) that you need to shield from any traffic spike, legitimate or not. It's checked before per-IP/per-URL rules, so it's the first line of defense under load.</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -11091,20 +11134,6 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>global</td>
 <td>no</td>
 <td>List of URLs to ignore when monitoring separated with spaces (e.g. /health)</td>
-</tr>
-<tr>
-<td><code>MONITORING_TOP_N_DECAY_HOURS</code></td>
-<td><code>6</code></td>
-<td>global</td>
-<td>no</td>
-<td>How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer.</td>
-</tr>
-<tr>
-<td><code>MONITORING_TOP_N_TRACK_MAX</code></td>
-<td><code>5000</code></td>
-<td>global</td>
-<td>no</td>
-<td>Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.</td>
 </tr>
 </tbody>
 </table>

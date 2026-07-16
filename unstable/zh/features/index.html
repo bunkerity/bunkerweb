@@ -6790,6 +6790,13 @@ TrustedMonitor/\d+\.\d+
 <td>否</td>
 <td><strong>国家/地区黑名单：</strong> 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。</td>
 </tr>
+<tr>
+<td><code>COUNTRY_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>忽略的 URI：</strong> 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。</td>
+</tr>
 </tbody>
 </table>
 <h3 id="_38">支持的国家/地区分组</h3>
@@ -9713,22 +9720,25 @@ TrustedMonitor/\d+\.\d+
 <ul>
 <li><strong>每个 IP 地址的连接数</strong> (流支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" />)</li>
 <li><strong>在特定时间段内每个 IP 地址和 URL 的请求数</strong> (流支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
+<li><strong>每个服务的聚合（全局）请求速率，合并所有客户端和 URL</strong> (流支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
 </ul>
 <h3 id="_75">工作原理</h3>
 <ol>
 <li><strong>速率限制：</strong> 跟踪来自每个客户端 IP 地址到特定 URL 的请求数。如果客户端超过配置的速率限制，后续请求将被暂时拒绝。</li>
+<li><strong>全局速率限制：</strong> 跟踪对某个服务的总请求数，与客户端 IP 或 URL 无关，保护源/后端容量免受聚合流量峰值的影响。此限制独立于按 IP/URL 的速率限制，并且在其之前进行评估。</li>
 <li><strong>连接限制：</strong> 监控并限制来自每个客户端 IP 地址的并发连接数。可以根据使用的协议（HTTP/1、HTTP/2、HTTP/3 或流）应用不同的连接限制。</li>
-<li>在这两种情况下，超过定义限制的客户端都会收到一个 HTTP 状态码 <strong>“429 - 请求过多”</strong>，这有助于防止服务器过载。</li>
+<li>在所有情况下，超过定义限制的客户端都会收到一个 HTTP 状态码 <strong>“429 - 请求过多”</strong>，这有助于防止服务器过载。</li>
 </ol>
 <h3 id="_76">使用步骤</h3>
 <ol>
 <li><strong>启用请求速率限制：</strong> 使用 <code>USE_LIMIT_REQ</code> 启用请求速率限制，并定义 URL 模式及其相应的速率限制。</li>
+<li><strong>启用全局速率限制：</strong> 使用 <code>USE_LIMIT_REQ_GLOBAL</code> 限制某个服务的总聚合请求速率，与客户端 IP 或 URL 无关——适用于保护源容量比按客户端公平更重要的场景。</li>
 <li><strong>启用连接限制：</strong> 使用 <code>USE_LIMIT_CONN</code> 启用连接限制，并为不同协议设置最大并发连接数。</li>
 <li><strong>应用精细控制：</strong> 为不同的 URL 创建多个速率限制规则，以便在您的网站上提供不同级别的保护。</li>
 <li><strong>监控有效性：</strong> 使用<a href="../web-ui/">Web UI</a>查看有关受限请求和连接的统计信息。</li>
 </ol>
 <h3 id="_77">配置设置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">请求速率限制</label><label for="__tabbed_28_2">连接限制</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">请求速率限制</label><label for="__tabbed_28_2">全局速率限制</label><label for="__tabbed_28_3">连接限制</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -9775,6 +9785,39 @@ TrustedMonitor/\d+\.\d+
 <li><code>t</code> 是时间单位：<code>s</code>（秒）、<code>m</code>（分钟）、<code>h</code>（小时）或 <code>d</code>（天）</li>
 </ul>
 <p>例如，<code>5r/m</code> 表示每个 IP 地址每分钟允许 5 个请求。</p>
+</div>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>默认值</th>
+<th>上下文</th>
+<th>多选</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_LIMIT_REQ_GLOBAL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>启用全局速率限制：</strong> 设置为 <code>yes</code> 以限制该服务的总聚合请求速率（所有客户端、所有 URL）。</td>
+</tr>
+<tr>
+<td><code>LIMIT_REQ_GLOBAL_RATE</code></td>
+<td><code>1000r/s</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>全局速率限制：</strong> 最大聚合请求速率，格式为 <code>Nr/t</code>，语法与 <code>LIMIT_REQ_RATE</code> 相同。</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">何时使用全局速率限制</p>
+<p>按 IP/URL 的速率限制可防止单个恶意客户端的滥用。全局速率限制则保护源服务器本身：无论请求方是谁，都会限制流向某个服务的总吞吐量。当您的后端有已知的容量上限（例如数据库连接池，或响应缓慢的第三方 API）需要防范任何流量峰值（无论合法与否）时，请使用此功能。它会在按 IP/URL 的规则之前进行评估，因此是负载下的第一道防线。</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -11093,20 +11136,6 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>global</td>
 <td>否</td>
 <td>List of URLs to ignore when monitoring separated with spaces (e.g. /health)</td>
-</tr>
-<tr>
-<td><code>MONITORING_TOP_N_DECAY_HOURS</code></td>
-<td><code>6</code></td>
-<td>global</td>
-<td>否</td>
-<td>How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer.</td>
-</tr>
-<tr>
-<td><code>MONITORING_TOP_N_TRACK_MAX</code></td>
-<td><code>5000</code></td>
-<td>global</td>
-<td>否</td>
-<td>Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.</td>
 </tr>
 </tbody>
 </table>

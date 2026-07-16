@@ -6757,6 +6757,13 @@ TrustedMonitor/\d+\.\d+
 <td>non</td>
 <td>Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.</td>
 </tr>
+<tr>
+<td><code>COUNTRY_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>URI ignorée : liste de motifs regex PCRE, séparés par des espaces, pour les URI à exclure de la vérification du pays. Les motifs sont vérifiés sur le chemin et sur l'URI de requête complète avec la chaîne de requête.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="groupes-de-pays-pris-en-charge">Groupes de pays pris en charge</h3>
@@ -9655,22 +9662,25 @@ TrustedMonitor/\d+\.\d+
 <ul>
 <li><strong>Le nombre de connexions simultanées par adresse IP</strong> (support STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" />)</li>
 <li><strong>Le nombre de requêtes par adresse IP et par URL sur une période donnée</strong> (support STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
+<li><strong>Le débit de requêtes agrégé (global) par service, tous clients et URL confondus</strong> (support STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
 </ul>
 <h3 id="fonctionnement_1">Fonctionnement</h3>
 <ol>
 <li><strong>Limitation de débit :</strong> Suit le nombre de requêtes de chaque adresse IP cliente vers des URL spécifiques. Si un client dépasse la limite de débit configurée, les requêtes suivantes sont temporairement refusées.</li>
+<li><strong>Limitation de débit globale :</strong> Suit le nombre total de requêtes vers un service, indépendamment de l'adresse IP cliente ou de l'URL, protégeant la capacité de l'origine/backend contre les pics de trafic agrégés. Cette limitation est indépendante de la limitation par IP/URL et est évaluée avant celle-ci.</li>
 <li><strong>Limitation de connexions :</strong> Surveille et restreint le nombre de connexions simultanées de chaque adresse IP cliente. Différentes limites de connexion peuvent être appliquées en fonction du protocole utilisé (HTTP/1, HTTP/2, HTTP/3 ou stream).</li>
-<li>Dans les deux cas, les clients qui dépassent les limites définies reçoivent un code de statut HTTP <strong>« 429 - Too Many Requests »</strong>, ce qui aide à prévenir la surcharge du serveur.</li>
+<li>Dans tous les cas, les clients qui dépassent les limites définies reçoivent un code de statut HTTP <strong>« 429 - Too Many Requests »</strong>, ce qui aide à prévenir la surcharge du serveur.</li>
 </ol>
 <h3 id="utilisation_1">Utilisation</h3>
 <ol>
 <li><strong>Activer la limitation de débit de requêtes :</strong> Utilisez <code>USE_LIMIT_REQ</code> pour activer la limitation de débit de requêtes et définissez des motifs d'URL avec leurs limites correspondantes.</li>
+<li><strong>Activer la limitation de débit globale :</strong> Utilisez <code>USE_LIMIT_REQ_GLOBAL</code> pour plafonner le débit total agrégé de requêtes d'un service, indépendamment de l'adresse IP cliente ou de l'URL, lorsque la protection de la capacité de l'origine prime sur l'équité par client.</li>
 <li><strong>Activer la limitation de connexions :</strong> Utilisez <code>USE_LIMIT_CONN</code> pour activer la limitation de connexions et définissez le nombre maximum de connexions simultanées pour différents protocoles.</li>
 <li><strong>Appliquer un contrôle granulaire :</strong> Créez plusieurs règles de limitation de débit pour différentes URL afin de fournir des niveaux de protection variés sur votre site.</li>
 <li><strong>Suivre l'efficacité :</strong> Utilisez l'<a href="../web-ui/">interface web</a> pour consulter les statistiques sur les requêtes et les connexions limitées.</li>
 </ol>
 <h3 id="parametres_11">Paramètres</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Limitation de requêtes</label><label for="__tabbed_28_2">Limitation de connexions</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Limitation de requêtes</label><label for="__tabbed_28_2">Limitation de débit globale</label><label for="__tabbed_28_3">Limitation de connexions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -9717,6 +9727,39 @@ TrustedMonitor/\d+\.\d+
 <li><code>t</code> est l'unité de temps : <code>s</code> (seconde), <code>m</code> (minute), <code>h</code> (heure), ou <code>d</code> (jour)</li>
 </ul>
 <p>Par exemple, <code>5r/m</code> signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.</p>
+</div>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Défaut</th>
+<th>Contexte</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_LIMIT_REQ_GLOBAL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Activer la limitation de débit globale :</strong> Mettre à <code>yes</code> pour plafonner le débit total agrégé de requêtes du service (tous clients, toutes URL).</td>
+</tr>
+<tr>
+<td><code>LIMIT_REQ_GLOBAL_RATE</code></td>
+<td><code>1000r/s</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Limite de débit globale :</strong> Débit maximal agrégé de requêtes au format <code>Nr/t</code>, même syntaxe que <code>LIMIT_REQ_RATE</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Quand utiliser la limitation de débit globale</p>
+<p>La limitation par IP/URL protège contre un client abusif isolé. La limitation de débit globale protège le serveur d'origine lui-même : elle plafonne le débit total vers un service, quel que soit le demandeur. Utilisez-la lorsque votre backend a une capacité maximale connue (par exemple un pool de connexions à une base de données, ou une API tierce lente) à protéger de tout pic de trafic, légitime ou non. Elle est évaluée avant les règles par IP/URL : c'est donc la première ligne de défense en cas de charge.</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -11033,20 +11076,6 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>global</td>
 <td>non</td>
 <td>List of URLs to ignore when monitoring separated with spaces (e.g. /health)</td>
-</tr>
-<tr>
-<td><code>MONITORING_TOP_N_DECAY_HOURS</code></td>
-<td><code>6</code></td>
-<td>global</td>
-<td>non</td>
-<td>How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer.</td>
-</tr>
-<tr>
-<td><code>MONITORING_TOP_N_TRACK_MAX</code></td>
-<td><code>5000</code></td>
-<td>global</td>
-<td>non</td>
-<td>Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.</td>
 </tr>
 </tbody>
 </table>
