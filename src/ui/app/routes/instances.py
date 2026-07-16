@@ -1,11 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
 from typing import Literal
-from urllib.parse import urlsplit
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from common_utils import has_url_userinfo, is_valid_host  # type: ignore
+from common_utils import parse_host  # type: ignore
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import flash, is_ui_api_method
 
@@ -54,29 +53,12 @@ def instances_new():
 
     # Parse provided hostname, optional scheme and port (robustly)
     raw_input = request.form["hostname"].strip()
-    if has_url_userinfo(raw_input):
-        return handle_error("Invalid hostname: URL user information is not allowed.", "instances", True)
-    if is_valid_host(raw_input):
-        explicit_scheme = False
-        scheme_https = False
-        hostname = raw_input.lower()
-        provided_port = None
-    else:
-        # Allow parsing host[:port] by prefixing // when no scheme is provided
-        to_parse = raw_input if "://" in raw_input else f"//{raw_input}"
-        try:
-            parts = urlsplit(to_parse)
-            provided_port = parts.port  # int | None
-        except ValueError:
-            return handle_error(f"Invalid hostname: {raw_input}. Please enter a valid domain or IP address.", "instances", True)
-        if parts.scheme not in ("", "http", "https"):
-            return handle_error("Invalid hostname: only HTTP(S) URLs are supported.", "instances", True)
-        explicit_scheme = bool(parts.scheme)
-        scheme_https = parts.scheme.lower() == "https"
-        hostname = (parts.hostname or "").lower()
-
-    if not is_valid_host(hostname):
-        return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain or IP address.", "instances", True)
+    try:
+        scheme, hostname, provided_port = parse_host(raw_input)
+    except ValueError as e:
+        return handle_error(f"{e}.", "instances", True)
+    explicit_scheme = bool(scheme)
+    scheme_https = scheme == "https"
 
     # Derive defaults
     default_http_port = str(db_config.get("API_HTTP_PORT", "5000"))
