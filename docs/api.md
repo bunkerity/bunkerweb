@@ -42,7 +42,7 @@ Choose the flavor that matches your environment.
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.13-rc1
+        image: bunkerity/bunkerweb:1.6.13
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Choose the flavor that matches your environment.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.13
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -77,7 +77,7 @@ Choose the flavor that matches your environment.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.13-rc1
+        image: bunkerity/bunkerweb-api:1.6.13
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ Choose the flavor that matches your environment.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.13-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.13
     ```
 
 === "Linux"
