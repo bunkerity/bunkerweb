@@ -11,7 +11,7 @@ RUN update-alternatives --install /usr/bin/cargo cargo /usr/bin/cargo-1.85 100 &
     cargo --version && rustc --version
 
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.30.3
+ENV NGINX_VERSION=1.30.4
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx

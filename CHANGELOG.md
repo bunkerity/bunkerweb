@@ -2,6 +2,7 @@
 
 ## v1.6.13~rc2 - 2026/07/??
 
+- [SECURITY] `nginx`: update nginx to 1.30.4 (except for Fedora, which stays on 1.30.3 until it is available in its repositories) to fix CVE-2026-42533, a heap buffer overflow in the `map` directive's regex matching; CVE-2026-60005, uninitialized memory access in the `slice` directive/background cache update that can disclose worker-process memory or crash a worker; and CVE-2026-56434, a use-after-free in `ngx_http_ssi_filter_module`.
 - [SECURITY] `instances`: validate registered destinations as IPv4/IPv6 literals or DNS hostnames at every input and outbound-client boundary, reject URL userinfo such as `A@B`, and allow only HTTP(S) endpoint schemes. (Refs GHSA-rwch-jhxx-cx5f) Thanks to @adilkhan7546 for the report.
 - [SECURITY] `ui`: enforce TOTP validation using the exact verification endpoint instead of a `/totp` path substring, preventing password-only sessions from reaching `/profile/totp-refresh` and rotating recovery codes before completing the second factor. (Fixes GHSA-j63f-j59c-q626) Thanks to @de3erve-hunter for the report.
 - [BUGFIX] `ui`, `api`: delete custom configurations by exact key so removing the last UI/API-managed config no longer requires a method-wide replacement that can race with concurrent updates.
