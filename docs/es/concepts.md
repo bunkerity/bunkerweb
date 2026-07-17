@@ -229,6 +229,10 @@ BunkerWeb aprovecha el poder de las plantillas para simplificar el proceso de co
 
 - **Plantillas personalizadas**: Además de las plantillas predefinidas, BunkerWeb permite a los usuarios crear plantillas personalizadas adaptadas a sus requisitos específicos. Las plantillas personalizadas permiten un ajuste fino de las configuraciones y configuraciones personalizadas, asegurando que BunkerWeb se alinee perfectamente con las necesidades del usuario.
 
+!!! tip "Plantillas comunitarias listas para usar"
+
+    Consulta el [repositorio de plantillas de BunkerWeb](https://github.com/bunkerity/bunkerweb-templates#installing-templates) y sigue su guía de instalación. El método de la interfaz web se recomienda para la mayoría de los usuarios; también se documenta una estructura de plugin para despliegues gestionados. Tras la instalación, selecciona la plantilla mediante el modo fácil o con la configuración `USE_TEMPLATE`.
+
 Con la interfaz de usuario web, las plantillas están disponibles a través del **modo fácil** cuando agregas o editas un servicio:
 
 <figure markdown>

@@ -229,6 +229,10 @@ BunkerWeb exploite la puissance des modèles pour simplifier le processus de con
 
 - **Modèles personnalisés**: En plus des modèles prédéfinis, BunkerWeb permet aux utilisateurs de créer des modèles personnalisés adaptés à leurs besoins spécifiques. Les modèles personnalisés permettent d'affiner les paramètres et les configurations personnalisées, garantissant que BunkerWeb s'aligne parfaitement sur les besoins de l'utilisateur.
 
+!!! tip "Modèles communautaires prêts à l'emploi"
+
+    Consultez le [dépôt de modèles BunkerWeb](https://github.com/bunkerity/bunkerweb-templates#installing-templates) et suivez son guide d'installation. La méthode via l'interface Web est recommandée pour la plupart des utilisateurs ; une arborescence de plugin est également documentée pour les déploiements gérés. Après l'installation, sélectionnez le modèle en mode facile ou avec le paramètre `USE_TEMPLATE`.
+
 Avec l'interface utilisateur Web, les modèles sont disponibles en **mode facile** lorsque vous ajoutez ou modifiez un service:
 
 <figure markdown>
