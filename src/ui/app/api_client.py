@@ -61,6 +61,15 @@ class ApiClient(BaseApiClient):
         }
         return self._get("/metrics/requests", params=params)
 
+    def get_metrics_timeseries(self, *, start: int, end: int, bucket: str = "hour", search_panes: str = ""):
+        return self._get("/metrics/requests/timeseries", params={"start": start, "end": end, "bucket": bucket, "search_panes": search_panes})
+
+    def get_metrics_top_offenders(self, *, start: int, end: int, limit: int = 10, search_panes: str = ""):
+        return self._get("/metrics/requests/top-offenders", params={"start": start, "end": end, "limit": limit, "search_panes": search_panes})
+
+    def get_metrics_top_rules(self, *, start: int, end: int, limit: int = 10):
+        return self._get("/metrics/requests/top-rules", params={"start": start, "end": end, "limit": limit})
+
     # ── Instances ───────────────────────────────────────────────────────
 
     def get_instances(self):

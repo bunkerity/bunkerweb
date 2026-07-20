@@ -68,7 +68,10 @@ def _row_to_dict(row: Requests) -> Dict[str, Any]:
         "id": row.request_id,
         "request_id": row.request_id,
         "instance_hostname": row.instance_hostname,
-        "date": int(row.date.timestamp()),  # epoch seconds, matching the Lua report contract the UI consumes
+        # epoch seconds, matching the Lua report contract the UI consumes. _to_datetime() re-applies
+        # UTC when the driver drops tzinfo on read-back (SQLite/MySQL/MariaDB return a naive datetime
+        # for a UTC wall-clock value; a bare .timestamp() would then apply the local system timezone).
+        "date": int(_to_datetime(row.date).timestamp()),
         "ip": row.ip,
         "country": row.country,
         "method": row.method,
@@ -78,6 +81,8 @@ def _row_to_dict(row: Requests) -> Dict[str, Any]:
         "reason": row.reason,
         "server_name": row.server_name,
         "data": loads(row.data) if row.data else None,
+        "asn_number": row.asn_number,
+        "asn_org": row.asn_org,
         "security_mode": row.security_mode,
     }
 
@@ -99,6 +104,8 @@ def _build_request_row(request_id: str, record: Dict[str, Any], instance_hostnam
         reason=str(record.get("reason") or ""),
         server_name=str(record.get("server_name") or ""),
         data=dumps(raw_data) if raw_data not in (None, "") else None,
+        asn_number=record.get("asn_number"),
+        asn_org=record.get("asn_org"),
         security_mode=str(record.get("security_mode") or ""),
         created_at=created_at,
     )
@@ -235,6 +242,146 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
                 counts = dict(session.execute(select(column, func.count()).where(*filtered).group_by(column)).all())
                 facets[field] = {value: {"total": total, "count": counts.get(value, 0)} for value, total in totals.items()}
         return facets
+
+    @retry_on_transient_db_errors
+    def get_metrics_timeseries(
+        self,
+        *,
+        start: int,
+        end: int,
+        bucket: str = "hour",
+        filters: Optional[Dict[str, List[str]]] = None,
+    ) -> Dict[str, Any]:
+        """Time-bucketed report counts over ``[start, end)`` (Unix epoch seconds), plus the same
+        count over the immediately-preceding equal-length window for a period-over-period trend
+        delta. Bucketing is done in Python rather than per-engine SQL (``date_trunc``/
+        ``DATE_FORMAT``/``strftime``) to stay portable across all 4 supported engines — the query
+        itself is bounded by the date range, not the whole table, but every matching row's ``date``
+        is still materialized into Python to bucket it: O(rows-in-range), not O(buckets). Fine for
+        dashboard-sized windows (hours/days); a "last 30 days" pull on a high-traffic WAF table can
+        still be a large scan — if that shows up as slow, move the bucketing to per-engine SQL
+        (``date_trunc``/``DATE_FORMAT``/``strftime``) instead.
+
+        ``bucket`` accepts ``"hour"``; anything else (including typos) is treated as ``"day"``.
+        """
+        bucket_seconds = 3600 if bucket == "hour" else 86400
+        start_dt = datetime.fromtimestamp(start, tz=timezone.utc)
+        end_dt = datetime.fromtimestamp(end, tz=timezone.utc)
+        window = end - start
+        prev_start_dt = datetime.fromtimestamp(start - window, tz=timezone.utc)
+
+        conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
+        prev_conditions = _filter_conditions("", filters) + [Requests.date >= prev_start_dt, Requests.date < start_dt]
+
+        with self._db_session() as session:
+            dates = session.scalars(select(Requests.date).where(*conditions)).all()
+            prev_total = session.scalar(select(func.count()).select_from(select(Requests).where(*prev_conditions).subquery())) or 0
+
+        bucket_count = max(1, -(-window // bucket_seconds))  # ceil division
+        counts = [0] * bucket_count
+        for d in dates:
+            # SQLite drops tzinfo on read-back (returns a naive datetime representing UTC wall-clock
+            # time); .timestamp() on a naive datetime uses the local system timezone, which would
+            # silently shift every bucket index outside UTC. _to_datetime() (below) already carries
+            # this exact "treat naive as UTC" fix for the write path — reuse it here for reads.
+            idx = int((_to_datetime(d).timestamp() - start) // bucket_seconds)
+            if 0 <= idx < bucket_count:
+                counts[idx] += 1
+
+        total = len(dates)
+        trend_pct = round(((total - prev_total) / prev_total) * 100, 1) if prev_total else None
+        return {
+            "buckets": [start + i * bucket_seconds for i in range(bucket_count)],
+            "counts": counts,
+            "total": total,
+            "prev_total": prev_total,
+            "trend_pct": trend_pct,
+        }
+
+    @retry_on_transient_db_errors
+    def get_metrics_top_offenders(
+        self,
+        *,
+        start: int,
+        end: int,
+        limit: int = 10,
+        filters: Optional[Dict[str, List[str]]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Top attacker IPs in ``[start, end)`` by block count, with country/ASN attribution
+        (``None`` for rows predating the ASN migration), the most frequent block reason, and
+        first/last-seen timestamps."""
+        start_dt = datetime.fromtimestamp(start, tz=timezone.utc)
+        end_dt = datetime.fromtimestamp(end, tz=timezone.utc)
+        conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
+
+        with self._db_session() as session:
+            rows = session.execute(
+                select(Requests.ip, Requests.country, Requests.asn_number, Requests.asn_org, Requests.reason, Requests.date).where(*conditions)
+            ).all()
+
+        by_ip: Dict[str, Dict[str, Any]] = {}
+        for ip, country, asn_number, asn_org, reason, date in rows:
+            entry = by_ip.setdefault(
+                ip,
+                {"ip": ip, "country": country, "asn_number": asn_number, "asn_org": asn_org, "blocks": 0, "reasons": {}, "first_seen": date, "last_seen": date},
+            )
+            # asn_number/asn_org are nullable and only populated post-ASN-migration (NULL on older
+            # rows); country is NOT NULL but can still be "" (unset) pre-lookup. Row order across
+            # engines is unspecified (no ORDER BY), so coalesce instead of trusting whichever row
+            # landed first — once a truthy value is seen for an IP it's kept, and a later truthy
+            # value backfills a still-empty field. Makes attribution order-independent by construction.
+            entry["country"] = entry["country"] or country
+            entry["asn_number"] = entry["asn_number"] or asn_number
+            entry["asn_org"] = entry["asn_org"] or asn_org
+            entry["blocks"] += 1
+            entry["reasons"][reason] = entry["reasons"].get(reason, 0) + 1
+            entry["first_seen"] = min(entry["first_seen"], date)
+            entry["last_seen"] = max(entry["last_seen"], date)
+
+        offenders = [
+            {
+                "ip": entry["ip"],
+                "country": entry["country"],
+                "asn_number": entry["asn_number"],
+                "asn_org": entry["asn_org"],
+                "blocks": entry["blocks"],
+                "top_reason": max(entry["reasons"].items(), key=lambda kv: kv[1])[0],
+                # _to_datetime() re-applies UTC when the driver drops tzinfo on read-back (see the
+                # module docstring note on _row_to_dict's "date" field / get_metrics_timeseries above) —
+                # a bare .timestamp() on a naive datetime would silently apply the host's local timezone.
+                "first_seen": int(_to_datetime(entry["first_seen"]).timestamp()),
+                "last_seen": int(_to_datetime(entry["last_seen"]).timestamp()),
+            }
+            for entry in by_ip.values()
+        ]
+        offenders.sort(key=lambda o: o["blocks"], reverse=True)
+        return offenders[:limit]
+
+    @retry_on_transient_db_errors
+    def get_metrics_top_rules(self, *, start: int, end: int, limit: int = 10) -> List[Dict[str, Any]]:
+        """Most-frequently-fired ModSecurity rule IDs in ``[start, end)``, tallied from the
+        ``data.ids`` JSON array each modsecurity-reason row carries (see ``utils.get_reason`` in
+        ``utils.lua``). Non-modsecurity rows carry no ``ids`` and are skipped."""
+        start_dt = datetime.fromtimestamp(start, tz=timezone.utc)
+        end_dt = datetime.fromtimestamp(end, tz=timezone.utc)
+        conditions = [Requests.reason == "modsecurity", Requests.date >= start_dt, Requests.date < end_dt]
+
+        with self._db_session() as session:
+            blobs = session.scalars(select(Requests.data).where(*conditions)).all()
+
+        tally: Dict[str, int] = {}
+        for blob in blobs:
+            if not blob:
+                continue
+            try:
+                parsed = loads(blob)
+            except (TypeError, ValueError):
+                continue
+            for rule_id in (parsed or {}).get("ids", []) or []:
+                tally[str(rule_id)] = tally.get(str(rule_id), 0) + 1
+
+        ranked = sorted(tally.items(), key=lambda kv: (-kv[1], kv[0]))
+        return [{"rule_id": rule_id, "count": count} for rule_id, count in ranked[:limit]]
 
     @retry_on_transient_db_errors
     def cleanup_metrics_by_age(self, days: int) -> str:

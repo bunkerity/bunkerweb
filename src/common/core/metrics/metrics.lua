@@ -32,6 +32,7 @@ local worker_id = worker.id
 
 local get_reason = utils.get_reason
 local get_country = utils.get_country
+local get_asn = utils.get_asn
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
 local encode = cjson.encode
@@ -345,12 +346,14 @@ function metrics:log(bypass_checks)
 	if reason then
 		local country = "local"
 		local err
+		local asn_number, asn_org
 		if self.ctx.bw.ip_is_global then
 			country, err = get_country(self.ctx.bw.remote_addr)
 			if not country then
 				country = "unknown"
 				self.logger:log(ERR, "can't get country code " .. err)
 			end
+			asn_number, asn_org = get_asn(self.ctx.bw.remote_addr)
 		end
 		local request = {
 			id = self.ctx.bw.request_id,
@@ -366,6 +369,8 @@ function metrics:log(bypass_checks)
 			data = data,
 			security_mode = security_mode,
 			synced = not self.use_redis,
+			asn_number = asn_number,
+			asn_org = asn_org,
 		}
 		-- Get requests from LRU
 		local requests = lru:get("requests") or {}

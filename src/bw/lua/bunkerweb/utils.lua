@@ -706,17 +706,17 @@ end
 utils.get_asn = function(ip)
 	-- Check if mmdp is loaded
 	if not mmdb.asn_db then
-		return false, "mmdb asn not loaded"
+		return false, nil, "mmdb asn not loaded"
 	end
 	-- Perform lookup
 	local ok, result, err = pcall(mmdb.asn_db.lookup, mmdb.asn_db, ip)
 	if not ok then
-		return nil, result
+		return nil, nil, result
 	end
 	if not result then
-		return nil, err
+		return nil, nil, err
 	end
-	return result.autonomous_system_number, "success"
+	return result.autonomous_system_number, result.autonomous_system_organization, "success"
 end
 
 utils.rand = function(nb, no_numbers, alphabet)

@@ -5,6 +5,8 @@ fixture suffices — no seeding needed. Records mirror the per-request shape the
 ``/metrics/requests/query`` endpoint returns (``date`` is a Unix epoch int).
 """
 
+import os
+import time
 from datetime import datetime, timezone
 
 # fixed epoch for determinism: 2024-01-01T00:00:00Z
@@ -42,6 +44,24 @@ class TestBatchUpsert:
     def test_empty_batch_is_noop(self, db):
         assert db.batch_upsert_metrics_requests([], instance_hostname="bw-1") == ""
         assert db.get_metrics_requests()["total"] == 0
+
+    def test_date_round_trips_as_exact_utc_epoch(self, db):
+        # Regression guard: drivers that drop tzinfo on read-back (SQLite/MySQL/MariaDB) must not let
+        # a naive-datetime .timestamp() apply the local system timezone instead of UTC. Pin TZ away
+        # from UTC for the duration of the test — on a UTC CI runner, a naive .timestamp() would
+        # coincidentally equal the correct value and this guard would silently stop catching the bug.
+        original_tz = os.environ.get("TZ")
+        os.environ["TZ"] = "America/New_York"
+        time.tzset()
+        try:
+            db.batch_upsert_metrics_requests([_rec("r1", date=EPOCH)], instance_hostname="bw-1")
+            assert db.get_metrics_requests()["data"][0]["date"] == EPOCH
+        finally:
+            if original_tz is None:
+                os.environ.pop("TZ", None)
+            else:
+                os.environ["TZ"] = original_tz
+            time.tzset()
 
     def test_data_dict_round_trips(self, db):
         # the WAF detail blob arrives as a dict (JSON-decoded from the instance) and must round-trip
@@ -141,6 +161,39 @@ class TestFacets:
         assert facets["ip"] == {"1.1.1.1": {"total": 1, "count": 1}, "2.2.2.2": {"total": 1, "count": 0}}
 
 
+class TestTopRules:
+    def test_tallies_rule_ids_from_modsecurity_rows(self, db):
+        db.batch_upsert_metrics_requests(
+            [
+                _rec("m1", reason="modsecurity", data={"ids": ["942100", "932100"]}, date=EPOCH),
+                _rec("m2", reason="modsecurity", data={"ids": ["942100"]}, date=EPOCH + 60),
+                _rec("nm", reason="blacklist", date=EPOCH),
+            ],
+            instance_hostname="bw-1",
+        )
+        res = db.get_metrics_top_rules(start=EPOCH - 1, end=EPOCH + 3600)
+        assert res[0] == {"rule_id": "942100", "count": 2}
+        assert {"rule_id": "932100", "count": 1} in res
+
+    def test_no_modsecurity_rows_returns_empty(self, db):
+        db.batch_upsert_metrics_requests([_rec("a", reason="blacklist", date=EPOCH)], instance_hostname="bw-1")
+        assert db.get_metrics_top_rules(start=EPOCH - 1, end=EPOCH + 3600) == []
+
+    def test_tied_counts_break_ties_by_rule_id_ascending(self, db):
+        # Regression guard: ties must not depend on the DB's (unordered) row-return order, which
+        # can differ across SQLite/PostgreSQL/MariaDB. The sort key breaks ties on rule_id ascending.
+        db.batch_upsert_metrics_requests(
+            [
+                _rec("m1", reason="modsecurity", data={"ids": ["999200"]}, date=EPOCH),
+                _rec("m2", reason="modsecurity", data={"ids": ["111100"]}, date=EPOCH + 60),
+            ],
+            instance_hostname="bw-1",
+        )
+        res = db.get_metrics_top_rules(start=EPOCH - 1, end=EPOCH + 3600)
+        tied = [r["rule_id"] for r in res if r["rule_id"] in ("999200", "111100")]
+        assert tied == ["111100", "999200"]
+
+
 class TestRetention:
     def test_cleanup_by_age_removes_old(self, db):
         recent = int(datetime.now(tz=timezone.utc).timestamp())
@@ -164,3 +217,154 @@ class TestRetention:
     def test_cleanup_by_count_under_limit_noop(self, db):
         db.batch_upsert_metrics_requests([_rec("r1")], instance_hostname="bw-1")
         assert db.cleanup_metrics_by_count(10) == "Removed 0 metrics requests by count"
+
+
+class TestAsnAttribution:
+    def test_asn_fields_round_trip(self, db):
+        db.batch_upsert_metrics_requests([_rec("a", asn_number=4134, asn_org="China Telecom")], instance_hostname="bw-1")
+        row = db.get_metrics_requests()["data"][0]
+        assert row["asn_number"] == 4134
+        assert row["asn_org"] == "China Telecom"
+
+    def test_asn_fields_default_to_none(self, db):
+        db.batch_upsert_metrics_requests([_rec("a")], instance_hostname="bw-1")
+        row = db.get_metrics_requests()["data"][0]
+        assert row["asn_number"] is None
+        assert row["asn_org"] is None
+
+
+class TestTimeseries:
+    def test_buckets_and_totals(self, db):
+        db.batch_upsert_metrics_requests([_rec("a", date=EPOCH), _rec("b", date=EPOCH + 3600)], instance_hostname="bw-1")
+        res = db.get_metrics_timeseries(start=EPOCH, end=EPOCH + 7200, bucket="hour")
+        assert res["total"] == 2
+        assert res["counts"] == [1, 1]
+        assert res["buckets"][0] == EPOCH
+
+    def test_bucket_index_correct_regardless_of_host_timezone(self, db):
+        # Regression guard: the bucket-index loop in get_metrics_timeseries must use
+        # _to_datetime(d).timestamp() rather than a bare d.timestamp() — same reasoning as
+        # TestBatchUpsert.test_date_round_trips_as_exact_utc_epoch above. On a UTC CI runner a
+        # naive datetime's bare .timestamp() coincidentally matches the correct UTC value, so
+        # this guard pins TZ away from UTC to make a regression fail deterministically
+        # regardless of the host's ambient timezone.
+        original_tz = os.environ.get("TZ")
+        os.environ["TZ"] = "America/New_York"
+        time.tzset()
+        try:
+            db.batch_upsert_metrics_requests([_rec("a", date=EPOCH), _rec("b", date=EPOCH + 3600)], instance_hostname="bw-1")
+            res = db.get_metrics_timeseries(start=EPOCH, end=EPOCH + 7200, bucket="hour")
+            assert res["counts"] == [1, 1]
+            assert res["buckets"][0] == EPOCH
+        finally:
+            if original_tz is None:
+                os.environ.pop("TZ", None)
+            else:
+                os.environ["TZ"] = original_tz
+            time.tzset()
+
+    def test_trend_pct_vs_previous_window(self, db):
+        db.batch_upsert_metrics_requests(
+            [_rec("p1", date=EPOCH - 7200), _rec("p2", date=EPOCH - 3600), _rec("c1", date=EPOCH)],
+            instance_hostname="bw-1",
+        )
+        res = db.get_metrics_timeseries(start=EPOCH, end=EPOCH + 7200, bucket="hour")
+        assert res["prev_total"] == 2
+        assert res["total"] == 1
+        assert res["trend_pct"] == -50.0
+
+    def test_no_previous_window_data_gives_none_trend(self, db):
+        db.batch_upsert_metrics_requests([_rec("a", date=EPOCH)], instance_hostname="bw-1")
+        res = db.get_metrics_timeseries(start=EPOCH, end=EPOCH + 3600, bucket="hour")
+        assert res["prev_total"] == 0
+        assert res["trend_pct"] is None
+
+
+class TestTopOffenders:
+    def test_ranks_by_block_count_with_attribution(self, db):
+        db.batch_upsert_metrics_requests(
+            [
+                _rec("a1", ip="9.9.9.9", country="RU", asn_number=12389, asn_org="Rostelecom", date=EPOCH),
+                _rec("a2", ip="9.9.9.9", country="RU", asn_number=12389, asn_org="Rostelecom", date=EPOCH + 60, reason="modsecurity"),
+                _rec("b1", ip="1.1.1.1", country="US", date=EPOCH),
+            ],
+            instance_hostname="bw-1",
+        )
+        res = db.get_metrics_top_offenders(start=EPOCH - 1, end=EPOCH + 3600)
+        assert res[0]["ip"] == "9.9.9.9"
+        assert res[0]["blocks"] == 2
+        assert res[0]["asn_org"] == "Rostelecom"
+        assert res[0]["first_seen"] == EPOCH
+        assert res[0]["last_seen"] == EPOCH + 60
+        assert res[1]["ip"] == "1.1.1.1"
+
+    def test_limit_caps_results(self, db):
+        db.batch_upsert_metrics_requests(
+            [_rec(f"r{i}", ip=f"1.1.1.{i}", date=EPOCH) for i in range(5)],
+            instance_hostname="bw-1",
+        )
+        res = db.get_metrics_top_offenders(start=EPOCH - 1, end=EPOCH + 3600, limit=2)
+        assert len(res) == 2
+
+    def test_first_last_seen_correct_regardless_of_host_timezone(self, db):
+        # Regression guard: get_metrics_top_offenders must run first_seen/last_seen through
+        # _to_datetime() before .timestamp(), same reasoning as
+        # TestBatchUpsert.test_date_round_trips_as_exact_utc_epoch and
+        # TestTimeseries.test_bucket_index_correct_regardless_of_host_timezone above. On a UTC CI
+        # runner a naive datetime's bare .timestamp() coincidentally matches the correct UTC value,
+        # so this guard pins TZ away from UTC to make a regression fail deterministically regardless
+        # of the host's ambient timezone.
+        original_tz = os.environ.get("TZ")
+        os.environ["TZ"] = "America/New_York"
+        time.tzset()
+        try:
+            db.batch_upsert_metrics_requests(
+                [
+                    _rec("a1", ip="9.9.9.9", date=EPOCH),
+                    _rec("a2", ip="9.9.9.9", date=EPOCH + 60),
+                ],
+                instance_hostname="bw-1",
+            )
+            res = db.get_metrics_top_offenders(start=EPOCH - 1, end=EPOCH + 3600)
+            assert res[0]["first_seen"] == EPOCH
+            assert res[0]["last_seen"] == EPOCH + 60
+        finally:
+            if original_tz is None:
+                os.environ.pop("TZ", None)
+            else:
+                os.environ["TZ"] = original_tz
+            time.tzset()
+
+    def test_attribution_backfills_partial_fields_from_multiple_rows(self, db):
+        # Regression guard: neither single row is fully populated (row 1 has asn_number but not
+        # asn_org, row 2 has the reverse) — plain first-row-wins setdefault would leave one field
+        # permanently null; the coalesce must merge the non-null field from each row.
+        db.batch_upsert_metrics_requests(
+            [
+                _rec("a1", ip="8.8.4.4", country="US", asn_number=15169, asn_org=None, date=EPOCH),
+                _rec("a2", ip="8.8.4.4", country="US", asn_number=None, asn_org="Google LLC", date=EPOCH + 60),
+            ],
+            instance_hostname="bw-1",
+        )
+        res = db.get_metrics_top_offenders(start=EPOCH - 1, end=EPOCH + 3600)
+        assert res[0]["ip"] == "8.8.4.4"
+        assert res[0]["asn_number"] == 15169
+        assert res[0]["asn_org"] == "Google LLC"
+
+    def test_attribution_backfills_regardless_of_insertion_order(self, db):
+        # Regression guard: an IP with one post-migration row (real country/ASN) and one
+        # pre-migration row (country/asn_number/asn_org all NULL) must show the real
+        # attribution — with the NULL row inserted FIRST, proving the result is
+        # order-independent rather than merely "first row happened to be populated".
+        db.batch_upsert_metrics_requests(
+            [
+                _rec("a1", ip="8.8.8.8", country=None, asn_number=None, asn_org=None, date=EPOCH),
+                _rec("a2", ip="8.8.8.8", country="US", asn_number=15169, asn_org="Google LLC", date=EPOCH + 60),
+            ],
+            instance_hostname="bw-1",
+        )
+        res = db.get_metrics_top_offenders(start=EPOCH - 1, end=EPOCH + 3600)
+        assert res[0]["ip"] == "8.8.8.8"
+        assert res[0]["country"] == "US"
+        assert res[0]["asn_number"] == 15169
+        assert res[0]["asn_org"] == "Google LLC"

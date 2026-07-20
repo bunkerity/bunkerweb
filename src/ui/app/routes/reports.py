@@ -169,6 +169,28 @@ def reports_page():
     return render_template("reports.html")
 
 
+@reports.route("/reports/dashboard", methods=["POST"])
+@login_required
+@cors_required
+def reports_dashboard():
+    try:
+        end = int(request.form.get("end") or datetime.now().timestamp())
+        start = int(request.form.get("start") or (end - 86400))
+        bucket = request.form.get("bucket", "hour")
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Invalid start/end"}), 400
+
+    try:
+        timeseries = API_CLIENT.get_metrics_timeseries(start=start, end=end, bucket=bucket)
+        offenders = API_CLIENT.get_metrics_top_offenders(start=start, end=end, limit=10)
+        rules = API_CLIENT.get_metrics_top_rules(start=start, end=end, limit=10)
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.warning(f"Metrics API unavailable ({e}); dashboard tabs will show empty state")
+        return jsonify({"status": "error", "message": "Metrics service unavailable"}), 503
+
+    return jsonify({"status": "success", "timeseries": timeseries, "offenders": offenders.get("offenders", []), "rules": rules.get("rules", [])})
+
+
 @reports.route("/reports/fetch", methods=["POST"])
 @login_required
 @cors_required

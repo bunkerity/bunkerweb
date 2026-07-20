@@ -267,6 +267,8 @@ class Requests(Base):
     server_name: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
     data: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     security_mode: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    asn_number: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    asn_org: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 

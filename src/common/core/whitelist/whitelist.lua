@@ -347,7 +347,7 @@ function whitelist:is_whitelisted_ip()
 
 	-- Check if ASN is in whitelist
 	if self.ctx.bw.ip_is_global then
-		local asn, err = get_asn(self.ctx.bw.remote_addr)
+		local asn, _, err = get_asn(self.ctx.bw.remote_addr)
 		if not asn then
 			self.logger:log(ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
 		else
