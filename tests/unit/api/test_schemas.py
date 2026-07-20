@@ -127,3 +127,43 @@ class TestWebCachePurgeRequest:
     def test_url_must_be_absolute_http(self, url):
         with pytest.raises(ValidationError, match=r"absolute HTTP\(S\) URL"):
             schemas.WebCachePurgeRequest(scope="url", urls=[{"url": url}])
+
+
+class TestCertificateRequests:
+    def test_selfsigned_defaults_and_normalization(self):
+        request = schemas.CertificateCreateRequest(
+            source="selfsigned",
+            name=" cert ",
+            common_name=" example.com ",
+            sans=["example.com", "example.com", "www.example.com"],
+        )
+        assert request.name == "cert"
+        assert request.common_name == "example.com"
+        assert request.sans == ["example.com", "www.example.com"]
+        assert request.key_type == "ec"
+
+    def test_letsencrypt_requires_service(self):
+        with pytest.raises(ValidationError, match="requires at least one service_id"):
+            schemas.CertificateCreateRequest(source="letsencrypt", name="cert", common_name="example.com")
+
+    def test_metadata_rejects_secrets(self):
+        with pytest.raises(ValidationError, match="must not contain credentials"):
+            schemas.CertificateCreateRequest(
+                source="selfsigned",
+                name="cert",
+                common_name="example.com",
+                renewal_metadata={"api_token": "secret"},
+            )
+
+        with pytest.raises(ValidationError, match="must not contain credentials"):
+            schemas.CertificateCreateRequest(
+                source="selfsigned",
+                name="cert",
+                common_name="example.com",
+                renewal_metadata={"providers": [{"password": "secret"}]},
+            )
+
+    @pytest.mark.parametrize("key", ["cache_checksum", "cert_name", "legacy", "managed_by", "service_ids"])
+    def test_metadata_rejects_provider_owned_keys(self, key):
+        with pytest.raises(ValidationError, match="provider-managed"):
+            schemas.CertificateUpdateRequest(renewal_metadata={key: "caller-controlled"})

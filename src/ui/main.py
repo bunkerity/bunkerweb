@@ -31,6 +31,7 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
 from common_utils import get_redis_client as get_common_redis_client, is_newer_version_available  # type: ignore
+from resource_group_resolver import kind_for_key as resource_kind_for_setting  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
@@ -64,6 +65,7 @@ from app.lang_config import SUPPORTED_LANGUAGES
 from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
+from app.routes.certificates import certificates
 from app.routes.web_cache import web_cache
 from app.routes.configs import configs
 from app.routes.global_settings import global_settings
@@ -77,6 +79,7 @@ from app.routes.plugins import plugins
 from app.routes.pro import pro
 from app.routes.profile import profile
 from app.routes.reports import reports
+from app.routes.resource_groups import resource_groups
 from app.routes.services import services
 from app.routes.setup import setup
 from app.routes.totp import totp
@@ -89,6 +92,7 @@ BLUEPRINTS = (
     profile,
     jobs,
     reports,
+    resource_groups,
     totp,
     home,
     logout,
@@ -97,6 +101,7 @@ BLUEPRINTS = (
     global_settings,
     pro,
     cache,
+    certificates,
     web_cache,
     logs,
     login,
@@ -752,6 +757,7 @@ with app.app_context():
         is_plugin_active=is_plugin_active,
         is_ui_api_method=is_ui_api_method,
         can_delete_service=can_delete_service,
+        resource_kind_for_setting=resource_kind_for_setting,
     )
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
@@ -1276,6 +1282,13 @@ def before_request():
             data["config"] = BW_CONFIG.get_config(global_only=True, methods=True)
         except Exception:
             data["config"] = {}
+
+        data["resource_groups"] = {}
+        if request.path.startswith(("/global-config", "/global-settings", "/services/")):
+            try:
+                data["resource_groups"] = API_CLIENT.get_resource_groups()
+            except (ApiClientError, ApiUnavailableError):
+                LOGGER.warning("Failed to fetch resource groups for settings selectors.")
 
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
             try:

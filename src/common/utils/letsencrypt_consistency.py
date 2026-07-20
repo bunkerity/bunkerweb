@@ -20,7 +20,7 @@ from os.path import sep
 from pathlib import Path
 from typing import Dict, Iterator, List, Tuple
 
-# Shared sentinel: UI heal/delete and scheduler renew/new flock this path so the last writer
+# Shared sentinel: Let's Encrypt cache writers/readers flock this path so the last writer
 # of the LE DB cache row doesn't silently win. Must stay OUTSIDE /var/cache/bunkerweb/letsencrypt:
 # that dir is a Job.job_path whose restore_cache cleanup deletes stray files in it.
 LE_CACHE_LOCK_PATH = Path(sep, "var", "cache", "bunkerweb", ".letsencrypt-cache-write.lock")

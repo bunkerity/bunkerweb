@@ -22,9 +22,8 @@ def _is_allowed_member(member):
     that is rmtree'd in pre_render's finally block — the filtered state never
     flows back into the canonical DB cache row. DO NOT reuse this filter on any
     path that re-tars and writes back to the cache: dropping accounts/ from the
-    snapshot poisons renewals with certbot AccountNotFound. The canonical
-    restore lives in blueprints/letsencrypt.py:download_certificates() and is
-    intentionally unfiltered.
+    snapshot poisons renewals with certbot AccountNotFound. Canonical cache
+    readers must restore the complete archive without this display-only filter.
     """
     parts = Path(member.name).parts
     if member.name == ".":

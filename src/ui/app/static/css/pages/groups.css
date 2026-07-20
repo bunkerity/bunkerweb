@@ -1,0 +1,68 @@
+.resource-groups-search {
+  flex: 1 1 22rem;
+  max-width: 34rem;
+}
+
+.resource-group-expand-column {
+  width: 2.5rem;
+}
+
+.resource-groups-table th,
+.resource-groups-table td {
+  vertical-align: middle;
+}
+
+.resource-group-description {
+  max-width: 28rem;
+  min-width: 14rem;
+}
+
+.resource-group-actions {
+  min-width: 7rem;
+}
+
+.resource-group-details > td {
+  background: var(--bs-tertiary-bg);
+  white-space: normal;
+}
+
+.resource-kind-panel {
+  padding: 1rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+}
+
+.resource-entry-list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 16rem;
+  padding-left: 1.25rem;
+  overflow: auto;
+}
+
+.resource-entry-list code {
+  overflow-wrap: anywhere;
+}
+
+.resource-entry-editor {
+  min-width: 48rem;
+}
+
+.resource-entry-editor th:first-child {
+  width: 10rem;
+}
+
+.resource-entry-editor th:last-child {
+  width: 8.5rem;
+}
+
+#resource-group-alias[readonly] {
+  background: var(--bs-secondary-bg);
+}
+
+@media (max-width: 991.98px) {
+  .resource-groups-search {
+    max-width: none;
+  }
+}

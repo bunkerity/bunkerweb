@@ -1,0 +1,77 @@
+.certificates-search {
+  flex: 1 1 22rem;
+  max-width: 36rem;
+}
+
+.certificates-toolbar > div:not(.certificates-search) {
+  min-width: 10rem;
+}
+
+.certificate-expand-column {
+  width: 2.5rem;
+}
+
+.certificates-table {
+  min-width: 74rem;
+}
+
+.certificates-table th,
+.certificates-table td {
+  vertical-align: middle;
+}
+
+.certificate-actions {
+  min-width: 16rem;
+}
+
+.certificate-details > td {
+  background: var(--bs-tertiary-bg);
+  white-space: normal;
+}
+
+.certificate-detail-panel {
+  padding: 1rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+}
+
+.certificate-renewal-list {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+#certificate-upload-modal .raw-config-dropzone {
+  min-height: 13rem;
+  padding: 1.5rem;
+  border: calc(var(--bs-border-width) * 2) dashed var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-tertiary-bg);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out;
+}
+
+#certificate-upload-modal .raw-config-dropzone:hover,
+#certificate-upload-modal .raw-config-dropzone:focus-visible,
+#certificate-upload-modal .raw-config-dropzone.is-dragover {
+  border-color: var(--bs-primary);
+  background: var(--bs-primary-bg-subtle);
+  outline: none;
+}
+
+#certificate-upload-modal .raw-config-dropzone.is-invalid {
+  border-color: var(--bs-danger);
+  background: var(--bs-danger-bg-subtle);
+}
+
+@media (max-width: 991.98px) {
+  .certificates-search {
+    max-width: none;
+  }
+
+  .certificates-toolbar > div {
+    flex: 1 1 100%;
+  }
+}

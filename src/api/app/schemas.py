@@ -300,6 +300,114 @@ class WebCachePurgeRequest(BaseModel):
         return self
 
 
+# Certificates
+_CERTIFICATE_PROVIDER_METADATA_KEYS = frozenset({"cache_checksum", "cert_name", "legacy", "managed_by", "service_ids"})
+
+
+def _non_secret_certificate_metadata(value: Dict[str, Any]) -> Dict[str, Any]:
+    forbidden = ("password", "secret", "credential", "private_key", "api_key", "token")
+
+    reserved = _CERTIFICATE_PROVIDER_METADATA_KEYS.intersection(value)
+    if reserved:
+        raise ValueError(f"renewal_metadata keys are provider-managed and cannot be changed: {', '.join(sorted(reserved))}")
+
+    def check(nested: Any) -> None:
+        if isinstance(nested, dict):
+            for key, item in nested.items():
+                normalized = str(key).lower()
+                if any(marker in normalized for marker in forbidden):
+                    raise ValueError("renewal_metadata must not contain credentials or private keys")
+                check(item)
+        elif isinstance(nested, (list, tuple)):
+            for item in nested:
+                check(item)
+
+    check(value)
+    return value
+
+
+class CertificateCreateRequest(BaseModel):
+    source: Literal["letsencrypt", "selfsigned"]
+    name: str = Field(..., min_length=1, max_length=256)
+    description: str = Field("", max_length=4096)
+    common_name: str = Field(..., min_length=1, max_length=253)
+    sans: List[str] = Field(default_factory=list, max_length=100)
+    service_ids: List[str] = Field(default_factory=list, max_length=100)
+    primary: bool = True
+    valid_days: int = Field(365, ge=1, le=825)
+    key_type: Literal["ec", "rsa"] = "ec"
+    renewal_metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("name", "common_name")
+    @classmethod
+    def _certificate_non_empty(cls, value: str) -> str:
+        value = value.strip()
+        if not value or "\x00" in value:
+            raise ValueError("must be a non-empty string without NUL bytes")
+        return value
+
+    @field_validator("sans", "service_ids")
+    @classmethod
+    def _certificate_unique_values(cls, values: List[str]) -> List[str]:
+        normalized = list(dict.fromkeys(value.strip() for value in values if value.strip()))
+        if any("\x00" in value or len(value) > 253 for value in normalized):
+            raise ValueError("values must be at most 253 characters without NUL bytes")
+        return normalized
+
+    @field_validator("renewal_metadata")
+    @classmethod
+    def _certificate_metadata(cls, value: Dict[str, Any]) -> Dict[str, Any]:
+        return _non_secret_certificate_metadata(value)
+
+    @model_validator(mode="after")
+    def _letsencrypt_requires_service(self):
+        if self.source == "letsencrypt" and not self.service_ids:
+            raise ValueError("Let's Encrypt issuance requires at least one service_id")
+        return self
+
+
+class CertificateUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=256)
+    description: Optional[str] = Field(None, max_length=4096)
+    renewal_metadata: Optional[Dict[str, Any]] = None
+
+    @field_validator("name")
+    @classmethod
+    def _certificate_name(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value or "\x00" in value:
+            raise ValueError("name must be a non-empty string without NUL bytes")
+        return value
+
+    @field_validator("renewal_metadata")
+    @classmethod
+    def _certificate_update_metadata(cls, value: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        return _non_secret_certificate_metadata(value) if value is not None else None
+
+
+class CertificateAttachmentRequest(BaseModel):
+    service_id: str = Field(..., min_length=1, max_length=256)
+    primary: bool = True
+
+    @field_validator("service_id")
+    @classmethod
+    def _certificate_service_id(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("service_id must be a non-empty string")
+        return value
+
+
+class CertificateRenewRequest(BaseModel):
+    valid_days: int = Field(365, ge=1, le=825)
+
+
+class CertificateRevokeRequest(BaseModel):
+    reason: Optional[str] = Field(None, max_length=512)
+
+
 # Jobs
 class JobItem(BaseModel):
     plugin: str

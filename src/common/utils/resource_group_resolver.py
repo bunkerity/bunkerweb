@@ -11,12 +11,15 @@ group edit re-propagates on the next generation).
 
 It is deliberately dependency-light (no ORM import): callers hand it a ``db``
 object exposing ``get_resource_groups()`` (the real shared Database, available
-both in the config generator and in the worker). Expansion is fail-open — a
-group lookup error never breaks config generation, the value is just left as-is.
+both in the config generator and in the worker). A group lookup error never
+breaks config generation, but unresolved non-country references are removed so
+they cannot poison a runtime list consumer.
 """
 
 from re import compile as re_compile
 from typing import Any, Dict, List, Optional
+
+from resource_validation import RESOURCE_GROUP_RESERVED_ALIASES  # type: ignore
 
 # Base setting id -> resource kind. Only settings whose value is a user-curated
 # list of resources appear here (NOT their ``*_URLS`` downloader variants).
@@ -61,7 +64,7 @@ RESOURCE_LIST_SETTINGS: Dict[str, str] = {
     "ANTIBOT_IGNORE_COUNTRY": "country",
 }
 
-_GROUP_TOKEN_RX = re_compile(r"@[A-Za-z0-9_-]+")
+_GROUP_TOKEN_RX = re_compile(r"(?<!\S)@[A-Za-z0-9_-]+(?!\S)")
 
 
 def kind_for_key(key: str) -> Optional[str]:
@@ -97,6 +100,29 @@ def build_group_index(db: Any) -> Dict[str, Dict[str, List[str]]]:
     return index
 
 
+def validate_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Dict[str, List[str]]]) -> Optional[str]:
+    """Return an error when a resource-list setting references an unusable group."""
+    for key, value in config.items():
+        if not isinstance(value, str) or "@" not in value:
+            continue
+        kind = kind_for_key(key)
+        if kind is None:
+            continue
+
+        for token in value.split():
+            if not token.startswith("@"):
+                continue
+            alias = token[1:]
+            group = group_index.get(alias)
+            if group is None:
+                if kind == "country" and alias.upper() in RESOURCE_GROUP_RESERVED_ALIASES:
+                    continue
+                return f"Unknown resource group @{alias} referenced by {key}"
+            if not group.get(kind):
+                return f"Resource group @{alias} has no {kind} entries required by {key}"
+    return None
+
+
 def expand_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Dict[str, List[str]]]) -> Dict[str, Any]:
     """Return a copy of ``config`` with ``@name`` tokens in list settings expanded.
 
@@ -105,10 +131,7 @@ def expand_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Di
     unknown group (or a group with no entry of that kind) contributes nothing.
     Values without an ``@`` are left untouched (fast path).
     """
-    if not group_index:
-        return config
-
-    out = dict(config)
+    out = config.copy()
     for key, value in config.items():
         if not isinstance(value, str) or "@" not in value:
             continue
@@ -119,15 +142,24 @@ def expand_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Di
         resolved: List[str] = []
         seen: set = set()
         for token in value.split():
-            if token.startswith("@") and token[1:] in group_index:
-                # Known resource group: substitute its entries of this kind.
-                for entry_value in group_index[token[1:]].get(kind, []):
+            if token.startswith("@"):
+                alias = token[1:]
+                group = group_index.get(alias)
+                if group is None and kind == "country" and alias.upper() in RESOURCE_GROUP_RESERVED_ALIASES:
+                    # Keep legacy built-in country aliases when their seeded group is absent.
+                    if token not in seen:
+                        seen.add(token)
+                        resolved.append(token)
+                    continue
+                # Unknown and wrong-kind references are invalid legacy values. Drop them
+                # defensively instead of feeding them to Lua list consumers.
+                if group is None:
+                    continue
+                for entry_value in group.get(kind, []):
                     if entry_value not in seen:
                         seen.add(entry_value)
                         resolved.append(entry_value)
             elif token not in seen:
-                # Literal value, or an unknown @token (e.g. the built-in country group @EU,
-                # expanded later in Lua) — kept as-is so a reference is never silently dropped.
                 seen.add(token)
                 resolved.append(token)
 
@@ -139,15 +171,15 @@ def expand_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Di
 def expand_config_groups(config: Dict[str, Any], db: Any, logger: Any = None) -> Dict[str, Any]:
     """Convenience wrapper: build the index from ``db`` and expand ``config``.
 
-    Fail-open: if the groups cannot be read (db unavailable, method missing on a
-    non-Database client, ...) the config is returned unchanged.
+    If groups cannot be read, unresolved references are removed defensively while
+    legacy built-in country aliases are preserved.
     """
     if db is None:
-        return config
+        return expand_resource_group_refs(config, {})
     try:
         group_index = build_group_index(db)
     except Exception as exc:  # noqa: BLE001 - never break config generation over groups
         if logger is not None:
             logger.warning(f"Could not expand resource group references: {exc}")
-        return config
+        return expand_resource_group_refs(config, {})
     return expand_resource_group_refs(config, group_index)

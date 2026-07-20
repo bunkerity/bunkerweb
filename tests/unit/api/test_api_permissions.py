@@ -62,6 +62,18 @@ class TestGrantRevoke:
         assert adb.check_api_permission("alice", "web_cache_read", resource_type="web_cache") is True
         assert adb.check_api_permission("alice", "web_cache_purge", resource_type="web_cache") is False
 
+    @pytest.mark.parametrize(
+        ("permission", "resource_type"),
+        [
+            ("resource_group_clone", "resource_groups"),
+            ("certificate_download", "certificates"),
+            ("certificate_revoke", "certificates"),
+        ],
+    )
+    def test_resource_group_and_certificate_permissions(self, adb, permission, resource_type):
+        assert adb.grant_api_permission("alice", permission, resource_type=resource_type) == ""
+        assert adb.check_api_permission("alice", permission, resource_type=resource_type) is True
+
     def test_invalid_resource_type(self, adb):
         assert "Invalid resource_type" in adb.grant_api_permission("alice", "service_read", resource_type="bogus")
 

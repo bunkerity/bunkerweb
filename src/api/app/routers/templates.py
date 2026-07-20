@@ -54,7 +54,10 @@ def get_template(template_id: str) -> JSONResponse:
     """Get template details including settings, steps, and configs."""
     details = get_db().get_template_details(template_id)
     if not details:
-        return JSONResponse(status_code=404, content={"status": "error", "message": "Template not found"})
+        return JSONResponse(
+            status_code=404,
+            content={"status": "error", "message": "Template not found"},
+        )
 
     # Serialize datetime fields
     if hasattr(details.get("creation_date"), "isoformat"):
@@ -78,7 +81,20 @@ def create_template(req: TemplateCreateRequest) -> JSONResponse:
         method=req.method,
     )
     if ret:
-        code = 400 if "already exists" in ret or "read-only" in ret or "required" in ret or "cannot be empty" in ret else 500
+        code = (
+            400
+            if any(
+                hint in ret.lower()
+                for hint in (
+                    "already exists",
+                    "read-only",
+                    "required",
+                    "cannot be empty",
+                    "resource group",
+                )
+            )
+            else 500
+        )
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
     return JSONResponse(status_code=201, content={"status": "success"})
 
@@ -95,7 +111,7 @@ def update_template(template_id: str, req: TemplateUpdateRequest) -> JSONRespons
         configs=req.configs,
     )
     if ret:
-        code = 404 if "not found" in ret else (400 if "read-only" in ret else 500)
+        code = 404 if "not found" in ret else (400 if "read-only" in ret.lower() or "resource group" in ret.lower() else 500)
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
 

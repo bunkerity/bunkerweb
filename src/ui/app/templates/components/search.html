@@ -1,0 +1,64 @@
+{# usage: {% from "components/search.html" import search %} #}
+{# ============================================================================
+   components/search.html — a compact search input (bx-search icon + form-control)
+   ----------------------------------------------------------------------------
+   Superset of the ad-hoc search boxes already hand-rolled across the UI
+   (config_edit.html service search, plugins_settings.html plugin search,
+   multiselect_setting.html option search, template_edit.html setting search):
+   same Bootstrap input-group markup, now parameterized in one place.
+
+   variant:
+     "default" — plain input-group (template_edit.html setting search)
+     "merge"   — input-group-merge, bottom-border-only style
+                 (config_edit.html / plugins_settings.html)
+     "flat"    — borderless, transparent input-group-text
+                 (multiselect_setting.html option search)
+
+   Filtering behavior stays page-specific (each page already wires its own
+   "input"/"click" listeners against the id it passes in) — this macro only
+   renders the markup, it does not ship a generic filter/clear script.
+   ============================================================================ #}
+{% macro search(
+    id=none,
+    name=none,
+    placeholder="Search...",
+    i18n_key="form.placeholder.search",
+    value="",
+    label=none,
+    label_i18n_key=none,
+    size="",
+    variant="default",
+    clearable=false,
+    clear_id=none,
+    classes="",
+    input_classes="",
+    icon_classes="",
+    attrs=""
+) -%}
+{%- if label %}
+<label class="form-label"{% if id %} for="{{ id }}"{% endif %}{% if label_i18n_key %} data-i18n="{{ label_i18n_key }}"{% endif %}>{{ label }}</label>
+{%- endif %}
+<div class="input-group{% if variant == 'merge' %} input-group-merge{% endif %}{% if size %} input-group-{{ size }}{% endif %}{% if classes %} {{ classes }}{% endif %}">
+  <span class="input-group-text{% if variant == 'merge' %} p-2 border-0 border-primary border-bottom shadow-none{% elif variant == 'flat' %} border-0 bg-transparent{% endif %}"><i class="bx bx-search{% if variant == 'merge' %} fs-6{% endif %}{% if icon_classes %} {{ icon_classes }}{% endif %}" aria-hidden="true"></i></span>
+  <input type="search"
+         role="searchbox"
+         {% if id %}id="{{ id }}"{% endif %}
+         {% if name %}name="{{ name }}"{% endif %}
+         class="form-control{% if variant == 'merge' %} border-0 border-primary border-bottom shadow-none{% elif variant == 'flat' %} border-0{% endif %}{% if input_classes %} {{ input_classes }}{% endif %}"
+         placeholder="{{ placeholder }}"
+         aria-label="{{ placeholder }}"
+         value="{{ value }}"
+         autocomplete="off"
+         data-i18n="{{ i18n_key }}"
+         {% if attrs %}{{ attrs | safe }}{% endif %}>
+  {%- if clearable %}
+  <button type="button"
+          class="btn btn-outline-secondary"
+          {% if clear_id %}id="{{ clear_id }}"{% endif %}
+          aria-label="Clear search"
+          data-i18n="aria.label.clear_search">
+    <i class="bx bx-x" aria-hidden="true"></i>
+  </button>
+  {%- endif %}
+</div>
+{%- endmacro %}

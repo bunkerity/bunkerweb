@@ -198,6 +198,112 @@ class ApiClient(BaseApiClient):
     def convert_service(self, service_id, convert_to):
         return self._post(f"/services/{service_id}/convert", params={"convert_to": convert_to})
 
+    # Resource groups
+
+    def get_resource_groups(self, include_usage=False):
+        params = {"include_usage": "true"} if include_usage else {}
+        return self._get("/resource_groups", params=params).get("resource_groups", {})
+
+    def get_resource_group(self, group_id):
+        data = self._get(f"/resource_groups/{group_id}")
+        return data.get("resource_group", data)
+
+    def get_resource_group_references(self, group_id):
+        return self._get(f"/resource_groups/{group_id}/references").get("references", [])
+
+    def create_resource_group(self, group_id, name, description="", entries=None):
+        return self._post(
+            "/resource_groups",
+            json={"id": group_id, "name": name, "description": description, "entries": list(entries or [])},
+        )
+
+    def update_resource_group(self, group_id, **kwargs):
+        return self._patch(f"/resource_groups/{group_id}", json=kwargs)
+
+    def delete_resource_group(self, group_id):
+        return self._delete(f"/resource_groups/{group_id}")
+
+    def clone_resource_group(self, group_id, new_id, name):
+        return self._post(f"/resource_groups/{group_id}/clone", json={"id": new_id, "name": name})
+
+    # Certificates
+
+    def get_certificates(self, search="", source="", status="", service_id="", offset=0, limit=500):
+        params = {"offset": offset, "limit": limit}
+        for key, value in (("search", search), ("source", source), ("status", status), ("service_id", service_id)):
+            if value:
+                params[key] = value
+        return self._get("/certificates", params=params)
+
+    def get_certificate(self, certificate_id):
+        data = self._get(f"/certificates/{certificate_id}")
+        return data.get("certificate", data)
+
+    def get_letsencrypt_orphans(self):
+        return self._get("/letsencrypt/certificates/orphans").get("orphans", [])
+
+    def create_certificate(self, **kwargs):
+        payload = kwargs.copy()
+        source = payload.pop("source", "")
+        if source == "selfsigned":
+            return self._post("/selfsigned/certificates", json=payload)
+        if source == "letsencrypt":
+            return self._post("/letsencrypt/certificates", json={"service_ids": payload.get("service_ids", [])})
+        raise ValueError(f"Unsupported certificate source: {source or 'missing'}")
+
+    def update_certificate(self, certificate_id, **kwargs):
+        return self._patch(f"/certificates/{certificate_id}", json=kwargs)
+
+    def upload_certificate(self, certificate, private_key, **kwargs):
+        return self._request(
+            "POST",
+            "/customcert/certificates/upload",
+            files={"certificate": certificate, "private_key": private_key},
+            data=kwargs,
+            headers={"Content-Type": None},
+        )
+
+    def attach_certificate(self, certificate_id, service_id, primary=True):
+        return self._post(f"/certificates/{certificate_id}/attachments", json={"service_id": service_id, "primary": primary})
+
+    def detach_certificate(self, certificate_id, service_id):
+        return self._delete(f"/certificates/{certificate_id}/attachments/{service_id}")
+
+    def renew_certificate(self, certificate_id, source, valid_days=365):
+        if source != "selfsigned":
+            raise ValueError(f"Certificate source {source!r} does not support targeted renewal")
+        return self._post(f"/selfsigned/certificates/{certificate_id}/renew", json={"valid_days": valid_days})
+
+    def renew_due_certificates(self):
+        provider_results = []
+        provider_errors = []
+        first_error = None
+        for source, path in (
+            ("selfsigned", "/selfsigned/certificates/renew-due"),
+            ("letsencrypt", "/letsencrypt/certificates/renew-due"),
+        ):
+            try:
+                provider_results.append(self._post(path))
+            except (ApiClientError, ApiUnavailableError) as exc:
+                first_error = first_error or exc
+                provider_errors.append({"source": source, "status": "error", "message": str(exc)})
+        if not provider_results:
+            raise first_error
+        messages = [result.get("message", "") for result in provider_results if result.get("message")]
+        messages.extend(f"{error['source']}: {error['message']}" for error in provider_errors)
+        return {
+            "status": "partial" if provider_errors or any(result.get("status") == "partial" for result in provider_results) else "success",
+            "total_due": sum(result.get("total_due", 0) for result in provider_results),
+            "results": [item for result in provider_results for item in result.get("results", [])] + provider_errors,
+            "message": " ".join(messages),
+        }
+
+    def delete_certificate(self, certificate_id):
+        return self._delete(f"/certificates/{certificate_id}")
+
+    def download_certificate(self, certificate_id, part="chain"):
+        return self._raw_request("GET", f"/certificates/{certificate_id}/download", params={"part": part})
+
     # ── Configs ─────────────────────────────────────────────────────────
 
     def get_configs(self, service=None, type=None, with_drafts=True, with_data=False):

@@ -71,5 +71,11 @@
       "reload": true,
       "async": true
     }
-  ]
+  ],
+  "extensions": {
+    "api": {
+      "module": "api/router.py",
+      "prefix": "/customcert"
+    }
+  }
 }

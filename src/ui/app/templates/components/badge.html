@@ -1,0 +1,25 @@
+{# usage: {% from "components/badge.html" import badge %}
+          {{ badge(text="Enabled", i18n_key="web_cache.enabled", variant="success") }} #}
+
+{# Generic status/label pill built on the existing "badge rounded-pill bg-label-<color>" pattern
+   already used across web_cache.html, configs.html, services.html and instances.html.
+
+   Params:
+     text       (required) English fallback copy shown before i18next rewrites it.
+     i18n_key   data-i18n key for the text, e.g. "status.up", "web_cache.enabled". Omit for
+                text that has no translation (rare).
+     variant    color suffix appended to "bg-label-", e.g. "success", "danger", "warning",
+                "secondary", "primary", "bw-green". Must be a color with an existing
+                .bg-label-<variant> rule in core.css/overrides.css/theme-default.css.
+     pill       fully rounded pill shape (rounded-pill). Set false for the square count/type
+                badges used in template_edit.html.
+     icon       optional Boxicons class, e.g. "bx-globe", "bx-file-blank". When set, the badge
+                switches to the icon + inner-span layout (see configs.html/services.html).
+     id         optional id attribute, e.g. "status-" ~ instance.hostname.
+     data_value optional data-value attribute used by page JS to filter/sort rows by state
+                (e.g. "draft" / "online" in configs.html and services.html).
+     classes    extra utility classes appended as-is, e.g. "text-uppercase". #}
+{% macro badge(text, i18n_key=none, variant='secondary', pill=true, icon=none, id=none, data_value=none, classes='') -%}
+    {%- set outer_classes = 'badge' ~ (' rounded-pill' if pill else '') ~ ' bg-label-' ~ variant ~ (' d-inline-flex align-items-center' if icon else '') ~ (' ' ~ classes if classes else '') -%}
+    <span{% if id %} id="{{ id }}"{% endif %} class="{{ outer_classes }}"{% if data_value %} data-value="{{ data_value }}"{% endif %}{% if not icon and i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{% if icon %}<i class="bx {{ icon }} me-1" aria-hidden="true"></i><span{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ text }}</span>{% else %}{{ text }}{% endif %}</span>
+{%- endmacro %}

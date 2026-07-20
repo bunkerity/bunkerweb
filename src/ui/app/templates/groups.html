@@ -1,0 +1,310 @@
+{% extends "dashboard.html" %}
+{% from "components/alert.html" import alert %}
+{% from "components/badge.html" import badge %}
+{% from "components/button.html" import button %}
+{% from "components/card.html" import card %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/modal.html" import modal %}
+{% from "components/search.html" import search %}
+{% from "components/title.html" import title %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/groups.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block content %}
+    {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
+    {% set resource_groups_url = url_for("resource_groups") %}
+    {{ title(label="Resource groups", i18n_key="navigation.groups", level="h1", icon="bx-collection", subtitle="Reusable typed aliases for IPs, countries, ASNs, reverse DNS names, user agents, and URIs.", subtitle_i18n_key="resource_groups.subtitle", classes="mb-4") }}
+    {% if readonly %}
+        {{ alert(message="The database is read-only. Resource groups can be inspected and exported, but not changed.", message_key="resource_groups.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
+    {% endif %}
+    <textarea id="resource-groups-data" hidden readonly>{{ resource_groups | tojson }}</textarea>
+    {% call card(classes="p-4 min-vh-70") %}
+        <div class="resource-groups-toolbar d-flex flex-wrap align-items-center gap-2 mb-4">
+            <div class="resource-groups-search">
+                {{ search(id="resource-groups-search", placeholder="Search aliases, descriptions, kinds, or values...", i18n_key="resource_groups.search", size="sm", clearable=true, clear_id="resource-groups-search-clear") }}
+            </div>
+            <div class="d-flex flex-wrap gap-2 ms-lg-auto">
+                {{ button(id="resource-groups-expand-all", label="Expand all", i18n_key="resource_groups.expand_all", variant="outline-secondary", size="sm", icon="bx-expand-vertical") }}
+                {{ button(label="Export", i18n_key="button.export", variant="outline-secondary", size="sm", icon="bx-download", tag="a", href=resource_groups_url ~ "/export") }}
+                {{ button(id="resource-group-new", label="New group", i18n_key="resource_groups.new", size="sm", icon="bx-plus", disabled=readonly) }}
+            </div>
+        </div>
+        {% if resource_groups %}
+            <div class="table-responsive">
+                <table class="table align-middle resource-groups-table">
+                    <thead>
+                        <tr>
+                            <th class="resource-group-expand-column"><span class="visually-hidden">Details</span></th>
+                            <th data-i18n="table.header.name">Name</th>
+                            <th data-i18n="table.header.description">Description</th>
+                            <th data-i18n="resource_groups.kinds">Kinds</th>
+                            <th data-i18n="resource_groups.entries">Entries</th>
+                            <th data-i18n="resource_groups.usage">Usage</th>
+                            <th data-i18n="table.header.method">Method</th>
+                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group in resource_groups %}
+                            {% set editable = group.method in editable_methods %}
+                            <tr class="resource-group-row"
+                                data-group-id="{{ group.id }}"
+                                data-references-url="{{ resource_groups_url }}/{{ group.id }}/references">
+                                <td>
+                                    {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label="Show details for @" ~ group.name, classes="resource-group-toggle p-0") }}
+                                </td>
+                                <td><code>@{{ group.name }}</code></td>
+                                <td class="resource-group-description text-wrap">{{ group.description or "—" }}</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for kind in resource_kinds %}
+                                            {% set kind_entries = group.entries | selectattr("kind", "equalto", kind) | list %}
+                                            {% if kind_entries %}{{ badge(text=kind, variant="secondary", classes="resource-kind-badge") }}{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>{{ group.entries | length }}</td>
+                                <td>
+                                    {% if group.usage_count %}
+                                        {{ button(label=group.usage_count ~ " reference" ~ ("s" if group.usage_count != 1 else ""), variant="link", size="sm", icon="bx-link", classes="resource-group-usage p-0") }}
+                                    {% else %}
+                                        {{ badge(text="0 references", variant="secondary", icon="bx-unlink") }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if editable %}
+                                        {{ badge(text=group.method, variant="primary", icon="bx-edit-alt") }}
+                                    {% else %}
+                                        {{ badge(text=group.method, variant="secondary", icon="bx-lock-alt") }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-end gap-1 resource-group-actions">
+                                        {% if editable %}
+                                            {{ button(label="", variant="outline-primary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label="Edit @" ~ group.name, disabled=readonly, classes="resource-group-edit") }}
+                                        {% endif %}
+                                        {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label="Clone @" ~ group.name, disabled=readonly, classes="resource-group-clone") }}
+                                        {% if editable %}
+                                            {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete @" ~ group.name, disabled=readonly, classes="resource-group-delete") }}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="resource-group-details" data-group-id="{{ group.id }}" hidden>
+                                <td colspan="8">
+                                    <div class="row g-3 py-2">
+                                        {% for kind in resource_kinds %}
+                                            {% set kind_entries = group.entries | selectattr("kind", "equalto", kind) | list %}
+                                            {% if kind_entries %}
+                                                <div class="col-12 col-xl-6">
+                                                    <section class="resource-kind-panel h-100" aria-label="{{ kind }} entries">
+                                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                                            {{ badge(text=kind, variant="primary", icon="bx-layer") }}
+                                                            <span class="text-muted small">{{ kind_entries | length }} value{{ "s" if kind_entries | length != 1 else "" }}</span>
+                                                        </div>
+                                                        <ol class="resource-entry-list mb-0">
+                                                            {% for entry in kind_entries %}
+                                                                <li>
+                                                                    <code>{{ entry.value }}</code>
+                                                                    {% if entry.comment %}<span class="text-muted small">— {{ entry.comment }}</span>{% endif %}
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ol>
+                                                    </section>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if not group.entries %}
+                                            <div class="col-12">
+                                                {{ empty_state(title="No entries", title_key="resource_groups.no_entries", icon="bx-layer", size="sm") }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p id="resource-groups-count" class="text-muted small mb-0 mt-3" aria-live="polite">
+                <span data-i18n="resource_groups.showing_count"
+                      data-i18n-options='{{ {"visible": resource_groups | length, "total": resource_groups | length} | tojson }}'>Showing {{ resource_groups | length }} of {{ resource_groups | length }} groups</span>
+            </p>
+        {% else %}
+            {{ empty_state(title="No resource groups", title_key="resource_groups.empty", message="Create a reusable alias to share typed values across compatible settings.", message_key="resource_groups.empty_help", icon="bx-collection", bordered=true, action_label=none if readonly else "New group", action_key="resource_groups.new", action_icon="bx-plus", action_id="resource-group-empty-new") }}
+        {% endif %}
+    {% endcall %}
+
+    {% call modal(id="resource-group-editor", title_key="resource_groups.editor_title", title="Resource group", size="xl") %}
+        <form method="post" action="{{ resource_groups_url }}/save" id="resource-group-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="group_id" id="resource-group-id" />
+            <textarea name="entries" id="resource-group-entries" hidden>[]</textarea>
+            <div class="modal-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label" for="resource-group-alias" data-i18n="resource_groups.alias">Alias</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@</span>
+                            <input type="text"
+                                   class="form-control"
+                                   id="resource-group-alias"
+                                   name="alias"
+                                   maxlength="64"
+                                   pattern="[A-Za-z0-9_-]+"
+                                   required />
+                        </div>
+                        <div class="form-text" data-i18n="resource_groups.alias_help">Letters, digits, underscores, and dashes. Existing aliases cannot be renamed.</div>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label" for="resource-group-description" data-i18n="table.header.description">Description</label>
+                        <textarea class="form-control"
+                                  id="resource-group-description"
+                                  name="description"
+                                  rows="2"
+                                  maxlength="4000"></textarea>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                    <h6 class="mb-0" data-i18n="resource_groups.entries">Entries</h6>
+                    {{ button(id="resource-group-add-entry", label="Add entry", i18n_key="resource_groups.add_entry", variant="outline-primary", size="sm", icon="bx-plus") }}
+                </div>
+                <div class="table-responsive border rounded-3">
+                    <table class="table table-sm align-middle mb-0 resource-entry-editor">
+                        <thead>
+                            <tr>
+                                <th data-i18n="resource_groups.kind">Kind</th>
+                                <th data-i18n="resource_groups.value">Value</th>
+                                <th data-i18n="resource_groups.comment">Comment</th>
+                                <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resource-group-entry-rows"></tbody>
+                    </table>
+                    <div id="resource-group-entry-empty">
+                        {{ empty_state(title="No entries", title_key="resource_groups.no_entries", message="Add entries individually or use the bulk importer below.", message_key="resource_groups.no_entries_help", icon="bx-layer", size="sm") }}
+                    </div>
+                </div>
+                <section class="border rounded-3 p-3 mt-3" aria-labelledby="resource-group-bulk-title">
+                    <h6 id="resource-group-bulk-title" class="mb-3" data-i18n="resource_groups.bulk_import">Bulk import</h6>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label" for="resource-group-bulk-kind" data-i18n="resource_groups.kind">Kind</label>
+                            <select class="form-select" id="resource-group-bulk-kind">
+                                {% for kind in resource_kinds %}<option value="{{ kind }}">{{ kind }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="resource-group-bulk-values" data-i18n="resource_groups.values">Values</label>
+                            <textarea class="form-control"
+                                      id="resource-group-bulk-values"
+                                      rows="2"
+                                      placeholder="One value per line, or comma-separated"></textarea>
+                        </div>
+                        <div class="col-md-3 d-flex flex-wrap gap-2">
+                            {{ button(id="resource-group-add-bulk", label="Add values", i18n_key="resource_groups.add_values", variant="outline-primary", size="sm", icon="bx-list-plus") }}
+                            {{ button(id="resource-group-import-trigger", label="TXT/CSV", i18n_key="resource_groups.import_file", variant="outline-secondary", size="sm", icon="bx-upload") }}
+                            <input type="file"
+                                   id="resource-group-import-file"
+                                   hidden
+                                   accept=".txt,.csv,text/plain,text/csv" />
+                        </div>
+                    </div>
+                    <p id="resource-group-import-error" class="text-danger small mb-0 mt-2" role="alert" hidden></p>
+                </section>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Save group", i18n_key="resource_groups.save", icon="bx-save", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="resource-group-clone-modal", title_key="resource_groups.clone", title="Clone resource group") %}
+        <form method="post" action="{{ resource_groups_url }}/clone" id="resource-group-clone-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="source_id" id="resource-group-clone-source" />
+            <div class="modal-body">
+                <p class="text-muted" id="resource-group-clone-copy"></p>
+                <label class="form-label" for="resource-group-clone-alias" data-i18n="resource_groups.new_alias">New alias</label>
+                <div class="input-group">
+                    <span class="input-group-text">@</span>
+                    <input type="text"
+                           class="form-control"
+                           id="resource-group-clone-alias"
+                           name="alias"
+                           maxlength="64"
+                           pattern="[A-Za-z0-9_-]+"
+                           required />
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Clone", i18n_key="button.clone", icon="bx-copy", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="resource-group-delete-modal", title_key="resource_groups.delete", title="Delete resource group") %}
+        <form method="post" action="{{ resource_groups_url }}/delete" id="resource-group-delete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="group_id" id="resource-group-delete-id" />
+            <div class="modal-body">
+                <p id="resource-group-delete-copy"></p>
+                <p class="text-muted small mb-0" data-i18n="resource_groups.delete_help">Deletion is blocked while a setting references this alias.</p>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Delete", i18n_key="button.delete", variant="danger", icon="bx-trash", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="resource-group-usage-modal", title_key="resource_groups.usage", title="Resource group usage", static_backdrop=false) %}
+        <div class="modal-body">
+            <p id="resource-group-usage-loading"
+               class="text-muted mb-0"
+               role="status"
+               data-i18n="resource_groups.loading_references">Loading references...</p>
+            <div id="resource-group-usage-error" class="alert alert-danger mb-0" role="alert" hidden></div>
+            <div id="resource-group-usage-empty" hidden>
+                {{ empty_state(title="No references", title_key="resource_groups.no_references", icon="bx-unlink", size="sm") }}
+            </div>
+            <ul id="resource-group-reference-list" class="list-group list-group-flush" hidden></ul>
+        </div>
+        <div class="modal-footer">
+            {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", dismiss="modal") }}
+        </div>
+    {% endcall %}
+
+    <template id="resource-group-entry-template">
+        <tr>
+            <td>
+                <label class="visually-hidden">Kind</label>
+                <select class="form-select form-select-sm resource-entry-kind">
+                    {% for kind in resource_kinds %}<option value="{{ kind }}">{{ kind }}</option>{% endfor %}
+                </select>
+            </td>
+            <td>
+                <label class="visually-hidden">Value</label>
+                <input type="text" class="form-control form-control-sm resource-entry-value" maxlength="8192" required />
+            </td>
+            <td>
+                <label class="visually-hidden">Comment</label>
+                <input type="text" class="form-control form-control-sm resource-entry-comment" maxlength="1000" />
+            </td>
+            <td>
+                <div class="d-flex justify-content-end gap-1">
+                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-up-arrow-alt", icon_only=true, aria_label="Move entry up", classes="resource-entry-up") }}
+                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-down-arrow-alt", icon_only=true, aria_label="Move entry down", classes="resource-entry-down") }}
+                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-x", icon_only=true, aria_label="Remove entry", classes="resource-entry-remove") }}
+                </div>
+            </td>
+        </tr>
+    </template>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/groups.js') }}" nonce="{{ script_nonce }}" defer></script>
+{% endblock %}

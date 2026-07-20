@@ -169,13 +169,19 @@ try:
             if status == 0:
                 status = 1
         else:
-            # Serialize against the UI heal/delete flow, which writes the same DB cache row.
+            # Serialize this cache writer with other Let's Encrypt cache users.
             with le_cache_write_lock():
                 cached, err = JOB.cache_dir(DATA_PATH)
             if not cached:
                 LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
             else:
                 LOGGER.info("Successfully saved Let's Encrypt data to db cache")
+                try:
+                    import_summary = JOB.db.import_legacy_certbot_certificates()
+                    if import_summary.get("errors"):
+                        LOGGER.warning(f"Certificate inventory sync completed with errors: {import_summary['errors']}")
+                except Exception as exc:
+                    LOGGER.warning(f"Unable to sync the certificate inventory: {exc}")
                 # Only when a cert was actually renewed this run (status==1): deliver the renewed LE
                 # cache to every live instance NOW, directly. Same whole-/var/cache push + /reload the
                 # worker's reload path performs on ret==1 (src/worker/tasks.py:81), issued here so it

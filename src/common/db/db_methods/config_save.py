@@ -7,9 +7,27 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from model import Custom_configs, Global_values, Jobs_cache, Metadata, Multiselects, Plugins, Selects, Services, Services_settings, Settings, Template_settings  # type: ignore
+from model import (  # type: ignore
+    Custom_configs,
+    Global_values,
+    Jobs_cache,
+    Metadata,
+    Multiselects,
+    Plugins,
+    Selects,
+    Services,
+    Services_settings,
+    Settings,
+    Template_settings,
+)
 
-from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
+from common_utils import (
+    normalize_check_value,
+    normalize_list_value,
+    normalize_select_value,
+    trim_scalar_value,
+)  # type: ignore
+from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import delete, select, update
@@ -66,7 +84,11 @@ def _scheduler_can_override(ctx: _SaveConfigContext, full_key: str, incoming_val
 
 
 def _get_setting_file_name(
-    ctx: _SaveConfigContext, setting_type: str, original_key: str, value_changed: bool, current_file_name: str = ""
+    ctx: _SaveConfigContext,
+    setting_type: str,
+    original_key: str,
+    value_changed: bool,
+    current_file_name: str = "",
 ) -> Tuple[Optional[str], bool]:
     if setting_type != "file":
         return None, False
@@ -83,7 +105,13 @@ def _get_setting_file_name(
 
 
 def _is_default_value(
-    ctx: _SaveConfigContext, val: str, key: str, setting: dict, template_default: Optional[str] = None, suffix: int = 0, is_global: bool = False
+    ctx: _SaveConfigContext,
+    val: str,
+    key: str,
+    setting: dict,
+    template_default: Optional[str] = None,
+    suffix: int = 0,
+    is_global: bool = False,
 ) -> bool:
     """
     Determines whether the provided value is considered the default value.
@@ -111,7 +139,15 @@ def _is_default_value(
     )
 
 
-def _check_value(ctx: _SaveConfigContext, key: str, value: str, setting: dict, template_default: Optional[str], suffix: int, is_global: bool = False) -> bool:
+def _check_value(
+    ctx: _SaveConfigContext,
+    key: str,
+    value: str,
+    setting: dict,
+    template_default: Optional[str],
+    suffix: int,
+    is_global: bool = False,
+) -> bool:
     """
     Determine if a configuration value should be considered default.
 
@@ -127,7 +163,11 @@ def _check_value(ctx: _SaveConfigContext, key: str, value: str, setting: dict, t
 
 
 def _canonicalize_stored_value(
-    setting_type: Optional[str], value: Any, separator: Optional[str] = " ", options: Optional[List[str]] = None, case_insensitive: bool = False
+    setting_type: Optional[str],
+    value: Any,
+    separator: Optional[str] = " ",
+    options: Optional[List[str]] = None,
+    case_insensitive: bool = False,
 ) -> Any:
     """Canonicalize a value to its stored form by setting type (mirrors
     ``Configurator.__normalize_value``): trim -> check yes/no -> size/duration NGINX unit
@@ -145,7 +185,13 @@ def _canonicalize_stored_value(
     if setting_type in ("multiselect", "multivalue"):
         value = normalize_list_value(value, separator or " ")
         if setting_type == "multiselect":
-            value = normalize_select_value(value, options or [], multi=True, separator=separator or " ", case_insensitive=case_insensitive)
+            value = normalize_select_value(
+                value,
+                options or [],
+                multi=True,
+                separator=separator or " ",
+                case_insensitive=case_insensitive,
+            )
         return value
     return value
 
@@ -213,6 +259,18 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
             self.logger.debug(f"Saving config for method {method}")
 
+            if any(isinstance(value, str) and "@" in value and kind_for_key(key) for key, value in config.items()):
+                try:
+                    group_index = self._get_resource_group_index(session)
+                except (ProgrammingError, OperationalError) as exc:
+                    session.rollback()
+                    self.logger.warning(f"Could not load resource groups while validating config: {exc}")
+                    group_index = {}
+
+                if error := validate_resource_group_refs(config, group_index):
+                    self.logger.warning(error)
+                    return error
+
             drafted_service_ids = self._sc_compute_drafted_service_ids(session, ctx, skip_service_management, disable_cleanup)
 
             refused, global_settings_to_delete, ret_changed_services = self._sc_cleanup_global_settings(session, ctx, changed_plugins)
@@ -223,8 +281,17 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 # plugins collected so far, exactly like the original early return.
                 return changed_plugins
 
-            refused, service_settings_to_delete, ret_changed_services, ret_service_template_change = self._sc_cleanup_service_settings(
-                session, ctx, skip_service_management, drafted_service_ids, changed_plugins
+            (
+                refused,
+                service_settings_to_delete,
+                ret_changed_services,
+                ret_service_template_change,
+            ) = self._sc_cleanup_service_settings(
+                session,
+                ctx,
+                skip_service_management,
+                drafted_service_ids,
+                changed_plugins,
             )
             if ret_changed_services:
                 changed_services = True
@@ -241,9 +308,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 ctx.template = config.get("USE_TEMPLATE", "")
 
                 if not skip_service_management:
-                    refused, services, db_ids, drafts, ret_changed_services, ret_service_template_change = self._sc_reconcile_services(
-                        session, ctx, disable_cleanup, to_put, to_update
-                    )
+                    (
+                        refused,
+                        services,
+                        db_ids,
+                        drafts,
+                        ret_changed_services,
+                        ret_service_template_change,
+                    ) = self._sc_reconcile_services(session, ctx, disable_cleanup, to_put, to_update)
                     if ret_changed_services:
                         changed_services = True
                     if ret_service_template_change:
@@ -264,19 +336,37 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     # Use ThreadPoolExecutor to process services in parallel
                     with ThreadPoolExecutor() as executor:
                         futures = [
-                            executor.submit(self._sc_process_service, ctx, service_name, service_config, db_ids)
+                            executor.submit(
+                                self._sc_process_service,
+                                ctx,
+                                service_name,
+                                service_config,
+                                db_ids,
+                            )
                             for service_name, service_config in service_configs.items()
                         ]
 
                         # Process global settings in another thread or the main thread
-                        futures.append(executor.submit(self._sc_process_global_settings, session, ctx, global_config))
+                        futures.append(
+                            executor.submit(
+                                self._sc_process_global_settings,
+                                session,
+                                ctx,
+                                global_config,
+                            )
+                        )
 
                         # Collect results from threads
                         for future in as_completed(futures):
                             try:
-                                ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change = (
-                                    future.result()
-                                )
+                                (
+                                    ret_to_put,
+                                    ret_to_update,
+                                    ret_to_delete,
+                                    ret_changed_plugins,
+                                    ret_changed_services,
+                                    ret_service_template_change,
+                                ) = future.result()
                                 to_put.extend(ret_to_put)
                                 to_update.extend(ret_to_update)
                                 to_delete.extend(ret_to_delete)
@@ -290,7 +380,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
                 else:
                     ret_changed_services, ret_service_template_change = self._sc_apply_non_multisite_config(
-                        session, ctx, skip_service_management, to_put, to_update, to_delete, changed_plugins
+                        session,
+                        ctx,
+                        skip_service_management,
+                        to_put,
+                        to_update,
+                        to_delete,
+                        changed_plugins,
                     )
                     if ret_changed_services:
                         changed_services = True
@@ -350,7 +446,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
         return changed_plugins
 
-    def _sc_compute_drafted_service_ids(self, session, ctx: _SaveConfigContext, skip_service_management: bool, disable_cleanup: bool) -> Set[str]:
+    def _sc_compute_drafted_service_ids(
+        self,
+        session,
+        ctx: _SaveConfigContext,
+        skip_service_management: bool,
+        disable_cleanup: bool,
+    ) -> Set[str]:
         """save_config phase: drafted-service-id precomputation (no session writes)."""
         # When the autoconf disable_cleanup flag is on, precompute the set of existing
         # autoconf services missing from the incoming SERVER_NAME so the services_settings
@@ -428,7 +530,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         return False, global_settings_to_delete, changed_services
 
     def _sc_cleanup_service_settings(
-        self, session, ctx: _SaveConfigContext, skip_service_management: bool, drafted_service_ids: Set[str], changed_plugins: Set[str]
+        self,
+        session,
+        ctx: _SaveConfigContext,
+        skip_service_management: bool,
+        drafted_service_ids: Set[str],
+        changed_plugins: Set[str],
     ) -> Tuple[bool, List[Any], bool, bool]:
         """save_config phase: per-service settings cleanup collection.
 
@@ -446,7 +553,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # Track per-service totals so we can detect would-wipe-the-whole-service deletions below.
         service_method_total: Dict[str, int] = defaultdict(int)
         service_method_to_delete: Dict[str, int] = defaultdict(int)
-        for db_service_config in [] if skip_service_management else session.scalars(select(Services_settings).filter_by(method=ctx.method)).all():
+        for db_service_config in ([] if skip_service_management else session.scalars(select(Services_settings).filter_by(method=ctx.method)).all()):
             # Preserve settings of services about to be drafted by the autoconf disable_cleanup path
             # so they can be re-published when the orchestration object returns.
             if db_service_config.service_id in drafted_service_ids:
@@ -471,9 +578,15 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                             changed_plugins.add(plugin_id)
 
                     # Handle special SERVER_NAME case
-                    if key in ("SERVER_NAME", f"{db_service_config.service_id}_SERVER_NAME"):
+                    if key in (
+                        "SERVER_NAME",
+                        f"{db_service_config.service_id}_SERVER_NAME",
+                    ):
                         changed_services = True
-                    elif key in ("USE_TEMPLATE", f"{db_service_config.service_id}_USE_TEMPLATE"):
+                    elif key in (
+                        "USE_TEMPLATE",
+                        f"{db_service_config.service_id}_USE_TEMPLATE",
+                    ):
                         service_template_change = True
             except Exception as e:
                 self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
@@ -508,12 +621,27 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     f"submitted an incomplete config (e.g. an Advanced-mode form post missing keys). "
                     f"Aborting save_config to prevent data loss."
                 )
-                return True, service_settings_to_delete, changed_services, service_template_change
+                return (
+                    True,
+                    service_settings_to_delete,
+                    changed_services,
+                    service_template_change,
+                )
 
-        return False, service_settings_to_delete, changed_services, service_template_change
+        return (
+            False,
+            service_settings_to_delete,
+            changed_services,
+            service_template_change,
+        )
 
     def _sc_reconcile_services(
-        self, session, ctx: _SaveConfigContext, disable_cleanup: bool, to_put: List[Any], to_update: List[Any]
+        self,
+        session,
+        ctx: _SaveConfigContext,
+        disable_cleanup: bool,
+        to_put: List[Any],
+        to_update: List[Any],
     ) -> Tuple[bool, List[str], Dict[str, dict], Set[str], bool, bool]:
         """save_config phase: SERVER_NAME service reconciliation (add/draftify/delete).
 
@@ -564,13 +692,27 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                             f"Received empty SERVER_NAME for method 'autoconf' but database has {len(foreign_services)} non-autoconf service(s), "
                             "skipping entire config save to prevent data loss"
                         )
-                        return True, services, db_ids, set(), changed_services, service_template_change
+                        return (
+                            True,
+                            services,
+                            db_ids,
+                            set(),
+                            changed_services,
+                            service_template_change,
+                        )
                 else:
                     self.logger.warning(
                         f"Received empty SERVER_NAME for method '{ctx.method}' but database has {len(method_services)} existing service(s), "
                         "skipping entire config save to prevent data loss"
                     )
-                    return True, services, db_ids, set(), changed_services, service_template_change
+                    return (
+                        True,
+                        services,
+                        db_ids,
+                        set(),
+                        changed_services,
+                        service_template_change,
+                    )
             else:
                 missing_ids = [
                     service.id
@@ -592,7 +734,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     session.execute(
                         update(Services)
                         .filter(Services.id.in_(draftable_ids))
-                        .values({Services.is_draft: True, Services.last_update: datetime.now().astimezone()})
+                        .values(
+                            {
+                                Services.is_draft: True,
+                                Services.last_update: datetime.now().astimezone(),
+                            }
+                        )
                         .execution_options(synchronize_session=False)
                     )
                     session.execute(
@@ -604,7 +751,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     session.execute(
                         update(Metadata)
                         .filter_by(id=1)
-                        .values({Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()})
+                        .values(
+                            {
+                                Metadata.custom_configs_changed: True,
+                                Metadata.last_custom_configs_change: datetime.now().astimezone(),
+                            }
+                        )
                     )
                     changed_services = True
                     if any(ctx.config.get(f"{sid}_USE_TEMPLATE", "") for sid in draftable_ids):
@@ -622,7 +774,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     session.execute(
                         update(Metadata)
                         .filter_by(id=1)
-                        .values({Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()})
+                        .values(
+                            {
+                                Metadata.custom_configs_changed: True,
+                                Metadata.last_custom_configs_change: datetime.now().astimezone(),
+                            }
+                        )
                     )
                     changed_services = True
                     if any(ctx.config.get(f"{sid}_USE_TEMPLATE", "") for sid in hard_delete_ids):
@@ -654,14 +811,35 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 current_time = datetime.now().astimezone()
                 if draft not in db_ids:
                     self.logger.debug(f"Adding draft {draft}")
-                    to_put.append(Services(id=draft, method=ctx.method, is_draft=True, creation_date=current_time, last_update=current_time))
+                    to_put.append(
+                        Services(
+                            id=draft,
+                            method=ctx.method,
+                            is_draft=True,
+                            creation_date=current_time,
+                            last_update=current_time,
+                        )
+                    )
                     db_ids[draft] = {"method": ctx.method, "is_draft": True}
                 elif db_ids[draft]["method"] == ctx.method or (db_ids[draft]["method"] in ("ui", "api") and ctx.method in ("ui", "api")):
                     self.logger.debug(f"Updating draft {draft}")
-                    to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
+                    to_update.append(
+                        {
+                            "model": Services,
+                            "filter": {"id": draft},
+                            "values": {"is_draft": True, "last_update": current_time},
+                        }
+                    )
                     changed_services = True
 
-        return False, services, db_ids, drafts, changed_services, service_template_change
+        return (
+            False,
+            services,
+            db_ids,
+            drafts,
+            changed_services,
+            service_template_change,
+        )
 
     def _sc_split_multisite_config(
         self, ctx: _SaveConfigContext, services: List[str], db_ids: Dict[str, dict]
@@ -719,7 +897,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         multisite worker threads, storing them on ``ctx`` (read-only afterwards)."""
         # Collect necessary data before threading
         settings_data = session.execute(
-            select(Settings.id, Settings.default, Settings.plugin_id, Settings.type, Settings.separator, Settings.case_insensitive)
+            select(
+                Settings.id,
+                Settings.default,
+                Settings.plugin_id,
+                Settings.type,
+                Settings.separator,
+                Settings.case_insensitive,
+            )
         ).all()
         select_options = self._sc_load_select_options(session)
         ctx.settings_dict = {
@@ -763,9 +948,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # as-is via ctx.template (pure structural refactor — zero behavior change).
         template = ctx.template
         for template in session.execute(
-            select(Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default).order_by(
-                Template_settings.order
-            )
+            select(
+                Template_settings.template_id,
+                Template_settings.setting_id,
+                Template_settings.suffix,
+                Template_settings.default,
+            ).order_by(Template_settings.order)
         ):
             if template.template_id not in templates:
                 templates[template.template_id] = {}
@@ -773,7 +961,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         ctx.template = template
         ctx.templates = templates
 
-    def _sc_process_service(self, ctx: _SaveConfigContext, server_name: str, service_config: Dict[str, str], db_ids: Dict[str, dict]):
+    def _sc_process_service(
+        self,
+        ctx: _SaveConfigContext,
+        server_name: str,
+        service_config: Dict[str, str],
+        db_ids: Dict[str, dict],
+    ):
         """save_config worker (runs in ThreadPoolExecutor threads): per-service multisite settings pass.
 
         Verbatim body of the original nested ``process_service`` closure, with the
@@ -800,15 +994,30 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
 
-            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"), setting.get("options"), setting.get("case_insensitive", False))
+            value = _canonicalize_stored_value(
+                setting["type"],
+                value,
+                setting.get("separator"),
+                setting.get("options"),
+                setting.get("case_insensitive", False),
+            )
 
             if server_name not in db_ids:
                 self.logger.debug(f"Adding service {server_name}")
                 current_time = datetime.now().astimezone()
                 local_to_put.append(
-                    Services(id=server_name, method=ctx.method, is_draft=server_name in ctx.drafts, creation_date=current_time, last_update=current_time)
+                    Services(
+                        id=server_name,
+                        method=ctx.method,
+                        is_draft=server_name in ctx.drafts,
+                        creation_date=current_time,
+                        last_update=current_time,
+                    )
                 )
-                db_ids[server_name] = {"method": ctx.method, "is_draft": server_name in ctx.drafts}
+                db_ids[server_name] = {
+                    "method": ctx.method,
+                    "is_draft": server_name in ctx.drafts,
+                }
                 if server_name not in ctx.drafts:
                     local_changed_services = True
 
@@ -848,7 +1057,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     )
                 )
                 # Update Services.last_update
-                local_to_update.append({"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}})
+                local_to_update.append(
+                    {
+                        "model": Services,
+                        "filter": {"id": server_name},
+                        "values": {"last_update": datetime.now().astimezone()},
+                    }
+                )
                 if key == "SERVER_NAME":
                     local_changed_services = True
             elif should_update_value or file_name_changed:
@@ -857,27 +1072,54 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
                 if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix):
                     self.logger.debug(f"Removing setting {key} for service {server_name}")
-                    local_to_delete.append({"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}})
+                    local_to_delete.append(
+                        {
+                            "model": Services_settings,
+                            "filter": {
+                                "service_id": server_name,
+                                "setting_id": key,
+                                "suffix": suffix,
+                            },
+                        }
+                    )
                     continue
 
                 self.logger.debug(f"Updating setting {key} for service {server_name}")
-                setting_values = {"value": self._empty_if_none(value), "method": ctx.method}
+                setting_values = {
+                    "value": self._empty_if_none(value),
+                    "method": ctx.method,
+                }
                 if setting["type"] == "file" and (file_name_changed or value_changed):
                     setting_values["file_name"] = target_file_name
                 local_to_update.extend(
                     [
                         {
                             "model": Services_settings,
-                            "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix},
+                            "filter": {
+                                "service_id": server_name,
+                                "setting_id": key,
+                                "suffix": suffix,
+                            },
                             "values": setting_values,
                         },
-                        {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}},
+                        {
+                            "model": Services,
+                            "filter": {"id": server_name},
+                            "values": {"last_update": datetime.now().astimezone()},
+                        },
                     ]
                 )
                 if key == "SERVER_NAME":
                     local_changed_services = True
 
-        return local_to_put, local_to_update, local_to_delete, local_changed_plugins, local_changed_services, local_service_template_change
+        return (
+            local_to_put,
+            local_to_update,
+            local_to_delete,
+            local_changed_plugins,
+            local_changed_services,
+            local_service_template_change,
+        )
 
     def _sc_process_global_settings(self, session, ctx: _SaveConfigContext, global_config: Dict[str, str]):
         """save_config worker (runs in a ThreadPoolExecutor thread): multisite global settings pass.
@@ -904,7 +1146,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 self.logger.debug(f"Setting {key} does not exist")
                 continue
 
-            value = _canonicalize_stored_value(setting["type"], value, setting.get("separator"), setting.get("options"), setting.get("case_insensitive", False))
+            value = _canonicalize_stored_value(
+                setting["type"],
+                value,
+                setting.get("separator"),
+                setting.get("options"),
+                setting.get("case_insensitive", False),
+            )
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)
@@ -914,7 +1162,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             should_update_value = (
                 value_changed
                 and self._methods_are_compatible(
-                    ctx.method, global_value.method, allow_scheduler_override=_scheduler_can_override(ctx, original_key, value)
+                    ctx.method,
+                    global_value.method,
+                    allow_scheduler_override=_scheduler_can_override(ctx, original_key, value),
                 )
             ) or (bool(global_value) and ctx.method == "autoconf" and global_value.method != "autoconf")
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting["type"], original_key, value_changed, current_file_name)
@@ -945,11 +1195,19 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
                 if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix, True):
                     self.logger.debug(f"Removing global setting {key}")
-                    local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                    local_to_delete.append(
+                        {
+                            "model": Global_values,
+                            "filter": {"setting_id": key, "suffix": suffix},
+                        }
+                    )
                     continue
 
                 self.logger.debug(f"Updating global setting {key}")
-                setting_values = {"value": self._empty_if_none(value), "method": ctx.method}
+                setting_values = {
+                    "value": self._empty_if_none(value),
+                    "method": ctx.method,
+                }
                 if setting["type"] == "file" and (file_name_changed or value_changed):
                     setting_values["file_name"] = target_file_name
                 local_to_update.append(
@@ -960,7 +1218,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     }
                 )
 
-        return local_to_put, local_to_update, local_to_delete, local_changed_plugins, False, local_service_template_change
+        return (
+            local_to_put,
+            local_to_update,
+            local_to_delete,
+            local_changed_plugins,
+            False,
+            local_service_template_change,
+        )
 
     def _sc_apply_non_multisite_config(
         self,
@@ -1015,7 +1280,15 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 key = key[: -len(str(suffix)) - 1]
 
             setting = session.execute(
-                select(Settings.default, Settings.plugin_id, Settings.type, Settings.separator, Settings.case_insensitive).filter_by(id=key).limit(1)
+                select(
+                    Settings.default,
+                    Settings.plugin_id,
+                    Settings.type,
+                    Settings.separator,
+                    Settings.case_insensitive,
+                )
+                .filter_by(id=key)
+                .limit(1)
             ).first()
 
             if not setting:
@@ -1025,7 +1298,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             if setting.type in ("select", "multiselect"):
                 options = self._sc_load_select_options(session, {key}).get(key)
 
-            value = _canonicalize_stored_value(setting.type, value, setting.separator, options, setting.case_insensitive)
+            value = _canonicalize_stored_value(
+                setting.type,
+                value,
+                setting.separator,
+                options,
+                setting.case_insensitive,
+            )
 
             global_value = session.execute(
                 select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)
@@ -1034,7 +1313,11 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             value_changed = bool(global_value and global_value.value != value)
             should_update_value = bool(
                 global_value
-                and self._methods_are_compatible(ctx.method, global_value.method, allow_scheduler_override=_scheduler_can_override(ctx, original_key, value))
+                and self._methods_are_compatible(
+                    ctx.method,
+                    global_value.method,
+                    allow_scheduler_override=_scheduler_can_override(ctx, original_key, value),
+                )
                 and value_changed
             )
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting.type, original_key, value_changed, current_file_name)
@@ -1067,11 +1350,19 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
                 if should_update_value and value == (template_setting.default if template_setting is not None else setting.default):
                     self.logger.debug(f"Removing global setting {key}")
-                    to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                    to_delete.append(
+                        {
+                            "model": Global_values,
+                            "filter": {"setting_id": key, "suffix": suffix},
+                        }
+                    )
                     continue
 
                 self.logger.debug(f"Updating global setting {key}")
-                setting_values = {"value": self._empty_if_none(value), "method": ctx.method}
+                setting_values = {
+                    "value": self._empty_if_none(value),
+                    "method": ctx.method,
+                }
                 if setting.type == "file" and (file_name_changed or value_changed):
                     setting_values["file_name"] = target_file_name
                 to_update.append(

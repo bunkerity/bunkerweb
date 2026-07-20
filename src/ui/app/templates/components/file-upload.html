@@ -1,0 +1,278 @@
+{# usage: {% from "components/file-upload.html" import file_upload %}
+          {{ file_upload(id="raw-config-dropzone", variant="dropzone", input_id="raw-configs-upload", multiple=true, accept=".conf,.cfg,.txt,text/plain", hint="Drag and drop config files here or click to browse.", show_browse_button=true, browse_label="Browse files") }} #}
+
+{# Generic file-input component -- two shapes, both real supersets of markup already shipped
+   (not a redesign): no new visual language, no new CSS class invented.
+
+   variant="dropzone" -- superset of the drag-and-drop import boxes duplicated across
+   template_edit.html ("raw-config-dropzone" for custom-config imports, "missing-configs-dropzone"
+   for the missing-configs modal) and plugins.html's plain "#drag-area" box. Renders the icon +
+     hint(s) + optional Browse affordance + a hidden native <input type="file"> the box proxies clicks
+   to, plus optional upload-list / feedback containers. `box_class` picks the real CSS treatment
+   ("raw-config-dropzone" default, or "missing-configs-dropzone", or your own plain Bootstrap
+   utility classes a la plugins.html -- all three already exist/work today). Actual file handling
+   (parsing, validation, populating the list) stays page-specific JS, exactly like today --
+   this macro only renders the box and gives it click / keyboard / drag-drop *affordance* via the
+   companion `static/js/components/file-upload.js` (opt-in: it only wires elements carrying the
+   `data-bw-file-upload="dropzone"` marker this macro renders, so it can never double-wire
+   plugins.html's `#drag-area` or template_edit.html's existing dropzones, which don't have that
+   marker and keep their own bespoke handlers untouched).
+
+   variant="inline" -- superset of the plugin-setting file-to-text field in
+   models/input_setting.html (file picker + manual paste/edit toggle, file read as TEXT into a
+   hidden value input so the field submits file *content*, e.g. PEM/CRT/allowlist/NGINX-snippet
+   settings). Reuses the exact existing classes/data-attributes
+   (.plugin-setting / .plugin-file-setting-wrapper / .plugin-setting-file-text /
+   .plugin-setting-file-upload / .plugin-setting-file-upload-display / .plugin-setting-file-manual /
+   .plugin-setting-file-status / .plugin-setting-file-mode-toggle / data-upload-target /
+   data-manual-target / data-file-input)
+   already wired generically (by class + data-attribute, not by page or id) in the already-shipped
+   `static/js/plugins-settings.js` (and setup.html's own `static/js/pages/setup.js`, which wires the
+   same classes independently) -- so this variant needs **no companion JS** on any page that already
+   includes one of those scripts, same as this project's checkbox.html/label.html precedent. The
+   hidden input always carries the bare `.plugin-setting` class too (not just
+   `.plugin-setting-file-text`) since that's the umbrella class both scripts use to find/validate
+   *every* settings field.
+
+   Params (shared):
+     id             (required) dropzone: id of the clickable box. inline: id of the hidden value
+                    input (the field that actually submits) -- never a fixed literal, always the
+                    real per-instance id.
+     variant        'dropzone' | 'inline'. Default 'dropzone'.
+     name           form field name. dropzone: on the native file input (usually omitted --
+                    real dropzones today submit via JS/FormData, not a native form post). inline:
+                    on the hidden value input, defaults to `id`.
+     accept         native accept filter, e.g. ".conf,.cfg,.txt,text/plain" or ".pem,.crt,.key".
+     disabled       dropzone: adds "is-disabled" + aria-disabled + tabindex="-1" (matches
+                    template_edit.html's `can_edit_template` gate, improved to also pull the box
+                    out of tab order while disabled). inline: disables both the file input and the
+                    manual textarea.
+     classes        extra classes appended to the outer element.
+     attrs          raw extra attributes string, e.g. 'data-original="..." data-default="..."'
+                    for page-specific wiring this macro deliberately doesn't know about (see "Not
+                    covered" below). Passed through "| safe" (like dropdown-menu.html's `attrs`) --
+                    it renders as literal HTML, not autoescaped, so build it from trusted/static
+                    template values, never raw user input.
+
+   Params (variant="dropzone" only):
+     input_id           id of the hidden native <input type="file">. Defaults to `id ~ "-input"`.
+     multiple           allow multiple files. Default false.
+     box_class          CSS class of the box. 'raw-config-dropzone' (default, template_edit.html's
+                        primary-styled import box) | 'missing-configs-dropzone' (neutral/gray
+                        variant, same file) | your own utility classes (plugins.html style).
+     icon_class         icon element classes. Default 'bx bx-file-import bx-lg mb-3 text-primary'
+                        (raw-config-dropzone's icon) -- pass 'bx bx-cloud-upload bx-lg mb-2
+                        text-primary' to match missing-configs-dropzone instead.
+     hint / hint_class / hint_i18n_key           primary hint line. hint_class default 'mb-1'.
+     sub_hint / sub_hint_class / sub_hint_i18n_key   secondary line (e.g. supported formats, or
+                        template_edit.html's "or"). sub_hint_class default 'text-muted small mb-3'.
+     show_browse_button render an explicit styled Browse affordance (template_edit.html style) instead of
+                        relying on the whole box being the click target alone (plugins.html style,
+                        which still works since the whole box stays clickable either way).
+     browse_id / browse_label / browse_label_i18n_key   the Browse affordance's id/label.
+     list_id / list_classes   optional id for a caller-populated <ul> upload list, rendered only
+                        when list_id is given. list_classes default 'list-group small d-none'
+                        (raw-configs-upload-list's classes, minus the page-specific name itself).
+     feedback_id        optional id for a caller-populated feedback <div>, rendered only when
+                        given (missing-configs-upload-feedback pattern).
+     aria_label / aria_label_i18n_key   accessible name for the box when no adjacent visible
+                        label/heading names it (missing-configs-dropzone pattern). Omit when a
+                        heading already labels it via aria-labelledby passed through `attrs`.
+
+   Params (variant="inline" only):
+     value                   initial text value (the file's content, or a hand-typed value).
+     file_name               persisted original filename to show once JS has loaded a file (drives
+                             the ".plugin-setting-file-upload-display" overlay + status line).
+     required                adds `required` to the hidden value input.
+     pattern                 optional validation pattern on the hidden value input. Rendered as
+                             a normal escaped attribute; do not pass it through raw `attrs`.
+     allow_edit              show the manual paste/edit toggle + textarea. Default true.
+     upload_id / manual_id   ids for the native file input / manual textarea. Default `id ~
+                             "-upload"` / `id ~ "-manual"` -- override when a page's existing JS
+                             already hardcodes the literal id (e.g. setup.js toggling
+                             #custom-ssl-cert-data-upload's disabled state directly).
+     manual_placeholder      placeholder text for the manual textarea. Default "Paste or edit the
+                             value here..." -- override for a field-specific hint (e.g. "...the
+                             certificate data here...").
+     aria_labelledby         id of an external <label> (e.g. from components/label.html) naming
+                             this field -- reproduces input_setting.html's aria-labelledby wiring.
+     toggle_upload_label / toggle_manual_label   the mode-toggle button's two tooltip/aria texts
+                             (data-upload-label / data-manual-label -- plugins-settings.js swaps
+                             the visible tooltip between them at runtime).
+     toggle_i18n_key         data-i18n key applied to the toggle button (translates whichever
+                             label is showing at initial render, i.e. toggle_upload_label -- see
+                             "Not covered" below for the runtime-relabeling gap).
+     status_id               id for the status <small>. Defaults to `id ~ "-status"`.
+     status_text             explicit override for the status line. Omit to auto-compute the same
+                             text input_setting.html computes ("Current content loaded from X (N
+                             chars)" / "Current content loaded (N chars)" / empty_text).
+     empty_text / empty_text_i18n_key   shown when there's no value yet. Default "No file selected".
+
+   Not covered (stays page-specific, same call as label.html's own "Not covered" section):
+     - The reset-to-default button and its data-original/data-default/data-method wiring in
+       models/input_setting.html -- pass those via `attrs` on the hidden value input, or keep
+       rendering that button yourself right after the macro call, same as today.
+     - Runtime i18n relabeling of the inline toggle's tooltip when the mode flips (upload <->
+       manual) -- plugins-settings.js swaps `data-bs-original-title` between the two
+       data-*-label values directly; i18next's data-i18n only retranslates the label shown at
+       initial render. Not solved here -- flag it if a caller actually needs live-relabeled
+       tooltips on language switch.
+     - Populating/validating the dropzone's upload list or feedback text -- that's real business
+       logic (file type checks, reading archives, etc.) and stays page-specific JS, same as
+       plugins.js / template_edit.js today. #}
+{% macro file_upload(
+    id,
+    variant="dropzone",
+    name=none,
+    accept=none,
+    disabled=false,
+    classes="",
+    attrs="",
+    input_id=none,
+    multiple=false,
+    box_class="raw-config-dropzone",
+    icon_class="bx bx-file-import bx-lg mb-3 text-primary",
+    hint=none,
+    hint_class="mb-1",
+    hint_i18n_key=none,
+    sub_hint=none,
+    sub_hint_class="text-muted small mb-3",
+    sub_hint_i18n_key=none,
+    show_browse_button=false,
+    browse_id=none,
+    browse_label="Browse files",
+    browse_label_i18n_key=none,
+    list_id=none,
+    list_classes="list-group small d-none",
+    feedback_id=none,
+    aria_label=none,
+    aria_label_i18n_key=none,
+    value="",
+    file_name=none,
+    required=false,
+    pattern=none,
+    allow_edit=true,
+    upload_id=none,
+    manual_id=none,
+    manual_placeholder="Paste or edit the value here...",
+    aria_labelledby=none,
+    toggle_upload_label="Switch to text editor",
+    toggle_manual_label="Back to file upload",
+    toggle_i18n_key=none,
+    status_id=none,
+    status_text=none,
+    empty_text="No file selected",
+    empty_text_i18n_key=none
+) -%}
+{%- if variant == "inline" -%}
+{%- set upload_id = upload_id or (id ~ "-upload") -%}
+{%- set manual_id = manual_id or (id ~ "-manual") -%}
+{%- set field_name = name or id -%}
+{%- set has_value = (value | trim | length) > 0 -%}
+<div class="mt-1 position-relative plugin-file-setting-wrapper{% if classes %} {{ classes }}{% endif %}">
+    <input id="{{ id }}"
+           name="{{ field_name }}"
+           type="hidden"
+           class="plugin-setting plugin-setting-file-text"
+           {%- if aria_labelledby %} aria-labelledby="{{ aria_labelledby }}"{% endif %}
+           value="{{ value }}"
+           data-file-name="{{ file_name or '' }}"
+           data-upload-target="#{{ upload_id }}"
+           data-manual-target="#{{ manual_id }}"
+           {%- if disabled %} disabled{% endif %}
+           {%- if required %} required{% endif %}
+           {%- if pattern is not none %} pattern="{{ pattern }}"{% endif %}
+           {%- if attrs %} {{ attrs | safe }}{% endif %}>
+    <div class="position-relative plugin-setting-file-upload-container">
+        <div class="input-group">
+            <input id="{{ upload_id }}"
+                   type="file"
+                   class="form-control plugin-setting-file-upload"
+                   data-file-input="#{{ id }}"
+                   {%- if aria_labelledby %} aria-labelledby="{{ aria_labelledby }}"{% endif %}
+                   {%- if accept %} accept="{{ accept }}"{% endif %}
+                   {%- if disabled %} disabled{% endif %}>
+            {%- if allow_edit %}
+            <button type="button"
+                    class="btn btn-outline-secondary plugin-setting-file-mode-toggle"
+                    data-file-input="#{{ id }}"
+                    data-mode="upload"
+                    data-upload-label="{{ toggle_upload_label }}"
+                    data-manual-label="{{ toggle_manual_label }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-original-title="{{ toggle_upload_label }}"
+                    aria-label="{{ toggle_upload_label }}"
+                    {%- if toggle_i18n_key %} data-i18n="{{ toggle_i18n_key }}"{% endif %}
+                    {%- if disabled %} disabled{% endif %}>
+                <i class="bx bx-edit-alt" aria-hidden="true"></i>
+            </button>
+            {%- endif %}
+        </div>
+        <span class="plugin-setting-file-upload-display text-muted d-none" aria-hidden="true"></span>
+    </div>
+    {%- if allow_edit %}
+    <textarea id="{{ manual_id }}"
+              class="form-control mt-2 d-none plugin-setting-file-manual"
+              rows="6"
+              data-file-input="#{{ id }}"
+              placeholder="{{ manual_placeholder }}"
+              {%- if aria_labelledby %} aria-labelledby="{{ aria_labelledby }}"{% endif %}
+              {%- if disabled %} disabled{% endif %}>{{ value }}</textarea>
+    {%- endif %}
+    <small class="text-muted d-block mt-1 plugin-setting-file-status"
+           id="{{ status_id or (id ~ '-status') }}"
+           data-empty-text="{{ empty_text }}"
+           {%- if empty_text_i18n_key %} data-i18n-empty-text="{{ empty_text_i18n_key }}"{% endif %}>
+        {%- if status_text -%}
+            {{ status_text }}
+        {%- elif has_value and file_name -%}
+            Current content loaded from {{ file_name }} ({{ value | length }} chars)
+        {%- elif has_value -%}
+            Current content loaded ({{ value | length }} chars)
+        {%- else -%}
+            {{ empty_text }}
+        {%- endif -%}
+    </small>
+</div>
+{%- else -%}
+{%- set fid = input_id or (id ~ "-input") -%}
+<div id="{{ id }}"
+     class="{{ box_class }} text-center{% if disabled %} is-disabled{% endif %}{% if classes %} {{ classes }}{% endif %}"
+     data-bw-file-upload="dropzone"
+     data-file-input="#{{ fid }}"
+     role="button"
+     tabindex="{{ '-1' if disabled else '0' }}"
+     aria-disabled="{{ 'true' if disabled else 'false' }}"
+     {%- if aria_label %} aria-label="{{ aria_label }}"{% if aria_label_i18n_key %} data-i18n="{{ aria_label_i18n_key }}"{% endif %}{% endif %}
+     {%- if attrs %} {{ attrs | safe }}{% endif %}>
+    <i class="{{ icon_class }}" aria-hidden="true"></i>
+    {%- if hint %}
+    <p class="{{ hint_class }}"{% if hint_i18n_key %} data-i18n="{{ hint_i18n_key }}"{% endif %}>{{ hint }}</p>
+    {%- endif %}
+    {%- if sub_hint %}
+    <p class="{{ sub_hint_class }}"{% if sub_hint_i18n_key %} data-i18n="{{ sub_hint_i18n_key }}"{% endif %}>{{ sub_hint }}</p>
+    {%- endif %}
+    {%- if show_browse_button %}
+    <span {%- if browse_id %} id="{{ browse_id }}"{% endif %}
+          class="btn btn-sm btn-outline-primary{% if disabled %} disabled{% endif %}"
+          {%- if browse_label_i18n_key %} data-i18n="{{ browse_label_i18n_key }}"{% endif %}>{{ browse_label }}</span>
+    {%- endif %}
+</div>
+<input type="file"
+       id="{{ fid }}"
+       class="visually-hidden"
+       tabindex="-1"
+       aria-hidden="true"
+       {%- if name %} name="{{ name }}"{% endif %}
+       {%- if accept %} accept="{{ accept }}"{% endif %}
+       {%- if multiple %} multiple{% endif %}
+       {%- if disabled %} disabled{% endif %}>
+{%- if list_id %}
+<ul id="{{ list_id }}" class="{{ list_classes }}" aria-live="polite"></ul>
+{%- endif %}
+{%- if feedback_id %}
+<div id="{{ feedback_id }}" class="mt-2 small"></div>
+{%- endif %}
+{%- endif -%}
+{%- endmacro %}

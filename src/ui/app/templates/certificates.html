@@ -1,0 +1,468 @@
+{% extends "dashboard.html" %}
+{% from "components/alert.html" import alert %}
+{% from "components/badge.html" import badge %}
+{% from "components/button.html" import button %}
+{% from "components/card.html" import card %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/file-upload.html" import file_upload %}
+{% from "components/modal.html" import modal %}
+{% from "components/search.html" import search %}
+{% from "components/tile.html" import tile %}
+{% from "components/title.html" import title %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/certificates.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block content %}
+    {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
+    {% macro service_select(id, services, required) -%}
+        <label class="form-label" for="{{ id }}" data-i18n="certificates.services">Services</label>
+        <select class="form-select" id="{{ id }}" name="service_ids" multiple size="4"{% if required %} required{% endif %}>
+            {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+        </select>
+        <div class="form-text" data-i18n="certificates.services_help">Use Ctrl or Command to select multiple services.</div>
+    {%- endmacro %}
+
+    {% macro primary_switch(id) -%}
+        <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="{{ id }}" name="primary" checked />
+            <label class="form-check-label" for="{{ id }}" data-i18n="certificates.primary_help">Mark as the primary inventory assignment for selected services</label>
+        </div>
+    {%- endmacro %}
+
+    {% macro selfsigned_form_fields(services) -%}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="certificate-selfsigned-name" data-i18n="table.header.name">Name</label>
+                <input class="form-control" id="certificate-selfsigned-name" name="name" maxlength="256" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="certificate-selfsigned-cn" data-i18n="certificates.common_name">Common name</label>
+                <input class="form-control" id="certificate-selfsigned-cn" name="common_name" maxlength="253" required />
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="certificate-selfsigned-description" data-i18n="table.header.description">Description</label>
+                <input class="form-control" id="certificate-selfsigned-description" name="description" maxlength="4096" />
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="certificate-selfsigned-sans" data-i18n="certificates.sans">Subject alternative names</label>
+                <textarea class="form-control" id="certificate-selfsigned-sans" name="sans" rows="2" placeholder="www.example.com, api.example.com"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="certificate-selfsigned-key-type" data-i18n="certificates.algorithm">Key type</label>
+                <select class="form-select" id="certificate-selfsigned-key-type" name="key_type">
+                    <option value="ec">ECDSA</option>
+                    <option value="rsa">RSA</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="certificate-selfsigned-valid-days" data-i18n="certificates.valid_days">Validity in days</label>
+                <input class="form-control" type="number" id="certificate-selfsigned-valid-days" name="valid_days" min="1" max="825" value="365" required />
+            </div>
+            <div class="col-md-8">{{ service_select("certificate-selfsigned-services", services, false) }}</div>
+            <div class="col-md-4 d-flex align-items-end">{{ primary_switch("certificate-selfsigned-primary") }}</div>
+        </div>
+    {%- endmacro %}
+
+    {% set status_variants = {
+        "valid": "success",
+        "expiring_soon": "warning",
+        "expired": "danger",
+        "not_yet_valid": "info",
+        "revoked": "danger"
+    } %}
+    {% set source_variants = {"letsencrypt": "primary", "customcert": "secondary", "selfsigned": "warning"} %}
+    {% set certificates_url = url_for("certificates") %}
+    {{ title(label="Certificates", i18n_key="navigation.certificates", level="h1", icon="bxs-certification", subtitle="Issue, upload, assign, renew, and inspect certificates in the central inventory.", subtitle_i18n_key="certificates.subtitle", classes="mb-4") }}
+    {% if readonly %}
+        {{ alert(message="The database is read-only. Certificates can be inspected and downloaded, but not changed.", message_key="certificates.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
+    {% endif %}
+    {% if truncated %}
+        {{ alert(message="Only the first 500 certificates are displayed. Narrow the inventory through the API for the complete result.", message_key="certificates.truncated", variant="warning", icon="bx-info-circle", classes="mb-4") }}
+    {% endif %}
+    {{ alert(message="Assignments organise the central inventory; TLS deployment remains controlled by each service's certificate settings.", message_key="certificates.assignment_notice", variant="info", icon="bx-info-circle", role=none, classes="mb-4") }}
+    <textarea id="certificates-data" hidden readonly>{{ certificate_context | tojson }}</textarea>
+
+    <div class="d-flex flex-wrap justify-content-end gap-2 mb-4">
+        {{ button(id="certificates-renew-due", label="Check/renew due", i18n_key="certificates.renew_due", variant="outline-secondary", size="sm", icon="bx-refresh", disabled=readonly) }}
+        {{ button(label="Upload custom", i18n_key="certificates.upload_custom", variant="outline-primary", size="sm", icon="bx-upload", modal_target="certificate-upload-modal", disabled=readonly) }}
+        {{ button(label="Schedule ACME", i18n_key="certificates.schedule_acme", variant="outline-primary", size="sm", icon="bx-cloud", modal_target="certificate-acme-modal", disabled=readonly) }}
+        {{ button(label="New self-signed", i18n_key="certificates.new_selfsigned", size="sm", icon="bx-plus", modal_target="certificate-selfsigned-modal", disabled=readonly, classes="don-jose") }}
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            {{ tile(title="Total", title_i18n="certificates.total", value=total, color="primary", icon="bxs-certification", caption="Managed certificates", caption_i18n="certificates.managed") }}
+        </div>
+        <div class="col-6 col-xl-3">
+            {{ tile(title="Valid", title_i18n="certificates.status.valid", value=status_counts.get("valid", 0), color="success", icon="bx-check-shield", caption="Active certificates", caption_i18n="certificates.active") }}
+        </div>
+        <div class="col-6 col-xl-3">
+            {{ tile(title="Expiring", title_i18n="certificates.status.expiring_soon", value=status_counts.get("expiring_soon", 0), color="warning", icon="bx-time-five", caption="30 days or less", caption_i18n="certificates.expiring_help") }}
+        </div>
+        <div class="col-6 col-xl-3">
+            {{ tile(title="Expired", title_i18n="certificates.status.expired", value=status_counts.get("expired", 0), color="danger", icon="bx-x-circle", caption="Needs attention", caption_i18n="certificates.expired_help") }}
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-8">
+            {% call card(title="Upcoming renewals", title_key="certificates.upcoming", subtitle="Expired or within the 30-day renewal window", subtitle_key="certificates.upcoming_help", icon="bx-calendar-event", classes="h-100") %}
+                {% if upcoming %}
+                    <div class="certificate-renewal-list">
+                        {% for certificate in upcoming %}
+                            <div class="d-flex align-items-center gap-3 py-2{% if not loop.last %} border-bottom{% endif %}">
+                                <i class="bx {{ 'bx-x-circle text-danger' if certificate.status == 'expired' else 'bx-time-five text-warning' }} fs-4"
+                                   aria-hidden="true"></i>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-semibold text-truncate">{{ certificate.common_name }}</div>
+                                    <small class="text-muted text-truncate d-block">{{ certificate.issuer }}</small>
+                                </div>
+                                <time class="certificate-date font-monospace small" datetime="{{ certificate.valid_to }}">{{ certificate.valid_to }}</time>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ empty_state(title="No certificates due", title_key="certificates.none_due", icon="bx-check-shield", size="sm") }}
+                {% endif %}
+            {% endcall %}
+        </div>
+        <div class="col-12 col-xl-4">
+            {% call card(title="Top issuers", title_key="certificates.issuers", icon="bx-pie-chart-alt", classes="h-100") %}
+                {% if issuer_counts %}
+                    <ul class="list-group list-group-flush">
+                        {% for issuer, count in issuer_counts[:6] %}
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <span class="text-truncate me-2">{{ issuer }}</span>
+                                {{ badge(text=count, variant="secondary") }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    {{ empty_state(title="No issuer data", title_key="certificates.no_issuers", icon="bx-certification", size="sm") }}
+                {% endif %}
+            {% endcall %}
+        </div>
+    </div>
+
+    {% call card(classes="p-4 min-vh-70") %}
+        <div class="certificates-toolbar d-flex flex-wrap gap-2 align-items-end mb-4">
+            <div class="certificates-search">
+                {{ search(id="certificates-search", placeholder="Search name, common name, SAN, issuer, or fingerprint...", i18n_key="certificates.search", size="sm", clearable=true, clear_id="certificates-search-clear") }}
+            </div>
+            <div>
+                <label class="form-label small" for="certificates-source-filter" data-i18n="certificates.source_label">Source</label>
+                <select class="form-select form-select-sm" id="certificates-source-filter">
+                    <option value="" data-i18n="certificates.all">All</option>
+                    <option value="letsencrypt" data-i18n="certificates.source.letsencrypt">Let's Encrypt</option>
+                    <option value="customcert" data-i18n="certificates.source.customcert">Custom</option>
+                    <option value="selfsigned" data-i18n="certificates.source.selfsigned">Self-signed</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label small" for="certificates-status-filter" data-i18n="table.header.status">Status</label>
+                <select class="form-select form-select-sm" id="certificates-status-filter">
+                    <option value="" data-i18n="certificates.all">All</option>
+                    {% for status in ["valid", "expiring_soon", "expired", "not_yet_valid", "revoked"] %}
+                        <option value="{{ status }}" data-i18n="certificates.status.{{ status }}">{{ status | replace("_", " ") | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="form-label small" for="certificates-service-filter" data-i18n="table.header.service">Service</label>
+                <select class="form-select form-select-sm" id="certificates-service-filter">
+                    <option value="" data-i18n="certificates.all">All</option>
+                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        {% if certificates %}
+            <div class="table-responsive">
+                <table class="table align-middle certificates-table">
+                    <thead>
+                        <tr>
+                            <th class="certificate-expand-column"><span class="visually-hidden">Details</span></th>
+                            <th data-i18n="table.header.name">Name</th>
+                            <th data-i18n="certificates.common_name">Common name</th>
+                            <th data-i18n="certificates.issuer">Issuer</th>
+                            <th data-i18n="certificates.algorithm">Algorithm</th>
+                            <th data-i18n="certificates.expires">Expires</th>
+                            <th data-i18n="table.header.status">Status</th>
+                            <th data-i18n="table.header.service">Services</th>
+                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for certificate in certificates %}
+                            <tr class="certificate-row"
+                                data-certificate-id="{{ certificate.id }}"
+                                data-source="{{ certificate.source }}"
+                                data-status="{{ certificate.status }}"
+                                data-services="{{ certificate.attachments | map(attribute='service_id') | join(' ') }}">
+                                <td>
+                                    {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label="Show details for " ~ certificate.name, classes="certificate-toggle p-0") }}
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">{{ certificate.name }}</div>
+                                    {{ badge(text=certificate.source, i18n_key="certificates.source." ~ certificate.source, variant=source_variants.get(certificate.source, "secondary"), classes="mt-1") }}
+                                    {% if certificate.is_orphan %}
+                                        {{ badge(text="ACME account missing", i18n_key="certificates.orphan_badge", variant="warning", icon="bx-error-circle", classes="mt-1") }}
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ certificate.common_name }}</code></td>
+                                <td class="text-wrap">{{ certificate.issuer }}</td>
+                                <td><code>{{ certificate.key_type | upper }}</code></td>
+                                <td><time class="certificate-date font-monospace small" datetime="{{ certificate.valid_to }}">{{ certificate.valid_to }}</time></td>
+                                <td>{{ badge(text=certificate.status | replace("_", " ") | title, i18n_key="certificates.status." ~ certificate.status, variant=status_variants.get(certificate.status, "secondary")) }}</td>
+                                <td>
+                                    {% if certificate.attachments %}
+                                        {{ badge(text=certificate.attachments | length ~ " service" ~ ("s" if certificate.attachments | length != 1 else ""), variant="primary", icon="bx-server") }}
+                                    {% else %}
+                                        {{ badge(text="Unassigned", i18n_key="certificates.unassigned", variant="secondary", icon="bx-unlink") }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-end gap-1 certificate-actions">
+                                        {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label="Edit certificate metadata", disabled=readonly, classes="certificate-edit") }}
+                                        {{ button(label="", variant="outline-primary", size="sm", icon="bx-link", icon_only=true, aria_label="Assign certificate in inventory", disabled=readonly, classes="certificate-attach") }}
+                                        {% if certificate.source == "selfsigned" %}
+                                            {{ button(label="", variant="outline-primary", size="sm", icon="bx-refresh", icon_only=true, aria_label="Renew certificate", disabled=readonly, classes="certificate-renew") }}
+                                        {% endif %}
+                                        {{ button(label="", variant="outline-secondary", size="sm", icon="bx-download", icon_only=true, aria_label="Download public chain", tag="a", href=certificates_url ~ "/" ~ certificate.id ~ "/download/chain") }}
+                                        {% if certificate.source != "letsencrypt" %}
+                                            {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete certificate", disabled=readonly or certificate.attachments, classes="certificate-delete") }}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="certificate-details" data-certificate-id="{{ certificate.id }}" hidden>
+                                <td colspan="9">
+                                    <div class="row g-3 py-2">
+                                        <div class="col-12 col-xl-7">
+                                            <section class="certificate-detail-panel h-100" aria-label="Certificate public details">
+                                                {% if certificate.is_orphan %}
+                                                    {% call alert(title="ACME account missing", title_key="certificates.orphan_title", variant="warning", icon="bx-error-circle", role=none, classes="mb-3") %}
+                                                        <p class="mb-2" data-i18n="certificates.orphan_help">This renewal record references an ACME account that is no longer present. Renewal remains blocked until the provider state is repaired.</p>
+                                                        <dl class="row mb-0 small">
+                                                            <dt class="col-sm-4" data-i18n="certificates.orphan_account">Account</dt>
+                                                            <dd class="col-sm-8"><code class="text-break">{{ certificate.orphan_state.account }}</code></dd>
+                                                            <dt class="col-sm-4" data-i18n="certificates.orphan_server">ACME server</dt>
+                                                            <dd class="col-sm-8"><code class="text-break">{{ certificate.orphan_state.server }}</code></dd>
+                                                        </dl>
+                                                    {% endcall %}
+                                                {% endif %}
+                                                <dl class="row mb-0 small">
+                                                    <dt class="col-sm-4" data-i18n="table.header.description">Description</dt>
+                                                    <dd class="col-sm-8">{{ certificate.description or "—" }}</dd>
+                                                    <dt class="col-sm-4" data-i18n="certificates.serial">Serial number</dt>
+                                                    <dd class="col-sm-8"><code class="text-break">{{ certificate.serial_number }}</code></dd>
+                                                    <dt class="col-sm-4" data-i18n="certificates.fingerprint">SHA-256 fingerprint</dt>
+                                                    <dd class="col-sm-8"><code class="text-break">{{ certificate.fingerprint }}</code></dd>
+                                                    <dt class="col-sm-4" data-i18n="certificates.valid_from">Valid from</dt>
+                                                    <dd class="col-sm-8"><time class="certificate-date" datetime="{{ certificate.valid_from }}">{{ certificate.valid_from }}</time></dd>
+                                                    <dt class="col-sm-4" data-i18n="certificates.valid_to">Valid until</dt>
+                                                    <dd class="col-sm-8"><time class="certificate-date" datetime="{{ certificate.valid_to }}">{{ certificate.valid_to }}</time></dd>
+                                                    <dt class="col-sm-4" data-i18n="certificates.sans">Subject alternative names</dt>
+                                                    <dd class="col-sm-8">
+                                                        <div class="d-flex flex-wrap gap-1">
+                                                            {% for san in certificate.sans %}{{ badge(text=san, variant="secondary") }}{% else %}—{% endfor %}
+                                                        </div>
+                                                    </dd>
+                                                    {% if certificate.last_error %}
+                                                        <dt class="col-sm-4 text-danger" data-i18n="certificates.last_error">Last error</dt>
+                                                        <dd class="col-sm-8 text-danger text-break">{{ certificate.last_error }}</dd>
+                                                    {% endif %}
+                                                </dl>
+                                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                                    {{ button(label="Download leaf", i18n_key="certificates.download_leaf", variant="outline-secondary", size="sm", icon="bx-download", tag="a", href=certificates_url ~ "/" ~ certificate.id ~ "/download/leaf") }}
+                                                    {{ button(label="Download chain", i18n_key="certificates.download_chain", variant="outline-secondary", size="sm", icon="bx-download", tag="a", href=certificates_url ~ "/" ~ certificate.id ~ "/download/chain") }}
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="col-12 col-xl-5">
+                                            <section class="certificate-detail-panel h-100" aria-label="Certificate inventory assignments">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div>
+                                                        <h6 class="mb-1" data-i18n="certificates.assignments">Inventory assignments</h6>
+                                                        <small class="text-muted" data-i18n="certificates.assignments_help">These assignments do not change live TLS settings.</small>
+                                                    </div>
+                                                    {{ button(label="Assign", i18n_key="certificates.attach", variant="outline-primary", size="sm", icon="bx-link", disabled=readonly, classes="certificate-attach") }}
+                                                </div>
+                                                {% if certificate.attachments %}
+                                                    <ul class="list-group list-group-flush">
+                                                        {% for attachment in certificate.attachments %}
+                                                            <li class="list-group-item px-0 d-flex align-items-center justify-content-between gap-2">
+                                                                <div class="text-break">
+                                                                    <code>{{ attachment.service_id }}</code>
+                                                                    {% if attachment.is_primary %}{{ badge(text="Primary assignment", i18n_key="certificates.primary", variant="success", classes="ms-1") }}{% endif %}
+                                                                </div>
+                                                                <form method="post" action="{{ certificates_url }}/detach">
+                                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                                                    <input type="hidden" name="certificate_id" value="{{ certificate.id }}" />
+                                                                    <input type="hidden" name="service_id" value="{{ attachment.service_id }}" />
+                                                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-unlink", icon_only=true, aria_label="Remove inventory assignment from " ~ attachment.service_id, type="submit", disabled=readonly) }}
+                                                                </form>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    {{ empty_state(title="Not assigned", title_key="certificates.unassigned", icon="bx-unlink", size="sm") }}
+                                                {% endif %}
+                                            </section>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p id="certificates-count"
+               class="text-muted small mb-0 mt-3"
+               aria-live="polite"
+               data-i18n="certificates.showing_count"
+               data-i18n-options='{{ {"visible": certificates | length, "total": certificates | length} | tojson }}'>Showing {{ certificates | length }} of {{ certificates | length }} certificates</p>
+        {% else %}
+            {{ empty_state(title="No certificates", title_key="certificates.empty", message="Create a self-signed certificate, schedule ACME issuance, or upload an existing PEM certificate and key.", message_key="certificates.empty_help", icon="bxs-certification", bordered=true) }}
+        {% endif %}
+    {% endcall %}
+
+    {% call modal(id="certificate-selfsigned-modal", title_key="certificates.new_selfsigned", title="New self-signed certificate", size="lg") %}
+        <form method="post" action="{{ certificates_url }}/create">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="source" value="selfsigned" />
+            <div class="modal-body">{{ selfsigned_form_fields(services) }}</div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Create certificate", i18n_key="certificates.create", icon="bx-plus", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="certificate-acme-modal", title_key="certificates.schedule_acme", title="Schedule ACME issuance", size="lg") %}
+        <form method="post" action="{{ certificates_url }}/create">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="source" value="letsencrypt" />
+            <div class="modal-body">
+                {{ alert(message="Select services whose existing settings already enable and configure Let's Encrypt. This action only schedules that configuration; certificate details and challenge credentials are not entered here.", message_key="certificates.acme_help", variant="info", icon="bx-info-circle", role=none) }}
+                {{ service_select("certificate-acme-services", services, true) }}
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Schedule issuance", i18n_key="certificates.schedule", icon="bx-cloud", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="certificate-upload-modal", title_key="certificates.upload_custom", title="Upload custom certificate", size="xl") %}
+        <form method="post"
+              action="{{ certificates_url }}/upload"
+              enctype="multipart/form-data"
+              id="certificate-upload-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="modal-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="certificate-upload-name" data-i18n="table.header.name">Name</label>
+                        <input class="form-control" id="certificate-upload-name" name="name" maxlength="256" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="certificate-upload-description" data-i18n="table.header.description">Description</label>
+                        <input class="form-control" id="certificate-upload-description" name="description" maxlength="4096" />
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <h6 id="certificate-pem-label" data-i18n="certificates.pem_certificate">PEM certificate or chain</h6>
+                        {{ file_upload(id="certificate-pem-dropzone", input_id="certificate-pem-input", name="certificate", accept=".pem,.crt,.cer,application/x-pem-file", hint="Drop the public PEM certificate or chain here", hint_i18n_key="certificates.pem_drop", sub_hint="Maximum 1 MiB", sub_hint_i18n_key="certificates.pem_limit", show_browse_button=true, browse_label="Browse certificate", browse_label_i18n_key="certificates.browse_certificate", feedback_id="certificate-pem-feedback", attrs='aria-labelledby="certificate-pem-label" aria-describedby="certificate-pem-feedback"') }}
+                    </div>
+                    <div class="col-lg-6">
+                        <h6 id="certificate-key-label" data-i18n="certificates.pem_private_key">PEM private key</h6>
+                        {{ file_upload(id="certificate-key-dropzone", input_id="certificate-key-input", name="private_key", accept=".pem,.key,application/x-pem-file", hint="Drop the matching private key here", hint_i18n_key="certificates.key_drop", sub_hint="Maximum 1 MiB; encrypted at rest and never downloadable", sub_hint_i18n_key="certificates.key_limit", show_browse_button=true, browse_label="Browse private key", browse_label_i18n_key="certificates.browse_key", feedback_id="certificate-key-feedback", attrs='aria-labelledby="certificate-key-label" aria-describedby="certificate-key-feedback"') }}
+                    </div>
+                </div>
+                <div id="certificate-upload-error" class="alert alert-danger mt-3 mb-0" role="alert" hidden></div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-8">{{ service_select("certificate-upload-services", services, false) }}</div>
+                    <div class="col-md-4 d-flex align-items-end">{{ primary_switch("certificate-upload-primary") }}</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Upload certificate", i18n_key="certificates.upload", icon="bx-upload", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="certificate-edit-modal", title_key="certificates.edit_metadata", title="Edit certificate metadata") %}
+        <form method="post" action="{{ certificates_url }}/update">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="certificate_id" id="certificate-edit-id" />
+            <div class="modal-body">
+                <p class="text-muted small" data-i18n="certificates.edit_help">This changes inventory metadata only, not certificate material or live TLS settings.</p>
+                <div class="mb-3">
+                    <label class="form-label" for="certificate-edit-name" data-i18n="table.header.name">Name</label>
+                    <input class="form-control" id="certificate-edit-name" name="name" maxlength="256" required />
+                </div>
+                <div>
+                    <label class="form-label" for="certificate-edit-description" data-i18n="table.header.description">Description</label>
+                    <textarea class="form-control" id="certificate-edit-description" name="description" maxlength="4096" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Save metadata", i18n_key="certificates.save_metadata", icon="bx-save", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="certificate-attach-modal", title_key="certificates.attach", title="Assign certificate") %}
+        <form method="post" action="{{ certificates_url }}/attach">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="certificate_id" id="certificate-attach-id" />
+            <div class="modal-body">
+                <p id="certificate-attach-copy" class="text-muted"></p>
+                <label class="form-label" for="certificate-attach-service" data-i18n="table.header.service">Service</label>
+                <select class="form-select" id="certificate-attach-service" name="service_id" required>
+                    <option value="" data-i18n="form.placeholder.select_service">Select a service</option>
+                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                </select>
+                <div class="form-check form-switch mt-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="certificate-attach-primary" name="primary" checked />
+                    <label class="form-check-label" for="certificate-attach-primary" data-i18n="certificates.make_primary">Mark as the primary inventory assignment for this service</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Assign", i18n_key="certificates.attach", icon="bx-link", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="certificate-action-modal", title_key="certificates.confirm_action", title="Confirm certificate action") %}
+        <form method="post" action="{{ certificates_url }}/action" id="certificate-action-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="certificate_id" id="certificate-action-id" />
+            <input type="hidden" name="action" id="certificate-action-name" />
+            <input type="hidden" name="source" id="certificate-action-source" />
+            <div class="modal-body">
+                <p id="certificate-action-copy"></p>
+                <div id="certificate-renew-days" hidden>
+                    <label class="form-label" for="certificate-action-valid-days" data-i18n="certificates.valid_days">Validity in days</label>
+                    <input class="form-control" type="number" id="certificate-action-valid-days" name="valid_days" min="1" max="825" value="365" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(id="certificate-action-submit", label="Confirm", i18n_key="certificates.confirm", icon="bx-check", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/components/file-upload.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='js/pages/certificates.js') }}" nonce="{{ script_nonce }}" defer></script>
+{% endblock %}

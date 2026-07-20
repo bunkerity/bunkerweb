@@ -455,5 +455,11 @@
       "every": "day",
       "reload": true
     }
-  ]
+  ],
+  "extensions": {
+    "api": {
+      "module": "api/router.py",
+      "prefix": "/letsencrypt"
+    }
+  }
 }

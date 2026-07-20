@@ -308,6 +308,43 @@ def _resolve_jobs(path_normalized: str, method_u: str) -> tuple[Optional[str], O
     return rtype, None
 
 
+def _resolve_resource_groups(path_normalized: str, method_u: str) -> tuple[Optional[str], Optional[str]]:
+    rtype = "resource_groups"
+    parts = [segment for segment in path_normalized.split("/") if segment]
+    if method_u in {"GET", "OPTIONS"}:
+        return rtype, "resource_group_read"
+    if method_u == "POST" and len(parts) == 3 and parts[2] == "clone":
+        return rtype, "resource_group_clone"
+    if method_u == "POST" and len(parts) == 1:
+        return rtype, "resource_group_create"
+    if method_u in {"PUT", "PATCH"}:
+        return rtype, "resource_group_update"
+    if method_u == "DELETE":
+        return rtype, "resource_group_delete"
+    return rtype, None
+
+
+def _resolve_certificates(path_normalized: str, method_u: str) -> tuple[Optional[str], Optional[str]]:
+    rtype = "certificates"
+    parts = [segment for segment in path_normalized.split("/") if segment]
+    action = parts[-1] if len(parts) > 1 else ""
+    if method_u in {"GET", "OPTIONS"}:
+        return rtype, "certificate_download" if action == "download" else "certificate_read"
+    if action in {"renew", "renew-due"}:
+        return rtype, "certificate_renew"
+    if action == "revoke":
+        return rtype, "certificate_revoke"
+    if "attachments" in parts:
+        return rtype, "certificate_assign"
+    if method_u == "POST" and (len(parts) == 1 or action == "upload"):
+        return rtype, "certificate_create"
+    if method_u in {"PUT", "PATCH"}:
+        return rtype, "certificate_update"
+    if method_u == "DELETE":
+        return rtype, "certificate_delete"
+    return rtype, None
+
+
 def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], Optional[str]]:
     """Derive resource_type and required permission name from request path and method.
 
@@ -364,6 +401,12 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     # Web cache special cases (canonicalize hyphenated URL segment to the enum value)
     if first in {"web-cache", "web_cache"}:
         return _resolve_web_cache(p, method_u)
+    if first == "resource_groups":
+        return _resolve_resource_groups(p, method_u)
+    if first == "certificates":
+        return _resolve_certificates(p, method_u)
+    if first in {"selfsigned", "customcert", "letsencrypt"} and len(parts) >= 2 and parts[1] == "certificates":
+        return _resolve_certificates("/" + "/".join(parts[1:]), method_u)
 
     # Generic mapping based on first segment
     rtype = first
@@ -386,6 +429,8 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
     parts = [p for p in path.split("/") if p]
     if not parts:
         return None
+    if parts[0] in {"selfsigned", "customcert", "letsencrypt"} and len(parts) >= 2 and parts[1] == "certificates":
+        parts = parts[1:]
     # Skip known action-like endpoints without IDs
     if parts[0] in {"reload", "stop", "ban", "unban", "bans", "global_settings", "global-settings"}:
         return None
@@ -397,6 +442,8 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
         return None
     # Skip jobs pseudo-action segments
     if parts[0] == "jobs" and len(parts) >= 2 and parts[1] in {"run", "errors"}:
+        return None
+    if parts[0] == "certificates" and len(parts) >= 2 and parts[1] in {"orphans", "upload", "renew", "renew-due"}:
         return None
     # For instances category, skip action subpaths like /instances/ping, /instances/reload, /instances/stop
     if parts[0] == "instances" and len(parts) >= 2 and parts[1] in {"ping", "reload", "stop"}:

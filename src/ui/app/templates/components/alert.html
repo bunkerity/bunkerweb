@@ -1,0 +1,65 @@
+{# usage: {% from "components/alert.html" import alert %}
+          {{ alert(message="A reverse proxy is already configured.", message_key="setup.status.reverse_proxy_configured", variant="primary") }} #}
+
+{# Contextual feedback banner -- superset of the ad-hoc "alert alert-<variant>" <div role="alert">
+   blocks duplicated across setup.html, bans.html, cache.html, configs.html, instances.html,
+   plugins.html, profile.html, services.html, template_edit.html, templates.html and
+   unauthorized.html. Covers both the simple one-liner form (plain data-i18n text, e.g.
+   setup.html's "admin user already exists" notices) and the richer form (icon + title +
+   list/links body, e.g. template_edit.html's read-only banner and the fetch-global-settings
+   modal body) via the {% call %} block.
+
+   Params:
+     message      English fallback body text, used when the macro is called WITHOUT a
+                   {% call %}...{% endcall %} block (the setup.html-style one-liner case).
+                   Ignored (not rendered) when a call block is supplied.
+     message_key  data-i18n key for message, e.g. "setup.status.admin_user_exists". Only
+                   applied in the no-call-block form, on a <span> wrapping just the message --
+                   never on a shared div, because src/ui/app/static/js/i18n.js applies
+                   translations via jQuery .text(), which clobbers ALL children of the element
+                   it's set on (would wipe out a sibling icon/title/dismiss button otherwise).
+                   With a call block the caller owns its own inner data-i18n attributes (see
+                   template_edit.html's readonly banner).
+     title        optional bold lead-in line, rendered as <h6 class="alert-heading">. For a
+                   custom heading level/branded header (e.g. setup.html's PRO trial banner with
+                   a logo image), skip this param and build the header inside a call block
+                   instead -- title is only the plain-text shorthand.
+     title_key    data-i18n key for title.
+     variant      color suffix appended to "alert-", e.g. "primary", "danger", "warning",
+                   "info", "light" -- any variant with an existing .alert-<variant> rule in
+                   core.css. Pass none/"" to omit the color class entirely (bare ".alert", the
+                   transparent-bg help-box pattern used in instances.html for the hostname
+                   format hint). Default "info".
+     icon         optional Boxicons class, e.g. "bx-error-circle" (see template_edit.html's
+                   read-only banner). Switches the layout to icon + flex-grow-1 body so long
+                   text wraps under the icon instead of beside it.
+     dismissible  adds Bootstrap's real "alert-dismissible fade show" + a native .btn-close
+                   button wired with data-bs-dismiss="alert". No companion JS -- the Alert
+                   plugin is already part of the vendored bootstrap.bundle.min.js loaded in
+                   base.html. Default false.
+     role         ARIA role. Default "alert" (matches every existing usage in the codebase
+                   today). Pass none to omit for purely decorative info boxes (instances.html's
+                   hostname-help box has no role at all).
+     id           optional id attribute, e.g. "dns-check-result" (setup.html) or
+                   "template-form-feedback" (template_edit.html) for JS-targeted alerts.
+     classes      extra utility classes appended as-is, e.g. "text-center", "mt-3", "shadow-sm".
+     attrs        raw extra attributes appended as-is (e.g. data-* hooks read by page JS). #}
+{% macro alert(message="", message_key=none, title=none, title_key=none, variant="info", icon=none, dismissible=false, role="alert", id=none, classes="", attrs="") -%}
+    <div{% if id %} id="{{ id }}"{% endif %}
+         class="alert{% if variant %} alert-{{ variant }}{% endif %}{% if dismissible %} alert-dismissible fade show{% endif %}{% if icon %} d-flex align-items-start gap-2{% endif %}{% if classes %} {{ classes }}{% endif %}"
+         {%- if role %} role="{{ role }}"{% endif %}
+         {%- if attrs %} {{ attrs }}{% endif %}>
+        {%- if icon %}<i class="bx {{ icon }} flex-shrink-0" aria-hidden="true"></i>{% endif %}
+        <div{% if icon or dismissible %} class="flex-grow-1"{% endif %}>
+            {%- if title %}<h6 class="alert-heading"{% if title_key %} data-i18n="{{ title_key }}"{% endif %}>{{ title }}</h6>{% endif %}
+            {%- if caller %}{{ caller() }}{% else %}<span{% if message_key %} data-i18n="{{ message_key }}"{% endif %}>{{ message }}</span>{% endif -%}
+        </div>
+        {%- if dismissible %}
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                    data-i18n="aria.label.close"></button>
+        {%- endif %}
+    </div>
+{%- endmacro %}

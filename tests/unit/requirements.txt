@@ -29,4 +29,5 @@ schedule==1.2.2
 #
 # DB libraries under test — pinned to match src/common/db/requirements.in so the
 # tests run the exact library versions BunkerWeb ships.
+alembic==1.18.5
 SQLAlchemy==2.0.50

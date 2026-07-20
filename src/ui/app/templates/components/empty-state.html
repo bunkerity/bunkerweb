@@ -1,0 +1,120 @@
+{# usage: {% from "components/empty-state.html" import empty_state %}
+          {{ empty_state(id="web-cache-metrics-empty", title_key="status.no_data") }} #}
+
+{# Centered "nothing to render" placeholder -- superset of the ad-hoc
+   <p class="text-muted mb-0" data-i18n="status.no_data">No data</p> snippet duplicated
+   across home.html, plugin_page.html and web_cache.html. Covers three states:
+
+     state="empty"    zero results / no data yet (default) -- what every call site above
+                      already renders today.
+     state="loading"  async fetch in flight -- swaps the icon for a Bootstrap spinner
+                      (same spinner-border/-sm convention components/button.html already
+                      uses for its own `loading` param).
+     state="error"    the fetch failed -- danger-tinted, usually paired with a Retry action.
+
+   Sits inside whatever container already exists -- a card body, a <td colspan>, a bare
+   {% else %} branch -- it does NOT wrap itself in components/card.html, matching how
+   home.html/plugin_page.html/web_cache.html already nest their "no data" text directly
+   inside a pre-existing card. Actions reuse components/button.html verbatim (variant=
+   "primary" / "outline-secondary" -- never "btn-light", not a real class in this codebase)
+   instead of hand-rolled <button> markup.
+
+   Params:
+     id              optional DOM id on the outer <div>.
+     state           "empty" | "loading" | "error". Selects the default icon/title/i18n key
+                     and the ARIA role ("status" for loading, "alert" for error).
+     title           English fallback title text. Defaults to the state's own text ("No
+                     data", "Loading...", "Couldn't load data").
+     title_key       data-i18n key for title. Defaults to the state's existing key
+                     ("status.no_data", "status.loading", "status.error_loading_data") --
+                     the first two are the very keys home.html/plugin_page.html/
+                     web_cache.html already use today, not new copy.
+     message         optional secondary explanatory line (English fallback). No default --
+                     none of today's call sites have one, so nothing is forced on them.
+     message_key     data-i18n key for message.
+     icon            Boxicons class override, e.g. "bx-shield-x". Ignored for
+                     state="loading" (spinner instead). Pass "none" to hide the icon
+                     entirely. Defaults to "bx-folder-open" (empty) / "bx-error-circle"
+                     (error).
+     size            "sm" | "md" | "lg" -- icon/spinner scale via existing fs-*/display-*
+                     utilities -- "lg" reuses the exact "fs-1 display-1" combo
+                     unauthorized.html already renders its big status icon with.
+     bordered        true wraps the block in a thin dashed box (border + border-dashed +
+                     rounded-3, all pre-existing utilities -- see .border-dashed in
+                     overrides.css) for standalone zones that aren't already inside a card.
+     action_label    primary action's visible label. Omit to render no action.
+     action_key      data-i18n key for action_label.
+     action_icon     leading Boxicons class for the primary action, e.g. "bx-plus",
+                     "bx-refresh".
+     action_href     set -> primary action renders as a link (<a role="button">); omit ->
+                     a <button type="button"> the caller's own JS wires up (e.g. a Retry
+                     handler bound to action_id).
+     action_id       optional id on the primary action, for the caller's own click handler.
+     secondary_label / secondary_key / secondary_href / secondary_id
+                     optional second, less prominent action (variant="outline-secondary").
+     classes         extra utility classes appended to the outer <div>.
+
+   No companion JS: this is a static, one-shot render like components/card.html -- there is
+   no auto-mount or fetch behind it (unlike chart-area.html's ApexCharts wiring). Swapping a
+   page between empty/loading/error client-side, or wiring a Retry click, is left to the
+   calling page's own JS via `action_id`/`secondary_id` -- the same division of labor
+   components/button.html documents for its own `loading` param ("this macro can't know
+   when your request finishes"). #}
+{% from "components/button.html" import button %}
+{%- set EMPTY_STATE_DEFAULTS = {
+    "empty":   {"icon": "bx-folder-open", "title": "No data", "key": "status.no_data"},
+    "loading": {"icon": "bx-loader-alt", "title": "Loading...", "key": "status.loading"},
+    "error":   {"icon": "bx-error-circle", "title": "Couldn't load data", "key": "status.error_loading_data"}
+} -%}
+{% macro empty_state(
+    id=none,
+    state="empty",
+    title=none,
+    title_key=none,
+    message=none,
+    message_key=none,
+    icon=none,
+    size="md",
+    bordered=false,
+    action_label=none,
+    action_key=none,
+    action_icon=none,
+    action_href=none,
+    action_id=none,
+    secondary_label=none,
+    secondary_key=none,
+    secondary_href=none,
+    secondary_id=none,
+    classes=""
+) -%}
+{%- set d = EMPTY_STATE_DEFAULTS[state] if state in EMPTY_STATE_DEFAULTS else EMPTY_STATE_DEFAULTS["empty"] -%}
+{%- set _title = title or d.title -%}
+{%- set _title_key = title_key or d.key -%}
+{%- set _icon = icon if icon is not none else d.icon -%}
+{%- set _icon_size = "fs-3" if size == "sm" else ("fs-1 display-1" if size == "lg" else "fs-1") -%}
+<div{% if id %} id="{{ id }}"{% endif %}
+     class="text-center{{ ' border border-dashed rounded-3 p-4' if bordered else ' py-3' }}{% if classes %} {{ classes }}{% endif %}"
+     data-state="{{ state }}"
+     {%- if state == "loading" %} role="status" aria-live="polite" aria-busy="true"
+     {%- elif state == "error" %} role="alert"{% endif %}>
+    {%- if state == "loading" %}
+        <span class="spinner-border{{ ' spinner-border-sm' if size == 'sm' else '' }} text-primary mb-2" aria-hidden="true"></span>
+    {%- elif _icon != "none" %}
+        <i class="bx {{ _icon }} {{ _icon_size }} d-block mb-2 {{ 'text-danger' if state == 'error' else 'text-muted' }}" aria-hidden="true"></i>
+    {%- endif %}
+    <p class="fw-semibold mb-0"{% if _title_key %} data-i18n="{{ _title_key }}"{% endif %}>{{ _title }}</p>
+    {%- if message %}
+        <p class="text-muted small mb-0 mt-1"{% if message_key %} data-i18n="{{ message_key }}"{% endif %}>{{ message }}</p>
+    {%- endif %}
+    {%- if action_label or secondary_label %}
+        <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+            {%- if action_label %}
+                {{ button(id=action_id, label=action_label, i18n_key=action_key, icon=action_icon, variant="primary", size="sm", tag="a" if action_href else "button", href=action_href) }}
+            {%- endif %}
+            {%- if secondary_label %}
+                {{ button(id=secondary_id, label=secondary_label, i18n_key=secondary_key, variant="outline-secondary", size="sm", tag="a" if secondary_href else "button", href=secondary_href) }}
+            {%- endif %}
+        </div>
+    {%- endif %}
+</div>
+{%- endmacro %}

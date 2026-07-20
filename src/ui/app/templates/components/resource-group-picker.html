@@ -1,0 +1,26 @@
+{# Add an existing resource group to a compatible multivalue setting as @alias. #}
+{% macro resource_group_picker(target_id, groups, kind, disabled=false) -%}
+    {%- set compatible = [] -%}
+    {%- for group_id, group in groups.items() -%}
+        {%- set matching_entries = group.get("entries", []) | selectattr("kind", "equalto", kind) | list -%}
+        {%- if matching_entries -%}
+            {%- if compatible.append({"name": group.get("name", group_id), "count": matching_entries | length}) %}{% endif -%}
+        {%- endif -%}
+    {%- endfor -%}
+    {%- if compatible %}
+        <div class="mt-2">
+            <label class="visually-hidden"
+                   for="{{ target_id }}-resource-group"
+                   data-i18n="resource_groups.add_to_setting">Add a resource group</label>
+            <select id="{{ target_id }}-resource-group"
+                    class="form-select form-select-sm resource-group-picker"
+                    data-target="#{{ target_id }}"
+                    {% if disabled %}disabled{% endif %}>
+                <option value="" selected data-i18n="resource_groups.add_to_setting">Add a resource group…</option>
+                {%- for group in compatible | sort(attribute="name") %}
+                    <option value="@{{ group.name }}">@{{ group.name }} ({{ group.count }})</option>
+                {%- endfor %}
+            </select>
+        </div>
+    {%- endif %}
+{%- endmacro %}

@@ -1,6 +1,11 @@
 """DatabaseTemplatesMixin — service template create/get/delete + validation."""
 
-from fixtures.seed import add_global_value, add_select_setting, add_setting, seed_minimal
+from fixtures.seed import (
+    add_global_value,
+    add_select_setting,
+    add_setting,
+    seed_minimal,
+)
 
 
 def _minimal_template_args():
@@ -9,6 +14,22 @@ def _minimal_template_args():
         "name": "Low",
         "settings": {"USE_REVERSE_PROXY": "yes"},
         "steps": [{"title": "Step 1", "settings": ["USE_REVERSE_PROXY"]}],
+    }
+
+
+def _seed_resource_group_templates(db):
+    seed_minimal(db)
+    add_setting(db, "BLACKLIST_IP", context="multisite", type="multivalue")
+    add_setting(db, "BLACKLIST_COUNTRY", context="multisite", type="multivalue")
+    db.create_resource_group("office", name="office", entries=[{"kind": "ip", "value": "192.0.2.1"}])
+    db.create_resource_group("countries", name="countries", entries=[{"kind": "country", "value": "FR"}])
+
+
+def _resource_template_args(setting_id, value, *, name="Security"):
+    return {
+        "name": name,
+        "settings": {setting_id: value},
+        "steps": [{"title": "Security", "settings": [setting_id]}],
     }
 
 
@@ -33,20 +54,42 @@ class TestCreateTemplate:
 
     def test_step_references_unknown_setting(self, db):
         seed_minimal(db)
-        msg = db.create_template("x", name="X", settings={"USE_REVERSE_PROXY": "yes"}, steps=[{"title": "S", "settings": ["NOPE"]}])
+        msg = db.create_template(
+            "x",
+            name="X",
+            settings={"USE_REVERSE_PROXY": "yes"},
+            steps=[{"title": "S", "settings": ["NOPE"]}],
+        )
         assert "references unknown setting" in msg
 
     def test_unknown_base_setting_rejected(self, db):
         seed_minimal(db)
-        msg = db.create_template("x", name="X", settings={"FAKE": "v"}, steps=[{"title": "S", "settings": ["FAKE"]}])
+        msg = db.create_template(
+            "x",
+            name="X",
+            settings={"FAKE": "v"},
+            steps=[{"title": "S", "settings": ["FAKE"]}],
+        )
         assert "Unknown settings" in msg
 
     def test_defaults_are_normalized_together(self, db):
         seed_minimal(db)
         add_setting(db, "MEM_SIZE", type="size", regex=r"^\d+([kKmMgG])?$", default="0")
-        add_setting(db, "MY_TIMEOUT", type="duration", regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", default="0")
+        add_setting(
+            db,
+            "MY_TIMEOUT",
+            type="duration",
+            regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$",
+            default="0",
+        )
         add_setting(db, "TEST_PORT", type="number", regex=r"^\d+$", default="0")
-        add_select_setting(db, "CIPHERS", ["modern", "intermediate", "old"], default="modern", case_insensitive=True)
+        add_select_setting(
+            db,
+            "CIPHERS",
+            ["modern", "intermediate", "old"],
+            default="modern",
+            case_insensitive=True,
+        )
         add_select_setting(db, "SEC_ENGINE", ["On", "Off"], default="On", case_insensitive=False)
         settings = {
             "USE_REVERSE_PROXY": "true",
@@ -58,7 +101,15 @@ class TestCreateTemplate:
             "SEC_ENGINE": "On",
         }
 
-        assert db.create_template("t", name="T", settings=settings, steps=[{"title": "S", "settings": list(settings)}]) == ""
+        assert (
+            db.create_template(
+                "t",
+                name="T",
+                settings=settings,
+                steps=[{"title": "S", "settings": list(settings)}],
+            )
+            == ""
+        )
         assert db.get_template_settings("t") == {
             "USE_REVERSE_PROXY": "yes",
             "SECURITY_MODE": "  on  ",
@@ -72,7 +123,12 @@ class TestCreateTemplate:
     def test_update_template_check_default_canonicalized(self, db):
         seed_minimal(db)
         db.create_template("low", **_minimal_template_args())  # USE_REVERSE_PROXY default "yes"
-        msg = db.update_template("low", name="Low", settings={"USE_REVERSE_PROXY": "off"}, steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}])
+        msg = db.update_template(
+            "low",
+            name="Low",
+            settings={"USE_REVERSE_PROXY": "off"},
+            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}],
+        )
         assert msg == ""
         assert db.get_template_settings("low") == {"USE_REVERSE_PROXY": "no"}
 
@@ -132,7 +188,13 @@ def _args_with_config():
     return {
         "name": "Low",
         "settings": {"USE_REVERSE_PROXY": "yes"},
-        "steps": [{"title": "Step 1", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/cfg.conf"]}],
+        "steps": [
+            {
+                "title": "Step 1",
+                "settings": ["USE_REVERSE_PROXY"],
+                "configs": ["server_http/cfg.conf"],
+            }
+        ],
         "configs": [{"type": "server_http", "name": "cfg", "data": "# tmpl-data"}],
     }
 
@@ -153,13 +215,25 @@ class TestCreateTemplateWithConfigs:
 
 class TestTemplateConfigValidation:
     def _create(self, db, *, steps, configs):
-        return db.create_template("x", name="X", settings={"USE_REVERSE_PROXY": "yes"}, steps=steps, configs=configs)
+        return db.create_template(
+            "x",
+            name="X",
+            settings={"USE_REVERSE_PROXY": "yes"},
+            steps=steps,
+            configs=configs,
+        )
 
     def test_config_entry_not_dict(self, db):
         seed_minimal(db)
         msg = self._create(
             db,
-            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/c.conf"]}],
+            steps=[
+                {
+                    "title": "S",
+                    "settings": ["USE_REVERSE_PROXY"],
+                    "configs": ["server_http/c.conf"],
+                }
+            ],
             configs=["not-a-dict"],
         )
         assert msg == "Config entries must be objects"
@@ -168,7 +242,13 @@ class TestTemplateConfigValidation:
         seed_minimal(db)
         msg = self._create(
             db,
-            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/ghost.conf"]}],
+            steps=[
+                {
+                    "title": "S",
+                    "settings": ["USE_REVERSE_PROXY"],
+                    "configs": ["server_http/ghost.conf"],
+                }
+            ],
             configs=[],
         )
         assert "unknown config" in msg
@@ -186,8 +266,17 @@ class TestTemplateConfigValidation:
         seed_minimal(db)
         msg = self._create(
             db,
-            steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/dup.conf"]}],
-            configs=[{"type": "server_http", "name": "dup", "data": "# a"}, {"type": "server-http", "name": "dup", "data": "# b"}],
+            steps=[
+                {
+                    "title": "S",
+                    "settings": ["USE_REVERSE_PROXY"],
+                    "configs": ["server_http/dup.conf"],
+                }
+            ],
+            configs=[
+                {"type": "server_http", "name": "dup", "data": "# a"},
+                {"type": "server-http", "name": "dup", "data": "# b"},
+            ],
         )
         assert "Duplicate config" in msg
 
@@ -199,7 +288,12 @@ class TestTemplateSettingValidation:
 
     def test_setting_not_assigned_to_step(self, db):
         seed_minimal(db)
-        msg = db.create_template("x", name="X", settings={"USE_REVERSE_PROXY": "yes"}, steps=[{"title": "S", "settings": []}])
+        msg = db.create_template(
+            "x",
+            name="X",
+            settings={"USE_REVERSE_PROXY": "yes"},
+            steps=[{"title": "S", "settings": []}],
+        )
         assert "are not assigned to any step" in msg
 
     def test_setting_assigned_to_multiple_steps(self, db):
@@ -208,15 +302,57 @@ class TestTemplateSettingValidation:
             "x",
             name="X",
             settings={"USE_REVERSE_PROXY": "yes"},
-            steps=[{"title": "S1", "settings": ["USE_REVERSE_PROXY"]}, {"title": "S2", "settings": ["USE_REVERSE_PROXY"]}],
+            steps=[
+                {"title": "S1", "settings": ["USE_REVERSE_PROXY"]},
+                {"title": "S2", "settings": ["USE_REVERSE_PROXY"]},
+            ],
         )
         assert "assigned to multiple steps" in msg
 
     def test_restricted_setting_rejected(self, db):
         seed_minimal(db)
         # USE_TEMPLATE is in RESTRICTED_TEMPLATE_SETTINGS -> cannot live inside a template.
-        msg = db.create_template("x", name="X", settings={"USE_TEMPLATE": "low"}, steps=[{"title": "S", "settings": ["USE_TEMPLATE"]}])
+        msg = db.create_template(
+            "x",
+            name="X",
+            settings={"USE_TEMPLATE": "low"},
+            steps=[{"title": "S", "settings": ["USE_TEMPLATE"]}],
+        )
         assert msg == "Setting USE_TEMPLATE cannot be part of a template"
+
+
+class TestTemplateResourceGroupValidation:
+    def test_create_rejects_unknown_and_wrong_kind_groups(self, db):
+        _seed_resource_group_templates(db)
+        assert db.create_template("unknown", **_resource_template_args("BLACKLIST_IP", "@typo")) == "Unknown resource group @typo referenced by BLACKLIST_IP"
+        assert (
+            db.create_template("wrong-kind", **_resource_template_args("BLACKLIST_IP", "@countries"))
+            == "Resource group @countries has no ip entries required by BLACKLIST_IP"
+        )
+
+    def test_create_accepts_valid_and_legacy_country_groups(self, db):
+        _seed_resource_group_templates(db)
+        assert db.create_template("valid", **_resource_template_args("BLACKLIST_IP", "@office")) == ""
+        assert (
+            db.create_template(
+                "legacy",
+                **_resource_template_args("BLACKLIST_COUNTRY", "@EU", name="Legacy"),
+            )
+            == ""
+        )
+
+    def test_update_rejects_invalid_group_without_replacing_settings(self, db):
+        _seed_resource_group_templates(db)
+        assert db.create_template("security", **_resource_template_args("BLACKLIST_IP", "@office")) == ""
+
+        result = db.update_template(
+            "security",
+            settings={"BLACKLIST_IP": "@typo"},
+            steps=[{"title": "Security", "settings": ["BLACKLIST_IP"]}],
+        )
+
+        assert result == "Unknown resource group @typo referenced by BLACKLIST_IP"
+        assert db.get_template_settings("security") == {"BLACKLIST_IP": "@office"}
 
 
 class TestCreateTemplateGuards:
@@ -244,7 +380,13 @@ class TestUpdateTemplateBranches:
             db.update_template(
                 "low",
                 settings={"USE_REVERSE_PROXY": "yes"},
-                steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": ["server_http/added.conf"]}],
+                steps=[
+                    {
+                        "title": "S",
+                        "settings": ["USE_REVERSE_PROXY"],
+                        "configs": ["server_http/added.conf"],
+                    }
+                ],
                 configs=[{"type": "server_http", "name": "added", "data": "# new"}],
             )
             == ""

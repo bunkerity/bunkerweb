@@ -24,12 +24,22 @@ from .utils import LOGGER
 from .rate_limit import setup_rate_limiter, limiter_dep_dynamic
 from .config import api_config
 from .host_allowlist import invalid_host_patterns
+from .request_size_limit import (
+    CERTIFICATE_UPLOAD_MAX_BODY_SIZE,
+    CertificateUploadSizeLimitMiddleware,
+)
 
 BUNKERWEB_VERSION = get_version()
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    try:
+        from .routers.certificates import import_legacy_certificates
+
+        import_legacy_certificates()
+    except Exception as exc:
+        LOGGER.warning(f"Unable to initialize the certificate inventory: {exc}")
     yield
     from .utils import _DB_INSTANCE, _API_DB_INSTANCE
 
@@ -45,14 +55,25 @@ def create_app() -> FastAPI:
         description=description,
         summary="The API used by BunkerWeb to communicate with the database and the instances",
         version=BUNKERWEB_VERSION,
-        contact={"name": "BunkerWeb Team", "url": "https://www.bunkerweb.io", "email": "contact@bunkerity.com"},
-        license_info={"name": "GNU Affero General Public License v3.0", "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md"},
+        contact={
+            "name": "BunkerWeb Team",
+            "url": "https://www.bunkerweb.io",
+            "email": "contact@bunkerity.com",
+        },
+        license_info={
+            "name": "GNU Affero General Public License v3.0",
+            "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
+        },
         openapi_tags=tags_metadata,
         docs_url=api_config.docs_url,
         redoc_url=api_config.redoc_url,
         openapi_url=api_config.openapi_url,
         root_path=api_config.API_ROOT_PATH or "",
         lifespan=lifespan,
+    )
+    app.add_middleware(
+        CertificateUploadSizeLimitMiddleware,
+        max_body_size=CERTIFICATE_UPLOAD_MAX_BODY_SIZE,
     )
 
     # Optional IP whitelist (enabled by default, can be disabled)
@@ -166,8 +187,7 @@ def create_app() -> FastAPI:
     return app
 
 
-description = (
-    """# BunkerWeb API
+description = """# BunkerWeb API
 
 This API is the control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
 
@@ -213,9 +233,7 @@ Settings can be provided via `/etc/bunkerweb/api.yml`, `/etc/bunkerweb/api.env`,
 - `API_RATE_LIMIT_*`: knobs to enable/shape rate limiting.
 - `API_BISCUIT_TTL_SECONDS`: lifetime of Biscuit tokens in seconds (0 disables expiry; default 3600).
 
-"""
-    + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."
-)  # noqa: E501
+""" + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."  # noqa: E501
 
 tags_metadata = [
     {"name": "core", "description": "Health probes and global utility endpoints"},
@@ -228,10 +246,27 @@ tags_metadata = [
     {"name": "plugins", "description": "Operations related to plugin management"},
     {"name": "cache", "description": "Operations related to job cache files"},
     {"name": "jobs", "description": "Operations related to scheduler jobs"},
-    {"name": "system", "description": "System-level operations (readonly status, change tracking)"},
-    {"name": "users", "description": "UI user management (login, profile, sessions, TOTP, recovery codes)"},
+    {
+        "name": "system",
+        "description": "System-level operations (readonly status, change tracking)",
+    },
+    {
+        "name": "users",
+        "description": "UI user management (login, profile, sessions, TOTP, recovery codes)",
+    },
     {"name": "templates", "description": "Service template management (CRUD)"},
-    {"name": "metadata", "description": "System metadata (pro license, scheduler state)"},
+    {
+        "name": "resource_groups",
+        "description": "Reusable typed resource-list aliases and references",
+    },
+    {
+        "name": "metadata",
+        "description": "System metadata (pro license, scheduler state)",
+    },
+    {
+        "name": "certificates",
+        "description": "Centralized certificate inventory with provider-owned lifecycle extensions",
+    },
 ]
 
 app = create_app()

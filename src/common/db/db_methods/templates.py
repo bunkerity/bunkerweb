@@ -3,9 +3,28 @@ from contextlib import suppress
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from model import Global_values, Metadata, Multiselects, Plugins, Selects, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
+from model import (
+    Global_values,
+    Metadata,
+    Multiselects,
+    Plugins,
+    Selects,
+    Services_settings,
+    Settings,
+    Template_custom_configs,
+    Template_settings,
+    Template_steps,
+    Templates,
+)  # type: ignore
 
-from common_utils import bytes_hash, normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
+from common_utils import (
+    bytes_hash,
+    normalize_check_value,
+    normalize_list_value,
+    normalize_select_value,
+    trim_scalar_value,
+)  # type: ignore
+from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import case, delete, select, update
@@ -20,8 +39,21 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
     def get_templates(self, plugin: Optional[str] = None) -> Dict[str, dict]:
         """Get templates."""
         with self._db_session() as session:
-            query = select(Templates.id, Templates.plugin_id, Templates.name, Templates.method, Templates.creation_date, Templates.last_update).order_by(
-                case((Templates.id == "low", 1), (Templates.id == "medium", 2), (Templates.id == "high", 3), else_=4), Templates.name
+            query = select(
+                Templates.id,
+                Templates.plugin_id,
+                Templates.name,
+                Templates.method,
+                Templates.creation_date,
+                Templates.last_update,
+            ).order_by(
+                case(
+                    (Templates.id == "low", 1),
+                    (Templates.id == "medium", 2),
+                    (Templates.id == "high", 3),
+                    else_=4,
+                ),
+                Templates.name,
             )
 
             if plugin:
@@ -42,7 +74,12 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
 
                 steps_settings = {}
                 for setting in session.execute(
-                    select(Template_settings.setting_id, Template_settings.step_id, Template_settings.default, Template_settings.suffix)
+                    select(
+                        Template_settings.setting_id,
+                        Template_settings.step_id,
+                        Template_settings.default,
+                        Template_settings.suffix,
+                    )
                     .filter_by(template_id=template.id)
                     .order_by(Template_settings.order)
                 ):
@@ -56,7 +93,12 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
 
                 steps_configs = {}
                 for config in session.execute(
-                    select(Template_custom_configs.step_id, Template_custom_configs.type, Template_custom_configs.name, Template_custom_configs.data)
+                    select(
+                        Template_custom_configs.step_id,
+                        Template_custom_configs.type,
+                        Template_custom_configs.name,
+                        Template_custom_configs.data,
+                    )
                     .filter_by(template_id=template.id)
                     .order_by(Template_custom_configs.order)
                 ):
@@ -71,7 +113,10 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
                 for step in session.execute(
                     select(Template_steps.id, Template_steps.title, Template_steps.subtitle).filter_by(template_id=template.id).order_by(Template_steps.id)
                 ):
-                    step_data = {"title": step.title, "subtitle": self._empty_if_none(step.subtitle)}
+                    step_data = {
+                        "title": step.title,
+                        "subtitle": self._empty_if_none(step.subtitle),
+                    }
                     if step.id in steps_settings:
                         step_data["settings"] = steps_settings[step.id]
                     if step.id in steps_configs:
@@ -169,7 +214,11 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
         with self._db_session() as session:
             settings = {}
             for setting in session.execute(
-                select(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
+                select(
+                    Template_settings.setting_id,
+                    Template_settings.default,
+                    Template_settings.suffix,
+                )
                 .filter_by(template_id=template_id)
                 .order_by(Template_settings.order)
             ):
@@ -225,12 +274,27 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
 
             for setting_ref_raw in step_settings:
                 if not isinstance(setting_ref_raw, str):
-                    return f"Step {index} contains an invalid setting reference", [], [], []
+                    return (
+                        f"Step {index} contains an invalid setting reference",
+                        [],
+                        [],
+                        [],
+                    )
                 setting_ref = setting_ref_raw.strip()
                 if setting_ref not in normalized_settings:
-                    return f"Step {index} references unknown setting {setting_ref}", [], [], []
+                    return (
+                        f"Step {index} references unknown setting {setting_ref}",
+                        [],
+                        [],
+                        [],
+                    )
                 if setting_ref in step_assignments:
-                    return f"Setting {setting_ref} is assigned to multiple steps", [], [], []
+                    return (
+                        f"Setting {setting_ref} is assigned to multiple steps",
+                        [],
+                        [],
+                        [],
+                    )
                 step_assignments[setting_ref] = index
                 ordered_setting_keys.append(setting_ref)
 
@@ -242,17 +306,37 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
 
             for config_ref_raw in step_configs:
                 if not isinstance(config_ref_raw, str):
-                    return f"Step {index} contains an invalid config reference", [], [], []
+                    return (
+                        f"Step {index} contains an invalid config reference",
+                        [],
+                        [],
+                        [],
+                    )
                 normalized_ref = self._normalize_template_config_reference(config_ref_raw)
                 if not normalized_ref:
-                    return f"Step {index} contains an invalid config reference", [], [], []
+                    return (
+                        f"Step {index} contains an invalid config reference",
+                        [],
+                        [],
+                        [],
+                    )
                 if normalized_ref in config_step_map:
-                    return f"Config {normalized_ref} is assigned to multiple steps", [], [], []
+                    return (
+                        f"Config {normalized_ref} is assigned to multiple steps",
+                        [],
+                        [],
+                        [],
+                    )
                 config_step_map[normalized_ref] = index
 
         missing_settings = [key for key in normalized_settings.keys() if key not in step_assignments]
         if missing_settings:
-            return f"Settings {', '.join(missing_settings)} are not assigned to any step", [], [], []
+            return (
+                f"Settings {', '.join(missing_settings)} are not assigned to any step",
+                [],
+                [],
+                [],
+            )
 
         base_setting_ids: Set[str] = set()
         setting_entities: List[Dict[str, Any]] = []
@@ -276,7 +360,12 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             setting_meta = {
                 row[0]: (row[1], row[2], row[3])
                 for row in session.execute(
-                    select(Settings.id, Settings.type, Settings.separator, Settings.case_insensitive).filter(Settings.id.in_(base_setting_ids))
+                    select(
+                        Settings.id,
+                        Settings.type,
+                        Settings.separator,
+                        Settings.case_insensitive,
+                    ).filter(Settings.id.in_(base_setting_ids))
                 )
             }
             missing_base_ids = sorted(base_setting_ids - set(setting_meta))
@@ -307,7 +396,9 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
                         entity["default"] = canonical
                 elif stype == "select":
                     entity["default"] = normalize_select_value(
-                        entity["default"], select_options.get(entity["setting_id"], []), case_insensitive=case_insensitive
+                        entity["default"],
+                        select_options.get(entity["setting_id"], []),
+                        case_insensitive=case_insensitive,
                     )
                 elif stype in ("multiselect", "multivalue"):
                     entity["default"] = normalize_list_value(entity["default"], separator or " ")
@@ -319,6 +410,20 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
                             separator=separator or " ",
                             case_insensitive=case_insensitive,
                         )
+
+        semantic_config = {
+            f"{entity['setting_id']}_{entity['suffix']}" if entity["suffix"] else entity["setting_id"]: entity["default"] for entity in setting_entities
+        }
+        if any(isinstance(value, str) and "@" in value and kind_for_key(key) for key, value in semantic_config.items()):
+            try:
+                group_index = self._get_resource_group_index(session)
+            except (ProgrammingError, OperationalError) as exc:
+                session.rollback()
+                self.logger.warning(f"Could not load resource groups while validating template: {exc}")
+                group_index = {}
+            if error := validate_resource_group_refs(semantic_config, group_index):
+                self.logger.warning(error)
+                return error, [], [], []
 
         configs = configs or []
         config_map: Dict[str, Tuple[Dict[str, Any], int]] = {}
@@ -338,7 +443,10 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             data_str = data_raw if isinstance(data_raw, str) else str(data_raw)
             cfg_type, cfg_name_conf = ref.split("/", 1)
             cfg_name = cfg_name_conf.replace(".conf", "")
-            config_map[ref] = (config | {"type": cfg_type, "name": cfg_name, "data": data_str}, index)
+            config_map[ref] = (
+                config | {"type": cfg_type, "name": cfg_name, "data": data_str},
+                index,
+            )
 
         for ref in config_step_map:
             if ref not in config_map:
@@ -525,7 +633,11 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             template.last_update = datetime.now().astimezone()
 
             error, step_entities, setting_entities, config_entities = self._prepare_template_entities(
-                session, template_id, effective_settings, effective_steps, effective_configs
+                session,
+                template_id,
+                effective_settings,
+                effective_steps,
+                effective_configs,
             )
             if error:
                 return error

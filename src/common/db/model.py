@@ -43,6 +43,8 @@ PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_st
 INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum")
 INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", "failover", name="instance_status_enum")
 RESOURCE_KINDS_ENUM = Enum("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum")
+RESOURCE_TYPES_ENUM = Enum("certificate", name="resource_types_enum")
+CERTIFICATE_SOURCES_ENUM = Enum("letsencrypt", "customcert", "selfsigned", name="certificate_sources_enum")
 
 
 class Base(DeclarativeBase):
@@ -165,6 +167,7 @@ class Services(Base):
     settings: Mapped[List["Services_settings"]] = relationship("Services_settings", back_populates="service", cascade="all")
     custom_configs: Mapped[List["Custom_configs"]] = relationship("Custom_configs", back_populates="service", cascade="all")
     jobs_cache: Mapped[List["Jobs_cache"]] = relationship("Jobs_cache", back_populates="service", cascade="all")
+    resource_attachments: Mapped[List["ResourceAttachments"]] = relationship("ResourceAttachments", back_populates="service", cascade="all")
 
 
 class Services_settings(Base):
@@ -414,6 +417,62 @@ class ResourceGroup_entries(Base):
     group: Mapped["ResourceGroups"] = relationship("ResourceGroups", back_populates="entries")
 
 
+class Resources(Base):
+    __tablename__ = "bw_resources"
+    __table_args__ = (UniqueConstraint("type", "name"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    type: Mapped[str] = mapped_column(RESOURCE_TYPES_ENUM, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default="")
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_update: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    certificate: Mapped[Optional["Certificates"]] = relationship("Certificates", back_populates="resource", cascade="all, delete-orphan", uselist=False)
+    attachments: Mapped[List["ResourceAttachments"]] = relationship("ResourceAttachments", back_populates="resource", cascade="all, delete-orphan")
+
+
+class Certificates(Base):
+    __tablename__ = "bw_certificates"
+
+    resource_id: Mapped[str] = mapped_column(String(36), ForeignKey("bw_resources.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    source: Mapped[str] = mapped_column(CERTIFICATE_SOURCES_ENUM, nullable=False)
+    certificate_pem: Mapped[str] = mapped_column(LargeText, nullable=False)
+    private_key_ciphertext: Mapped[bytes] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=False)
+    private_key_nonce: Mapped[bytes] = mapped_column(LargeBinary(12), nullable=False)
+    private_key_key_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    common_name: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
+    sans: Mapped[str] = mapped_column(LargeText, nullable=False, default="[]")
+    issuer: Mapped[str] = mapped_column(String(512), nullable=False)
+    serial_number: Mapped[str] = mapped_column(String(128), nullable=False)
+    fingerprint: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    key_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    valid_from: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    valid_to: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    renewal_metadata: Mapped[str] = mapped_column(LargeText, nullable=False, default="{}")
+    last_renewal: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    next_renewal: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default="")
+    revoked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    resource: Mapped["Resources"] = relationship("Resources", back_populates="certificate")
+
+
+class ResourceAttachments(Base):
+    __tablename__ = "bw_resource_attachments"
+    __table_args__ = (UniqueConstraint("resource_id", "service_id"), Index("ix_bw_resource_attachments_service_primary", "service_id", "is_primary"))
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    resource_id: Mapped[str] = mapped_column(String(36), ForeignKey("bw_resources.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    service_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    resource: Mapped["Resources"] = relationship("Resources", back_populates="attachments")
+    service: Mapped["Services"] = relationship("Services", back_populates="resource_attachments")
+
+
 class Metadata(Base):
     __tablename__ = "bw_metadata"
 
@@ -629,6 +688,21 @@ API_PERMISSION_ENUM = Enum(
     # Job permissions
     "job_read",
     "job_run",
+    # Resource group permissions
+    "resource_group_read",
+    "resource_group_create",
+    "resource_group_update",
+    "resource_group_delete",
+    "resource_group_clone",
+    # Certificate permissions
+    "certificate_read",
+    "certificate_create",
+    "certificate_update",
+    "certificate_delete",
+    "certificate_assign",
+    "certificate_renew",
+    "certificate_revoke",
+    "certificate_download",
     name="api_permission_enum",
 )
 
@@ -642,6 +716,8 @@ API_RESOURCE_ENUM = Enum(
     "web_cache",
     "bans",
     "jobs",
+    "resource_groups",
+    "certificates",
     name="api_resource_enum",
 )
 

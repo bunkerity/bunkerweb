@@ -8,14 +8,18 @@ from resource_group_resolver import (  # type: ignore
     expand_config_groups,
     expand_resource_group_refs,
     kind_for_key,
+    validate_resource_group_refs,
     value_for_validation,
 )
 from resource_validation import validate_resource_value  # type: ignore
 
-
 # A group index as produced by build_group_index(): {name: {kind: [values]}}
 INDEX = {
-    "office": {"ip": ["203.0.113.5", "198.51.100.0/24"], "country": ["FR"], "asn": ["32934"]},
+    "office": {
+        "ip": ["203.0.113.5", "198.51.100.0/24"],
+        "country": ["FR"],
+        "asn": ["32934"],
+    },
     "cdn": {"ip": ["192.0.2.0/24"]},
 }
 
@@ -23,7 +27,10 @@ INDEX = {
 class TestValidateResourceValue:
     def test_ip(self):
         assert validate_resource_value("ip", "203.0.113.5") == (True, "203.0.113.5")
-        assert validate_resource_value("ip", "198.51.100.0/24") == (True, "198.51.100.0/24")
+        assert validate_resource_value("ip", "198.51.100.0/24") == (
+            True,
+            "198.51.100.0/24",
+        )
         assert validate_resource_value("ip", "nope")[0] is False
 
     def test_country_uppercased(self):
@@ -36,12 +43,20 @@ class TestValidateResourceValue:
         assert validate_resource_value("asn", "abc")[0] is False
 
     def test_rdns_lowercased(self):
-        assert validate_resource_value("rdns", ".GoogleBot.com") == (True, ".googlebot.com")
+        assert validate_resource_value("rdns", ".GoogleBot.com") == (
+            True,
+            ".googlebot.com",
+        )
         assert validate_resource_value("rdns", "has space")[0] is False
 
     def test_user_agent_and_uri_free_form(self):
         assert validate_resource_value("user_agent", "(?i)bad") == (True, "(?i)bad")
         assert validate_resource_value("uri", "^/admin") == (True, "^/admin")
+
+    def test_runtime_token_whitespace_is_rejected(self):
+        assert validate_resource_value("user_agent", "^Mozilla Firefox$")[0] is False
+        assert validate_resource_value("uri", "^/admin\tarea$")[0] is False
+        assert validate_resource_value("user_agent", r"^Mozilla\sFirefox$")[0] is True
 
     def test_unknown_kind(self):
         assert validate_resource_value("port", "80")[0] is False
@@ -78,10 +93,13 @@ class TestExpandResourceGroupRefs:
         out = expand_resource_group_refs({"WHITELIST_COUNTRY": "@office DE"}, INDEX)
         assert out["WHITELIST_COUNTRY"] == "FR DE"
 
-    def test_unknown_token_kept_literal(self):
-        # @EU is not a resource group (built-in country group expanded later in Lua) -> kept as-is
+    def test_legacy_builtin_country_token_kept_literal(self):
         out = expand_resource_group_refs({"BLACKLIST_COUNTRY": "@EU FR"}, INDEX)
         assert out["BLACKLIST_COUNTRY"] == "@EU FR"
+
+    def test_unknown_and_wrong_kind_tokens_are_dropped(self):
+        assert expand_resource_group_refs({"BLACKLIST_IP": "@typo 192.0.2.1"}, INDEX)["BLACKLIST_IP"] == "192.0.2.1"
+        assert expand_resource_group_refs({"BLACKLIST_IP": "@office @cdn"}, {"office": {"country": ["FR"]}})["BLACKLIST_IP"] == ""
 
     def test_multisite_prefixed_key(self):
         out = expand_resource_group_refs({"app.example.com_WHITELIST_IP": "@cdn"}, INDEX)
@@ -95,9 +113,9 @@ class TestExpandResourceGroupRefs:
         cfg = {"WHITELIST_IP": "1.2.3.4 5.6.7.8"}
         assert expand_resource_group_refs(cfg, INDEX)["WHITELIST_IP"] == "1.2.3.4 5.6.7.8"
 
-    def test_empty_index_returns_config(self):
+    def test_empty_index_drops_non_country_reference(self):
         cfg = {"WHITELIST_IP": "@office"}
-        assert expand_resource_group_refs(cfg, {}) is cfg
+        assert expand_resource_group_refs(cfg, {})["WHITELIST_IP"] == ""
 
     def test_dedupes_across_group_and_literal(self):
         out = expand_resource_group_refs({"WHITELIST_IP": "@cdn 192.0.2.0/24"}, INDEX)
@@ -111,12 +129,12 @@ class TestExpandConfigGroups:
                 raise RuntimeError("db down")
 
         cfg = {"WHITELIST_IP": "@office"}
-        # never raises; returns config unchanged
-        assert expand_config_groups(cfg, BadDB()) == cfg
+        # never raises; strips the unresolved token before it reaches Lua
+        assert expand_config_groups(cfg, BadDB()) == {"WHITELIST_IP": ""}
 
     def test_none_db_returns_config(self):
         cfg = {"WHITELIST_IP": "@office"}
-        assert expand_config_groups(cfg, None) is cfg
+        assert expand_config_groups(cfg, None) == {"WHITELIST_IP": ""}
 
     def test_end_to_end_with_fake_db(self):
         class FakeDB:
@@ -140,5 +158,26 @@ class TestValueForValidation:
         assert value_for_validation("WHITELIST_IP", "@office 1.2.3.4") == " 1.2.3.4"
         assert value_for_validation("WHITELIST_IP", "@office") == ""
 
+    def test_does_not_strip_embedded_group_like_substring(self):
+        assert value_for_validation("WHITELIST_IP", "1.2.3.4@office") == "1.2.3.4@office"
+        assert value_for_validation("WHITELIST_IP", "@office,1.2.3.4") == "@office,1.2.3.4"
+
     def test_untouched_for_non_list_setting(self):
         assert value_for_validation("SERVER_NAME", "@office") == "@office"
+
+
+class TestValidateResourceGroupRefs:
+    def test_valid_group(self):
+        assert validate_resource_group_refs({"BLACKLIST_IP": "@office"}, INDEX) is None
+
+    def test_unknown_group(self):
+        assert validate_resource_group_refs({"BLACKLIST_IP": "@typo"}, INDEX) == "Unknown resource group @typo referenced by BLACKLIST_IP"
+
+    def test_wrong_kind_group(self):
+        assert (
+            validate_resource_group_refs({"BLACKLIST_IP": "@office"}, {"office": {"country": ["FR"]}})
+            == "Resource group @office has no ip entries required by BLACKLIST_IP"
+        )
+
+    def test_reserved_country_alias_survives_legacy_index(self):
+        assert validate_resource_group_refs({"BLACKLIST_COUNTRY": "@EU"}, {}) is None
