@@ -1043,9 +1043,79 @@
       "sessions": "Sessions"
     }
   },
+  "range_picker": {
+    "1h": "Last hour",
+    "24h": "Last 24 h",
+    "30d": "Last 30 days",
+    "7d": "Last week",
+    "aria_label": "Time range",
+    "custom": "Custom"
+  },
   "reports": {
+    "bad_behavior_activity_detected": "Bad behavior activity detected",
+    "bad_behavior_activity_explanation": "These requests exceeded the bad behavior threshold and were grouped together.",
+    "bad_behavior_captured_at": "Captured at",
+    "bad_behavior_ip": "IP address",
+    "bad_behavior_no_details": "No bad behavior details were captured for this report.",
+    "bad_behavior_request_id": "Request ID",
+    "bad_behavior_request_label": "Request",
+    "bad_behavior_server": "Server",
+    "bad_behavior_total_requests": "Suspicious requests",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "Attack families"
+      },
+      "recent": {
+        "title": "Most recent incidents"
+      },
+      "top_asn": {
+        "title": "Top offender ASNs"
+      },
+      "top_offenders": {
+        "title": "Top offenders"
+      },
+      "top_rules": {
+        "title": "Top ModSecurity rules fired"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time"
+      }
+    },
     "security_incident": "Security Incident",
-    "security_report_data": "Security Report Data"
+    "security_report_data": "Security Report Data",
+    "subtitle": "Security reports generated from blocked requests across your BunkerWeb instances — search, filter, export, and ban offending IPs directly from the table.",
+    "tab": {
+      "eventlog": "Event log",
+      "offenders": "Top offenders",
+      "overview": "Overview",
+      "patterns": "Attack patterns"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "Blocks",
+      "country": "Country",
+      "fires": "Fires",
+      "ip": "IP",
+      "rule": "Rule",
+      "top_rule": "Top rule"
+    },
+    "tile": {
+      "asns": "Top offender ASNs",
+      "blocked": "Blocked requests",
+      "blocked_rate": "Trend vs previous period",
+      "bot": "Bot / scraper",
+      "countries": "Top offender countries",
+      "peak_hour": "Peak hour",
+      "rce": "RCE / command",
+      "repeat_offenders": "Repeat offenders (top 10)",
+      "sqli": "SQL injection",
+      "unique_ips": "Top attacker IPs",
+      "unique_offenders": "Top offenders"
+    }
   },
   "scope": {
     "all_services": "All Services",
@@ -1214,6 +1284,7 @@
     "no_search_results": "No items found.",
     "no_steps": "No Steps Available",
     "no_steps_description": "This template does not have any steps to configure.",
+    "not_applicable": "N/A",
     "online": "Online",
     "partial": "Partial",
     "pinging_instances": "Pinging instances, please wait...",
@@ -1600,6 +1671,7 @@
     "password_requirements": "Password must be at least 8 characters long and include 1 uppercase letter, 1 number, and 1 special character.",
     "pro_feature": "This is a PRO feature.",
     "readonly_db_action_disabled": "Disabled: The database is in read-only mode.",
+    "readonly_mode": "This action is not allowed in read-only mode.",
     "readonly_user_action_disabled": "Disabled: Your account is read-only, action '{{action}}' disabled.",
     "real_ip_from": "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
     "real_ip_from_urls": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",

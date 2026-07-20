@@ -18,6 +18,16 @@
   --bs-link-color-rgb: 11, 53, 74;
   --bs-link-hover-color: #2eac68;
   --bs-link-hover-color-rgb: 46, 172, 104;
+  --bs-body-line-height: 1.47;
+  --bw-fg-1: #384551;
+  --bw-fg-2: #646e78;
+  --bw-fg-3: #8b9197;
+  --bw-fg-4: #aeb4b9;
+  --bw-bg-card: #ffffff;
+  --bw-bg-subtle: #eef0f3;
+  --bw-border: #dbdee2;
+  --bw-shadow-sm: 0 0.125rem 0.375rem rgba(145, 152, 159, 0.12);
+  --bw-shadow-md: 0 0 0.375rem 0.25rem rgba(145, 152, 159, 0.15);
 
   /* Country-choropleth palette — derived from --bs-primary / --bs-bw-blue.
      Consumed by static/js/pages/home.js via getComputedStyle().
@@ -36,6 +46,15 @@
 }
 
 [data-bs-theme="dark"] {
+  --bw-fg-1: #d7dee3;
+  --bw-fg-2: #b1c0ca;
+  --bw-fg-3: #9caeb7;
+  --bw-fg-4: #7e8f98;
+  --bw-bg-card: #133044;
+  --bw-bg-subtle: #102a3d;
+  --bw-border: #29485a;
+  --bw-shadow-sm: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.28);
+  --bw-shadow-md: 0 0 0.375rem 0.25rem rgba(0, 0, 0, 0.34);
   --bw-map-ocean: #08141c;
   --bw-map-land: #1b2e3a;
   --bw-map-land-border: #4e6a7a;
@@ -396,11 +415,7 @@ button.list-group-item-secondary.active {
   height: 0.9rem;
   display: inline-block;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.4),
-    rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.2)
-  );
+  background: rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.3);
   border: 1px solid rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.45);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
@@ -448,11 +463,7 @@ button.list-group-item-secondary.active {
 
 .ace_marker-layer .raw-disabled-line {
   position: absolute;
-  background: linear-gradient(
-    90deg,
-    rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.18),
-    rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.06)
-  );
+  background: rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.12);
   border-left: 0.25rem solid rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.55);
 }
 
@@ -460,18 +471,6 @@ button.list-group-item-secondary.active {
   color: rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.9) !important;
   font-weight: 600;
   padding-left: 1rem;
-}
-
-.ace_gutter-cell.raw-disabled-gutter::before {
-  content: "🔒";
-  position: absolute;
-  left: 0.1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-block;
-  font-size: 0.78rem;
-  line-height: 1;
-  pointer-events: none;
 }
 
 .ace_gutter-cell.raw-disabled-annotation .ace_gutter_annotation,
@@ -536,11 +535,7 @@ button.list-group-item-secondary.active {
 }
 
 .dark-style .ace_marker-layer .raw-disabled-line {
-  background: linear-gradient(
-    90deg,
-    rgba(88, 103, 132, 0.28),
-    rgba(88, 103, 132, 0.1)
-  );
+  background: rgba(88, 103, 132, 0.18);
   border-left-color: rgba(88, 103, 132, 0.7);
 }
 
@@ -651,6 +646,19 @@ button.list-group-item-secondary.active {
   overflow-y: auto;
 }
 
+/* templates/flash.html size variant -- "md" is the pre-existing default (no class, no
+   override needed). Targets .bs-toast by descendant selector so page-owned toasts that get
+   cloned into #feedback-toast-container (static/js/plugins-settings.js) size the same way. */
+.toast-container-sm .bs-toast {
+  --bs-toast-max-width: 280px;
+  font-size: 0.8125rem;
+}
+
+.toast-container-lg .bs-toast {
+  --bs-toast-max-width: 420px;
+  font-size: 1rem;
+}
+
 /*
 * Main overrides
 ******************************************************************************/
@@ -675,6 +683,25 @@ button.list-group-item-secondary.active {
 
 .badge-dot-text {
   font-size: 0.6rem;
+  animation: pulsate 1.7s infinite;
+}
+
+/* components/status.html -- inline live-state dot preceding a status pill's label. Distinct
+   from .badge-dot/.badge-dot-text above (navbar/news corner-count badges, position:absolute) --
+   this is a plain inline circle sized to sit before text inside a badge rounded-pill
+   bg-label-<variant>. Color comes from currentColor, so it always matches the pill's own
+   bg-label-<variant> text color with no per-variant rule needed. Reuses the existing
+   @keyframes pulsate above for the "live/in-progress" pulse. */
+.status-dot {
+  background-color: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.status-dot-pulse {
   animation: pulsate 1.7s infinite;
 }
 
@@ -804,16 +831,6 @@ td.highlight {
 
 .text-bw-green {
   color: var(--bs-bw-green) !important;
-}
-
-.btn-primary.active {
-  background-color: var(--bs-primary) !important;
-  border-color: var(--bs-primary) !important;
-}
-
-.btn-primary:hover {
-  background-color: var(--bs-primary) !important;
-  border-color: var(--bs-primary) !important;
 }
 
 .btn-bw-green {
@@ -1000,6 +1017,42 @@ a.badge:hover {
 
 .template-steps-container .breadcrumb-item + .breadcrumb-item::before {
   padding: 0 1rem 0 1rem;
+}
+
+/* Page breadcrumb (templates/breadcrumb.html) -- tighter type scale, fg-scale
+   text/divider colors and a bold "current page" item, matching the design kit's
+   Layout/Breadcrumbs component look. The chevron separator glyph itself comes
+   from the existing .breadcrumb-style1 utility above (Boxicons bx-chevron-right
+   via ::before content) -- this block only resizes/fades it and layers on the
+   typography. Selectors are scoped under nav.bw-breadcrumbs (element + class) so
+   their specificity beats the pre-existing ".dark-style .breadcrumb-item" rules
+   further down without needing !important. */
+.bw-breadcrumbs {
+  --bs-breadcrumb-divider-color: var(--bw-fg-3);
+  --bs-breadcrumb-item-padding-x: 0.4rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+nav.bw-breadcrumbs .breadcrumb-item,
+nav.bw-breadcrumbs .breadcrumb-item a {
+  color: var(--bw-fg-2);
+  font-weight: 500;
+}
+
+nav.bw-breadcrumbs .breadcrumb-item a:hover,
+nav.bw-breadcrumbs .breadcrumb-item a:focus {
+  color: var(--bs-bw-green);
+}
+
+nav.bw-breadcrumbs .breadcrumb-item.active {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+nav.bw-breadcrumbs .breadcrumb-item + .breadcrumb-item::before {
+  font-size: 0.7rem;
+  opacity: 0.6;
 }
 
 .h-vh-40 {
@@ -2084,7 +2137,9 @@ span.cursor-pointer ~ .reset-setting {
   background-color: #133044;
 }
 
-/* Multivalue setting styles */
+/* Multivalue setting styles -- chip/tag row (models/multivalue_setting.html:
+   type + Enter adds a chip, click the x removes one; JS in
+   plugins-settings.js's multivalue block keeps rows/hidden input in sync) */
 .multivalue-container {
   width: 100%;
 }
@@ -2094,141 +2149,87 @@ span.cursor-pointer ~ .reset-setting {
 }
 
 .multivalue-input-group {
-  width: 100%;
-  margin-bottom: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  padding: 0.15rem 0.15rem 0.15rem 0.65rem;
+  border: 1px solid var(--bw-border);
+  border-radius: var(--bs-border-radius-pill);
+  background-color: var(--bw-bg-subtle);
+  animation: fadeInUp 0.2s ease-in-out;
 }
 
-.multivalue-input-group:last-child {
-  margin-bottom: 0;
+.multivalue-input-group:not(.has-value) {
+  border-style: dashed;
+  background-color: transparent;
 }
 
-.multivalue-input-group .input-group .form-control {
-  flex: 1;
-  border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
-  height: calc(3.5rem + 2px);
-  padding: 1rem 0.75rem;
+.multivalue-input-group:focus-within {
+  border-color: var(--bs-primary);
+  border-style: solid;
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
-.multivalue-input-group .input-group .btn {
-  border-left: 0;
-  min-width: 38px;
-  display: flex;
+.multivalue-input-group .multivalue-input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 6ch;
+  max-width: 22ch;
+  padding: 0.2rem 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--bw-fg-1);
+  box-shadow: none !important;
+}
+
+.multivalue-container .multivalue-input:disabled {
+  color: var(--bw-fg-3);
+  background-color: transparent;
+  opacity: 1;
+}
+
+/* Remove (x) button -- hidden on the empty trailing chip via .has-value,
+   nothing to remove there */
+.multivalue-chip-remove {
+  display: none;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  padding: 0.375rem 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  border-radius: 0;
-  height: calc(3.5rem + 2px);
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--bw-fg-3);
 }
 
-.multivalue-input-group .btn:last-child {
-  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+.multivalue-input-group.has-value .multivalue-chip-remove {
+  display: inline-flex;
 }
 
-.multivalue-input-group .btn:only-of-type {
-  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
-}
-
-.multivalue-input-group .btn i {
-  font-size: 16px;
-}
-
-.multivalue-input-group .btn-outline-success {
-  color: var(--bs-success);
-  border-color: var(--bs-border-color);
-}
-
-.multivalue-input-group .btn-outline-success:hover {
-  background-color: var(--bs-success);
-  border-color: var(--bs-success);
-  color: white;
-}
-
-.multivalue-input-group .btn-outline-danger {
-  color: var(--bs-danger);
-  border-color: var(--bs-border-color);
-}
-
-.multivalue-input-group .btn-outline-danger:hover {
+.multivalue-chip-remove:hover,
+.multivalue-chip-remove:focus-visible {
   background-color: var(--bs-danger);
-  border-color: var(--bs-danger);
-  color: white;
+  color: #fff;
+  outline: none;
 }
 
-/* Focus styles for multivalue inputs */
-.multivalue-input:focus {
-  border-color: var(--bs-primary);
-  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
-  z-index: 3;
+.multivalue-chip-remove i {
+  font-size: 14px;
 }
 
-.multivalue-input-group:focus-within .btn {
-  border-color: var(--bs-primary);
-}
-
-/* Ensure floating labels work properly with input groups in multivalue containers */
-.multivalue-input-group.form-floating:focus-within > label,
-.multivalue-input-group.form-floating.has-value > label {
-  opacity: 0.65;
-  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-}
-
-/* Ensure multivalue inputs behave like regular form-floating inputs */
-.multivalue-input-group.form-floating .multivalue-input:focus,
-.multivalue-input-group.form-floating.has-value .multivalue-input {
-  padding-top: 1.625rem !important;
-  padding-bottom: 0.625rem !important;
-}
-
-/* Fix label positioning for input groups inside form-floating */
-.multivalue-input-group.form-floating > label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  padding: 1rem 0.75rem;
-  pointer-events: none;
-  border: 1px solid transparent;
-  transform-origin: 0 0;
-  transition:
-    opacity 0.1s ease-in-out,
-    transform 0.1s ease-in-out;
-  z-index: 2;
-}
-
-/* Ensure inputs have proper padding for floating labels */
-.multivalue-input-group.form-floating:focus-within .multivalue-input,
-.multivalue-input-group.form-floating.has-value .multivalue-input {
-  padding-top: 1.625rem !important;
-  padding-bottom: 0.625rem !important;
-}
-
-/* Animation for adding/removing multivalue items */
-.multivalue-input-group {
-  animation: fadeInUp 0.3s ease-in-out;
-}
-
+/* Animation for adding/removing chips */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Disabled state for multivalue containers */
-.multivalue-container .multivalue-input:disabled {
-  background-color: var(--bs-secondary-bg);
-  opacity: 0.65;
-}
-
-.multivalue-container .btn:disabled {
-  opacity: 0.65;
-  pointer-events: none;
 }
 
 /* Help text styling */
@@ -2242,18 +2243,6 @@ span.cursor-pointer ~ .reset-setting {
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-size: 0.8em;
-}
-
-/* Responsive design for multivalue buttons */
-@media (max-width: 576px) {
-  .multivalue-input-group .btn {
-    min-width: 34px;
-    padding: 0.375rem 0.375rem;
-  }
-
-  .multivalue-input-group .btn i {
-    font-size: 14px;
-  }
 }
 
 /* Multivalue toggle button */
@@ -2295,7 +2284,7 @@ span.cursor-pointer ~ .reset-setting {
 
 .pro-alert {
   background: none;
-  border: linear-gradient(135deg, #0b354a, var(--bs-bw-blue));
+  border: 1px solid var(--bs-primary);
   border-radius: 0.5rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
@@ -2306,7 +2295,7 @@ span.cursor-pointer ~ .reset-setting {
 }
 
 .pro-card {
-  background: linear-gradient(135deg, #0b354a, var(--bs-bw-blue));
+  background: #0b354a;
   border-radius: 0.5rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition:
@@ -2884,6 +2873,14 @@ span.cursor-pointer ~ .reset-setting {
 .dark-style .bg-danger-subtle.text-dark,
 .dark-style .bg-light-subtle.text-dark {
   color: var(--bs-emphasis-color) !important;
+}
+
+/* The `.border-*-subtle` utility group was dropped from this custom Bootstrap
+   build (only the `--bs-*-border-subtle` tokens survived). Restore the one
+   variant the ported pages use, mirroring core.css's `.bg-light-subtle`
+   pattern; the underlying var is already theme-aware (see override above). */
+.border-light-subtle {
+  border-color: var(--bs-light-border-subtle) !important;
 }
 
 .dark-style .list-group {
@@ -3613,18 +3610,6 @@ code.bad-behavior-event__value {
   background-color: var(--bs-gray-800);
 }
 
-/* WCAG 1.4.11: these +/x buttons' border is their only shape cue;
-   var(--bs-border-color) (.18 = 1.77:1) fails 3:1 on the navy surface. */
-.dark-style .multivalue-input-group .btn-outline-success {
-  color: var(--bs-success);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.dark-style .multivalue-input-group .btn-outline-danger {
-  color: var(--bs-danger);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
 .dark-style .pro-alert .alert-link {
   color: #cdd7db;
 }
@@ -3853,7 +3838,445 @@ code.bad-behavior-event__value {
 /* Keyboard focus ring for the import dropzones (role=button divs).
    Bootstrap does not add a focus style to these; make it visible for a11y. */
 #configs-drag-area:focus-visible,
-#services-drag-area:focus-visible {
-  outline: 2px solid var(--bs-primary);
+#services-drag-area:focus-visible,
+#drag-area:focus-visible {
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25);
   outline-offset: 2px;
+}
+
+/* Admin component library */
+.card {
+  border: 1px solid var(--bw-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--bw-shadow-sm);
+}
+
+.card-header {
+  background: transparent;
+  border-bottom-color: var(--bw-border);
+  padding: 1rem 1.25rem;
+}
+
+.card-header .card-title {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.modal-content,
+.dropdown-menu,
+.offcanvas {
+  border-color: var(--bw-border);
+  box-shadow: var(--bw-shadow-md);
+}
+
+.modal-content {
+  border-radius: 0.75rem;
+}
+
+.btn,
+.form-control,
+.form-select,
+.input-group-text {
+  border-radius: 0.5rem;
+}
+
+.table > :not(caption) > * > * {
+  border-bottom-color: var(--bw-border);
+}
+
+.table > thead > tr > th {
+  color: var(--bw-fg-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bw-kpi-tile {
+  --bw-kpi-accent: var(--bs-primary);
+  background: var(--bw-bg-card);
+  overflow: hidden;
+}
+
+.bw-kpi-tile::before {
+  background: var(--bw-kpi-accent);
+  content: "";
+  height: 0.2rem;
+  inset: 0 0 auto;
+  position: absolute;
+}
+
+.bw-kpi-tile-primary {
+  --bw-kpi-accent: var(--bs-primary);
+}
+
+.bw-kpi-tile-secondary {
+  --bw-kpi-accent: var(--bs-secondary);
+}
+
+.bw-kpi-tile-bw-green,
+.bw-kpi-tile-success {
+  --bw-kpi-accent: var(--bs-success);
+}
+
+.bw-kpi-tile-warning {
+  --bw-kpi-accent: var(--bs-warning);
+}
+
+.bw-kpi-tile-danger {
+  --bw-kpi-accent: var(--bs-danger);
+}
+
+.bw-kpi-tile-info {
+  --bw-kpi-accent: var(--bs-info);
+}
+
+.bw-kpi-tile > .bx,
+.bw-kpi-value {
+  color: var(--bw-kpi-accent);
+}
+
+.bw-stat-pct {
+  color: var(--bw-fg-2);
+  white-space: nowrap;
+}
+
+.bw-stat-sm .progress {
+  --bs-progress-height: 0.25rem;
+}
+
+.bw-stat-sm .bw-stat-label,
+.bw-stat-sm .bw-stat-pct {
+  font-size: 0.75rem;
+}
+
+.bw-stat-lg .progress {
+  --bs-progress-height: 0.625rem;
+}
+
+.bw-stat-lg .bw-stat-label,
+.bw-stat-lg .bw-stat-pct {
+  font-size: 1rem;
+}
+
+[data-bw-file-upload="dropzone"] {
+  align-items: center;
+  background: rgba(var(--bs-primary-rgb), 0.025);
+  border: 1px dashed var(--bw-border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 11rem;
+  padding: 1.5rem;
+}
+
+[data-bw-file-upload="dropzone"]:hover,
+[data-bw-file-upload="dropzone"]:focus-visible {
+  border-color: var(--bs-primary);
+}
+
+[data-bw-file-upload="dropzone"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.25);
+  outline: none;
+}
+
+[data-bw-file-upload="dropzone"].is-disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.bw-selected-list {
+  background: rgba(var(--bs-primary-rgb), 0.025);
+  border: 1px solid var(--bw-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.bw-selected-list [data-selected-list] {
+  max-height: 15rem;
+}
+
+.bw-selected-list-cell {
+  flex: 1 1 0;
+}
+
+/* components/select.html -- combobox listbox sized to match its trigger + scrollable for
+   long option lists; .dropdown-item's white-space: nowrap (core.css) is relaxed so a
+   two-line option (label + description) can wrap instead of being clipped mid-word. */
+.bw-select-list {
+  max-height: 16rem;
+  min-width: 100%;
+  overflow-y: auto;
+}
+
+.bw-select-list .dropdown-item {
+  white-space: normal;
+}
+
+.bw-code-editor-sm {
+  height: 10rem;
+}
+
+.bw-code-editor-md {
+  height: 13.75rem;
+}
+
+.bw-code-editor-lg {
+  height: 24rem;
+}
+
+.bw-lottie {
+  display: block;
+}
+
+.bw-lottie-sm {
+  height: 8rem;
+  width: 8rem;
+}
+
+.bw-lottie-md {
+  height: 12rem;
+  width: 12rem;
+}
+
+.bw-lottie-lg {
+  height: 18.75rem;
+  width: 18.75rem;
+}
+
+/* components/anchor.html -- text-link sizes/underline behaviour this repo has no existing
+   utility class for (color comes from the plain .text-<color> utilities instead). */
+.bw-anchor {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+
+.bw-anchor-xs {
+  font-size: 0.75rem;
+}
+
+.bw-anchor-sm {
+  font-size: 0.8125rem;
+}
+
+.bw-anchor-md {
+  font-size: 0.9375rem;
+}
+
+.bw-anchor-lg {
+  font-size: 1.0625rem;
+}
+
+.bw-anchor-u-always {
+  text-decoration: underline;
+}
+
+.bw-anchor-u-hover:hover,
+.bw-anchor-u-hover:focus-visible {
+  text-decoration: underline;
+}
+
+.bw-anchor.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* components/cron.html -- monospace cron-expression chip with optional tooltip */
+.bw-cron {
+  background: var(--bw-bg-subtle);
+  border: 1px solid var(--bw-border);
+  border-radius: 0.375rem;
+  color: var(--bw-fg-1);
+  display: inline-block;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  padding: 0.15rem 0.5rem;
+}
+
+.bw-cron-sm {
+  font-size: 0.6875rem;
+  padding: 0.1rem 0.375rem;
+}
+
+.bw-cron-lg {
+  font-size: 0.9375rem;
+  padding: 0.25rem 0.625rem;
+}
+
+.bw-cron:focus-visible {
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25);
+  outline-offset: 2px;
+}
+
+/* components/timeline.html -- vertical event list: a coloured dot per item (colour set via
+   the --bw-timeline-accent custom property, same accent-var idiom as .bw-kpi-tile) joined
+   by a single connecting rule. */
+.bw-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bw-timeline-item {
+  padding: 0 0 1.25rem 1.5rem;
+  position: relative;
+}
+
+.bw-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.bw-timeline-item::before {
+  background-color: var(--bw-timeline-accent, var(--bw-fg-4));
+  border-radius: 50%;
+  content: "";
+  height: 0.5rem;
+  left: 0;
+  position: absolute;
+  top: 0.3rem;
+  width: 0.5rem;
+}
+
+.bw-timeline-item::after {
+  background-color: var(--bw-border);
+  bottom: 0;
+  content: "";
+  left: 0.1875rem;
+  position: absolute;
+  top: 0.9rem;
+  width: 1px;
+}
+
+.bw-timeline-item:last-child::after {
+  content: none;
+}
+
+.bw-timeline-item-primary {
+  --bw-timeline-accent: var(--bs-primary);
+}
+
+.bw-timeline-item-secondary {
+  --bw-timeline-accent: var(--bs-secondary);
+}
+
+.bw-timeline-item-success {
+  --bw-timeline-accent: var(--bs-success);
+}
+
+.bw-timeline-item-danger {
+  --bw-timeline-accent: var(--bs-danger);
+}
+
+.bw-timeline-item-warning {
+  --bw-timeline-accent: var(--bs-warning);
+}
+
+.bw-timeline-item-info {
+  --bw-timeline-accent: var(--bs-info);
+}
+
+.bw-timeline-ringed .bw-timeline-item::before {
+  background-color: var(--bw-bg-card);
+  border: 2px solid var(--bw-timeline-accent, var(--bw-fg-4));
+  height: 0.625rem;
+  top: 0.25rem;
+  width: 0.625rem;
+}
+
+.bw-timeline-time {
+  color: var(--bw-fg-3);
+  display: block;
+  font-size: 0.8125rem;
+}
+
+.bw-timeline-title {
+  color: var(--bw-fg-1);
+  font-weight: 600;
+}
+
+.bw-timeline-subtitle {
+  color: var(--bw-fg-2);
+  font-size: 0.875rem;
+}
+
+/* models/multiselect_setting.html -- trigger-chips row + "view selected" modal shown
+   when a caller opts into multiselect_chips. Chips reuse the .badge/rounded-pill/
+   bg-label-* utilities already used everywhere else; only the close icon needed
+   shrinking down from Bootstrap's default .btn-close size to fit inside a small pill. */
+.multiselect-chip .btn-close {
+  width: 0.5em;
+  height: 0.5em;
+  padding: 0.2em;
+}
+
+.multiselect-eye {
+  flex-shrink: 0;
+}
+
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .dropdown-menu,
+[data-bs-theme="dark"] .offcanvas {
+  background-color: var(--bw-bg-card);
+  border-color: var(--bw-border);
+}
+
+[data-bs-theme="dark"] .card-header .card-title {
+  color: var(--bw-fg-1);
+}
+
+[data-bs-theme="dark"] .bw-kpi-tile-primary {
+  --bw-kpi-accent: var(--bs-info);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* components/input-list.html -- scrollable Name/Value settings recap + "view all" modal */
+.bw-input-list-scroll {
+  overflow-y: auto;
+}
+
+.bw-input-list-sm {
+  max-height: 8rem;
+}
+
+.bw-input-list-md {
+  max-height: 12.5rem;
+}
+
+.bw-input-list-lg {
+  max-height: 18.75rem;
+}
+
+.bw-input-list-subtle {
+  background: var(--bw-bg-subtle);
+  border: 1px solid var(--bw-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.bw-input-list-modal-scroll {
+  max-height: 60vh;
 }

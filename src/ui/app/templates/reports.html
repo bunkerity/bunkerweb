@@ -1,4 +1,13 @@
 {% extends "dashboard.html" %}
+{% from "components/card.html" import card %}
+{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/modal.html" import modal %}
+{% from "components/button.html" import button %}
+{% from "components/title.html" import title %}
+{% from "components/tabs.html" import tabs, tab_pane %}
+{% from "components/range-picker.html" import range_picker %}
+{% from "components/tile.html" import tile %}
+{% from "components/chart-area.html" import chart_area %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -7,107 +16,135 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
           nonce="{{ style_nonce }}" />
+    <!-- ApexCharts (Overview tab timeseries chart) -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <!-- Flatpickr (range-picker.js "Custom" range) -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
+          nonce="{{ style_nonce }}" />
+    {% if theme == 'dark' %}
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
+              nonce="{{ style_nonce }}" />
+    {% endif %}
 {% endblock %}
 {% block content %}
-    <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
-        {% set base_flags_url = url_for('static', filename='img/flags') %}
-        <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
-        <textarea type="hidden" id="columns_preferences_defaults" class="visually-hidden">
-{{ columns_preferences_defaults['reports']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">
-{{ columns_preferences|tojson }}</textarea>
-        <input type="hidden"
-               id="csrf_token"
-               name="csrf_token"
-               value="{{ csrf_token() }}" />
-        <p id="reports-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-           data-i18n="status.loading_reports">Loading reports...</p>
-        <table id="reports"
-               class="table responsive nowrap position-relative w-100 d-none">
-        </table>
-        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
-            <div class="flex-grow-1 text-center">
-                <span class="badge rounded-pill bg-secondary">
-                    TZ:
-                    <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-                </span>
-            </div>
-            <a href="https://db-ip.com"
-               class="link-secondary text-decoration-none ms-sm-auto"
-               target="_blank"
-               rel="noopener noreferrer">IP Geolocation by DB-IP</a>
-        </div>
+    {{ title(label="Reports", i18n_key="navigation.reports", level="h1", icon="bxs-flag-checkered", subtitle="Security reports generated from blocked requests across your BunkerWeb instances — search, filter, export, and ban offending IPs directly from the table.", subtitle_i18n_key="reports.subtitle", classes="mb-4") }}
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        {{ tabs(id="reports-tabs", items=[
+            {"id": "overview", "i18n": "reports.tab.overview", "label": "Overview", "icon": "bx-line-chart"},
+            {"id": "patterns", "i18n": "reports.tab.patterns", "label": "Attack patterns", "icon": "bx-shield-quarter"},
+            {"id": "offenders", "i18n": "reports.tab.offenders", "label": "Top offenders", "icon": "bx-user-x"},
+            {"id": "eventlog", "i18n": "reports.tab.eventlog", "label": "Event log", "icon": "bx-list-ul"},
+        ], active="overview", label="Reports sections") }}
+        {{ range_picker(id="reports-range", active="24h") }}
     </div>
+    <!-- Content -->
+    {% call tab_pane(id="overview", tabs_id="reports-tabs", active=True) %}
+        <div id="reports-overview-root">
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-blocked", title="Blocked requests", title_i18n="reports.tile.blocked", value="—") }}</div>
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-rate", title="Trend vs previous period", title_i18n="reports.tile.blocked_rate", value="—", color="secondary") }}</div>
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-unique", title="Top attacker IPs", title_i18n="reports.tile.unique_ips", value="—", color="warning") }}</div>
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-peak", title="Peak hour", title_i18n="reports.tile.peak_hour", value="—", color="secondary") }}</div>
+            </div>
+            {{ chart_area(id="reports-timeseries-chart", title="Blocked requests over time", title_key="reports.chart.timeseries.title", height=280) }}
+            <div class="row g-3 mt-1">
+                <div class="col-lg-8">
+                    {% call card(title="Most recent incidents", title_key="reports.card.recent.title") %}
+                        <div id="reports-recent-incidents"></div>
+                    {% endcall %}
+                </div>
+                <div class="col-lg-4">
+                    {% call card(title="Top offender ASNs", title_key="reports.card.top_asn.title") %}
+                        <div id="reports-top-asns"></div>
+                    {% endcall %}
+                </div>
+            </div>
+        </div>
+    {% endcall %}
+    {% call tab_pane(id="patterns", tabs_id="reports-tabs") %}
+        <div id="reports-patterns-root">
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">{{ tile(id="reports-tile-sqli", title="SQL injection", title_i18n="reports.tile.sqli", value="—", color="danger") }}</div>
+                <div class="col-md-4">{{ tile(id="reports-tile-rce", title="RCE / command", title_i18n="reports.tile.rce", value="—", color="warning") }}</div>
+                <div class="col-md-4">{{ tile(id="reports-tile-bot", title="Bot / scraper", title_i18n="reports.tile.bot", value="—", color="secondary") }}</div>
+            </div>
+            {% call card(title="Top ModSecurity rules fired", title_key="reports.card.top_rules.title") %}
+                <div id="reports-top-rules"></div>
+            {% endcall %}
+            {% call card(title="Attack families", title_key="reports.card.attack_families.title", classes="mt-3") %}
+                <div id="reports-attack-families"></div>
+            {% endcall %}
+        </div>
+    {% endcall %}
+    {% call tab_pane(id="offenders", tabs_id="reports-tabs") %}
+        <div id="reports-offenders-root">
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-uniqueoff", title="Top offenders", title_i18n="reports.tile.unique_offenders", value="—") }}</div>
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-repeat", title="Repeat offenders (top 10)", title_i18n="reports.tile.repeat_offenders", value="—", color="danger") }}</div>
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-countries", title="Top offender countries", title_i18n="reports.tile.countries", value="—", color="secondary") }}</div>
+                <div class="col-6 col-lg-3">{{ tile(id="reports-tile-asns", title="Top offender ASNs", title_i18n="reports.tile.asns", value="—", color="secondary") }}</div>
+            </div>
+            {% call card(title="Top offenders", title_key="reports.card.top_offenders.title") %}
+                <div id="reports-offenders-table"></div>
+            {% endcall %}
+        </div>
+    {% endcall %}
+    {% call tab_pane(id="eventlog", tabs_id="reports-tabs") %}
+        {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
+            {% set base_flags_url = url_for('static', filename='img/flags') %}
+            <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
+            {% call table_toolbar(id="reports", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_reports", loading_default="Loading reports...") %}
+            {% endcall %}
+            <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
+                <div class="flex-grow-1 text-center">
+                    <span class="badge rounded-pill bg-secondary">
+                        TZ:
+                        <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                    </span>
+                </div>
+                <a href="https://db-ip.com"
+                   class="link-secondary text-decoration-none ms-sm-auto"
+                   target="_blank"
+                   rel="noopener noreferrer">IP Geolocation by DB-IP</a>
+            </div>
+        {% endcall %}
+    {% endcall %}
     <!-- / Content -->
     <!-- Full URL Modal -->
-    <div class="modal fade"
-         id="fullUrlModal"
-         tabindex="-1"
-         aria-labelledby="fullUrlModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="fullUrlModalLabel">Full URL</h5>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <span id="fullUrlContent" class="text-break"></span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button"
-                            id="copyUrlBtn"
-                            class="btn btn-sm btn-outline-primary me-1">
-                        <span class="tf-icons bx bx-copy me-1"></span>Copy
-                    </button>
-                    <button type="button"
-                            class="btn btn-sm btn-outline-secondary"
-                            data-bs-dismiss="modal">Close</button>
-                </div>
+    {% call modal(id="fullUrlModal", title_key="modal.title.full_url", title="Full URL", static_backdrop=false) %}
+        <div class="modal-body">
+            <div class="mb-3">
+                <span id="fullUrlContent" class="text-break"></span>
             </div>
         </div>
-    </div>
+        <div class="modal-footer">
+            {{ button(id="copyUrlBtn", label="Copy", i18n_key="button.copy", variant="outline-primary", size="sm", icon="bx-copy", classes="me-1") }}
+            {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", size="sm", dismiss="modal") }}
+        </div>
+    {% endcall %}
     <!-- Security Report Data Modal -->
-    <div class="modal fade"
-         id="dataModal"
-         tabindex="-1"
-         aria-labelledby="dataModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="dataModalLabel">
-                        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report
-                        Details
-                    </h5>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="dataContent" class="report-data-content"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button"
-                            id="copyDataBtn"
-                            class="btn btn-sm btn-outline-primary me-1">
-                        <span class="tf-icons bx bx-copy me-1"></span>Copy Raw Data
-                    </button>
-                    <button type="button"
-                            class="btn btn-sm btn-outline-secondary"
-                            data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
+    {% call modal(id="dataModal", title_key="modal.title.security_report_details", title="Security Report Details", size="lg", static_backdrop=false) %}
+        <div class="modal-body">
+            <div id="dataContent" class="report-data-content"></div>
         </div>
-    </div>
+        <div class="modal-footer">
+            {{ button(id="copyDataBtn", label="Copy Raw Data", i18n_key="button.copy_raw", variant="outline-primary", size="sm", icon="bx-copy", classes="me-1") }}
+            {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", size="sm", dismiss="modal") }}
+        </div>
+    {% endcall %}
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
@@ -119,8 +156,29 @@
     <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
+    <script src="{{ url_for('static', filename='js/components/country-flag.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
     <script src="{{ url_for('static', filename='js/pages/reports.js') }}"
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/range-picker.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/reports-overview.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/reports-patterns.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/reports-offenders.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

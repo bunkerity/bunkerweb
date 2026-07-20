@@ -1,0 +1,49 @@
+{# usage: {% from "components/title.html" import title %}
+          {{ title(label="Purge", i18n_key="web_cache.purge", level="h6") }} #}
+
+{# Freestanding page/section title header -- heading (h1-h6) with an optional icon,
+   subtitle and color variant. Superset of the ad-hoc headers already duplicated
+   across the app:
+     - <h6 class="mb-3" data-i18n="web_cache.purge">Purge</h6>          (web_cache.html
+       section headers, also used in bans.html/cache.html card bodies)
+     - <p class="text-muted mb-4" data-i18n="bans.subtitle">...</p>    (bans.html/
+       web_cache.html page subtitle line, no heading of its own today)
+   Unlike components/card.html's built-in header (fixed h5, always inside a
+   card-header), this is the bare heading for a full page title, a section divider
+   inside a card body, or anywhere else that isn't a Bootstrap card header. Modal
+   titles keep using Bootstrap's own <h5 class="modal-title"> as-is, not this macro.
+
+   Params:
+     label             (required) English fallback heading text.
+     i18n_key          data-i18n key for the heading, e.g. "web_cache.purge". Omit
+                       for text that has no translation (rare).
+     level             'h1'..'h6' -- heading level *and* visual size. Default 'h5'
+                       for a section header. Use 'h1' once per page for the real
+                       page title, and never skip a level when nesting headings
+                       (h2 -> h3 -> h4).
+     subtitle          optional English fallback text for the description line
+                       under the heading.
+     subtitle_i18n_key data-i18n key for the subtitle.
+     icon              optional Boxicons class suffix, e.g. "bx-server" (rendered
+                       as "bx {{ icon }}"), shown before the heading text.
+     variant           'default' | 'primary' | 'secondary' | 'muted' -- maps to the
+                       matching Bootstrap "text-*" utility class already shipped in
+                       core.css. No invented classes.
+     id                optional id attribute on the heading element.
+     classes           extra utility classes on the wrapper div, e.g. "mb-3" (the
+                       section-header spacing it replaces) or "mb-4" (the page
+                       subtitle spacing it replaces). Empty by default -- caller
+                       decides, same as components/card.html and components/tile.html.
+
+   No companion JS -- this is a static heading, there is no interaction to wire up. #}
+{% macro title(label, i18n_key=none, level='h5', subtitle=none, subtitle_i18n_key=none, icon=none, variant='default', id=none, classes='') -%}
+    {%- set color_cls = '' if variant == 'default' else (' text-' ~ variant) -%}
+    <div{% if classes %} class="{{ classes }}"{% endif %}>
+        <{{ level }}{% if id %} id="{{ id }}"{% endif %}
+            class="mb-0{{ color_cls }}{% if icon %} d-flex align-items-center{% endif %}"
+            {%- if not icon and i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{% if icon %}<i class="bx {{ icon }} me-2" aria-hidden="true"></i><span{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</span>{% else %}{{ label }}{% endif %}</{{ level }}>
+        {%- if subtitle %}
+            <p class="text-muted mb-0 mt-1"{% if subtitle_i18n_key %} data-i18n="{{ subtitle_i18n_key }}"{% endif %}>{{ subtitle }}</p>
+        {%- endif %}
+    </div>
+{%- endmacro %}

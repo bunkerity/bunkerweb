@@ -1,0 +1,87 @@
+{# usage: {% from "components/table-toolbar.html" import table_toolbar %}
+          {% call table_toolbar(id="services", columns_preferences_defaults=columns_preferences_defaults,
+                 columns_preferences=columns_preferences, loading_key="status.loading_services",
+                 loading_default="Loading services...", number=services|length) %}
+            <thead>...</thead>
+            <tbody>...</tbody>
+          {% endcall %} #}
+
+{# components/table-toolbar.html -- the pre-DataTables-init scaffold every BunkerWeb
+   list page shares: the hidden state dataTableInit.js / the page's own
+   static/js/pages/<page>.js read before init (row count, column-visibility
+   preferences, CSRF token), the "Loading..." placeholder shown until the table is
+   drawn, and the empty <table id="..."> skeleton DataTables attaches to. Duplicated
+   near-verbatim today across bans.html, cache.html, configs.html, instances.html,
+   jobs.html, plugins.html, reports.html, services.html and templates.html.
+
+   NOT in scope here: the DataTables Buttons/SearchPanes chrome (search box,
+   "Columns", "Export", the "Filters" toggle, faceted filter panes). That chrome is
+   generated at runtime by each page's own `layout` / `buttons` config in
+   static/js/pages/<page>.js (see services.js for the fullest example: create/import
+   buttons, colvis, colvisRestore, export collection, toggle_filters, action menu),
+   wired up by initializeDataTable() in static/js/dataTableInit.js. Hand-rendering
+   that chrome as static markup here would create a second, competing DataTables
+   config path -- keep authoring toolbar buttons the existing way, in the page's own
+   `layout` object.
+
+   Params:
+     id             table element id (DataTables selector "#{id}") and the key into
+                    columns_preferences_defaults -- required. Matches the i18n
+                    "entity" name dataTableInit.js derives ("bans", "cache",
+                    "configs", "instances", "jobs", "plugins", "reports", "services",
+                    "templates").
+     columns_preferences_defaults / columns_preferences
+                    the two values every page already receives from its route and
+                    forwards as-is -- columns_preferences_defaults[id] and
+                    columns_preferences go straight into the hidden <textarea> state
+                    dataTableInit.js reads on init.
+     loading_key    data-i18n key for the waiting text, e.g. "status.loading_services"
+                    -- required, must be a real key already in en.json (this macro
+                    introduces no new copy).
+     loading_default  English fallback text for the waiting paragraph -- required.
+     number         optional row count rendered into a "{id}_number" (or number_id)
+                    hidden input, read by that page's own static/js/pages/*.js (e.g.
+                    serviceNumber = parseInt($("#services_number").val())). Omit for
+                    server-side-processed tables (bans, reports) that have no such
+                    input today.
+     number_id      override the hidden input's id -- defaults to "{id}_number".
+                    jobs.html's JS reads the (singular) "job_number", so jobs would
+                    pass number_id="job_number" to stay a drop-in match.
+     table_classes  classes on the <table> tag. Default matches the common "table
+                    responsive nowrap position-relative w-100 d-none" already used by
+                    most pages (a couple of pages currently use non-Bootstrap classes
+                    here -- "w-full"/"rounded-lg"/bare "relative" aren't defined
+                    anywhere in core.css/overrides.css -- this default uses the real
+                    Bootstrap 5 equivalents instead).
+
+   Body (via {% call %}...{% endcall %}) is the table's <thead>/<tbody> -- headers
+   differ per page, so they stay page-owned, same as the existing hand-written
+   <table>...</table> blocks.
+
+   No companion JS -- static/js/dataTableInit.js plus the page's own
+   static/js/pages/*.js already own every interaction here (loading toggle,
+   DataTable init, column-preference persistence). This macro only removes the
+   copy-pasted markup that sits around them. #}
+{% macro table_toolbar(
+    id,
+    columns_preferences_defaults,
+    columns_preferences,
+    loading_key,
+    loading_default,
+    number=none,
+    number_id=none,
+    table_classes="table responsive nowrap position-relative w-100 d-none"
+) -%}
+    {%- if number is not none %}
+    <input type="hidden" id="{{ number_id or id ~ '_number' }}" value="{{ number }}" />
+    {%- endif %}
+    <textarea type="hidden" id="columns_preferences_defaults" class="visually-hidden">{{ columns_preferences_defaults[id] | tojson }}</textarea>
+    <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences | tojson }}</textarea>
+    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}" />
+    <p id="{{ id }}-waiting"
+       class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
+       data-i18n="{{ loading_key }}">{{ loading_default }}</p>
+    <table id="{{ id }}" class="{{ table_classes }}">
+        {{ caller() }}
+    </table>
+{%- endmacro %}

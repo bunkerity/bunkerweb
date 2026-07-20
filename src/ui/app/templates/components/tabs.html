@@ -1,0 +1,73 @@
+{# usage: {% from "components/tabs.html" import tabs, tab_pane %} #}
+{#
+  Shared tab-nav wrapper -- superset of the ad-hoc nav-pills/nav-tabs blocks
+  duplicated across profile.html, setup.html, dashboard.html, config_edit.html,
+  service_settings.html, global_settings.html and template_edit.html.
+
+  Switching is handled entirely by Bootstrap 5's own tab plugin
+  (data-bs-toggle="tab", already vendored in libs/bootstrap and loaded on
+  every page) -- no companion JS file needed.
+
+  tabs(id, items, active=none, variant="pills", vertical=False, fill=False, classes="", label="")
+    id       (required) unique id for the <ul> tablist; also namespaces the
+                         generated tab/pane ids so multiple tab groups can
+                         live on one page.
+    items    (required) list of dicts:
+                         { id, i18n, label, icon=None, count=None }
+                         - id:    used to build "{id}-tab-{item.id}" /
+                                  "{id}-pane-{item.id}"
+                         - i18n:  data-i18n key for the label (real key must
+                                  exist in static/locales/en.json)
+                         - label: English fallback shown before i18n loads
+                         - icon:  optional boxicons name, e.g. "bx-user"
+                         - count: optional badge text/number
+    active   id of the initially-active item; defaults to items[0].id
+    variant  "pills" | "tabs" -- Bootstrap nav-pills vs nav-tabs styling
+    vertical stack tabs in a column below sm (flex-column flex-md-row)
+    fill     spread tabs evenly (nav-fill)
+    classes  extra classes on the <ul> wrapper
+    label    aria-label for the tablist (plain string, no i18n -- keep short
+             and non-visible, e.g. "Profile sections")
+
+  tab_pane(id, tabs_id, active=False, classes="") -- call-block wrapper for
+  the matching <div class="tab-pane">, wired to the same tabs_id namespace:
+    {% call tab_pane(id="security", tabs_id="profile-tabs", active=True) %}
+      ...panel content...
+    {% endcall %}
+#}
+{% macro tabs(id, items, active=none, variant="pills", vertical=False, fill=False, classes="", label="") -%}
+    {% if not active and items %}{% set active = items[0].id %}{% endif %}
+    <ul class="nav nav-{{ variant }}{% if vertical %} flex-column flex-md-row{% endif %}{% if fill %} nav-fill{% endif %}{% if classes %} {{ classes }}{% endif %} mb-6"
+        id="{{ id }}"
+        role="tablist"
+        {% if label %}aria-label="{{ label }}"{% endif %}>
+        {% for item in items %}
+            {% set is_active = (item.id == active) %}
+            <li class="nav-item me-0 me-sm-2" role="presentation">
+                <button type="button"
+                        class="nav-link d-flex align-items-center{% if is_active %} active{% endif %}"
+                        id="{{ id }}-tab-{{ item.id }}"
+                        role="tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#{{ id }}-pane-{{ item.id }}"
+                        aria-controls="{{ id }}-pane-{{ item.id }}"
+                        aria-selected="{{ 'true' if is_active else 'false' }}">
+                    {% if item.icon %}<i class="tf-icons bx {{ item.icon }} bx-sm" aria-hidden="true"></i>{% endif %}
+                    <span{% if item.icon %} class="d-none d-sm-inline"{% endif %}>{% if item.icon %}&nbsp;{% endif %}<span data-i18n="{{ item.i18n }}">{{ item.label }}</span></span>
+                    {% if item.count is defined and item.count not in (none, "") %}
+                        <span class="badge rounded-pill bg-label-secondary ms-2">{{ item.count }}</span>
+                    {% endif %}
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+{%- endmacro %}
+{% macro tab_pane(id, tabs_id, active=False, classes="") -%}
+    <div class="tab-pane fade{% if active %} show active{% endif %}{% if classes %} {{ classes }}{% endif %}"
+         id="{{ tabs_id }}-pane-{{ id }}"
+         role="tabpanel"
+         aria-labelledby="{{ tabs_id }}-tab-{{ id }}"
+         tabindex="0">
+        {{ caller() }}
+    </div>
+{%- endmacro %}

@@ -1,0 +1,63 @@
+{# usage: {% from "components/card.html" import card %}
+          {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
+            ...content...
+          {% endcall %} #}
+
+{# Generic content-card wrapper -- superset of the ad-hoc "card p-4 min-vh-70" and
+   "card table-responsive text-nowrap p-4 pb-8 min-vh-70" <div> blocks duplicated across
+   bans.html, cache.html, cache_view.html, config_edit.html, configs.html, instances.html,
+   jobs.html, logs.html, plugins.html, reports.html, services.html, templates.html and
+   web_cache.html.
+
+   Body content is passed via {% call %}...{% endcall %} so it can hold anything (a table,
+   a form, plain text, another macro's output) -- exactly like the plain <div class="card
+   ..."> blocks it replaces. When no header args are given, content is rendered directly
+   inside <div class="card"> with zero extra markup, so existing pages can swap in the
+   macro without any visual change.
+
+   Params:
+     id           optional id attribute on the outer <div class="card">.
+     classes      extra utility classes appended as-is after "card", e.g.
+                  "table-responsive text-nowrap p-4 pb-8 min-vh-70" (table-card pattern)
+                  or "p-4 mb-4" (simple boxed-section pattern) or "p-4 position-relative
+                  shadow-sm rounded-3 h-100 bg-primary text-white" (colored tile pattern).
+     title        optional English fallback header title. When set, renders a
+                  <div class="card-header"> with a <h5 class="card-title"> and the outer
+                  <div> gets role="region" aria-label="{title}".
+     title_key    data-i18n key for title, e.g. "web_cache.purge". Omit for text with no
+                  translation.
+     subtitle     optional caption under the title (<p class="card-subtitle">).
+     subtitle_key data-i18n key for subtitle.
+     icon         optional Boxicons class rendered before the title, e.g. "bx-line-chart".
+     header_right raw HTML rendered at the right of the header (e.g. a badge() call) --
+                  caller is responsible for escaping/rendering it; passed through | safe.
+     separator    when false, drops the header's bottom border (border-0) -- useful for
+                  chart-style cards where the divider looks heavy.
+
+   No companion JS -- this is a static wrapper, there is no interaction to wire up. #}
+{% macro card(id=none, classes="", title=none, title_key=none, subtitle=none, subtitle_key=none, icon=none, header_right=none, separator=true) -%}
+    {%- set has_header = title or icon or header_right -%}
+    <div{% if id %} id="{{ id }}"{% endif %}
+         class="card{% if classes %} {{ classes }}{% endif %}"
+         {%- if title %} role="region" aria-label="{{ title }}"{% endif %}>
+        {%- if has_header %}
+            <div class="card-header d-flex align-items-center justify-content-between{% if not separator %} border-0{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    {%- if icon %}<i class="bx {{ icon }}" aria-hidden="true"></i>{% endif %}
+                    {%- if title %}
+                        <div class="d-flex flex-column">
+                            <h5 class="card-title mb-0"{% if title_key %} data-i18n="{{ title_key }}"{% endif %}>{{ title }}</h5>
+                            {%- if subtitle %}<p class="card-subtitle text-muted mb-0"{% if subtitle_key %} data-i18n="{{ subtitle_key }}"{% endif %}>{{ subtitle }}</p>{% endif -%}
+                        </div>
+                    {%- endif %}
+                </div>
+                {%- if header_right %}{{ header_right | safe }}{% endif %}
+            </div>
+            <div class="card-body">
+                {{ caller() }}
+            </div>
+        {%- else %}
+            {{ caller() }}
+        {%- endif %}
+    </div>
+{%- endmacro %}

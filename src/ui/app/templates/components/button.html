@@ -1,0 +1,140 @@
+{# usage: {% from "components/button.html" import button %}
+          {{ button(label="Purge URL", i18n_key="web_cache.purge_url", variant="danger", icon="bx-eraser") }} #}
+
+{# Generic clickable-action element -- superset of the "btn btn-<variant>[ btn-<size>]"
+   markup duplicated across (non-exhaustive) web_cache.html, services.html, instances.html,
+   configs.html, template_edit.html, config_edit.html, plugins.html and profile.html:
+     - plain text button:      <button class="btn btn-outline-primary">...
+     - icon + label button:    <i class="bx bx-eraser me-1" aria-hidden="true"></i><span data-i18n="...">...
+     - link styled as button:  <a class="btn btn-primary" href="...">...
+     - icon-only button:       aria-label required, no visible label (plugin_page.html's
+                                secret-toggle, modal.html's close button)
+     - disabled button:        BOTH the ".disabled" class (dims it) AND the native
+                                `disabled` attribute (blocks keyboard/SR activation) --
+                                see template_edit.html's #save-template-btn / config_edit.html's
+                                .save-config for the gold pattern this macro replicates.
+     - tooltip trigger:        data-bs-toggle="tooltip" + data-bs-original-title (recovery-code.html)
+     - modal trigger / dismiss: data-bs-toggle="modal" / data-bs-dismiss="modal" (web_cache.html,
+                                every components/modal.html caller)
+
+   `loading=true` renders the initial disabled/spinner state. Page-specific JavaScript owns
+   transitions into and out of that state because only the caller knows request lifetime.
+
+   Params:
+     label            visible text. Empty for icon-only buttons.
+     i18n_key         data-i18n key for label, e.g. "web_cache.purge_url", "button.save".
+                      Applied to the inner <span> that wraps label, never to the outer
+                      element -- so it never clobbers a sibling icon like a bare
+                      data-i18n on the <button> would.
+     variant          color suffix appended to "btn-", e.g. "primary", "outline-primary",
+                      "outline-secondary", "secondary", "danger", "outline-danger",
+                      "bw-green", "outline-bw-green", "text-bw-green", "link". Must have an
+                      existing ".btn-<variant>" rule in core.css/overrides.css/theme-default.css.
+                      Special value "close" ignores every other param below and renders the
+                      icon-only ".btn-close" element used by components/modal.html and
+                      toast/alert dismiss buttons. Default "primary".
+     size             "" (default/md) | "sm" | "lg" -- appended as "btn-<size>".
+     icon             optional Boxicons class for a leading icon, e.g. "bx-plus", "bx-save".
+     icon_end         optional Boxicons class for a trailing icon, e.g. "bx-chevron-right",
+                      "bx-link-external".
+     icon_only        true renders a square icon-only button (adds ".btn-icon", drops the
+                      label span even if `label` is set). `aria_label` becomes required --
+                      omitting it is a real accessibility bug, not a style choice.
+     tag              "button" (default) | "a". Use "a" for navigation/downloads (needs
+                      `href`); link semantics are preserved even when Bootstrap styles it.
+     type             "button" (default) | "submit" | "reset". Only applies when tag="button".
+     href             required when tag="a", e.g. url_for("services") ~ "/" ~ service.id.
+     id               optional id attribute.
+     name             optional name attribute (form buttons distinguishing which was clicked).
+     disabled         true adds the ".disabled" class (dims it, matches services.html/
+                      plugins.html) AND -- on tag="button" -- the native `disabled`
+                      attribute too (matches template_edit.html's #save-template-btn /
+                      config_edit.html's .save-config gold pattern: class + attribute
+                      together, not just the class). On tag="a" (no `disabled` attribute
+                      exists) it instead adds aria-disabled="true" and tabindex="-1" so
+                      it isn't keyboard-focusable/announced as enabled -- production's
+                      plain ".disabled"-class-only anchors (services.html) don't do this
+                      today, it's a real a11y gap this macro closes rather than copies.
+                      Bootstrap tooltips don't fire on disabled elements -- if you need one,
+                      wrap the macro call in your own tooltip-trigger <div>, see
+                      config_edit.html's .save-config wrapper for the pattern.
+     loading          true forces the native `disabled`/aria-disabled behavior above (you
+                      don't also need to pass disabled=true) plus aria-busy="true", and
+                      swaps icon(s) for a decorative spinner-border-sm and the label for
+                      loading_label/loading_i18n_key (falls back to label/i18n_key when
+                      unset). Does NOT add the ".disabled" dimming class -- a loading
+                      button should keep its normal color, just with a spinner in place
+                      of its icon, not look greyed out.
+     loading_label    label shown while loading. Defaults to `label`.
+     loading_i18n_key data-i18n key for the loading label. Defaults to `i18n_key`.
+     aria_label       English fallback for the accessible name. Required for icon_only.
+     aria_i18n_key    data-i18n key for aria_label. Ignored when tooltip_i18n_key is also
+                      set -- only one data-i18n attribute can live on the element, and
+                      i18n.js resolves data-bs-original-title before aria-label, so the
+                      tooltip key would win anyway; pass only the one you need translated.
+     tooltip_text     optional Bootstrap tooltip text (data-bs-toggle="tooltip").
+     tooltip_i18n_key data-i18n key for tooltip_text.
+     tooltip_placement Bootstrap tooltip placement. Default "top".
+     modal_target     id (without "#") of a components/modal.html instance to open --
+                      renders data-bs-toggle="modal" data-bs-target="#<id>".
+     dismiss          data-bs-dismiss value, e.g. "modal", "toast", "alert".
+     classes          extra utility classes appended as-is, e.g. "me-2 w-100".
+     label_classes    extra classes on the label <span>, e.g. "d-none d-md-inline"
+                      to collapse to an icon-only button below a breakpoint
+                      (matches components/dropdown-menu.html's identical param). #}
+{% macro button(
+    label="",
+    i18n_key=none,
+    variant="primary",
+    size="",
+    icon=none,
+    icon_end=none,
+    icon_only=false,
+    tag="button",
+    type="button",
+    href=none,
+    id=none,
+    name=none,
+    disabled=false,
+    loading=false,
+    loading_label=none,
+    loading_i18n_key=none,
+    aria_label=none,
+    aria_i18n_key=none,
+    tooltip_text=none,
+    tooltip_i18n_key=none,
+    tooltip_placement="top",
+    modal_target=none,
+    dismiss=none,
+    classes="",
+    label_classes=""
+) -%}
+    {%- if variant == "close" -%}
+        <button type="button"
+                {%- if id %} id="{{ id }}"{% endif %}
+                class="btn-close{% if classes %} {{ classes }}{% endif %}"
+                {%- if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}
+                aria-label="{{ aria_label or 'Close' }}"
+                data-i18n="{{ aria_i18n_key or 'aria.label.close' }}"></button>
+    {%- else -%}
+        {%- set force_disabled = disabled or loading -%}
+        {%- set outer_classes = 'btn btn-' ~ variant ~ (' btn-' ~ size if size else '') ~ (' btn-icon' if icon_only else '') ~ (' don-jose' if variant == 'primary' and not icon_only and 'don-jose' not in classes.split() else '') ~ (' disabled' if disabled else '') ~ (' ' ~ classes if classes else '') -%}
+        <{{ 'a' if tag == 'a' else 'button' }}
+                {%- if id %} id="{{ id }}"{% endif %}
+                {%- if name %} name="{{ name }}"{% endif %}
+                class="{{ outer_classes }}"
+                {%- if tag == 'a' %}
+                    href="{{ href }}"
+                    {%- if force_disabled %} aria-disabled="true" tabindex="-1"{% endif %}
+                {%- else %}
+                    type="{{ type }}"
+                    {%- if force_disabled %} disabled{% endif %}
+                {%- endif %}
+                {%- if loading %} aria-busy="true"{% endif %}
+                {%- if modal_target %} data-bs-toggle="modal" data-bs-target="#{{ modal_target }}"{% endif %}
+                {%- if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}
+                {%- if tooltip_text %} data-bs-toggle="tooltip" data-bs-placement="{{ tooltip_placement }}" data-bs-original-title="{{ tooltip_text }}"{% if tooltip_i18n_key %} data-i18n="{{ tooltip_i18n_key }}"{% endif %}{% endif %}
+                {%- if aria_label %} aria-label="{{ aria_label }}"{% if aria_i18n_key and not tooltip_i18n_key %} data-i18n="{{ aria_i18n_key }}"{% endif %}{% endif %}
+                >{% if loading %}<span class="spinner-border spinner-border-sm{% if label or loading_label %} me-1{% endif %}" role="status" aria-hidden="true"></span>{% if not icon_only %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}{% if loading_i18n_key or i18n_key %} data-i18n="{{ loading_i18n_key or i18n_key }}"{% endif %}>{{ loading_label or label }}</span>{% endif %}{% else %}{% if icon %}<i class="bx {{ icon }}{% if label and not icon_only %} me-1{% endif %}" aria-hidden="true"></i>{% endif %}{% if label and not icon_only %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</span>{% endif %}{% if icon_end %}<i class="bx {{ icon_end }}{% if label and not icon_only %} ms-1{% endif %}" aria-hidden="true"></i>{% endif %}{% endif %}</{{ 'a' if tag == 'a' else 'button' }}>
+    {%- endif -%}
+{%- endmacro %}

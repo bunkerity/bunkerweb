@@ -1,0 +1,72 @@
+{# usage: {% from "components/modal.html" import modal %}
+          {% call modal(id="purge-all", title_key="web_cache.purge_all_confirm_title", title="Purge entire cache?") %}
+            <div class="modal-body" data-i18n="web_cache.purge_all_confirm_body">This deletes every cached response...</div>
+            <div class="modal-footer">...</div>
+          {% endcall %} #}
+
+{# Generic Bootstrap 5 modal shell (backdrop + dialog + content + header) --
+   superset of the near-identical "modal fade" blocks duplicated across
+   web_cache.html (#purgeAllModal), instances.html, services.html, configs.html,
+   templates.html, template_edit.html, setup.html and reports.html.
+
+   The macro only renders the outer shell + header (title, close button); the
+   body and footer are free-form via {% call %} so every existing shape still
+   works untouched: a single <form> wrapping both modal-body and modal-footer
+   (instances.html, services.html, configs.html), a modal-footer with its own
+   inner <form> around just the submit button while Cancel stays outside any
+   form (web_cache.html's #purgeAllModal), or a plain body+footer with no form
+   at all (reports.html). Remember to keep
+   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /> inside
+   every <form method="POST"> you put in the caller block -- the macro can't
+   add it for you since it never sees your form tag.
+
+   Show/hide, focus trap, Esc-to-close and backdrop click are all handled by
+   Bootstrap 5's own Modal plugin (data-bs-toggle/data-bs-target/data-bs-dismiss,
+   already vendored in libs/bootstrap and loaded on every page, or the
+   `new bootstrap.Modal(...)` JS API already used in pages/instances.js etc.)
+   -- no companion JS file needed.
+
+   Params:
+     id              (required) unique id for the outer .modal div; also used
+                      to build "{id}-title" for aria-labelledby. Never a fixed
+                      literal -- always pass the real per-page id.
+     title_key       (required) data-i18n key for the header title, e.g.
+                      "modal.title.create_new_instance". Must exist in
+                      static/locales/en.json.
+     title           (required) English fallback text for the title, shown
+                      before i18next rewrites it.
+     size            "" | "sm" | "lg" | "xl" -- Bootstrap modal size class.
+                      Default "" (~35rem, matches simple confirm dialogs like
+                      #purgeAllModal).
+     centered        vertically center the dialog (modal-dialog-centered).
+                      Default true.
+     static_backdrop data-bs-backdrop="static" so an outside click can't
+                      dismiss unsaved input / a destructive confirmation.
+                      Default true; pass false for read-only/info modals
+                      (e.g. a reports.html-style URL viewer).
+
+   caller() renders everything after the header: your own modal-body /
+   modal-footer div(s), optionally wrapped in a <form>. #}
+{% macro modal(id, title_key, title, size="", centered=true, static_backdrop=true) -%}
+    <div class="modal fade"
+         id="{{ id }}"
+         {% if static_backdrop %}data-bs-backdrop="static"{% endif %}
+         tabindex="-1"
+         aria-hidden="true"
+         aria-labelledby="{{ id }}-title"
+         role="dialog">
+        <div class="modal-dialog{% if size %} modal-{{ size }}{% endif %}{% if centered %} modal-dialog-centered{% endif %}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="{{ id }}-title" data-i18n="{{ title_key }}">{{ title }}</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            data-i18n="aria.label.close"></button>
+                </div>
+                {{ caller() }}
+            </div>
+        </div>
+    </div>
+{%- endmacro %}

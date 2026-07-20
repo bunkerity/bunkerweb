@@ -208,24 +208,9 @@ $(document).ready(function () {
     },
   ];
 
-  // Batch update tooltips
-  const updateCountryTooltips = () => {
-    $("[data-country]").each(function () {
-      const $elem = $(this);
-      const countryCode = $elem.data("country");
-
-      const countryName = t(
-        countryCode === "unknown"
-          ? "country.not_applicable"
-          : `country.${countryCode}`,
-        "Unknown",
-      );
-      if (countryName && countryName !== "country.not_applicable") {
-        $elem.attr("data-bs-original-title", countryName);
-      }
-    });
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
-  };
+  // Country-flag cell rendering + tooltip retranslation now live in the shared
+  // components/country-flag.html / static/js/components/country-flag.js helper
+  // (window.BWCountryFlag) -- see that file's doc comment.
 
   // Configure DataTable layout
   const layout = {
@@ -481,27 +466,10 @@ $(document).ready(function () {
             combiner: "or",
           },
           targets: 5,
+          // Rendered via the shared window.BWCountryFlag helper
+          // (static/js/components/country-flag.js) -- see that file's doc comment.
           render: function (data) {
-            const countryCode = data.toLowerCase();
-            const tooltipContent = "N/A";
-            return `
-              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                countryCode === "local"
-                  ? "not_applicable"
-                  : countryCode.toUpperCase()
-              }" data-country="${
-                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
-              }">
-                <img src="${escapeHtml(baseFlagsUrl)}/${
-                  countryCode === "local" ? "zz" : escapeHtml(countryCode)
-                }.svg"
-                     class="border border-1 p-0 me-1"
-                     height="17"
-                     loading="lazy" />
-                &nbsp;－&nbsp;${
-                  countryCode === "local" ? "N/A" : escapeHtml(data)
-                }
-              </span>`;
+            return window.BWCountryFlag.html(data, { flagBase: baseFlagsUrl });
           },
         },
         {
@@ -959,7 +927,7 @@ $(document).ready(function () {
         reason,
       )}
     `;
-    $("#dataModalLabel").html(baseTitle);
+    $("#dataModal-title").html(baseTitle);
     $("#dataContent").html(`
       <div class="d-flex align-items-center gap-2 text-muted">
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -1042,7 +1010,7 @@ $(document).ready(function () {
             anomalyScore,
           )}</span></span>`;
         }
-        $("#dataModalLabel").html(modalTitleHtml);
+        $("#dataModal-title").html(modalTitleHtml);
 
         try {
           const formattedContent = formatSecurityReportData(
@@ -1769,7 +1737,7 @@ $(document).ready(function () {
         $(".tooltip").remove();
       });
       dt.on("draw.dt", function () {
-        updateCountryTooltips();
+        window.BWCountryFlag.updateTooltips();
         updateHeaderTooltips(dt.table().header(), headers);
         // Re-init tooltips for dynamic elements
         $(".tooltip").remove();
@@ -1787,6 +1755,20 @@ $(document).ready(function () {
       return dt;
     });
   }
+
+  // The #reports DataTable initializes inside the eventlog tab pane, which is
+  // not the default-active pane (overview is) -- it first renders while
+  // display:none, so column widths/Responsive collapse are computed against a
+  // width of 0. Recompute them every time the tab is actually shown. Bound to
+  // the trigger button: Bootstrap fires shown.bs.tab there, and the tabs()
+  // macro names it "{tabs_id}-tab-{item_id}". `.on` (not `.one`) so this also
+  // self-heals if the user opens the tab before the first serverSide draw.
+  $("#reports-tabs-tab-eventlog").on("shown.bs.tab", function () {
+    if (!$.fn.dataTable.isDataTable("#reports")) return;
+    const table = $("#reports").DataTable();
+    table.columns.adjust();
+    if (table.responsive) table.responsive.recalc();
+  });
 
   if (sessionAutoRefresh === "true") {
     toggleAutoRefresh();

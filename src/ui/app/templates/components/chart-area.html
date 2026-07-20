@@ -1,0 +1,7 @@
+{% from "components/card.html" import card %}
+{% macro chart_area(id, title, title_key=none, series={}, height=400, card_classes="") -%}
+    {% call card(classes=card_classes, title=title, title_key=title_key, separator=false) %}
+        <div id="{{ id }}" class="w-100" data-chart-height="{{ height }}"></div>
+        <div id="{{ id }}-data" class="visually-hidden">{{ series | tojson }}</div>
+    {% endcall %}
+{%- endmacro %}
