@@ -483,24 +483,24 @@ $(document).ready(function () {
           targets: 5,
           render: function (data) {
             const countryCode = data.toLowerCase();
+            const isNotApplicable =
+              countryCode === "unknown" ||
+              countryCode === "local" ||
+              countryCode === "n/a";
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                countryCode === "local"
-                  ? "not_applicable"
-                  : countryCode.toUpperCase()
+                isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
               }" data-country="${
-                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+                isNotApplicable ? "unknown" : countryCode.toUpperCase()
               }">
                 <img src="${escapeHtml(baseFlagsUrl)}/${
-                  countryCode === "local" ? "zz" : escapeHtml(countryCode)
+                  isNotApplicable ? "zz" : escapeHtml(countryCode)
                 }.svg"
                      class="border border-1 p-0 me-1"
                      height="17"
                      loading="lazy" />
-                &nbsp;－&nbsp;${
-                  countryCode === "local" ? "N/A" : escapeHtml(data)
-                }
+                &nbsp;－&nbsp;${isNotApplicable ? "N/A" : escapeHtml(data)}
               </span>`;
           },
         },
