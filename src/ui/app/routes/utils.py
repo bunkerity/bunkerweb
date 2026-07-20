@@ -267,6 +267,18 @@ def parse_search_panes(source, *, sort_values: bool = False) -> str:
     return ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items())
 
 
+def get_default_ban_time(config: dict, server_name: str) -> int:
+    """Resolve the Bad Behavior ban duration for a report service."""
+    try:
+        if server_name and server_name not in ("_", ""):
+            service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
+            if service_key in config:
+                return int(config[service_key])
+        return int(config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
+    except (AttributeError, TypeError, ValueError):
+        return 86400
+
+
 def parse_search_panes_dict(source) -> Dict[str, list]:
     """Same as `parse_search_panes` but returns the parsed mapping for callers
     that need to apply the filter in-process rather than forwarding a string."""
