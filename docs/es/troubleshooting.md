@@ -445,7 +445,7 @@ puedes forzar una actualización del “marcador de cambios”:
 
 En caso de que hayas olvidado tus credenciales de la interfaz de usuario o estés experimentando problemas con la 2FA, puedes conectarte a la base de datos para recuperar el acceso.
 
-### Acceder a la base de datos
+### Acceder a la base de datos {#access-database}
 
 === "SQLite"
 

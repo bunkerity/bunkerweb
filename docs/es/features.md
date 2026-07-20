@@ -5014,7 +5014,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     cualquier ajuste sin una clave dedicada en el chart, use `scheduler.extraEnvs`. Definirlos solo en
     `bunkerweb.extraEnvs` no tiene **ningún efecto**.
 
-### Mejores Prácticas de Redis
+### Mejores Prácticas de Redis {#redis-best-practices}
 
 Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas para garantizar un rendimiento, seguridad y fiabilidad óptimos:
 

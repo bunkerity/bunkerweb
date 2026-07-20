@@ -343,7 +343,7 @@ Suivez ces étapes pour activer et configurer Antibot :
 !!! warning "Sessions en environnement cluster"
     La fonction antibot utilise des cookies pour suivre si un utilisateur a complété le défi. Si vous exécutez BunkerWeb en cluster (plusieurs instances), vous devez configurer correctement la gestion des sessions : définissez `SESSIONS_SECRET` et `SESSIONS_NAME` avec les mêmes valeurs sur toutes les instances BunkerWeb. Sinon, les utilisateurs pourront être invités à répéter le défi. Plus d’informations sur la configuration des sessions [ici](#sessions).
 
-### Paramètres communs
+### Paramètres communs {#paramètres-communs}
 
 Les paramètres suivants sont partagés par tous les mécanismes de défi :
 
@@ -4876,7 +4876,7 @@ Comment ça marche :
     (chart ≥ v1.0.21). Pour tout paramètre sans clé dédiée dans le chart, utilisez
     `scheduler.extraEnvs`. Les définir uniquement sur `bunkerweb.extraEnvs` n’a **aucun effet**.
 
-### Bonnes pratiques Redis
+### Bonnes pratiques Redis {#redis-best-practices}
 
 Lorsque vous utilisez Redis ou Valkey avec BunkerWeb, prenez en compte ces bonnes pratiques pour garantir des performances, une sécurité et une fiabilité optimales :
 

@@ -444,7 +444,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
 
 如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。
 
-### 访问数据库
+### 访问数据库 {#access-database}
 
 === "SQLite"
 
