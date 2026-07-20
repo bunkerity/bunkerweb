@@ -87,6 +87,36 @@ def test_timeseries_endpoint_parses_search_panes(db):
     db.get_metrics_timeseries.assert_called_once_with(start=EPOCH, end=EPOCH + 3600, bucket="day", filters={"ip": ["1.2.3.4", "5.6.7.8"], "country": ["US"]})
 
 
+def test_timeseries_endpoint_returns_400_not_500_on_oversized_window(db):
+    # Regression guard: get_metrics_timeseries raises ValueError for a crafted window that would
+    # need too many buckets (authenticated-DoS guard). The endpoint must translate that into a
+    # clean 400 response rather than letting it propagate as an unhandled 500.
+    db.get_metrics_timeseries.side_effect = ValueError("requested range too large: 50000 buckets exceeds 10000")
+
+    response = ROUTER.query_metrics_timeseries(start=0, end=180000000, bucket="hour")
+
+    assert response.status_code == 400
+    assert response.content == {"status": "error", "message": "requested range too large: 50000 buckets exceeds 10000"}
+
+
+def test_top_offenders_endpoint_returns_400_on_value_error(db):
+    db.get_metrics_top_offenders.side_effect = ValueError("start epoch out of range: 10**18")
+
+    response = ROUTER.query_metrics_top_offenders(start=10**18, end=10**18 + 3600)
+
+    assert response.status_code == 400
+    assert response.content["status"] == "error"
+
+
+def test_top_rules_endpoint_returns_400_on_value_error(db):
+    db.get_metrics_top_rules.side_effect = ValueError("start epoch out of range: 10**18")
+
+    response = ROUTER.query_metrics_top_rules(start=10**18, end=10**18 + 3600)
+
+    assert response.status_code == 400
+    assert response.content["status"] == "error"
+
+
 def test_top_offenders_endpoint(db):
     db.get_metrics_top_offenders.return_value = [{"ip": "1.2.3.4", "blocks": 3}]
 

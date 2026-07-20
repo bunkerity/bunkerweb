@@ -46,6 +46,14 @@ _SEARCH_COLUMNS = (
     Requests.security_mode,
 )
 
+# Hard cap on get_metrics_timeseries' bucket_count: it sizes a Python list from the
+# caller-controlled (start, end) window with no other bound. Real UI presets top out at
+# 30d/1h = 720 buckets; 10000 (~416 days hourly) leaves generous headroom while still
+# refusing a crafted multi-decade window that would otherwise allocate tens of millions of
+# list entries (authenticated-DoS -- see get_metrics_timeseries). A future "1y hourly"
+# custom-range preset would need this bumped (or bucketed by day instead of hour).
+MAX_TIMESERIES_BUCKETS = 10000
+
 
 def _to_datetime(value: Any) -> datetime:
     """Coerce a metrics record ``date`` (Unix epoch int/float, datetime, or string) to an aware datetime."""
@@ -59,6 +67,17 @@ def _to_datetime(value: Any) -> datetime:
         with suppress(ValueError):
             return datetime.fromisoformat(value)
     return datetime.now().astimezone()
+
+
+def _safe_epoch_to_datetime(value: int, label: str) -> datetime:
+    """``datetime.fromtimestamp(value, tz=timezone.utc)``, normalizing the stdlib's out-of-range
+    failures (``ValueError`` past year 9999, ``OverflowError``/``OSError`` past the platform's
+    ``time_t``) into a single clean ``ValueError`` so an absurd caller-supplied epoch is a 400,
+    not a 500."""
+    try:
+        return datetime.fromtimestamp(value, tz=timezone.utc)
+    except (ValueError, OverflowError, OSError) as e:
+        raise ValueError(f"{label} epoch out of range: {value}") from e
 
 
 def _row_to_dict(row: Requests) -> Dict[str, Any]:
@@ -263,12 +282,21 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         (``date_trunc``/``DATE_FORMAT``/``strftime``) instead.
 
         ``bucket`` accepts ``"hour"``; anything else (including typos) is treated as ``"day"``.
+
+        Raises ``ValueError`` (400 at the API/UI boundary, not a 500) if the requested window
+        would need more than ``MAX_TIMESERIES_BUCKETS`` buckets, or if ``start``/``end`` are
+        epochs the stdlib can't represent as a datetime -- both computed/checked before any
+        DB query or list allocation happens.
         """
         bucket_seconds = 3600 if bucket == "hour" else 86400
-        start_dt = datetime.fromtimestamp(start, tz=timezone.utc)
-        end_dt = datetime.fromtimestamp(end, tz=timezone.utc)
         window = end - start
-        prev_start_dt = datetime.fromtimestamp(start - window, tz=timezone.utc)
+        bucket_count = max(1, -(-window // bucket_seconds))  # ceil division
+        if bucket_count > MAX_TIMESERIES_BUCKETS:
+            raise ValueError(f"requested range too large: {bucket_count} buckets exceeds {MAX_TIMESERIES_BUCKETS}")
+
+        start_dt = _safe_epoch_to_datetime(start, "start")
+        end_dt = _safe_epoch_to_datetime(end, "end")
+        prev_start_dt = _safe_epoch_to_datetime(start - window, "start")
 
         conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
         prev_conditions = _filter_conditions("", filters) + [Requests.date >= prev_start_dt, Requests.date < start_dt]
@@ -277,7 +305,6 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
             dates = session.scalars(select(Requests.date).where(*conditions)).all()
             prev_total = session.scalar(select(func.count()).select_from(select(Requests).where(*prev_conditions).subquery())) or 0
 
-        bucket_count = max(1, -(-window // bucket_seconds))  # ceil division
         counts = [0] * bucket_count
         for d in dates:
             # SQLite drops tzinfo on read-back (returns a naive datetime representing UTC wall-clock
@@ -310,8 +337,8 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         """Top attacker IPs in ``[start, end)`` by block count, with country/ASN attribution
         (``None`` for rows predating the ASN migration), the most frequent block reason, and
         first/last-seen timestamps."""
-        start_dt = datetime.fromtimestamp(start, tz=timezone.utc)
-        end_dt = datetime.fromtimestamp(end, tz=timezone.utc)
+        start_dt = _safe_epoch_to_datetime(start, "start")
+        end_dt = _safe_epoch_to_datetime(end, "end")
         conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
 
         with self._db_session() as session:
@@ -362,8 +389,8 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         """Most-frequently-fired ModSecurity rule IDs in ``[start, end)``, tallied from the
         ``data.ids`` JSON array each modsecurity-reason row carries (see ``utils.get_reason`` in
         ``utils.lua``). Non-modsecurity rows carry no ``ids`` and are skipped."""
-        start_dt = datetime.fromtimestamp(start, tz=timezone.utc)
-        end_dt = datetime.fromtimestamp(end, tz=timezone.utc)
+        start_dt = _safe_epoch_to_datetime(start, "start")
+        end_dt = _safe_epoch_to_datetime(end, "end")
         conditions = [Requests.reason == "modsecurity", Requests.date >= start_dt, Requests.date < end_dt]
 
         with self._db_session() as session:

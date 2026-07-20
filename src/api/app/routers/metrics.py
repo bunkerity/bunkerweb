@@ -60,7 +60,10 @@ def query_metrics_requests(
 def query_metrics_timeseries(start: int, end: int, bucket: str = "hour", search_panes: str = "") -> JSONResponse:
     db = get_db()
     filters = _parse_search_panes(search_panes)
-    result = db.get_metrics_timeseries(start=start, end=end, bucket=bucket, filters=filters)
+    try:
+        result = db.get_metrics_timeseries(start=start, end=end, bucket=bucket, filters=filters)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
     return JSONResponse(status_code=200, content={"status": "success", **result})
 
 
@@ -68,12 +71,18 @@ def query_metrics_timeseries(start: int, end: int, bucket: str = "hour", search_
 def query_metrics_top_offenders(start: int, end: int, limit: int = 10, search_panes: str = "") -> JSONResponse:
     db = get_db()
     filters = _parse_search_panes(search_panes)
-    result = db.get_metrics_top_offenders(start=start, end=end, limit=limit, filters=filters)
+    try:
+        result = db.get_metrics_top_offenders(start=start, end=end, limit=limit, filters=filters)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
     return JSONResponse(status_code=200, content={"status": "success", "offenders": result})
 
 
 @router.get("/requests/top-rules", dependencies=[Depends(guard)])
 def query_metrics_top_rules(start: int, end: int, limit: int = 10) -> JSONResponse:
     db = get_db()
-    result = db.get_metrics_top_rules(start=start, end=end, limit=limit)
+    try:
+        result = db.get_metrics_top_rules(start=start, end=end, limit=limit)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
     return JSONResponse(status_code=200, content={"status": "success", "rules": result})

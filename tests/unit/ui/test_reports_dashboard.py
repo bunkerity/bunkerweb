@@ -137,6 +137,34 @@ def test_dashboard_api_error_returns_503(route_app):
     assert response.get_json() == {"status": "error", "message": "Metrics service unavailable"}
 
 
+def test_dashboard_api_400_surfaces_as_400_not_503(route_app):
+    # Regression guard: the metrics API now rejects an oversized window with a 400 (DoS guard in
+    # get_metrics_timeseries), which base_api_client.py raises as ApiClientError(status_code=400).
+    # That must reach the browser as a 400 (bad request), not be lumped into the generic
+    # "service unavailable" 503 the except clause returns for everything else.
+    module, client, app = route_app
+    client.get_metrics_timeseries.side_effect = module.ApiClientError("requested range too large: 50000 buckets exceeds 10000", status_code=400)
+
+    with app.test_request_context("/reports/dashboard", method="POST", data={"start": "0", "end": "180000000"}):
+        response, status = module.reports_dashboard.__wrapped__.__wrapped__()
+
+    assert status == 400
+    assert response.get_json() == {"status": "error", "message": "requested range too large: 50000 buckets exceeds 10000"}
+
+
+def test_dashboard_api_unavailable_error_still_returns_503(route_app):
+    # ApiUnavailableError (5xx / network failure) is a distinct exception class from
+    # ApiClientError -- must still be caught and mapped to 503, not leak as an unhandled 500.
+    module, client, app = route_app
+    client.get_metrics_timeseries.side_effect = module.ApiUnavailableError("API returned 502")
+
+    with app.test_request_context("/reports/dashboard", method="POST", data={"start": "0", "end": "3600"}):
+        response, status = module.reports_dashboard.__wrapped__.__wrapped__()
+
+    assert status == 503
+    assert response.get_json() == {"status": "error", "message": "Metrics service unavailable"}
+
+
 def test_dashboard_success_payload_shape(route_app):
     module, client, app = route_app
     client.get_metrics_timeseries.return_value = {"buckets": [0], "counts": [1], "total": 1}

@@ -9,6 +9,10 @@ import os
 import time
 from datetime import datetime, timezone
 
+import pytest
+
+from db_methods.metrics import MAX_TIMESERIES_BUCKETS
+
 # fixed epoch for determinism: 2024-01-01T00:00:00Z
 EPOCH = 1704067200
 
@@ -278,6 +282,30 @@ class TestTimeseries:
         res = db.get_metrics_timeseries(start=EPOCH, end=EPOCH + 3600, bucket="hour")
         assert res["prev_total"] == 0
         assert res["trend_pct"] is None
+
+    def test_oversized_window_is_rejected_before_allocating_buckets(self, db):
+        # Regression guard (authenticated DoS): bucket_count = ceil(window / bucket_seconds) was
+        # sized straight from the caller-controlled start/end with no cap, so a crafted multi-decade
+        # window would allocate tens of millions of list entries. One bucket past the cap must raise
+        # before any list is built or the DB is queried.
+        window = (MAX_TIMESERIES_BUCKETS + 1) * 3600
+        with pytest.raises(ValueError, match="requested range too large"):
+            db.get_metrics_timeseries(start=0, end=window, bucket="hour")
+
+    def test_real_30d_hourly_window_still_succeeds(self, db):
+        # The guard must not be so tight it breaks the UI's own largest preset: 30 days of
+        # hourly buckets = 720, far under the cap.
+        res = db.get_metrics_timeseries(start=0, end=30 * 86400, bucket="hour")
+        assert len(res["buckets"]) == 720
+        assert len(res["counts"]) == 720
+
+    def test_out_of_range_epoch_raises_value_error_not_uncaught_exception(self, db):
+        # start beyond the platform's representable range (datetime.fromtimestamp raises
+        # OverflowError/OSError/ValueError depending on how far out of range) must normalize to a
+        # clean ValueError rather than propagate a raw stdlib exception up to the API as a 500.
+        huge = 10**18
+        with pytest.raises(ValueError):
+            db.get_metrics_timeseries(start=huge, end=huge + 3600, bucket="hour")
 
 
 class TestTopOffenders:

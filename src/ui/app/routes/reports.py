@@ -184,7 +184,15 @@ def reports_dashboard():
         timeseries = API_CLIENT.get_metrics_timeseries(start=start, end=end, bucket=bucket)
         offenders = API_CLIENT.get_metrics_top_offenders(start=start, end=end, limit=10)
         rules = API_CLIENT.get_metrics_top_rules(start=start, end=end, limit=10)
-    except (ApiClientError, ApiUnavailableError) as e:
+    except ApiClientError as e:
+        if e.status_code == 400:
+            # The API rejected the range itself (e.g. a crafted window needing too many
+            # timeseries buckets) -- a client input error, not a service-availability one.
+            LOGGER.warning(f"Metrics API rejected the request ({e})")
+            return jsonify({"status": "error", "message": str(e) or "Invalid range"}), 400
+        LOGGER.warning(f"Metrics API unavailable ({e}); dashboard tabs will show empty state")
+        return jsonify({"status": "error", "message": "Metrics service unavailable"}), 503
+    except ApiUnavailableError as e:
         LOGGER.warning(f"Metrics API unavailable ({e}); dashboard tabs will show empty state")
         return jsonify({"status": "error", "message": "Metrics service unavailable"}), 503
 
