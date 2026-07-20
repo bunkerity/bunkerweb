@@ -52,7 +52,9 @@ from letsencrypt_utils import (
     le_cache_write_lock,
     letsencrypt_cache_consistent,
     prepare_logs_dir,
+    purge_lineage,
     resolve_certbot_entrypoint,
+    sanitize_and_persist,
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
@@ -831,6 +833,11 @@ try:
     # ? Fetch existing certificates
     cmd_env = build_certbot_env(JOB, DEPS_PATH)
 
+    # Quarantine any renewal conf whose lineage name disagrees with its filename (or that has no
+    # cert material) BEFORE calling certbot: a single broken conf makes `certbot certificates`
+    # exit non-zero, which would otherwise force_renew every service and never persist the fix.
+    sanitized_lineages = sanitize_and_persist(JOB, DATA_PATH, LOGGER)
+
     proc = run(
         [
             CERTBOT_BIN,
@@ -1058,7 +1065,13 @@ try:
                     ret = certbot_delete(service, cmd_env)
 
                     if ret != 0:
-                        LOGGER.error(f"Failed to delete certificate for {service}")
+                        # certbot delete fails on exactly the broken confs this cleanup exists to
+                        # remove, so fall back to purging the lineage directly (conf + live/archive).
+                        removed = purge_lineage(DATA_PATH, DATA_PATH.joinpath("renewal", f"{service}.conf"), quarantine_root=None, logger=LOGGER)
+                        if removed:
+                            LOGGER.info(f"certbot delete failed for {service}; purged {len(removed)} path(s) directly: {removed}")
+                        else:
+                            LOGGER.error(f"Failed to delete certificate for {service} and nothing was purged; manual cleanup may be required.")
                     else:
                         LOGGER.info(f"Certificate for {service} deleted successfully.")
 
@@ -1090,7 +1103,9 @@ try:
         if not JOB.restore_ok:
             LOGGER.error("Skipping db cache update: initial cache restore failed, refusing to overwrite good DB state with current disk state.")
             status = 2
-        elif not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem")):
+        elif not sanitized_lineages and (not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem"))):
+            # Skip the "no live certs" persist only when nothing was sanitized; if a broken lineage
+            # was quarantined we must still write the cleaned tree back so it can't be restored again.
             LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
         else:
             # Refuse to re-cache when renewal/ references account IDs that are missing from accounts/.
