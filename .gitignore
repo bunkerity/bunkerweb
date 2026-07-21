@@ -27,3 +27,6 @@ src/ui/templates
 .DS_Store
 .playwright-mcp/
 .claude/
+
+# Design-system handoff exports (large binaries, not source)
+*-handoff.zip

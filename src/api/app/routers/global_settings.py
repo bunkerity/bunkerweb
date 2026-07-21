@@ -32,9 +32,19 @@ def read_global_settings(
     db = get_db()
     fs = tuple(filtered_settings) if filtered_settings else None
     if full:
-        conf = db.get_config(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=fs)
+        conf = db.get_config(
+            global_only=global_only,
+            methods=methods,
+            with_drafts=with_drafts,
+            filtered_settings=fs,
+        )
     else:
-        conf = db.get_non_default_settings(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=fs)
+        conf = db.get_non_default_settings(
+            global_only=global_only,
+            methods=methods,
+            with_drafts=with_drafts,
+            filtered_settings=fs,
+        )
     return JSONResponse(status_code=200, content={"status": "success", "settings": conf})
 
 

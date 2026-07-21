@@ -12,7 +12,6 @@ import pytest
 import plugin_extensions as pe
 from model import Base  # type: ignore
 
-
 LOGGER = logging.getLogger("bw-unit-test-ext")
 LOGGER.addHandler(logging.NullHandler())
 

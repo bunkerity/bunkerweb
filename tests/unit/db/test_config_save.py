@@ -20,15 +20,39 @@ def seeded(db):
 
 
 def _check(setting_id, ctx, *, default="no"):
-    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": "^(yes|no)$", "type": "check"}
+    return {
+        "id": setting_id,
+        "context": ctx,
+        "default": default,
+        "help": "h",
+        "label": "L",
+        "regex": "^(yes|no)$",
+        "type": "check",
+    }
 
 
 def _size(setting_id, ctx, *, default="0"):
-    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^\d+([kKmMgG])?$", "type": "size"}
+    return {
+        "id": setting_id,
+        "context": ctx,
+        "default": default,
+        "help": "h",
+        "label": "L",
+        "regex": r"^\d+([kKmMgG])?$",
+        "type": "size",
+    }
 
 
 def _dur(setting_id, ctx, *, default="0"):
-    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$", "type": "duration"}
+    return {
+        "id": setting_id,
+        "context": ctx,
+        "default": default,
+        "help": "h",
+        "label": "L",
+        "regex": r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$",
+        "type": "duration",
+    }
 
 
 def _list(setting_id, ctx, *, default=""):
@@ -45,11 +69,27 @@ def _list(setting_id, ctx, *, default=""):
 
 
 def _num(setting_id, ctx, *, default="0"):
-    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^\d+$", "type": "number"}
+    return {
+        "id": setting_id,
+        "context": ctx,
+        "default": default,
+        "help": "h",
+        "label": "L",
+        "regex": r"^\d+$",
+        "type": "number",
+    }
 
 
 def _text(setting_id, ctx, *, default=""):
-    return {"id": setting_id, "context": ctx, "default": default, "help": "h", "label": "L", "regex": r"^.*$", "type": "text"}
+    return {
+        "id": setting_id,
+        "context": ctx,
+        "default": default,
+        "help": "h",
+        "label": "L",
+        "regex": r"^.*$",
+        "type": "text",
+    }
 
 
 def _select(setting_id, ctx, options, *, default="", case_insensitive=False):
@@ -75,7 +115,13 @@ class TestSaveConfigNormalization:
             "ALPHA_LIST": _list("alpha-list", "global"),
             "ALPHA_NUM": _num("alpha-num", "global"),
             "ALPHA_TXT": _text("alpha-txt", "global"),
-            "ALPHA_PICK": _select("alpha-pick", "global", ["modern", "intermediate", "old"], default="modern", case_insensitive=True),
+            "ALPHA_PICK": _select(
+                "alpha-pick",
+                "global",
+                ["modern", "intermediate", "old"],
+                default="modern",
+                case_insensitive=True,
+            ),
             "ALPHA_RAW_PICK": _select("alpha-raw-pick", "global", ["On", "Off"], default="On"),
         }
         db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
@@ -111,7 +157,13 @@ class TestSaveConfigNormalization:
             "ALPHA_FLAG": _check("alpha-flag", "global"),
             "ALPHA_SVC_FLAG": _check("alpha-svc-flag", "multisite"),
             "ALPHA_SVC_SIZE": _size("alpha-svc-size", "multisite"),
-            "ALPHA_SVC_PICK": _select("alpha-svc-pick", "multisite", ["modern", "old"], default="modern", case_insensitive=True),
+            "ALPHA_SVC_PICK": _select(
+                "alpha-svc-pick",
+                "multisite",
+                ["modern", "old"],
+                default="modern",
+                case_insensitive=True,
+            ),
         }
         db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
         db.initialize_db("1.7.0", "Docker")
@@ -142,7 +194,11 @@ class TestSaveConfigNormalization:
         db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
         db.initialize_db("1.7.0", "Docker")
 
-        db.save_config({"ALPHA_FLAG": "TRUE", "ALPHA_DEFAULT": "off"}, "autoconf", skip_service_management=True)
+        db.save_config(
+            {"ALPHA_FLAG": "TRUE", "ALPHA_DEFAULT": "off"},
+            "autoconf",
+            skip_service_management=True,
+        )
 
         assert db.get_config()["ALPHA_FLAG"] == "yes"
         assert db.get_config()["ALPHA_DEFAULT"] == "no"
@@ -226,4 +282,7 @@ class TestSaveConfigMultisite:
             },
             "scheduler",
         )
-        assert {s["id"] for s in seeded.get_services()} == {"app1.example.com", "app2.example.com"}
+        assert {s["id"] for s in seeded.get_services()} == {
+            "app1.example.com",
+            "app2.example.com",
+        }

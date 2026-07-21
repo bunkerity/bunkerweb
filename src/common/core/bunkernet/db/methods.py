@@ -165,9 +165,7 @@ class DatabaseBunkernetMixin(DatabaseMixinBase):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
             cutoff = datetime.now().astimezone() - timedelta(days=days)
-            removed = session.execute(
-                delete(BunkernetStats).where(BunkernetStats.bucket < cutoff), execution_options={"synchronize_session": False}
-            ).rowcount
+            removed = session.execute(delete(BunkernetStats).where(BunkernetStats.bucket < cutoff), execution_options={"synchronize_session": False}).rowcount
             try:
                 session.commit()
             except BaseException as e:
