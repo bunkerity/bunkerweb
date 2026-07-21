@@ -7,7 +7,16 @@
     "tagline": "حماية قوية، مبسطة",
     "version": "الإصدار: {{version}}"
   },
+  "accordion": {
+    "body": {
+      "tls": "إصدار وتجديد الشهادات تلقائيًا."
+    },
+    "title": {
+      "tls": "TLS والشهادات"
+    }
+  },
   "alert": {
+    "configs_import_invalid_file": "الرجاء تحميل ملف تصدير التكوينات المخصصة صالح (.json).",
     "custom_end_date_required": "يرجى تحديد تاريخ انتهاء مخصص.",
     "important": "هام",
     "no_changes_detected": "لم يتم اكتشاف أي تغييرات.",
@@ -17,10 +26,13 @@
   },
   "aria": {
     "label": {
+      "clear_search": "مسح البحث",
       "close": "إغلاق",
       "copy": "نسخ السجلات",
       "download_log": "تنزيل ملف السجل هذا",
       "follow": "متابعة",
+      "hide_value": "إخفاء القيمة",
+      "reveal_value": "إظهار القيمة",
       "select_file": "اختر ملفًا",
       "select_page": "اختر صفحة",
       "issue_count": "عدد الأخطاء والتحذيرات",
@@ -34,10 +46,9 @@
       "configs_dropzone": "حدد ملف تصدير التكوينات المخصصة أو أفلت واحدًا هنا",
       "raw_configuration": "التكوين الخام",
       "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا",
-      "hide_value": "إخفاء القيمة",
-      "reveal_value": "إظهار القيمة",
       "user_avatar": "صورة المستخدم",
-      "remove_value": "حذف القيمة"
+      "remove_value": "حذف القيمة",
+      "view_selected_items": "عرض العناصر المحددة"
     }
   },
   "badge": {
@@ -56,10 +67,14 @@
     "pro": "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. مزيد من المعلومات وتجربة مجانية <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">هنا</a>.",
     "support": "هل تحتاج إلى دعم متميز أو استشارات مخصصة لـ BunkerWeb؟ تحقق من <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">خدماتنا الاحترافية</a>."
   },
+  "bans": {
+    "subtitle": "عناوين IP المحظورة عبر مثيلات BunkerWeb الخاصة بك — أضف، أو احذف، أو اضبط مدة الحظر."
+  },
   "breadcrumb": {
     "about": "حول",
     "bans": "الحظر",
     "cache": "الذاكرة المؤقتة",
+    "web_cache": "ذاكرة التخزين المؤقت للموقع",
     "configs": "التكوينات",
     "extra_pages": "صفحات إضافية",
     "global_settings": "الإعدادات العامة",
@@ -76,10 +91,10 @@
     "pro": "Pro",
     "profile": "الملف الشخصي",
     "reports": "التقارير",
+    "groups": "مجموعات الموارد",
     "services": "الخدمات",
     "support": "الدعم",
-    "templates": "القوالب",
-    "groups": "مجموعات الموارد"
+    "templates": "القوالب"
   },
   "button": {
     "actions": "الإجراءات",
@@ -95,6 +110,7 @@
     "cancel": "إلغاء",
     "clear": "مسح",
     "close": "إغلاق",
+    "clone": "نسخ",
     "columns": "الأعمدة",
     "convert_configs": "تحويل الإعدادات",
     "convert_configs_to": "التحويل إلى {{state}}",
@@ -171,8 +187,13 @@
     "upload_photo": "تحميل صورة جديدة",
     "view_details": "عرض التفاصيل",
     "view_raw_data": "عرض البيانات الخام",
-    "wipe_other_sessions": "مسح الجلسات الأخرى",
-    "clone": "نسخ"
+    "wipe_other_sessions": "مسح الجلسات الأخرى"
+  },
+  "cache": {
+    "subtitle": "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة."
+  },
+  "configs": {
+    "subtitle": "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق."
   },
   "country": {
     "AD": "أندورا",
@@ -581,6 +602,8 @@
     "select_rows_templates_0": "لم يتم تحديد أي قوالب",
     "select_rows_templates_1": "تم تحديد 1 قالب",
     "select_rows_templates_plural": "تم تحديد %d قوالب",
+    "selected_list_count": "{{count}} {{entity}} محدد",
+    "selected_list_empty": "لا يوجد {{entity}} محدد.",
     "zero_records_bans": "لم يتم العثور على حظر مطابق",
     "zero_records_cache": "لم يتم العثور على ملفات ذاكرة مؤقتة مطابقة",
     "zero_records_configs": "لم يتم العثور على تكوينات مخصصة مطابقة",
@@ -590,9 +613,7 @@
     "zero_records_plugins": "لم يتم العثور على إضافات مطابقة",
     "zero_records_reports": "لم يتم العثور على تقارير مطابقة",
     "zero_records_services": "لم يتم العثور على خدمات مطابقة",
-    "zero_records_templates": "لم يتم العثور على قوالب مطابقة",
-    "selected_list_count": "{{count}} {{entity}} محدد",
-    "selected_list_empty": "لا يوجد {{entity}} محدد."
+    "zero_records_templates": "لم يتم العثور على قوالب مطابقة"
   },
   "dev_log": {
     "copy_failed": "فشل نسخ النص:",
@@ -632,7 +653,7 @@
     "unban_failed": "فشل رفع الحظر عن عنوان IP. يرجى المحاولة مرة أخرى."
   },
   "flash": {
-    "easter_egg": "إذا قرأت هذا، فهذا يعني أنك فضولي 👀",
+    "easter_egg": "إذا قرأت هذا، فهذا يعني أنك فضولي",
     "error": "خطأ",
     "message": "معلومة",
     "pro": "BunkerWeb PRO",
@@ -679,6 +700,7 @@
       "configuration_name": "اسم التكوين",
       "confirm_password": "تأكيد كلمة المرور",
       "current_password": "كلمة المرور الحالية",
+      "custom_config": "التكوين",
       "custom_end_date": "تاريخ انتهاء مخصص",
       "custom_ssl_certificate": "شهادة SSL مخصصة",
       "custom_ssl_certificate_data": "بيانات شهادة SSL المخصصة (Base64/PEM)",
@@ -691,6 +713,7 @@
       "email_for_lets_encrypt": "البريد الإلكتروني لـ Let's Encrypt",
       "end_date": "تاريخ الانتهاء",
       "hostname": "اسم المضيف",
+      "instance_id": "معرف المثيل",
       "ip_address": "عنوان IP",
       "keywords": "الكلمات المفتاحية",
       "lets_encrypt_custom_profile": "ملف تعريف Let's Encrypt مخصص",
@@ -730,8 +753,7 @@
       "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL",
-      "instance_id": "معرف المثيل"
+      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
@@ -754,12 +776,22 @@
       "password_uppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل."
     }
   },
+  "input_list": {
+    "view_all_settings": "عرض جميع {{count}} الإعدادات"
+  },
   "instance": {
     "type": {
       "container": "حاوية",
       "pod": "Pod",
       "static": "ثابت"
     }
+  },
+  "instances": {
+    "down": "متوقف",
+    "loading": "جاري التحميل",
+    "subtitle": "إدارة مثيلات BunkerWeb المتصلة بواجهة المستخدم هذه: أنشئ، وقم بالتحقق من الاتصال، وأعد التحميل، أو أوقفها أو احذفها.",
+    "total": "إجمالي المثيلات",
+    "up": "قيد التشغيل"
   },
   "interval": {
     "day": "يوميًا",
@@ -774,6 +806,15 @@
       "success": "نجاح"
     }
   },
+  "jobs": {
+    "subtitle": "المهام المجدولة والمهام لمرة واحدة التي يتم تشغيلها بواسطة جدولة BunkerWeb — تتبع حالتها وقم بتشغيلها عند الطلب.",
+    "tile": {
+      "async": "غير متزامن",
+      "failed_last_run": "فشل التشغيل الأخير",
+      "reload_required": "إعادة التحميل مطلوبة",
+      "total": "إجمالي المهام"
+    }
+  },
   "legend": {
     "locked_settings_annotation": "مقفل ({{method}})",
     "locked_settings_hint": "الإعدادات المقفلة مميزة"
@@ -784,11 +825,14 @@
     "here": "هنا",
     "more_info": "مزيد من المعلومات",
     "more_news": "المزيد من الأخبار",
+    "opens_new_tab": "(يفتح في علامة تبويب جديدة)",
     "privacy_policy": "سياسة الخصوصية",
     "read_more": "اقرأ المزيد",
     "see_more": "شاهد المزيد",
-    "upgrade": "ترقية؟",
-    "opens_new_tab": "(يفتح في علامة تبويب جديدة)"
+    "upgrade": "ترقية؟"
+  },
+  "login": {
+    "subtitle": "تسجيل الدخول إلى حساب BunkerWeb الخاص بك"
   },
   "logs": {
     "annotation_error": "خطأ",
@@ -797,6 +841,7 @@
     "letsencrypt_logs": "سجلات Let's Encrypt",
     "main_logs": "السجلات الرئيسية",
     "new_lines_sr": "{{count}} أسطر سجل جديدة",
+    "no_log_files": "لا توجد ملفات سجل لعرضها، يرجى الرجوع إلى الوثائق للحصول على مزيد من المعلومات حول كيفية تمكين التسجيل",
     "issue_summary": "{{errors}} خطأ، {{warnings}} تحذير",
     "level_critical": "حرج",
     "level_debug": "تصحيح",
@@ -810,6 +855,7 @@
     "new_lines": "أسطر جديدة",
     "showing_all": "{{total}} أسطر",
     "showing_some": "عرض {{shown}} من {{total}}",
+    "select_file_prompt": "حدد ملف السجل لعرض محتواه",
     "trimmed_notice": "--- تم إزالة {{count}} سطر من السجلات القديمة لتحسين الأداء ---"
   },
   "modal": {
@@ -849,6 +895,7 @@
       "recovery_codes_save_alert": "يرجى حفظ رموز الاسترداد هذه في مكان آمن (مثل مدير كلمات المرور أو قبو). يمكنك استخدامها للوصول إلى حسابك إذا فقدت جهاز المصادقة الخاص بك.",
       "recovery_codes_shown_once_alert": "يتم عرض رموز الاسترداد هذه مرة واحدة فقط. يرجى التأكد من حفظها بأمان.",
       "reset_template_alert": "هل أنت متأكد أنك تريد إعادة تعيين إعدادات القالب الحالية والتكوينات المخصصة؟",
+      "services_conversion_confirmation": "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟",
       "services_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟",
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
       "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",
@@ -883,8 +930,10 @@
       "import_services": "استيراد الخدمات",
       "job_history": "آخر 10 عمليات تنفيذ للمهام",
       "job_history_count": "آخر {{count}} عمليات تنفيذ للمهمة",
+      "multiselect_selected": "العناصر المحددة",
       "recovery_codes": "رموز الاسترداد",
       "reset_template_config": "إعادة تعيين تكوين القالب؟",
+      "security_report_details": "تفاصيل تقرير الأمان",
       "server_name_not_unique": "اسم الخادم ليس فريدًا",
       "update_duration": "تحديث مدة الحظر"
     }
@@ -910,9 +959,12 @@
     "about": "حول",
     "bans": "الحظر",
     "cache": "الذاكرة المؤقتة",
+    "certificates": "الشهادات",
+    "web_cache": "ذاكرة التخزين المؤقت للموقع",
     "configs": "التكوينات",
     "extra_pages": "صفحات إضافية",
     "global_settings": "الإعدادات العامة",
+    "groups": "مجموعات الموارد",
     "home": "الرئيسية",
     "instances": "المثيلات",
     "jobs": "المهام",
@@ -930,9 +982,7 @@
     "reports": "التقارير",
     "services": "الخدمات",
     "support": "الدعم",
-    "templates": "القوالب",
-    "certificates": "الشهادات",
-    "groups": "مجموعات الموارد"
+    "templates": "القوالب"
   },
   "news": {
     "image_alt": "صورة الخبر",
@@ -966,6 +1016,13 @@
       "external": "خارجي",
       "pro": "Pro",
       "ui": "واجهة المستخدم"
+    }
+  },
+  "plugins": {
+    "multivalue": {
+      "more_value": "قيمة أخرى",
+      "more_values": "قيم أخرى",
+      "show_less": "إظهار أقل"
     }
   },
   "pro": {
@@ -1022,6 +1079,10 @@
     "alert": {
       "refresh_recovery_codes": "تحديث رموز الاسترداد الخاصة بك سيؤدي إلى إبطال الرموز السابقة."
     },
+    "badge": {
+      "2fa_disabled": "تم تعطيل المصادقة الثنائية (2FA)",
+      "2fa_enabled": "تم تمكين المصادقة الثنائية"
+    },
     "card": {
       "coming_soon": "قريبا",
       "title": {
@@ -1037,6 +1098,14 @@
     "help": {
       "photo_extensions": "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
     },
+    "modal": {
+      "body": {
+        "wipe_sessions_confirm": "يقوم هذا بتسجيل الخروج الفوري لكل جلسة نشطة أخرى في حسابك. أدخل كلمة المرور للتحقق."
+      },
+      "title": {
+        "wipe_sessions": "مسح الجلسات الأخرى؟"
+      }
+    },
     "session": {
       "browser": "المتصفح",
       "creation_date": "تاريخ الإنشاء",
@@ -1048,16 +1117,86 @@
       "title": "الجلسة",
       "wipe_help": "إنهاء كل جلسة نشطة أخرى في حسابك. ستبقى مسجلاً هنا."
     },
+    "subtitle": "إدارة حسابك، والأمان، والجلسات النشطة.",
     "tab": {
       "profile": "الملف الشخصي",
       "security": "الأمان",
       "sessions": "الجلسات"
-    },
-    "subtitle": "إدارة حسابك، والأمان، والجلسات النشطة."
+    }
+  },
+  "range_picker": {
+    "1h": "الساعة الماضية",
+    "24h": "آخر 24 ساعة",
+    "30d": "آخر 30 يومًا",
+    "7d": "الأسبوع الماضي",
+    "aria_label": "نطاق زمني",
+    "custom": "مخصص"
   },
   "reports": {
+    "bad_behavior_activity_detected": "تم اكتشاف نشاط غير لائق",
+    "bad_behavior_activity_explanation": "تم تجاوز هذه الطلبات الحد المسموح به من النشاط غير اللائق وتم تجميعها معًا.",
+    "bad_behavior_captured_at": "تم التقاط في",
+    "bad_behavior_ip": "عنوان IP",
+    "bad_behavior_no_details": "لم يتم التقاط أي تفاصيل حول النشاط غير اللائق لهذا التقرير.",
+    "bad_behavior_request_id": "معرف الطلب",
+    "bad_behavior_request_label": "طلب",
+    "bad_behavior_server": "الخادم",
+    "bad_behavior_total_requests": "طلبات مشبوهة",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "عائلات الهجوم"
+      },
+      "recent": {
+        "title": "أحدث الحوادث"
+      },
+      "top_asn": {
+        "title": "أرقام ASN الأعلى"
+      },
+      "top_offenders": {
+        "title": "المخالفون"
+      },
+      "top_rules": {
+        "title": "قواعد ModSecurity الأكثر تفعيلًا"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "محظورة",
+        "title": "الطلبات المحظورة مع مرور الوقت"
+      }
+    },
     "security_incident": "حادث أمني",
-    "security_report_data": "بيانات تقرير الأمان"
+    "security_report_data": "بيانات تقرير الأمان",
+    "subtitle": "تم إنشاء تقارير أمان بناءً على الطلبات المحظورة عبر مثيلات BunkerWeb الخاصة بك — ابحث، وقم بالتصفية، وقم بالتصدير، وحظر عناوين IP المخالفة مباشرة من الجدول.",
+    "tab": {
+      "eventlog": "سجل الأحداث",
+      "offenders": "المخالفون",
+      "overview": "نظرة عامة",
+      "patterns": "أنماط الهجوم"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "حظر",
+      "country": "البلد",
+      "fires": "تفعيل",
+      "ip": "IP",
+      "rule": "قاعدة",
+      "top_rule": "قاعدة الأعلى"
+    },
+    "tile": {
+      "asns": "أرقام ASN الأعلى",
+      "blocked": "طلبات محظورة",
+      "blocked_rate": "الاتجاه مقارنة بالفترة السابقة",
+      "bot": "روبوت / جامع بيانات",
+      "countries": "دول المخالفون الأعلى",
+      "peak_hour": "الساعة الذروة",
+      "rce": "RCE / أمر",
+      "repeat_offenders": "المخالفون المتكررون (أفضل 10)",
+      "sqli": "حقن SQL",
+      "unique_ips": "أعلى عناوين IP للمهاجمين",
+      "unique_offenders": "أعلى المخالفين"
+    }
   },
   "scope": {
     "all_services": "جميع الخدمات",
@@ -1069,6 +1208,7 @@
   "searchpane": {
     "active": "نشط",
     "async": "غير متزامن",
+    "ban_scope": "نطاق الحظر",
     "clear": "مسح الكل",
     "collapse_0": "لوحات البحث",
     "collapse_message": "طي الكل",
@@ -1127,6 +1267,13 @@
     "block": "حظر",
     "detect": "اكتشاف"
   },
+  "services": {
+    "draft": "خدمات مسودة",
+    "online": "متصل",
+    "subtitle": "إدارة الخدمات المتعددة المدعومة بـ BunkerWeb: إنشاء، تعديل، تحويل إلى مسودة، أو حذفها.",
+    "total": "إجمالي الخدمات",
+    "with_configs": "مع تكوينات مخصصة"
+  },
   "settings": {
     "custom_config": {
       "title": "تكوين مخصص"
@@ -1138,9 +1285,9 @@
   },
   "setup": {
     "status": {
-      "admin_user_exists": "🧑‍🚀 يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية.",
-      "pro_license_key_exists": "⭐ تم تكوين مفتاح ترخيص PRO بالفعل، يرجى المتابعة إلى الخطوة التالية.",
-      "reverse_proxy_configured": "↪️ تم تكوين وكيل عكسي بالفعل لواجهة الويب. يرجى المتابعة إلى الخطوة التالية.",
+      "admin_user_exists": "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية.",
+      "pro_license_key_exists": "تم تكوين مفتاح ترخيص PRO بالفعل، يرجى المتابعة إلى الخطوة التالية.",
+      "reverse_proxy_configured": "تم تكوين وكيل عكسي بالفعل لواجهة الويب. يرجى المتابعة إلى الخطوة التالية.",
       "secure_password": "كلمة مرور آمنة",
       "unique_server_name": "اسم خادم فريد"
     },
@@ -1191,13 +1338,15 @@
     "title": "معالج الإعداد"
   },
   "status": {
-    "admin_user_exists": "🧑‍🚀 يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية.",
+    "admin_user_exists": "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية.",
     "blog_connection_fail": "تعذر الاتصال بالمدونة للحصول على تحديثات الأخبار.",
     "default_server": "الخادم الافتراضي",
+    "done": "مكتمل",
     "down": "متوقف",
     "draft": "مسودة",
     "error_deleting_template": "حدث خطأ أثناء حذف القالب.",
     "error_loading_bans": "خطأ في تحميل الحظر. يرجى محاولة تحديث الصفحة.",
+    "error_loading_data": "تعذر تحميل البيانات",
     "error_loading_template": "حدث خطأ أثناء تحميل القالب.",
     "error_saving_template": "حدث خطأ أثناء حفظ القالب.",
     "failed": "فشل",
@@ -1226,8 +1375,10 @@
     "no_search_results": "لم يتم العثور على عناصر.",
     "no_steps": "لا توجد خطوات متاحة",
     "no_steps_description": "لا يحتوي هذا القالب على أي خطوات للتكوين.",
+    "not_applicable": "غير متاح",
     "online": "متصل",
     "partial": "جزئي",
+    "pending": "قيد الانتظار",
     "pinging_instances": "جار اختبار اتصال المثيلات، يرجى الانتظار...",
     "plugin_page": {
       "status": {
@@ -1236,7 +1387,7 @@
         "not_available": "صفحة الإضافة غير متاحة بعد خلال مرحلة البيتا."
       }
     },
-    "reverse_proxy_configured": "↪️ تم تكوين وكيل عكسي بالفعل لواجهة الويب. يرجى المتابعة إلى الخطوة التالية.",
+    "reverse_proxy_configured": "تم تكوين وكيل عكسي بالفعل لواجهة الويب. يرجى المتابعة إلى الخطوة التالية.",
     "secure_password": "كلمة مرور آمنة",
     "setting_up_bunkerweb": "جار إعداد BunkerWeb الخاص بك، يرجى الانتظار...",
     "success": "نجاح",
@@ -1244,9 +1395,7 @@
     "template_in_use_description": "لا يُسمح بإجراء تغييرات خارج القالب الحالي. يرجى إجراء التغييرات باستخدام القالب الحالي أو التبديل إلى الوضع المتقدم/الخام.",
     "unique_server_name": "اسم خادم فريد",
     "up": "قيد التشغيل",
-    "yes": "نعم",
-    "done": "مكتمل",
-    "pending": "قيد الانتظار"
+    "yes": "نعم"
   },
   "step": {
     "next": "التالي",
@@ -1317,8 +1466,8 @@
       "type": "النوع",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "الإصدار",
-      "value": "القيمة"
+      "value": "القيمة",
+      "version": "الإصدار"
     }
   },
   "template": {
@@ -1488,6 +1637,9 @@
     },
     "none": "لا يوجد قالب"
   },
+  "templates": {
+    "subtitle": "قوالب تكوين قابلة لإعادة الاستخدام لخدماتك — تجميع الإعدادات، والخطوات، والتكوينات المخصصة، ثم إنشاءها أو نسخها أو حذفها."
+  },
   "theme": {
     "dark": "داكن",
     "light": "فاتح"
@@ -1535,6 +1687,7 @@
       "show_selected_only": "إظهار المحددة فقط",
       "stop_instance": "إيقاف المثيل {{hostname}}",
       "unban_ip": "رفع الحظر عن {{ip}}",
+      "update_ban_duration": "تحديث مدة الحظر",
       "value_from_global": "قيمة من الإعدادات العامة"
     },
     "cannot_delete_original_ban": "لا يمكن حذف إدخال الحظر الأصلي.",
@@ -1616,6 +1769,7 @@
     "password_requirements": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل وأن تتضمن حرفًا كبيرًا واحدًا ورقمًا واحدًا وحرفًا خاصًا واحدًا.",
     "pro_feature": "هذه ميزة PRO.",
     "readonly_db_action_disabled": "معطل: قاعدة البيانات في وضع القراءة فقط.",
+    "readonly_mode": "هذه العملية غير مسموح بها في وضع القراءة فقط.",
     "readonly_user_action_disabled": "معطل: حسابك للقراءة فقط، الإجراء '{{action}}' معطل.",
     "real_ip_from": "قائمة عناوين IP / الشبكات الموثوقة، مفصولة بمسافات، التي تأتي منها الطلبات الوكيلة.",
     "real_ip_from_urls": "قائمة عناوين URL التي تحتوي على عناوين IP / شبكات موثوقة، مفصولة بمسافات، التي تأتي منها الطلبات الوكيلة. تدعم أيضًا عناوين URL file:// والمصادقة الأساسية باستخدام مخطط http://user:pass@url.",
@@ -1662,8 +1816,8 @@
         "job_name": "المهمة التي أنشأت ملف الذاكرة المؤقتة هذا",
         "last_update": "تاريخ ووقت آخر تحديث لملف الذاكرة المؤقتة",
         "plugin": "الإضافة المرتبطة بالمهمة التي أنشأت ملف الذاكرة المؤقتة هذا",
-        "service": "الخدمة المرتبطة بملف الذاكرة المؤقتة هذا (أو عام)",
-        "select_all": "حدد جميع ملفات الذاكرة المؤقتة"
+        "select_all": "حدد جميع ملفات الذاكرة المؤقتة",
+        "service": "الخدمة المرتبطة بملف الذاكرة المؤقتة هذا (أو عام)"
       },
       "configs": {
         "actions": "الإجراءات المتاحة لهذا التكوين المخصص",
@@ -1778,18 +1932,6 @@
   },
   "totp": {
     "prompt": "يرجى إدخال رمز TOTP الخاص بك."
-  },
-  "validation": {
-    "default_field_name": "هذا الحقل",
-    "invalid_date": "تاريخ غير صالح",
-    "ip_global_duplicate": "عنوان IP هذا محظور عالميًا بالفعل.",
-    "ip_invalid": "تنسيق عنوان IP غير صالح.",
-    "ip_required": "عنوان IP مطلوب.",
-    "ip_service_duplicate": "عنوان IP هذا محظور بالفعل للخدمة المحددة ({{service}}).",
-    "pattern": "يرجى إدخال قيمة صالحة لـ {{field}}.",
-    "required": "{{field}} مطلوب.",
-    "service_required_for_ban": "يجب تحديد خدمة لحظر خاص بالخدمة.",
-    "zerossl_email_or_api_key_required": "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفتاح API لـ ZeroSSL."
   },
   "certificates": {
     "acme_help": "حدد الخدمات التي تمكينها وإعدادها بالفعل Let's Encrypt. هذه العملية تقوم فقط بجدولة هذا التكوين؛ لا يتم إدخال تفاصيل الشهادة و بيانات التحدي هنا.",
@@ -1929,6 +2071,18 @@
     "value": "القيمة",
     "values": "القيم"
   },
+  "validation": {
+    "default_field_name": "هذا الحقل",
+    "invalid_date": "تاريخ غير صالح",
+    "ip_global_duplicate": "عنوان IP هذا محظور عالميًا بالفعل.",
+    "ip_invalid": "تنسيق عنوان IP غير صالح.",
+    "ip_required": "عنوان IP مطلوب.",
+    "ip_service_duplicate": "عنوان IP هذا محظور بالفعل للخدمة المحددة ({{service}}).",
+    "pattern": "يرجى إدخال قيمة صالحة لـ {{field}}.",
+    "required": "{{field}} مطلوب.",
+    "service_required_for_ban": "يجب تحديد خدمة لحظر خاص بالخدمة.",
+    "zerossl_email_or_api_key_required": "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفتاح API لـ ZeroSSL."
+  },
   "web_cache": {
     "available": "متاح",
     "cache_state": "الحالة",
@@ -1962,25 +2116,5 @@
     "services": "تمكين الخدمة",
     "status": "تخزين المثيل",
     "subtitle": "حالة ذاكرة التخزين المؤقت لـ Reverse-proxy، مقاييس معدل الضربة الإجمالية والتحكم في المسح الفوري."
-  },
-  "cache": {
-    "subtitle": "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة."
-  },
-  "accordion": {
-    "body": {
-      "tls": "إصدار وتجديد الشهادات تلقائيًا."
-    },
-    "title": {
-      "tls": "TLS والشهادات"
-    }
-  },
-  "input_list": {
-    "view_all_settings": "عرض جميع {{count}} الإعدادات"
-  },
-  "templates": {
-    "subtitle": "قوالب تكوين قابلة لإعادة الاستخدام لخدماتك — تجميع الإعدادات، والخطوات، والتكوينات المخصصة، ثم إنشاءها أو نسخها أو حذفها."
-  },
-  "login": {
-    "subtitle": "تسجيل الدخول إلى حساب BunkerWeb الخاص بك"
   }
 }

@@ -7,7 +7,16 @@
     "tagline": "Protection Puissante, Simplifiée",
     "version": "Version : {{version}}"
   },
+  "accordion": {
+    "body": {
+      "tls": "Émettre et renouveler automatiquement les certificats."
+    },
+    "title": {
+      "tls": "TLS & certificats"
+    }
+  },
   "alert": {
+    "configs_import_invalid_file": "Veuillez télécharger un fichier d'exportation de configuration personnalisé valide (.json).",
     "custom_end_date_required": "Veuillez sélectionner une date de fin personnalisée.",
     "important": "Important",
     "no_changes_detected": "Aucun changement détecté.",
@@ -17,10 +26,13 @@
   },
   "aria": {
     "label": {
+      "clear_search": "Effacer la recherche",
       "close": "Fermer",
       "copy": "Copier les journaux",
       "download_log": "Télécharger ce fichier journal",
       "follow": "Suivre",
+      "hide_value": "Masquer la valeur",
+      "reveal_value": "Afficher la valeur",
       "select_file": "Sélectionner un fichier",
       "select_page": "Sélectionner une page",
       "issue_count": "Nombre d'erreurs et d'avertissements",
@@ -34,10 +46,9 @@
       "configs_dropzone": "Sélectionnez un fichier d'exportation de configurations personnalisées ou déposez-le ici",
       "raw_configuration": "Configuration brute",
       "services_dropzone": "Sélectionnez un fichier d'exportation de services ou déposez-le ici",
-      "hide_value": "Masquer la valeur",
-      "reveal_value": "Afficher la valeur",
       "user_avatar": "Icône de l'utilisateur",
-      "remove_value": "Supprimer la valeur"
+      "remove_value": "Supprimer la valeur",
+      "view_selected_items": "Afficher les éléments sélectionnés"
     }
   },
   "badge": {
@@ -55,6 +66,9 @@
     },
     "pro": "Tirez le meilleur parti de BunkerWeb en passant à la version PRO. Plus d'infos et essai gratuit <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">ici</a>.",
     "support": "Besoin d'un support premium ou de conseils sur mesure pour BunkerWeb ? Consultez nos <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">services professionnels</a>."
+  },
+  "bans": {
+    "subtitle": "Adresses IP bloquées sur vos instances BunkerWeb — ajoutez, supprimez ou ajustez les durées de blocage."
   },
   "breadcrumb": {
     "about": "À propos",
@@ -77,10 +91,10 @@
     "pro": "Pro",
     "profile": "Profil",
     "reports": "Rapports",
+    "groups": "Groupes de ressources",
     "services": "Services",
     "support": "Support",
-    "templates": "Modèles",
-    "groups": "Groupes de ressources"
+    "templates": "Modèles"
   },
   "button": {
     "actions": "Actions",
@@ -96,6 +110,7 @@
     "cancel": "Annuler",
     "clear": "EFFACER",
     "close": "Fermer",
+    "clone": "Cloner",
     "columns": "Colonnes",
     "convert_configs": "Convertir les configurations",
     "convert_configs_to": "Convertir en {{state}}",
@@ -172,8 +187,13 @@
     "upload_photo": "Télécharger Nouvelle Photo",
     "view_details": "Voir les détails",
     "view_raw_data": "Voir les données brutes",
-    "wipe_other_sessions": "Effacer les Autres Sessions",
-    "clone": "Cloner"
+    "wipe_other_sessions": "Effacer les Autres Sessions"
+  },
+  "cache": {
+    "subtitle": "Fichiers de cache générés par les tâches planifiées (listes noires, bases de données GeoIP, etc.) — inspectez, téléchargez ou supprimez-les par service et plugin."
+  },
+  "configs": {
+    "subtitle": "Extraits de configuration NGINX personnalisés pour vos services — créez, modifiez et gérez les surcharges HTTP, ModSecurity et au niveau du flux."
   },
   "country": {
     "AD": "Andorre",
@@ -582,6 +602,8 @@
     "select_rows_templates_0": "Aucun Modèle sélectionné",
     "select_rows_templates_1": "1 Modèle sélectionné",
     "select_rows_templates_plural": "%d Modèles sélectionnés",
+    "selected_list_count": "{{count}} {{entity}} sélectionnés",
+    "selected_list_empty": "Aucune {{entity}} sélectionnée.",
     "zero_records_bans": "Aucun Bannissement correspondant trouvé",
     "zero_records_cache": "Aucun Fichier Cache correspondant trouvé",
     "zero_records_configs": "Aucune Configuration Personnalisée correspondante trouvée",
@@ -591,9 +613,7 @@
     "zero_records_plugins": "Aucun Plugin correspondant trouvé",
     "zero_records_reports": "Aucun Rapport correspondant trouvé",
     "zero_records_services": "Aucun Service correspondant trouvé",
-    "zero_records_templates": "Aucun Modèle correspondant trouvé",
-    "selected_list_count": "{{count}} {{entity}} sélectionnés",
-    "selected_list_empty": "Aucune {{entity}} sélectionnée."
+    "zero_records_templates": "Aucun Modèle correspondant trouvé"
   },
   "dev_log": {
     "copy_failed": "Échec de la copie du texte :",
@@ -633,7 +653,7 @@
     "unban_failed": "Échec du débannissement de l'adresse IP. Veuillez réessayer."
   },
   "flash": {
-    "easter_egg": "Si vous lisez ceci, c'est que vous êtes curieux 👀",
+    "easter_egg": "Si vous lisez ceci, c'est que vous êtes curieux",
     "error": "Erreur",
     "message": "Info",
     "pro": "BunkerWeb PRO",
@@ -680,6 +700,7 @@
       "configuration_name": "Nom de la Configuration",
       "confirm_password": "Confirmer le Mot de Passe",
       "current_password": "Mot de Passe Actuel",
+      "custom_config": "Configuration",
       "custom_end_date": "Date de Fin Personnalisée",
       "custom_ssl_certificate": "Certificat SSL Personnalisé",
       "custom_ssl_certificate_data": "Données Certificat SSL Perso (Base64/PEM)",
@@ -692,6 +713,7 @@
       "email_for_lets_encrypt": "Email pour Let's Encrypt",
       "end_date": "Date de Fin",
       "hostname": "Nom d'hôte",
+      "instance_id": "ID de l'instance",
       "ip_address": "Adresse IP",
       "keywords": "Mots-clés",
       "lets_encrypt_custom_profile": "Profil Let's Encrypt Personnalisé",
@@ -731,8 +753,7 @@
       "zerossl_api_retry": "Nouvelles tentatives API ZeroSSL",
       "zerossl_api_retry_delay": "Délai de nouvelle tentative API ZeroSSL",
       "zerossl_api_connect_timeout": "Délai de connexion API ZeroSSL",
-      "zerossl_api_max_time": "Durée maximale API ZeroSSL",
-      "instance_id": "ID de l'instance"
+      "zerossl_api_max_time": "Durée maximale API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Entrez le code",
@@ -755,12 +776,22 @@
       "password_uppercase": "Le mot de passe doit contenir au moins 1 lettre majuscule."
     }
   },
+  "input_list": {
+    "view_all_settings": "Afficher tous les {{count}} paramètres"
+  },
   "instance": {
     "type": {
       "container": "Conteneur",
       "pod": "Pod",
       "static": "Statique"
     }
+  },
+  "instances": {
+    "down": "Inactif",
+    "loading": "Chargement",
+    "subtitle": "Gérer les instances BunkerWeb connectées à cette interface : créez, ping, rechargez, arrêtez ou supprimez-les.",
+    "total": "Nombre total d'instances",
+    "up": "Actif"
   },
   "interval": {
     "day": "Quotidien",
@@ -775,6 +806,15 @@
       "success": "Succès"
     }
   },
+  "jobs": {
+    "subtitle": "Tâches planifiées et ponctuelles exécutées par le planificateur BunkerWeb — suivez leur statut et exécutez-les à la demande.",
+    "tile": {
+      "async": "Asynchrone",
+      "failed_last_run": "Échec de la dernière exécution",
+      "reload_required": "Recharge nécessaire",
+      "total": "Nombre total de tâches"
+    }
+  },
   "legend": {
     "locked_settings_annotation": "Verrouillé ({{method}})",
     "locked_settings_hint": "Les paramètres verrouillés sont mis en surbrillance"
@@ -785,11 +825,14 @@
     "here": "ici",
     "more_info": "Plus d'Infos",
     "more_news": "Plus d'Actualités",
+    "opens_new_tab": "(s'ouvre dans un nouvel onglet)",
     "privacy_policy": "Politique de Confidentialité",
     "read_more": "Lire Plus",
     "see_more": "Voir Plus",
-    "upgrade": "Mettre à niveau ?",
-    "opens_new_tab": "(s'ouvre dans un nouvel onglet)"
+    "upgrade": "Mettre à niveau ?"
+  },
+  "login": {
+    "subtitle": "Connectez-vous à votre compte BunkerWeb"
   },
   "logs": {
     "annotation_error": "Erreur",
@@ -798,6 +841,7 @@
     "letsencrypt_logs": "Journaux Let's Encrypt",
     "main_logs": "Journaux principaux",
     "new_lines_sr": "{{count}} nouvelles lignes de journal",
+    "no_log_files": "Il n'y a pas de fichiers journaux à afficher, consultez la documentation pour plus d'informations sur l'activation de la journalisation.",
     "issue_summary": "{{errors}} erreur(s), {{warnings}} avertissement(s)",
     "level_critical": "Critique",
     "level_debug": "Débogage",
@@ -811,6 +855,7 @@
     "new_lines": "nouvelles lignes",
     "showing_all": "{{total}} lignes",
     "showing_some": "{{shown}} sur {{total}} affichées",
+    "select_file_prompt": "Sélectionnez un fichier journal pour afficher son contenu",
     "trimmed_notice": "--- {{count}} anciennes lignes de log ont été supprimées pour les performances ---"
   },
   "modal": {
@@ -850,6 +895,7 @@
       "recovery_codes_save_alert": "Veuillez sauvegarder ces codes de récupération dans un endroit sûr (comme un gestionnaire de mots de passe ou un bunker). Vous pourrez les utiliser pour accéder à votre compte si vous perdez votre appareil d'authentification.",
       "recovery_codes_shown_once_alert": "Ces codes de récupération ne sont affichés qu'une seule fois. Veuillez vous assurer de les sauvegarder en lieu sûr.",
       "reset_template_alert": "Êtes-vous sûr de vouloir réinitialiser les paramètres du modèle actuel et les configurations personnalisées ?",
+      "services_conversion_confirmation": "Êtes-vous sûr de vouloir convertir les services sélectionnés ?",
       "services_deletion_confirmation": "Êtes-vous sûr de vouloir supprimer les services sélectionnés ?",
       "unban_confirmation_alert": "Êtes-vous sûr de vouloir débannir l'adresse IP sélectionnée ?",
       "unban_confirmation_alert_plural": "Êtes-vous sûr de vouloir débannir les adresses IP sélectionnées ?",
@@ -884,8 +930,10 @@
       "import_services": "Importer des services",
       "job_history": "10 Dernières Exécutions de la Tâche",
       "job_history_count": "{{count}} dernières exécutions de la Tâche",
+      "multiselect_selected": "Éléments sélectionnés",
       "recovery_codes": "Codes de Récupération",
       "reset_template_config": "Réinitialiser la Configuration du Modèle ?",
+      "security_report_details": "Détails du rapport de sécurité",
       "server_name_not_unique": "Le Nom du Serveur n'est pas Unique",
       "update_duration": "Mettre à Jour la Durée du Bannissement"
     }
@@ -911,10 +959,12 @@
     "about": "À Propos",
     "bans": "Bannissements",
     "cache": "Cache",
+    "certificates": "Certificats",
     "web_cache": "Cache web",
     "configs": "Configurations",
     "extra_pages": "Pages Supplémentaires",
     "global_settings": "Paramètres globaux",
+    "groups": "Groupes de ressources",
     "home": "Accueil",
     "instances": "Instances",
     "jobs": "Tâches",
@@ -932,9 +982,7 @@
     "reports": "Rapports",
     "services": "Services",
     "support": "Support",
-    "templates": "Modèles",
-    "certificates": "Certificats",
-    "groups": "Groupes de ressources"
+    "templates": "Modèles"
   },
   "news": {
     "image_alt": "Image d'actualité",
@@ -968,6 +1016,13 @@
       "external": "Externe",
       "pro": "Pro",
       "ui": "UI"
+    }
+  },
+  "plugins": {
+    "multivalue": {
+      "more_value": "plus de valeurs",
+      "more_values": "plus de valeurs",
+      "show_less": "Afficher moins"
     }
   },
   "pro": {
@@ -1024,6 +1079,10 @@
     "alert": {
       "refresh_recovery_codes": "Rafraîchir vos codes de récupération invalidera les précédents."
     },
+    "badge": {
+      "2fa_disabled": "2FA Désactivé",
+      "2fa_enabled": "2FA Activé"
+    },
     "card": {
       "coming_soon": "Bientôt Disponible",
       "title": {
@@ -1039,6 +1098,14 @@
     "help": {
       "photo_extensions": "JPG, GIF ou PNG autorisés. Taille max : 800 Ko."
     },
+    "modal": {
+      "body": {
+        "wipe_sessions_confirm": "Cela se déconnecte immédiatement de toutes les autres sessions actives sur votre compte. Entrez votre mot de passe pour confirmer."
+      },
+      "title": {
+        "wipe_sessions": "Effacer les autres sessions ?"
+      }
+    },
     "session": {
       "browser": "Navigateur",
       "creation_date": "Date de Création",
@@ -1050,16 +1117,86 @@
       "title": "Session",
       "wipe_help": "Terminer toutes les autres sessions actives sur votre compte. Vous resterez connecté ici."
     },
+    "subtitle": "Gérer votre compte, la sécurité et les sessions actives.",
     "tab": {
       "profile": "Profil",
       "security": "Sécurité",
       "sessions": "Sessions"
-    },
-    "subtitle": "Gérer votre compte, la sécurité et les sessions actives."
+    }
+  },
+  "range_picker": {
+    "1h": "Dernière heure",
+    "24h": "Dernières 24 h",
+    "30d": "Derniers 30 jours",
+    "7d": "Dernière semaine",
+    "aria_label": "Période de temps",
+    "custom": "Personnalisé"
   },
   "reports": {
+    "bad_behavior_activity_detected": "Détection d'activité suspecte",
+    "bad_behavior_activity_explanation": "Ces requêtes ont dépassé le seuil d'activité suspecte et ont été regroupées.",
+    "bad_behavior_captured_at": "Capturé à",
+    "bad_behavior_ip": "Adresse IP",
+    "bad_behavior_no_details": "Aucun détail sur l'activité suspecte n'a été capturé pour ce rapport.",
+    "bad_behavior_request_id": "Identifiant de la requête",
+    "bad_behavior_request_label": "Requête",
+    "bad_behavior_server": "Serveur",
+    "bad_behavior_total_requests": "Requêtes suspectes",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "Familles d'attaques"
+      },
+      "recent": {
+        "title": "Incidents les plus récents"
+      },
+      "top_asn": {
+        "title": "ASNs des principaux attaquants"
+      },
+      "top_offenders": {
+        "title": "Attaquants principaux"
+      },
+      "top_rules": {
+        "title": "Règles ModSecurity les plus fréquemment déclenchées"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "Bloqué",
+        "title": "Requêtes bloquées au fil du temps"
+      }
+    },
     "security_incident": "Incident de sécurité",
-    "security_report_data": "Données du rapport de sécurité"
+    "security_report_data": "Données du rapport de sécurité",
+    "subtitle": "Rapports de sécurité générés à partir des requêtes bloquées sur vos instances BunkerWeb : recherchez, filtrez, exportez et bloquez directement les adresses IP fautes à partir du tableau.",
+    "tab": {
+      "eventlog": "Journal d'événements",
+      "offenders": "Attaquants principaux",
+      "overview": "Aperçu",
+      "patterns": "Modèles d'attaques"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "Blocs",
+      "country": "Pays",
+      "fires": "Déclenchements",
+      "ip": "IP",
+      "rule": "Règle",
+      "top_rule": "Règle la plus fréquente"
+    },
+    "tile": {
+      "asns": "ASNs des principaux attaquants",
+      "blocked": "Requêtes bloquées",
+      "blocked_rate": "Évolution par rapport à la période précédente",
+      "bot": "Bot / scraper",
+      "countries": "Pays des principaux attaquants",
+      "peak_hour": "Heure de pointe",
+      "rce": "RCE / commande",
+      "repeat_offenders": "Attaquants répétés (10 plus fréquents)",
+      "sqli": "Injection SQL",
+      "unique_ips": "Adresses IP des attaquants les plus fréquents",
+      "unique_offenders": "Les plus fautes"
+    }
   },
   "scope": {
     "all_services": "Tous les Services",
@@ -1071,6 +1208,7 @@
   "searchpane": {
     "active": "Actif",
     "async": "Asynchrone",
+    "ban_scope": "Portée du Bannissement",
     "clear": "Tout Effacer",
     "collapse_0": "Volets de Recherche",
     "collapse_message": "Tout Réduire",
@@ -1129,6 +1267,13 @@
     "block": "Bloquer",
     "detect": "Détecter"
   },
+  "services": {
+    "draft": "Services en brouillon",
+    "online": "En Ligne",
+    "subtitle": "Gérer les services multisites protégés par BunkerWeb : créer, modifier, convertir en brouillon ou les supprimer.",
+    "total": "Nombre total de services",
+    "with_configs": "Avec des configurations personnalisées"
+  },
   "settings": {
     "custom_config": {
       "title": "Configuration Personnalisée"
@@ -1140,9 +1285,9 @@
   },
   "setup": {
     "status": {
-      "admin_user_exists": "🧑‍🚀 Un utilisateur admin existe déjà. Veuillez passer à l'étape suivante.",
-      "pro_license_key_exists": "⭐ Une clé de licence PRO est déjà configurée, veuillez passer à l'étape suivante.",
-      "reverse_proxy_configured": "↪️ Un proxy inverse est déjà configuré pour l'interface web. Veuillez passer à l'étape suivante.",
+      "admin_user_exists": "Un utilisateur admin existe déjà. Veuillez passer à l'étape suivante.",
+      "pro_license_key_exists": "Une clé de licence PRO est déjà configurée, veuillez passer à l'étape suivante.",
+      "reverse_proxy_configured": "Un proxy inverse est déjà configuré pour l'interface web. Veuillez passer à l'étape suivante.",
       "secure_password": "Mot de Passe Sécurisé",
       "unique_server_name": "Nom de Serveur Unique"
     },
@@ -1193,13 +1338,15 @@
     "title": "Assistant de Configuration"
   },
   "status": {
-    "admin_user_exists": "🧑‍🚀 Un utilisateur admin existe déjà. Veuillez passer à l'étape suivante.",
+    "admin_user_exists": "Un utilisateur admin existe déjà. Veuillez passer à l'étape suivante.",
     "blog_connection_fail": "Impossible de se connecter au blog pour les actualités.",
     "default_server": "serveur par défaut",
+    "done": "Terminé",
     "down": "Inactif",
     "draft": "Brouillon",
     "error_deleting_template": "Une erreur s'est produite lors de la suppression du modèle.",
     "error_loading_bans": "Erreur lors du chargement des bannissements. Veuillez essayer de rafraîchir la page.",
+    "error_loading_data": "Impossible de charger les données",
     "error_loading_template": "Impossible de charger les données du modèle.",
     "error_saving_template": "Une erreur s'est produite lors de l'enregistrement du modèle.",
     "failed": "Échoué",
@@ -1228,8 +1375,10 @@
     "no_search_results": "Aucun élément trouvé.",
     "no_steps": "Aucune Étape Disponible",
     "no_steps_description": "Ce modèle n'a aucune étape à configurer.",
+    "not_applicable": "N/A",
     "online": "En Ligne",
     "partial": "Partiel",
+    "pending": "En attente",
     "pinging_instances": "Ping des instances, veuillez patienter...",
     "plugin_page": {
       "status": {
@@ -1238,7 +1387,7 @@
         "not_available": "La page du plugin n'est pas encore disponible pendant la phase bêta."
       }
     },
-    "reverse_proxy_configured": "↪️ Un proxy inverse est déjà configuré pour l'interface web. Veuillez passer à l'étape suivante.",
+    "reverse_proxy_configured": "Un proxy inverse est déjà configuré pour l'interface web. Veuillez passer à l'étape suivante.",
     "secure_password": "Mot de Passe Sécurisé",
     "setting_up_bunkerweb": "Configuration de votre BunkerWeb, veuillez patienter...",
     "success": "Succès",
@@ -1246,9 +1395,7 @@
     "template_in_use_description": "Les modifications en dehors du modèle actuel ne sont pas autorisées. Veuillez effectuer les modifications en utilisant le modèle actuel ou passer en mode Avancé/Brut.",
     "unique_server_name": "Nom de Serveur Unique",
     "up": "Actif",
-    "yes": "Oui",
-    "done": "Terminé",
-    "pending": "En attente"
+    "yes": "Oui"
   },
   "step": {
     "next": "Suivant",
@@ -1319,8 +1466,8 @@
       "type": "Type",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Version",
-      "value": "Valeur"
+      "value": "Valeur",
+      "version": "Version"
     }
   },
   "template": {
@@ -1490,6 +1637,9 @@
     },
     "none": "Aucun modèle"
   },
+  "templates": {
+    "subtitle": "Modèles de configuration réutilisables pour vos services : regrouper les paramètres, les étapes et les configurations personnalisées, puis les créer, les cloner ou les supprimer."
+  },
   "theme": {
     "dark": "Sombre",
     "light": "Clair"
@@ -1537,6 +1687,7 @@
       "show_selected_only": "Afficher uniquement la sélection",
       "stop_instance": "Arrêter l'Instance {{hostname}}",
       "unban_ip": "Débannir {{ip}}",
+      "update_ban_duration": "Mettre à jour la durée de blocage",
       "value_from_global": "Valeur provenant des paramètres globaux"
     },
     "cannot_delete_original_ban": "Impossible de supprimer l'entrée de bannissement originale.",
@@ -1618,6 +1769,7 @@
     "password_requirements": "Le mot de passe doit comporter au moins 8 caractères et inclure 1 majuscule, 1 chiffre et 1 caractère spécial.",
     "pro_feature": "Ceci est une fonctionnalité PRO.",
     "readonly_db_action_disabled": "Désactivé : La base de données est en lecture seule, action '{{action}}' désactivée.",
+    "readonly_mode": "Cette action n'est pas autorisée en mode lecture seule.",
     "readonly_user_action_disabled": "Désactivé : Votre compte est en lecture seule, action '{{action}}' désactivée.",
     "real_ip_from": "Liste des adresses IP / réseaux de confiance, séparés par des espaces, d'où proviennent les requêtes proxy.",
     "real_ip_from_urls": "Liste des URL contenant des adresses IP / réseaux de confiance, séparées par des espaces, d'où proviennent les requêtes proxy. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url.",
@@ -1664,8 +1816,8 @@
         "job_name": "Tâche ayant généré ce fichier cache",
         "last_update": "Date et heure de la dernière mise à jour du fichier cache",
         "plugin": "Plugin associé à la tâche ayant généré ce fichier cache",
-        "service": "Service associé à ce fichier cache (ou Global)",
-        "select_all": "Sélectionner tous les fichiers Cache"
+        "select_all": "Sélectionner tous les fichiers Cache",
+        "service": "Service associé à ce fichier cache (ou Global)"
       },
       "configs": {
         "actions": "Actions disponibles pour cette Config Perso",
@@ -1780,18 +1932,6 @@
   },
   "totp": {
     "prompt": "Veuillez entrer votre code TOTP."
-  },
-  "validation": {
-    "default_field_name": "Ce champ",
-    "invalid_date": "Date invalide",
-    "ip_global_duplicate": "Cette adresse IP est déjà bannie globalement.",
-    "ip_invalid": "Format d'adresse IP invalide.",
-    "ip_required": "L'adresse IP est requise.",
-    "ip_service_duplicate": "Cette adresse IP est déjà bannie pour le service sélectionné ({{service}}).",
-    "pattern": "Veuillez entrer une valeur valide pour {{field}}.",
-    "required": "{{field}} est requis.",
-    "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service.",
-    "zerossl_email_or_api_key_required": "ZeroSSL nécessite soit un email, soit une clé API ZeroSSL."
   },
   "certificates": {
     "acme_help": "Sélectionner les services dont les paramètres existants activent et configurent déjà Let's Encrypt. Cette action ne planifie que cette configuration ; les détails du certificat et les informations d'authentification ne sont pas saisies ici.",
@@ -1931,6 +2071,18 @@
     "value": "Valeur",
     "values": "Valeurs"
   },
+  "validation": {
+    "default_field_name": "Ce champ",
+    "invalid_date": "Date invalide",
+    "ip_global_duplicate": "Cette adresse IP est déjà bannie globalement.",
+    "ip_invalid": "Format d'adresse IP invalide.",
+    "ip_required": "L'adresse IP est requise.",
+    "ip_service_duplicate": "Cette adresse IP est déjà bannie pour le service sélectionné ({{service}}).",
+    "pattern": "Veuillez entrer une valeur valide pour {{field}}.",
+    "required": "{{field}} est requis.",
+    "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service.",
+    "zerossl_email_or_api_key_required": "ZeroSSL nécessite soit un email, soit une clé API ZeroSSL."
+  },
   "web_cache": {
     "available": "Disponibles",
     "cache_state": "État",
@@ -1964,25 +2116,5 @@
     "services": "Activation du service",
     "status": "Stockage de l'instance",
     "subtitle": "État du cache inverse, métriques agrégées du taux de réussite et commandes de purge immédiate."
-  },
-  "cache": {
-    "subtitle": "Fichiers de cache générés par les tâches planifiées (listes noires, bases de données GeoIP, etc.) — inspectez, téléchargez ou supprimez-les par service et plugin."
-  },
-  "accordion": {
-    "body": {
-      "tls": "Émettre et renouveler automatiquement les certificats."
-    },
-    "title": {
-      "tls": "TLS & certificats"
-    }
-  },
-  "input_list": {
-    "view_all_settings": "Afficher tous les {{count}} paramètres"
-  },
-  "templates": {
-    "subtitle": "Modèles de configuration réutilisables pour vos services : regrouper les paramètres, les étapes et les configurations personnalisées, puis les créer, les cloner ou les supprimer."
-  },
-  "login": {
-    "subtitle": "Connectez-vous à votre compte BunkerWeb"
   }
 }

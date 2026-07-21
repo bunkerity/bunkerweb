@@ -7,7 +7,16 @@
     "tagline": "طاقتور تحفظ، آسان بنایا گیا",
     "version": "ورژن: {{version}}"
   },
+  "accordion": {
+    "body": {
+      "tls": "سفرنامے خود بخود جاری اور تجدید کریں۔"
+    },
+    "title": {
+      "tls": "TLS اور سفرنامے"
+    }
+  },
   "alert": {
+    "configs_import_invalid_file": "براہ کرم ایک معتبر سفارشی کنفیگریشنز کی تصدیر فائل (.json) اپ لوڈ کریں۔",
     "custom_end_date_required": "براہ کرم ایک حسب ضرورت اختتامی تاریخ منتخب کریں۔",
     "important": "اہم",
     "no_changes_detected": "کوئی تبدیلی نہیں ملی۔",
@@ -17,10 +26,13 @@
   },
   "aria": {
     "label": {
+      "clear_search": "تلاش صاف کریں",
       "close": "بند کریں",
       "copy": "لاگز کاپی کریں",
       "download_log": "یہ لاگ فائل ڈاؤن لوڈ کریں",
       "follow": "فالو کریں",
+      "hide_value": "ظاہر نہ کریں",
+      "reveal_value": "ظاہر کریں",
       "select_file": "فائل منتخب کریں",
       "select_page": "صفحہ منتخب کریں",
       "issue_count": "خرابیوں اور انتباہات کی تعداد",
@@ -34,10 +46,9 @@
       "configs_dropzone": "کسٹم کنفیگریشنز کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں",
       "raw_configuration": "خام کنفیگریشن",
       "services_dropzone": "خدمات کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں",
-      "hide_value": "ظاہر نہ کریں",
-      "reveal_value": "ظاہر کریں",
       "user_avatar": "کاربر کا آواتار",
-      "remove_value": "قيمة کو ہٹائیں"
+      "remove_value": "قيمة کو ہٹائیں",
+      "view_selected_items": " منتخب عناصر دیکھیں"
     }
   },
   "badge": {
@@ -56,10 +67,14 @@
     "pro": "PRO ورژن میں اپ گریڈ کر کے BunkerWeb سے زیادہ سے زیادہ فائدہ اٹھائیں۔ مزید معلومات اور مفت ٹرائل <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">یہاں</a>۔",
     "support": "BunkerWeb کے لیے پریمیم سپورٹ یا موزوں مشاورت کی ضرورت ہے؟ ہماری <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">پیشہ ورانہ خدمات</a> دیکھیں۔"
   },
+  "bans": {
+    "subtitle": "آپ کے BunkerWeb انسٹینسز میں ممنوعہ IP ایڈریسز - شامل کریں، ہٹائیں، یا پابندی کی مدت کو ایڈجسٹ کریں۔"
+  },
   "breadcrumb": {
     "about": "متعلق",
     "bans": "پابندیاں",
     "cache": "کیشے",
+    "web_cache": "ویب کیش",
     "configs": "کنفیگریشنز",
     "extra_pages": "اضافی صفحات",
     "global_settings": "عالمی سیٹنگز",
@@ -76,10 +91,10 @@
     "pro": "پرو",
     "profile": "پروفائل",
     "reports": "رپورٹس",
+    "groups": "رسورس گروپس",
     "services": "خدمات",
     "support": "سپورٹ",
-    "templates": "ٹیمپلیٹس",
-    "groups": "رسورس گروپس"
+    "templates": "ٹیمپلیٹس"
   },
   "button": {
     "actions": "اعمال",
@@ -95,6 +110,7 @@
     "cancel": "منسوخ کریں",
     "clear": "صاف کریں",
     "close": "بند کریں",
+    "clone": "کپی کریں",
     "columns": "کالم",
     "convert_configs": "کنفیگریشن تبدیل کریں",
     "convert_configs_to": "{{state}} میں تبدیل کریں",
@@ -171,8 +187,13 @@
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
     "view_details": "تفصیلات دیکھیں",
     "view_raw_data": "خام ڈیٹا دیکھیں",
-    "wipe_other_sessions": "دیگر سیشنز صاف کریں",
-    "clone": "کپی کریں"
+    "wipe_other_sessions": "دیگر سیشنز صاف کریں"
+  },
+  "cache": {
+    "subtitle": "جداول کے ذریعے بنائے گئے کیش فائلوں (بلوکلیسٹ، جیوآئی پی ڈیٹا بیس، اور دیگر) - ہر سروس اور پگین کے لیے ان کا تفحص، ڈاؤن لوڈ، یا حذف کریں۔"
+  },
+  "configs": {
+    "subtitle": "آپ کے سروسز کے لیے سفارشی NGINX کنفیگریشن اسنیپس - HTTP، ModSecurity، اور اسٹریم لیول کے لیے بنائیں، ترمیم کریں، اور کاولٹن کریں۔"
   },
   "country": {
     "AD": "انڈورا",
@@ -581,6 +602,8 @@
     "select_rows_templates_0": "کوئی ٹیمپلیٹ منتخب نہیں",
     "select_rows_templates_1": "1 ٹیمپلیٹ منتخب کیا گیا",
     "select_rows_templates_plural": "%d ٹیمپلیٹس منتخب کیے گئے",
+    "selected_list_count": "{{count}} {{entity}} منتخب",
+    "selected_list_empty": "{{entity}} منتخب نہیں ہے۔",
     "zero_records_bans": "کوئی مماثل پابندی نہیں ملی",
     "zero_records_cache": "کوئی مماثل کیشے فائل نہیں ملی",
     "zero_records_configs": "کوئی مماثل کسٹم کنفیگریشن نہیں ملی",
@@ -590,9 +613,7 @@
     "zero_records_plugins": "کوئی مماثل پلگ ان نہیں ملا",
     "zero_records_reports": "کوئی مماثل رپورٹ نہیں ملی",
     "zero_records_services": "کوئی مماثل سروس نہیں ملی",
-    "zero_records_templates": "کوئی مماثل ٹیمپلیٹس نہیں ملے",
-    "selected_list_count": "{{count}} {{entity}} منتخب",
-    "selected_list_empty": "{{entity}} منتخب نہیں ہے۔"
+    "zero_records_templates": "کوئی مماثل ٹیمپلیٹس نہیں ملے"
   },
   "dev_log": {
     "copy_failed": "متن کاپی کرنے میں ناکام:",
@@ -632,7 +653,7 @@
     "unban_failed": "IP ایڈریس سے پابندی ہٹانے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
   },
   "flash": {
-    "easter_egg": "اگر آپ یہ پڑھ رہے ہیں، تو اس کا مطلب ہے کہ آپ متجسس ہیں 👀",
+    "easter_egg": "اگر آپ یہ پڑھ رہے ہیں، تو اس کا مطلب ہے کہ آپ متجسس ہیں",
     "error": "خرابی",
     "message": "معلومات",
     "pro": "BunkerWeb PRO",
@@ -679,6 +700,7 @@
       "configuration_name": "کنفیگریشن کا نام",
       "confirm_password": "پاس ورڈ کی تصدیق کریں",
       "current_password": "موجودہ پاس ورڈ",
+      "custom_config": "کنفیگریشن",
       "custom_end_date": "حسب ضرورت اختتامی تاریخ",
       "custom_ssl_certificate": "کسٹم SSL سرٹیفکیٹ",
       "custom_ssl_certificate_data": "کسٹم SSL سرٹیفکیٹ ڈیٹا (Base64/PEM)",
@@ -691,6 +713,7 @@
       "email_for_lets_encrypt": "Let's Encrypt کے لیے ای میل",
       "end_date": "اختتامی تاریخ",
       "hostname": "ہوسٹ نام",
+      "instance_id": "انسٹینس ID",
       "ip_address": "IP ایڈریس",
       "keywords": "کلیدی الفاظ",
       "lets_encrypt_custom_profile": "Let's Encrypt کسٹم پروفائل",
@@ -730,8 +753,7 @@
       "zerossl_api_retry": "ZeroSSL API دوبارہ کوششیں",
       "zerossl_api_retry_delay": "ZeroSSL API دوبارہ کوشش میں تاخیر",
       "zerossl_api_connect_timeout": "ZeroSSL API کنکشن ٹائم آؤٹ",
-      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت",
-      "instance_id": "انسٹینس ID"
+      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت"
     },
     "placeholder": {
       "2fa_code": "کوڈ درج کریں",
@@ -754,12 +776,22 @@
       "password_uppercase": "پاس ورڈ میں کم از کم 1 بڑا حرف ہونا چاہیے۔"
     }
   },
+  "input_list": {
+    "view_all_settings": "تمام {{count}} سیٹنگز دیکھیں"
+  },
   "instance": {
     "type": {
       "container": "کنٹینر",
       "pod": "پوڈ",
       "static": "سٹیٹک"
     }
+  },
+  "instances": {
+    "down": "غیر فعال",
+    "loading": "لوڈنگ",
+    "subtitle": "BunkerWeb انسٹینسز کو کاwalten جو اس UI سے منسلک ہیں: انہیں بنائیں، پنگ کریں، ریلوڈ کریں، اسٹاپ کریں، یا ہٹائیں۔",
+    "total": "کل انسٹینسز",
+    "up": "فعال"
   },
   "interval": {
     "day": "روزانہ",
@@ -774,6 +806,15 @@
       "success": "کامیاب"
     }
   },
+  "jobs": {
+    "subtitle": "BunkerWeb شیڈولر کے ذریعے چلائے جانے والے شیڈول اور ایک بار کے کام - ان کی حالت کا پتہ لگائیں اور حسب ضرورت چلائیں۔",
+    "tile": {
+      "async": "آسائن",
+      "failed_last_run": "پچھلا عمل ناکام",
+      "reload_required": "ریلوڈ کی ضرورت ہے",
+      "total": "کل کام"
+    }
+  },
   "legend": {
     "locked_settings_annotation": "مقفل ({{method}})",
     "locked_settings_hint": "لاک شدہ ترتیبات نمایاں ہیں"
@@ -784,11 +825,14 @@
     "here": "یہاں",
     "more_info": "مزید معلومات",
     "more_news": "مزید خبریں",
+    "opens_new_tab": "(ایک نئی ٹیب میں کھولیں)",
     "privacy_policy": "رازداری کی پالیسی",
     "read_more": "مزید پڑھیں",
     "see_more": "مزید دیکھیں",
-    "upgrade": "اپ گریڈ کریں؟",
-    "opens_new_tab": "(ایک نئی ٹیب میں کھولیں)"
+    "upgrade": "اپ گریڈ کریں؟"
+  },
+  "login": {
+    "subtitle": "اپنے BunkerWeb اکاؤنٹ میں لاگ ان کریں۔"
   },
   "logs": {
     "annotation_error": "خرابی",
@@ -797,6 +841,7 @@
     "letsencrypt_logs": "Let's Encrypt لاگز",
     "main_logs": "مرکزی لاگز",
     "new_lines_sr": "{{count}} نئی لاگ لائنیں",
+    "no_log_files": "کوئی لاگ فائل ظاہر کرنے کے لیے موجود نہیں ہیں، مزید معلومات کے لیے ڈاکومنٹیشن چیک کریں۔",
     "issue_summary": "{{errors}} خرابیاں، {{warnings}} انتباہات",
     "level_critical": "نہایت اہم",
     "level_debug": "ڈیبگ",
@@ -810,6 +855,7 @@
     "new_lines": "نئی لائنیں",
     "showing_all": "{{total}} لائنیں",
     "showing_some": "{{total}} میں سے {{shown}} دکھائی جا رہی ہیں",
+    "select_file_prompt": "لاگ فائل کا انتخاب کریں تاکہ اس کی вміنٹ دیکھو",
     "trimmed_notice": "--- کارکردگی کے لیے {{count}} پرانی لاگ لائنیں ہٹا دی گئیں ---"
   },
   "modal": {
@@ -849,6 +895,7 @@
       "recovery_codes_save_alert": "براہ کرم یہ ریکوری کوڈز محفوظ جگہ پر محفوظ کریں (جیسے پاس ورڈ مینیجر یا بنکر)۔ اگر آپ اپنا تصدیقی آلہ کھو دیتے ہیں تو آپ اپنے اکاؤنٹ تک رسائی کے لیے ان کا استعمال کر سکتے ہیں۔",
       "recovery_codes_shown_once_alert": "یہ ریکوری کوڈز صرف ایک بار دکھائے جاتے ہیں۔ براہ کرم یقینی بنائیں کہ آپ انہیں محفوظ طریقے سے محفوظ کرتے ہیں۔",
       "reset_template_alert": "کیا آپ واقعی موجودہ ٹیمپلیٹ سیٹنگز اور کسٹم کنفیگریشنز ری سیٹ کرنا چاہتے ہیں؟",
+      "services_conversion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات کو تبدیل کرنا چاہتے ہیں؟",
       "services_deletion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات حذف کرنا چاہتے ہیں؟",
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
       "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
@@ -883,8 +930,10 @@
       "import_services": "خدمات درآمد کریں",
       "job_history": "آخری 10 ٹاسک ایگزیکیوشنز",
       "job_history_count": "ٹاسک کی آخری {{count}} ایگزیکیوشنز",
+      "multiselect_selected": "منتخب عناصر",
       "recovery_codes": "ریکوری کوڈز",
       "reset_template_config": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں؟",
+      "security_report_details": "سیکورٹی رپورٹ کی تفصیلات",
       "server_name_not_unique": "سرور کا نام منفرد نہیں ہے",
       "update_duration": "پابندی کی مدت اپ ڈیٹ کریں"
     }
@@ -910,9 +959,12 @@
     "about": "متعلق",
     "bans": "پابندیاں",
     "cache": "کیشے",
+    "certificates": "سفرنامے",
+    "web_cache": "ویب کیش",
     "configs": "کنفیگریشنز",
     "extra_pages": "اضافی صفحات",
     "global_settings": "عالمی سیٹنگز",
+    "groups": "رسورس گروپس",
     "home": "مرکزی صفحہ",
     "instances": "انسٹینسز",
     "jobs": "ٹاسکس",
@@ -930,9 +982,7 @@
     "reports": "رپورٹس",
     "services": "خدمات",
     "support": "سپورٹ",
-    "templates": "ٹیمپلیٹس",
-    "certificates": "سفرنامے",
-    "groups": "رسورس گروپس"
+    "templates": "ٹیمپلیٹس"
   },
   "news": {
     "image_alt": "خبر کی تصویر",
@@ -966,6 +1016,13 @@
       "external": "بیرونی",
       "pro": "پرو",
       "ui": "UI"
+    }
+  },
+  "plugins": {
+    "multivalue": {
+      "more_value": "مزید",
+      "more_values": "مزید",
+      "show_less": "کم دکھائیں"
     }
   },
   "pro": {
@@ -1022,6 +1079,10 @@
     "alert": {
       "refresh_recovery_codes": "اپنے ریکوری کوڈز کو ریفریش کرنے سے پچھلے کوڈز غیر فعال ہو جائیں گے۔"
     },
+    "badge": {
+      "2fa_disabled": "2FA غیر فعال",
+      "2fa_enabled": "2FA فعال ہے"
+    },
     "card": {
       "coming_soon": "جلد آرہا ہے",
       "title": {
@@ -1037,6 +1098,14 @@
     "help": {
       "photo_extensions": "JPG, GIF, یا PNG کی اجازت ہے۔ زیادہ سے زیادہ سائز: 800KB۔"
     },
+    "modal": {
+      "body": {
+        "wipe_sessions_confirm": "یہ فوری طور پر آپ کے اکاؤنٹ پر موجود تمام فعال سیشنوں کو خارج کر دیتا ہے۔ تصدیق کے لیے اپنا پاس ورڈ درج کریں۔"
+      },
+      "title": {
+        "wipe_sessions": "دوسرے سیشنوں کو حذف کرنا؟"
+      }
+    },
     "session": {
       "browser": "براؤزر",
       "creation_date": "تخلیق کی تاریخ",
@@ -1048,16 +1117,86 @@
       "title": "سیشن",
       "wipe_help": "آپ کے اکاؤنٹ پر موجود تمام فعال سیشنوں کو ختم کریں۔ آپ یہاںsigned in رہیں گے۔"
     },
+    "subtitle": "اپنے اکاؤنٹ، حفاظت اور فعال سیشنوں کا انتظام کریں۔",
     "tab": {
       "profile": "پروفائل",
       "security": "سیکیورٹی",
       "sessions": "سیشنز"
-    },
-    "subtitle": "اپنے اکاؤنٹ، حفاظت اور فعال سیشنوں کا انتظام کریں۔"
+    }
+  },
+  "range_picker": {
+    "1h": "پچھلا گھنٹہ",
+    "24h": "پچھلے 24 گھنٹے",
+    "30d": "آخری 30 دن",
+    "7d": "پچھلا ہفتہ",
+    "aria_label": "وقت کا تناؤ",
+    "custom": "حسب ضرورت"
   },
   "reports": {
+    "bad_behavior_activity_detected": "برے سلوک کی نشاندہی",
+    "bad_behavior_activity_explanation": "یہ درخواستیں برے سلوک کی حد سے تجاوز کر گئیں تھیں اور انہیں ملایا گیا ہے۔",
+    "bad_behavior_captured_at": "جس وقت ریکارڈ کیا گیا",
+    "bad_behavior_ip": "آئی پی ایڈریس",
+    "bad_behavior_no_details": "اس رپورٹ کے لیے کوئی برے سلوک کی تفصیلات ریکارڈ نہیں کی گئیں ہیں۔",
+    "bad_behavior_request_id": "ریکویسٹ آئی ڈی",
+    "bad_behavior_request_label": "درخواست",
+    "bad_behavior_server": "سرور",
+    "bad_behavior_total_requests": "مشکوک درخواستیں",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "ہجوم کے خاندان"
+      },
+      "recent": {
+        "title": "تاز ترین واقعات"
+      },
+      "top_asn": {
+        "title": "سب سے زیادہ اہم ASN"
+      },
+      "top_offenders": {
+        "title": "اہم مجرم"
+      },
+      "top_rules": {
+        "title": "سب سے زیادہ ModSecurity قوانین فعال ہوئے"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "بند کر دیا گیا",
+        "title": "وقت کے ساتھ روکی گئی درخواستیں"
+      }
+    },
     "security_incident": "سیکیورٹی واقعہ",
-    "security_report_data": "سیکیورٹی رپورٹ ڈیٹا"
+    "security_report_data": "سیکیورٹی رپورٹ ڈیٹا",
+    "subtitle": "آپ کے BunkerWeb کے تمام انسٹنسز سے بند درخواستوں سے بنائے گئے سیکورٹی رپورٹ - تلاش کریں، فیلٹر کریں، تصدیر کریں اور براہ راست ٹیبل سے مجرم آئی پی ایڈریسوں کو بلا دیں۔",
+    "tab": {
+      "eventlog": "ایونٹ لاگ",
+      "offenders": "اہم مجرم",
+      "overview": "جائزہ",
+      "patterns": "ہجوم کے نمونے"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "بند",
+      "country": "ملک",
+      "fires": "فعال",
+      "ip": "آئی پی",
+      "rule": "قانون",
+      "top_rule": "سب سے اہم قانون"
+    },
+    "tile": {
+      "asns": "اہم مجرم ASN",
+      "blocked": "بند درخواستیں",
+      "blocked_rate": "پچھلے دور کے مقابلے میں رجحان",
+      "bot": "بٹ / اسکرپر",
+      "countries": "اہم مجرم ملک",
+      "peak_hour": "تیز گھنٹہ",
+      "rce": "RCE / کمان",
+      "repeat_offenders": "دوہری مجرم (ٹپ 10)",
+      "sqli": "SQL انجکشن",
+      "unique_ips": "ٹپ اٹیکٹر آئی پی",
+      "unique_offenders": "اہم مجرم"
+    }
   },
   "scope": {
     "all_services": "تمام خدمات",
@@ -1069,6 +1208,7 @@
   "searchpane": {
     "active": "فعال",
     "async": "غیر مطابقت پذیر",
+    "ban_scope": "پابندی کا دائرہ کار",
     "clear": "سب صاف کریں",
     "collapse_0": "تلاش پینلز",
     "collapse_message": "سب کو سمیٹیں",
@@ -1127,6 +1267,13 @@
     "block": "بلاک",
     "detect": "دریافت"
   },
+  "services": {
+    "draft": "ڈرافت سروسز",
+    "online": "آن لائن",
+    "subtitle": "BunkerWeb کے ذریعے متعدد سائٹ سروسز کا انتظام کریں: انہیں بنائیں، ترمیم کریں، ڈرافت میں تبدیل کریں، یا حذف کریں۔",
+    "total": "کل سروسز",
+    "with_configs": "کسٹم کنفیگیشن کے ساتھ"
+  },
   "settings": {
     "custom_config": {
       "title": "حسب ضرورت کنفیگریشن"
@@ -1138,9 +1285,9 @@
   },
   "setup": {
     "status": {
-      "admin_user_exists": "🧑‍🚀 ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
-      "pro_license_key_exists": "⭐ ایک PRO لائسنس کلید پہلے سے کنفیگر ہے، براہ کرم اگلے مرحلے پر جائیں۔",
-      "reverse_proxy_configured": "↪️ ویب انٹرفیس کے لیے ایک ریورس پراکسی پہلے سے کنفیگر ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
+      "admin_user_exists": "ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
+      "pro_license_key_exists": "ایک PRO لائسنس کلید پہلے سے کنفیگر ہے، براہ کرم اگلے مرحلے پر جائیں۔",
+      "reverse_proxy_configured": "ویب انٹرفیس کے لیے ایک ریورس پراکسی پہلے سے کنفیگر ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
       "secure_password": "محفوظ پاس ورڈ",
       "unique_server_name": "منفرد سرور نام"
     },
@@ -1191,13 +1338,15 @@
     "title": "سیٹ اپ وزرڈ"
   },
   "status": {
-    "admin_user_exists": "🧑‍🚀 ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
+    "admin_user_exists": "ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
     "blog_connection_fail": "خبروں کی اپ ڈیٹس کے لیے بلاگ سے رابطہ نہیں ہو سکا۔",
     "default_server": "ڈیفالٹ سرور",
+    "done": "مکمل",
     "down": "غیر فعال",
     "draft": "ڈرافٹ",
     "error_deleting_template": "ٹیمپلیٹ کو حذف کرتے وقت ایک خرابی پیش آگئی۔",
     "error_loading_bans": "پابندیاں لوڈ کرتے وقت خرابی پیش آئی۔ براہ کرم صفحہ ریفریش کرنے کی کوشش کریں۔",
+    "error_loading_data": "دستروں میں ڈیٹا لوڈ نہیں ہو سکا",
     "error_loading_template": "ٹیمپلیٹ ڈیٹا لوڈ کرنے سے قاصر۔",
     "error_saving_template": "ٹیمپلیٹ کو محفوظ کرتے وقت ایک خرابی پیش آگئی۔",
     "failed": "ناکام",
@@ -1226,8 +1375,10 @@
     "no_search_results": "کوئی آئٹم نہیں ملا۔",
     "no_steps": "کوئی قدم دستیاب نہیں",
     "no_steps_description": "اس ٹیمپلیٹ میں کنفیگر کرنے کے لیے کوئی قدم نہیں ہیں۔",
+    "not_applicable": "لاگو نہیں",
     "online": "آن لائن",
     "partial": "جزوی",
+    "pending": "در انتظار",
     "pinging_instances": "انسٹینسز کو پنگ کیا جا رہا ہے، براہ کرم انتظار کریں...",
     "plugin_page": {
       "status": {
@@ -1236,7 +1387,7 @@
         "not_available": "پلگ ان صفحہ بیٹا مرحلے کے دوران ابھی تک دستیاب نہیں ہے۔"
       }
     },
-    "reverse_proxy_configured": "↪️ ویب انٹرفیس کے لیے ایک ریورس پراکسی پہلے سے کنفیگر ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
+    "reverse_proxy_configured": "ویب انٹرفیس کے لیے ایک ریورس پراکسی پہلے سے کنفیگر ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
     "secure_password": "محفوظ پاس ورڈ",
     "setting_up_bunkerweb": "آپ کا BunkerWeb سیٹ اپ کیا جا رہا ہے، براہ کرم انتظار کریں...",
     "success": "کامیاب",
@@ -1244,9 +1395,7 @@
     "template_in_use_description": "موجودہ ٹیمپلیٹ سے باہر تبدیلیاں کرنے کی اجازت نہیں ہے۔ براہ کرم موجودہ ٹیمپلیٹ کا استعمال کرتے ہوئے تبدیلیاں کریں یا اعلی درجے/خام موڈ پر سوئچ کریں۔",
     "unique_server_name": "منفرد سرور نام",
     "up": "فعال",
-    "yes": "ہاں",
-    "done": "مکمل",
-    "pending": "در انتظار"
+    "yes": "ہاں"
   },
   "step": {
     "next": "اگلا",
@@ -1317,8 +1466,8 @@
       "type": "قسم",
       "url": "URL",
       "user_agent": "صارف ایجنٹ",
-      "version": "ورژن",
-      "value": "واضح"
+      "value": "واضح",
+      "version": "ورژن"
     }
   },
   "template": {
@@ -1488,6 +1637,9 @@
     },
     "none": "کوئی ٹیمپلیٹ نہیں"
   },
+  "templates": {
+    "subtitle": "اپنے سروسز کے لیے قابل استعمال کنفیگریشن ٹیمپلیٹس - سیٹنگز، اقدامات اور کسٹم کنفیگیشن کو ایک ساتھ پیک کریں، پھر انہیں بنائیں، کلون کریں، یا حذف کریں۔"
+  },
   "theme": {
     "dark": "تاریک",
     "light": "روشن"
@@ -1535,6 +1687,7 @@
       "show_selected_only": "صرف منتخب دکھائیں",
       "stop_instance": "انسٹینس {{hostname}} روکیں",
       "unban_ip": "{{ip}} سے پابندی ہٹائیں",
+      "update_ban_duration": "بنو کی مدت کو اپ ڈیٹ کریں",
       "value_from_global": "عالمی سیٹنگز سے قدر"
     },
     "cannot_delete_original_ban": "اصل پابندی اندراج کو حذف نہیں کیا جا سکتا۔",
@@ -1616,6 +1769,7 @@
     "password_requirements": "پاس ورڈ کم از کم 8 حروف کا ہونا چاہیے اور اس میں 1 بڑا حرف، 1 عدد، اور 1 خصوصی حرف شامل ہونا چاہیے۔",
     "pro_feature": "یہ ایک پرو خصوصیت ہے۔",
     "readonly_db_action_disabled": "غیر فعال: ڈیٹا بیس صرف پڑھنے کے موڈ میں ہے۔",
+    "readonly_mode": "یہ عمل ریڈ-آنلی موڈ میں نہیں дозвоل ہے۔",
     "readonly_user_action_disabled": "غیر فعال: آپ کا اکاؤنٹ صرف پڑھنے کے لیے ہے، عمل '{{action}}' غیر فعال ہے۔",
     "real_ip_from": "قابل اعتماد IPs / نیٹ ورکس کی فہرست، خالی جگہوں سے الگ، جہاں سے پراکسی شدہ درخواستیں آتی ہیں۔",
     "real_ip_from_urls": "قابل اعتماد IPs / نیٹ ورکس پر مشتمل URLs کی فہرست، خالی جگہوں سے الگ، جہاں سے پراکسی شدہ درخواستیں آتی ہیں۔ file:// URLs اور http://user:pass@url اسکیم کا استعمال کرتے ہوئے بنیادی تصدیق کی بھی حمایت کرتا ہے۔",
@@ -1662,8 +1816,8 @@
         "job_name": "اس کیشے فائل کو بنانے والا ٹاسک",
         "last_update": "کیشے فائل کی آخری اپ ڈیٹ کی تاریخ اور وقت",
         "plugin": "اس کیشے فائل کو بنانے والے ٹاسک سے وابستہ پلگ ان",
-        "service": "اس کیشے فائل سے وابستہ سروس (یا عالمی)",
-        "select_all": "تمام کیش فائلوں کا انتخاب کریں"
+        "select_all": "تمام کیش فائلوں کا انتخاب کریں",
+        "service": "اس کیشے فائل سے وابستہ سروس (یا عالمی)"
       },
       "configs": {
         "actions": "اس کسٹم کنفیگریشن کے لیے دستیاب اعمال",
@@ -1778,18 +1932,6 @@
   },
   "totp": {
     "prompt": "براہ کرم اپنا TOTP کوڈ درج کریں۔"
-  },
-  "validation": {
-    "default_field_name": "یہ فیلڈ",
-    "invalid_date": "غلط تاریخ",
-    "ip_global_duplicate": "یہ IP ایڈریس پہلے ہی عالمی طور پر پابندی عائد ہے۔",
-    "ip_invalid": "غلط IP ایڈریس فارمیٹ۔",
-    "ip_required": "IP ایڈریس درکار ہے۔",
-    "ip_service_duplicate": "یہ IP ایڈریس منتخب کردہ سروس ({{service}}) کے لیے پہلے ہی پابندی عائد ہے۔",
-    "pattern": "براہ کرم {{field}} کے لیے ایک درست قدر درج کریں۔",
-    "required": "{{field}} درکار ہے۔",
-    "service_required_for_ban": "سروس-مخصوص پابندی کے لیے ایک سروس منتخب کرنی ضروری ہے۔",
-    "zerossl_email_or_api_key_required": "ZeroSSL کے لیے ای میل یا ZeroSSL API کلید میں سے ایک درکار ہے۔"
   },
   "certificates": {
     "acme_help": "ان سروسز کا انتخاب کریں جن کے موجودہ سیٹنگز پہلے سے ہی Let's Encrypt کو فعال اور کنفیگور کر چکے ہیں۔ یہ عمل صرف اس کنفیگریشن کی شمولیت کا انتظام کرتا ہے؛ سرٹیفکیٹ کے تفصیلات اور چیلنج کے کریڈینشل یہاں درج نہیں کیے جائیں۔",
@@ -1929,6 +2071,18 @@
     "value": "واڈ",
     "values": "واڈز"
   },
+  "validation": {
+    "default_field_name": "یہ فیلڈ",
+    "invalid_date": "غلط تاریخ",
+    "ip_global_duplicate": "یہ IP ایڈریس پہلے ہی عالمی طور پر پابندی عائد ہے۔",
+    "ip_invalid": "غلط IP ایڈریس فارمیٹ۔",
+    "ip_required": "IP ایڈریس درکار ہے۔",
+    "ip_service_duplicate": "یہ IP ایڈریس منتخب کردہ سروس ({{service}}) کے لیے پہلے ہی پابندی عائد ہے۔",
+    "pattern": "براہ کرم {{field}} کے لیے ایک درست قدر درج کریں۔",
+    "required": "{{field}} درکار ہے۔",
+    "service_required_for_ban": "سروس-مخصوص پابندی کے لیے ایک سروس منتخب کرنی ضروری ہے۔",
+    "zerossl_email_or_api_key_required": "ZeroSSL کے لیے ای میل یا ZeroSSL API کلید میں سے ایک درکار ہے۔"
+  },
   "web_cache": {
     "available": "موجود",
     "cache_state": "حالت",
@@ -1962,25 +2116,5 @@
     "services": "سرویس کی فعال کاری",
     "status": "انسٹنس سٹوریج",
     "subtitle": "ریورس-پروکسی کیش کی حالت، مجموعی ہٹ ریٹ میٹرکس اور فوری صاف کرنے کے کنٹرول۔"
-  },
-  "cache": {
-    "subtitle": "جداول کے ذریعے بنائے گئے کیش فائلوں (بلوکلیسٹ، جیوآئی پی ڈیٹا بیس، اور دیگر) - ہر سروس اور پگین کے لیے ان کا تفحص، ڈاؤن لوڈ، یا حذف کریں۔"
-  },
-  "accordion": {
-    "body": {
-      "tls": "سفرنامے خود بخود جاری اور تجدید کریں۔"
-    },
-    "title": {
-      "tls": "TLS اور سفرنامے"
-    }
-  },
-  "input_list": {
-    "view_all_settings": "تمام {{count}} سیٹنگز دیکھیں"
-  },
-  "templates": {
-    "subtitle": "اپنے سروسز کے لیے قابل استعمال کنفیگریشن ٹیمپلیٹس - سیٹنگز، اقدامات اور کسٹم کنفیگیشن کو ایک ساتھ پیک کریں، پھر انہیں بنائیں، کلون کریں، یا حذف کریں۔"
-  },
-  "login": {
-    "subtitle": "اپنے BunkerWeb اکاؤنٹ میں لاگ ان کریں۔"
   }
 }

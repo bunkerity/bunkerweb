@@ -7,7 +7,16 @@
     "tagline": "शक्तिशाली सुरक्षा, सरलीकृत",
     "version": "संस्करण: {{version}}"
   },
+  "accordion": {
+    "body": {
+      "tls": "स्वचालित रूप से प्रमाणपत्र जारी करें और नवीनीकृत करें।"
+    },
+    "title": {
+      "tls": "TLS & प्रमाणपत्र"
+    }
+  },
   "alert": {
+    "configs_import_invalid_file": "कृपया एक वैध कस्टम कॉन्फ़िगरेशन निर्यात फ़ाइल (.json) अपलोड करें।",
     "custom_end_date_required": "कृपया एक कस्टम अंतिम तिथि चुनें।",
     "important": "महत्वपूर्ण",
     "no_changes_detected": "कोई परिवर्तन नहीं पाया गया।",
@@ -17,10 +26,13 @@
   },
   "aria": {
     "label": {
+      "clear_search": "खोज साफ़ करें",
       "close": "बंद करें",
       "copy": "लॉग कॉपी करें",
       "download_log": "यह लॉग फ़ाइल डाउनलोड करें",
       "follow": "अनुसरण करें",
+      "hide_value": "मूल्य छिपाएँ",
+      "reveal_value": "मूल्य दिखाएँ",
       "select_file": "फ़ाइल चुनें",
       "select_page": "पृष्ठ चुनें",
       "issue_count": "त्रुटि और चेतावनी की संख्या",
@@ -34,10 +46,9 @@
       "configs_dropzone": "कस्टम कॉन्फ़िगरेशन एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
       "raw_configuration": "रॉ कॉन्फ़िगरेशन",
       "services_dropzone": "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
-      "hide_value": "मूल्य छिपाएँ",
-      "reveal_value": "मूल्य दिखाएँ",
       "user_avatar": "उपयोगकर्ता अवतार",
-      "remove_value": "मूल्य हटाएं"
+      "remove_value": "मूल्य हटाएं",
+      "view_selected_items": "चुने गए आइटम देखें"
     }
   },
   "badge": {
@@ -56,10 +67,14 @@
     "pro": "PRO संस्करण में अपग्रेड करके BunkerWeb का अधिकतम लाभ उठाएं। अधिक जानकारी और निःशुल्क परीक्षण के लिए <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">यहाँ</a> क्लिक करें।",
     "support": "BunkerWeb के लिए प्रीमियम समर्थन या अनुकूलित परामर्श की आवश्यकता है? हमारी <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">पेशेवर सेवाओं</a> की जाँच करें।"
   },
+  "bans": {
+    "subtitle": "आपके BunkerWeb इंस्टेंस में अवरुद्ध IP पते — जोड़ें, हटाएं, या प्रतिबंध अवधि समायोजित करें।"
+  },
   "breadcrumb": {
     "about": "बारे में",
     "bans": "प्रतिबंध",
     "cache": "कैश",
+    "web_cache": "वेब कैश",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
     "global_settings": "ग्लोबल सेटिंग्स",
@@ -76,10 +91,10 @@
     "pro": "प्रो",
     "profile": "प्रोफ़ाइल",
     "reports": "रिपोर्ट",
+    "groups": "संसाधन समूह",
     "services": "सेवाएं",
     "support": "समर्थन",
-    "templates": "टेम्पलेट्स",
-    "groups": "संसाधन समूह"
+    "templates": "टेम्पलेट्स"
   },
   "button": {
     "actions": "कार्रवाइयाँ",
@@ -95,6 +110,7 @@
     "cancel": "रद्द करें",
     "clear": "साफ़ करें",
     "close": "बंद करें",
+    "clone": "क्लोन करें",
     "columns": "कॉलम",
     "convert_configs": "कॉन्फ़िग रूपांतरित करें",
     "convert_configs_to": "{{state}} में रूपांतरित करें",
@@ -171,8 +187,13 @@
     "upload_photo": "नई फ़ोटो अपलोड करें",
     "view_details": "विवरण देखें",
     "view_raw_data": "रॉ डेटा देखें",
-    "wipe_other_sessions": "अन्य सत्र साफ़ करें",
-    "clone": "क्लोन करें"
+    "wipe_other_sessions": "अन्य सत्र साफ़ करें"
+  },
+  "cache": {
+    "subtitle": "अनुसूचित कार्यों द्वारा उत्पन्न कैश फ़ाइलें (ब्लॉकलिस्ट, GeoIP डेटाबेस, और अन्य) — प्रति सेवा और प्लगइन के लिए जांचें, डाउनलोड करें, या हटाएं।"
+  },
+  "configs": {
+    "subtitle": "अपने सेवाओं के लिए कस्टम NGINX कॉन्फ़िगरेशन स्निपेट — बनाएँ, संपादित करें, और प्रबंधित करें HTTP, ModSecurity, और स्ट्रीम-स्तरीय ओवरराइड।"
   },
   "country": {
     "AD": "अंडोरा",
@@ -581,6 +602,8 @@
     "select_rows_templates_0": "कोई टेम्प्लेट चयनित नहीं",
     "select_rows_templates_1": "1 टेम्प्लेट चयनित",
     "select_rows_templates_plural": "%d टेम्प्लेट चयनित",
+    "selected_list_count": "{{count}} {{entity}} चयनित",
+    "selected_list_empty": "कोई {{entity}} चयनित नहीं।",
     "zero_records_bans": "कोई मेल खाने वाला प्रतिबंध नहीं मिला",
     "zero_records_cache": "कोई मेल खाने वाली कैश फ़ाइल नहीं मिली",
     "zero_records_configs": "कोई मेल खाने वाली कस्टम कॉन्फ़िगरेशन नहीं मिली",
@@ -590,9 +613,7 @@
     "zero_records_plugins": "कोई मेल खाने वाला प्लगइन नहीं मिला",
     "zero_records_reports": "कोई मेल खाने वाली रिपोर्ट नहीं मिली",
     "zero_records_services": "कोई मेल खाने वाली सेवा नहीं मिली",
-    "zero_records_templates": "कोई मेल खाते टेम्प्लेट नहीं मिले",
-    "selected_list_count": "{{count}} {{entity}} चयनित",
-    "selected_list_empty": "कोई {{entity}} चयनित नहीं।"
+    "zero_records_templates": "कोई मेल खाते टेम्प्लेट नहीं मिले"
   },
   "dev_log": {
     "copy_failed": "पाठ कॉपी करने में विफल:",
@@ -632,7 +653,7 @@
     "unban_failed": "आईपी पते का प्रतिबंध हटाने में विफल। कृपया पुनः प्रयास करें।"
   },
   "flash": {
-    "easter_egg": "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं 👀",
+    "easter_egg": "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं",
     "error": "त्रुटि",
     "message": "सूचना",
     "pro": "BunkerWeb PRO",
@@ -679,6 +700,7 @@
       "configuration_name": "कॉन्फ़िगरेशन नाम",
       "confirm_password": "पासवर्ड की पुष्टि करें",
       "current_password": "वर्तमान पासवर्ड",
+      "custom_config": "कॉन्फ़िगरेशन",
       "custom_end_date": "कस्टम अंतिम तिथि",
       "custom_ssl_certificate": "कस्टम SSL प्रमाणपत्र",
       "custom_ssl_certificate_data": "कस्टम SSL प्रमाणपत्र डेटा (Base64/PEM)",
@@ -691,6 +713,7 @@
       "email_for_lets_encrypt": "Let's Encrypt के लिए ईमेल",
       "end_date": "अंतिम तिथि",
       "hostname": "होस्टनाम",
+      "instance_id": "इंस्टेंस आईडी",
       "ip_address": "आईपी पता",
       "keywords": "कीवर्ड",
       "lets_encrypt_custom_profile": "Let's Encrypt कस्टम प्रोफ़ाइल",
@@ -730,8 +753,7 @@
       "zerossl_api_retry": "ZeroSSL API पुनः प्रयास",
       "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब",
       "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
-      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय",
-      "instance_id": "इंस्टेंस आईडी"
+      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
@@ -754,12 +776,22 @@
       "password_uppercase": "पासवर्ड में कम से कम 1 बड़ा अक्षर होना चाहिए।"
     }
   },
+  "input_list": {
+    "view_all_settings": "सभी {{count}} सेटिंग्स देखें"
+  },
   "instance": {
     "type": {
       "container": "कंटेनर",
       "pod": "पॉड",
       "static": "स्थैतिक"
     }
+  },
+  "instances": {
+    "down": "बंद",
+    "loading": "लोड हो रहा है",
+    "subtitle": "इस UI से जुड़े BunkerWeb इंस्टेंस का प्रबंधन करें: उन्हें बनाएँ, पिंग करें, रीलोड करें, रोकें, या हटाएं।",
+    "total": "कुल इंस्टेंस",
+    "up": "चालू"
   },
   "interval": {
     "day": "दैनिक",
@@ -774,6 +806,15 @@
       "success": "सफलता"
     }
   },
+  "jobs": {
+    "subtitle": "BunkerWeb शेड्यूलर द्वारा चलाए जाने वाले अनुसूचित और एक-बार के कार्य — उनकी स्थिति को ट्रैक करें और आवश्यकतानुसार चलाएं।",
+    "tile": {
+      "async": "असिंक्रोनस",
+      "failed_last_run": "अंतिम रन विफल",
+      "reload_required": "रीलोड की आवश्यकता है",
+      "total": "कुल कार्य"
+    }
+  },
   "legend": {
     "locked_settings_annotation": "लॉक किया गया ({{method}})",
     "locked_settings_hint": "लॉक की गई सेटिंग्स हाइलाइट की गई हैं"
@@ -784,11 +825,14 @@
     "here": "यहाँ",
     "more_info": "अधिक जानकारी",
     "more_news": "अधिक समाचार",
+    "opens_new_tab": "(एक नए टैब में खुलता है)",
     "privacy_policy": "गोपनीयता नीति",
     "read_more": "और पढ़ें",
     "see_more": "और देखें",
-    "upgrade": "अपग्रेड करें?",
-    "opens_new_tab": "(एक नए टैब में खुलता है)"
+    "upgrade": "अपग्रेड करें?"
+  },
+  "login": {
+    "subtitle": "अपने BunkerWeb खाते में साइन इन करें"
   },
   "logs": {
     "annotation_error": "त्रुटि",
@@ -797,6 +841,7 @@
     "letsencrypt_logs": "Let's Encrypt लॉग",
     "main_logs": "मुख्य लॉग",
     "new_lines_sr": "{{count}} नई लॉग पंक्तियाँ",
+    "no_log_files": "कोई लॉग फ़ाइल प्रदर्शित करने के लिए नहीं, अधिक जानकारी के लिए दस्तावेज़ देखें कि लॉगिंग कैसे सक्षम करें",
     "issue_summary": "{{errors}} त्रुटि(याँ), {{warnings}} चेतावनी(याँ)",
     "level_critical": "गंभीर",
     "level_debug": "डीबग",
@@ -810,6 +855,7 @@
     "new_lines": "नई पंक्तियाँ",
     "showing_all": "{{total}} पंक्तियाँ",
     "showing_some": "{{total}} में से {{shown}} दिखा रहे हैं",
+    "select_file_prompt": "एक लॉग फ़ाइल का चयन करें ताकि उसकी सामग्री देखी जा सके",
     "trimmed_notice": "--- प्रदर्शन के लिए {{count}} पुरानी लॉग लाइनें हटा दी गईं ---"
   },
   "modal": {
@@ -849,6 +895,7 @@
       "recovery_codes_save_alert": "कृपया इन पुनर्प्राप्ति कोड को सुरक्षित स्थान (जैसे पासवर्ड मैनेजर या बंकर) पर सहेजें। यदि आप अपना प्रमाणीकरण उपकरण खो देते हैं तो आप इनका उपयोग अपने खाते तक पहुँचने के लिए कर सकते हैं।",
       "recovery_codes_shown_once_alert": "ये पुनर्प्राप्ति कोड केवल एक बार दिखाए जाते हैं। कृपया सुनिश्चित करें कि आप इन्हें सुरक्षित रूप से सहेजते हैं।",
       "reset_template_alert": "क्या आप वाकई वर्तमान टेम्पलेट सेटिंग्स और कस्टम कॉन्फ़िगरेशन रीसेट करना चाहते हैं?",
+      "services_conversion_confirmation": "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?",
       "services_deletion_confirmation": "क्या आप वाकई चयनित सेवाओं को हटाना चाहते हैं?",
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
@@ -883,8 +930,10 @@
       "import_services": "सेवाएं आयात करें",
       "job_history": "पिछले 10 कार्य निष्पादन",
       "job_history_count": "कार्य {{count}} निष्पादन",
+      "multiselect_selected": "चुने गए आइटम",
       "recovery_codes": "पुनर्प्राप्ति कोड",
       "reset_template_config": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें?",
+      "security_report_details": "सुरक्षा रिपोर्ट विवरण",
       "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है",
       "update_duration": "प्रतिबंध अवधि अपडेट करें"
     }
@@ -910,9 +959,12 @@
     "about": "बारे में",
     "bans": "प्रतिबंध",
     "cache": "कैश",
+    "certificates": "प्रमाणपत्र",
+    "web_cache": "वेब कैश",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
     "global_settings": "ग्लोबल सेटिंग्स",
+    "groups": "संसाधन समूह",
     "home": "होम",
     "instances": "इंस्टेंस",
     "jobs": "कार्य",
@@ -930,9 +982,7 @@
     "reports": "रिपोर्ट",
     "services": "सेवाएं",
     "support": "समर्थन",
-    "templates": "टेम्पलेट्स",
-    "certificates": "प्रमाणपत्र",
-    "groups": "संसाधन समूह"
+    "templates": "टेम्पलेट्स"
   },
   "news": {
     "image_alt": "समाचार छवि",
@@ -966,6 +1016,13 @@
       "external": "बाहरी",
       "pro": "प्रो",
       "ui": "UI"
+    }
+  },
+  "plugins": {
+    "multivalue": {
+      "more_value": "अधिक मूल्य",
+      "more_values": "अधिक मूल्य",
+      "show_less": "कम दिखाएँ"
     }
   },
   "pro": {
@@ -1022,6 +1079,10 @@
     "alert": {
       "refresh_recovery_codes": "आपके पुनर्प्राप्ति कोड को ताज़ा करने से पिछले वाले अमान्य हो जाएंगे।"
     },
+    "badge": {
+      "2fa_disabled": "2FA अक्षम",
+      "2fa_enabled": "2FA सक्षम"
+    },
     "card": {
       "coming_soon": "जल्द आ रहा है",
       "title": {
@@ -1037,6 +1098,14 @@
     "help": {
       "photo_extensions": "JPG, GIF, या PNG की अनुमति है। अधिकतम आकार: 800KB।"
     },
+    "modal": {
+      "body": {
+        "wipe_sessions_confirm": "यह आपके खाते पर सभी सक्रिय सत्रों को तुरंत लॉग आउट कर देता है। पुष्टि करने के लिए अपना पासवर्ड दर्ज करें।"
+      },
+      "title": {
+        "wipe_sessions": "अन्य सत्रों को साफ़ करें?"
+      }
+    },
     "session": {
       "browser": "ब्राउज़र",
       "creation_date": "निर्माण तिथि",
@@ -1048,16 +1117,86 @@
       "title": "सत्र",
       "wipe_help": "अपने खाते पर सभी सक्रिय सत्रों को समाप्त करें। आप यहां लॉग इन रहेंगे।"
     },
+    "subtitle": "अपने खाते, सुरक्षा और सक्रिय सत्रों का प्रबंधन करें।",
     "tab": {
       "profile": "प्रोफ़ाइल",
       "security": "सुरक्षा",
       "sessions": "सत्र"
-    },
-    "subtitle": "अपने खाते, सुरक्षा और सक्रिय सत्रों का प्रबंधन करें।"
+    }
+  },
+  "range_picker": {
+    "1h": "पिछले घंटे",
+    "24h": "पिछले 24 घंटे",
+    "30d": "पिछले 30 दिन",
+    "7d": "पिछले सप्ताह",
+    "aria_label": "समय सीमा",
+    "custom": "कस्टम"
   },
   "reports": {
+    "bad_behavior_activity_detected": "खराब व्यवहार गतिविधि का पता चला",
+    "bad_behavior_activity_explanation": "ये अनुरोध खराब व्यवहार सीमा से अधिक थे और एक साथ समूहीकृत किए गए थे।",
+    "bad_behavior_captured_at": "रिकॉर्ड किया गया",
+    "bad_behavior_ip": "IP पता",
+    "bad_behavior_no_details": "इस रिपोर्ट के लिए कोई खराब व्यवहार विवरण नहीं कैप्चर किया गया।",
+    "bad_behavior_request_id": "अनुरोध आईडी",
+    "bad_behavior_request_label": "अनुरोध",
+    "bad_behavior_server": "सर्वर",
+    "bad_behavior_total_requests": "संदिग्ध अनुरोध",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "हमले के परिवार"
+      },
+      "recent": {
+        "title": "नवीनतम घटनाएँ"
+      },
+      "top_asn": {
+        "title": "शीर्ष ASN"
+      },
+      "top_offenders": {
+        "title": "शीर्ष अपराधी"
+      },
+      "top_rules": {
+        "title": "सबसे अधिक उपयोग किए गए ModSecurity नियम"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "अवरुद्ध",
+        "title": "समय के साथ अवरुद्ध अनुरोध"
+      }
+    },
     "security_incident": "सुरक्षा घटना",
-    "security_report_data": "सुरक्षा रिपोर्ट डेटा"
+    "security_report_data": "सुरक्षा रिपोर्ट डेटा",
+    "subtitle": "आपके BunkerWeb इंस्टेंस में अवरुद्ध अनुरोधों से सुरक्षा रिपोर्टें — खोजें, फ़िल्टर करें, निर्यात करें और सीधे तालिका से उल्लंघनकारी IP पतों को प्रतिबंधित करें।",
+    "tab": {
+      "eventlog": "घटना लॉग",
+      "offenders": "शीर्ष अपराधी",
+      "overview": "अवलोकन",
+      "patterns": "हमले के पैटर्न"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "अवरुद्ध",
+      "country": "देश",
+      "fires": "फायर",
+      "ip": "IP",
+      "rule": "नियम",
+      "top_rule": "शीर्ष नियम"
+    },
+    "tile": {
+      "asns": "शीर्ष ASN",
+      "blocked": "अवरुद्ध अनुरोध",
+      "blocked_rate": "पिछले अवधि के सापेक्ष रुझान",
+      "bot": "बॉट / स्क्रैपर",
+      "countries": "शीर्ष उल्लंघनकारी देश",
+      "peak_hour": "पीक घंटा",
+      "rce": "RCE / कमांड",
+      "repeat_offenders": "बार-बार उल्लंघन करने वाले (शीर्ष 10)",
+      "sqli": "SQL इंजेक्शन",
+      "unique_ips": "शीर्ष हमलावर आईपी",
+      "unique_offenders": "शीर्ष उल्लंघनकर्ता"
+    }
   },
   "scope": {
     "all_services": "सभी सेवाएं",
@@ -1069,6 +1208,7 @@
   "searchpane": {
     "active": "सक्रिय",
     "async": "असिंक्रोनस",
+    "ban_scope": "प्रतिबंध का दायरा",
     "clear": "सभी साफ़ करें",
     "collapse_0": "खोज पैन",
     "collapse_message": "सभी को संक्षिप्त करें",
@@ -1127,6 +1267,13 @@
     "block": "ब्लॉक",
     "detect": "पता लगाना"
   },
+  "services": {
+    "draft": "ड्राफ्ट सेवाएं",
+    "online": "ऑनलाइन",
+    "subtitle": "BunkerWeb द्वारा संरक्षित मल्टीसाइट सेवाओं का प्रबंधन करें: उन्हें बनाएं, संपादित करें, ड्राफ्ट में बदलें, या हटाएं।",
+    "total": "कुल सेवाएं",
+    "with_configs": "कस्टम कॉन्फ़िगरेशन के साथ"
+  },
   "settings": {
     "custom_config": {
       "title": "कस्टम कॉन्फ़िगरेशन"
@@ -1138,9 +1285,9 @@
   },
   "setup": {
     "status": {
-      "admin_user_exists": "🧑‍🚀 एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।",
-      "pro_license_key_exists": "⭐ एक प्रो लाइसेंस कुंजी पहले से कॉन्फ़िगर है, कृपया अगले चरण पर जाएं।",
-      "reverse_proxy_configured": "↪️ वेब इंटरफ़ेस के लिए एक रिवर्स प्रॉक्सी पहले से कॉन्फ़िगर है। कृपया अगले चरण पर जाएं।",
+      "admin_user_exists": "एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।",
+      "pro_license_key_exists": "एक प्रो लाइसेंस कुंजी पहले से कॉन्फ़िगर है, कृपया अगले चरण पर जाएं।",
+      "reverse_proxy_configured": "वेब इंटरफ़ेस के लिए एक रिवर्स प्रॉक्सी पहले से कॉन्फ़िगर है। कृपया अगले चरण पर जाएं।",
       "secure_password": "सुरक्षित पासवर्ड",
       "unique_server_name": "अद्वितीय सर्वर नाम"
     },
@@ -1191,13 +1338,15 @@
     "title": "सेटअप विज़ार्ड"
   },
   "status": {
-    "admin_user_exists": "🧑‍🚀 एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।",
+    "admin_user_exists": "एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।",
     "blog_connection_fail": "समाचार अपडेट के लिए ब्लॉग से कनेक्ट नहीं हो सका।",
     "default_server": "डिफ़ॉल्ट सर्वर",
+    "done": "पूर्ण",
     "down": "बंद",
     "draft": "ड्राफ्ट",
     "error_deleting_template": "टेम्प्लेट हटाते समय एक त्रुटि हुई।",
     "error_loading_bans": "प्रतिबंध लोड करने में त्रुटि। कृपया पृष्ठ को ताज़ा करने का प्रयास करें।",
+    "error_loading_data": "डेटा लोड नहीं हो सका",
     "error_loading_template": "टेम्प्लेट डेटा लोड करने में असमर्थ।",
     "error_saving_template": "टेम्प्लेट सहेजते समय एक त्रुटि हुई।",
     "failed": "विफल",
@@ -1226,8 +1375,10 @@
     "no_search_results": "कोई आइटम नहीं मिला।",
     "no_steps": "कोई चरण उपलब्ध नहीं",
     "no_steps_description": "इस टेम्पलेट में कॉन्फ़िगर करने के लिए कोई चरण नहीं हैं।",
+    "not_applicable": "लागू नहीं",
     "online": "ऑनलाइन",
     "partial": "आंशिक",
+    "pending": "प्रतीक्षा में",
     "pinging_instances": "इंस्टेंस पिंग हो रहे हैं, कृपया प्रतीक्षा करें...",
     "plugin_page": {
       "status": {
@@ -1236,7 +1387,7 @@
         "not_available": "प्लगइन पृष्ठ बीटा चरण के दौरान अभी उपलब्ध नहीं है।"
       }
     },
-    "reverse_proxy_configured": "↪️ वेब इंटरफ़ेस के लिए एक रिवर्स प्रॉक्सी पहले से कॉन्फ़िगर है। कृपया अगले चरण पर जाएं।",
+    "reverse_proxy_configured": "वेब इंटरफ़ेस के लिए एक रिवर्स प्रॉक्सी पहले से कॉन्फ़िगर है। कृपया अगले चरण पर जाएं।",
     "secure_password": "सुरक्षित पासवर्ड",
     "setting_up_bunkerweb": "आपका BunkerWeb सेट हो रहा है, कृपया प्रतीक्षा करें...",
     "success": "सफलता",
@@ -1244,9 +1395,7 @@
     "template_in_use_description": "वर्तमान टेम्पलेट के बाहर परिवर्तन की अनुमति नहीं है। कृपया वर्तमान टेम्पलेट का उपयोग करके परिवर्तन करें या उन्नत/रॉ मोड पर स्विच करें।",
     "unique_server_name": "अद्वितीय सर्वर नाम",
     "up": "चालू",
-    "yes": "हाँ",
-    "done": "पूर्ण",
-    "pending": "प्रतीक्षा में"
+    "yes": "हाँ"
   },
   "step": {
     "next": "अगला",
@@ -1317,8 +1466,8 @@
       "type": "प्रकार",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "संस्करण",
-      "value": "मूल्य"
+      "value": "मूल्य",
+      "version": "संस्करण"
     }
   },
   "template": {
@@ -1488,6 +1637,9 @@
     },
     "none": "कोई टेम्पलेट नहीं"
   },
+  "templates": {
+    "subtitle": "अपनी सेवाओं के लिए पुन: प्रयोज्य कॉन्फ़िगरेशन टेम्पलेट — सेटिंग्स, चरणों और कस्टम कॉन्फ़िगरेशन को एक साथ समूहित करें, फिर उन्हें बनाएं, क्लोन करें, या हटाएं।"
+  },
   "theme": {
     "dark": "डार्क",
     "light": "लाइट"
@@ -1535,6 +1687,7 @@
       "show_selected_only": "केवल चयनित दिखाएं",
       "stop_instance": "इंस्टेंस {{hostname}} रोकें",
       "unban_ip": "{{ip}} का प्रतिबंध हटाएं",
+      "update_ban_duration": "बैन अवधि अपडेट करें",
       "value_from_global": "ग्लोबल सेटिंग्स से मान"
     },
     "cannot_delete_original_ban": "मूल प्रतिबंध प्रविष्टि को हटाया नहीं जा सकता।",
@@ -1616,6 +1769,7 @@
     "password_requirements": "पासवर्ड कम से कम 8 वर्ण लंबा होना चाहिए और इसमें 1 बड़ा अक्षर, 1 अंक और 1 विशेष वर्ण शामिल होना चाहिए।",
     "pro_feature": "यह एक प्रो सुविधा है।",
     "readonly_db_action_disabled": "अक्षम: डेटाबेस रीड-ओनली मोड में है।",
+    "readonly_mode": "यह क्रिया केवल रीड-ओनली मोड में अनुमत नहीं है।",
     "readonly_user_action_disabled": "अक्षम: आपका खाता रीड-ओनली है, कार्रवाई '{{action}}' अक्षम है।",
     "real_ip_from": "विश्वसनीय आईपी/नेटवर्क की सूची, स्पेस द्वारा अलग की गई, जहां से प्रॉक्सी किए गए अनुरोध आते हैं।",
     "real_ip_from_urls": "विश्वसनीय आईपी/नेटवर्क वाले यूआरएल की सूची, स्पेस द्वारा अलग की गई, जहां से प्रॉक्सी किए गए अनुरोध आते हैं। file:// यूआरएल और http://user:pass@url योजना का उपयोग करके मूल प्रमाणीकरण का भी समर्थन करता है।",
@@ -1662,8 +1816,8 @@
         "job_name": "इस कैश फ़ाइल को उत्पन्न करने वाला कार्य",
         "last_update": "कैश फ़ाइल को अंतिम बार अपडेट करने की तारीख और समय",
         "plugin": "इस कैश फ़ाइल को उत्पन्न करने वाले कार्य से जुड़ा प्लगइन",
-        "service": "इस कैश फ़ाइल से जुड़ी सेवा (या वैश्विक)",
-        "select_all": "सभी कैश फ़ाइलों का चयन करें"
+        "select_all": "सभी कैश फ़ाइलों का चयन करें",
+        "service": "इस कैश फ़ाइल से जुड़ी सेवा (या वैश्विक)"
       },
       "configs": {
         "actions": "इस कस्टम कॉन्फ़िगरेशन के लिए उपलब्ध कार्रवाइयाँ",
@@ -1778,18 +1932,6 @@
   },
   "totp": {
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
-  },
-  "validation": {
-    "default_field_name": "यह फ़ील्ड",
-    "invalid_date": "अमान्य दिनांक",
-    "ip_global_duplicate": "यह आईपी पता पहले से ही विश्व स्तर पर प्रतिबंधित है।",
-    "ip_invalid": "अमान्य आईपी पता प्रारूप।",
-    "ip_required": "आईपी पता आवश्यक है।",
-    "ip_service_duplicate": "यह आईपी पता चयनित सेवा ({{service}}) के लिए पहले से ही प्रतिबंधित है।",
-    "pattern": "कृपया {{field}} के लिए एक मान्य मान दर्ज करें।",
-    "required": "{{field}} आवश्यक है।",
-    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।",
-    "zerossl_email_or_api_key_required": "ZeroSSL के लिए ईमेल या ZeroSSL API कुंजी में से एक आवश्यक है।"
   },
   "certificates": {
     "acme_help": "उन सेवाओं का चयन करें, जिनके मौजूदा सेटिंग्स पहले से ही Let's Encrypt को सक्षम और कॉन्फ़िगर करती हैं। यह क्रिया केवल उस कॉन्फ़िगरेशन को शेड्यूल करती है; प्रमाणपत्र विवरण और चुनौती क्रेडेंशियल यहां दर्ज नहीं किए जाते हैं।",
@@ -1929,6 +2071,18 @@
     "value": "मान",
     "values": "मान"
   },
+  "validation": {
+    "default_field_name": "यह फ़ील्ड",
+    "invalid_date": "अमान्य दिनांक",
+    "ip_global_duplicate": "यह आईपी पता पहले से ही विश्व स्तर पर प्रतिबंधित है।",
+    "ip_invalid": "अमान्य आईपी पता प्रारूप।",
+    "ip_required": "आईपी पता आवश्यक है।",
+    "ip_service_duplicate": "यह आईपी पता चयनित सेवा ({{service}}) के लिए पहले से ही प्रतिबंधित है।",
+    "pattern": "कृपया {{field}} के लिए एक मान्य मान दर्ज करें।",
+    "required": "{{field}} आवश्यक है।",
+    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।",
+    "zerossl_email_or_api_key_required": "ZeroSSL के लिए ईमेल या ZeroSSL API कुंजी में से एक आवश्यक है।"
+  },
   "web_cache": {
     "available": "उपलब्ध",
     "cache_state": "स्थिति",
@@ -1962,25 +2116,5 @@
     "services": "सेवा को सक्षम करना",
     "status": "इंस्टेंस स्टोरेज",
     "subtitle": "रिवर्स-प्रॉक्सी कैश स्थिति, एकत्रित हिट-दर मेट्रिक्स और तत्काल साफ़ करने के नियंत्रण।"
-  },
-  "cache": {
-    "subtitle": "अनुसूचित कार्यों द्वारा उत्पन्न कैश फ़ाइलें (ब्लॉकलिस्ट, GeoIP डेटाबेस, और अन्य) — प्रति सेवा और प्लगइन के लिए जांचें, डाउनलोड करें, या हटाएं।"
-  },
-  "accordion": {
-    "body": {
-      "tls": "स्वचालित रूप से प्रमाणपत्र जारी करें और नवीनीकृत करें।"
-    },
-    "title": {
-      "tls": "TLS & प्रमाणपत्र"
-    }
-  },
-  "input_list": {
-    "view_all_settings": "सभी {{count}} सेटिंग्स देखें"
-  },
-  "templates": {
-    "subtitle": "अपनी सेवाओं के लिए पुन: प्रयोज्य कॉन्फ़िगरेशन टेम्पलेट — सेटिंग्स, चरणों और कस्टम कॉन्फ़िगरेशन को एक साथ समूहित करें, फिर उन्हें बनाएं, क्लोन करें, या हटाएं।"
-  },
-  "login": {
-    "subtitle": "अपने BunkerWeb खाते में साइन इन करें"
   }
 }

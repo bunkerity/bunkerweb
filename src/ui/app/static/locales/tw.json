@@ -7,7 +7,16 @@
     "tagline": "強大保護，化繁為簡",
     "version": "版本：{{version}}"
   },
+  "accordion": {
+    "body": {
+      "tls": "自動發行和更新憑證。"
+    },
+    "title": {
+      "tls": "TLS & 憑證"
+    }
+  },
   "alert": {
+    "configs_import_invalid_file": "請上傳有效的自定義配置匯出檔案（.json）。",
     "custom_end_date_required": "請選擇一個自訂結束日期。",
     "important": "重要",
     "no_changes_detected": "未偵測到任何變更。",
@@ -17,10 +26,13 @@
   },
   "aria": {
     "label": {
+      "clear_search": "清除搜尋",
       "close": "關閉",
       "copy": "複製日誌",
       "download_log": "下載此日誌檔案",
       "follow": "跟隨",
+      "hide_value": "隱藏值",
+      "reveal_value": "顯示值",
       "select_file": "選擇檔案",
       "select_page": "選擇頁面",
       "issue_count": "錯誤與警告數量",
@@ -34,10 +46,9 @@
       "configs_dropzone": "選取自訂設定匯出檔，或將檔案拖放到這裡",
       "raw_configuration": "原始設定",
       "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡",
-      "hide_value": "隱藏值",
-      "reveal_value": "顯示值",
       "user_avatar": "使用者頭像",
-      "remove_value": "移除值"
+      "remove_value": "移除值",
+      "view_selected_items": "檢視已選取項目"
     }
   },
   "badge": {
@@ -56,10 +67,14 @@
     "pro": "升級至 PRO 版本，充分利用 BunkerWeb。更多資訊和免費試用請點擊<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">這裡</a>。",
     "support": "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
   },
+  "bans": {
+    "subtitle": "跨您所有 BunkerWeb 實例的封鎖 IP 位址 — 建立、移除或調整封鎖期限。"
+  },
   "breadcrumb": {
     "about": "關於",
     "bans": "封鎖",
     "cache": "快取",
+    "web_cache": "Web 緩存",
     "configs": "設定",
     "extra_pages": "附加頁面",
     "global_settings": "全域設定",
@@ -76,10 +91,10 @@
     "pro": "Pro",
     "profile": "個人資料",
     "reports": "報告",
+    "groups": "資源群組",
     "services": "服務",
     "support": "支援",
-    "templates": "範本",
-    "groups": "資源群組"
+    "templates": "範本"
   },
   "button": {
     "actions": "操作",
@@ -95,6 +110,7 @@
     "cancel": "取消",
     "clear": "清除",
     "close": "關閉",
+    "clone": "複製",
     "columns": "欄",
     "convert_configs": "轉換設定",
     "convert_configs_to": "轉換為 {{state}}",
@@ -171,8 +187,13 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段",
-    "clone": "複製"
+    "wipe_other_sessions": "清除其他工作階段"
+  },
+  "cache": {
+    "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。"
+  },
+  "configs": {
+    "subtitle": "針對您服務的自定義 NGINX 配置片段 — 建立、編輯和管理 HTTP、ModSecurity 和流層過濾。"
   },
   "country": {
     "AD": "安道爾",
@@ -581,6 +602,8 @@
     "select_rows_templates_0": "未選擇模板",
     "select_rows_templates_1": "選擇了 1 個模板",
     "select_rows_templates_plural": "選擇了 %d 個模板",
+    "selected_list_count": "{{count}} {{entity}} 已選取",
+    "selected_list_empty": "未選取 {{entity}}。",
     "zero_records_bans": "找不到相符的封鎖",
     "zero_records_cache": "找不到相符的快取檔案",
     "zero_records_configs": "找不到相符的自訂設定",
@@ -590,9 +613,7 @@
     "zero_records_plugins": "找不到相符的外掛程式",
     "zero_records_reports": "找不到相符的報告",
     "zero_records_services": "找不到相符的服務",
-    "zero_records_templates": "未找到匹配的模板",
-    "selected_list_count": "{{count}} {{entity}} 已選取",
-    "selected_list_empty": "未選取 {{entity}}。"
+    "zero_records_templates": "未找到匹配的模板"
   },
   "dev_log": {
     "copy_failed": "複製文字失敗：",
@@ -632,7 +653,7 @@
     "unban_failed": "解除封鎖 IP 位址失敗。請再試一次。"
   },
   "flash": {
-    "easter_egg": "如果你讀到這條訊息，表示你很好奇 👀",
+    "easter_egg": "如果你讀到這條訊息，表示你很好奇",
     "error": "錯誤",
     "message": "訊息",
     "pro": "BunkerWeb PRO",
@@ -679,6 +700,7 @@
       "configuration_name": "設定名稱",
       "confirm_password": "確認密碼",
       "current_password": "目前密碼",
+      "custom_config": "配置",
       "custom_end_date": "自訂結束日期",
       "custom_ssl_certificate": "自訂 SSL 憑證",
       "custom_ssl_certificate_data": "自訂 SSL 憑證資料 (Base64/PEM)",
@@ -691,6 +713,7 @@
       "email_for_lets_encrypt": "用於 Let's Encrypt 的電子郵件",
       "end_date": "結束日期",
       "hostname": "主機名稱",
+      "instance_id": "實例 ID",
       "ip_address": "IP 位址",
       "keywords": "關鍵字",
       "lets_encrypt_custom_profile": "Let's Encrypt 自訂設定檔",
@@ -730,8 +753,7 @@
       "zerossl_api_retry": "ZeroSSL API 重試次數",
       "zerossl_api_retry_delay": "ZeroSSL API 重試延遲",
       "zerossl_api_connect_timeout": "ZeroSSL API 連線逾時",
-      "zerossl_api_max_time": "ZeroSSL API 最長時間",
-      "instance_id": "實例 ID"
+      "zerossl_api_max_time": "ZeroSSL API 最長時間"
     },
     "placeholder": {
       "2fa_code": "輸入代碼",
@@ -754,12 +776,22 @@
       "password_uppercase": "密碼必須至少包含 1 個大寫字母。"
     }
   },
+  "input_list": {
+    "view_all_settings": "檢視所有 {{count}} 設定"
+  },
   "instance": {
     "type": {
       "container": "容器",
       "pod": "Pod",
       "static": "靜態"
     }
+  },
+  "instances": {
+    "down": "已停止",
+    "loading": "正在載入",
+    "subtitle": "管理與此 UI 連結的 BunkerWeb 實例：建立、ping、重新載入、停止或移除它們。",
+    "total": "總實例數",
+    "up": "執行中"
   },
   "interval": {
     "day": "每天",
@@ -774,6 +806,15 @@
       "success": "成功"
     }
   },
+  "jobs": {
+    "subtitle": "由 BunkerWeb 計劃器執行，包括排程和一次性任務 — 追蹤其狀態並按需執行。",
+    "tile": {
+      "async": "非同步",
+      "failed_last_run": "上次執行失敗",
+      "reload_required": "需要重新載入",
+      "total": "總任務數"
+    }
+  },
   "legend": {
     "locked_settings_annotation": "已鎖定 ({{method}})",
     "locked_settings_hint": "鎖定的設定會反白顯示"
@@ -784,11 +825,14 @@
     "here": "這裡",
     "more_info": "更多資訊",
     "more_news": "更多新聞",
+    "opens_new_tab": "（在新視窗中開啟）",
     "privacy_policy": "隱私權政策",
     "read_more": "閱讀更多",
     "see_more": "查看更多",
-    "upgrade": "升級？",
-    "opens_new_tab": "（在新視窗中開啟）"
+    "upgrade": "升級？"
+  },
+  "login": {
+    "subtitle": "登入您的 BunkerWeb 帳戶"
   },
   "logs": {
     "annotation_error": "錯誤",
@@ -797,6 +841,7 @@
     "letsencrypt_logs": "Let's Encrypt 日誌",
     "main_logs": "主要日誌",
     "new_lines_sr": "{{count}} 行新日誌",
+    "no_log_files": "沒有任何記錄檔案可顯示，請參閱文件以獲取更多關於如何啟用記錄的資訊。",
     "issue_summary": "{{errors}} 個錯誤，{{warnings}} 個警告",
     "level_critical": "嚴重",
     "level_debug": "除錯",
@@ -810,6 +855,7 @@
     "new_lines": "新行",
     "showing_all": "{{total}} 行",
     "showing_some": "顯示 {{shown}} / {{total}}",
+    "select_file_prompt": "選擇一個記錄檔案以檢視其內容",
     "trimmed_notice": "--- 為了效能，已移除 {{count}} 筆較舊的日誌行 ---"
   },
   "modal": {
@@ -849,6 +895,7 @@
       "recovery_codes_save_alert": "請將這些恢復碼儲存在安全的位置（例如密碼管理器或保險箱）。如果遺失驗證裝置，您可以使用它們存取您的帳戶。",
       "recovery_codes_shown_once_alert": "這些恢復碼僅顯示一次。請確保將其安全儲存。",
       "reset_template_alert": "您確定要重設目前的範本設定和自訂設定嗎？",
+      "services_conversion_confirmation": "您確定要轉換選定的服務嗎？",
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
@@ -883,8 +930,10 @@
       "import_services": "匯入服務",
       "job_history": "最近 10 次任務執行",
       "job_history_count": "任務 {{count}} 次執行",
+      "multiselect_selected": "已選取項目",
       "recovery_codes": "恢復碼",
       "reset_template_config": "重設範本設定？",
+      "security_report_details": "安全報告詳細資訊",
       "server_name_not_unique": "伺服器名稱不是唯一的",
       "update_duration": "更新封鎖期限"
     }
@@ -910,9 +959,12 @@
     "about": "關於",
     "bans": "封鎖",
     "cache": "快取",
+    "certificates": "憑證",
+    "web_cache": "Web 緩存",
     "configs": "設定",
     "extra_pages": "附加頁面",
     "global_settings": "全域設定",
+    "groups": "資源群組",
     "home": "首頁",
     "instances": "執行個體",
     "jobs": "任務",
@@ -930,9 +982,7 @@
     "reports": "報告",
     "services": "服務",
     "support": "支援",
-    "templates": "範本",
-    "certificates": "憑證",
-    "groups": "資源群組"
+    "templates": "範本"
   },
   "news": {
     "image_alt": "新聞圖片",
@@ -966,6 +1016,13 @@
       "external": "外部",
       "pro": "Pro",
       "ui": "UI"
+    }
+  },
+  "plugins": {
+    "multivalue": {
+      "more_value": "更多值",
+      "more_values": "更多值",
+      "show_less": "顯示較少"
     }
   },
   "pro": {
@@ -1022,6 +1079,10 @@
     "alert": {
       "refresh_recovery_codes": "重新整理恢復碼將使先前的代碼失效。"
     },
+    "badge": {
+      "2fa_disabled": "2FA 已停用",
+      "2fa_enabled": "啟用雙重驗證"
+    },
     "card": {
       "coming_soon": "即將推出",
       "title": {
@@ -1037,6 +1098,14 @@
     "help": {
       "photo_extensions": "允許的格式：JPG、GIF 或 PNG。最大大小：800KB。"
     },
+    "modal": {
+      "body": {
+        "wipe_sessions_confirm": "這會立即登出您帳戶上的所有其他正在運行的會話。請輸入您的密碼以確認。"
+      },
+      "title": {
+        "wipe_sessions": "清除其他會話？"
+      }
+    },
     "session": {
       "browser": "瀏覽器",
       "creation_date": "建立日期",
@@ -1048,16 +1117,86 @@
       "title": "工作階段",
       "wipe_help": "結束您帳戶上的所有其他正在運行的會話。您將在此處保持登入狀態。"
     },
+    "subtitle": "管理您的帳戶、安全性和正在運行的會話。",
     "tab": {
       "profile": "個人資料",
       "security": "安全性",
       "sessions": "工作階段"
-    },
-    "subtitle": "管理您的帳戶、安全性和正在運行的會話。"
+    }
+  },
+  "range_picker": {
+    "1h": "過去一小時",
+    "24h": "過去 24 小時",
+    "30d": "過去 30 天",
+    "7d": "過去一週",
+    "aria_label": "時間範圍",
+    "custom": "自訂"
   },
   "reports": {
+    "bad_behavior_activity_detected": "偵測到不良行為活動",
+    "bad_behavior_activity_explanation": "這些請求超過不良行為閾值，並已合併。",
+    "bad_behavior_captured_at": "擷取於",
+    "bad_behavior_ip": "IP 位址",
+    "bad_behavior_no_details": "此報告中沒有擷取任何不良行為細節。",
+    "bad_behavior_request_id": "請求識別碼",
+    "bad_behavior_request_label": "請求",
+    "bad_behavior_server": "伺服器",
+    "bad_behavior_total_requests": "可疑請求",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "攻擊類型"
+      },
+      "recent": {
+        "title": "最近事件"
+      },
+      "top_asn": {
+        "title": "頂級 ASN"
+      },
+      "top_offenders": {
+        "title": "頂級惡意行為者"
+      },
+      "top_rules": {
+        "title": "觸發頂級 ModSecurity 規則"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "已封鎖",
+        "title": "隨時間變化的已封鎖請求"
+      }
+    },
     "security_incident": "安全事件",
-    "security_report_data": "安全報告資料"
+    "security_report_data": "安全報告資料",
+    "subtitle": "從您的 BunkerWeb 實例中產生，針對已封鎖的請求的安全報告 — 搜尋、過濾、匯出，並直接從表格中封鎖可疑 IP 位址。",
+    "tab": {
+      "eventlog": "事件記錄",
+      "offenders": "頂級惡意行為者",
+      "overview": "概觀",
+      "patterns": "攻擊模式"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "封鎖",
+      "country": "國家/地區",
+      "fires": "觸發",
+      "ip": "IP",
+      "rule": "規則",
+      "top_rule": "頂級規則"
+    },
+    "tile": {
+      "asns": "頂級 ASN",
+      "blocked": "已封鎖的請求",
+      "blocked_rate": "與前一期間的比較",
+      "bot": "Bot / 爬蟲",
+      "countries": "頂級國家",
+      "peak_hour": "高峰時段",
+      "rce": "RCE / 命令",
+      "repeat_offenders": "重複違規者（前10名）",
+      "sqli": "SQL 注入",
+      "unique_ips": "主要攻擊 IP 位址",
+      "unique_offenders": "主要違規者"
+    }
   },
   "scope": {
     "all_services": "所有服務",
@@ -1069,6 +1208,7 @@
   "searchpane": {
     "active": "啟用中",
     "async": "非同步",
+    "ban_scope": "封鎖範圍",
     "clear": "全部清除",
     "collapse_0": "搜尋窗格",
     "collapse_message": "全部摺疊",
@@ -1127,6 +1267,13 @@
     "block": "封鎖",
     "detect": "偵測"
   },
+  "services": {
+    "draft": "草稿服務",
+    "online": "線上",
+    "subtitle": "管理使用 BunkerWeb 提供的多網站服務：建立、編輯、轉換為草稿或刪除。",
+    "total": "總服務",
+    "with_configs": "使用自訂設定"
+  },
   "settings": {
     "custom_config": {
       "title": "自訂設定"
@@ -1138,9 +1285,9 @@
   },
   "setup": {
     "status": {
-      "admin_user_exists": "🧑‍🚀 管理員使用者已存在。請繼續下一步。",
-      "pro_license_key_exists": "⭐ PRO 授權金鑰已設定，請繼續下一步。",
-      "reverse_proxy_configured": "↪️ Web 介面已設定反向代理。請繼續下一步。",
+      "admin_user_exists": "管理員使用者已存在。請繼續下一步。",
+      "pro_license_key_exists": "PRO 授權金鑰已設定，請繼續下一步。",
+      "reverse_proxy_configured": "Web 介面已設定反向代理。請繼續下一步。",
       "secure_password": "安全密碼",
       "unique_server_name": "唯一伺服器名稱"
     },
@@ -1191,13 +1338,15 @@
     "title": "設定精靈"
   },
   "status": {
-    "admin_user_exists": "🧑‍🚀 管理員使用者已存在。請繼續下一步。",
+    "admin_user_exists": "管理員使用者已存在。請繼續下一步。",
     "blog_connection_fail": "無法連線至部落格以取得新聞更新。",
     "default_server": "預設伺服器",
+    "done": "已完成",
     "down": "已停止",
     "draft": "草稿",
     "error_deleting_template": "刪除模板時發生錯誤。",
     "error_loading_bans": "載入封鎖時發生錯誤。請嘗試重新整理頁面。",
+    "error_loading_data": "無法載入資料",
     "error_loading_template": "無法載入模板資料。",
     "error_saving_template": "儲存模板時發生錯誤。",
     "failed": "失敗",
@@ -1226,8 +1375,10 @@
     "no_search_results": "找不到項目。",
     "no_steps": "無可用步驟",
     "no_steps_description": "此範本沒有任何可設定的步驟。",
+    "not_applicable": "不適用",
     "online": "線上",
     "partial": "部分",
+    "pending": "待辦",
     "pinging_instances": "正在 Ping 執行個體，請稍候...",
     "plugin_page": {
       "status": {
@@ -1236,7 +1387,7 @@
         "not_available": "外掛程式頁面在 Beta 階段尚不可用。"
       }
     },
-    "reverse_proxy_configured": "↪️ Web 介面已設定反向代理。請繼續下一步。",
+    "reverse_proxy_configured": "Web 介面已設定反向代理。請繼續下一步。",
     "secure_password": "安全密碼",
     "setting_up_bunkerweb": "正在設定您的 BunkerWeb，請稍候...",
     "success": "成功",
@@ -1244,9 +1395,7 @@
     "template_in_use_description": "不允許在目前範本之外進行變更。請使用目前範本進行變更或切換到進階/原始模式。",
     "unique_server_name": "唯一伺服器名稱",
     "up": "執行中",
-    "yes": "是",
-    "done": "已完成",
-    "pending": "待辦"
+    "yes": "是"
   },
   "step": {
     "next": "下一步",
@@ -1317,8 +1466,8 @@
       "type": "類型",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "版本",
-      "value": "值"
+      "value": "值",
+      "version": "版本"
     }
   },
   "template": {
@@ -1488,6 +1637,9 @@
     },
     "none": "無範本"
   },
+  "templates": {
+    "subtitle": "可重複使用的服務設定範本 — 包含設定、步驟和自訂設定，然後建立、複製或刪除。"
+  },
   "theme": {
     "dark": "深色",
     "light": "淺色"
@@ -1535,6 +1687,7 @@
       "show_selected_only": "僅顯示所選項目",
       "stop_instance": "停止執行個體 {{hostname}}",
       "unban_ip": "解除封鎖 {{ip}}",
+      "update_ban_duration": "更新封鎖期限",
       "value_from_global": "來自全域設定的值"
     },
     "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
@@ -1616,6 +1769,7 @@
     "password_requirements": "密碼必須至少包含 8 個字元，並包括 1 個大寫字母、1 個數字和 1 個特殊字元。",
     "pro_feature": "這是一個 PRO 功能。",
     "readonly_db_action_disabled": "已停用：資料庫處於唯讀模式。",
+    "readonly_mode": "此操作在唯讀模式下無法執行。",
     "readonly_user_action_disabled": "已停用：您的帳戶是唯讀的，操作 '{{action}}' 已停用。",
     "real_ip_from": "受信任的 IP / 網路清單（以空格分隔），代理請求的來源。",
     "real_ip_from_urls": "包含受信任的 IP / 網路的 URL 清單（以空格分隔），代理請求的來源。也支援 file:// URL 和使用 http://user:pass@url 格式的基本驗證。",
@@ -1662,8 +1816,8 @@
         "job_name": "產生此快取檔案的任務",
         "last_update": "快取檔案最後更新的日期和時間",
         "plugin": "與產生此快取檔案的任務關聯的外掛程式",
-        "service": "與此快取檔案關聯的服務（或全域）",
-        "select_all": "選擇所有快取檔案"
+        "select_all": "選擇所有快取檔案",
+        "service": "與此快取檔案關聯的服務（或全域）"
       },
       "configs": {
         "actions": "此自訂設定可用的操作",
@@ -1778,18 +1932,6 @@
   },
   "totp": {
     "prompt": "請輸入您的 TOTP 代碼。"
-  },
-  "validation": {
-    "default_field_name": "此欄位",
-    "invalid_date": "無效日期",
-    "ip_global_duplicate": "此 IP 位址已被全域封鎖。",
-    "ip_invalid": "IP 位址格式無效。",
-    "ip_required": "需要 IP 位址。",
-    "ip_service_duplicate": "此 IP 位址已針對所選服務 ({{service}}) 被封鎖。",
-    "pattern": "請輸入有效的 {{field}} 值。",
-    "required": "{{field}} 是必填項。",
-    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。",
-    "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
   },
   "certificates": {
     "acme_help": "選擇已啟用且設定 Let's Encrypt 的現有設定的服務。此操作僅排程設定；憑證細節和挑戰憑證在此處不會輸入。",
@@ -1929,6 +2071,18 @@
     "value": "值",
     "values": "值"
   },
+  "validation": {
+    "default_field_name": "此欄位",
+    "invalid_date": "無效日期",
+    "ip_global_duplicate": "此 IP 位址已被全域封鎖。",
+    "ip_invalid": "IP 位址格式無效。",
+    "ip_required": "需要 IP 位址。",
+    "ip_service_duplicate": "此 IP 位址已針對所選服務 ({{service}}) 被封鎖。",
+    "pattern": "請輸入有效的 {{field}} 值。",
+    "required": "{{field}} 是必填項。",
+    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。",
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
+  },
   "web_cache": {
     "available": "可用",
     "cache_state": "狀態",
@@ -1962,25 +2116,5 @@
     "services": "服務啟用",
     "status": "實例儲存",
     "subtitle": "反向代理緩存狀態，匯總命中率指標和即時清除控制。"
-  },
-  "cache": {
-    "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。"
-  },
-  "accordion": {
-    "body": {
-      "tls": "自動發行和更新憑證。"
-    },
-    "title": {
-      "tls": "TLS & 憑證"
-    }
-  },
-  "input_list": {
-    "view_all_settings": "檢視所有 {{count}} 設定"
-  },
-  "templates": {
-    "subtitle": "可重複使用的服務設定範本 — 包含設定、步驟和自訂設定，然後建立、複製或刪除。"
-  },
-  "login": {
-    "subtitle": "登入您的 BunkerWeb 帳戶"
   }
 }

@@ -7,7 +7,16 @@
     "tagline": "단순함 속에 담긴 강력한 보안",
     "version": "버전: {{version}}"
   },
+  "accordion": {
+    "body": {
+      "tls": "자동으로 인증서 발급 및 갱신"
+    },
+    "title": {
+      "tls": "TLS & 인증서"
+    }
+  },
   "alert": {
+    "configs_import_invalid_file": "유효한 사용자 지정 구성 파일(.json)을 업로드하십시오.",
     "custom_end_date_required": "사용자 지정 종료 날짜를 선택해 주세요.",
     "important": "중요",
     "no_changes_detected": "감지된 변경 사항이 없습니다.",
@@ -17,10 +26,13 @@
   },
   "aria": {
     "label": {
+      "clear_search": "검색 지우기",
       "close": "닫기",
       "copy": "로그 복사",
       "download_log": "이 로그 파일 다운로드",
       "follow": "따라가기",
+      "hide_value": "값 숨기기",
+      "reveal_value": "값 표시",
       "select_file": "파일 선택",
       "select_page": "페이지 선택",
       "issue_count": "오류 및 경고 수",
@@ -34,10 +46,9 @@
       "configs_dropzone": "사용자 지정 설정 내보내기 파일을 선택하거나 여기에 놓으세요",
       "raw_configuration": "원본 설정",
       "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요",
-      "hide_value": "값 숨기기",
-      "reveal_value": "값 표시",
       "user_avatar": "사용자 프로필",
-      "remove_value": "값 제거"
+      "remove_value": "값 제거",
+      "view_selected_items": "선택된 항목 보기"
     }
   },
   "badge": {
@@ -56,10 +67,14 @@
     "pro": "PRO 버전으로 업그레이드하여 BunkerWeb의 모든 기능을 활용해 보세요. 자세한 정보와 무료 체험은 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">여기</a>를 클릭하세요.",
     "support": "BunkerWeb에 대한 프리미엄 기술 지원이나 맞춤형 컨설팅이 필요하신가요? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">전문 서비스</a>를 확인해 보세요."
   },
+  "bans": {
+    "subtitle": "BunkerWeb 인스턴스 전반에 걸쳐 차단된 IP 주소 — 차단 기간을 추가, 제거 또는 조정합니다."
+  },
   "breadcrumb": {
     "about": "정보",
     "bans": "차단 목록",
     "cache": "캐시",
+    "web_cache": "웹 캐시",
     "configs": "설정",
     "extra_pages": "추가 페이지",
     "global_settings": "전역 설정",
@@ -76,10 +91,10 @@
     "pro": "Pro",
     "profile": "프로필",
     "reports": "보고서",
+    "groups": "리소스 그룹",
     "services": "서비스",
     "support": "지원",
-    "templates": "템플릿",
-    "groups": "리소스 그룹"
+    "templates": "템플릿"
   },
   "button": {
     "actions": "작업",
@@ -95,6 +110,7 @@
     "cancel": "취소",
     "clear": "삭제",
     "close": "닫기",
+    "clone": "복제",
     "columns": "열",
     "convert_configs": "설정 전환",
     "convert_configs_to": "{{state}}(으)로 전환",
@@ -171,8 +187,13 @@
     "upload_photo": "새 사진 업로드",
     "view_details": "상세 보기",
     "view_raw_data": "원본 데이터 보기",
-    "wipe_other_sessions": "다른 세션 로그아웃",
-    "clone": "복제"
+    "wipe_other_sessions": "다른 세션 로그아웃"
+  },
+  "cache": {
+    "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다."
+  },
+  "configs": {
+    "subtitle": "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다."
   },
   "country": {
     "AD": "안도라",
@@ -581,6 +602,8 @@
     "select_rows_templates_0": "선택된 템플릿 없음",
     "select_rows_templates_1": "1개의 템플릿 선택됨",
     "select_rows_templates_plural": "%d개의 템플릿 선택됨",
+    "selected_list_count": "{{count}} {{entity}} 선택됨",
+    "selected_list_empty": "{{entity}} 선택되지 않음.",
     "zero_records_bans": "일치하는 차단 항목이 없습니다.",
     "zero_records_cache": "일치하는 캐시 파일이 없습니다.",
     "zero_records_configs": "일치하는 설정이 없습니다.",
@@ -590,9 +613,7 @@
     "zero_records_plugins": "일치하는 플러그인이 없습니다.",
     "zero_records_reports": "일치하는 보고서가 없습니다.",
     "zero_records_services": "일치하는 서비스가 없습니다.",
-    "zero_records_templates": "일치하는 템플릿이 없습니다.",
-    "selected_list_count": "{{count}} {{entity}} 선택됨",
-    "selected_list_empty": "{{entity}} 선택되지 않음."
+    "zero_records_templates": "일치하는 템플릿이 없습니다."
   },
   "dev_log": {
     "copy_failed": "텍스트 복사 실패:",
@@ -632,7 +653,7 @@
     "unban_failed": "IP 주소 차단 해제 실패. 다시 시도해 주세요."
   },
   "flash": {
-    "easter_egg": "이 글을 보고 계신다면 호기심이 많으시군요! 👀",
+    "easter_egg": "이 글을 보고 계신다면 호기심이 많으시군요!",
     "error": "오류",
     "message": "정보",
     "pro": "BunkerWeb PRO",
@@ -679,6 +700,7 @@
       "configuration_name": "설정 이름",
       "confirm_password": "비밀번호 확인",
       "current_password": "현재 비밀번호",
+      "custom_config": "구성",
       "custom_end_date": "사용자 정의 종료일",
       "custom_ssl_certificate": "사용자 정의 SSL 인증서",
       "custom_ssl_certificate_data": "인증서 데이터 (Base64/PEM)",
@@ -691,6 +713,7 @@
       "email_for_lets_encrypt": "Let's Encrypt용 이메일",
       "end_date": "종료 날짜",
       "hostname": "호스트 이름",
+      "instance_id": "인스턴스 ID",
       "ip_address": "IP 주소",
       "keywords": "키워드",
       "lets_encrypt_custom_profile": "Let's Encrypt 사용자 정의 프로필",
@@ -730,8 +753,7 @@
       "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
       "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
       "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
-      "zerossl_api_max_time": "ZeroSSL API 최대 시간",
-      "instance_id": "인스턴스 ID"
+      "zerossl_api_max_time": "ZeroSSL API 최대 시간"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -754,12 +776,22 @@
       "password_uppercase": "비밀번호에 대문자가 최소 1개 포함되어야 합니다."
     }
   },
+  "input_list": {
+    "view_all_settings": "모든 {{count}} 설정 보기"
+  },
   "instance": {
     "type": {
       "container": "컨테이너",
       "pod": "포드(Pod)",
       "static": "정적"
     }
+  },
+  "instances": {
+    "down": "비활성",
+    "loading": "로딩 중",
+    "subtitle": "이 UI에 연결된 BunkerWeb 인스턴스를 관리합니다: 생성, 핑, 다시 로드, 중지 또는 제거합니다.",
+    "total": "총 인스턴스 수",
+    "up": "활성"
   },
   "interval": {
     "day": "매일",
@@ -774,6 +806,15 @@
       "success": "성공"
     }
   },
+  "jobs": {
+    "subtitle": "BunkerWeb 스케줄러에 의해 실행되는 스케줄 및 단일 작업 — 상태를 추적하고 필요에 따라 실행합니다.",
+    "tile": {
+      "async": "비동기",
+      "failed_last_run": "마지막 실행 실패",
+      "reload_required": "다시 로드 필요",
+      "total": "총 작업 수"
+    }
+  },
   "legend": {
     "locked_settings_annotation": "잠금됨 ({{method}})",
     "locked_settings_hint": "잠금된 설정은 강조 표시됩니다"
@@ -784,11 +825,14 @@
     "here": "여기",
     "more_info": "자세한 정보",
     "more_news": "더 많은 소식",
+    "opens_new_tab": "(새 탭에서 열기)",
     "privacy_policy": "개인정보 처리방침",
     "read_more": "더 읽어보기",
     "see_more": "더 보기",
-    "upgrade": "업그레이드하시겠습니까?",
-    "opens_new_tab": "(새 탭에서 열기)"
+    "upgrade": "업그레이드하시겠습니까?"
+  },
+  "login": {
+    "subtitle": "BunkerWeb 계정에 로그인"
   },
   "logs": {
     "annotation_error": "오류",
@@ -797,6 +841,7 @@
     "letsencrypt_logs": "Let's Encrypt 로그",
     "main_logs": "기본 로그",
     "new_lines_sr": "{{count}}개의 새 로그 줄",
+    "no_log_files": "표시할 로그 파일이 없습니다. 자세한 내용은 로그 활성화 방법에 대한 문서를 참조하십시오.",
     "issue_summary": "오류 {{errors}}개, 경고 {{warnings}}개",
     "level_critical": "치명적",
     "level_debug": "디버그",
@@ -810,6 +855,7 @@
     "new_lines": "새 줄",
     "showing_all": "{{total}}줄",
     "showing_some": "{{total}}개 중 {{shown}}개 표시",
+    "select_file_prompt": "로그 파일 선택하여 내용을 보기",
     "trimmed_notice": "--- 성능을 위해 {{count}}개의 오래된 로그 라인을 제거했습니다 ---"
   },
   "modal": {
@@ -849,6 +895,7 @@
       "recovery_codes_save_alert": "이 복구 코드를 안전한 장소(비밀번호 관리자 등)에 저장하세요. 인증 기기를 분실했을 때 계정에 접근하는 데 필요합니다.",
       "recovery_codes_shown_once_alert": "이 복구 코드는 한 번만 표시됩니다. 반드시 안전하게 저장해 주세요.",
       "reset_template_alert": "현재 템플릿 설정과 사용자 정의 설정을 초기화하시겠습니까?",
+      "services_conversion_confirmation": "선택한 서비스를 전환하시겠습니까?",
       "services_deletion_confirmation": "선택한 서비스를 삭제하시겠습니까?",
       "unban_confirmation_alert": "선택한 IP 주소의 차단을 해제하시겠습니까?",
       "unban_confirmation_alert_plural": "선택한 IP 주소들의 차단을 해제하시겠습니까?",
@@ -883,8 +930,10 @@
       "import_services": "서비스 가져오기",
       "job_history": "최근 10회 작업 실행 기록",
       "job_history_count": "최근 {{count}}회 작업 실행 기록",
+      "multiselect_selected": "선택된 항목",
       "recovery_codes": "복구 코드",
       "reset_template_config": "템플릿 설정을 초기화하시겠습니까?",
+      "security_report_details": "보안 보고서 세부 정보",
       "server_name_not_unique": "서버 이름이 중복됩니다",
       "update_duration": "차단 기간 업데이트"
     }
@@ -910,9 +959,12 @@
     "about": "정보",
     "bans": "차단 목록",
     "cache": "캐시",
+    "certificates": "인증서",
+    "web_cache": "웹 캐시",
     "configs": "설정",
     "extra_pages": "추가 페이지",
     "global_settings": "전역 설정",
+    "groups": "리소스 그룹",
     "home": "홈",
     "instances": "인스턴스",
     "jobs": "작업",
@@ -930,9 +982,7 @@
     "reports": "보고서",
     "services": "서비스",
     "support": "지원",
-    "templates": "템플릿",
-    "certificates": "인증서",
-    "groups": "리소스 그룹"
+    "templates": "템플릿"
   },
   "news": {
     "image_alt": "소식 이미지",
@@ -966,6 +1016,13 @@
       "external": "외부",
       "pro": "Pro",
       "ui": "UI"
+    }
+  },
+  "plugins": {
+    "multivalue": {
+      "more_value": "더 보기",
+      "more_values": "더 많은 값",
+      "show_less": "덜 표시"
     }
   },
   "pro": {
@@ -1022,6 +1079,10 @@
     "alert": {
       "refresh_recovery_codes": "복구 코드를 새로 고치면 이전 코드는 사용할 수 없게 됩니다."
     },
+    "badge": {
+      "2fa_disabled": "2FA 비활성화",
+      "2fa_enabled": "2FA 활성화"
+    },
     "card": {
       "coming_soon": "준비 중",
       "title": {
@@ -1037,6 +1098,14 @@
     "help": {
       "photo_extensions": "JPG, GIF, PNG 파일만 허용됩니다. 최대 크기: 800KB."
     },
+    "modal": {
+      "body": {
+        "wipe_sessions_confirm": "이것은 계정의 모든 활성 세션을 즉시 로그아웃합니다. 확인을 위해 비밀번호를 입력하세요."
+      },
+      "title": {
+        "wipe_sessions": "다른 세션 삭제?"
+      }
+    },
     "session": {
       "browser": "브라우저",
       "creation_date": "생성일",
@@ -1048,16 +1117,86 @@
       "title": "세션",
       "wipe_help": "계정의 모든 활성 세션을 종료합니다. 여기에서 계속 로그인됩니다."
     },
+    "subtitle": "계정, 보안 및 활성 세션을 관리합니다.",
     "tab": {
       "profile": "프로필",
       "security": "보안",
       "sessions": "세션"
-    },
-    "subtitle": "계정, 보안 및 활성 세션을 관리합니다."
+    }
+  },
+  "range_picker": {
+    "1h": "지난 1시간",
+    "24h": "지난 24시간",
+    "30d": "최근 30일",
+    "7d": "지난 1주일",
+    "aria_label": "시간 범위",
+    "custom": "사용자 정의"
   },
   "reports": {
+    "bad_behavior_activity_detected": "부적절한 활동 감지",
+    "bad_behavior_activity_explanation": "이 요청은 부적절한 활동 임계값을 초과하여 그룹화되었습니다.",
+    "bad_behavior_captured_at": "캡처됨",
+    "bad_behavior_ip": "IP 주소",
+    "bad_behavior_no_details": "이 보고서에 대한 부적절한 활동 세부 정보는 캡처되지 않았습니다.",
+    "bad_behavior_request_id": "요청 ID",
+    "bad_behavior_request_label": "요청",
+    "bad_behavior_server": "서버",
+    "bad_behavior_total_requests": "의심스러운 요청",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "공격 유형"
+      },
+      "recent": {
+        "title": "최근 발생"
+      },
+      "top_asn": {
+        "title": "최상위 ASNs"
+      },
+      "top_offenders": {
+        "title": "최상위 공격자"
+      },
+      "top_rules": {
+        "title": "가장 많이 발생한 ModSecurity 규칙"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "차단됨",
+        "title": "시간에 따른 차단 요청 수"
+      }
+    },
     "security_incident": "보안 사고",
-    "security_report_data": "보안 보고서 데이터"
+    "security_report_data": "보안 보고서 데이터",
+    "subtitle": "BunkerWeb 인스턴스에서 차단된 요청에서 생성된 보안 보고서 — 테이블에서 직접 검색, 필터링, 내보내기 및 공격 IP 주소를 차단합니다.",
+    "tab": {
+      "eventlog": "이벤트 로그",
+      "offenders": "최상위 공격자",
+      "overview": "개요",
+      "patterns": "공격 패턴"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "차단",
+      "country": "국가",
+      "fires": "발동",
+      "ip": "IP",
+      "rule": "규칙",
+      "top_rule": "최상위 규칙"
+    },
+    "tile": {
+      "asns": "최상위 ASNs",
+      "blocked": "차단된 요청",
+      "blocked_rate": "이전 기간과의 비교",
+      "bot": "봇 / 스크래퍼",
+      "countries": "최상위 공격자 국가",
+      "peak_hour": "최고 시간",
+      "rce": "RCE / 명령",
+      "repeat_offenders": "반복적인 위반 행위 (상위 10개)",
+      "sqli": "SQL 삽입",
+      "unique_ips": "상위 공격 IP 주소",
+      "unique_offenders": "상위 위반 행위"
+    }
   },
   "scope": {
     "all_services": "모든 서비스",
@@ -1069,6 +1208,7 @@
   "searchpane": {
     "active": "활성",
     "async": "비동기",
+    "ban_scope": "차단 범위",
     "clear": "모두 지우기",
     "collapse_0": "검색창",
     "collapse_message": "모두 접기",
@@ -1127,6 +1267,13 @@
     "block": "Block",
     "detect": "Detect"
   },
+  "services": {
+    "draft": "초안 서비스",
+    "online": "온라인",
+    "subtitle": "BunkerWeb로 보호된 멀티 사이트 서비스를 관리합니다: 생성, 편집, 초안으로 변환 또는 삭제합니다.",
+    "total": "전체 서비스",
+    "with_configs": "사용자 정의 설정과 함께"
+  },
   "settings": {
     "custom_config": {
       "title": "사용자 정의 설정"
@@ -1138,9 +1285,9 @@
   },
   "setup": {
     "status": {
-      "admin_user_exists": "🧑‍🚀 관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요.",
-      "pro_license_key_exists": "⭐ PRO 라이선스 키가 이미 설정되어 있습니다. 다음 단계로 진행하세요.",
-      "reverse_proxy_configured": "↪️ 웹 인터페이스용 리버스 프록시가 이미 설정되어 있습니다. 다음 단계로 진행하세요.",
+      "admin_user_exists": "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요.",
+      "pro_license_key_exists": "PRO 라이선스 키가 이미 설정되어 있습니다. 다음 단계로 진행하세요.",
+      "reverse_proxy_configured": "웹 인터페이스용 리버스 프록시가 이미 설정되어 있습니다. 다음 단계로 진행하세요.",
       "secure_password": "안전한 비밀번호",
       "unique_server_name": "고유한 서버 이름"
     },
@@ -1191,13 +1338,15 @@
     "title": "설정 마법사"
   },
   "status": {
-    "admin_user_exists": "🧑‍🚀 관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요.",
+    "admin_user_exists": "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요.",
     "blog_connection_fail": "소식 업데이트를 위해 블로그에 연결할 수 없습니다.",
     "default_server": "기본 서버",
+    "done": "완료됨",
     "down": "비활성",
     "draft": "초안",
     "error_deleting_template": "템플릿 삭제 중 오류가 발생했습니다.",
     "error_loading_bans": "차단 목록 로드 중 오류 발생. 페이지를 새로고침해 주세요.",
+    "error_loading_data": "데이터 로드 실패",
     "error_loading_template": "템플릿 데이터를 로드할 수 없습니다.",
     "error_saving_template": "템플릿 저장 중 오류가 발생했습니다.",
     "failed": "실패",
@@ -1226,8 +1375,10 @@
     "no_search_results": "항목을 찾을 수 없습니다.",
     "no_steps": "사용 가능한 단계 없음",
     "no_steps_description": "이 템플릿에는 구성할 수 있는 단계가 없습니다.",
+    "not_applicable": "해당 없음",
     "online": "온라인",
     "partial": "일부 적용",
+    "pending": "대기 중",
     "pinging_instances": "인스턴스에 핑을 보내는 중입니다. 잠시만 기다려 주세요...",
     "plugin_page": {
       "status": {
@@ -1236,7 +1387,7 @@
         "not_available": "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다."
       }
     },
-    "reverse_proxy_configured": "↪️ 웹 인터페이스용 리버스 프록시가 이미 설정되어 있습니다. 다음 단계로 진행하세요.",
+    "reverse_proxy_configured": "웹 인터페이스용 리버스 프록시가 이미 설정되어 있습니다. 다음 단계로 진행하세요.",
     "secure_password": "안전한 비밀번호",
     "setting_up_bunkerweb": "BunkerWeb을 설정 중입니다. 잠시만 기다려 주세요...",
     "success": "성공",
@@ -1244,9 +1395,7 @@
     "template_in_use_description": "현재 템플릿 외부에서의 변경은 허용되지 않습니다. 현재 템플릿을 사용하여 수정하거나 고급/원본 모드로 전환하세요.",
     "unique_server_name": "고유한 서버 이름",
     "up": "활성",
-    "yes": "예",
-    "done": "완료됨",
-    "pending": "대기 중"
+    "yes": "예"
   },
   "step": {
     "next": "다음",
@@ -1317,8 +1466,8 @@
       "type": "유형",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "버전",
-      "value": "값"
+      "value": "값",
+      "version": "버전"
     }
   },
   "template": {
@@ -1488,6 +1637,9 @@
     },
     "none": "템플릿 없음"
   },
+  "templates": {
+    "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다."
+  },
   "theme": {
     "dark": "어둡게",
     "light": "밝게"
@@ -1535,6 +1687,7 @@
       "show_selected_only": "선택한 항목만 표시",
       "stop_instance": "인스턴스 {{hostname}} 중지",
       "unban_ip": "{{ip}} 차단 해제",
+      "update_ban_duration": "금지 기간 업데이트",
       "value_from_global": "전역 설정에서 가져온 값"
     },
     "cannot_delete_original_ban": "원본 차단 항목은 삭제할 수 없습니다.",
@@ -1616,6 +1769,7 @@
     "password_requirements": "비밀번호는 최소 8자 이상이어야 하며 대문자, 숫자, 특수 문자를 각각 하나 이상 포함해야 합니다.",
     "pro_feature": "이 기능은 PRO 전용 기능입니다.",
     "readonly_db_action_disabled": "비활성화됨: 데이터베이스가 읽기 전용 모드입니다.",
+    "readonly_mode": "이 작업은 읽기 전용 모드에서는 허용되지 않습니다.",
     "readonly_user_action_disabled": "비활성화됨: 계정이 읽기 전용입니다. '{{action}}' 작업을 수행할 수 없습니다.",
     "real_ip_from": "프록시 요청이 들어오는 신뢰할 수 있는 IP/네트워크 목록입니다 (공백으로 구분).",
     "real_ip_from_urls": "프록시 요청이 들어오는 신뢰할 수 있는 IP/네트워크 목록이 포함된 URL들입니다 (공백으로 구분). file:// URL 및 http://user:pass@url 형식의 기본 인증도 지원합니다.",
@@ -1662,8 +1816,8 @@
         "job_name": "이 파일을 생성한 작업",
         "last_update": "캐시 파일 마지막 업데이트 날짜 및 시간",
         "plugin": "이 파일을 생성한 작업 관련 플러그인",
-        "service": "이 파일과 관련된 서비스 (또는 전역)",
-        "select_all": "모든 캐시 파일 선택"
+        "select_all": "모든 캐시 파일 선택",
+        "service": "이 파일과 관련된 서비스 (또는 전역)"
       },
       "configs": {
         "actions": "이 사용자 정의 설정에 사용 가능한 작업",
@@ -1778,18 +1932,6 @@
   },
   "totp": {
     "prompt": "TOTP 코드를 입력해 주세요."
-  },
-  "validation": {
-    "default_field_name": "이 필드",
-    "invalid_date": "유효하지 않은 날짜입니다.",
-    "ip_global_duplicate": "이 IP 주소는 이미 전역 차단 목록에 있습니다.",
-    "ip_invalid": "IP 주소 형식이 올바르지 않습니다.",
-    "ip_required": "IP 주소는 필수입니다.",
-    "ip_service_duplicate": "이 IP 주소는 선택한 서비스({{service}})에 이미 차단되어 있습니다.",
-    "pattern": "{{field}}에 유효한 값을 입력해 주세요.",
-    "required": "{{field}} 필드는 필수입니다.",
-    "service_required_for_ban": "서비스별 차단을 위해서는 서비스를 선택해야 합니다.",
-    "zerossl_email_or_api_key_required": "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
   },
   "certificates": {
     "acme_help": "기존 설정이 Let's Encrypt를 활성화하고 구성하는 서비스 중에서 선택합니다. 이 작업은 해당 설정을 예약하는 것만입니다. 인증서 세부 정보 및 도전 인증 자격 증명은 여기에 입력되지 않습니다.",
@@ -1929,6 +2071,18 @@
     "value": "값",
     "values": "값"
   },
+  "validation": {
+    "default_field_name": "이 필드",
+    "invalid_date": "유효하지 않은 날짜입니다.",
+    "ip_global_duplicate": "이 IP 주소는 이미 전역 차단 목록에 있습니다.",
+    "ip_invalid": "IP 주소 형식이 올바르지 않습니다.",
+    "ip_required": "IP 주소는 필수입니다.",
+    "ip_service_duplicate": "이 IP 주소는 선택한 서비스({{service}})에 이미 차단되어 있습니다.",
+    "pattern": "{{field}}에 유효한 값을 입력해 주세요.",
+    "required": "{{field}} 필드는 필수입니다.",
+    "service_required_for_ban": "서비스별 차단을 위해서는 서비스를 선택해야 합니다.",
+    "zerossl_email_or_api_key_required": "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
+  },
   "web_cache": {
     "available": "사용 가능",
     "cache_state": "상태",
@@ -1962,25 +2116,5 @@
     "services": "서비스 활성화",
     "status": "인스턴스 저장",
     "subtitle": "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어."
-  },
-  "cache": {
-    "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다."
-  },
-  "accordion": {
-    "body": {
-      "tls": "자동으로 인증서 발급 및 갱신"
-    },
-    "title": {
-      "tls": "TLS & 인증서"
-    }
-  },
-  "input_list": {
-    "view_all_settings": "모든 {{count}} 설정 보기"
-  },
-  "templates": {
-    "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다."
-  },
-  "login": {
-    "subtitle": "BunkerWeb 계정에 로그인"
   }
 }

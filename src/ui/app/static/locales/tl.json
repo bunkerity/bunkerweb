@@ -7,7 +7,16 @@
     "tagline": "Malakas na Proteksyon, Simpleng Gamitin",
     "version": "Bersyon: {{version}}"
   },
+  "accordion": {
+    "body": {
+      "tls": "Mag-isyu at mag-renew ng mga sertipiko nang awtomatiko."
+    },
+    "title": {
+      "tls": "TLS & sertipiko"
+    }
+  },
   "alert": {
+    "configs_import_invalid_file": "Mangyaring i-upload ang isang valid na file ng custom na configuration (.json).",
     "custom_end_date_required": "Mangyaring pumili ng pasadyang petsa ng pagtatapos.",
     "important": "Mahalaga",
     "no_changes_detected": "Walang nakitang pagbabago.",
@@ -17,10 +26,13 @@
   },
   "aria": {
     "label": {
+      "clear_search": "Linisin ang paghahanap",
       "close": "Isara",
       "copy": "Kopyahin ang mga log",
       "download_log": "I-download ang log file na ito",
       "follow": "Subaybayan",
+      "hide_value": "Itago ang halaga",
+      "reveal_value": "Ipakita ang halaga",
       "select_file": "Pumili ng File",
       "select_page": "Pumili ng Pahina",
       "issue_count": "Bilang ng error at babala",
@@ -34,10 +46,9 @@
       "configs_dropzone": "Pumili ng custom na file ng export ng mga configuration o i-drop dito",
       "raw_configuration": "Raw na configuration",
       "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito",
-      "hide_value": "Itago ang halaga",
-      "reveal_value": "Ipakita ang halaga",
       "user_avatar": "Avatar ng gumagamit",
-      "remove_value": "Alisin ang halaga"
+      "remove_value": "Alisin ang halaga",
+      "view_selected_items": "Tingnan ang napiling mga item"
     }
   },
   "badge": {
@@ -56,10 +67,14 @@
     "pro": "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Karagdagang impormasyon at libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">dito</a>.",
     "support": "Kailangan ng premium na suporta o pasadyang konsultasyon para sa BunkerWeb? Tingnan ang aming <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">mga propesyonal na serbisyo</a>."
   },
+  "bans": {
+    "subtitle": "Mga IP address na binuwag sa iyong mga instance ng BunkerWeb — idagdag, alisin, o ayusin ang tagal ng pagbabawal."
+  },
   "breadcrumb": {
     "about": "Tungkol Sa",
     "bans": "Mga Ban",
     "cache": "Cache",
+    "web_cache": "Web Cache",
     "configs": "Mga Config",
     "extra_pages": "Karagdagang Mga Pahina",
     "global_settings": "Mga Pandaigdigang Setting",
@@ -76,10 +91,10 @@
     "pro": "Pro",
     "profile": "Profile",
     "reports": "Mga Ulat",
+    "groups": "Mga grupo ng mapagkukunan",
     "services": "Mga Serbisyo",
     "support": "Suporta",
-    "templates": "Mga Template",
-    "groups": "Mga grupo ng mapagkukunan"
+    "templates": "Mga Template"
   },
   "button": {
     "actions": "Mga Aksyon",
@@ -95,6 +110,7 @@
     "cancel": "Kanselahin",
     "clear": "LINISIN",
     "close": "Isara",
+    "clone": "Kopyahin",
     "columns": "Mga Hanay",
     "convert_configs": "I-convert ang Mga Config",
     "convert_configs_to": "I-convert sa {{state}}",
@@ -171,8 +187,13 @@
     "upload_photo": "Mag-upload ng Bagong Larawan",
     "view_details": "Tingnan ang Mga Detalye",
     "view_raw_data": "Tingnan ang Raw Data",
-    "wipe_other_sessions": "Burahin ang Ibang Mga Session",
-    "clone": "Kopyahin"
+    "wipe_other_sessions": "Burahin ang Ibang Mga Session"
+  },
+  "cache": {
+    "subtitle": "Mga file ng cache na nabuo ng mga naka-iskedyul na gawain (blocklists, GeoIP databases, at iba pa) — suriin, i-download, o burahin ang mga ito bawat serbisyo at plugin."
+  },
+  "configs": {
+    "subtitle": "Mga snippet ng custom na configuration ng NGINX para sa iyong mga serbisyo — lumikha, i-edit, at pamahalaan ang HTTP, ModSecurity, at mga override sa antas ng stream."
   },
   "country": {
     "AD": "Andora",
@@ -581,6 +602,8 @@
     "select_rows_templates_0": "Walang napiling Mga Template",
     "select_rows_templates_1": "Napili ang 1 Template",
     "select_rows_templates_plural": "Napili ang %d na Mga Template",
+    "selected_list_count": "{{count}} {{entity}} napili",
+    "selected_list_empty": "Walang {{entity}} napili.",
     "zero_records_bans": "Walang nahanap na katugmang Mga Ban",
     "zero_records_cache": "Walang nahanap na katugmang Mga Cache File",
     "zero_records_configs": "Walang nahanap na katugmang Mga Custom Config",
@@ -590,9 +613,7 @@
     "zero_records_plugins": "Walang nahanap na katugmang Mga Plugin",
     "zero_records_reports": "Walang nahanap na katugmang Mga Ulat",
     "zero_records_services": "Walang nahanap na katugmang Mga Serbisyo",
-    "zero_records_templates": "Walang nahanap na katugmang Mga Template",
-    "selected_list_count": "{{count}} {{entity}} napili",
-    "selected_list_empty": "Walang {{entity}} napili."
+    "zero_records_templates": "Walang nahanap na katugmang Mga Template"
   },
   "dev_log": {
     "copy_failed": "Nabigo ang pagkopya ng teksto:",
@@ -632,7 +653,7 @@
     "unban_failed": "Nabigo ang pag-unban ng IP address. Mangyaring subukan muli."
   },
   "flash": {
-    "easter_egg": "Kung nabasa mo ito, ibig sabihin ay mausisa ka 👀",
+    "easter_egg": "Kung nabasa mo ito, ibig sabihin ay mausisa ka",
     "error": "Error",
     "message": "Impormasyon",
     "pro": "BunkerWeb PRO",
@@ -679,6 +700,7 @@
       "configuration_name": "Pangalan ng Configuration",
       "confirm_password": "Kumpirmahin ang Password",
       "current_password": "Kasalukuyang Password",
+      "custom_config": "Configuration",
       "custom_end_date": "Pasadyang Petsa ng Pagtatapos",
       "custom_ssl_certificate": "Custom SSL Certificate",
       "custom_ssl_certificate_data": "Data ng Custom SSL Certificate (Base64/PEM)",
@@ -691,6 +713,7 @@
       "email_for_lets_encrypt": "Email para sa Let's Encrypt",
       "end_date": "Petsa ng Pagtatapos",
       "hostname": "Hostname",
+      "instance_id": "ID ng Instance",
       "ip_address": "IP Address",
       "keywords": "Mga Keyword",
       "lets_encrypt_custom_profile": "Custom Profile ng Let's Encrypt",
@@ -730,8 +753,7 @@
       "zerossl_api_retry": "Mga Ulit ng ZeroSSL API",
       "zerossl_api_retry_delay": "Pagkaantala ng Ulit ng ZeroSSL API",
       "zerossl_api_connect_timeout": "Connect Timeout ng ZeroSSL API",
-      "zerossl_api_max_time": "Max na Oras ng ZeroSSL API",
-      "instance_id": "ID ng Instance"
+      "zerossl_api_max_time": "Max na Oras ng ZeroSSL API"
     },
     "placeholder": {
       "2fa_code": "Ipasok ang code",
@@ -754,12 +776,22 @@
       "password_uppercase": "Ang password ay dapat may hindi bababa sa 1 malaking titik."
     }
   },
+  "input_list": {
+    "view_all_settings": "Tingnan ang lahat ng {{count}} setting"
+  },
   "instance": {
     "type": {
       "container": "Container",
       "pod": "Pod",
       "static": "Static"
     }
+  },
+  "instances": {
+    "down": "Hindi Aktibo",
+    "loading": "Naglo-load",
+    "subtitle": "Pamahalaan ang mga instance ng BunkerWeb na konektado sa UI na ito: lumikha, i-ping, i-reload, itigil, o alisin ang mga ito.",
+    "total": "Kabuuang bilang ng mga instance",
+    "up": "Aktibo"
   },
   "interval": {
     "day": "Araw-araw",
@@ -774,6 +806,15 @@
       "success": "Matagumpay"
     }
   },
+  "jobs": {
+    "subtitle": "Mga naka-iskedyul at one-off na gawain na pinapatakbo ng scheduler ng BunkerWeb — subaybayan ang kanilang katayuan at patakbuhin ang mga ito sa pangangailangan.",
+    "tile": {
+      "async": "Asynchronous",
+      "failed_last_run": "Nabigo ang huling pagtakbo",
+      "reload_required": "Kailangan i-reload",
+      "total": "Kabuuang bilang ng mga gawain"
+    }
+  },
   "legend": {
     "locked_settings_annotation": "Naka-lock ({{method}})",
     "locked_settings_hint": "Ang mga naka-lock na setting ay naka-highlight"
@@ -784,11 +825,14 @@
     "here": "dito",
     "more_info": "Karagdagang Impormasyon",
     "more_news": "Higit pang Balita",
+    "opens_new_tab": "(bubukas sa bagong tab)",
     "privacy_policy": "Patakaran sa Privacy",
     "read_more": "Magbasa ng Higit Pa",
     "see_more": "Tingnan ang Higit Pa",
-    "upgrade": "Mag-upgrade?",
-    "opens_new_tab": "(bubukas sa bagong tab)"
+    "upgrade": "Mag-upgrade?"
+  },
+  "login": {
+    "subtitle": "Mag-log in sa iyong account ng BunkerWeb"
   },
   "logs": {
     "annotation_error": "Error",
@@ -797,6 +841,7 @@
     "letsencrypt_logs": "Mga Log ng Let's Encrypt",
     "main_logs": "Pangunahing mga Log",
     "new_lines_sr": "{{count}} bagong linya ng log",
+    "no_log_files": "Walang mga file ng log na ipapakita, tingnan ang dokumentasyon para sa karagdagang impormasyon kung paano paganahin ang pag-log",
     "issue_summary": "{{errors}} error, {{warnings}} babala",
     "level_critical": "Kritikal",
     "level_debug": "Debug",
@@ -810,6 +855,7 @@
     "new_lines": "bagong mga linya",
     "showing_all": "{{total}} linya",
     "showing_some": "ipinapakita ang {{shown}} sa {{total}}",
+    "select_file_prompt": "Piliin ang isang file ng log upang tingnan ang nilalaman nito",
     "trimmed_notice": "--- Inalis ang {{count}} na mas lumang linya ng log para sa pagganap ---"
   },
   "modal": {
@@ -849,6 +895,7 @@
       "recovery_codes_save_alert": "Mangyaring i-save ang mga recovery code na ito sa isang ligtas na lugar (tulad ng password manager o bunker). Maaari mo itong gamitin upang ma-access ang iyong account kung mawawala ang iyong authentication device.",
       "recovery_codes_shown_once_alert": "Ang mga recovery code na ito ay ipinakita nang isang beses lamang. Mangyaring tiyakin na nai-save mo ang mga ito nang ligtas.",
       "reset_template_alert": "Sigurado ka bang gusto mong i-reset ang kasalukuyang mga setting ng template at custom na mga configuration?",
+      "services_conversion_confirmation": "Sigurado ka bang gusto mong i-convert ang mga napiling serbisyo?",
       "services_deletion_confirmation": "Sigurado ka bang gusto mong burahin ang mga napiling serbisyo?",
       "unban_confirmation_alert": "Sigurado ka bang gusto mong i-unban ang napiling IP address?",
       "unban_confirmation_alert_plural": "Sigurado ka bang gusto mong i-unban ang mga napiling IP address?",
@@ -883,8 +930,10 @@
       "import_services": "Mag-import ng mga serbisyo",
       "job_history": "Huling 10 Pagpapatupad ng Trabaho",
       "job_history_count": "Huling {{count}} pagpapatupad ng Trabaho",
+      "multiselect_selected": "Napiling mga item",
       "recovery_codes": "Mga Recovery Code",
       "reset_template_config": "I-reset ang Configuration ng Template?",
+      "security_report_details": "Detalye ng Security Report",
       "server_name_not_unique": "Ang Pangalan ng Server ay Hindi Natatangi",
       "update_duration": "I-update ang Tagal ng Ban"
     }
@@ -910,9 +959,12 @@
     "about": "Tungkol Sa",
     "bans": "Mga Ban",
     "cache": "Cache",
+    "certificates": "Mga Sertipiko",
+    "web_cache": "Web Cache",
     "configs": "Mga Config",
     "extra_pages": "Karagdagang Mga Pahina",
     "global_settings": "Mga Pandaigdigang Setting",
+    "groups": "Mga grupo ng mapagkukunan",
     "home": "Tahanan",
     "instances": "Mga Instance",
     "jobs": "Mga Trabaho",
@@ -930,9 +982,7 @@
     "reports": "Mga Ulat",
     "services": "Mga Serbisyo",
     "support": "Suporta",
-    "templates": "Mga Template",
-    "certificates": "Mga Sertipiko",
-    "groups": "Mga grupo ng mapagkukunan"
+    "templates": "Mga Template"
   },
   "news": {
     "image_alt": "Larawan ng balita",
@@ -966,6 +1016,13 @@
       "external": "External",
       "pro": "Pro",
       "ui": "UI"
+    }
+  },
+  "plugins": {
+    "multivalue": {
+      "more_value": "mas maraming halaga",
+      "more_values": "mas maraming halaga",
+      "show_less": "Ipakita ang mas kaunti"
     }
   },
   "pro": {
@@ -1022,6 +1079,10 @@
     "alert": {
       "refresh_recovery_codes": "Ang pag-refresh ng iyong mga recovery code ay magpapawalang-bisa sa mga nakaraang code."
     },
+    "badge": {
+      "2fa_disabled": "2FA Disabled",
+      "2fa_enabled": "Naka-enable ang 2FA"
+    },
     "card": {
       "coming_soon": "Malapit na",
       "title": {
@@ -1037,6 +1098,14 @@
     "help": {
       "photo_extensions": "Pinapayagan ang JPG, GIF, o PNG. Max na laki: 800KB."
     },
+    "modal": {
+      "body": {
+        "wipe_sessions_confirm": "Agad na nagtatapos ang lahat ng aktibong sesyon sa iyong account. Ipasok ang iyong password upang kumpirmahin."
+      },
+      "title": {
+        "wipe_sessions": "Tanggalin ang ibang sesyon?"
+      }
+    },
     "session": {
       "browser": "Browser",
       "creation_date": "Petsa ng Paglikha",
@@ -1048,16 +1117,86 @@
       "title": "Session",
       "wipe_help": "Tapusin ang lahat ng aktibong sesyon sa iyong account. Mananatili kang naka-log in dito."
     },
+    "subtitle": "Pamahalaan ang iyong account, seguridad, at aktibong sesyon.",
     "tab": {
       "profile": "Profile",
       "security": "Seguridad",
       "sessions": "Mga Session"
-    },
-    "subtitle": "Pamahalaan ang iyong account, seguridad, at aktibong sesyon."
+    }
+  },
+  "range_picker": {
+    "1h": "Huling oras",
+    "24h": "Huling 24 na oras",
+    "30d": "Nakaraang 30 araw",
+    "7d": "Huling linggo",
+    "aria_label": "Saklaw ng oras",
+    "custom": "Pasadya"
   },
   "reports": {
+    "bad_behavior_activity_detected": "Natukoy ang hindi kanais-nais na aktibidad",
+    "bad_behavior_activity_explanation": "Ang mga kahilingang ito ay lumampas sa limitasyon ng hindi kanais-nais na aktibidad at pinagsama-sama.",
+    "bad_behavior_captured_at": "Nakuha sa",
+    "bad_behavior_ip": "IP address",
+    "bad_behavior_no_details": "Walang detalye ng hindi kanais-nais na aktibidad na nakuhang para sa ulat na ito.",
+    "bad_behavior_request_id": "ID ng Kahilingan",
+    "bad_behavior_request_label": "Kahilingan",
+    "bad_behavior_server": "Server",
+    "bad_behavior_total_requests": "Mga kahilingang kahina-hinala",
+    "bad_behavior_url": "URL",
+    "card": {
+      "attack_families": {
+        "title": "Mga pamilya ng pag-atake"
+      },
+      "recent": {
+        "title": "Mga kamakailang insidente"
+      },
+      "top_asn": {
+        "title": "Mga nangungunang ASNs"
+      },
+      "top_offenders": {
+        "title": "Mga nangungunang gumagamit"
+      },
+      "top_rules": {
+        "title": "Mga nangungunang patakaran ng ModSecurity na na-trigger"
+      }
+    },
+    "chart": {
+      "timeseries": {
+        "series": "Na-block",
+        "title": "Mga na-block na kahilingan sa paglipas ng panahon"
+      }
+    },
     "security_incident": "Insidente ng Seguridad",
-    "security_report_data": "Data ng Ulat ng Seguridad"
+    "security_report_data": "Data ng Ulat ng Seguridad",
+    "subtitle": "Mga ulat ng seguridad na nabuo mula sa mga na-block na kahilingan sa iyong mga instance ng BunkerWeb — maghanap, mag-filter, mag-export, at i-ban ang mga IP na nagdulot ng problema nang direkta mula sa talahanayan.",
+    "tab": {
+      "eventlog": "Log ng pangyayari",
+      "offenders": "Mga nangungunang gumagamit",
+      "overview": "Pangkalahatang-tanaw",
+      "patterns": "Mga pattern ng pag-atake"
+    },
+    "table": {
+      "asn": "ASN",
+      "blocks": "Mga pagbabawal",
+      "country": "Bansa",
+      "fires": "Mga trigger",
+      "ip": "IP",
+      "rule": "Patakaran",
+      "top_rule": "Nangungunang patakaran"
+    },
+    "tile": {
+      "asns": "Mga nangungunang ASNs",
+      "blocked": "Mga na-block na kahilingan",
+      "blocked_rate": "Trend kumpara sa nakaraang panahon",
+      "bot": "Bot / scraper",
+      "countries": "Mga nangungunang bansa",
+      "peak_hour": "Oras ng peak",
+      "rce": "RCE / command",
+      "repeat_offenders": "Mga madalas na gumagamit (top 10)",
+      "sqli": "SQL injection",
+      "unique_ips": "Top na IP address ng mga umaatake",
+      "unique_offenders": "Mga madalas na gumagamit"
+    }
   },
   "scope": {
     "all_services": "Lahat ng Serbisyo",
@@ -1069,6 +1208,7 @@
   "searchpane": {
     "active": "Aktibo",
     "async": "Async",
+    "ban_scope": "Saklaw ng Ban",
     "clear": "Linisin ang Lahat",
     "collapse_0": "Mga Search Pane",
     "collapse_message": "I-collapse ang Lahat",
@@ -1127,6 +1267,13 @@
     "block": "I-block",
     "detect": "Tuklasin"
   },
+  "services": {
+    "draft": "Mga serbisyo sa draft",
+    "online": "Online",
+    "subtitle": "Pamahalaan ang mga serbisyo na protektado ng BunkerWeb: lumikha, i-edit, i-convert sa draft, o tanggalin ang mga ito.",
+    "total": "Kabuuang bilang ng mga serbisyo",
+    "with_configs": "Na may custom na configuration"
+  },
   "settings": {
     "custom_config": {
       "title": "Custom na Configuration"
@@ -1138,9 +1285,9 @@
   },
   "setup": {
     "status": {
-      "admin_user_exists": "🧑‍🚀 Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang.",
-      "pro_license_key_exists": "⭐ Naka-configure na ang isang PRO license key, mangyaring magpatuloy sa susunod na hakbang.",
-      "reverse_proxy_configured": "↪️ Naka-configure na ang isang reverse proxy para sa web interface. Mangyaring magpatuloy sa susunod na hakbang.",
+      "admin_user_exists": "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang.",
+      "pro_license_key_exists": "Naka-configure na ang isang PRO license key, mangyaring magpatuloy sa susunod na hakbang.",
+      "reverse_proxy_configured": "Naka-configure na ang isang reverse proxy para sa web interface. Mangyaring magpatuloy sa susunod na hakbang.",
       "secure_password": "Ligtas na Password",
       "unique_server_name": "Natatanging Pangalan ng Server"
     },
@@ -1191,13 +1338,15 @@
     "title": "Setup Wizard"
   },
   "status": {
-    "admin_user_exists": "🧑‍🚀 Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang.",
+    "admin_user_exists": "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang.",
     "blog_connection_fail": "Hindi makakonekta sa blog para sa mga update sa balita.",
     "default_server": "Default na Server",
+    "done": "Tapos na",
     "down": "Hindi Aktibo",
     "draft": "Draft",
     "error_deleting_template": "Naganap ang isang error habang binubura ang template.",
     "error_loading_bans": "Error sa pag-load ng mga ban. Mangyaring i-refresh ang pahina.",
+    "error_loading_data": "Hindi ma-load ang data",
     "error_loading_template": "Hindi ma-load ang data ng template.",
     "error_saving_template": "Naganap ang isang error habang sine-save ang template.",
     "failed": "Nabigo",
@@ -1226,8 +1375,10 @@
     "no_search_results": "Walang nahanap na item.",
     "no_steps": "Walang Available na Mga Hakbang",
     "no_steps_description": "Ang template na ito ay walang mga hakbang na iko-configure.",
+    "not_applicable": "Hindi Naaangkop",
     "online": "Online",
     "partial": "Bahagyan",
+    "pending": "Naka-antay",
     "pinging_instances": "Pina-ping ang mga instance, mangyaring maghintay...",
     "plugin_page": {
       "status": {
@@ -1236,7 +1387,7 @@
         "not_available": "Ang pahina ng plugin ay hindi pa available sa panahon ng beta phase."
       }
     },
-    "reverse_proxy_configured": "↪️ Naka-configure na ang isang reverse proxy para sa web interface. Mangyaring magpatuloy sa susunod na hakbang.",
+    "reverse_proxy_configured": "Naka-configure na ang isang reverse proxy para sa web interface. Mangyaring magpatuloy sa susunod na hakbang.",
     "secure_password": "Ligtas na Password",
     "setting_up_bunkerweb": "Kino-configure ang iyong BunkerWeb, mangyaring maghintay...",
     "success": "Matagumpay",
@@ -1244,9 +1395,7 @@
     "template_in_use_description": "Ang mga pagbabago sa labas ng kasalukuyang template ay hindi pinapayagan. Mangyaring gumawa ng mga pagbabago gamit ang kasalukuyang template o lumipat sa Advanced/Raw mode.",
     "unique_server_name": "Natatanging Pangalan ng Server",
     "up": "Aktibo",
-    "yes": "Oo",
-    "done": "Tapos na",
-    "pending": "Naka-antay"
+    "yes": "Oo"
   },
   "step": {
     "next": "Susunod",
@@ -1317,8 +1466,8 @@
       "type": "Uri",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Bersyon",
-      "value": "Halaga"
+      "value": "Halaga",
+      "version": "Bersyon"
     }
   },
   "template": {
@@ -1488,6 +1637,9 @@
     },
     "none": "Walang Template"
   },
+  "templates": {
+    "subtitle": "Mga reusable na template ng configuration para sa iyong mga serbisyo — i-bundle ang mga setting, hakbang, at custom na configuration, pagkatapos ay lumikha, kopyahin, o tanggalin ang mga ito."
+  },
   "theme": {
     "dark": "Madilim",
     "light": "Maliwanag"
@@ -1535,6 +1687,7 @@
       "show_selected_only": "Ipakita ang mga napili lamang",
       "stop_instance": "Itigil ang Instance na {{hostname}}",
       "unban_ip": "I-unban ang {{ip}}",
+      "update_ban_duration": "Baguhin ang tagal ng pagbabawal",
       "value_from_global": "Value mula sa mga pandaigdigang setting"
     },
     "cannot_delete_original_ban": "Hindi mabura ang orihinal na entry ng Ban.",
@@ -1616,6 +1769,7 @@
     "password_requirements": "Ang password ay dapat hindi bababa sa 8 na character at may kasamang 1 malaking titik, 1 numero, at 1 espesyal na character.",
     "pro_feature": "Ito ay isang PRO feature.",
     "readonly_db_action_disabled": "Hindi pinagana: Ang database ay nasa read-only na mode.",
+    "readonly_mode": "Hindi pinapayagan ang aksyong ito sa mode na \"read-only\".",
     "readonly_user_action_disabled": "Hindi pinagana: Ang iyong account ay read-only, aksyon na '{{action}}' ay hindi pinagana.",
     "real_ip_from": "Listahan ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan.",
     "real_ip_from_urls": "Listahan ng mga URL na naglalaman ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan. Sinusuportahan din ang mga file:// URL at auth basic gamit ang http://user:pass@url scheme.",
@@ -1662,8 +1816,8 @@
         "job_name": "Trabaho na lumikha ng cache file na ito",
         "last_update": "Petsa at oras kung kailan huling na-update ang cache file",
         "plugin": "Plugin na nauugnay sa trabaho na lumikha ng cache file na ito",
-        "service": "Serbisyo na nauugnay sa cache file na ito (o Pandaigdigang)",
-        "select_all": "Piliin ang lahat ng file ng Cache"
+        "select_all": "Piliin ang lahat ng file ng Cache",
+        "service": "Serbisyo na nauugnay sa cache file na ito (o Pandaigdigang)"
       },
       "configs": {
         "actions": "Mga aksyon na available para sa Custom Config na ito",
@@ -1778,18 +1932,6 @@
   },
   "totp": {
     "prompt": "Mangyaring ipasok ang iyong TOTP code."
-  },
-  "validation": {
-    "default_field_name": "Ang field na ito",
-    "invalid_date": "Hindi valid na petsa",
-    "ip_global_duplicate": "Ang IP address na ito ay pandaigdigang na-ban na.",
-    "ip_invalid": "Hindi valid na format ng IP address.",
-    "ip_required": "Kailangan ng IP address.",
-    "ip_service_duplicate": "Ang IP address na ito ay na-ban na para sa napiling serbisyo ({{service}}).",
-    "pattern": "Mangyaring magpasok ng valid na value para sa {{field}}.",
-    "required": "Kailangan ang {{field}}.",
-    "service_required_for_ban": "Kailangan ng serbisyo para sa isang ban na tukoy sa serbisyo.",
-    "zerossl_email_or_api_key_required": "Nangangailangan ang ZeroSSL ng email o ZeroSSL API key."
   },
   "certificates": {
     "acme_help": "Piliin ang mga serbisyo kung saan ang mga kasalukuyang setting ay nagpapagana at nagko-configure ng Let's Encrypt. Ang aksyong ito ay nagpaplano lamang ng configuration; ang mga detalye ng sertipiko at mga kredensyal ng hamon ay hindi ipinasok dito.",
@@ -1929,6 +2071,18 @@
     "value": "Halaga",
     "values": "Mga halaga"
   },
+  "validation": {
+    "default_field_name": "Ang field na ito",
+    "invalid_date": "Hindi valid na petsa",
+    "ip_global_duplicate": "Ang IP address na ito ay pandaigdigang na-ban na.",
+    "ip_invalid": "Hindi valid na format ng IP address.",
+    "ip_required": "Kailangan ng IP address.",
+    "ip_service_duplicate": "Ang IP address na ito ay na-ban na para sa napiling serbisyo ({{service}}).",
+    "pattern": "Mangyaring magpasok ng valid na value para sa {{field}}.",
+    "required": "Kailangan ang {{field}}.",
+    "service_required_for_ban": "Kailangan ng serbisyo para sa isang ban na tukoy sa serbisyo.",
+    "zerossl_email_or_api_key_required": "Nangangailangan ang ZeroSSL ng email o ZeroSSL API key."
+  },
   "web_cache": {
     "available": "Available",
     "cache_state": "Estado",
@@ -1962,25 +2116,5 @@
     "services": "Pag-enable ng serbisyo",
     "status": "Imbakan ng instance",
     "subtitle": "Status ng cache ng reverse-proxy, aggregate na mga sukatan ng hit-rate at agarang kontrol sa pagtanggal."
-  },
-  "cache": {
-    "subtitle": "Mga file ng cache na nabuo ng mga naka-iskedyul na gawain (blocklists, GeoIP databases, at iba pa) — suriin, i-download, o burahin ang mga ito bawat serbisyo at plugin."
-  },
-  "accordion": {
-    "body": {
-      "tls": "Mag-isyu at mag-renew ng mga sertipiko nang awtomatiko."
-    },
-    "title": {
-      "tls": "TLS & sertipiko"
-    }
-  },
-  "input_list": {
-    "view_all_settings": "Tingnan ang lahat ng {{count}} setting"
-  },
-  "templates": {
-    "subtitle": "Mga reusable na template ng configuration para sa iyong mga serbisyo — i-bundle ang mga setting, hakbang, at custom na configuration, pagkatapos ay lumikha, kopyahin, o tanggalin ang mga ito."
-  },
-  "login": {
-    "subtitle": "Mag-log in sa iyong account ng BunkerWeb"
   }
 }
