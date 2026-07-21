@@ -30,7 +30,7 @@
     "CUSTOM_SSL_KEY": "",
     "CUSTOM_SSL_CERT_DATA": "",
     "CUSTOM_SSL_KEY_DATA": "",
-    "ALLOWED_METHODS": "GET|POST|HEAD",
+    "ALLOWED_METHODS": "GET|POST|HEAD|QUERY",
     "MAX_CLIENT_SIZE": "10m",
     "HTTP2": "yes",
     "HTTP3": "yes",

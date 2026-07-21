@@ -4,6 +4,7 @@
 
 - [FEATURE] `metrics`: keep blocked-request reports flowing when Redis is full — an OOM-aware circuit breaker stops the log storm, timer stall, and report destruction previously triggered at `maxmemory`; reports blocked during the OOM window stay buffered per worker and sync once memory frees; list/facet updates are now atomic server-side scripts with per-cycle self-healing of facet counters; new `METRICS_REDIS_TTL` setting (default 30 days, `0` to disable) gives metrics keys a TTL refreshed on every sync. Note for `volatile-lru` operators: metrics keys previously had no TTL and were immune to eviction; they are now evictable under sustained memory pressure so Redis can recover instead of rejecting writes forever.
 - [FEATURE] `headers`: deny the Chrome built-in AI APIs by default — add `language-detector`, `language-model`, `proofreader`, `rewriter`, `translator` and `writer` to the default `PERMISSIONS_POLICY`, the high/medium service templates, and the Permissions-Policy header BunkerWeb sets on its own pages (web UI, error pages, default-server and loading pages).
+- [FEATURE] `misc`: allow the `QUERY` HTTP method by default in `ALLOWED_METHODS` and bundled service templates.
 
 ## v1.6.13 - 2026/07/16
 
