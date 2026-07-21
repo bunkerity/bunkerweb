@@ -591,6 +591,10 @@ end
 -- Web cache (proxy_cache) management -----------------------------------------
 -- Shared on-disk cache zone for the reverseproxy plugin (keys_zone=proxycache).
 local PROXY_CACHE_DIR = "/var/tmp/bunkerweb/proxy_cache"
+local MAX_PROXY_CACHE_PURGE_URLS = 100
+local MAX_PROXY_CACHE_URL_LENGTH = 8192
+local MAX_PROXY_CACHE_KEY_TEMPLATE_LENGTH = 4096
+local MAX_PROXY_CACHE_KEY_LENGTH = 16384
 
 -- Rebuild the nginx proxy_cache key string for a URL by expanding the
 -- URL-derivable nginx variables of PROXY_CACHE_KEY (default $scheme$host$request_uri).
@@ -598,35 +602,87 @@ local PROXY_CACHE_DIR = "/var/tmp/bunkerweb/proxy_cache"
 -- from a URL alone, so we error out rather than purge the wrong entry.
 local function reconstruct_cache_key(url, key_template)
 	key_template = key_template or "$scheme$host$request_uri"
-	local scheme, host, uri = url:match("^(https?)://([^/]+)(.*)$")
+	if type(key_template) ~= "string" or #key_template == 0 then
+		return nil, "invalid PROXY_CACHE_KEY template"
+	end
+	if #key_template > MAX_PROXY_CACHE_KEY_TEMPLATE_LENGTH then
+		return nil, "PROXY_CACHE_KEY template is too long"
+	end
+
+	local scheme, authority, uri = url:match("^([Hh][Tt][Tt][Pp][Ss]?)://([^/?#]+)(.*)$")
 	if not scheme then
 		return nil, "invalid url: " .. tostring(url)
 	end
+	scheme = scheme:lower()
+	authority = authority:lower()
+	if authority:find("@", 1, true) or uri:find("#", 1, true) then
+		return nil, "invalid url: credentials and fragments are not supported"
+	end
 	if uri == "" then
 		uri = "/"
+	elseif uri:sub(1, 1) == "?" then
+		uri = "/" .. uri
+	elseif uri:sub(1, 1) ~= "/" then
+		return nil, "invalid url: " .. tostring(url)
 	end
-	host = host:gsub(":%d+$", ""):lower()
+
+	local host, port = authority, nil
+	if authority:sub(1, 1) == "[" then
+		local bracket = authority:find("]", 2, true)
+		if not bracket then
+			return nil, "invalid url authority: " .. authority
+		end
+		host = authority:sub(1, bracket)
+		local suffix = authority:sub(bracket + 1)
+		if suffix ~= "" then
+			port = suffix:match("^:(%d+)$")
+			if not port then
+				return nil, "invalid url port"
+			end
+		end
+	else
+		local name, parsed_port = authority:match("^(.-):(%d+)$")
+		if name then
+			host, port = name, parsed_port
+		elseif authority:find(":", 1, true) then
+			return nil, "invalid url authority: " .. authority
+		end
+	end
+	if host == "" or (port and (tonumber(port) < 1 or tonumber(port) > 65535)) then
+		return nil, "invalid url authority: " .. authority
+	end
+
 	local path = uri:match("^([^?]*)") or uri
 	local args = uri:match("%?(.*)$") or ""
 	local subst = {
 		["$scheme"] = scheme,
 		["$host"] = host,
-		["$http_host"] = host,
+		["$http_host"] = authority,
 		["$request_uri"] = uri,
 		["$uri"] = path,
 		["$args"] = args,
 		["$query_string"] = args,
 	}
 	local unknown
-	local key = key_template:gsub("%$[%w_]+", function(var)
-		if subst[var] == nil then
+	local function substitute(open_brace, name, close_brace)
+		local var = "$" .. open_brace .. name .. close_brace
+		if (open_brace == "{") ~= (close_brace == "}") then
 			unknown = var
 			return var
 		end
-		return subst[var]
-	end)
+		local value = subst["$" .. name]
+		if value == nil then
+			unknown = var
+			return var
+		end
+		return value
+	end
+	local key = key_template:gsub("%$({?)([%w_]+)(}?)", substitute)
 	if unknown then
 		return nil, "PROXY_CACHE_KEY uses non-URL-derivable variable " .. unknown
+	end
+	if #key > MAX_PROXY_CACHE_KEY_LENGTH then
+		return nil, "reconstructed cache key is too long"
 	end
 	return key
 end
@@ -652,19 +708,18 @@ api.global.POST["^/proxy%-cache/purge$"] = function(self)
 
 	local scope = body.scope or "url"
 
-	-- Purge everything: no native "purge all" exists for a dedicated location
-	-- (module purge_all needs a proxy_pass cache location), so clear the shared
-	-- zone directory directly. nginx tolerates missing files (-> MISS/refetch)
-	-- and reconciles the keys_zone index lazily; no reload needed.
+	-- Purge everything through ngx_cache_purge. This keeps the on-disk cache and
+	-- the shared keys_zone index in sync and avoids shell-based file deletion.
 	if scope == "all" then
-		local count = 0
-		local counter = io.popen("find " .. PROXY_CACHE_DIR .. " -type f 2>/dev/null | wc -l")
-		if counter then
-			count = tonumber((counter:read("*a") or ""):match("%d+")) or 0
-			counter:close()
+		local res = ngx.location.capture("/_proxy-cache/purge-all", { method = ngx.HTTP_POST })
+		if not res or res.status ~= HTTP_OK then
+			return self:response(
+				HTTP_INTERNAL_SERVER_ERROR,
+				"error",
+				"native cache purge failed (status " .. tostring(res and res.status or "nil") .. ")"
+			)
 		end
-		execute("find " .. PROXY_CACHE_DIR .. " -mindepth 1 -type f -delete 2>/dev/null")
-		return self:response(HTTP_OK, "success", { scope = "all", purged = count })
+		return self:response(HTTP_OK, "success", { scope = "all", purged = true })
 	end
 
 	if scope ~= "url" then
@@ -673,6 +728,9 @@ api.global.POST["^/proxy%-cache/purge$"] = function(self)
 
 	if type(body.urls) ~= "table" or #body.urls == 0 then
 		return self:response(HTTP_BAD_REQUEST, "error", "scope 'url' requires a non-empty 'urls' array")
+	end
+	if #body.urls > MAX_PROXY_CACHE_PURGE_URLS then
+		return self:response(HTTP_BAD_REQUEST, "error", "too many URLs (maximum 100)")
 	end
 
 	-- Purge each URL by its exact cache key via the native proxy_cache_purge
@@ -683,6 +741,8 @@ api.global.POST["^/proxy%-cache/purge$"] = function(self)
 		local key_template = type(item) == "table" and item.key or nil
 		if type(url) ~= "string" then
 			errors[#errors + 1] = "invalid url entry"
+		elseif #url > MAX_PROXY_CACHE_URL_LENGTH then
+			errors[#errors + 1] = "url is too long"
 		else
 			local key, kerr = reconstruct_cache_key(url, key_template)
 			if not key then

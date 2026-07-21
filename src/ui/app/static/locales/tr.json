@@ -1913,5 +1913,42 @@
     "usage": "Kullanım",
     "value": "Değer",
     "values": "Değerler"
+  },
+  "web_cache": {
+    "available": "Mevcut",
+    "cache_state": "Durum",
+    "cached_files": "Önbelleğe alınmış dosyalar",
+    "deployment": "Dağıtım",
+    "disabled": "Devre dışı",
+    "disk_usage": "Disk kullanımı",
+    "empty": "Boş",
+    "error": "Hata",
+    "enabled": "Etkin",
+    "enabled_instances": "Önbelleğe alma etkin",
+    "enabled_services": "Etkin hizmetler",
+    "hit_rate": "Islem oranı",
+    "instance": "Örnek",
+    "metrics": "Örneklerin toplam / başarısız dağılımı",
+    "metrics_scope": "Ölçümler, tüm önbelleğe alınmış hizmetler üzerinden örnek başına toplanır.",
+    "not_reporting": "Raporlanmıyor",
+    "path": "Yol",
+    "purge": "Önbelleğe alınmış yanıtları temizle",
+    "purge_all": "Tümünü temizle",
+    "purge_all_confirm_body": "Bu işlem, erişilebilen tüm örneklerdeki tüm hizmetlerin önbelleğe alınmış yanıtlarını siler. Bu işlem geri alınamaz.",
+    "purge_all_confirm_title": "Tamamen önbelleği temizle?",
+    "purge_help": "Erişilebilir örneklerdeki işlemler hemen çalıştırılır. Erişilemeyen örnekler atlanır ve herhangi bir işlem kuyruğa alınmaz.",
+    "purge_key": "Etkili önbellek anahtarı",
+    "purge_key_help": "Varsayılan $scheme$host$request_uri için önbellek anahtarını boş bırakın. Hizmet PROXY_CACHE_KEY'i geçersiz kılıyorsa, burada etkili değerini yapıştırın; desteklenmeyen, yalnızca istek değişkenleri farklı bir girişin temizlenmesi yerine reddedilir.",
+    "purge_key_placeholder": "Etkili PROXY_CACHE_KEY (isteğe bağlı)",
+    "purge_url": "URL'yi temizle",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Örnekleri raporla",
+    "service": "Servis",
+    "services": "Hizmetin etkinleştirilmesi",
+    "status": "Örnek depolama",
+    "subtitle": "Ters proxy önbelleği durumu, toplu olarak isabet oran metrikleri ve anında temizleme kontrolleri."
+  },
+  "cache": {
+    "subtitle": "Planlı işler tarafından oluşturulan önbellek dosyaları (blok listeleri, GeoIP veritabanları ve daha fazlası) — hizmet ve eklenti başına inceleyin, indirin veya silin."
   }
 }

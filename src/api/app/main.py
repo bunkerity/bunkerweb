@@ -245,6 +245,10 @@ tags_metadata = [
     {"name": "configs", "description": "Operations related to custom NGINX configs"},
     {"name": "plugins", "description": "Operations related to plugin management"},
     {"name": "cache", "description": "Operations related to job cache files"},
+    {
+        "name": "web_cache",
+        "description": "Reverse-proxy cache status, metrics, and purge operations",
+    },
     {"name": "jobs", "description": "Operations related to scheduler jobs"},
     {
         "name": "system",

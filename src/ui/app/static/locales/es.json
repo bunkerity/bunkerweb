@@ -1913,5 +1913,42 @@
     "usage": "Uso",
     "value": "Valor",
     "values": "Valores"
+  },
+  "web_cache": {
+    "available": "Disponibles",
+    "cache_state": "Estado",
+    "cached_files": "Archivos en caché",
+    "deployment": "Despliegue",
+    "disabled": "Desactivado",
+    "disk_usage": "Uso del disco",
+    "empty": "Vacío",
+    "error": "Error",
+    "enabled": "Habilitado",
+    "enabled_instances": "Caché habilitada",
+    "enabled_services": "Servicios habilitados",
+    "hit_rate": "Tasa de aciertos",
+    "instance": "Instancia",
+    "metrics": "Distribución de aciertos / fallos",
+    "metrics_scope": "Los contadores se agregan por instancia en todos los servicios con caché habilitada.",
+    "not_reporting": "No se está informando",
+    "path": "Ruta",
+    "purge": "Eliminar respuestas en caché",
+    "purge_all": "Eliminar todas",
+    "purge_all_confirm_body": "Esto elimina todas las respuestas en caché para cada servicio en cada instancia accesible. Esto no se puede deshacer.",
+    "purge_all_confirm_title": "Eliminar toda la caché?",
+    "purge_help": "Eliminar acciones que se ejecutan inmediatamente en las instancias accesibles. Las instancias inaccesibles se omiten y no se crea ninguna acción.",
+    "purge_key": "Clave de caché efectiva",
+    "purge_key_help": "Dejar la clave de caché vacía solo para el valor predeterminado $scheme$host$request_uri. Si el servicio sobrescribe PROXY_CACHE_KEY, pégalo aquí; las variables solo para la solicitud no compatibles se rechazan en lugar de eliminar una entrada diferente.",
+    "purge_key_placeholder": "PROXY_CACHE_KEY efectivo (opcional)",
+    "purge_url": "Eliminar URL",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Informar instancias",
+    "service": "Servicio",
+    "services": "Habilitar servicio",
+    "status": "Almacenamiento de instancia",
+    "subtitle": "Estado de caché del proxy inverso, métricas de tasa de aciertos y controles de eliminación inmediata."
+  },
+  "cache": {
+    "subtitle": "Archivos de caché generados por trabajos programados (listas negras, bases de datos GeoIP, etc.) — inspeccione, descargue o elimine los archivos por servicio y plugin."
   }
 }

@@ -1913,5 +1913,42 @@
     "usage": "使用方式",
     "value": "值",
     "values": "值"
+  },
+  "web_cache": {
+    "available": "可用",
+    "cache_state": "狀態",
+    "cached_files": "快取檔案",
+    "deployment": "部署",
+    "disabled": "停用",
+    "disk_usage": "磁碟使用量",
+    "empty": "空",
+    "error": "錯誤",
+    "enabled": "已啟用",
+    "enabled_instances": "快取已啟用",
+    "enabled_services": "已啟用服務",
+    "hit_rate": "命中率",
+    "instance": "實例",
+    "metrics": "匯總命中/失誤分配",
+    "metrics_scope": "計數器按實例彙總，適用於所有已啟用快取的服務。",
+    "not_reporting": "未報告",
+    "path": "路徑",
+    "purge": "清除快取回應",
+    "purge_all": "清除全部",
+    "purge_all_confirm_body": "這會刪除所有可連線執行個體上每個服務的所有快取回應。此操作無法復原。",
+    "purge_all_confirm_title": "清除整個緩存？",
+    "purge_help": "立即在可達實例上執行清除操作。 無法達到的實例會被跳過，且不會產生任何佇列。",
+    "purge_key": "有效的緩存鍵",
+    "purge_key_help": "僅在預設的 $scheme$host$request_uri 上將緩存鍵留空。 如果服務覆蓋 PROXY_CACHE_KEY，請在此處輸入其有效的值；未支援的僅限請求變數將被拒絕，而不是清除不同的記錄。",
+    "purge_key_placeholder": "有效的 PROXY_CACHE_KEY (可選)",
+    "purge_url": "清除 URL",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "報告實例",
+    "service": "服務",
+    "services": "服務啟用",
+    "status": "實例儲存",
+    "subtitle": "反向代理緩存狀態，匯總命中率指標和即時清除控制。"
+  },
+  "cache": {
+    "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。"
   }
 }

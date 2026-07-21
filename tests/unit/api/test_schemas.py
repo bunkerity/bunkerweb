@@ -121,12 +121,41 @@ class TestWebCachePurgeRequest:
         }
 
     @pytest.mark.parametrize(
+        ("url", "canonical"),
+        [
+            ("HTTPS://Example.COM?x=1", "https://example.com/?x=1"),
+            ("HTTPS://Example.COM?", "https://example.com/?"),
+            ("http://Example.COM:8080", "http://example.com:8080/"),
+            ("https://[2001:DB8::1]:8443/a", "https://[2001:db8::1]:8443/a"),
+        ],
+    )
+    def test_url_is_canonicalized_for_lua_cache_key_reconstruction(self, url, canonical):
+        request = schemas.WebCachePurgeRequest(scope="url", urls=[{"url": url}])
+        assert request.urls[0].url == canonical
+
+    @pytest.mark.parametrize(
         "url",
         ["/asset.js", "example.com/asset.js", "ftp://example.com/asset.js", "http://"],
     )
     def test_url_must_be_absolute_http(self, url):
         with pytest.raises(ValidationError, match=r"absolute HTTP\(S\) URL"):
             schemas.WebCachePurgeRequest(scope="url", urls=[{"url": url}])
+
+    @pytest.mark.parametrize(
+        "url",
+        ["https://user@example.com/a", "https://example.com/a#section", "https://example.com/a#", "https://example.com:0/a"],
+    )
+    def test_url_rejects_authority_or_request_parts_that_cannot_match_cache_key(self, url):
+        with pytest.raises(ValidationError):
+            schemas.WebCachePurgeRequest(scope="url", urls=[{"url": url}])
+
+    def test_bulk_and_field_sizes_are_capped(self):
+        with pytest.raises(ValidationError):
+            schemas.WebCachePurgeRequest(scope="url", urls=[{"url": "https://example.com/"}] * 101)
+        with pytest.raises(ValidationError):
+            schemas.WebCachePurgeRequest(scope="url", urls=[{"url": "https://example.com/" + "a" * 8192}])
+        with pytest.raises(ValidationError):
+            schemas.WebCachePurgeRequest(scope="url", urls=[{"url": "https://example.com/", "key": "$host" * 1025}])
 
 
 class TestCertificateRequests:

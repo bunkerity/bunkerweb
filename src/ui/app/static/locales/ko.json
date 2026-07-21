@@ -1913,5 +1913,42 @@
     "usage": "사용법",
     "value": "값",
     "values": "값"
+  },
+  "web_cache": {
+    "available": "사용 가능",
+    "cache_state": "상태",
+    "cached_files": "캐시된 파일",
+    "deployment": "배포",
+    "disabled": "비활성화",
+    "disk_usage": "디스크 사용량",
+    "empty": "비어 있음",
+    "error": "오류",
+    "enabled": "활성화됨",
+    "enabled_instances": "캐시 활성화",
+    "enabled_services": "활성화된 서비스",
+    "hit_rate": "성공률",
+    "instance": "인스턴스",
+    "metrics": "성공/실패 분포",
+    "metrics_scope": "모든 캐시 활성화된 서비스에 걸쳐 인스턴스별로 카운터가 집계됩니다.",
+    "not_reporting": "보고되지 않음",
+    "path": "경로",
+    "purge": "캐시된 응답 지우기",
+    "purge_all": "모두 지우기",
+    "purge_all_confirm_body": "이 기능은 모든 서비스의 모든 연결 가능한 인스턴스에 대한 캐시된 응답을 삭제합니다. 이 작업을 취소할 수 없습니다.",
+    "purge_all_confirm_title": "전체 캐시 삭제?",
+    "purge_help": "연결 가능한 인스턴스에서 즉시 실행되는 작업을 삭제합니다. 연결되지 않은 인스턴스는 건너뛰고 작업이 큐에 추가되지 않습니다.",
+    "purge_key": "유효한 캐시 키",
+    "purge_key_help": "기본 $scheme$host$request_uri에 대해서만 캐시 키를 비워두십시오. 서비스가 PROXY_CACHE_KEY를 덮어쓰는 경우, 여기에 유효한 값을 붙여넣으십시오. 지원되지 않는 request-only 변수는 다른 항목을 삭제하는 대신 거부됩니다.",
+    "purge_key_placeholder": "유효한 PROXY_CACHE_KEY (선택 사항)",
+    "purge_url": "URL 삭제",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "보고 대상 인스턴스",
+    "service": "서비스",
+    "services": "서비스 활성화",
+    "status": "인스턴스 저장",
+    "subtitle": "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어."
+  },
+  "cache": {
+    "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다."
   }
 }

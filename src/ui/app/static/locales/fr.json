@@ -1915,5 +1915,42 @@
     "usage": "Utilisation",
     "value": "Valeur",
     "values": "Valeurs"
+  },
+  "web_cache": {
+    "available": "Disponibles",
+    "cache_state": "État",
+    "cached_files": "Fichiers mis en cache",
+    "deployment": "Déploiement",
+    "disabled": "Désactivé",
+    "disk_usage": "Utilisation du disque",
+    "empty": "Vide",
+    "error": "Erreur",
+    "enabled": "Activé",
+    "enabled_instances": "Cache activé",
+    "enabled_services": "Services activés",
+    "hit_rate": "Taux de réussite",
+    "instance": "Instance",
+    "metrics": "Répartition agrégée des succès / échecs",
+    "metrics_scope": "Les compteurs sont agrégés par instance pour tous les services activés en cache.",
+    "not_reporting": "Ne pas signaler",
+    "path": "Chemin",
+    "purge": "Effacer les réponses mises en cache",
+    "purge_all": "Effacer tout",
+    "purge_all_confirm_body": "Cela supprime toutes les réponses mises en cache pour tous les services sur toutes les instances accessibles. Cela ne peut pas être annulé.",
+    "purge_all_confirm_title": "Effacer toute la cache ?",
+    "purge_help": "Les actions de nettoyage s'exécutent immédiatement sur les instances accessibles. Les instances inaccessibles sont ignorées et aucune action n'est mise en file d'attente.",
+    "purge_key": "Clé de cache efficace",
+    "purge_key_help": "Laisser la clé de cache vide uniquement pour l'URL par défaut $scheme$host$request_uri. Si le service remplace PROXY_CACHE_KEY, collez sa valeur effective ici ; les variables uniquement pour la requête non prises en charge sont rejetées au lieu de supprimer une autre entrée.",
+    "purge_key_placeholder": "PROXY_CACHE_KEY efficace (facultatif)",
+    "purge_url": "URL de nettoyage",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Instances de reporting",
+    "service": "Service",
+    "services": "Activation du service",
+    "status": "Stockage de l'instance",
+    "subtitle": "État du cache inverse, métriques agrégées du taux de réussite et commandes de purge immédiate."
+  },
+  "cache": {
+    "subtitle": "Fichiers de cache générés par les tâches planifiées (listes noires, bases de données GeoIP, etc.) — inspectez, téléchargez ou supprimez-les par service et plugin."
   }
 }

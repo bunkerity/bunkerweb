@@ -1913,5 +1913,42 @@
     "usage": "Użycie",
     "value": "Wartość",
     "values": "Wartości"
+  },
+  "web_cache": {
+    "available": "Dostępne",
+    "cache_state": "Stan",
+    "cached_files": "Pliki w pamięci podręcznej",
+    "deployment": "Wdrożenie",
+    "disabled": "Wyłączone",
+    "disk_usage": "Wykorzystanie dysku",
+    "empty": "Puste",
+    "error": "Błąd",
+    "enabled": "Włączone",
+    "enabled_instances": "Pamięć podręczna włączona",
+    "enabled_services": "Aktywne usługi",
+    "hit_rate": "Wskaźnik trafień",
+    "instance": "Instancja",
+    "metrics": "Agregowana dystrybucja trafień / błędów",
+    "metrics_scope": "Liczniki są agregowane dla każdej instancji w przypadku wszystkich usług z włączoną pamięcią podręczną.",
+    "not_reporting": "Nie raportowane",
+    "path": "Ścieżka",
+    "purge": "Wyczyść odpowiedzi w pamięci podręcznej",
+    "purge_all": "Wyczyść wszystko",
+    "purge_all_confirm_body": "Usuwa wszystkie zapisane odpowiedzi dla każdego serwisu na każdej dostępnej instancji. Nie można tego cofnąć.",
+    "purge_all_confirm_title": "Czy chcesz wyczyścić całą pamięć podręczną?",
+    "purge_help": "Czy chcesz wykonać operacje natychmiast na dostępnych instancjach? Nieostępne instancje są pomijane i żaden działanie nie jest planowany.",
+    "purge_key": "Aktywny klucz pamięci podręcznej",
+    "purge_key_help": "Pozostaw klucz pamięci podręcznej pusty tylko dla domyślnego $scheme$host$request_uri. Jeśli serwus nadpisuje PROXY_CACHE_KEY, wklej jego aktywną wartość tutaj; nieobsługiwane zmienne tylko dla żądania są odrzucane zamiast usuwać inną wpis.",
+    "purge_key_placeholder": "Aktywny PROXY_CACHE_KEY (opcjonalnie)",
+    "purge_url": "Usuń URL",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Raportowanie instancji",
+    "service": "Usługa",
+    "services": "Włączenie serwisu",
+    "status": "Przechowywanie danych instancji",
+    "subtitle": "Status pamięci podręcznej reverse-proxy, agregowane metryki trafień i natychmiastowe kontrole czyszczenia."
+  },
+  "cache": {
+    "subtitle": "Pliki cache generowane przez zadania zaplanowane (listy blokujące, bazy GeoIP i inne) — sprawdzaj, pobieraj lub usuwaj je dla każdego serwisu i wtyczki."
   }
 }

@@ -1913,5 +1913,42 @@
     "usage": "Verwendung",
     "value": "Wert",
     "values": "Werte"
+  },
+  "web_cache": {
+    "available": "Verfügbar",
+    "cache_state": "Status",
+    "cached_files": "Zwischengespeicherte Dateien",
+    "deployment": "Bereitstellung",
+    "disabled": "Deaktiviert",
+    "disk_usage": "Festplattennutzung",
+    "empty": "Leer",
+    "error": "Fehler",
+    "enabled": "Aktiviert",
+    "enabled_instances": "Cache aktiviert",
+    "enabled_services": "Aktivierte Dienste",
+    "hit_rate": "Trefferquote",
+    "instance": "Instanz",
+    "metrics": "Aggregierte Hit / Miss-Verteilung",
+    "metrics_scope": "Zähler werden pro Instanz über alle cache-fähigen Dienste hinweg aggregiert.",
+    "not_reporting": "Nicht gemeldet",
+    "path": "Pfad",
+    "purge": "Zwischengespeicherte Antworten bereinigen",
+    "purge_all": "Alle",
+    "purge_all_confirm_body": "Dies löscht jede zwischengespeicherte Antwort für jeden Dienst auf jeder erreichbaren Instanz. Dies kann nicht rückgängig gemacht werden.",
+    "purge_all_confirm_title": "Gesamten Cache leeren?",
+    "purge_help": "Aktionen werden sofort auf erreichbaren Instanzen ausgeführt. Unreichbare Instanzen werden übersprungen und keine Aktion wird in der Warteschlange gestellt.",
+    "purge_key": "Effektiver Cache-Schlüssel",
+    "purge_key_help": "Lassen Sie den Cache-Schlüssel leer, nur für die Standard-URL $scheme$host$request_uri. Wenn der Dienst PROXY_CACHE_KEY überschreibt, fügen Sie hier den effektiven Wert ein; nicht unterstützte Variablen werden anstelle des Löschens eines anderen Eintrags abgelehnt.",
+    "purge_key_placeholder": "Effektiver PROXY_CACHE_KEY (optional)",
+    "purge_url": "URL leeren",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Instanzen melden",
+    "service": "Dienst",
+    "services": "Dienst aktivieren",
+    "status": "Instanzspeicher",
+    "subtitle": "Reverse-Proxy-Cache-Status, aggregierte Treffer-Metriken und unmittelbare Löschkontrollen."
+  },
+  "cache": {
+    "subtitle": "Cache-Dateien, die von geplanten Jobs generiert wurden (Blocklisten, GeoIP-Datenbanken usw.) — prüfen, herunterladen oder löschen Sie diese pro Service und Plugin."
   }
 }

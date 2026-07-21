@@ -1913,5 +1913,42 @@
     "usage": "ব্যবহার",
     "value": "মান",
     "values": "মানসমূহ"
+  },
+  "web_cache": {
+    "available": "উপলব্ধ",
+    "cache_state": "অবস্থা",
+    "cached_files": "ক্যাশে করা ফাইল",
+    "deployment": "ডিপ্লয়মেন্ট",
+    "disabled": "অক্ষম",
+    "disk_usage": "ডিস্ক ব্যবহার",
+    "empty": "খালি",
+    "error": "ত্রুটি",
+    "enabled": "সক্ষম",
+    "enabled_instances": "ক্যাশে সক্রিয়",
+    "enabled_services": "সক্রিয় পরিষেবা",
+    "hit_rate": "হিট রেট",
+    "instance": "ইনস্ট্যান্স",
+    "metrics": "হিট / মিস বিতরণ",
+    "metrics_scope": "সমস্ত ক্যাশে-সক্ষম পরিষেবাগুলির মধ্যে প্রতিটি ইনস্ট্যান্সের জন্য কাউন্টারগুলি একত্রিত করা হয়।",
+    "not_reporting": "রিপোর্টিং হচ্ছে না",
+    "path": "পাথ",
+    "purge": "ক্যাশে করা প্রতিক্রিয়া পরিষ্কার করুন",
+    "purge_all": "সব",
+    "purge_all_confirm_body": "This deletes every cached response for every service on every reachable instance. This cannot be undone.",
+    "purge_all_confirm_title": "পুরো ক্যাশে পরিষ্কার করবেন?",
+    "purge_help": "Purge actions run immediately on reachable instances. Unreachable instances are skipped and no action is queued.",
+    "purge_key": "কার্যকর ক্যাশে কী",
+    "purge_key_help": "Leave the cache key empty only for the default $scheme$host$request_uri. If the service overrides PROXY_CACHE_KEY, paste its effective value here; unsupported request-only variables are rejected instead of purging a different entry.",
+    "purge_key_placeholder": "কার্যকর PROXY_CACHE_KEY (ঐচ্ছিক)",
+    "purge_url": "URL পরিষ্কার করুন",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "ইনস্ট্যান্সগুলির রিপোর্টিং",
+    "service": "পরিষেবা",
+    "services": "সার্ভিস সক্রিয়করণ",
+    "status": "ইনস্ট্যান্স স্টোরেজ",
+    "subtitle": "Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls."
+  },
+  "cache": {
+    "subtitle": "পরিকল্পিত কাজের দ্বারা তৈরি ক্যাশে ফাইল (ব্লকলিস্ট, জিওআইপি ডাটাবেস, এবং আরও) — প্রতিটি পরিষেবার জন্য এবং প্লাগিনের জন্য পরিদর্শন, ডাউনলোড, অথবা মুছে ফেলুন।"
   }
 }

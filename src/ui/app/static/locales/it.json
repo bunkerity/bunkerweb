@@ -1913,5 +1913,42 @@
     "usage": "Utilizzo",
     "value": "Valore",
     "values": "Valori"
+  },
+  "web_cache": {
+    "available": "Disponibili",
+    "cache_state": "Stato",
+    "cached_files": "File in cache",
+    "deployment": "Distribuzione",
+    "disabled": "Disabilitato",
+    "disk_usage": "Utilizzo del disco",
+    "empty": "Vuoto",
+    "error": "Errore",
+    "enabled": "Abilitato",
+    "enabled_instances": "Cache abilitata",
+    "enabled_services": "Servizi abilitati",
+    "hit_rate": "Tasso di successo",
+    "instance": "Istanza",
+    "metrics": "Distribuzione hit / miss",
+    "metrics_scope": "I contatori sono aggregati per istanza su tutti i servizi con cache abilitata.",
+    "not_reporting": "Non in fase di report",
+    "path": "Percorso",
+    "purge": "Elimina le risposte in cache",
+    "purge_all": "Elimina tutto",
+    "purge_all_confirm_body": "Questo elimina ogni risposta memorizzata nella cache per ogni servizio su ogni istanza raggiungibile. Non è possibile annullare.",
+    "purge_all_confirm_title": "Eliminare l'intera cache?",
+    "purge_help": "Eliminare le azioni eseguite immediatamente sulle istanze raggiungibili. Le istanze inaccessibili vengono ignorate e nessuna azione viene aggiunta alla coda.",
+    "purge_key": "Chiave di cache efficace",
+    "purge_key_help": "Lasciare vuota la chiave di cache solo per il valore predefinito $scheme$host$request_uri. Se il servizio sovrascrive PROXY_CACHE_KEY, incolla il valore efficace qui; le variabili richieste non supportate vengono rifiutate invece di eliminare un'altra voce.",
+    "purge_key_placeholder": "PROXY_CACHE_KEY efficace (opzionale)",
+    "purge_url": "Eliminare URL",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Rapportare istanze",
+    "service": "Servizio",
+    "services": "Abilitare il servizio",
+    "status": "Archiviazione istanza",
+    "subtitle": "Stato della cache del reverse-proxy, metriche aggregate di hit-rate e controlli di eliminazione immediata."
+  },
+  "cache": {
+    "subtitle": "File di cache generati da attività programmate (liste di blocco, database GeoIP e altro) — ispeziona, scarica o eliminali per servizio e plugin."
   }
 }

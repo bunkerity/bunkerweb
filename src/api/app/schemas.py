@@ -261,9 +261,14 @@ class CacheFilesDeleteRequest(BaseModel):
 
 # Web cache (proxy_cache) management
 class WebCachePurgeUrl(BaseModel):
-    url: str = Field(..., description="Absolute URL whose cached response should be purged")
+    url: str = Field(
+        ...,
+        max_length=8192,
+        description="Absolute URL whose cached response should be purged",
+    )
     key: Optional[str] = Field(
         None,
+        max_length=4096,
         description="Custom PROXY_CACHE_KEY template if the service overrides the default",
     )
 
@@ -275,10 +280,39 @@ class WebCachePurgeUrl(BaseModel):
             raise ValueError("url must be a non-empty string")
         try:
             parsed = urlsplit(v)
+            hostname = parsed.hostname
+            port = parsed.port
         except ValueError as exc:
             raise ValueError("url must be an absolute HTTP(S) URL") from exc
-        if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+        if parsed.scheme.lower() not in {"http", "https"} or not hostname:
             raise ValueError("url must be an absolute HTTP(S) URL")
+        if parsed.username is not None or parsed.password is not None:
+            raise ValueError("url must not contain credentials")
+        if "#" in v:
+            raise ValueError("url must not contain a fragment")
+        if port is not None and not 1 <= port <= 65535:
+            raise ValueError("url port must be between 1 and 65535")
+
+        # Match the variables reconstructed by the instance-side Lua handler:
+        # normalized scheme/host, an explicit port when supplied, and a request
+        # URI that always starts with a slash (including query-only URLs).
+        host = hostname.lower()
+        authority = f"[{host}]" if ":" in host else host
+        if port is not None:
+            authority = f"{authority}:{port}"
+        request_uri = parsed.path or "/"
+        if "?" in v:
+            request_uri = f"{request_uri}?{parsed.query}"
+        return f"{parsed.scheme.lower()}://{authority}{request_uri}"
+
+    @field_validator("key")
+    @classmethod
+    def _non_empty_key(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            raise ValueError("key must be a non-empty string when provided")
         return v
 
 
@@ -287,10 +321,10 @@ class WebCachePurgeRequest(BaseModel):
         "url",
         description='"all" clears the whole proxy cache; "url" purges specific URLs',
     )
-    urls: Optional[List[WebCachePurgeUrl]] = Field(None, description="URLs to purge when scope is 'url'")
-    service: Optional[str] = Field(
+    urls: Optional[List[WebCachePurgeUrl]] = Field(
         None,
-        description="Reserved for future per-service purge (currently informational)",
+        max_length=100,
+        description="URLs to purge when scope is 'url'",
     )
 
     @model_validator(mode="after")

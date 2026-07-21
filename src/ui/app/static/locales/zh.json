@@ -1913,5 +1913,42 @@
     "usage": "使用",
     "value": "值",
     "values": "值"
+  },
+  "web_cache": {
+    "available": "可用",
+    "cache_state": "状态",
+    "cached_files": "缓存文件",
+    "deployment": "部署",
+    "disabled": "禁用",
+    "disk_usage": "磁盘使用量",
+    "empty": "为空",
+    "error": "错误",
+    "enabled": "已启用",
+    "enabled_instances": "启用缓存",
+    "enabled_services": "启用服务",
+    "hit_rate": "命中率",
+    "instance": "实例",
+    "metrics": "聚合命中/未命中分布",
+    "metrics_scope": "计数器按实例在所有启用的缓存服务中进行聚合。",
+    "not_reporting": "未报告",
+    "path": "路径",
+    "purge": "清除缓存响应",
+    "purge_all": "清除所有",
+    "purge_all_confirm_body": "这将删除所有服务的所有可访问实例上的所有缓存响应。 无法撤销。",
+    "purge_all_confirm_title": "清除整个缓存？",
+    "purge_help": "立即在可访问的实例上执行清除操作。 不可访问的实例将被跳过，并且不会有任何操作排队。",
+    "purge_key": "有效的缓存键",
+    "purge_key_help": "仅将缓存键留空用于默认的 $scheme$host$request_uri。 如果服务覆盖 PROXY_CACHE_KEY，请在此处粘贴其有效值；不支持的仅请求变量将被拒绝，而不是清除不同的条目。",
+    "purge_key_placeholder": "有效的 PROXY_CACHE_KEY (可选)",
+    "purge_url": "清除 URL",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "报告实例",
+    "service": "服务",
+    "services": "服务启用",
+    "status": "实例存储",
+    "subtitle": "反向代理缓存状态，汇总命中率指标和立即清除控制。"
+  },
+  "cache": {
+    "subtitle": "由计划任务生成的缓存文件（黑名单、GeoIP 数据库等） — 针对每个服务和插件进行检查、下载或删除。"
   }
 }

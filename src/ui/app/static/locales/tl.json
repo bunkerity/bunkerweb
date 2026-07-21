@@ -1913,5 +1913,42 @@
     "usage": "Paggamit",
     "value": "Halaga",
     "values": "Mga halaga"
+  },
+  "web_cache": {
+    "available": "Available",
+    "cache_state": "Estado",
+    "cached_files": "Mga naka-cache na file",
+    "deployment": "Pag-deploy",
+    "disabled": "Hindi naka-enable",
+    "disk_usage": "Paglalaan ng disk",
+    "empty": "Walang laman",
+    "error": "Error",
+    "enabled": "Pinagana",
+    "enabled_instances": "Naka-enable ang cache",
+    "enabled_services": "Mga naka-enable na serbisyo",
+    "hit_rate": "Rate ng pag-hit",
+    "instance": "Instance",
+    "metrics": "Aggregate hit / miss distribution",
+    "metrics_scope": "Ang mga counter ay pinagsama-sama sa bawat instance sa lahat ng mga serbisyo na may naka-enable na cache.",
+    "not_reporting": "Hindi nag-uulat",
+    "path": "Path",
+    "purge": "Tanggalin ang mga naka-cache na tugon",
+    "purge_all": "Tanggalin ang lahat",
+    "purge_all_confirm_body": "Ito ay nagtatanggal ng lahat ng naka-cache na tugon para sa bawat serbisyo sa bawat naa-access na instance. Hindi ito maaaring i-undo.",
+    "purge_all_confirm_title": "Tanggalin ang buong cache?",
+    "purge_help": "Tanggalin ang mga aksyon na tumatakbo kaagad sa mga naa-access na instance. Ang mga hindi naa-access na instance ay hindi isinasagawa at walang aksyon na ina-queue.",
+    "purge_key": "Epektibong susi ng cache",
+    "purge_key_help": "Iwanan ang susi ng cache na walang laman lamang para sa default na $scheme$host$request_uri. Kung ang serbisyo ay nag-o-override ng PROXY_CACHE_KEY, ilagay dito ang epektibong halaga; ang mga variable na may kaugnayan lamang sa kahilingan na hindi sinusuportahan ay tinatanggihan sa halip na tanggalin ang ibang entry.",
+    "purge_key_placeholder": "Epektibong PROXY_CACHE_KEY (opsyonal)",
+    "purge_url": "Tanggalin ang URL",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Pag-uulat ng mga instance",
+    "service": "Serbisyo",
+    "services": "Pag-enable ng serbisyo",
+    "status": "Imbakan ng instance",
+    "subtitle": "Status ng cache ng reverse-proxy, aggregate na mga sukatan ng hit-rate at agarang kontrol sa pagtanggal."
+  },
+  "cache": {
+    "subtitle": "Mga file ng cache na nabuo ng mga naka-iskedyul na gawain (blocklists, GeoIP databases, at iba pa) — suriin, i-download, o burahin ang mga ito bawat serbisyo at plugin."
   }
 }

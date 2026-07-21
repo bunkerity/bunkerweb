@@ -1913,5 +1913,42 @@
     "usage": "Uso",
     "value": "Valor",
     "values": "Valores"
+  },
+  "web_cache": {
+    "available": "Disponível",
+    "cache_state": "Estado",
+    "cached_files": "Arquivos em cache",
+    "deployment": "Implantação",
+    "disabled": "Desativado",
+    "disk_usage": "Uso do disco",
+    "empty": "Vazio",
+    "error": "Erro",
+    "enabled": "Habilitado",
+    "enabled_instances": "Cache habilitado",
+    "enabled_services": "Serviços habilitados",
+    "hit_rate": "Taxa de acerto",
+    "instance": "Instância",
+    "metrics": "Distribuição agregada de acertos / erros",
+    "metrics_scope": "Os contadores são agregados por instância em todos os serviços habilitados para cache.",
+    "not_reporting": "Não reportando",
+    "path": "Caminho",
+    "purge": "Limpar respostas em cache",
+    "purge_all": "Limpar tudo",
+    "purge_all_confirm_body": "Isso exclui todas as respostas em cache para todos os serviços em todas as instâncias acessíveis. Isso não pode ser desfeito.",
+    "purge_all_confirm_title": "Limpar toda a cache?",
+    "purge_help": "Limpar ações executadas imediatamente nas instâncias acessíveis. Instâncias inacessíveis são ignoradas e nenhuma ação é agendada.",
+    "purge_key": "Chave de cache efetiva",
+    "purge_key_help": "Deixar a chave de cache vazia apenas para o padrão $scheme$host$request_uri. Se o serviço sobrescrever PROXY_CACHE_KEY, cole seu valor efetivo aqui; variáveis apenas para solicitação não suportadas são rejeitadas em vez de limpar uma entrada diferente.",
+    "purge_key_placeholder": "PROXY_CACHE_KEY efetivo (opcional)",
+    "purge_url": "Limpar URL",
+    "purge_url_placeholder": "https://www.example.com/asset.js",
+    "reporting_instances": "Relatar instâncias",
+    "service": "Serviço",
+    "services": "Habilitar serviço",
+    "status": "Armazenamento de instância",
+    "subtitle": "Status de cache do reverse-proxy, métricas de taxa de acerto agregadas e controles de limpeza imediata."
+  },
+  "cache": {
+    "subtitle": "Arquivos de cache gerados por tarefas agendadas (listas de bloqueio, bancos de dados GeoIP e muito mais) — inspecione, baixe ou exclua-os por serviço e plugin."
   }
 }

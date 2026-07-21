@@ -5,6 +5,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
+from types import SimpleNamespace
 from typing import Optional
 from unittest.mock import Mock, call, patch
 
@@ -39,6 +40,7 @@ def _load_router():
         "bw_web_cache.auth.guard": ModuleType("bw_web_cache.auth.guard"),
         "bw_web_cache.deps": ModuleType("bw_web_cache.deps"),
         "bw_web_cache.schemas": schemas,
+        "bw_web_cache.utils": ModuleType("bw_web_cache.utils"),
     }
     names["fastapi"].APIRouter = _Router
     names["fastapi"].Depends = lambda dependency: dependency
@@ -48,6 +50,10 @@ def _load_router():
     names["bw_web_cache.auth"].__path__ = []
     names["bw_web_cache.auth.guard"].guard = object()
     names["bw_web_cache.deps"].get_instances_api_caller = object()
+    names["bw_web_cache.utils"].get_db = lambda: SimpleNamespace(
+        get_config=lambda **_kwargs: {},
+        get_services=lambda **_kwargs: [],
+    )
     with patch.dict(sys.modules, names):
         path = ROOT / "src" / "api" / "app" / "routers" / "web_cache.py"
         spec = importlib.util.spec_from_file_location("bw_web_cache.routers.web_cache", path)
@@ -70,6 +76,17 @@ def test_status_and_metrics_fanout():
     metrics = ROUTER.web_cache_metrics(caller)
 
     assert (status.status_code, metrics.status_code) == (200, 200)
+    assert status.content == {
+        "status": "success",
+        "instances": {"node": {"enabled": True}},
+        "services": [],
+        "message": None,
+    }
+    assert metrics.content == {
+        "status": "success",
+        "instances": {"node": {"HIT": 2}},
+        "message": None,
+    }
     assert caller.send_to_apis.call_args_list == [
         call("GET", "/proxy-cache/status", response=True),
         call("GET", "/metrics/reverseproxy", response=True),
@@ -84,6 +101,12 @@ def test_purge_forwards_validated_payload():
     response = ROUTER.web_cache_purge(request, caller)
 
     assert response.status_code == 200
+    assert response.content["summary"] == {
+        "requested": 1,
+        "succeeded": 1,
+        "failed": 0,
+        "skipped": 0,
+    }
     caller.send_to_apis.assert_called_once_with(
         "POST",
         "/proxy-cache/purge",
@@ -92,14 +115,135 @@ def test_purge_forwards_validated_payload():
     )
 
 
-def test_fanout_failure_is_502_with_fallback_body():
+def test_fanout_failure_is_503_with_structured_body():
     caller = Mock()
     caller.send_to_apis.return_value = False, None
 
     response = ROUTER.web_cache_status(caller)
 
-    assert response.status_code == 502
-    assert response.content == {"status": "error", "msg": "internal error"}
+    assert response.status_code == 503
+    assert response.content == {
+        "status": "error",
+        "instances": {},
+        "services": [],
+        "message": "No BunkerWeb instance reported cache status",
+    }
+
+
+def test_status_partial_response_preserves_successes():
+    caller = Mock()
+    caller.send_to_apis.return_value = (
+        False,
+        {"node-a": {"status": "success", "data": {"enabled": True}}},
+    )
+
+    response = ROUTER.web_cache_status(caller)
+
+    assert response.status_code == 207
+    assert response.content["status"] == "partial"
+    assert response.content["instances"]["node-a"]["data"]["enabled"] is True
+
+
+def test_status_with_no_configured_instances_is_unavailable():
+    caller = Mock()
+    caller.send_to_apis.return_value = True, {}
+
+    response = ROUTER.web_cache_status(caller)
+
+    assert response.status_code == 503
+    assert response.content["status"] == "error"
+
+
+def test_status_includes_effective_service_enablement(monkeypatch):
+    db = Mock()
+    db.get_services.return_value = [
+        {"id": "online.example", "is_draft": False},
+        {"id": "draft.example", "is_draft": True},
+    ]
+    db.get_config.return_value = {
+        "USE_PROXY_CACHE": "no",
+        "online.example_USE_PROXY_CACHE": "yes",
+    }
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+    caller = Mock()
+    caller.send_to_apis.return_value = True, {"node": {"status": "success"}}
+
+    response = ROUTER.web_cache_status(caller)
+
+    assert response.content["services"] == [
+        {"id": "online.example", "enabled": True, "is_draft": False},
+        {"id": "draft.example", "enabled": False, "is_draft": True},
+    ]
+
+
+def test_partial_purge_marks_unreachable_instances_skipped_without_queue():
+    caller = Mock()
+    caller.apis = [
+        SimpleNamespace(endpoint="http://node-a:5000"),
+        SimpleNamespace(endpoint="http://node-b:5000"),
+        SimpleNamespace(endpoint="http://node-c:5000"),
+    ]
+    caller.send_to_apis.return_value = (
+        False,
+        {
+            "node-a": {"status": "success", "data": {"purged": True}},
+            "node-c": {"status": "error", "msg": "purge failed"},
+        },
+    )
+    request = schemas.WebCachePurgeRequest(scope="all")
+
+    response = ROUTER.web_cache_purge(request, caller)
+
+    assert response.status_code == 207
+    assert response.content["status"] == "partial"
+    assert response.content["summary"] == {
+        "requested": 3,
+        "succeeded": 1,
+        "failed": 1,
+        "skipped": 1,
+    }
+    assert response.content["instances"]["node-b"] == {
+        "status": "skipped",
+        "reason": "unreachable",
+        "queued": False,
+    }
+
+
+def test_native_purge_all_uses_module_not_shell_delete():
+    lua = (ROOT / "src" / "bw" / "lua" / "bunkerweb" / "api.lua").read_text(encoding="utf-8")
+    nginx = (ROOT / "src" / "common" / "confs" / "api.conf").read_text(encoding="utf-8")
+
+    assert 'ngx.location.capture("/_proxy-cache/purge-all"' in lua
+    assert "-mindepth 1 -type f -delete" not in lua
+    assert "proxy_cache_purge POST purge_all from all;" in nginx
+
+
+def test_native_purge_remains_configured_when_no_service_cache_is_enabled():
+    nginx = (ROOT / "src" / "common" / "confs" / "api.conf").read_text(encoding="utf-8")
+    reverse_proxy = (ROOT / "src" / "common" / "core" / "reverseproxy" / "confs" / "http" / "reverse-proxy.conf").read_text(encoding="utf-8")
+
+    assert 'has_variable(all, "USE_PROXY_CACHE", "yes")' not in nginx
+    assert 'has_variable(all, "USE_PROXY_CACHE", "yes")' not in reverse_proxy
+    assert "keys_zone=proxycache:" in reverse_proxy
+
+
+def test_instance_purge_defensively_matches_api_limits_and_url_parts():
+    lua = (ROOT / "src" / "bw" / "lua" / "bunkerweb" / "api.lua").read_text(encoding="utf-8")
+
+    assert "MAX_PROXY_CACHE_PURGE_URLS = 100" in lua
+    assert "MAX_PROXY_CACHE_URL_LENGTH = 8192" in lua
+    assert "MAX_PROXY_CACHE_KEY_TEMPLATE_LENGTH = 4096" in lua
+    assert '["$http_host"] = authority' in lua
+    assert 'uri:sub(1, 1) == "?"' in lua
+    assert 'uri:find("#", 1, true)' in lua
+    assert 'key_template:gsub("%$({?)([%w_]+)(}?)", substitute)' in lua
+
+
+def test_openapi_metadata_lists_resource_groups_and_web_cache():
+    main = (ROOT / "src" / "api" / "app" / "main.py").read_text(encoding="utf-8")
+
+    assert '"name": "resource_groups"' in main
+    assert '"name": "web_cache"' in main
 
 
 def _load_acl_resolvers():
