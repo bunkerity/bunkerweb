@@ -33,7 +33,10 @@
       "toggle_wrap": "लाइन रैपिंग टॉगल करें",
       "configs_dropzone": "कस्टम कॉन्फ़िगरेशन एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
       "raw_configuration": "रॉ कॉन्फ़िगरेशन",
-      "services_dropzone": "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें"
+      "services_dropzone": "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
+      "hide_value": "मूल्य छिपाएँ",
+      "reveal_value": "मूल्य दिखाएँ",
+      "user_avatar": "उपयोगकर्ता अवतार"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "कोई मेल खाने वाला प्लगइन नहीं मिला",
     "zero_records_reports": "कोई मेल खाने वाली रिपोर्ट नहीं मिली",
     "zero_records_services": "कोई मेल खाने वाली सेवा नहीं मिली",
-    "zero_records_templates": "कोई मेल खाते टेम्प्लेट नहीं मिले"
+    "zero_records_templates": "कोई मेल खाते टेम्प्लेट नहीं मिले",
+    "selected_list_count": "{{count}} {{entity}} चयनित",
+    "selected_list_empty": "कोई {{entity}} चयनित नहीं।"
   },
   "dev_log": {
     "copy_failed": "पाठ कॉपी करने में विफल:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL API पुनः प्रयास",
       "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब",
       "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
-      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय"
+      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय",
+      "instance_id": "इंस्टेंस आईडी"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
@@ -780,7 +786,8 @@
     "privacy_policy": "गोपनीयता नीति",
     "read_more": "और पढ़ें",
     "see_more": "और देखें",
-    "upgrade": "अपग्रेड करें?"
+    "upgrade": "अपग्रेड करें?",
+    "opens_new_tab": "(एक नए टैब में खुलता है)"
   },
   "logs": {
     "annotation_error": "त्रुटि",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "वर्तमान टेम्पलेट के बाहर परिवर्तन की अनुमति नहीं है। कृपया वर्तमान टेम्पलेट का उपयोग करके परिवर्तन करें या उन्नत/रॉ मोड पर स्विच करें।",
     "unique_server_name": "अद्वितीय सर्वर नाम",
     "up": "चालू",
-    "yes": "हाँ"
+    "yes": "हाँ",
+    "done": "पूर्ण",
+    "pending": "प्रतीक्षा में"
   },
   "step": {
     "next": "अगला",
@@ -1304,7 +1313,8 @@
       "type": "प्रकार",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "संस्करण"
+      "version": "संस्करण",
+      "value": "मूल्य"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "अनुसूचित कार्यों द्वारा उत्पन्न कैश फ़ाइलें (ब्लॉकलिस्ट, GeoIP डेटाबेस, और अन्य) — प्रति सेवा और प्लगइन के लिए जांचें, डाउनलोड करें, या हटाएं।"
+  },
+  "accordion": {
+    "body": {
+      "tls": "स्वचालित रूप से प्रमाणपत्र जारी करें और नवीनीकृत करें।"
+    },
+    "title": {
+      "tls": "TLS & प्रमाणपत्र"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "सभी {{count}} सेटिंग्स देखें"
   }
 }

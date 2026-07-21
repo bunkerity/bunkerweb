@@ -1,0 +1,100 @@
+{# usage: {% from "components/country-flag.html" import country_flag %}
+          {{ country_flag(code=ban.country, flag_base=base_flags_url, id="ban-country-" ~ ban.id) }} #}
+
+{# A "country cell": a decorative flag (ISO 3166-1 alpha-2) + a localized country name +
+   a Bootstrap hover/focus tooltip, for the origin country of a banned/reported IP.
+
+   Why this exists: bans.html and reports.html each already build this exact cell, but
+   entirely client-side inside their own DataTables `render()` callbacks (static/js/pages/
+   bans.js and static/js/pages/reports.js) -- rows in both tables are fetched and drawn via
+   AJAX, so there is no server-rendered <tr> for this macro to slot into on first paint. This
+   macro exists for the cases that DO render server-side (a details/print view, a
+   non-DataTables list, a future page) and, more importantly, as the single documented markup
+   contract that static/js/components/country-flag.js's `BWCountryFlag.html()` mirrors --
+   bans.js/reports.js were rewired to call that helper instead of hand-building this markup
+   twice, in two subtly different shapes (bans.js's version was already the more complete/
+   accessible one -- alt="" + aria-hidden="true" on the flag, a separate text node for the
+   name; reports.js additionally injected a "&nbsp;－&nbsp;" separator glyph between flag and
+   name that this consolidation drops in favor of the plain `me-1` spacing already used
+   everywhere else in the app).
+
+   Flags are served from this app's own static/img/flags/*.svg (258 files, "zz.svg" for the
+   not-applicable case) -- `flag_base` MUST stay same-origin. The UI's CSP `img-src`
+   (main.py's set_security_headers) only allowlists 'self', data:, blob: and a couple of
+   bunkerweb.io/openstreetmap hosts; it does NOT allowlist flagcdn.com or any other CDN, so
+   pointing this at a remote flag host silently blocks every flag image.
+
+   Not-applicable countries -- "", "unknown", "local", "n/a", "na", "zz", "-", "—", or
+   anything that isn't exactly 2 characters -- render the zz.svg flag and the
+   "country.not_applicable" key (en.json: "N/A"), matching bans.js/reports.js's existing
+   isNotApplicable checks (with a length guard added so a malformed/missing code degrades to
+   the N/A flag instead of requesting a nonexistent "<garbage>.svg").
+
+   Params:
+     code         (required) ISO 3166-1 alpha-2 country code (e.g. "FR"), or one of the
+                  not-applicable sentinels above.
+     flag_base    base path flag SVGs are served from. Default "/static/img/flags" (this
+                  app's own static files) -- NEVER point this at flagcdn.com or another
+                  third-party host, see the CSP note above. Trailing slash tolerated.
+     name         override the pre-i18next fallback text. Default: the uppercased ISO code,
+                  or "N/A" for not-applicable. The actual localized country name (e.g.
+                  "France") comes from i18next translating data-i18n="country.<ISO>" at
+                  runtime -- both that key and "country.not_applicable" already exist for all
+                  252 codes in en.json, so this param is for the rare caller that wants a
+                  different fallback string, not for supplying the real name.
+     show_label   show the name text next to the flag. Default true; pass false for a
+                  flag-only cell that keeps the name in the DOM for screen readers
+                  (visually-hidden) instead of dropping it -- e.g. a compact avatar-style
+                  icon strip.
+     tooltip      attach the Bootstrap `data-bs-toggle="tooltip"` wiring (title = the same
+                  label text, kept in sync after i18next translation by
+                  static/js/components/country-flag.js's `updateTooltips()`). Default true.
+     height       flag <img> height in px (width is automatic -- the SVGs are pre-cropped to
+                  a flag aspect ratio). Default 17, matching every existing call site.
+     id           optional id on the outer wrapper span.
+     classes      extra utility classes on the outer wrapper span.
+
+   Not covered: the design system's "code"/"both" display variants (flag+ISO-code, or
+   flag+name+ISO-code) and per-size flag dimensions (sm/md/lg) -- no call site in this app
+   uses anything but flag+name at a single fixed height, so those variants aren't wired up
+   here; add them if a real caller needs them. Also not covered: a NAMES lookup table for the
+   pre-i18next fallback text -- en.json already has every country name keyed by ISO code, so
+   a second copy of that data baked into this template or its JS companion would just be a
+   second place for it to drift out of sync.
+
+   Companion JS lives in static/js/components/country-flag.js -- `BWCountryFlag.html()`
+   renders this same markup for DataTables `render()` callbacks, and
+   `BWCountryFlag.updateTooltips()` re-translates every `[data-country]` cell's tooltip after
+   i18next (re)translates the page. Include it once on any page using either. #}
+{% macro country_flag(
+    code,
+    flag_base="/static/img/flags",
+    name=none,
+    show_label=true,
+    tooltip=true,
+    height=17,
+    id=none,
+    classes=""
+) -%}
+{%- set _NA_CODES = ["", "unknown", "local", "n/a", "na", "zz", "-", "—"] -%}
+{%- set _raw = (code | string | trim) -%}
+{%- set _is_na = (_raw | lower in _NA_CODES) or (_raw | length != 2) -%}
+{%- set iso = "ZZ" if _is_na else _raw | upper -%}
+{%- set _flag_code = "zz" if _is_na else iso | lower -%}
+{%- set _i18n_key = "country.not_applicable" if _is_na else "country." ~ iso -%}
+{%- set _label = name if name is not none else ("N/A" if _is_na else iso) -%}
+{%- set _data_country = "unknown" if _is_na else iso -%}
+{%- set _base = flag_base.rstrip("/") -%}
+<span{% if id %} id="{{ id }}"{% endif %}
+      class="d-inline-flex align-items-center{% if classes %} {{ classes }}{% endif %}"
+      data-country="{{ _data_country }}"
+      {%- if tooltip %} data-bs-toggle="tooltip" data-bs-original-title="{{ _label }}"{% endif %}>
+    <img src="{{ _base }}/{{ _flag_code }}.svg"
+         class="border border-1 p-0 me-1"
+         height="{{ height }}"
+         loading="lazy"
+         alt=""
+         aria-hidden="true" />
+    <span{% if not show_label %} class="visually-hidden"{% endif %} data-i18n="{{ _i18n_key }}">{{ _label }}</span>
+</span>
+{%- endmacro %}

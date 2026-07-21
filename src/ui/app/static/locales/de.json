@@ -33,7 +33,10 @@
       "toggle_wrap": "Zeilenumbruch umschalten",
       "configs_dropzone": "Eine Exportdatei für benutzerdefinierte Konfigurationen auswählen oder hier ablegen",
       "raw_configuration": "Rohkonfiguration",
-      "services_dropzone": "Eine Dienste-Exportdatei auswählen oder hier ablegen"
+      "services_dropzone": "Eine Dienste-Exportdatei auswählen oder hier ablegen",
+      "hide_value": "Wert ausblenden",
+      "reveal_value": "Wert anzeigen",
+      "user_avatar": "Benutzeravatar"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "Keine übereinstimmenden Plugins gefunden",
     "zero_records_reports": "Keine übereinstimmenden Berichte gefunden",
     "zero_records_services": "Keine übereinstimmenden Dienste gefunden",
-    "zero_records_templates": "Keine passenden Vorlagen gefunden"
+    "zero_records_templates": "Keine passenden Vorlagen gefunden",
+    "selected_list_count": "{{count}} {{entity}} ausgewählt",
+    "selected_list_empty": "Keine {{entity}} ausgewählt."
   },
   "dev_log": {
     "copy_failed": "Fehler beim Kopieren des Textes:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL-API-Wiederholungen",
       "zerossl_api_retry_delay": "ZeroSSL-API-Wiederholungsverzögerung",
       "zerossl_api_connect_timeout": "ZeroSSL-API-Verbindungs-Timeout",
-      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit"
+      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit",
+      "instance_id": "Instanz-ID"
     },
     "placeholder": {
       "2fa_code": "Code eingeben",
@@ -780,7 +786,8 @@
     "privacy_policy": "Datenschutzrichtlinie",
     "read_more": "Mehr lesen",
     "see_more": "Mehr sehen",
-    "upgrade": "Upgraden?"
+    "upgrade": "Upgraden?",
+    "opens_new_tab": "(öffnet in einem neuen Tab)"
   },
   "logs": {
     "annotation_error": "Fehler",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "Änderungen außerhalb der aktuellen Vorlage sind nicht erlaubt. Bitte nehmen Sie Änderungen mit der aktuellen Vorlage vor oder wechseln Sie in den Erweitert/Roh-Modus.",
     "unique_server_name": "Eindeutiger Servername",
     "up": "Aktiv",
-    "yes": "Ja"
+    "yes": "Ja",
+    "done": "Abgeschlossen",
+    "pending": "Ausstehend"
   },
   "step": {
     "next": "Weiter",
@@ -1304,7 +1313,8 @@
       "type": "Typ",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Version"
+      "version": "Version",
+      "value": "Wert"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "Cache-Dateien, die von geplanten Jobs generiert wurden (Blocklisten, GeoIP-Datenbanken usw.) — prüfen, herunterladen oder löschen Sie diese pro Service und Plugin."
+  },
+  "accordion": {
+    "body": {
+      "tls": "Zertifikate automatisch ausstellen und erneuern."
+    },
+    "title": {
+      "tls": "TLS & Zertifikate"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "Alle {{count}} Einstellungen anzeigen"
   }
 }

@@ -1,0 +1,144 @@
+{# usage: {% from "components/drawer.html" import drawer %}
+          {% call drawer(id="side-offcanvas-notifications", theme=theme) %}
+            <div id="data-notifications-container" class="offcanvas-body ...">...</div>
+          {% endcall %}
+          (trigger anywhere: <button data-bs-toggle="offcanvas" data-bs-target="#side-offcanvas-notifications">...</button>) #}
+
+{# Right-side slide-in panel -- superset of the near-identical "offcanvas offcanvas-end"
+   shells duplicated across sidebar-notifications.html and sidebar-news.html. The social
+   media header row, the close button and the sticky Sendinblue newsletter footer are
+   100% identical between the two today -- only the body content (and, for notifications,
+   the extra timezone/"Clear All" toolbar row above it) differs, so that part stays
+   free-form via {% call %}, exactly like components/modal.html does for its body/footer.
+
+   Show/hide, focus trap, scroll-lock, Esc-to-close and the backdrop are all handled by
+   Bootstrap 5.3's own Offcanvas plugin (data-bs-toggle="offcanvas" data-bs-target="#id" on
+   any trigger button elsewhere on the page, already vendored in libs/bootstrap and loaded
+   on every page) -- no companion JS file needed.
+
+   Params:
+     id         (required) unique id for the outer .offcanvas div -- triggers target
+                #{{ id }}. Also seeds the newsletter field ids below so two drawers
+                rendered on the same page at once (dashboard.html shows both Notifications
+                and News) never collide on duplicate ids the way the current hand-written
+                templates do (both hardcode "newsletter-email-check" / "newsletter-locale").
+     placement  "end" (right, default) | "start" | "top" | "bottom" -- any Bootstrap
+                offcanvas-<placement> variant.
+     backdrop   Bootstrap's data-bs-backdrop -- true | false | "static". Default false,
+                matching both existing panels (they don't dim the page behind them).
+     keyboard   Bootstrap's data-bs-keyboard (Esc-to-close). Default false, matching both
+                existing panels.
+     social     show the BunkerWeb social-links row (Discord/LinkedIn/Reddit/Instagram/X)
+                in the header. Default true.
+     newsletter show the sticky "Join the Newsletter" Sendinblue signup footer. Default
+                true.
+     theme      "light" | "dark" -- only used to pick the newsletter footer's
+                bg-light-subtle/bg-dark-subtle tint. Pass the page's own `theme` template
+                var straight through (theme=theme) -- the macro has no context access of
+                its own since it's imported, not included. Default "light".
+     classes    extra utility classes appended to the outer .offcanvas div.
+     attrs      raw extra attributes appended as-is (e.g. data-* hooks read by page JS).
+
+   caller() renders everything after the header: the body content and, for notifications,
+   the toolbar row above it -- exactly the free-form shape each existing panel already
+   uses, untouched. #}
+{% macro drawer(id, placement="end", backdrop=false, keyboard=false, social=true, newsletter=true, theme="light", classes="", attrs="") -%}
+<div class="offcanvas offcanvas-{{ placement }}{% if classes %} {{ classes }}{% endif %}"
+     tabindex="-1"
+     id="{{ id }}"
+     data-bs-keyboard="{{ keyboard|lower }}"
+     data-bs-backdrop="{{ backdrop|lower }}"
+     {%- if attrs %} {{ attrs }}{% endif %}>
+    <div class="offcanvas-header">
+        {%- if social %}
+        <div class="social-buttons">
+            <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noopener"
+               aria-label="Discord">
+                <i class='bx bxl-discord-alt bx-sm' aria-hidden="true"></i>
+            </a>
+            <a href="https://www.linkedin.com/company/bunkerity/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer"
+               aria-label="LinkedIn">
+                <i class='bx bxl-linkedin bx-sm' aria-hidden="true"></i>
+            </a>
+            <a href="https://www.reddit.com/r/BunkerWeb/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer"
+               aria-label="Reddit">
+                <i class='bx bxl-reddit bx-sm' aria-hidden="true"></i>
+            </a>
+            <a href="https://www.instagram.com/bunkerweb/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer"
+               aria-label="Instagram">
+                <i class='bx bxl-instagram bx-sm' aria-hidden="true"></i>
+            </a>
+            <a href="https://x.com/bunkerity/"
+               class="btn btn-sm btn-link"
+               target="_blank"
+               rel="noreferrer"
+               aria-label="X">
+                <img src="{{ url_for('static', filename='img/brands/Twitter-X-Logo.svg') }}"
+                     class="x-logo"
+                     alt=""
+                     width="20px"
+                     height="20px"
+                     loading="lazy" />
+            </a>
+        </div>
+        {%- endif %}
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+                data-i18n="aria.label.close"></button>
+    </div>
+    {{ caller() }}
+    {%- if newsletter %}
+    <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
+        <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
+        <form action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
+              method="POST"
+              target="_blank">
+            <input id="{{ id }}-newsletter-email-check"
+                   type="hidden"
+                   name="email_address_check"
+                   value="" />
+            <input id="{{ id }}-newsletter-locale" type="hidden" name="locale" value="en" />
+            <div class="mb-3">
+                <input type="email"
+                       name="EMAIL"
+                       class="form-control"
+                       placeholder="John.doe@example.com"
+                       required />
+            </div>
+            <div class="form-check mb-3">
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="{{ id }}-privacyPolicyCheck"
+                       name="OPT_IN"
+                       required />
+                <label class="form-check-label" for="{{ id }}-privacyPolicyCheck">
+                    <span data-i18n="newsletter.legal_agreement">I want to subscribe to the newsletter and I've read and agree to the:&nbsp;</span>
+                    <a class="fst-italic"
+                       href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+                       target="_blank"
+                       rel="noopener"
+                       data-i18n="link.privacy_policy">privacy policy</a>
+                </label>
+            </div>
+            <button type="submit"
+                    class="btn btn-primary w-100 text-uppercase don-jose"
+                    data-i18n="button.subscribe">Subscribe</button>
+        </form>
+    </div>
+    {%- endif %}
+</div>
+{%- endmacro %}

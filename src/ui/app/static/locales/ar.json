@@ -33,7 +33,10 @@
       "toggle_wrap": "تبديل التفاف الأسطر",
       "configs_dropzone": "حدد ملف تصدير التكوينات المخصصة أو أفلت واحدًا هنا",
       "raw_configuration": "التكوين الخام",
-      "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا"
+      "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا",
+      "hide_value": "إخفاء القيمة",
+      "reveal_value": "إظهار القيمة",
+      "user_avatar": "صورة المستخدم"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "لم يتم العثور على إضافات مطابقة",
     "zero_records_reports": "لم يتم العثور على تقارير مطابقة",
     "zero_records_services": "لم يتم العثور على خدمات مطابقة",
-    "zero_records_templates": "لم يتم العثور على قوالب مطابقة"
+    "zero_records_templates": "لم يتم العثور على قوالب مطابقة",
+    "selected_list_count": "{{count}} {{entity}} محدد",
+    "selected_list_empty": "لا يوجد {{entity}} محدد."
   },
   "dev_log": {
     "copy_failed": "فشل نسخ النص:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
+      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL",
+      "instance_id": "معرف المثيل"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
@@ -780,7 +786,8 @@
     "privacy_policy": "سياسة الخصوصية",
     "read_more": "اقرأ المزيد",
     "see_more": "شاهد المزيد",
-    "upgrade": "ترقية؟"
+    "upgrade": "ترقية؟",
+    "opens_new_tab": "(يفتح في علامة تبويب جديدة)"
   },
   "logs": {
     "annotation_error": "خطأ",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "لا يُسمح بإجراء تغييرات خارج القالب الحالي. يرجى إجراء التغييرات باستخدام القالب الحالي أو التبديل إلى الوضع المتقدم/الخام.",
     "unique_server_name": "اسم خادم فريد",
     "up": "قيد التشغيل",
-    "yes": "نعم"
+    "yes": "نعم",
+    "done": "مكتمل",
+    "pending": "قيد الانتظار"
   },
   "step": {
     "next": "التالي",
@@ -1304,7 +1313,8 @@
       "type": "النوع",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "الإصدار"
+      "version": "الإصدار",
+      "value": "القيمة"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة."
+  },
+  "accordion": {
+    "body": {
+      "tls": "إصدار وتجديد الشهادات تلقائيًا."
+    },
+    "title": {
+      "tls": "TLS والشهادات"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "عرض جميع {{count}} الإعدادات"
   }
 }

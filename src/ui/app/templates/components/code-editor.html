@@ -1,0 +1,11 @@
+{% macro code_editor(id, value="", language="text", read_only=true, height="fill", aria_label=none, classes="") -%}
+    {%- set fill = height == "fill" -%}
+    <div id="{{ id }}"
+         class="ace-editor visually-hidden border rounded{% if fill %} position-absolute top-0 start-0 end-0 bottom-0{% else %} bw-code-editor-{{ height }}{% endif %}{% if classes %} {{ classes }}{% endif %}"
+         data-language="{{ language }}"
+         data-readonly="{{ 'true' if read_only else 'false' }}"
+         {% if read_only %}aria-readonly="true"{% endif %}
+         role="textbox"
+         aria-multiline="true"
+         {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}>{{ value | e }}</div>
+{%- endmacro %}

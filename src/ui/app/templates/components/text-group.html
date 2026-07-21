@@ -1,0 +1,67 @@
+{# usage: {% from "components/text-group.html" import text_group %}
+          {{ text_group(top="Setting", bottom=setting_name, top_i18n="template.editor.summary_metadata_created", icon="bx-time", value_id="summary-created-value") }} #}
+
+{# Two-line label/value text stack, optional leading icon -- for profile/detail views
+   (instance metadata, template summary, settings recap...). Superset of the vertical
+   label-above/value-below block already duplicated in template_edit.html's
+   setting-remove confirmation ("Setting" caption above, fw-semibold value below, no
+   icon -- lines 678-681). `emphasis` also covers the Claude Design "TextGroup"
+   component (icon + bold name line + muted caption below it) by flipping which line
+   is bold instead of hardcoding the label always on top.
+
+   Not covered: template_edit.html's metadata summary rows (icon+label on the left,
+   value on the right of the *same* row via justify-content-between, lines 93-134).
+   That's a horizontal key/value split, a different shape from this macro's vertical
+   stack -- pulling it in here would conflate two components, same call tile.html
+   makes for its own excluded nav-card variant. Extract that one separately if it
+   grows past three copies.
+
+   Params:
+     top            (required) English fallback copy for the first line.
+     bottom         optional English fallback copy for the second line. Caller
+                    decides what to pass when there's no value (e.g. the
+                    "Not available" fallback template_edit.html renders itself) --
+                    this macro never invents an empty-state placeholder.
+     top_i18n       data-i18n key for top, e.g. "template.editor.summary_metadata_created".
+     bottom_i18n    data-i18n key for bottom.
+     icon           optional Boxicons class suffix, e.g. "bx-time", "bx-cog".
+                    Rendered left of the text stack, aria-hidden (decorative --
+                    the label text already carries the meaning).
+     emphasis       'bottom' (default) -- top is the muted label, bottom is the
+                    bold value (the setting-remove pattern: label above, value
+                    below). 'top' -- top is the bold value, bottom is the muted
+                    caption (Claude Design TextGroup order, e.g. a name + status
+                    line).
+     variant        'default' | 'primary' | 'secondary' | 'success' | 'danger' |
+                    'warning' -- color of the emphasized line, maps to the
+                    matching Bootstrap text-* utility already in core.css.
+                    Default 'default' (inherit). The non-emphasized line is
+                    always text-muted.
+     uppercase      uppercase the non-emphasized (label) line, e.g. the
+                    setting-remove "Setting" caption. Default false.
+     id             optional id on the outer wrapper.
+     value_id       optional id on the emphasized line specifically, e.g.
+                    "summary-created-value" for JS to update it in place.
+     classes        extra utility classes appended to the outer wrapper, e.g.
+                    "small" to shrink the whole group (Bootstrap's own .small,
+                    same effect as the setting-remove box's wrapping class).
+
+   No companion JS -- static two-line display, nothing to wire up (same as
+   components/title.html and components/tile.html). #}
+{% macro text_group(top, bottom=none, top_i18n=none, bottom_i18n=none, icon=none, emphasis='bottom', variant='default', uppercase=false, id=none, value_id=none, classes='') -%}
+    {%- set emphasized_cls = 'fw-semibold' ~ (' text-' ~ variant if variant != 'default' else '') -%}
+    {%- set muted_cls = 'text-muted' ~ (' text-uppercase' if uppercase else '') -%}
+    {%- set top_cls = emphasized_cls if emphasis == 'top' else muted_cls -%}
+    {%- set bottom_cls = muted_cls if emphasis == 'top' else emphasized_cls -%}
+    {%- set top_id = value_id if emphasis == 'top' else none -%}
+    {%- set bottom_id = value_id if emphasis == 'bottom' else none -%}
+    <div{% if id %} id="{{ id }}"{% endif %} class="d-flex align-items-center gap-2{% if classes %} {{ classes }}{% endif %}">
+        {%- if icon %}<i class="bx {{ icon }}" aria-hidden="true"></i>{% endif %}
+        <div>
+            <div{% if top_id %} id="{{ top_id }}"{% endif %} class="{{ top_cls }}"{% if top_i18n %} data-i18n="{{ top_i18n }}"{% endif %}>{{ top }}</div>
+            {%- if bottom %}
+            <div{% if bottom_id %} id="{{ bottom_id }}"{% endif %} class="{{ bottom_cls }}"{% if bottom_i18n %} data-i18n="{{ bottom_i18n }}"{% endif %}>{{ bottom }}</div>
+            {%- endif %}
+        </div>
+    </div>
+{%- endmacro %}

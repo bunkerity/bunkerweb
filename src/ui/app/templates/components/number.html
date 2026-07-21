@@ -1,0 +1,84 @@
+{# usage: {% from "components/number.html" import number %}
+          {{ number(id="certificate-selfsigned-valid-days", name="valid_days", label="Validity in days", label_i18n="certificates.valid_days", value=365, min=1, max=825, required=true) }} #}
+
+{# Plain numeric <input class="form-control" type="number">, labelled via components/label.html --
+   superset of the hand-rolled "form-label" + "input type=number class=form-control" pairs
+   duplicated in certificates.html (#certificate-selfsigned-valid-days and
+   #certificate-action-valid-days, both "Validity in days" fields).
+
+   No custom stepper: the browser's native spinner (and native numeric keyboard on mobile)
+   is the whole affordance -- min/max/step are passed straight through as real HTML
+   attributes so the browser enforces and displays them itself, nothing to wire in JS.
+
+   Params:
+     id             (required) id on the <input>. Also the `for_id` passed to
+                    components/label.html and the aria-describedby target for help_text.
+     label          optional visible caption above the field (English fallback), rendered
+                    via components/label.html (variant="default").
+     label_i18n     data-i18n key for label.
+     name           form field name. Defaults to id.
+     value          initial value. Default "" (empty -- an empty number input is valid HTML,
+                    unlike e.g. omitting `value` on a controlled JS widget).
+     min / max/ step  passed through as-is to the native attributes. Default none (omitted).
+     placeholder    optional placeholder text.
+     required       adds the required attribute + aria-required="true", and passes
+                    required=true to components/label.html for its " *" marker. Default false.
+     disabled       disables the control. Default false.
+     readonly       adds the readonly attribute (still submitted, unlike disabled). Default
+                    false.
+     help_text      optional helper text rendered below as "form-text text-muted" (same
+                    markup components/label.html and components/checkbox.html use for their
+                    own help param), linked via aria-describedby.
+     help_i18n      data-i18n key for help_text.
+     input_class    extra classes appended to the <input>, e.g. a page-specific JS hook class.
+     classes        extra utility classes on the outer wrapper.
+
+   Not covered: a visual unit suffix / input-group addon (e.g. "days", "seconds") --
+   wrap the macro's own <input> in your own `.input-group` in the rare case that needs one,
+   same as this repo has no addon param on components/label.html either. Also not covered:
+   the plugin-setting-specific pattern/regex validation, data-original/data-default/
+   data-method wiring and multisite badge used for BunkerWeb settings fields in
+   models/input_setting.html -- that stays a separate, more specialized template, same
+   carve-out components/checkbox.html documents for models/checkbox_setting.html. #}
+{% from "components/label.html" import label as ui_label %}
+{% macro number(
+    id,
+    label=none,
+    label_i18n=none,
+    name=none,
+    value="",
+    min=none,
+    max=none,
+    step=none,
+    placeholder=none,
+    required=false,
+    disabled=false,
+    readonly=false,
+    help_text=none,
+    help_i18n=none,
+    input_class="",
+    classes=""
+) -%}
+    {%- set help_id = (id ~ "-help") if help_text else none -%}
+    <div{% if classes %} class="{{ classes }}"{% endif %}>
+        {%- if label %}
+            {{ ui_label(for_id=id, text=label, text_i18n=label_i18n, required=required) }}
+        {%- endif %}
+        <input type="number"
+               id="{{ id }}"
+               name="{{ name if name else id }}"
+               class="form-control{% if input_class %} {{ input_class }}{% endif %}"
+               {% if value is not none and value != "" %}value="{{ value }}"{% endif %}
+               {% if min is not none %}min="{{ min }}"{% endif %}
+               {% if max is not none %}max="{{ max }}"{% endif %}
+               {% if step is not none %}step="{{ step }}"{% endif %}
+               {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if required %}required aria-required="true"{% endif %}
+               {% if disabled %}disabled{% endif %}
+               {% if readonly %}readonly{% endif %}
+               {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>
+        {%- if help_text %}
+        <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+        {%- endif %}
+    </div>
+{%- endmacro %}

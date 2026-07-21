@@ -1,0 +1,126 @@
+{# usage: {% from "components/native-select.html" import native_select %}
+          {{ native_select(id="certificates-source-filter", options=[{"value": "", "text": "All", "i18n_key": "certificates.all"}, {"value": "letsencrypt", "text": "Let's Encrypt", "i18n_key": "certificates.source.letsencrypt"}], label="Source", label_i18n="certificates.source_label", size="sm") }} #}
+
+{# Plain native <select> + optional caption -- superset of the small
+   `<div><label class="form-label small" for="...">...</label><select
+   class="form-select form-select-sm">...` filter dropdowns duplicated across
+   certificates.html (#certificates-source-filter, #certificates-status-filter,
+   #certificates-service-filter), logs.html (#logs-tail) and bans.html
+   (#duration-select, the ban_scope/service selects).
+
+   This is a GENERIC, settings-unaware select for plain filter/picker use
+   cases. It is deliberately NOT a replacement for
+   models/select_setting.html, which is coupled to the plugin-settings form
+   contract (data-original/data-default/data-method, the reset-to-default
+   button, the floating-label layout, aria-labelledby pointing at a sibling
+   label element rendered by the settings grid itself) -- that stays a
+   separate, more specialized template.
+
+   No companion JS -- this is a bare `<select class="form-select">`, styled
+   entirely by the existing core.css/overrides.css/theme-default.css rules
+   already applied to every `.form-select` in the app (including dark mode).
+   Keyboard, focus and the native mobile picker UI are free browser behaviour.
+   Wire an onchange/filter handler the same way logs.js / certificates.js
+   already do for their own selects -- that's page-owned, not this macro's job.
+
+   Params:
+     id               (required) unique id for the <select>. Also the
+                      `for_id` passed to components/label.html when `label`
+                      is set, and the aria-describedby target for help_text.
+     options          (required) list of dicts: {value, text, i18n_key=none,
+                      disabled=false, selected=false}. `value`/`text` are
+                      required per option; `text` is the English fallback
+                      shown before i18next rewrites it via `i18n_key` (same
+                      contract as every other macro in this directory).
+                      `selected` force-selects an option regardless of
+                      `value` below (rarely needed -- prefer `value`).
+     name             form field name. Defaults to id.
+     value            currently selected value, matched against each
+                      option's `value`. Default none (no option preselected
+                      besides the placeholder, if any, or the browser's
+                      implicit first option).
+     label            optional visible caption above the field (English
+                      fallback). Rendered via components/label.html
+                      (variant="default").
+     label_i18n       data-i18n key for label.
+     placeholder      optional English fallback text for a disabled,
+                      not-directly-selectable leading option (the
+                      bans.html "Select a service" prompt pattern) --
+                      rendered selected only when `value` is none.
+     placeholder_i18n data-i18n key for placeholder.
+     size             'sm' | 'md' | 'lg'. Adds form-select-sm/form-select-lg
+                      to the <select> and is forwarded as-is to
+                      components/label.html's own `size` param so the
+                      caption shrinks/grows with it. Default 'md'.
+     disabled         disable the control. Default false.
+     required          add the required attribute + aria-required="true", and
+                      passes required=true to components/label.html for its
+                      " *" marker. Default false.
+     aria_label       aria-label on the <select> for the rare case a caller
+                      omits `label` but the control still needs an
+                      accessible name (e.g. a compact toolbar select with a
+                      sibling icon instead of a text caption). Ignored when
+                      `label` is set -- the <label for="id"> already gives
+                      the select an accessible name.
+     help_text        optional line under the field ("form-text
+                      text-muted", same markup components/label.html /
+                      components/checkbox.html already use for their own
+                      help param).
+     help_i18n        data-i18n key for help_text.
+     select_classes   extra classes appended to the <select> itself, e.g. a
+                      page-specific JS hook class.
+     classes          extra utility classes on the root wrapper.
+
+   Not covered: multi-select (certificates.html's `<select multiple
+   size="4">` service picker), optgroup grouping, and the rich
+   icon/description/search dropdown the design kit calls `Select` --
+   those need bespoke markup or JS and stay out of this macro's scope. #}
+{% from "components/label.html" import label as ui_label %}
+{% macro native_select(
+    id,
+    options,
+    name=none,
+    value=none,
+    label=none,
+    label_i18n=none,
+    placeholder=none,
+    placeholder_i18n=none,
+    size='md',
+    disabled=false,
+    required=false,
+    aria_label=none,
+    help_text=none,
+    help_i18n=none,
+    select_classes='',
+    classes=''
+) -%}
+{%- set help_id = (id ~ "-help") if help_text else none -%}
+<div{% if classes %} class="{{ classes }}"{% endif %}>
+    {%- if label %}
+        {{ ui_label(for_id=id, text=label, text_i18n=label_i18n, size=size, required=required) }}
+    {%- endif %}
+    <select id="{{ id }}"
+            name="{{ name if name else id }}"
+            class="form-select{% if size == 'sm' %} form-select-sm{% elif size == 'lg' %} form-select-lg{% endif %}{% if select_classes %} {{ select_classes }}{% endif %}"
+            {%- if not label and aria_label %} aria-label="{{ aria_label }}"{% endif %}
+            {%- if disabled %} disabled{% endif %}
+            {%- if required %} required aria-required="true"{% endif %}
+            {%- if help_id %} aria-describedby="{{ help_id }}"{% endif %}>
+        {%- if placeholder %}
+        <option value=""
+                disabled
+                {% if value is none %}selected{% endif %}
+                {% if placeholder_i18n %}data-i18n="{{ placeholder_i18n }}"{% endif %}>{{ placeholder }}</option>
+        {%- endif %}
+        {%- for option in options %}
+        <option value="{{ option.value }}"
+                {% if option.disabled %}disabled{% endif %}
+                {% if option.selected or (value is not none and option.value == value) %}selected{% endif %}
+                {% if option.i18n_key %}data-i18n="{{ option.i18n_key }}"{% endif %}>{{ option.text }}</option>
+        {%- endfor %}
+    </select>
+    {%- if help_text %}
+    <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+    {%- endif %}
+</div>
+{%- endmacro %}

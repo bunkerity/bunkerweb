@@ -1,0 +1,55 @@
+{# usage: {% from "components/cron.html" import cron %}
+          {{ cron(value="0 2 * * *", tooltip="Every day at 02:00 UTC") }} #}
+
+{# Read-only display of a raw cron/crontab expression (e.g. "0 2 * * *") -- rendered as a
+   small monospace chip with an optional tooltip spelling out what it actually means, since
+   crontab syntax is unpronounceable and screen readers have nothing to announce for it on
+   their own.
+
+   Net new: there's no raw-crontab-syntax renderer to replace anywhere in the app today.
+   jobs.html already renders schedule info via components/badge.html
+   (badge(text=job_data['every'], i18n_key="interval." ~ job_data['every'], ...)), but that's
+   the scheduler's coarse "every" enum (once/minute/hour/day/week), never an actual cron
+   expression string -- BunkerWeb's own job scheduler doesn't speak crontab syntax. This
+   component is for the (currently unwired) cases that do -- e.g. a future
+   custom-schedule/report-cadence field -- so it stays deliberately separate from that badge
+   instead of overloading it with a second, incompatible data shape.
+
+   Tooltip wiring reuses the app-wide `[data-bs-toggle="tooltip"]` init already in main.js
+   (re-initialized after i18next translation in i18n.js -- see components/label.html's
+   help_as_tooltip for the same data-bs-original-title + data-i18n pairing) -- no companion
+   JS file. `tabindex="0"` is added only when a tooltip is present, so the chip becomes a
+   keyboard/focus target (Bootstrap tooltips show on focus as well as hover) without adding a
+   pointless tab stop when there's nothing to reveal.
+
+   Params:
+     value          required -- the raw cron expression, rendered verbatim in courier-prime
+                    monospace. Never translated (it's data, not copy).
+     tooltip        optional English-fallback human-readable explanation of the schedule
+                    (e.g. "Every day at 02:00 UTC"). Strongly recommended: a bare cron string
+                    is unpronounceable and otherwise inaccessible to screen readers -- only
+                    omit it when the chip sits in a table whose column header already spells
+                    out the format.
+     tooltip_i18n   data-i18n key for tooltip. Omit for the rare untranslated case.
+     size           'sm' | 'md' | 'lg'. Default 'md'. Adds bw-cron-sm / bw-cron-lg
+                    (overrides.css) -- same sm/md/lg convention as the sibling
+                    bw-code-editor-* / bw-lottie-* component classes it sits next to there.
+     id             optional id on the chip, e.g. to target it from page-specific JS.
+     classes        extra utility classes appended to the chip.
+
+   Not covered: parsing/validating the cron string, or generating the human-readable tooltip
+   text from it -- both stay the caller's responsibility (server-side, or a future JS cron
+   parser), same as components/badge.html never validates its own `text`. #}
+{% macro cron(value, tooltip=none, tooltip_i18n=none, size='md', id=none, classes='') -%}
+    {%- set size_cls = (' bw-cron-' ~ size) if size != 'md' else '' -%}
+    <span{% if id %} id="{{ id }}"{% endif %}
+         class="bw-cron courier-prime{{ size_cls }}{% if classes %} {{ classes }}{% endif %}"
+         {%- if tooltip %}
+         data-bs-toggle="tooltip"
+         data-bs-placement="top"
+         data-bs-original-title="{{ tooltip }}"
+         {%- if tooltip_i18n %} data-i18n="{{ tooltip_i18n }}"{% endif %}
+         tabindex="0"
+         {%- endif %}
+         >{{ value }}</span>
+{%- endmacro %}

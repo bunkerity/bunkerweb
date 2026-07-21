@@ -1,0 +1,147 @@
+{# usage: {% from "components/pricing-card.html" import pricing_card %}
+          {{ pricing_card(id="plan-pro", title="PRO", title_i18n_key="pro.status.pro_version", price="49", period="/ month",
+                 tag="Most popular", tag_i18n_key="pricing.tag.most_popular",
+                 features=[{"text": "All Community features", "i18n_key": "pricing.feature.all_community"},
+                           {"text": "Priority support", "i18n_key": "pricing.feature.priority_support"}],
+                 button_label="Upgrade to PRO", button_i18n_key="pro.button.upgrade_to_pro",
+                 button_href="https://panel.bunkerweb.io/store/bunkerweb-pro", highlight=true) }} #}
+
+{# Single plan/tier card for a pricing table (plan name + price + feature checklist + CTA) --
+   generalizes the one hand-rolled instance already in production: setup.html's
+   `.pro-card.card.p-0 > .card-body` block (`h6` title, `ul.list-group.list-group-flush` of
+   `li.list-group-item` rows each with a leading `i.bx-check.text-success`, a centered CTA
+   `<a class="btn ...">` at the bottom) -- ported here as a reusable macro instead of the
+   copy-pasted markup that lives today only in setup.html's step-3 "PRO Benefits" panel.
+
+   `highlight=true` reuses that SAME `.pro-card` class (dark surface + the shimmer/glow
+   keyframes already defined in overrides.css for the unlock effect) instead of inventing a
+   second, visually-competing "featured plan" treatment -- this macro never itself adds the
+   `.pro-card-unlocked` class (that stays page-owned: it's toggled by static/js/pages/setup.js
+   as a one-shot animation tied to the license-key-accepted event, not a static render state).
+   Non-highlighted cards render as a plain themed `.card` (border/shadow/background already
+   driven by the --bw-border / --bw-shadow-sm / --bw-bg-card tokens via the existing `.card`
+   rule in overrides.css) -- no new CSS is added by this component.
+
+   `id` is a required, caller-supplied param (see components/label.html's doc comment for why
+   auto-derived ids are a bug class this repo avoids on purpose) -- it becomes both the root
+   element's id and, suffixed "-title", the id the card's `aria-labelledby` points at so each
+   card is a navigable landmark region without the caller having to wire that up by hand.
+
+   Params:
+     id                 required -- unique id for the root card; also used to build
+                        "{id}-title" for aria-labelledby.
+     title              required -- plan name (rendered as a semantic <h3>, visually sized to
+                        match a card-title via the "h5" utility class).
+     price              required -- e.g. "€49", "0", "Custom". Rendered with the app's
+                        existing courier-prime face (same reasoning as components/secret-field
+                        .html's `monospace` param: keeps figures/plan names visually aligned
+                        across a row of cards) -- there is no --font-mono token in this repo,
+                        courier-prime is the established equivalent.
+     title_i18n_key     data-i18n key for title.
+     price_i18n_key     data-i18n key for price (rare -- only for a literal-word price like
+                        "Custom"; leave unset for a currency figure with no translation).
+     period             optional trailing caption next to price, e.g. "/ month", "/ forever".
+     period_i18n_key    data-i18n key for period.
+     tag                optional top chip (e.g. "Most popular", "Community"). Rendered via
+                        components/badge.html -- omit for a plan with no chip.
+     tag_i18n_key       data-i18n key for tag.
+     tag_variant        badge() `variant` passed straight through. Default "primary".
+     features           list of {"text": ..., "i18n_key": None} dicts, one per checklist row
+                        (same shape convention as components/dropdown-menu.html's `items`).
+                        Default [] -- a plan card with no bullet list is valid (e.g. a bare
+                        price + CTA tile).
+     button_label       optional CTA text. Omit entirely to render a display-only card with no
+                        button (e.g. "Your current plan", nothing to click).
+     button_i18n_key    data-i18n key for button_label.
+     button_variant     components/button.html `variant`. Default "primary".
+     button_href        when set, the CTA renders as a link (button() tag="a"); omit for a
+                        JS-driven action and pass button_modal_target instead.
+     button_type        components/button.html `type` when no button_href. Default "button".
+     button_disabled    components/button.html `disabled` passthrough. Default false.
+     button_modal_target components/button.html `modal_target` passthrough (open a
+                        components/modal.html dialog instead of navigating), e.g. a license-key
+                        entry modal.
+     highlight          apply the existing `.pro-card` featured-tier treatment described above.
+                        Default false.
+     classes            extra utility classes appended to the root card, e.g. "h-100" to match
+                        sibling cards' height in a row (already the macro's own default).
+
+   Not covered: the `.pro-card-unlocked` shimmer/pulse animation itself (page-owned, see
+   above) -- and there is no "unavailable feature" row (a crossed-out / bx-x bullet); the one
+   real hand-rolled equivalent this replaces (setup.html's PRO Benefits list) only ever lists
+   included features, so that's the only shape generalized here. Laying out several cards
+   side by side (the row/col grid, matching heights across a *row* beyond this card's own
+   `h-100`) stays page-owned, same as every other multi-card grid in this app.
+
+   No companion JS -- markup/CSS only, composes components/badge.html for the tag chip and
+   components/button.html for the CTA. #}
+{% from "components/badge.html" import badge %}
+{% from "components/button.html" import button %}
+{% macro pricing_card(
+    id,
+    title,
+    price,
+    title_i18n_key=none,
+    price_i18n_key=none,
+    period=none,
+    period_i18n_key=none,
+    tag=none,
+    tag_i18n_key=none,
+    tag_variant="primary",
+    features=[],
+    button_label=none,
+    button_i18n_key=none,
+    button_variant="primary",
+    button_href=none,
+    button_type="button",
+    button_disabled=false,
+    button_modal_target=none,
+    highlight=false,
+    classes="h-100"
+) -%}
+<div id="{{ id }}"
+     class="card p-0{% if highlight %} pro-card{% endif %}{% if classes %} {{ classes }}{% endif %}"
+     role="region"
+     aria-labelledby="{{ id }}-title">
+    <div class="card-body d-flex flex-column">
+        {%- if tag %}
+        <div class="mb-2">
+            {{ badge(text=tag, i18n_key=tag_i18n_key, variant=tag_variant) }}
+        </div>
+        {%- endif %}
+        <h3 id="{{ id }}-title"
+            class="h5 fw-bold mb-1"
+            {%- if title_i18n_key %} data-i18n="{{ title_i18n_key }}"{% endif %}>{{ title }}</h3>
+        <div class="d-flex align-items-baseline gap-1 mb-3">
+            <span class="fs-3 fw-bold courier-prime"{% if price_i18n_key %} data-i18n="{{ price_i18n_key }}"{% endif %}>{{ price }}</span>
+            {%- if period %}
+            <small class="text-muted"{% if period_i18n_key %} data-i18n="{{ period_i18n_key }}"{% endif %}>{{ period }}</small>
+            {%- endif %}
+        </div>
+        {%- if features %}
+        <ul class="list-group list-group-flush mb-3">
+            {%- for feature in features %}
+            <li class="list-group-item">
+                <i class="bx bx-check text-success me-2" aria-hidden="true"></i><span{% if feature.i18n_key %} data-i18n="{{ feature.i18n_key }}"{% endif %}>{{ feature.text }}</span>
+            </li>
+            {%- endfor %}
+        </ul>
+        {%- endif %}
+        {%- if button_label %}
+        <div class="text-center mt-auto pt-2">
+            {{ button(
+                label=button_label,
+                i18n_key=button_i18n_key,
+                variant=button_variant,
+                tag="a" if button_href else "button",
+                href=button_href,
+                type=button_type,
+                disabled=button_disabled,
+                modal_target=button_modal_target,
+                classes="w-100"
+            ) }}
+        </div>
+        {%- endif %}
+    </div>
+</div>
+{%- endmacro %}

@@ -33,7 +33,10 @@
       "toggle_wrap": "切換自動換行",
       "configs_dropzone": "選取自訂設定匯出檔，或將檔案拖放到這裡",
       "raw_configuration": "原始設定",
-      "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡"
+      "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡",
+      "hide_value": "隱藏值",
+      "reveal_value": "顯示值",
+      "user_avatar": "使用者頭像"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "找不到相符的外掛程式",
     "zero_records_reports": "找不到相符的報告",
     "zero_records_services": "找不到相符的服務",
-    "zero_records_templates": "未找到匹配的模板"
+    "zero_records_templates": "未找到匹配的模板",
+    "selected_list_count": "{{count}} {{entity}} 已選取",
+    "selected_list_empty": "未選取 {{entity}}。"
   },
   "dev_log": {
     "copy_failed": "複製文字失敗：",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL API 重試次數",
       "zerossl_api_retry_delay": "ZeroSSL API 重試延遲",
       "zerossl_api_connect_timeout": "ZeroSSL API 連線逾時",
-      "zerossl_api_max_time": "ZeroSSL API 最長時間"
+      "zerossl_api_max_time": "ZeroSSL API 最長時間",
+      "instance_id": "實例 ID"
     },
     "placeholder": {
       "2fa_code": "輸入代碼",
@@ -780,7 +786,8 @@
     "privacy_policy": "隱私權政策",
     "read_more": "閱讀更多",
     "see_more": "查看更多",
-    "upgrade": "升級？"
+    "upgrade": "升級？",
+    "opens_new_tab": "（在新視窗中開啟）"
   },
   "logs": {
     "annotation_error": "錯誤",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "不允許在目前範本之外進行變更。請使用目前範本進行變更或切換到進階/原始模式。",
     "unique_server_name": "唯一伺服器名稱",
     "up": "執行中",
-    "yes": "是"
+    "yes": "是",
+    "done": "已完成",
+    "pending": "待辦"
   },
   "step": {
     "next": "下一步",
@@ -1304,7 +1313,8 @@
       "type": "類型",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "版本"
+      "version": "版本",
+      "value": "值"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。"
+  },
+  "accordion": {
+    "body": {
+      "tls": "自動發行和更新憑證。"
+    },
+    "title": {
+      "tls": "TLS & 憑證"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "檢視所有 {{count}} 設定"
   }
 }

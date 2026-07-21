@@ -1,0 +1,49 @@
+{# usage: {% from "components/checklist.html" import checklist %}
+          {{ checklist(items=[{"text": "Install BunkerWeb on 1+ host", "done": true},
+                               {"text": "Enable AUTO_LETS_ENCRYPT per service", "done": false}]) }} #}
+
+{# Static done/pending task list -- a green bx-check-circle for finished items, a
+   neutral bx-circle for the rest, one <li> per item. Display only: nothing here is
+   clickable or persists state, it just renders whatever `done` flags the caller
+   already computed (onboarding progress, setup prerequisites, plugin readiness...).
+
+   Distinct from the existing hand-rolled `#password-requirements` list in
+   profile.html/setup.html (bx-x/text-danger flipped to bx-check/text-success live
+   by static/js/pages/{profile,setup}.js as the user types): that's a pass/fail
+   *validator* wired to one specific password input, not a reusable list, and
+   stays out of scope here -- see "Not covered" below. No other page currently
+   hand-rolls a generic done/pending task list, so this is new UI, not an
+   extraction of duplicated markup.
+
+   Each item's state is also announced to screen readers via a visually-hidden
+   "Completed"/"Pending" prefix, since the status icon itself is aria-hidden --
+   color and shape alone aren't enough (same "don't rely on the icon alone" rule
+   components/label.html follows for its own decorative badges).
+
+   Params:
+     items     (required) list of dicts, each:
+                 text      (required) English fallback copy for the item.
+                 done      item is finished -- renders the green bx-check-circle.
+                           Default false (neutral bx-circle, muted text).
+                 i18n_key  data-i18n key for text. Omit for untranslated copy.
+                 id        optional id on that item's <li>.
+     id        optional id on the outer <ul>.
+     classes   extra utility classes appended to the outer <ul>.
+
+   Not covered: toggling state client-side -- this is a display component, the
+   caller decides `done` before render. For a live pass/fail checklist wired to a
+   form input (password rules, etc.) keep using the profile.html/setup.html
+   pattern above instead. For a checkable, submitted list use
+   components/checkbox.html per item -- this macro's icon is decorative
+   (aria-hidden), never a form control. No companion JS. #}
+{% macro checklist(items, id=none, classes="") -%}
+    <ul{% if id %} id="{{ id }}"{% endif %} class="list-unstyled d-flex flex-column gap-2 mb-0{% if classes %} {{ classes }}{% endif %}" role="list">
+        {%- for it in items %}
+        <li{% if it.id %} id="{{ it.id }}"{% endif %} class="d-flex align-items-center gap-2{% if not it.done %} text-muted{% endif %}" role="listitem">
+            <i class="bx {{ 'bx-check-circle text-success' if it.done else 'bx-circle' }} flex-shrink-0" aria-hidden="true"></i>
+            <span class="visually-hidden" data-i18n="{{ 'status.done' if it.done else 'status.pending' }}">{{ 'Completed' if it.done else 'Pending' }}</span>
+            <span{% if it.i18n_key %} data-i18n="{{ it.i18n_key }}"{% endif %}>{{ it.text }}</span>
+        </li>
+        {%- endfor %}
+    </ul>
+{%- endmacro %}

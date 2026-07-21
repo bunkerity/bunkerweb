@@ -1,0 +1,101 @@
+{# usage: {% from "components/tooltip.html" import tooltip, tooltip_icon %}
+          {% call tooltip(text="Restart the scheduler", i18n_key="tooltip.restart_scheduler") %}
+            <button type="button" class="btn btn-outline-secondary" aria-label="Restart">
+              <i class="bx bx-refresh" aria-hidden="true"></i>
+            </button>
+          {% endcall %}
+          {{ tooltip_icon(text="The primary domain BunkerWeb protects.", i18n_key="tooltip.help_server_name", label="Help: SERVER_NAME") }} #}
+
+{# Thin wrapper over the REAL Bootstrap 5.3.3 tooltip already vendored at
+   static/libs/bootstrap/bootstrap.bundle.min.js -- this macro only emits the attribute
+   contract already used throughout the codebase today (menu.html, navbar.html,
+   models/*.html, cache.html...). It does NOT add a second tooltip engine:
+     - static/js/main.js wires up every [data-bs-toggle="tooltip"] on DOMContentReady via
+       `new bootstrap.Tooltip(el)`.
+     - static/js/i18n.js re-syncs the visible bubble's text via
+       bootstrap.Tooltip.getInstance(el).setContent(...) whenever the locale changes.
+     - Pages that inject markup after load (plugins-settings.js, modules/setting_controls.js)
+       already call `new bootstrap.Tooltip(el)` themselves on the new node -- do the same
+       for anything you inject dynamically via this macro; nothing new to wire up.
+
+   Attribute contract emitted:
+     data-bs-toggle="tooltip"
+     data-bs-original-title="{text}"  -- never a plain `title`: a raw title flashes the
+                                         browser's native tooltip before bootstrap.js runs.
+     data-bs-placement="{placement}"
+     data-bs-trigger="{trigger}"      -- only emitted when it differs from the default.
+     data-bs-html="true"              -- only when html=true.
+     data-bs-delay="{delay}"          -- only when delay is set.
+     data-bs-custom-class="warning-tooltip"  -- only when variant="warning". Bootstrap 5
+                                         reads this data attribute and adds the class to the
+                                         generated .tooltip popup itself (which is appended
+                                         next to <body>, not nested under the trigger, so a
+                                         class on the trigger would never reach it).
+     data-i18n="{i18n_key}"           -- ONLY when html=false: i18n.js's applyTranslations()
+                                         special-cases `[data-bs-original-title]` elements and
+                                         rewrites that attribute directly on locale change
+                                         (see navbar.html's "Version" link, or the
+                                         reset-setting button in models/input_setting.html).
+                                         When html=true the translatable text is markup the
+                                         caller controls (see menu.html's "Pro feature"
+                                         tooltip) -- embed your own <span data-i18n="...">
+                                         inside `text` yourself in that case.
+
+   Params:
+     text        (required) English fallback tooltip copy (or trusted HTML when html=true).
+     i18n_key    data-i18n key applied to the trigger, e.g. "tooltip.restart_scheduler".
+                 Ignored when html=true -- see contract above.
+     placement   "top" | "right" | "bottom" | "left". Default "top".
+     trigger     space-separated Bootstrap trigger events. Default "hover focus" -- keep
+                 "focus" in the set so keyboard users get the hint too.
+     html        render `text` as HTML (data-bs-html="true"). Trusted input only. Default false.
+     variant     none | "warning" -- the only existing color variant (.warning-tooltip,
+                 overrides.css, recolors the bubble to bg-warning). Don't invent another.
+     disabled    add tabindex="0" to the wrapper so the tooltip still opens when caller()
+                 is a disabled control -- a disabled element fires no pointer/focus events,
+                 so a tooltip attached to it directly never opens. Default false.
+     delay       optional ms before show (data-bs-delay).
+     id          optional id on the rendered wrapper element.
+     tag         wrapper element name. Default "span".
+     classes     extra utility classes appended as-is.
+     caller()    the trigger markup, passed via {% call %}. #}
+{% macro tooltip(text, i18n_key=none, placement='top', trigger='hover focus', html=false, variant=none, disabled=false, delay=none, id=none, tag='span', classes='') -%}
+    {%- set outer_classes = 'd-inline-block' ~ (' ' ~ classes if classes else '') -%}
+    <{{ tag }}{% if id %} id="{{ id }}"{% endif %}
+          class="{{ outer_classes }}"
+          {%- if disabled %} tabindex="0"{% endif %}
+          data-bs-toggle="tooltip"
+          data-bs-original-title="{{ text }}"
+          data-bs-placement="{{ placement }}"
+          {%- if trigger and trigger != 'hover focus' %} data-bs-trigger="{{ trigger }}"{% endif %}
+          {%- if html %} data-bs-html="true"{% elif i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}
+          {%- if delay is not none %} data-bs-delay="{{ delay }}"{% endif %}
+          {%- if variant == 'warning' %} data-bs-custom-class="warning-tooltip"{% endif %}>{{ caller() }}</{{ tag }}>
+{%- endmacro %}
+
+
+{# Standalone help/info glyph whose only job is to host a tooltip -- e.g. a "Help:
+   SERVER_NAME" glyph next to a field label. Reuses the existing "btn btn-link" idiom
+   already used for icon-only actions (the reset-setting button in
+   models/input_setting.html) instead of inventing a new button class.
+
+   Params: text/i18n_key/placement/delay/variant same as tooltip(), plus:
+     glyph   Boxicons class, e.g. "bx-info-circle" (default), "bx-help-circle".
+     label   accessible name (aria-label). Falls back to `text`. Only emitted when
+             i18n_key is unset: when i18n_key is set, data-i18n targets
+             data-bs-original-title (see contract above) and a static aria-label would go
+             stale on locale change -- the same trade-off the existing reset-setting
+             button already makes (it has no aria-label either). #}
+{% macro tooltip_icon(text, i18n_key=none, glyph='bx-info-circle', placement='top', label=none, delay=none, variant=none, id=none, classes='') -%}
+<button type="button"
+        {%- if id %} id="{{ id }}"{% endif %}
+        class="btn btn-link p-0 border-0{% if classes %} {{ classes }}{% endif %}"
+        data-bs-toggle="tooltip"
+        data-bs-original-title="{{ text }}"
+        data-bs-placement="{{ placement }}"
+        {%- if i18n_key %} data-i18n="{{ i18n_key }}"{% else %} aria-label="{{ label or text }}"{% endif %}
+        {%- if delay is not none %} data-bs-delay="{{ delay }}"{% endif %}
+        {%- if variant == 'warning' %} data-bs-custom-class="warning-tooltip"{% endif %}>
+  <i class="bx {{ glyph }}" aria-hidden="true"></i>
+</button>
+{%- endmacro %}

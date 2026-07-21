@@ -33,7 +33,10 @@
       "toggle_wrap": "Satır kaydırmayı değiştir",
       "configs_dropzone": "Özel yapılandırma dışa aktarma dosyası seçin veya buraya bırakın",
       "raw_configuration": "Ham yapılandırma",
-      "services_dropzone": "Hizmet dışa aktarma dosyası seçin veya buraya bırakın"
+      "services_dropzone": "Hizmet dışa aktarma dosyası seçin veya buraya bırakın",
+      "hide_value": "Değeri gizle",
+      "reveal_value": "Değeri göster",
+      "user_avatar": "Kullanıcı avatarı"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "Eşleşen Eklenti bulunamadı",
     "zero_records_reports": "Eşleşen Rapor bulunamadı",
     "zero_records_services": "Eşleşen Servis bulunamadı",
-    "zero_records_templates": "Eşleşen şablon bulunamadı"
+    "zero_records_templates": "Eşleşen şablon bulunamadı",
+    "selected_list_count": "{{count}} {{entity}} seçildi",
+    "selected_list_empty": "Seçilen {{entity}} yok."
   },
   "dev_log": {
     "copy_failed": "Metin kopyalanamadı:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL API Yeniden Deneme Sayısı",
       "zerossl_api_retry_delay": "ZeroSSL API Yeniden Deneme Gecikmesi",
       "zerossl_api_connect_timeout": "ZeroSSL API Bağlantı Zaman Aşımı",
-      "zerossl_api_max_time": "ZeroSSL API Azami Süre"
+      "zerossl_api_max_time": "ZeroSSL API Azami Süre",
+      "instance_id": "Örnek kimliği"
     },
     "placeholder": {
       "2fa_code": "Kod girin",
@@ -780,7 +786,8 @@
     "privacy_policy": "Gizlilik Politikası",
     "read_more": "Devamını Oku",
     "see_more": "Daha Fazlası",
-    "upgrade": "Yükselt?"
+    "upgrade": "Yükselt?",
+    "opens_new_tab": "(Yeni bir sekmede açılır)"
   },
   "logs": {
     "annotation_error": "Hata",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "Mevcut şablon dışında değişiklik yapılamaz. Lütfen değişiklikleri mevcut şablon üzerinden yapın veya Gelişmiş/Ham moda geçin.",
     "unique_server_name": "Benzersiz Sunucu Adı",
     "up": "Açık",
-    "yes": "Evet"
+    "yes": "Evet",
+    "done": "Tamamlandı",
+    "pending": "Bekleyen"
   },
   "step": {
     "next": "İleri",
@@ -1304,7 +1313,8 @@
       "type": "Tür",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Versiyon"
+      "version": "Versiyon",
+      "value": "Değer"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "Planlı işler tarafından oluşturulan önbellek dosyaları (blok listeleri, GeoIP veritabanları ve daha fazlası) — hizmet ve eklenti başına inceleyin, indirin veya silin."
+  },
+  "accordion": {
+    "body": {
+      "tls": "Sertifikaları otomatik olarak oluştur ve yenileyin."
+    },
+    "title": {
+      "tls": "TLS & sertifikalar"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "Tüm {{count}} ayarları görüntüle"
   }
 }

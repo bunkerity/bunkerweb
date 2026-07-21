@@ -1,0 +1,58 @@
+{# usage: {% from "components/avatar.html" import avatar %}
+          {{ avatar(label="Admin", label_i18n_key="aria.label.user_avatar", src=avatar_url, status="online") }} #}
+
+{# User avatar -- image with initials fallback, built on the existing "avatar" / "avatar-<size>" /
+   "avatar-initial" / "avatar-<status>" CSS already shipped in core.css (today only used as a bare
+   "avatar avatar-online" wrapper + fixed-size <img> in navbar.html/profile.html, with no initials
+   fallback at all -- this macro is a superset, not a rewrite: same base classes, plus initials
+   rendering, sizing via the existing avatar-xs/sm/md/lg/xl tokens, and a shape switch reusing the
+   rounded-circle (navbar.html today) / rounded (profile.html today) Bootstrap utilities. No new
+   CSS class is introduced.
+
+   Accessibility: the wrapper carries role="img" + aria-label="{{ label }}" (translatable via
+   label_i18n_key -- aria-label is one of the attributes i18n.js already knows how to retranslate)
+   as the single accessible name. The inner <img> gets alt="" and the initials <span> gets
+   aria-hidden="true" so the label isn't announced twice.
+
+   Avatar group: to stack several avatars, reuse the existing .avatar-group CSS by wrapping N
+   calls to this macro in a plain <div class="avatar-group">...</div> -- no extra param needed.
+
+   Params:
+     label           (required) accessible name / English fallback, e.g. "Admin User".
+     label_i18n_key  data-i18n key for label, e.g. "aria.label.user_avatar". Omit for names that
+                     have no translation (e.g. a real person's display name).
+     src             image URL. Takes precedence over initials when both are given.
+     initials        1-2 letters shown when no src (CSS uppercases them automatically).
+     size            'xs' | 'sm' | 'md' | 'lg' | 'xl' | none. none = bare .avatar (2.375rem), the
+                     size navbar.html/profile.html use today via ad-hoc w-px-40/w-px-100 classes.
+     shape           'circle' (default, rounded-circle -- navbar.html today) | 'square' (rounded --
+                     profile.html today).
+     status          'online' | 'away' | 'busy' | 'offline' | none. Renders the existing presence
+                     dot (avatar-<status>, pure CSS ::after, no extra markup needed).
+     color           bg-label-<color> applied to the initials fallback only (e.g. "primary",
+                     "success"...). Must be an existing .bg-label-<color> rule in
+                     core.css/overrides.css/theme-default.css. Ignored when src is set.
+     id              optional id on the outer wrapper.
+     img_id          optional id placed directly on the <img> tag (e.g. "uploadedAvatar" so the
+                     existing upload-preview handling in profile.js can keep targeting it by id).
+     classes         extra utility classes appended to the outer wrapper, e.g. "w-px-100 h-px-100"
+                     to reproduce profile.html's fixed-size avatar as-is. #}
+{% macro avatar(label, label_i18n_key=none, src=none, initials=none, size=none, shape='circle', status=none, color=none, id=none, img_id=none, classes='') -%}
+    {%- set shape_class = 'rounded' if shape == 'square' else 'rounded-circle' -%}
+    {%- set outer_classes = 'avatar' ~ (' avatar-' ~ size if size else '') ~ (' avatar-' ~ status if status else '') ~ (' ' ~ classes if classes else '') -%}
+    <div{% if id %} id="{{ id }}"{% endif %}
+         class="{{ outer_classes }}"
+         role="img"
+         aria-label="{{ label }}"
+         {%- if label_i18n_key %} data-i18n="{{ label_i18n_key }}"{% endif %}>
+        {%- if src %}
+        <img src="{{ src }}"
+             alt=""
+             class="{{ shape_class }}"
+             {%- if img_id %} id="{{ img_id }}"{% endif %} />
+        {%- else %}
+        <span class="avatar-initial {{ shape_class }}{% if color %} bg-label-{{ color }}{% endif %}"
+              aria-hidden="true">{{ initials or '' }}</span>
+        {%- endif %}
+    </div>
+{%- endmacro %}

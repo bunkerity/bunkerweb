@@ -1,0 +1,88 @@
+{# usage: {% from "components/timeline.html" import timeline %}
+          {{ timeline(items=[{"date": "02:18:41", "status": "success", "title": "lets-encrypt-renew finished", "subtitle": "4 certs renewed, 0 errors."}]) }} #}
+
+{# Vertical timeline / activity feed -- a dated, colour-coded list of discrete events
+   (job runs, releases, login history) connected by a single rule. Nothing in the app
+   renders this shape as a real vertical timeline today; the closest existing hand-rolled
+   equivalent is jobs.html's per-job "history" block (a horizontal 3-column
+   list-group-horizontal table of start_date / end_date / a bx-check/bx-x success icon,
+   toggled by a `.show-history` button) -- same underlying data (a per-run status +
+   timestamps), different, denser layout. That block stays exactly as-is here; retrofitting
+   jobs.html onto this macro is separate page-by-page work, not done by adding the
+   component. core.css also still carries a vendored `.list-group-timeline` rule (Sneat
+   template leftover) that draws a connecting line but never sets a dot colour and pins the
+   dot to `top: 50%` (only correct for single-line rows) -- it is not referenced by any
+   template in this repo, so it is dead weight, not a base to build on; this component does
+   not use it.
+
+   `status` drives the dot colour using the same Bootstrap variant vocabulary
+   components/badge.html's `variant` and components/tile.html's `color` already use
+   ("success" | "danger" | "warning" | "info" | "secondary" | "primary"), not the design
+   kit's own done/fail/warn/skip/pending catalog -- reusing the vocabulary this codebase
+   already has beats introducing a second one. Suggested mapping when porting design-kit
+   copy: done->success, fail->danger, warn->warning, skip->secondary, pending->info.
+
+   `title` and `subtitle` are rendered through `| safe`, same contract as
+   components/card.html's `header_right` param ("caller is responsible for
+   escaping/rendering it; passed through | safe"). For plain dynamic text this is safe by
+   default because Jinja auto-escapes the values you interpolate -- capture it first with
+   `{% set title_html %}{{ dynamic_value }}...{% endset %}` (the block itself is
+   auto-escaped, so the resulting Markup is already safe to pass straight through) rather
+   than string-concatenating untrusted input. This is also what lets another macro's output
+   (components/badge.html, components/button.html...) be embedded inline, e.g.
+   `{% set title_html %}Scheduler speedups {{ ui_badge.badge(text="NEW", variant="success") }}{% endset %}`.
+
+   Params:
+     items              (required) list of dicts, one per event, oldest-or-newest order is
+                        the caller's choice (rendered as given, not sorted here):
+                          date      (required) display string for the timestamp/version,
+                                    e.g. "02:18:41", "1.6.1 - 2 days ago".
+                          date_iso  optional ISO-8601 value rendered as the wrapping
+                                    <time datetime="..."> attribute for machine-readable
+                                    parsing. Omit when `date` isn't a real point in time
+                                    (e.g. a version number) -- the <time> tag is still used
+                                    either way, just without the attribute.
+                          status    dot colour, one of "primary" | "secondary" | "success" |
+                                    "danger" | "warning" | "info". Defaults to "secondary"
+                                    (neutral grey) when omitted.
+                          title     (required) headline for the event -- rendered via
+                                    `| safe`, see above.
+                          subtitle  optional detail line -- rendered via `| safe`, see
+                                    above. Omit for a compact date+title-only item.
+     with_border_status  render "ringed" dots (hollow circle, coloured border) instead of
+                        solid filled dots. Default false.
+     live                add aria-live="polite" to the list for feeds that append new
+                        items in place while the page is open (e.g. a polling job-status
+                        view). Default false -- most timelines here render a fixed history
+                        and a live region would announce on every unrelated re-render.
+     id                 optional id on the outer <ol>.
+     classes            extra utility classes appended to the outer <ol>, e.g. "mt-3".
+
+   Not covered: the empty-items state (render components/empty-state.html yourself before
+   calling this macro when `items` is empty -- duplicating that placeholder here would
+   fork the one this repo already has). Also not covered: per-item action buttons/menus --
+   compose those into `title` or `subtitle` via the `| safe` + embedded-macro pattern
+   above instead of a dedicated param, same reasoning components/card.html uses for its
+   free-form `header_right`.
+
+   No companion JS -- static list markup only, nothing to wire up. `role="list"` /
+   role="listitem"` are added alongside the real <ol>/<li> elements on purpose: some
+   screen-reader/browser combinations (notably Safari+VoiceOver) drop the implicit list
+   semantics once `list-style: none` is applied, and the redundant role is the documented
+   workaround, not an ARIA-on-a-native-element anti-pattern. #}
+{% macro timeline(items, with_border_status=false, live=false, id=none, classes="") -%}
+<ol{% if id %} id="{{ id }}"{% endif %}
+    class="bw-timeline{% if with_border_status %} bw-timeline-ringed{% endif %}{% if classes %} {{ classes }}{% endif %}"
+    role="list"
+    {%- if live %} aria-live="polite"{% endif %}>
+    {% for it in items -%}
+    <li class="bw-timeline-item bw-timeline-item-{{ it.status | default('secondary') }}" role="listitem">
+        <time class="bw-timeline-time"{% if it.date_iso %} datetime="{{ it.date_iso }}"{% endif %}>{{ it.date }}</time>
+        <div class="bw-timeline-title">{{ it.title | safe }}</div>
+        {%- if it.subtitle %}
+        <div class="bw-timeline-subtitle">{{ it.subtitle | safe }}</div>
+        {%- endif %}
+    </li>
+    {% endfor -%}
+</ol>
+{%- endmacro %}

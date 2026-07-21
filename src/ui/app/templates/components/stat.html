@@ -1,0 +1,85 @@
+{# usage: {% from "components/stat.html" import stat %}
+          {{ stat(label="OWASP CRS", percent=34, color="primary") }} #}
+
+{# Labeled percentage row -- a caller-named value between 0 and 100, rendered as a thin
+   Bootstrap progress bar with the row's label on one side and the "34%" figure on the
+   other. Built directly on the app's own already-themed `.progress` / `.progress-bar`
+   (core.css already gives every `bg-<color>` variant a themed box-shadow, and
+   `--bs-primary` is already repointed to BunkerWeb blue in overrides.css) -- no new
+   bar-fill CSS invented here, only the row layout + size variants.
+
+   NOT a duplicate of web_cache.html's "Aggregate hit / miss distribution" card: that one
+   is a single `.progress` track split into several `.progress-bar bg-<status_color>`
+   children that together sum to 100% (one cumulative bar for every cache status at
+   once). This component is the opposite shape -- one named row per percentage, meant to
+   be stacked in a *list* (e.g. a future "Bans by reason" / "Top blocked reasons" panel).
+   Nothing in the app renders that list yet; this is extracted ahead of use, per the
+   design kit's Charts/Stat spec, so Phase 3 has it ready.
+
+   Params:
+     label        (required) English fallback row label, e.g. "OWASP CRS".
+     percent      (required) number 0-100 driving the bar width and the "{{ percent }}%"
+                  text. Caller pre-rounds it -- same convention as components/tile.html's
+                  `value`, this macro never touches formatting.
+     label_i18n   data-i18n key for label.
+     color        Bootstrap bg-<color> tinting the bar fill: "primary" (default),
+                  "secondary", "success", "warning", "danger".
+     pct_color    Bootstrap text-<color> tinting the percent figure, e.g. "danger" to
+                  flag an over-threshold row. Default none -- inherits the muted
+                  --bw-fg-2 tone every row gets by default.
+     variant      'aligned' (default) -- label, bar and percent on one line, for a tight
+                  list of same-shape rows. 'compact' -- label + percent stacked above a
+                  full-width bar, for long labels or narrow columns.
+     size         'sm' | 'md' (default) | 'lg' -- bar thickness + label/percent font
+                  size.
+     id           optional id on the outer wrapper.
+     classes      extra utility classes appended to the outer wrapper.
+
+   Not covered: independently hiding the label, the bar or the percent figure -- every
+   real usage needs all three, so unlike the design kit's own playground toggles there's
+   no show_label/show_percent/show_bar switch here; omit the whole row instead of a
+   half-row. Column alignment across several stacked rows (equal label widths) is the
+   caller's layout to own -- wrap calls in your own flex/grid container, the same way
+   components/table-toolbar.html leaves column headers to the page.
+
+   No companion JS -- the bar is a plain `role="progressbar"` div, static once rendered
+   (same "markup only, no JS" shape as components/badge.html). #}
+{% macro stat(
+    label,
+    percent,
+    label_i18n=none,
+    color="primary",
+    pct_color=none,
+    variant="aligned",
+    size="md",
+    id=none,
+    classes=""
+) -%}
+    {%- set outer_classes = "bw-stat" ~ (" bw-stat-" ~ size if size != "md" else "") ~ (" " ~ classes if classes else "") -%}
+    {%- set pct_classes = "bw-stat-pct courier-prime" ~ (" text-" ~ pct_color if pct_color else "") -%}
+    {%- set bar %}
+    <div class="progress{% if variant == 'aligned' %} flex-grow-1{% endif %}">
+        <div class="progress-bar bg-{{ color }}"
+             role="progressbar"
+             style="width: {{ percent }}%"
+             aria-label="{{ label }}"
+             aria-valuenow="{{ percent }}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuetext="{{ percent }} percent"></div>
+    </div>
+    {%- endset %}
+    <div{% if id %} id="{{ id }}"{% endif %} class="{{ outer_classes }}{% if variant == 'aligned' %} d-flex align-items-center gap-2{% endif %}">
+        {%- if variant == 'aligned' %}
+            <span class="bw-stat-label text-truncate"{% if label_i18n %} data-i18n="{{ label_i18n }}"{% endif %}>{{ label }}</span>
+            {{ bar }}
+            <span class="{{ pct_classes }}">{{ percent }}%</span>
+        {%- else %}
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+                <span class="bw-stat-label text-truncate"{% if label_i18n %} data-i18n="{{ label_i18n }}"{% endif %}>{{ label }}</span>
+                <span class="{{ pct_classes }}">{{ percent }}%</span>
+            </div>
+            {{ bar }}
+        {%- endif %}
+    </div>
+{%- endmacro %}

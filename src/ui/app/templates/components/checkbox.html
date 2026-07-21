@@ -1,0 +1,96 @@
+{# usage: {% from "components/checkbox.html" import checkbox %}
+          {{ checkbox(id="permanentBan-1", name="permanent", label="Ban Forever", i18n_key="form.label.permanent_ban") }} #}
+
+{# Generic checkbox / switch input -- superset of the "form-check" +
+   "form-check-input" + "form-check-label" block duplicated across login.html,
+   setup.html, totp.html, bans.html, services.html, sidebar-notifications.html,
+   sidebar-news.html and configs.html, plus the "form-check form-switch" +
+   role="switch" pill-toggle variant used by the dark-mode toggle in menu.html.
+   Pass switch=true to get that same pill-toggle look (menu.html itself is left
+   untouched -- this only reproduces its markup/classes for new call sites).
+
+   Toggling is native <input type="checkbox"> behaviour (Space, click on the
+   linked <label for="...">) styled entirely by core.css's .form-check /
+   .form-switch rules -- no companion JS file needed.
+
+   Params:
+     id             (required) unique id for the <input>. Never a fixed
+                    literal -- always pass the real per-instance id (e.g.
+                    "permanentBan-" ~ ban.id).
+     label          (required unless you truly render no visible label -- see
+                    below) English fallback text shown before i18next rewrites
+                    it, wired to the input via <label for="id">.
+     i18n_key       data-i18n key for the label, e.g. "form.label.permanent_ban".
+                    Must exist in static/locales/en.json. Omit only for the
+                    rare untranslated case.
+     name           form field name. Defaults to id.
+     value          value attribute submitted when checked. Omit (default) to
+                    match most existing checkboxes (browser default "on");
+                    pass value="yes" for BunkerWeb yes/no-style settings (see
+                    services.html's import/export checkboxes).
+     checked        initial checked state. Default false.
+     switch         render the pill-toggle "form-switch" variant + role="switch"
+                    instead of a plain square checkbox. Default false.
+     disabled       disable the control. Default false.
+     required       add the required attribute + aria-required="true". Default
+                    false.
+     help           optional helper text rendered below as "form-text
+                    text-muted" (see bans.html's permanent-ban help line),
+                    linked via aria-describedby.
+     help_i18n_key  data-i18n key for the help text.
+     label_class    classes on the <label>. Default "form-check-label" (the
+                    Bootstrap standard used almost everywhere). Pass
+                    "setting-checkbox-label ..." to reproduce the compact
+                    inline-switch label style used by menu.html and
+                    models/checkbox_setting.html instead.
+     input_class    extra classes appended to the <input>, e.g. a page-specific
+                    JS hook class like "permanent-ban-checkbox".
+     classes        extra classes appended to the outer ".form-check" wrapper,
+                    e.g. "mb-3", "mt-3 d-none".
+
+   Not covered: the two-flanking-labels layout in menu.html's dark-mode toggle
+   (a "Light" label + the switch + a "Dark" label, all three siblings) -- pass
+   label=none to skip the built-in label and wrap your own <label for="id">
+   elements around the macro call instead, same as menu.html does today. Also
+   not covered: the plugin-setting-specific reset-to-default button and
+   data-original/data-default/data-method wiring in
+   models/checkbox_setting.html -- that stays a separate, more specialized
+   template. Indeterminate state has no HTML attribute -- set the JS property
+   `document.getElementById(id).indeterminate = true` yourself if a caller
+   ever needs a tri-state checkbox. #}
+{% macro checkbox(
+    id,
+    label,
+    i18n_key=none,
+    name=none,
+    value=none,
+    checked=false,
+    switch=false,
+    disabled=false,
+    required=false,
+    help=none,
+    help_i18n_key=none,
+    label_class="form-check-label",
+    input_class="",
+    classes=""
+) -%}
+    {%- set help_id = (id ~ "-help") if help else none -%}
+    <div class="form-check{% if switch %} form-switch{% endif %}{% if classes %} {{ classes }}{% endif %}">
+        <input type="checkbox"
+               class="form-check-input{% if input_class %} {{ input_class }}{% endif %}"
+               id="{{ id }}"
+               name="{{ name if name else id }}"
+               {% if value %}value="{{ value }}"{% endif %}
+               {% if switch %}role="switch"{% endif %}
+               {% if checked %}checked{% endif %}
+               {% if disabled %}disabled{% endif %}
+               {% if required %}required aria-required="true"{% endif %}
+               {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>
+        {% if label %}
+            <label class="{{ label_class }}" for="{{ id }}"{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</label>
+        {% endif %}
+        {% if help %}
+            <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n_key %} data-i18n="{{ help_i18n_key }}"{% endif %}>{{ help }}</div>
+        {% endif %}
+    </div>
+{%- endmacro %}

@@ -1,0 +1,175 @@
+{# usage: {% from "components/post.html" import post %}
+          {{ post(title="BunkerWeb 1.7 released", excerpt="Faster scheduler, new Discord plugin.",
+                  href="https://www.bunkerweb.io/blog/...", external=true, image=img_url,
+                  meta="Posted on: 12 Apr 2026", tag="RELEASE", tag_variant="bw-green") }} #}
+
+{# Post/article preview card -- title (as a link), excerpt, meta line and an optional lead
+   image or author avatar, plus an optional tag pill in the footer. Two layouts: image-on-top
+   (orientation="vertical", the default -- a grid/sidebar card) and image-on-left
+   (orientation="horizontal" -- a wide dashboard-row card).
+
+   WHY this exists / what it replaces: static/js/utils.js's `News` class already builds this
+   exact card shape client-side (its `template()` method) for the WordPress blog feed shown in
+   sidebar-news.html and dashboard.html -- image top/left, `card-title` link, `card-text
+   courier-prime` excerpt, and a `card-footer` with a "Posted on: <date>" line plus category-tag
+   pills. That JS-built version stays as-is here: it is driven by live external blog API data
+   fetched after page load (WordPress REST fields, tag/category extraction, date formatting)
+   and isn't something a static Jinja macro can replace. What IS duplicated needlessly is the
+   *card markup and CSS* -- so this macro reuses it verbatim instead of inventing a parallel
+   set of classes: the outer element carries the same `data-news-row` / `data-news-row-home`
+   attribute hook the "News cards styling" block in overrides.css (search that file for
+   "News cards styling") already targets, so the hover-lift, image sizing, title-link colors and
+   courier-prime excerpt tinting apply with zero new CSS. This is a deliberate divergence from
+   the design kit's `post.js`, which invents its own `.news-slide`/`.news-thumb`/`.news-tag`
+   classes -- this codebase already has an equivalent, shipped, themed ruleset under a different
+   selector, and duplicating ~90 lines of near-identical CSS under new class names would be the
+   opposite of what this extraction pass is for. components/card.html was also considered and
+   doesn't fit: its header is a fixed title/subtitle bar rendered above `card-body`, whereas a
+   post's title/excerpt/footer all belong inside one flowing body under an (optional) image.
+
+   The tag pill is rendered via components/badge.html (icon + text, not a hand-rolled
+   `btn-outline-primary` pill) and the optional author avatar via components/avatar.html --
+   both already exist for exactly this job, so this macro composes them instead of redeclaring
+   more badge/avatar markup. Excerpt clamping reuses core.css's existing `.line-clamp-<n>`
+   utilities (only 1/2/3 are defined) rather than adding a new rule.
+
+   Params:
+     title           (required) English fallback title text, rendered as the card's link.
+     excerpt         (required) English fallback excerpt/body text.
+     href            link target for the title (and the image, if any). Default "#".
+     title_i18n      data-i18n key for title.
+     excerpt_i18n    data-i18n key for excerpt.
+     external        add target="_blank" rel="noopener" to the title/image links (outbound blog
+                      posts). Default false.
+     image           optional lead image URL. Omit to render a text-only card.
+     image_alt       English fallback alt text for the image. Default "".
+     image_alt_i18n  data-i18n key for image_alt.
+     orientation      'vertical' (default -- image on top, `data-news-row` styling, matches the
+                      sidebar-news.html card) | 'horizontal' (image on the left in a `row g-0`,
+                      `data-news-row-home` styling, matches the dashboard.html wide card).
+     avatar_label    optional author name -- when set, renders an xs components/avatar.html
+                      next to `meta` (the "image/avatar" alternative to a lead `image`; the two
+                      are independent, a card can have a lead image AND an author avatar).
+     avatar_i18n     data-i18n key for avatar_label.
+     avatar_src      avatar image URL, passed straight to components/avatar.html.
+     avatar_initials avatar initials fallback, passed straight to components/avatar.html.
+     meta            optional English fallback meta text (date, "by <author>", read time...).
+                      Rendered pre-formatted, same as the design kit's own `date` prop -- this
+                      macro does not localize a "Posted on:" prefix for you.
+     meta_i18n       data-i18n key for meta.
+     tag             optional English fallback text for the footer tag pill.
+     tag_i18n        data-i18n key for tag.
+     tag_variant     bg-label-<variant> color passed to components/badge.html. Default
+                      'secondary'.
+     clamp           number of lines to clamp the excerpt to via core.css's `.line-clamp-<n>`
+                      (1, 2 or 3). Pass none for no clamping. Default 3.
+     id              optional id on the outer wrapper.
+     classes         extra utility classes on the outer wrapper, e.g. "mb-3" when stacking
+                      several cards in a list (each call renders exactly one card -- spacing
+                      between them is the caller's layout, not this macro's).
+
+   Not covered: the live WordPress fetch/render itself (stays in static/js/utils.js), a
+   "read more" CTA (the design kit has none either -- the title is the link), and making the
+   whole card clickable -- add Bootstrap's `stretched-link` class to the title `<a>` yourself if
+   a given page wants that. No companion JS -- purely presentational markup. #}
+{% from "components/badge.html" import badge %}
+{% from "components/avatar.html" import avatar %}
+{% macro post(
+    title,
+    excerpt,
+    href="#",
+    title_i18n=none,
+    excerpt_i18n=none,
+    external=false,
+    image=none,
+    image_alt=none,
+    image_alt_i18n=none,
+    orientation='vertical',
+    avatar_label=none,
+    avatar_i18n=none,
+    avatar_src=none,
+    avatar_initials=none,
+    meta=none,
+    meta_i18n=none,
+    tag=none,
+    tag_i18n=none,
+    tag_variant='secondary',
+    clamp=3,
+    id=none,
+    classes=''
+) -%}
+{%- set is_horizontal = orientation == 'horizontal' -%}
+{%- set link_attrs = ' target="_blank" rel="noopener"' if external else '' -%}
+{%- set has_footer = meta or avatar_label or tag -%}
+{%- set footer_classes = 'card-footer p-0 mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2' -%}
+{%- set excerpt_classes = 'card-text courier-prime' ~ (' line-clamp-' ~ clamp if clamp else '') -%}
+<article{% if id %} id="{{ id }}"{% endif %}
+         {{ 'data-news-row-home' if is_horizontal else 'data-news-row' }}
+         {%- if classes %} class="{{ classes }}"{% endif %}>
+    <div class="card">
+        {%- if is_horizontal %}
+        <div class="row g-0 align-items-center">
+            {%- if image %}
+            <div class="col-md-5">
+                <a class="w-100" href="{{ href }}"{{ link_attrs | safe }}>
+                    <img class="card-img card-img-left"
+                         src="{{ image }}"
+                         alt="{{ image_alt or '' }}"
+                         {%- if image_alt_i18n %} data-i18n="{{ image_alt_i18n }}"{% endif %}
+                         loading="lazy" />
+                </a>
+            </div>
+            {%- endif %}
+            <div class="{{ 'col-md-7' if image else 'col-12' }}">
+                <div class="card-body p-3">
+                    <h6 class="card-title lh-sm mb-2">
+                        <a href="{{ href }}"{{ link_attrs | safe }}{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</a>
+                    </h6>
+                    <p class="card-text lh-1 courier-prime mb-0">
+                        <small{% if clamp %} class="line-clamp-{{ clamp }}"{% endif %}{% if excerpt_i18n %} data-i18n="{{ excerpt_i18n }}"{% endif %}>{{ excerpt }}</small>
+                    </p>
+                    {%- if has_footer %}
+                    <div class="{{ footer_classes }}">
+                        {%- if meta or avatar_label %}
+                        <div class="d-flex align-items-center gap-2">
+                            {%- if avatar_label %}{{ avatar(label=avatar_label, label_i18n_key=avatar_i18n, src=avatar_src, initials=avatar_initials, size='xs') }}{% endif %}
+                            {%- if meta %}<small class="text-muted courier-prime"{% if meta_i18n %} data-i18n="{{ meta_i18n }}"{% endif %}>{{ meta }}</small>{% endif %}
+                        </div>
+                        {%- endif %}
+                        {%- if tag %}{{ badge(text=tag, i18n_key=tag_i18n, variant=tag_variant, icon='bx-purchase-tag') }}{% endif %}
+                    </div>
+                    {%- endif %}
+                </div>
+            </div>
+        </div>
+        {%- else %}
+        {%- if image %}
+        <a href="{{ href }}"{{ link_attrs | safe }}>
+            <img class="card-img-top"
+                 src="{{ image }}"
+                 alt="{{ image_alt or '' }}"
+                 {%- if image_alt_i18n %} data-i18n="{{ image_alt_i18n }}"{% endif %}
+                 loading="lazy" />
+        </a>
+        {%- endif %}
+        <div class="card-body">
+            <h5 class="card-title">
+                <a href="{{ href }}"{{ link_attrs | safe }}{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</a>
+            </h5>
+            <p class="{{ excerpt_classes }}"{% if excerpt_i18n %} data-i18n="{{ excerpt_i18n }}"{% endif %}>{{ excerpt }}</p>
+            {%- if has_footer %}
+            <div class="{{ footer_classes }}">
+                {%- if meta or avatar_label %}
+                <div class="d-flex align-items-center gap-2">
+                    {%- if avatar_label %}{{ avatar(label=avatar_label, label_i18n_key=avatar_i18n, src=avatar_src, initials=avatar_initials, size='xs') }}{% endif %}
+                    {%- if meta %}<small class="text-muted courier-prime"{% if meta_i18n %} data-i18n="{{ meta_i18n }}"{% endif %}>{{ meta }}</small>{% endif %}
+                </div>
+                {%- endif %}
+                {%- if tag %}{{ badge(text=tag, i18n_key=tag_i18n, variant=tag_variant, icon='bx-purchase-tag') }}{% endif %}
+            </div>
+            {%- endif %}
+        </div>
+        {%- endif %}
+    </div>
+</article>
+{%- endmacro %}

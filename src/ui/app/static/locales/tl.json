@@ -33,7 +33,10 @@
       "toggle_wrap": "I-toggle ang pag-wrap ng linya",
       "configs_dropzone": "Pumili ng custom na file ng export ng mga configuration o i-drop dito",
       "raw_configuration": "Raw na configuration",
-      "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito"
+      "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito",
+      "hide_value": "Itago ang halaga",
+      "reveal_value": "Ipakita ang halaga",
+      "user_avatar": "Avatar ng gumagamit"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "Walang nahanap na katugmang Mga Plugin",
     "zero_records_reports": "Walang nahanap na katugmang Mga Ulat",
     "zero_records_services": "Walang nahanap na katugmang Mga Serbisyo",
-    "zero_records_templates": "Walang nahanap na katugmang Mga Template"
+    "zero_records_templates": "Walang nahanap na katugmang Mga Template",
+    "selected_list_count": "{{count}} {{entity}} napili",
+    "selected_list_empty": "Walang {{entity}} napili."
   },
   "dev_log": {
     "copy_failed": "Nabigo ang pagkopya ng teksto:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "Mga Ulit ng ZeroSSL API",
       "zerossl_api_retry_delay": "Pagkaantala ng Ulit ng ZeroSSL API",
       "zerossl_api_connect_timeout": "Connect Timeout ng ZeroSSL API",
-      "zerossl_api_max_time": "Max na Oras ng ZeroSSL API"
+      "zerossl_api_max_time": "Max na Oras ng ZeroSSL API",
+      "instance_id": "ID ng Instance"
     },
     "placeholder": {
       "2fa_code": "Ipasok ang code",
@@ -780,7 +786,8 @@
     "privacy_policy": "Patakaran sa Privacy",
     "read_more": "Magbasa ng Higit Pa",
     "see_more": "Tingnan ang Higit Pa",
-    "upgrade": "Mag-upgrade?"
+    "upgrade": "Mag-upgrade?",
+    "opens_new_tab": "(bubukas sa bagong tab)"
   },
   "logs": {
     "annotation_error": "Error",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "Ang mga pagbabago sa labas ng kasalukuyang template ay hindi pinapayagan. Mangyaring gumawa ng mga pagbabago gamit ang kasalukuyang template o lumipat sa Advanced/Raw mode.",
     "unique_server_name": "Natatanging Pangalan ng Server",
     "up": "Aktibo",
-    "yes": "Oo"
+    "yes": "Oo",
+    "done": "Tapos na",
+    "pending": "Naka-antay"
   },
   "step": {
     "next": "Susunod",
@@ -1304,7 +1313,8 @@
       "type": "Uri",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Bersyon"
+      "version": "Bersyon",
+      "value": "Halaga"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "Mga file ng cache na nabuo ng mga naka-iskedyul na gawain (blocklists, GeoIP databases, at iba pa) — suriin, i-download, o burahin ang mga ito bawat serbisyo at plugin."
+  },
+  "accordion": {
+    "body": {
+      "tls": "Mag-isyu at mag-renew ng mga sertipiko nang awtomatiko."
+    },
+    "title": {
+      "tls": "TLS & sertipiko"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "Tingnan ang lahat ng {{count}} setting"
   }
 }

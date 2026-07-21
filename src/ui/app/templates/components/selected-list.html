@@ -1,0 +1,170 @@
+{# usage: {% from "components/selected-list.html" import selected_list %}
+          {{ selected_list(name="instances", items=[], entity="instances", columns=[
+               {"key": "hostname", "i18n": "table.header.hostname", "label": "Hostname", "bold": true},
+               {"key": "health",   "i18n": "table.header.health",   "label": "Health", "safe": true}
+             ], hidden_mode="csv", id_key="hostname") }} #}
+
+{% from "components/text-group.html" import text_group %}
+{% from "components/badge.html" import badge %}
+
+{# Read-only review list rendered inside a bulk-action confirm modal ("Delete
+   the 3 instances below?") -- it recaps the rows the operator selected in a
+   DataTable so they can verify the scope before confirming, and carries the
+   hidden <input> the bulk action actually POSTs.
+
+   Superset of the near-identical "build a list-group-horizontal header + one
+   row per selected item" block hand-rolled in pages/{bans,cache,configs,
+   instances,plugins,services,templates}.js (setupUnbanModal/setupDeletionModal/
+   buildConfigsList/etc., each ~30-90 lines of jQuery template-literal HTML).
+   That existing shape -- a header row of column labels + one horizontal
+   list-group row per item -- is `columns` mode below and reproduces it
+   exactly (same classes, same "flex: 1 1 0" cell layout), so porting those
+   pages to this macro drops no capability. `columns=none` (the default)
+   instead renders a simpler single-column chip list (icon + label/sub via
+   components/text-group.html + a trailing components/badge.html) for bulk
+   actions that don't need a mini-table -- no current page uses that shape
+   yet, but it's the natural default for new bulk-selection UI.
+
+   The counting header ("N <entity> selected") and empty-state fallback reuse
+   the same {{count}}/{{entity}} interpolation convention already established
+   by datatable.bulk_select_page/bulk_select_all_filtered in dataTableInit.js
+   (`entity` is a plain, non-translated noun there too -- an existing
+   limitation this macro inherits rather than invents).
+
+   The visible list is only ever confirmation chrome -- the hidden <input>
+   (name="{{ name }}") is what the form actually submits. Populate `items`
+   at render time for server-rendered lists, or leave it "[]" and populate
+   both the list and the hidden value from the live DataTable selection with
+   static/js/components/selected-list.js (window.BWSelectedList) when the
+   modal opens.
+
+   Params:
+     name         (required in practice) hidden input name -- the form field
+                  the bulk action POSTs, e.g. "instances", "ips", "config_ids".
+     items        list of row dicts to pre-render server-side. Shape depends
+                  on `columns`:
+                    - columns mode: any dict with at least the keys named in
+                      each column's "key".
+                    - simple mode: { id, label, sub=None, icon=None,
+                      badge=None, badge_color=None }.
+                  Leave "[]" when the list is populated client-side only.
+     id_key       which key of each item feeds the hidden value (ids/csv
+                  modes). Default "id" (columns mode: often the natural
+                  identifier column, e.g. "hostname" or "ip").
+     hidden_mode  "ids"   -- hidden value = JSON array of items[*][id_key]
+                            (default; matches no legacy page, safe default
+                            for new callers).
+                  "csv"   -- comma-joined items[*][id_key] (matches
+                            instances.js/plugins.js/services.js/templates.js:
+                            `instances.join(",")`).
+                  "items" -- JSON array of the full item dicts (matches
+                            bans.js/cache.js: `JSON.stringify(bans)`, used
+                            when the bulk action needs more than just the id).
+                  "none"  -- macro leaves the hidden input empty; the calling
+                            page fills it itself (e.g. configs.js posts a
+                            transformed subset, not the displayed items
+                            verbatim).
+     entity       plural noun used in the count/empty copy, e.g. "instances",
+                  "bans". Plain English -- not itself translated (see note
+                  above), only interpolated into the translated sentence.
+     columns      None (default, simple mode) or a list of
+                  { key, i18n=None, label, bold=False }:
+                    key    -- attribute read off each item for this column.
+                    i18n   -- data-i18n key for the header label (reuse an
+                              existing "table.header.*" key when one fits).
+                    label  -- English fallback header text.
+                    bold   -- wrap the cell value in a <div class="fw-bold">
+                              (matches the legacy pages always bolding their
+                              first/primary column, e.g. hostname, IP).
+     icon         simple-mode leading Boxicon per row, overridable per item
+                  via items[i].icon. "" hides it.
+     show_count   show the "N <entity> selected" header line. Default true.
+     empty_text   override the auto "No <entity> selected." fallback.
+     id           optional id attribute on the outer host (e.g. so a legacy
+                  page can keep an existing "#selected-ips-unban" selector
+                  during migration).
+     classes      extra utility classes on the outer host.
+
+   See static/js/components/selected-list.js (window.BWSelectedList) for the
+   populate-from-DataTable / clear-on-modal-close helper this macro is built
+   to pair with. #}
+{% macro selected_list(
+    name="selected_ids",
+    items=[],
+    id_key="id",
+    hidden_mode="ids",
+    entity="items",
+    columns=none,
+    icon="bx-chevron-right",
+    show_count=true,
+    empty_text=none,
+    id=none,
+    classes=""
+) -%}
+{%- set _count = items | length -%}
+{%- set _empty = empty_text or ("No " ~ entity ~ " selected.") -%}
+<div{% if id %} id="{{ id }}"{% endif %} class="bw-selected-list{% if classes %} {{ classes }}{% endif %}" data-selected-host data-entity="{{ entity }}" data-id-key="{{ id_key }}" data-hidden-mode="{{ hidden_mode }}">
+    {%- if show_count %}
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bx bx-list-check" aria-hidden="true"></i>
+        <span data-selected-count
+              data-i18n="datatable.selected_list_count"
+              data-i18n-options='{{ {"count": _count, "entity": entity} | tojson }}'>{{ _count }} {{ entity }} selected</span>
+    </div>
+    {%- endif %}
+    {%- if _count %}
+        {%- if columns %}
+        <div data-selected-columns>
+            <ul class="list-group list-group-horizontal w-100">
+                {%- for col in columns %}
+                <li class="list-group-item bg-secondary text-white bw-selected-list-cell">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold"{% if col.i18n %} data-i18n="{{ col.i18n }}"{% endif %}>{{ col.label }}</div>
+                    </div>
+                </li>
+                {%- endfor %}
+            </ul>
+            <div class="overflow-auto" data-selected-list>
+                {%- for item in items %}
+                <ul class="list-group list-group-horizontal w-100" role="list">
+                    {%- for col in columns %}
+                    <li class="list-group-item bw-selected-list-cell" role="listitem">
+                        <div class="ms-2 me-auto">
+                            {%- if col.bold %}
+                            <div class="fw-bold">{{ item[col.key] }}</div>
+                            {%- else %}
+                            {{ item[col.key] }}
+                            {%- endif %}
+                        </div>
+                    </li>
+                    {%- endfor %}
+                </ul>
+                {%- endfor %}
+            </div>
+        </div>
+        {%- else %}
+        <ul class="list-group overflow-auto" role="list" data-selected-list aria-label="{{ _count }} {{ entity }} selected">
+            {%- for it in items %}
+            <li class="list-group-item d-flex align-items-center justify-content-between gap-2" role="listitem">
+                {{ text_group(top=it.label, bottom=it.sub, icon=it.icon or icon, emphasis='top') }}
+                {%- if it.badge %} {{ badge(text=it.badge, variant=it.badge_color or 'secondary') }}{% endif %}
+            </li>
+            {%- endfor %}
+        </ul>
+        {%- endif %}
+    {%- else %}
+    <p class="text-muted mb-0" data-selected-empty
+       data-i18n="datatable.selected_list_empty"
+       data-i18n-options='{{ {"entity": entity} | tojson }}'>{{ _empty }}</p>
+    {%- endif %}
+    {%- if hidden_mode == "csv" %}
+    <input type="hidden" name="{{ name }}" data-selected-input value="{{ items | map(attribute=id_key) | list | join(',') }}" />
+    {%- elif hidden_mode == "items" %}
+    <input type="hidden" name="{{ name }}" data-selected-input value='{{ items | tojson }}' />
+    {%- elif hidden_mode == "none" %}
+    <input type="hidden" name="{{ name }}" data-selected-input value="" />
+    {%- else %}
+    <input type="hidden" name="{{ name }}" data-selected-input value='{{ items | map(attribute=id_key) | list | tojson }}' />
+    {%- endif %}
+</div>
+{%- endmacro %}

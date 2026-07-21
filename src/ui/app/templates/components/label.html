@@ -1,0 +1,130 @@
+{# usage: {% from "components/label.html" import label %}
+          {{ label(for_id="SERVER_NAME", text="Server name", id="label-SERVER_NAME", text_i18n="form.label.server_name", emphasized=true, multisite=true) }} #}
+
+{# Generic <label> wrapper -- superset of the label markup duplicated across setup.html,
+   models/plugins_settings.html, models/checkbox_setting.html, models/input_setting.html,
+   models/select_setting.html, models/multivalue_setting.html and bans.html.
+
+   `for_id` and `id` are ALWAYS explicit caller-supplied params -- never derived by string
+   concatenation inside the macro. setup.html shipped two labels this session whose id/for
+   were copy-pasted from a different field (id="label-username" for="username" on the Admin
+   Email and UI URL rows, instead of id="label-email" for="email" / id="label-REVERSE_PROXY_URL"
+   for="REVERSE_PROXY_URL") because the id was hand-typed instead of bound to the actual field.
+   Requiring both as args here turns that class of bug into a caller-side typo instead of a
+   silent copy/paste trap baked into the macro.
+
+   Params:
+     for_id           (required) id of the input/select/textarea this label is bound to --
+                      rendered as the `for` attribute.
+     text             (required) English fallback copy shown before i18next rewrites it.
+     id               optional id on the <label> itself, e.g. "label-SERVER_NAME", so another
+                      element can reference it via aria-labelledby (input_setting.html /
+                      checkbox_setting.html pattern). Omit when nothing references it.
+     text_i18n        data-i18n key for text, e.g. "form.label.server_name".
+     variant          'default' (form-label -- most settings/forms, bans.html/setup.html),
+                      'check'   (form-check-label -- checkbox/switch rows, bans.html permanent
+                                ban row, checkbox_setting.html), or
+                      'bare'    (no base class, just text-truncate -- the easy-mode table-row
+                                label in input_setting.html / select_setting.html /
+                                multivalue_setting.html).
+     size             'sm' | 'md' | 'lg'. default variant: adds form-label-sm/form-label-lg
+                      (core.css). check variant: 'sm' adds setting-checkbox-label
+                      (overrides.css -- smaller font used for dense settings-grid switches).
+                      No effect on 'bare'.
+     emphasized       default variant: adds "fw-semibold text-truncate" (the prominent
+                      settings-label look in setup.html/plugins_settings.html). check variant:
+                      adds "text-truncate". No effect on 'bare' (already always truncated).
+     required         appends a decorative " *" marker (aria-hidden -- the actual required
+                      semantics stay on the input's own `required` attribute).
+     multisite        adds the circular bx-server "multisite setting" indicator badge seen in
+                      plugins_settings.html/setup.html (bg-secondary, reuses the existing
+                      tooltip.multisite_setting locale key). default variant only.
+     help             optional help copy. Rendered as a block <div class="form-text
+                      text-muted"> under the label (bans.html pattern) unless help_as_tooltip
+                      is set.
+     help_i18n        data-i18n key for help.
+     help_as_tooltip  render help as an inline "?" tooltip badge next to the label instead of
+                      a block underneath it (plugins_settings.html pattern). default variant
+                      only.
+     classes          extra utility classes appended to the <label>, e.g. "d-flex
+                      align-items-center ps-0" to reproduce checkbox_setting.html's exact
+                      switch-row layout on top of variant='check'.
+
+   Not covered: the docs.bunkerweb.io link wrapped around the multisite badge in
+   plugins_settings.html (<a href="{{ docs_url(...) }}">...</a>). Pulling that in would mean
+   every caller of this macro must `import ... with context` for docs_url/language/bw_version
+   to resolve, which the sibling macros in this directory deliberately avoid. The badge below
+   is a plain <span> with the same classes/icon/tooltip copy; wrap the macro's own output in
+   an <a> in the specific places that actually need the outbound link.
+
+   No companion JS -- label markup only. Tooltip badges rely on the app-wide
+   `[data-bs-toggle="tooltip"]` init already in main.js (and the re-init after i18next
+   translation in i18n.js), wired sitewide for every page that will use this macro. #}
+{% macro label(
+    for_id,
+    text,
+    id=none,
+    text_i18n=none,
+    variant='default',
+    size='md',
+    emphasized=false,
+    required=false,
+    multisite=false,
+    help=none,
+    help_i18n=none,
+    help_as_tooltip=false,
+    classes=''
+) -%}
+    {%- set base = 'form-check-label' if variant == 'check' else ('' if variant == 'bare' else 'form-label') -%}
+    {%- set size_cls = '' -%}
+    {%- if variant == 'default' and size == 'sm' -%}
+        {%- set size_cls = ' form-label-sm' -%}
+    {%- elif variant == 'default' and size == 'lg' -%}
+        {%- set size_cls = ' form-label-lg' -%}
+    {%- elif variant == 'check' and size == 'sm' -%}
+        {%- set size_cls = ' setting-checkbox-label' -%}
+    {%- endif -%}
+    {%- set emph_cls = '' -%}
+    {%- if variant == 'bare' -%}
+        {%- set emph_cls = ' text-truncate' -%}
+    {%- elif emphasized and variant == 'default' -%}
+        {%- set emph_cls = ' fw-semibold text-truncate' -%}
+    {%- elif emphasized and variant == 'check' -%}
+        {%- set emph_cls = ' text-truncate' -%}
+    {%- endif -%}
+    {%- set label_classes = (base ~ size_cls ~ emph_cls ~ (' ' ~ classes if classes else '')) | trim -%}
+    {%- set with_badges = variant == 'default' and (multisite or (help and help_as_tooltip)) -%}
+    {%- if with_badges %}
+        <div class="d-flex justify-content-between align-items-center">
+    {%- endif %}
+    <label{% if id %} id="{{ id }}"{% endif %}
+           for="{{ for_id }}"
+           {%- if label_classes %} class="{{ label_classes }}"{% endif %}
+           {%- if text_i18n %} data-i18n="{{ text_i18n }}"{% endif %}>{{ text }}{% if required %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}</label>
+    {%- if with_badges %}
+        <div class="d-flex align-items-center">
+            {%- if multisite %}
+                <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      data-bs-original-title="This is a multisite setting, affecting multiple services if defined globally."
+                      data-i18n="tooltip.multisite_setting">
+                    <span class="bx bx-server bx-xs" aria-hidden="true"></span>
+                </span>
+            {%- endif %}
+            {%- if help and help_as_tooltip %}
+                <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      data-bs-original-title="{{ help }}"
+                      {%- if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>
+                    <span class="bx bx-question-mark bx-xs" aria-hidden="true"></span>
+                </span>
+            {%- endif %}
+        </div>
+        </div>
+    {%- endif %}
+    {%- if help and not help_as_tooltip %}
+        <div class="form-text text-muted"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help }}</div>
+    {%- endif %}
+{%- endmacro %}

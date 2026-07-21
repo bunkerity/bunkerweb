@@ -1,0 +1,147 @@
+{# usage: {% from "components/copy-button.html" import copy_button %}
+          {{ copy_button(id="copy-api-token", text=api_token, aria_label="Copy API token") }} #}
+
+{# Copy-to-clipboard trigger with a transient "Copied!" Bootstrap-tooltip flash.
+   Superset of the copy affordances already duplicated ad hoc across the app:
+     - profile.html's `.input-group-text.copy-to-clipboard` (TOTP secret field) --
+       wired by a *static*, non-delegated `$(".copy-to-clipboard").on("click", ...)`
+       in main.js that only fires for markup present at initial page load, and
+       assumes the value always lives in a sibling `.input-group input`;
+     - logs.html's `#copy-logs` -- its own inline handler in pages/logs.js,
+       copies the ACE editor's selected text;
+     - plugins_settings_raw.html's `.copy-settings` -- its own inline handler in
+       plugins-settings.js, copies the raw editor value, already uses
+       i18next's "tooltip.copied" key for the feedback text.
+   All three show the same feedback (swap data-bs-original-title and
+   `.tooltip("show")`, restore after ~2s) via three separate hand-rolled click
+   handlers. This macro generalizes that into one drop-in trigger with a single
+   resolution contract -- see static/js/components/copy-button.js -- instead of
+   every page rolling its own. It does NOT touch the three call sites above;
+   porting them is page-by-page work for a later pass.
+
+   Two shapes:
+     variant="button" -- standalone <button>, icon (+ optional visible label),
+                         matching logs.html's / plugins_settings_raw.html's
+                         existing "Copy" button look.
+     variant="addon"  -- <span class="input-group-text">, icon-only, welded to
+                         a sibling read-only field via `target`, matching
+                         profile.html's / login.html's existing input-group
+                         affordance. The macro does not render the field
+                         itself -- the caller already owns that markup.
+
+   Params:
+     id             optional id on the trigger element.
+     text           literal string to copy, e.g. api_token. Rendered as
+                    data-copy-text. Wins over `target` if both are given.
+     target         CSS selector or bare element id to read from at click time
+                    (its .value for inputs/textareas, else .textContent), e.g.
+                    "#secret_token". Rendered as data-copy-target.
+     variant        'button' (default) or 'addon' -- see shapes above.
+     button_style   variant='button' only -- Bootstrap color suffix appended
+                    to "btn-", e.g. 'outline-secondary' (default, matches
+                    logs.html / plugins_settings_raw.html), 'outline-light'
+                    (dark toolbars), 'primary'. Must be a real .btn-<style>
+                    rule in core.css/overrides.css.
+     size           'sm' | 'md' | 'lg'. variant='button' only -- adds
+                    btn-sm/btn-lg and (for 'sm') the paired bx-xs icon size,
+                    matching configs.html's existing btn-sm copy icon. No
+                    effect on 'addon' (sized via the surrounding
+                    .input-group-* wrapper instead, same as today).
+     icon           Boxicons class, default 'bx-copy-alt' -- the icon already
+                    used for every copy affordance in this app (profile.html,
+                    logs.html, configs.html, plugins_settings*.html).
+     label          visible label text (English fallback). variant='button'
+                    only -- omit for an icon-only button. 'addon' is always
+                    icon-only, matching the existing input-group affordance.
+     label_i18n     data-i18n key for label. Defaults to the existing
+                    "button.copy" key ("Copy").
+     aria_label     English fallback for the trigger's accessible name. Only
+                    meaningful when there's no visible label (variant='addon',
+                    or variant='button' without `label`) -- a labelled button
+                    already has an accessible name from its own text, so this
+                    is ignored unless icon-only. Falls back to "Copy" when
+                    icon-only and omitted -- never silently ships an unlabeled
+                    icon-only control.
+     aria_i18n      data-i18n key for aria_label. Falls back to the existing
+                    "button.copy" key ONLY when icon-only and BOTH aria_label
+                    and aria_i18n are omitted (the fully-default case). Once
+                    a caller passes a custom aria_label, this default is
+                    dropped too -- otherwise i18next would silently overwrite
+                    the custom text with the generic "Copy" translation on
+                    every page load. Pass your own aria_i18n alongside a
+                    custom aria_label if it also needs translating.
+     copied_label   English fallback swapped into the tooltip on success.
+                    Default "Copied!".
+     copied_i18n    i18next key (NOT a data-i18n scan target -- read directly
+                    by copy-button.js at click time) for copied_label.
+                    Defaults to the existing "tooltip.copied" key, already
+                    used by plugins-settings.js for the same feedback text.
+     disabled       renders the trigger disabled. variant='button' gets the
+                    native `disabled` attribute; variant='addon' (a <span>,
+                    no native disabled state) gets aria-disabled="true" plus
+                    the existing ".disabled" utility class (dims it, already
+                    used this way on non-form elements in configs.html).
+                    Gate this from the caller, which knows about
+                    request.is_secure -- see logs.html's / plugins_settings_
+                    raw.html's own https-only disabling; this macro doesn't
+                    assume request context.
+     classes        extra utility classes appended to the trigger.
+
+   Wiring (click/keyboard -> clipboard write -> tooltip flash) lives in
+   static/js/components/copy-button.js -- delegated on document, same idiom as
+   components/recovery-code.html's companion script. Include it once on any
+   page that renders this macro. Its JS hook is `.js-copy-button`, a name
+   distinct from the legacy `.copy-to-clipboard` class above so the two never
+   double-fire on the same element. #}
+{% macro copy_button(
+    id=none,
+    text=none,
+    target=none,
+    variant="button",
+    button_style="outline-secondary",
+    size="md",
+    icon="bx-copy-alt",
+    label=none,
+    label_i18n="button.copy",
+    aria_label=none,
+    aria_i18n=none,
+    copied_label="Copied!",
+    copied_i18n="tooltip.copied",
+    disabled=false,
+    classes=""
+) -%}
+    {%- set icon_only = variant == "addon" or not label -%}
+    {%- set size_cls = "" -%}
+    {%- if variant == "button" and size == "sm" -%}
+        {%- set size_cls = " btn-sm" -%}
+    {%- elif variant == "button" and size == "lg" -%}
+        {%- set size_cls = " btn-lg" -%}
+    {%- endif -%}
+    {%- set base_cls = ("btn btn-" ~ button_style ~ size_cls) if variant == "button" else "input-group-text cursor-pointer" -%}
+    {%- set trigger_classes = (base_cls ~ " js-copy-button" ~ (" disabled" if disabled else "") ~ (" " ~ classes if classes else "")) | trim -%}
+    {#- icon-only always needs an accessible name, so it falls back to "Copy" /
+       "button.copy" when the caller supplies neither. A labelled button only
+       gets aria-label/data-i18n when the caller explicitly overrides it --
+       otherwise it relies on its own visible text, same as components/button.html.
+       Once the caller DOES pass a custom aria_label, the "button.copy" i18n
+       default is dropped too, so i18next never silently overwrites custom
+       copy with the generic "Copy" translation. #}
+    {%- set effective_aria_label = aria_label or ("Copy" if icon_only else none) -%}
+    {%- set effective_aria_i18n = aria_i18n or (("button.copy" if not aria_label else none) if icon_only else none) -%}
+    <{{ "button" if variant == "button" else "span" }}
+        {%- if variant == "button" %} type="button"{% else %} role="button" tabindex="{{ '-1' if disabled else '0' }}"{% endif %}
+        {%- if id %} id="{{ id }}"{% endif %}
+        class="{{ trigger_classes }}"
+        {%- if text is not none %} data-copy-text="{{ text }}"{% endif %}
+        {%- if target is not none %} data-copy-target="{{ target }}"{% endif %}
+        data-copied-label="{{ copied_label }}"
+        {%- if copied_i18n %} data-copied-i18n="{{ copied_i18n }}"{% endif %}
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-bs-original-title=""
+        {%- if effective_aria_label %} aria-label="{{ effective_aria_label }}"{% if effective_aria_i18n %} data-i18n="{{ effective_aria_i18n }}"{% endif %}{% endif %}
+        {%- if disabled %}{% if variant == "button" %} disabled{% else %} aria-disabled="true"{% endif %}{% endif %}>
+        <i class="bx {{ icon }}{% if size == 'sm' and variant == 'button' %} bx-xs{% endif %}" aria-hidden="true"></i>
+        {%- if label %}<span class="d-none d-md-inline">&nbsp;<span data-i18n="{{ label_i18n }}">{{ label }}</span></span>{% endif -%}
+    </{{ "button" if variant == "button" else "span" }}>
+{%- endmacro %}

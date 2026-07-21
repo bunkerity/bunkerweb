@@ -1,0 +1,82 @@
+{# usage: {% from "components/text-area.html" import text_area %}
+          {{ text_area(id="resource-group-description", name="description", label="Description", label_i18n="table.header.description", rows=2, maxlength=4000) }} #}
+
+{# Plain multi-line <textarea class="form-control">, labelled via components/label.html --
+   superset of the hand-rolled "form-label" + "textarea class=form-control" pairs duplicated
+   across certificates.html (#certificate-selfsigned-sans, #certificate-edit-description) and
+   groups.html (#resource-group-description, #resource-group-bulk-values).
+
+   Sized entirely by the `rows` attribute -- same native-resize-handle behaviour as every
+   textarea already in the app (Bootstrap's default .form-control resize:vertical), so there
+   is nothing to wire in JS.
+
+   Params:
+     id             (required) id on the <textarea>. Also the `for_id` passed to
+                    components/label.html and the aria-describedby target for help_text.
+     label          optional visible caption above the field (English fallback), rendered
+                    via components/label.html (variant="default").
+     label_i18n     data-i18n key for label.
+     name           form field name. Defaults to id.
+     value          initial content, rendered between the open/close tags (never a `value`
+                    attribute -- textareas don't have one). Default "" (empty).
+     rows           native `rows` attribute controlling initial height. Default 3.
+     placeholder    optional placeholder text.
+     maxlength      optional native `maxlength` attribute (see certificates.html's
+                    description field, maxlength="4096").
+     required       adds the required attribute + aria-required="true", and passes
+                    required=true to components/label.html for its " *" marker. Default false.
+     disabled       disables the control. Default false.
+     readonly       adds the readonly attribute (still submitted, unlike disabled). Default
+                    false.
+     help_text      optional helper text rendered below as "form-text text-muted" (same
+                    markup components/label.html and components/number.html use for their
+                    own help param), linked via aria-describedby.
+     help_i18n      data-i18n key for help_text.
+     textarea_class extra classes appended to the <textarea>, e.g. a page-specific JS hook
+                    class.
+     classes        extra utility classes on the outer wrapper.
+
+   Not covered: the file-upload/manual-edit toggle in models/input_setting.html's `type ==
+   'file'` branch (data-file-input wiring, upload/manual mode-switch button) and the raw
+   JSON/config state textareas used purely as hidden JS storage (templates.html's
+   #templates-usage, template_edit.html's #raw-template-value, configs.html's
+   #columns_preferences) -- those aren't visible form fields and stay hand-rolled. No
+   companion JS -- markup/CSS only. #}
+{% from "components/label.html" import label as ui_label %}
+{% macro text_area(
+    id,
+    label=none,
+    label_i18n=none,
+    name=none,
+    value="",
+    rows=3,
+    placeholder=none,
+    maxlength=none,
+    required=false,
+    disabled=false,
+    readonly=false,
+    help_text=none,
+    help_i18n=none,
+    textarea_class="",
+    classes=""
+) -%}
+    {%- set help_id = (id ~ "-help") if help_text else none -%}
+    <div{% if classes %} class="{{ classes }}"{% endif %}>
+        {%- if label %}
+            {{ ui_label(for_id=id, text=label, text_i18n=label_i18n, required=required) }}
+        {%- endif %}
+        <textarea id="{{ id }}"
+                  name="{{ name if name else id }}"
+                  class="form-control{% if textarea_class %} {{ textarea_class }}{% endif %}"
+                  rows="{{ rows }}"
+                  {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+                  {% if maxlength is not none %}maxlength="{{ maxlength }}"{% endif %}
+                  {% if required %}required aria-required="true"{% endif %}
+                  {% if disabled %}disabled{% endif %}
+                  {% if readonly %}readonly{% endif %}
+                  {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>{{ value }}</textarea>
+        {%- if help_text %}
+        <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+        {%- endif %}
+    </div>
+{%- endmacro %}

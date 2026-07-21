@@ -1,0 +1,87 @@
+{# usage: {% from "components/recovery-code.html" import recovery_code %}
+          {{ recovery_code(codes=totp_recovery_codes, theme=theme) }} #}
+
+{# TOTP recovery-code display chip -- monospace, copyable grid/list of one-time
+   backup codes. Superset of the ad-hoc markup in profile.html's
+   #modal-recovery-codes (a "row g-3" grid of ".recovery-code" boxes plus a
+   "Copy Codes" button, wired by an inline <script> block scoped to that one
+   modal's ids). That inline copy-all logic is generalized here into
+   static/js/components/recovery-code.js (delegated on [data-recovery-copy-target],
+   idempotent) so any page can drop this macro in without repeating the wiring.
+   Include that script once (via the page's {% block scripts %}) on any page
+   that renders this macro with copyable=true.
+
+   Params:
+     codes          (required) list of recovery-code strings, e.g.
+                    current_user.list_recovery_codes / TOTP.generate_recovery_codes().
+     id             wrapper id; also the copy-all button's target. Auto-generated
+                    when omitted -- pass one explicitly if you need to reference
+                    the wrapper elsewhere.
+     theme          "light" | "dark" -- picks the chip background (bg-light /
+                    bg-dark), same as profile.html does today, since the sitewide
+                    dark-mode toggle doesn't flip Bootstrap's static bg-* utilities
+                    on its own. Pass the request's `theme` context var.
+     variant        "grid" (default; matches the existing 2-up modal layout) or
+                    "inline" (flex-wrap chips, for tighter spaces such as a
+                    setup-wizard step).
+     cols           grid columns when variant="grid" -- must evenly divide 12
+                    (2, 3, 4, 6 or 12). Default 2, matching profile.html today.
+     copyable       show the "Copy Codes" button below the codes. Default true.
+     aria_label     English fallback for the codes list's aria-label.
+     aria_i18n_key  data-i18n key for aria_label. Defaults to the existing
+                    "modal.title.recovery_codes" key.
+     copy_label     English fallback for the copy button's text.
+     copy_i18n_key  data-i18n key for copy_label. Defaults to the existing
+                    "button.copy_codes" key.
+     classes        extra utility classes appended to the wrapper. #}
+{% macro recovery_code(
+    codes,
+    id=none,
+    theme="light",
+    variant="grid",
+    cols=2,
+    copyable=true,
+    aria_label="Recovery Codes",
+    aria_i18n_key="modal.title.recovery_codes",
+    copy_label="Copy Codes",
+    copy_i18n_key="button.copy_codes",
+    classes=""
+) -%}
+    {%- set wrapper_id = id or ("recovery-codes-" ~ range(100000, 999999) | random) -%}
+    {%- set bg = "bg-light" if theme == "light" else "bg-dark" -%}
+    <div id="{{ wrapper_id }}"
+         data-recovery-codes
+         role="list"
+         aria-label="{{ aria_label }}"
+         data-i18n="{{ aria_i18n_key }}"
+         {%- if classes %} class="{{ classes }}"{% endif %}>
+        {% if variant == "inline" %}
+            <div class="d-flex flex-wrap gap-2">
+                {% for code in codes %}
+                    <code class="recovery-code px-3 py-2 border rounded {{ bg }} shadow-sm font-monospace"
+                          role="listitem">{{ code }}</code>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="row g-3">
+                {% for code in codes %}
+                    <div class="col-{{ 12 // cols }}">
+                        <div class="recovery-code p-3 border rounded {{ bg }} shadow-sm text-center font-monospace"
+                             role="listitem">{{ code }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    {% if copyable %}
+        <div class="mt-3 text-center">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-recovery-copy-target="{{ wrapper_id }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-original-title=""
+                    data-i18n="{{ copy_i18n_key }}">{{ copy_label }}</button>
+        </div>
+    {% endif %}
+{%- endmacro %}

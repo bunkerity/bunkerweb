@@ -1,0 +1,81 @@
+{# usage: {% from "components/spinner.html" import spinner %}
+          {{ spinner(size="sm", label="Loading reports...", label_i18n="status.loading_reports") }} #}
+
+{# Bare loading glyph -- a thin wrapper around Bootstrap's own ".spinner-border"
+   (core.css, already vendored, size variants "sm"/""/"lg" all pre-existing --
+   no new CSS needed here). Two shapes, picked by whether `label` is passed:
+
+     no label   a standalone glyph, `role="status"` on the glyph itself with a
+                ".visually-hidden" fallback caption for screen readers (the
+                plain Bootstrap spinner pattern) -- for a spinner sitting next
+                to/inside something that already has its own visible caption
+                (a card header, a button -- see components/button.html's own
+                `loading` param, which renders this exact shape inline and is
+                deliberately left as-is rather than refactored onto this macro).
+
+     label set  an inline "spinner + visible text" row (`role="status"
+                aria-live="polite"` on the outer wrapper, the glyph itself
+                `aria-hidden` so the visible text is what gets announced, not
+                a redundant one) -- the shape reports.js hand-rolls today for
+                its "Loading report details..." modal placeholder:
+                `<span class="spinner-border spinner-border-sm" role="status"
+                aria-hidden="true"></span><span>Loading report details...</span>`.
+                Porting reports.js onto this macro is separate page-by-page
+                work (Phase 3), not done here.
+
+   Params:
+     size       'sm' | 'md' | 'lg'. Maps to spinner-border-sm / spinner-border /
+                spinner-border-lg (all three already in core.css). Default 'md'.
+     variant    color suffix appended to "text-", e.g. "primary", "success",
+                "danger", "info", "secondary", "muted". Must be a color with an
+                existing ".text-<variant>" rule. Default "primary".
+     label      optional visible caption rendered beside the glyph (English
+                fallback). Omit for the bare-glyph shape.
+     label_i18n data-i18n key for label. Optional -- omit for the rare
+                untranslated case.
+     id         optional id on the outer/root element.
+     classes    extra utility classes on the outer/root element.
+
+   Not covered:
+     - A full loading PANEL (icon/title/message, its own layout) --
+       components/empty-state.html's state="loading" already owns that
+       larger shape; this macro is only the glyph + optional inline caption.
+     - A blocking overlay pinned over an existing card/table while it
+       refreshes -- no such component exists yet in this codebase; add one
+       separately if a page actually needs it rather than growing this macro
+       to cover a shape nothing here uses today.
+     - bans.js's / reports.js's ".bx-loader" + ".bx-spin" toggle on the
+       "Auto refresh" button icon -- that's a persistent ON/OFF toggle
+       indicator (Boxicons rotate), not a transient "waiting for a response"
+       spinner, and isn't Bootstrap's `.spinner-border` at all. Different
+       affordance, left untouched.
+
+   No companion JS for the glyph itself -- inert markup, same as badge.html.
+   static/js/components/spinner.js instead ships a separate, standalone
+   utility, `setButtonLoading(button, isLoading)`, for toggling any <button>
+   (one rendered by components/button.html, or a plain hand-rolled one) into
+   and out of a disabled+spinner state at runtime in response to an async
+   call -- the same job template_edit.js's `setSaving()` (static/js/pages/
+   template_edit.js:2500) already does by hand for its own save button.
+   Consolidating that one call site onto the shared helper is out of scope
+   for this pass; the helper is just made available for new/future call
+   sites. Include spinner.js once on any page that calls setButtonLoading(). #}
+{%- set SPINNER_SIZE_CLASS = {"sm": "spinner-border-sm", "md": "", "lg": "spinner-border-lg"} -%}
+{% macro spinner(size="md", variant="primary", label=none, label_i18n=none, id=none, classes="") -%}
+    {%- set size_cls = SPINNER_SIZE_CLASS[size] if size in SPINNER_SIZE_CLASS else "" -%}
+    {%- if label %}
+        <span{% if id %} id="{{ id }}"{% endif %}
+              class="d-inline-flex align-items-center gap-2{% if classes %} {{ classes }}{% endif %}"
+              role="status"
+              aria-live="polite">
+            <span class="spinner-border {{ size_cls }} text-{{ variant }}" aria-hidden="true"></span>
+            <span{% if label_i18n %} data-i18n="{{ label_i18n }}"{% endif %}>{{ label }}</span>
+        </span>
+    {%- else %}
+        <span{% if id %} id="{{ id }}"{% endif %}
+              class="spinner-border {{ size_cls }} text-{{ variant }}{% if classes %} {{ classes }}{% endif %}"
+              role="status">
+            <span class="visually-hidden" data-i18n="status.loading">Loading...</span>
+        </span>
+    {%- endif %}
+{%- endmacro %}

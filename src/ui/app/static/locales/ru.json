@@ -33,7 +33,10 @@
       "toggle_wrap": "Переключить перенос строк",
       "configs_dropzone": "Выберите файл экспорта пользовательских конфигураций или перетащите его сюда",
       "raw_configuration": "Необработанная конфигурация",
-      "services_dropzone": "Выберите файл экспорта служб или перетащите его сюда"
+      "services_dropzone": "Выберите файл экспорта служб или перетащите его сюда",
+      "hide_value": "Скрыть значение",
+      "reveal_value": "Показать значение",
+      "user_avatar": "Аватар пользователя"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "Совпадающих плагинов не найдено",
     "zero_records_reports": "Совпадающих отчетов не найдено",
     "zero_records_services": "Совпадающих сервисов не найдено",
-    "zero_records_templates": "Совпадающих шаблонов не найдено"
+    "zero_records_templates": "Совпадающих шаблонов не найдено",
+    "selected_list_count": "{{count}} {{entity}} выбрано",
+    "selected_list_empty": "{{entity}} не выбрано."
   },
   "dev_log": {
     "copy_failed": "Не удалось скопировать текст:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "Повторы API ZeroSSL",
       "zerossl_api_retry_delay": "Задержка повтора API ZeroSSL",
       "zerossl_api_connect_timeout": "Таймаут подключения API ZeroSSL",
-      "zerossl_api_max_time": "Максимальное время API ZeroSSL"
+      "zerossl_api_max_time": "Максимальное время API ZeroSSL",
+      "instance_id": "ID экземпляра"
     },
     "placeholder": {
       "2fa_code": "Введите код",
@@ -780,7 +786,8 @@
     "privacy_policy": "Политика конфиденциальности",
     "read_more": "Читать дальше",
     "see_more": "Смотреть больше",
-    "upgrade": "Обновить?"
+    "upgrade": "Обновить?",
+    "opens_new_tab": "(открывается в новой вкладке)"
   },
   "logs": {
     "annotation_error": "Ошибка",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "Изменения вне текущего шаблона не допускаются. Пожалуйста, вносите изменения с использованием текущего шаблона или переключитесь в режим Продвинутый/Исходный.",
     "unique_server_name": "Уникальное имя сервера",
     "up": "В сети",
-    "yes": "Да"
+    "yes": "Да",
+    "done": "Завершенные",
+    "pending": "Ожидающие"
   },
   "step": {
     "next": "Далее",
@@ -1304,7 +1313,8 @@
       "type": "Тип",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Версия"
+      "version": "Версия",
+      "value": "Значение"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "Кэшированные файлы, созданные запланированными задачами (блоки, базы данных GeoIP и т.д.) — просматривайте, скачивайте или удаляйте их для каждого сервиса и плагина."
+  },
+  "accordion": {
+    "body": {
+      "tls": "Автоматически выдавать и обновлять сертификаты."
+    },
+    "title": {
+      "tls": "TLS & сертификаты"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "Просмотреть все {{count}} настроек"
   }
 }

@@ -33,7 +33,10 @@
       "toggle_wrap": "لائن ریپنگ ٹوگل کریں",
       "configs_dropzone": "کسٹم کنفیگریشنز کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں",
       "raw_configuration": "خام کنفیگریشن",
-      "services_dropzone": "خدمات کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں"
+      "services_dropzone": "خدمات کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں",
+      "hide_value": "ظاہر نہ کریں",
+      "reveal_value": "ظاہر کریں",
+      "user_avatar": "کاربر کا آواتار"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "کوئی مماثل پلگ ان نہیں ملا",
     "zero_records_reports": "کوئی مماثل رپورٹ نہیں ملی",
     "zero_records_services": "کوئی مماثل سروس نہیں ملی",
-    "zero_records_templates": "کوئی مماثل ٹیمپلیٹس نہیں ملے"
+    "zero_records_templates": "کوئی مماثل ٹیمپلیٹس نہیں ملے",
+    "selected_list_count": "{{count}} {{entity}} منتخب",
+    "selected_list_empty": "{{entity}} منتخب نہیں ہے۔"
   },
   "dev_log": {
     "copy_failed": "متن کاپی کرنے میں ناکام:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL API دوبارہ کوششیں",
       "zerossl_api_retry_delay": "ZeroSSL API دوبارہ کوشش میں تاخیر",
       "zerossl_api_connect_timeout": "ZeroSSL API کنکشن ٹائم آؤٹ",
-      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت"
+      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت",
+      "instance_id": "انسٹینس ID"
     },
     "placeholder": {
       "2fa_code": "کوڈ درج کریں",
@@ -780,7 +786,8 @@
     "privacy_policy": "رازداری کی پالیسی",
     "read_more": "مزید پڑھیں",
     "see_more": "مزید دیکھیں",
-    "upgrade": "اپ گریڈ کریں؟"
+    "upgrade": "اپ گریڈ کریں؟",
+    "opens_new_tab": "(ایک نئی ٹیب میں کھولیں)"
   },
   "logs": {
     "annotation_error": "خرابی",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "موجودہ ٹیمپلیٹ سے باہر تبدیلیاں کرنے کی اجازت نہیں ہے۔ براہ کرم موجودہ ٹیمپلیٹ کا استعمال کرتے ہوئے تبدیلیاں کریں یا اعلی درجے/خام موڈ پر سوئچ کریں۔",
     "unique_server_name": "منفرد سرور نام",
     "up": "فعال",
-    "yes": "ہاں"
+    "yes": "ہاں",
+    "done": "مکمل",
+    "pending": "در انتظار"
   },
   "step": {
     "next": "اگلا",
@@ -1304,7 +1313,8 @@
       "type": "قسم",
       "url": "URL",
       "user_agent": "صارف ایجنٹ",
-      "version": "ورژن"
+      "version": "ورژن",
+      "value": "واضح"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "جداول کے ذریعے بنائے گئے کیش فائلوں (بلوکلیسٹ، جیوآئی پی ڈیٹا بیس، اور دیگر) - ہر سروس اور پگین کے لیے ان کا تفحص، ڈاؤن لوڈ، یا حذف کریں۔"
+  },
+  "accordion": {
+    "body": {
+      "tls": "سفرنامے خود بخود جاری اور تجدید کریں۔"
+    },
+    "title": {
+      "tls": "TLS اور سفرنامے"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "تمام {{count}} سیٹنگز دیکھیں"
   }
 }

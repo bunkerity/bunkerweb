@@ -1,0 +1,9 @@
+{% macro lottie(src, size="lg", classes="", loop=true, autoplay=true) -%}
+    <lottie-player src="{{ src }}"
+                   background="transparent"
+                   speed="1"
+                   class="bw-lottie bw-lottie-{{ size }}{% if classes %} {{ classes }}{% endif %}"
+                   {% if loop %}loop{% endif %}
+                   {% if autoplay %}autoplay{% endif %}
+                   aria-hidden="true"></lottie-player>
+{%- endmacro %}

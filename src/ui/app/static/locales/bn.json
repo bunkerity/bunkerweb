@@ -33,7 +33,10 @@
       "toggle_wrap": "লাইন মোড়ানো চালু/বন্ধ করুন",
       "configs_dropzone": "একটি কাস্টম কনফিগারেশন এক্সপোর্ট ফাইল নির্বাচন করুন বা এখানে ড্রপ করুন",
       "raw_configuration": "র কনফিগারেশন",
-      "services_dropzone": "একটি পরিষেবা এক্সপোর্ট ফাইল নির্বাচন করুন বা এখানে ড্রপ করুন"
+      "services_dropzone": "একটি পরিষেবা এক্সপোর্ট ফাইল নির্বাচন করুন বা এখানে ড্রপ করুন",
+      "hide_value": "মান লুকান",
+      "reveal_value": "মান প্রদর্শন করুন",
+      "user_avatar": "ব্যবহারকারীর প্রতিকৃতি"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "কোনো মেলানো প্লাগইন পাওয়া যায়নি",
     "zero_records_reports": "কোনো মেলানো রিপোর্ট পাওয়া যায়নি",
     "zero_records_services": "কোনো মেলানো পরিষেবা পাওয়া যায়নি",
-    "zero_records_templates": "মেলে এমন কোনো টেমপ্লেট পাওয়া যায়নি"
+    "zero_records_templates": "মেলে এমন কোনো টেমপ্লেট পাওয়া যায়নি",
+    "selected_list_count": "{{count}} {{entity}} নির্বাচিত",
+    "selected_list_empty": "কোনো {{entity}} নির্বাচিত নয়।"
   },
   "dev_log": {
     "copy_failed": "টেক্সট কপি করতে ব্যর্থ:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL API পুনরায় চেষ্টা",
       "zerossl_api_retry_delay": "ZeroSSL API পুনরায় চেষ্টার বিলম্ব",
       "zerossl_api_connect_timeout": "ZeroSSL API সংযোগ টাইমআউট",
-      "zerossl_api_max_time": "ZeroSSL API সর্বোচ্চ সময়"
+      "zerossl_api_max_time": "ZeroSSL API সর্বোচ্চ সময়",
+      "instance_id": "ইনস্ট্যান্স আইডি"
     },
     "placeholder": {
       "2fa_code": "কোড লিখুন",
@@ -780,7 +786,8 @@
     "privacy_policy": "গোপনীয়তা নীতি",
     "read_more": "আরও পড়ুন",
     "see_more": "আরও দেখুন",
-    "upgrade": "আপগ্রেড করবেন?"
+    "upgrade": "আপগ্রেড করবেন?",
+    "opens_new_tab": "(নতুন ট্যাবে খুলুন)"
   },
   "logs": {
     "annotation_error": "ত্রুটি",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "বর্তমান টেমপ্লেটের বাইরে পরিবর্তন অনুমোদিত নয়। অনুগ্রহ করে বর্তমান টেমপ্লেট ব্যবহার করে পরিবর্তন করুন অথবা অ্যাডভান্সড/র মোডে স্যুইচ করুন।",
     "unique_server_name": "অনন্য সার্ভারের নাম",
     "up": "চালু",
-    "yes": "হ্যাঁ"
+    "yes": "হ্যাঁ",
+    "done": "সম্পন্ন",
+    "pending": "অপেক্ষমান"
   },
   "step": {
     "next": "পরবর্তী",
@@ -1304,7 +1313,8 @@
       "type": "প্রকার",
       "url": "URL",
       "user_agent": "ব্যবহারকারী এজেন্ট",
-      "version": "সংস্করণ"
+      "version": "সংস্করণ",
+      "value": "মান"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "পরিকল্পিত কাজের দ্বারা তৈরি ক্যাশে ফাইল (ব্লকলিস্ট, জিওআইপি ডাটাবেস, এবং আরও) — প্রতিটি পরিষেবার জন্য এবং প্লাগিনের জন্য পরিদর্শন, ডাউনলোড, অথবা মুছে ফেলুন।"
+  },
+  "accordion": {
+    "body": {
+      "tls": "স্বয়ংক্রিয়ভাবে সার্টিফিকেট ইস্যু এবং নবায়ন করুন।"
+    },
+    "title": {
+      "tls": "TLS & সার্টিফিকেট"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "সমস্ত {{count}} সেটিংস দেখুন"
   }
 }

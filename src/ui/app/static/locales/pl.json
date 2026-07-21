@@ -33,7 +33,10 @@
       "toggle_wrap": "Przełącz zawijanie wierszy",
       "configs_dropzone": "Wybierz plik eksportu konfiguracji niestandardowych albo upuść go tutaj",
       "raw_configuration": "Konfiguracja ręczna",
-      "services_dropzone": "Wybierz plik eksportu usług albo upuść go tutaj"
+      "services_dropzone": "Wybierz plik eksportu usług albo upuść go tutaj",
+      "hide_value": "Ukryj wartość",
+      "reveal_value": "Wyświetl wartość",
+      "user_avatar": "Avatar użytkownika"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "Nie znaleziono pasujących wtyczek.",
     "zero_records_reports": "Nie znaleziono pasujących raportów.",
     "zero_records_services": "Nie znaleziono pasujących usług",
-    "zero_records_templates": "Nie znaleziono pasujących szablonów."
+    "zero_records_templates": "Nie znaleziono pasujących szablonów.",
+    "selected_list_count": "{{count}} {{entity}} wybrane",
+    "selected_list_empty": "Żaden {{entity}} nie został wybrany."
   },
   "dev_log": {
     "copy_failed": "Nie udało się skopiować tekstu:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "Liczba ponowień API ZeroSSL",
       "zerossl_api_retry_delay": "Opóźnienie ponowień API ZeroSSL",
       "zerossl_api_connect_timeout": "Limit czasu połączenia API ZeroSSL",
-      "zerossl_api_max_time": "Maksymalny czas API ZeroSSL"
+      "zerossl_api_max_time": "Maksymalny czas API ZeroSSL",
+      "instance_id": "ID instancji"
     },
     "placeholder": {
       "2fa_code": "Wprowadź kod",
@@ -780,7 +786,8 @@
     "privacy_policy": "Polityka prywatności",
     "read_more": "Czytaj więcej",
     "see_more": "Zobacz więcej",
-    "upgrade": "Aktualizacja?"
+    "upgrade": "Aktualizacja?",
+    "opens_new_tab": "(otwiera w nowej zakładce)"
   },
   "logs": {
     "annotation_error": "Błąd",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "Zmiany poza bieżącym szablonem są niedozwolone. Proszę wprowadzać zmiany przy użyciu bieżącego szablonu lub przełączyć się do trybu zaawansowanego/ręcznego.",
     "unique_server_name": "Unikalna nazwa serwera",
     "up": "Aktywny",
-    "yes": "Tak"
+    "yes": "Tak",
+    "done": "Ukończone",
+    "pending": "W trakcie"
   },
   "step": {
     "next": "Dalej",
@@ -1304,7 +1313,8 @@
       "type": "Typ",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Wersja"
+      "version": "Wersja",
+      "value": "Wartość"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "Pliki cache generowane przez zadania zaplanowane (listy blokujące, bazy GeoIP i inne) — sprawdzaj, pobieraj lub usuwaj je dla każdego serwisu i wtyczki."
+  },
+  "accordion": {
+    "body": {
+      "tls": "Automatyczne wydawanie i odnawianie certyfikatów."
+    },
+    "title": {
+      "tls": "TLS & certyfikaty"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "Wyświetl wszystkie {{count}} ustawień"
   }
 }

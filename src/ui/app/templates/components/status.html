@@ -1,0 +1,96 @@
+{# usage: {% from "components/status.html" import status %}
+          {{ status(type="up", id="status-" ~ instance.hostname) }} #}
+
+{# Live-state indicator: a small pulsing/static dot + a "badge rounded-pill bg-label-<variant>"
+   pill, for states that come FROM THE SERVER and can change under the user (an instance's health,
+   a job's last run outcome) -- as opposed to components/badge.html, which is for static labels,
+   tags and counts that don't represent a live/changing condition. Keep using badge.html for
+   things like the Draft/Online service toggle (services.html, config_edit.html) -- that's a
+   deliberately-set mode, not a live health signal, so it stays out of the `type` catalog below.
+
+   Superset of the hand-rolled instance-status pill duplicated in instances.html
+   (`{% if instance.status == "up" %}<span id="status-{{ instance.hostname }}"
+   class="badge rounded-pill bg-label-bw-green" data-i18n="status.up">Up</span>{% elif ... %}`,
+   repeated for "loading"/other) -- same classes and id contract, plus the leading dot this macro
+   adds. instances.js already clones/replaces that span by id after a ping
+   (`$("#status-" + instance...).clone()`), so `id` here is deliberately free-form, never derived,
+   same as components/badge.html. Retrofitting instances.html onto this macro is separate
+   page-by-page work, not done here.
+
+   `type` looks up a small built-in catalog of the live states that already exist in the app
+   (see instances.html's Up/Down/Loading, jobs.js's Success/Failed run outcome) and fills in the
+   default label/i18n key/color/pulse for it. Any of those defaults can be overridden per call;
+   pass a `type` outside the catalog (e.g. one of the certificates.status.* states) together with
+   `label`/`i18n_key`/`variant` to cover a state this file doesn't know about yet, without editing
+   this macro.
+
+   Params:
+     type       (required) one of 'up' | 'down' | 'loading' | 'success' | 'failed', OR any other
+                string when paired with explicit label/variant (see above). Used verbatim as the
+                fallback label and as the `data-value` when data_value is omitted.
+     id         optional id on the outer pill, e.g. "status-" ~ instance.hostname. Never derive it
+                by string concatenation inside the macro -- always the caller's real id (same rule
+                components/label.html documents).
+     label      override the type's default English fallback text, e.g. a job's short error code.
+     i18n_key   override the type's default data-i18n key. Only meaningful paired with `label` for
+                a custom-but-still-translated state; a `label` override given alone (e.g. a one-off
+                value like a WAF rule id) renders with no data-i18n, same as badge.html's rule.
+     variant    override the type's default `bg-label-<variant>` color suffix. Must be a color
+                with an existing .bg-label-<variant> rule (see components/badge.html).
+     pulse      override the type's default dot animation (true = pulsing/"in progress", false =
+                static). Default none = use the type's own default.
+     tooltip    optional English fallback for a Bootstrap tooltip (data-bs-original-title) on the
+                pill, e.g. a job's last error message. Uses the app-wide `[data-bs-toggle=tooltip]`
+                init already in main.js -- no companion JS needed.
+     tooltip_i18n  data-i18n key for tooltip.
+     live       adds `role="status"` (implicit aria-live="polite") so screen readers announce
+                updates -- only when this exact pill is actually mutated in place by page JS after
+                render (instances.html's ping-instance flow). Leave false for a plain
+                server-rendered value that never changes without a full page reload: a role="status"
+                on a static pill just makes screen readers re-announce it on every re-render.
+                Default false.
+     data_value data-value attribute for DataTables column filtering/sorting (see badge.html).
+                Defaults to `type`.
+     classes    extra utility classes appended to the outer pill.
+
+   Not covered: outline/ghost styling -- this repo's badge system (core.css/theme-default.css) only
+   ships the tinted `bg-label-<variant>` fill, no outline variant, so it isn't invented here. Sizing
+   (sm/md/lg) is likewise skipped -- there's no existing badge-size CSS to hang it on; pass a plain
+   utility class via `classes` (e.g. "fs-6") for the rare one-off. The dot's pulse reuses the
+   existing `@keyframes pulsate` (overrides.css) and is already covered by the sitewide
+   `prefers-reduced-motion: reduce` override at the bottom of overrides.css -- nothing extra needed
+   here for that. #}
+{%- set STATUS_TYPES = {
+    'up':      {'label': 'Up',         'i18n': 'status.up',      'variant': 'bw-green', 'pulse': true},
+    'down':    {'label': 'Down',       'i18n': 'status.down',    'variant': 'danger',   'pulse': false},
+    'loading': {'label': 'Loading...', 'i18n': 'status.loading', 'variant': 'warning',  'pulse': true},
+    'success': {'label': 'Success',    'i18n': 'status.success', 'variant': 'success',  'pulse': false},
+    'failed':  {'label': 'Failed',     'i18n': 'status.failed',  'variant': 'danger',   'pulse': false},
+} -%}
+{% macro status(
+    type,
+    id=none,
+    label=none,
+    i18n_key=none,
+    variant=none,
+    pulse=none,
+    tooltip=none,
+    tooltip_i18n=none,
+    live=false,
+    data_value=none,
+    classes=""
+) -%}
+    {%- set t = STATUS_TYPES[type] if type in STATUS_TYPES else none -%}
+    {%- set _label = label or (t.label if t else type) -%}
+    {%- set _i18n = i18n_key if i18n_key else (none if label else (t.i18n if t else none)) -%}
+    {%- set _variant = variant or (t.variant if t else 'secondary') -%}
+    {%- set _pulse = pulse if pulse is not none else (t.pulse if t else false) -%}
+    <span{% if id %} id="{{ id }}"{% endif %}
+         class="badge rounded-pill bg-label-{{ _variant }} d-inline-flex align-items-center gap-1{% if classes %} {{ classes }}{% endif %}"
+         {%- if live %} role="status"{% endif %}
+         data-value="{{ data_value or type }}"
+         {%- if tooltip %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ tooltip }}"{% if tooltip_i18n %} data-i18n="{{ tooltip_i18n }}"{% endif %}{% endif %}>
+        <span class="status-dot{% if _pulse %} status-dot-pulse{% endif %}" aria-hidden="true"></span>
+        <span{% if _i18n %} data-i18n="{{ _i18n }}"{% endif %}>{{ _label }}</span>
+    </span>
+{%- endmacro %}

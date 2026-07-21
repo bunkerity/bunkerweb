@@ -1,0 +1,113 @@
+{# usage: {% from "components/text.html" import text %}
+          {{ text(id="hostname", name="hostname", label="Hostname", label_i18n="form.label.hostname", placeholder="http://bunkerweb:5000", pattern="^(https?://)?(?!.*\.\.)[^\s\/:]{1,256}(:\d+)?$", maxlength=256, required=true) }} #}
+
+{# Plain single-line <input type="text" class="form-control">, labelled via components/label.html --
+   superset of the hand-rolled "form-label" + "input type=text class=form-control" pairs
+   duplicated across instances.html (#hostname / #name in the create-instance modal),
+   template_edit.html (#template-id / #template-name), bans.html (#reason) and
+   web_cache.html (#web-cache-purge-key, a font-monospace variant reachable here via
+   input_class).
+
+   This is a *generic* text-field macro for simple, standalone form fields -- it is NOT a
+   replacement for models/input_setting.html, the BunkerWeb plugin-settings editor's own
+   `type: text` field. That template's form-floating layout + data-original/data-default/
+   data-method reset-to-default wiring + multisite badge + regex-from-plugin.json pattern
+   is a much more specialized, settings-schema-driven shape; components/password.html,
+   components/number.html and components/text-area.html all document the same carve-out
+   for their own settings-editor counterparts, kept here on purpose so the two families
+   don't get conflated.
+
+   `id` is a required, caller-supplied param -- never derived from `label` by string
+   concatenation (see components/label.html's doc comment for the bug class that invites).
+
+   Params:
+     id               required -- id on the <input>. Also the `for_id` passed to
+                      components/label.html and the aria-describedby target for help_text.
+     label            optional visible caption above the field (English fallback), rendered
+                      via components/label.html (variant="default").
+     label_i18n       data-i18n key for label.
+     name             form field name. Defaults to id.
+     value            initial value. Default "" (empty).
+     placeholder      optional placeholder text.
+     placeholder_i18n data-i18n key for placeholder, using i18next's "[placeholder]key"
+                      attribute-target syntax (same pattern components/password.html uses).
+     maxlength        optional native `maxlength` attribute (see groups.html's alias fields,
+                      maxlength=64, or web_cache.html's purge-key field, maxlength=4096).
+     pattern          optional native `pattern` attribute for client-side format hints (see
+                      instances.html's hostname field).
+     autocomplete     optional autocomplete attribute. Default none (omitted).
+     required         adds the required attribute + aria-required="true", and passes
+                      required=true to components/label.html for its " *" marker. Default
+                      false.
+     disabled         disables the control. Default false.
+     readonly         adds the readonly attribute (still submitted, unlike disabled) -- see
+                      template_edit.html's #template-id field in edit mode. Default false.
+     help_text        optional helper text rendered below as "form-text text-muted" (same
+                      markup components/label.html, components/number.html and
+                      components/text-area.html use for their own help param), linked via
+                      aria-describedby.
+     help_i18n        data-i18n key for help_text.
+     input_class      extra classes appended to the <input>, e.g. "font-monospace" (web_cache
+                      purge-key) or a page-specific JS hook class.
+     classes          extra utility classes on the outer wrapper.
+
+   Not covered:
+     - Any input-group composition -- a leading icon/addon (components/search.html's search
+       icon, groups.html's "@" alias prefix) or a trailing button (components/copy-button.html,
+       components/secret-field.html). Wrap the macro's own <input> in your own `.input-group`
+       for that, same escape hatch components/number.html documents for a unit-suffix addon.
+     - Masked/password input (show/hide toggle) -- use components/password.html.
+     - Search-typed input (role="searchbox", search icon, clear button) -- use
+       components/search.html.
+     - Multi-value/tag entry (models/multivalue_setting.html) or option typeahead
+       (models/multiselect_setting.html) -- different interaction models, not a single
+       plain <input>.
+     - The file-upload/manual-edit toggle in models/input_setting.html's `type == 'file'`
+       branch -- stays specialized, same carve-out components/text-area.html documents.
+
+   No companion JS -- markup/CSS only, same as components/number.html and
+   components/text-area.html. #}
+{% from "components/label.html" import label as ui_label %}
+{% macro text(
+    id,
+    label=none,
+    label_i18n=none,
+    name=none,
+    value="",
+    placeholder=none,
+    placeholder_i18n=none,
+    maxlength=none,
+    pattern=none,
+    autocomplete=none,
+    required=false,
+    disabled=false,
+    readonly=false,
+    help_text=none,
+    help_i18n=none,
+    input_class="",
+    classes=""
+) -%}
+    {%- set help_id = (id ~ "-help") if help_text else none -%}
+    <div{% if classes %} class="{{ classes }}"{% endif %}>
+        {%- if label %}
+            {{ ui_label(for_id=id, text=label, text_i18n=label_i18n, required=required) }}
+        {%- endif %}
+        <input type="text"
+               id="{{ id }}"
+               name="{{ name if name else id }}"
+               class="form-control{% if input_class %} {{ input_class }}{% endif %}"
+               value="{{ value }}"
+               {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if placeholder_i18n %}data-i18n="[placeholder]{{ placeholder_i18n }}"{% endif %}
+               {% if maxlength is not none %}maxlength="{{ maxlength }}"{% endif %}
+               {% if pattern %}pattern="{{ pattern }}"{% endif %}
+               {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+               {% if required %}required aria-required="true"{% endif %}
+               {% if disabled %}disabled{% endif %}
+               {% if readonly %}readonly{% endif %}
+               {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>
+        {%- if help_text %}
+        <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+        {%- endif %}
+    </div>
+{%- endmacro %}

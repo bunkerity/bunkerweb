@@ -1,0 +1,203 @@
+{# usage: {% from "components/input-list.html" import input_list %}
+          {{ input_list(id="tpl-42-settings", settings=[{"key": "SERVER_NAME", "value": "example.com"}, {"key": "USE_ANTIBOT", "value": "captcha"}], label="Template settings", label_i18n="template.editor.label_step_settings") }} #}
+
+{# Read-only recap of a list of key/value settings -- a compact scrollable Name/Value
+   table with a "view all N settings" trigger that opens the full list in a modal.
+   Replaces the pattern of showing only a bare count with no way to inspect the list
+   without leaving the page, e.g. templates.html's settings column (line 109,
+   `template_data.settings|length` rendered as a plain `<td>` number) -- there's no
+   preview today.
+
+   NOT a replacement for template_edit.html's step-settings editor (`#settings-list`,
+   static/js/pages/template_edit.js `dom.settingsList` and friends): that widget lets an
+   operator add/remove/reorder settings and is a different concern (editing) from this
+   one (read-only display). Nor does it replace the live plugin-settings grid in
+   plugins_settings.html -- both stay as-is.
+
+   The trigger button is hand-rolled rather than composed with components/button.html,
+   same reasoning components/secret-field.html documents for its own toggle/copy
+   buttons: it needs a `data-il-settings` JSON payload attribute button.html's fixed
+   param surface has no hook for. Everything else (the modal shell, its Close button,
+   the header title, the multisite badge) reuses the existing macros verbatim.
+
+   `show_values=false` only blanks the values shown in the compact table -- the modal
+   opened via the trigger always renders the real values from `data-il-settings`
+   regardless, the same reveal-on-demand shape components/secret-field.html uses (the
+   compact view can stay terse/private on a shared screen; explicitly opening "view
+   all" is the deliberate reveal action).
+
+   Params:
+     settings       (required) list of {key, value} pairs to render, e.g. the settings
+                    of a template step or a service's non-default settings. `value` may
+                    be omitted/None -- rendered as an em dash.
+     id             (required) base id -- also used for the modal ("{id}-modal") and the
+                    header heading ("{id}-label"). Never derived from `label`, same
+                    reasoning components/label.html documents for its own `id`/`for_id`.
+     label          optional header caption above the list (English fallback), rendered
+                    via components/title.html (level="h6").
+     label_i18n     data-i18n key for label.
+     subtitle       optional secondary caption under label (components/title.html).
+     subtitle_i18n  data-i18n key for subtitle.
+     help_text      optional line under the list ("form-text text-muted", same markup
+                    components/label.html/components/checkbox.html use for their own
+                    `help` param).
+     help_i18n      data-i18n key for help_text.
+     is_multisite   show the circular bx-server "multisite setting" badge next to the
+                    header (same markup/tooltip copy as components/label.html's own
+                    `multisite` param -- label.html isn't reused directly here because
+                    its `for_id` is meant to point at one bound form control, and this
+                    header fronts a whole list rather than a single input). Default false.
+     show_values    render the real values in the compact table. When false, every row
+                    shows an em dash instead (the modal still shows real values -- see
+                    above). Default true.
+     button_variant "minimal" (default) -- small icon-only eye button beside the header,
+                    only rendered when `label` is set (matches the design kit's own
+                    default). "default" -- full-width "View all N settings" button
+                    rendered above the list, shown regardless of `label`.
+     total_variant  Bootstrap color suffix ("btn-{{ total_variant }}") for the
+                    button_variant="default" trigger. Default "primary".
+     size           "sm" | "md" | "lg" -- max-height of the scrollable list (see
+                    components/code-editor.html's own sm/md/lg height param for the
+                    same idea applied to a different scrollable widget). Default "md".
+     bg             "none" (default) | "subtle" -- wraps the list in a `--bw-bg-subtle`
+                    panel with a border/radius, for standalone placement outside a card.
+     classes        extra utility classes on the outer wrapper.
+
+   Not covered: the design kit's second "settings" list layout (each row rendered as a
+   non-functional look-alike `<input>` box) -- dropped, since those inputs submit
+   nothing in the design kit either and shipping inert-but-input-shaped elements here
+   would mislead operators into thinking the values are editable; only the Name/Value
+   table layout is implemented. The design kit's inline "subtitle next to title"
+   variant (`with_subtitle_min`) -- only the block-below-heading shape
+   components/title.html already renders is supported. Per-row value masking (bullets
+   over one sensitive setting rather than the whole list) -- compose
+   components/secret-field.html on that specific row instead. Re-rendering the list
+   client-side after the initial paint -- this is a one-shot server-rendered display,
+   unlike components/selected-list.html's `window.BWSelectedList.render()`.
+
+   Trigger wiring (delegated [data-il-open] click -> populate + open the modal via
+   Bootstrap's own `new bootstrap.Modal(...)` API) lives in
+   static/js/components/input-list.js -- include it once on any page using this macro. #}
+{% from "components/title.html" import title as ui_title %}
+{% from "components/modal.html" import modal %}
+{% from "components/button.html" import button %}
+{% macro input_list(
+    settings,
+    id,
+    label=none,
+    label_i18n=none,
+    subtitle=none,
+    subtitle_i18n=none,
+    help_text=none,
+    help_i18n=none,
+    is_multisite=false,
+    show_values=true,
+    button_variant="minimal",
+    total_variant="primary",
+    size="md",
+    bg="none",
+    classes=""
+) -%}
+{%- set _count = settings | length -%}
+{%- set _show_header_row = label or is_multisite or (button_variant == "minimal" and _count) -%}
+<div id="{{ id }}" class="bw-input-list{% if bg == 'subtle' %} bw-input-list-subtle{% endif %}{% if classes %} {{ classes }}{% endif %}">
+    {%- if _show_header_row %}
+    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+        <div class="flex-grow-1 min-w-0">
+            {%- if label %}
+            {{ ui_title(label=label, i18n_key=label_i18n, level="h6", subtitle=subtitle, subtitle_i18n_key=subtitle_i18n, id=id ~ "-label") }}
+            {%- endif %}
+        </div>
+        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+            {%- if is_multisite %}
+            <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  data-bs-original-title="This is a multisite setting, affecting multiple services if defined globally."
+                  data-i18n="tooltip.multisite_setting">
+                <span class="bx bx-server bx-xs" aria-hidden="true"></span>
+            </span>
+            {%- endif %}
+            {%- if button_variant == "minimal" and _count %}
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary p-1 lh-1"
+                    data-il-open
+                    data-il-settings='{{ settings | tojson }}'
+                    aria-controls="{{ id }}-modal"
+                    aria-haspopup="dialog"
+                    aria-label="View all {{ _count }} settings"
+                    data-i18n="input_list.view_all_settings"
+                    data-i18n-options='{{ {"count": _count} | tojson }}'>
+                <i class="bx bx-show bx-xs" aria-hidden="true"></i>
+            </button>
+            {%- endif %}
+        </div>
+    </div>
+    {%- endif %}
+    {%- if button_variant == "default" and _count %}
+    <button type="button"
+            class="btn btn-{{ total_variant }} btn-sm w-100 mb-2 d-flex align-items-center justify-content-center gap-1"
+            data-il-open
+            data-il-settings='{{ settings | tojson }}'
+            aria-controls="{{ id }}-modal"
+            aria-haspopup="dialog">
+        <i class="bx bx-show" aria-hidden="true"></i>
+        <span data-i18n="input_list.view_all_settings" data-i18n-options='{{ {"count": _count} | tojson }}'>View all {{ _count }} settings</span>
+    </button>
+    {%- endif %}
+    <div class="bw-input-list-scroll bw-input-list-{{ size }}">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th data-i18n="table.header.name">Name</th>
+                    <th data-i18n="table.header.value">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%- for s in settings %}
+                <tr>
+                    <td><code class="courier-prime">{{ s.key }}</code></td>
+                    <td>
+                        {%- if show_values and s.value %}
+                        <code class="courier-prime text-break">{{ s.value }}</code>
+                        {%- else %}
+                        <span class="text-muted" aria-hidden="true">&mdash;</span>
+                        {%- endif %}
+                    </td>
+                </tr>
+                {%- else %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted py-3" data-i18n="status.no_data">No data</td>
+                </tr>
+                {%- endfor %}
+            </tbody>
+        </table>
+    </div>
+    {%- if help_text %}
+    <div class="form-text text-muted mt-1"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+    {%- endif %}
+</div>
+
+{% call modal(id=id ~ "-modal", title_key="input_list.view_all_settings", title="View all " ~ _count ~ " settings", size="lg", static_backdrop=false) %}
+    <div class="modal-body">
+        <div class="bw-input-list-scroll bw-input-list-modal-scroll">
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th data-i18n="table.header.name">Name</th>
+                        <th data-i18n="table.header.value">Value</th>
+                    </tr>
+                </thead>
+                <tbody data-il-modal-body>
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-3" data-i18n="status.no_data">No data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", dismiss="modal") }}
+    </div>
+{% endcall %}
+{%- endmacro %}

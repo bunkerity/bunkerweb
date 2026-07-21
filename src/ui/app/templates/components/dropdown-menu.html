@@ -1,0 +1,152 @@
+{# usage: {% from "components/dropdown-menu.html" import dropdown_menu %}
+          {{ dropdown_menu(id="log-types", label="Select File", i18n_key="button.select_file", icon="bx-file", items=[
+                { "header": "Main Logs", "header_i18n_key": "logs.main_logs" },
+                { "label": "error.log", "href": url_for('logs', file='error.log'), "active": true },
+                { "divider": true },
+                { "label": "Delete", "i18n_key": "button.delete", "icon": "bx-trash", "tag": "button", "danger": true,
+                  "attrs": 'data-bs-toggle="modal" data-bs-target="#delete-log-modal"' }
+          ]) }} #}
+
+{# Toggle button + floating action/navigation menu -- superset of the ad-hoc
+   "<div class="dropdown btn-group">...<button data-bs-toggle="dropdown">...<ul class="dropdown-menu">"
+   blocks duplicated across config_edit.html, jobs.html, logs.html,
+   language-selector.html, support.html and models/plugins_settings_easy.html
+   (navbar.html's account menu is a similar but navbar-specific shape and is
+   left as-is).
+
+   Wiring is entirely native Bootstrap 5.3 (data-bs-toggle="dropdown", already
+   vendored in libs/bootstrap/bootstrap.bundle.min.js and loaded on every page
+   via base.html) -- open/close, outside-click dismissal, Esc and arrow-key
+   focus all come for free, exactly like every dropdown already in production.
+   No companion JS file is shipped: the Claude Design prototype's
+   dropdown-menu.js reimplements that same open/close/keyboard behaviour by
+   hand (it ships no Bootstrap JS at all in the kit), so including it here
+   would install a second, competing delegated click/keydown handler on top
+   of the real Bootstrap dropdown plugin already active on this exact
+   [data-bs-toggle="dropdown"] markup everywhere else in the app.
+
+   Params:
+     id            (required) unique id. Becomes "{id}-toggle" (button) and
+                   "{id}" (the <ul>) -- so existing CSS id-selectors like
+                   #services-dropdown-menu keep working if a future port
+                   reuses the same id verbatim.
+     items         (required) list of dicts, one of:
+                     action:  { label, i18n_key=None, href=None, icon=None,
+                                tag="a"|"button", active=False,
+                                disabled=False, danger=False, attrs="" }
+                     divider: { "divider": true }
+                     header:  { header, header_i18n_key=None }
+                   tag="button" renders <button type="button"> for a JS-driven
+                   action (no URL); default "a" renders <a href="...">,
+                   matching components/button.html's tag convention.
+                   danger adds "text-danger" (real utility class already in
+                   core.css) -- pair it with `attrs` wiring a confirmation
+                   modal (data-bs-toggle="modal" data-bs-target="#...")
+                   instead of a bare destructive action.
+                   attrs is raw HTML passed through unescaped ("| safe", like
+                   components/card.html's header_right) -- caller-authored
+                   template text, not user input.
+     label         toggle button text (English fallback). Omit for an
+                   icon-only toggle (pass icon + aria_label instead).
+     i18n_key      data-i18n key for label, e.g. "button.select_file".
+     label_classes extra classes on the label <span>, e.g. "d-none d-md-inline"
+                   to collapse the text to an icon-only toggle below a
+                   breakpoint (matches jobs.html's Cache toggle, which hid
+                   "Cache" below md pre-port).
+     icon          optional Boxicons class on the toggle, e.g. "bx-cog",
+                   "bx-file" (leading icon, matches logs.html/config_edit.html).
+     variant       btn-<variant> on the toggle. Must have an existing
+                   .btn-<variant> rule (core.css/overrides.css/theme-default.css).
+                   Default "outline-primary" (today's most common toggle style
+                   -- config_edit.html, logs.html, support.html,
+                   plugins_settings_easy.html). "outline-secondary" is the
+                   other real usage (jobs.html, language-selector.html).
+     size          "" (default/md) | "sm" | "lg" -- appended as "btn-<size>".
+     align         "start" | "end" -- "end" adds dropdown-menu-end.
+     direction     "down" | "up" -- "up" adds dropup to the wrapper.
+     disabled      true dims the toggle (".disabled" class) and adds the
+                   native `disabled` attribute (matches logs.html's "no log
+                   files available" toggle).
+     aria_label    accessible name override for the toggle. Required (with
+                   aria_i18n_key) when label is omitted -- an icon-only
+                   toggle with no aria_label is a real accessibility bug.
+     aria_i18n_key data-i18n key for aria_label. i18n.js (see
+                   static/js/i18n.js) translates whichever attribute is
+                   present on the element in this order: placeholder >
+                   title > data-bs-original-title > aria-label -- since the
+                   toggle has none of the first three, a plain data-i18n here
+                   correctly retranslates aria-label (do NOT use the
+                   non-functional "data-i18n-aria-label" attribute name seen
+                   in a couple of older pages -- i18n.js never looks for it).
+     menu_classes  extra classes on the <ul>, e.g. "nav-pills max-vh-60
+                   overflow-auto pt-0" for the long scrollable lists used in
+                   config_edit.html/logs.html/support.html/language-selector.html.
+     classes / attrs
+                   extra classes / raw attributes (e.g. a
+                   tooltip trigger on a disabled toggle, see logs.html) on the
+                   outer wrapper. attrs is passed through "| safe".
+
+   Call the macro with a {% call %} block to inject extra raw markup (e.g. a
+   components/search.html input) right before the item list -- exactly the
+   pattern used today by config_edit.html/support.html/language-selector.html's
+   searchable service/language pickers. Filtering stays page-specific JS. #}
+{% macro dropdown_menu(
+    id,
+    items,
+    label="",
+    i18n_key=none,
+    label_classes="",
+    icon=none,
+    variant="outline-primary",
+    size="",
+    align="start",
+    direction="down",
+    disabled=false,
+    aria_label=none,
+    aria_i18n_key=none,
+    menu_classes="",
+    classes="",
+    attrs=""
+) -%}
+<div class="dropdown btn-group{% if direction == 'up' %} dropup{% endif %}{% if classes %} {{ classes }}{% endif %}"
+     {%- if attrs %} {{ attrs | safe }}{% endif %}>
+    <button type="button"
+            id="{{ id }}-toggle"
+            class="btn btn-{{ variant }}{% if size %} btn-{{ size }}{% endif %} dropdown-toggle{% if disabled %} disabled{% endif %}"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+            {%- if disabled %} disabled{% endif %}
+            {%- if aria_label %} aria-label="{{ aria_label }}"{% if aria_i18n_key %} data-i18n="{{ aria_i18n_key }}"{% endif %}{% endif %}>
+        {%- if icon %}<i class="bx {{ icon }}{% if label %} me-1{% endif %}" aria-hidden="true"></i>{% endif -%}
+        {%- if label %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</span>{% endif -%}
+    </button>
+    <ul id="{{ id }}"
+        class="dropdown-menu{% if align == 'end' %} dropdown-menu-end{% endif %}{% if menu_classes %} {{ menu_classes }}{% endif %}"
+        role="menu"
+        aria-labelledby="{{ id }}-toggle">
+        {%- if caller %}{{ caller() }}{% endif -%}
+        {%- for it in items %}
+        {%- if it.divider %}
+        <li role="presentation"><hr class="dropdown-divider"></li>
+        {%- elif it.header is defined %}
+        <li role="presentation"><h6 class="dropdown-header"{% if it.header_i18n_key %} data-i18n="{{ it.header_i18n_key }}"{% endif %}>{{ it.header }}</h6></li>
+        {%- else %}
+        {%- set tag = "button" if it.tag == "button" else "a" %}
+        <li role="presentation">
+            <{{ tag }} role="menuitem"
+               class="dropdown-item{% if it.active %} active{% endif %}{% if it.danger %} text-danger{% endif %}{% if it.disabled %} disabled{% endif %}"
+               {%- if tag == "a" %} href="{{ it.href or '#' }}"{% else %} type="button"{% endif %}
+               {%- if it.active %} aria-current="true"{% endif %}
+               {%- if it.disabled -%}
+                   {% if tag == "button" %} disabled{% else %} aria-disabled="true" tabindex="-1"{% endif %}
+               {%- endif %}
+               {%- if it.attrs %} {{ it.attrs | safe }}{% endif %}>
+                {%- if it.icon %}<i class="bx {{ it.icon }} me-2" aria-hidden="true"></i>{% endif %}<span{% if it.i18n_key %} data-i18n="{{ it.i18n_key }}"{% endif %}>{{ it.label }}</span>
+            </{{ tag }}>
+        </li>
+        {%- endif %}
+        {%- endfor %}
+    </ul>
+</div>
+{%- endmacro %}

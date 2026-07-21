@@ -33,7 +33,10 @@
       "toggle_wrap": "切换自动换行",
       "configs_dropzone": "选择自定义配置导出文件或将其拖放到此处",
       "raw_configuration": "原始配置",
-      "services_dropzone": "选择服务导出文件或将其拖放到此处"
+      "services_dropzone": "选择服务导出文件或将其拖放到此处",
+      "hide_value": "隐藏值",
+      "reveal_value": "显示值",
+      "user_avatar": "用户头像"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "未找到匹配的插件",
     "zero_records_reports": "未找到匹配的报告",
     "zero_records_services": "未找到匹配的服务",
-    "zero_records_templates": "未找到匹配的模板"
+    "zero_records_templates": "未找到匹配的模板",
+    "selected_list_count": "{{count}} {{entity}} 已选中",
+    "selected_list_empty": "未选中 {{entity}}。"
   },
   "dev_log": {
     "copy_failed": "复制文本失败：",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL API 重试次数",
       "zerossl_api_retry_delay": "ZeroSSL API 重试延迟",
       "zerossl_api_connect_timeout": "ZeroSSL API 连接超时",
-      "zerossl_api_max_time": "ZeroSSL API 最大时长"
+      "zerossl_api_max_time": "ZeroSSL API 最大时长",
+      "instance_id": "实例 ID"
     },
     "placeholder": {
       "2fa_code": "输入代码",
@@ -780,7 +786,8 @@
     "privacy_policy": "隐私政策",
     "read_more": "阅读更多",
     "see_more": "查看更多",
-    "upgrade": "升级？"
+    "upgrade": "升级？",
+    "opens_new_tab": "（在新标签页中打开）"
   },
   "logs": {
     "annotation_error": "错误",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "不允许在当前模板之外进行更改。请使用当前模板进行更改或切换到高级/原始模式。",
     "unique_server_name": "唯一服务器名称",
     "up": "运行中",
-    "yes": "是"
+    "yes": "是",
+    "done": "已完成",
+    "pending": "待处理"
   },
   "step": {
     "next": "下一步",
@@ -1304,7 +1313,8 @@
       "type": "类型",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "版本"
+      "version": "版本",
+      "value": "值"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "由计划任务生成的缓存文件（黑名单、GeoIP 数据库等） — 针对每个服务和插件进行检查、下载或删除。"
+  },
+  "accordion": {
+    "body": {
+      "tls": "自动颁发和续订证书。"
+    },
+    "title": {
+      "tls": "TLS & 证书"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "查看所有 {{count}} 设置"
   }
 }

@@ -33,7 +33,10 @@
       "toggle_wrap": "Attiva/disattiva ritorno a capo",
       "configs_dropzone": "Seleziona un file di esportazione delle configurazioni personalizzate o rilascialo qui",
       "raw_configuration": "Configurazione Grezza",
-      "services_dropzone": "Seleziona un file di esportazione dei servizi o rilascialo qui"
+      "services_dropzone": "Seleziona un file di esportazione dei servizi o rilascialo qui",
+      "hide_value": "Nascondi valore",
+      "reveal_value": "Mostra valore",
+      "user_avatar": "Avatar utente"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "Nessun Plugin corrispondente trovato",
     "zero_records_reports": "Nessun Report corrispondente trovato",
     "zero_records_services": "Nessun Servizio corrispondente trovato",
-    "zero_records_templates": "Nessun modello corrispondente trovato"
+    "zero_records_templates": "Nessun modello corrispondente trovato",
+    "selected_list_count": "{{count}} {{entity}} selezionati",
+    "selected_list_empty": "Nessuna {{entity}} selezionata."
   },
   "dev_log": {
     "copy_failed": "Copia del testo fallita:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "Tentativi API ZeroSSL",
       "zerossl_api_retry_delay": "Ritardo tentativi API ZeroSSL",
       "zerossl_api_connect_timeout": "Timeout di connessione API ZeroSSL",
-      "zerossl_api_max_time": "Tempo massimo API ZeroSSL"
+      "zerossl_api_max_time": "Tempo massimo API ZeroSSL",
+      "instance_id": "ID istanza"
     },
     "placeholder": {
       "2fa_code": "Inserisci codice",
@@ -780,7 +786,8 @@
     "privacy_policy": "Politica sulla Privacy",
     "read_more": "Leggi di Più",
     "see_more": "Vedi Altro",
-    "upgrade": "Aggiornare?"
+    "upgrade": "Aggiornare?",
+    "opens_new_tab": "(si apre in una nuova scheda)"
   },
   "logs": {
     "annotation_error": "Errore",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "Non sono consentite modifiche al di fuori del modello corrente. Effettua le modifiche utilizzando il modello corrente o passa alla modalità Avanzata/Grezza.",
     "unique_server_name": "Nome Server Unico",
     "up": "Attivo",
-    "yes": "Sì"
+    "yes": "Sì",
+    "done": "Completati",
+    "pending": "In attesa"
   },
   "step": {
     "next": "Successivo",
@@ -1304,7 +1313,8 @@
       "type": "Tipo",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Versione"
+      "version": "Versione",
+      "value": "Valore"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "File di cache generati da attività programmate (liste di blocco, database GeoIP e altro) — ispeziona, scarica o eliminali per servizio e plugin."
+  },
+  "accordion": {
+    "body": {
+      "tls": "Emettere e rinnovare automaticamente i certificati."
+    },
+    "title": {
+      "tls": "TLS & certificati"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "Visualizza tutte le {{count}} impostazioni"
   }
 }

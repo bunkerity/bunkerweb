@@ -33,7 +33,10 @@
       "toggle_wrap": "줄 바꿈 전환",
       "configs_dropzone": "사용자 지정 설정 내보내기 파일을 선택하거나 여기에 놓으세요",
       "raw_configuration": "원본 설정",
-      "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요"
+      "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요",
+      "hide_value": "값 숨기기",
+      "reveal_value": "값 표시",
+      "user_avatar": "사용자 프로필"
     }
   },
   "badge": {
@@ -586,7 +589,9 @@
     "zero_records_plugins": "일치하는 플러그인이 없습니다.",
     "zero_records_reports": "일치하는 보고서가 없습니다.",
     "zero_records_services": "일치하는 서비스가 없습니다.",
-    "zero_records_templates": "일치하는 템플릿이 없습니다."
+    "zero_records_templates": "일치하는 템플릿이 없습니다.",
+    "selected_list_count": "{{count}} {{entity}} 선택됨",
+    "selected_list_empty": "{{entity}} 선택되지 않음."
   },
   "dev_log": {
     "copy_failed": "텍스트 복사 실패:",
@@ -724,7 +729,8 @@
       "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
       "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
       "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
-      "zerossl_api_max_time": "ZeroSSL API 최대 시간"
+      "zerossl_api_max_time": "ZeroSSL API 최대 시간",
+      "instance_id": "인스턴스 ID"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -780,7 +786,8 @@
     "privacy_policy": "개인정보 처리방침",
     "read_more": "더 읽어보기",
     "see_more": "더 보기",
-    "upgrade": "업그레이드하시겠습니까?"
+    "upgrade": "업그레이드하시겠습니까?",
+    "opens_new_tab": "(새 탭에서 열기)"
   },
   "logs": {
     "annotation_error": "오류",
@@ -1234,7 +1241,9 @@
     "template_in_use_description": "현재 템플릿 외부에서의 변경은 허용되지 않습니다. 현재 템플릿을 사용하여 수정하거나 고급/원본 모드로 전환하세요.",
     "unique_server_name": "고유한 서버 이름",
     "up": "활성",
-    "yes": "예"
+    "yes": "예",
+    "done": "완료됨",
+    "pending": "대기 중"
   },
   "step": {
     "next": "다음",
@@ -1304,7 +1313,8 @@
       "type": "유형",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "버전"
+      "version": "버전",
+      "value": "값"
     }
   },
   "template": {
@@ -1950,5 +1960,16 @@
   },
   "cache": {
     "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다."
+  },
+  "accordion": {
+    "body": {
+      "tls": "자동으로 인증서 발급 및 갱신"
+    },
+    "title": {
+      "tls": "TLS & 인증서"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "모든 {{count}} 설정 보기"
   }
 }

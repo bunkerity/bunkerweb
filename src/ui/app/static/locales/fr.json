@@ -33,7 +33,10 @@
       "toggle_wrap": "Activer/désactiver le retour à la ligne",
       "configs_dropzone": "Sélectionnez un fichier d'exportation de configurations personnalisées ou déposez-le ici",
       "raw_configuration": "Configuration brute",
-      "services_dropzone": "Sélectionnez un fichier d'exportation de services ou déposez-le ici"
+      "services_dropzone": "Sélectionnez un fichier d'exportation de services ou déposez-le ici",
+      "hide_value": "Masquer la valeur",
+      "reveal_value": "Afficher la valeur",
+      "user_avatar": "Icône de l'utilisateur"
     }
   },
   "badge": {
@@ -587,7 +590,9 @@
     "zero_records_plugins": "Aucun Plugin correspondant trouvé",
     "zero_records_reports": "Aucun Rapport correspondant trouvé",
     "zero_records_services": "Aucun Service correspondant trouvé",
-    "zero_records_templates": "Aucun Modèle correspondant trouvé"
+    "zero_records_templates": "Aucun Modèle correspondant trouvé",
+    "selected_list_count": "{{count}} {{entity}} sélectionnés",
+    "selected_list_empty": "Aucune {{entity}} sélectionnée."
   },
   "dev_log": {
     "copy_failed": "Échec de la copie du texte :",
@@ -725,7 +730,8 @@
       "zerossl_api_retry": "Nouvelles tentatives API ZeroSSL",
       "zerossl_api_retry_delay": "Délai de nouvelle tentative API ZeroSSL",
       "zerossl_api_connect_timeout": "Délai de connexion API ZeroSSL",
-      "zerossl_api_max_time": "Durée maximale API ZeroSSL"
+      "zerossl_api_max_time": "Durée maximale API ZeroSSL",
+      "instance_id": "ID de l'instance"
     },
     "placeholder": {
       "2fa_code": "Entrez le code",
@@ -781,7 +787,8 @@
     "privacy_policy": "Politique de Confidentialité",
     "read_more": "Lire Plus",
     "see_more": "Voir Plus",
-    "upgrade": "Mettre à niveau ?"
+    "upgrade": "Mettre à niveau ?",
+    "opens_new_tab": "(s'ouvre dans un nouvel onglet)"
   },
   "logs": {
     "annotation_error": "Erreur",
@@ -1236,7 +1243,9 @@
     "template_in_use_description": "Les modifications en dehors du modèle actuel ne sont pas autorisées. Veuillez effectuer les modifications en utilisant le modèle actuel ou passer en mode Avancé/Brut.",
     "unique_server_name": "Nom de Serveur Unique",
     "up": "Actif",
-    "yes": "Oui"
+    "yes": "Oui",
+    "done": "Terminé",
+    "pending": "En attente"
   },
   "step": {
     "next": "Suivant",
@@ -1306,7 +1315,8 @@
       "type": "Type",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Version"
+      "version": "Version",
+      "value": "Valeur"
     }
   },
   "template": {
@@ -1952,5 +1962,16 @@
   },
   "cache": {
     "subtitle": "Fichiers de cache générés par les tâches planifiées (listes noires, bases de données GeoIP, etc.) — inspectez, téléchargez ou supprimez-les par service et plugin."
+  },
+  "accordion": {
+    "body": {
+      "tls": "Émettre et renouveler automatiquement les certificats."
+    },
+    "title": {
+      "tls": "TLS & certificats"
+    }
+  },
+  "input_list": {
+    "view_all_settings": "Afficher tous les {{count}} paramètres"
   }
 }

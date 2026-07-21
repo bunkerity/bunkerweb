@@ -1,0 +1,69 @@
+{# usage: {% from "components/anchor.html" import anchor %}
+          {{ anchor(label="Documentation", href=docs_url(), i18n_key="footer.documentation", right_icon="bx-link-external", external=true) }} #}
+
+{# Generic styled text link -- superset of the "colored + optionally underlined <a>" markup
+   duplicated ad hoc per page: home.html and sidebar-news.html both hand-roll
+   `class="text-decoration-underline link-underline-primary"`, reports.html hand-rolls
+   `class="link-secondary text-decoration-none"` for its DB-IP credit, and footer.html has its
+   own bespoke `.footer-link` class -- three different ways of expressing the same "color +
+   underline behaviour + optional icon" shape. This macro is markup/CSS only: it renders a
+   plain <a> and manages no click/JS state.
+
+   Params:
+     label       (required) English fallback copy shown before i18next rewrites it.
+     href        (required) link target.
+     i18n_key    data-i18n key for label. Omit for text that has no translation (rare).
+     color       'primary' | 'secondary' | 'warning' | 'danger' | 'muted'. Maps directly onto
+                 the existing .text-<color> utility (muted -> .text-muted). Default 'primary'.
+     size        'xs' | 'sm' | 'md' | 'lg'. Default 'md' (matches the body font-size). None of
+                 these had an existing utility class in this repo, so they're added as
+                 .bw-anchor-<size> in overrides.css.
+     underline   'hover' (default) -- underlined only on :hover/:focus-visible. This repo's
+                 base `a { text-decoration: none }` rule (core.css) means a plain <a> otherwise
+                 shows no hover affordance at all, so this is the safe default.
+                 'always' -- permanently underlined (reports.html's DB-IP credit shape).
+                 'never'  -- no underline ever (footer.html's nav-link shape). Also the base
+                 `.bw-anchor` behaviour, so this value adds no extra class.
+     left_icon   optional Boxicons class rendered before the label, e.g. "bx-book-open".
+     right_icon  optional Boxicons class rendered after the label, e.g. "bx-chevron-right".
+     external    adds target="_blank" rel="noopener noreferrer" plus a visually-hidden "(opens
+                 in a new tab)" suffix for screen readers. Default false.
+     disabled    renders aria-disabled="true" + tabindex="-1", and (via .is-disabled in
+                 overrides.css) pointer-events: none + reduced opacity -- href is left in place
+                 rather than removed, same pattern as components/file-upload.html's dropzone.
+                 Default false.
+     aria_label  override the accessible name when `label` alone isn't enough (e.g. an
+                 icon-only link). Optional.
+     id          optional id on the <a>, e.g. for another element's aria-describedby. Optional.
+     classes     extra utility classes appended as-is.
+
+   Not covered: link-styled-as-button controls (role="button" + .btn-* classes, e.g.
+   support.html's "Download logs" / "Entire config" actions). Those trigger an action rather
+   than navigate inline with text, and belong to a Button component instead.
+
+   No companion JS -- markup/CSS only, like components/badge.html. #}
+{% macro anchor(
+    label,
+    href,
+    i18n_key=none,
+    color='primary',
+    size='md',
+    underline='hover',
+    left_icon=none,
+    right_icon=none,
+    external=false,
+    disabled=false,
+    aria_label=none,
+    id=none,
+    classes=''
+) -%}
+    {%- set color_class = 'text-muted' if color == 'muted' else 'text-' ~ color -%}
+    {%- set underline_class = ' bw-anchor-u-always' if underline == 'always' else (' bw-anchor-u-hover' if underline == 'hover' else '') -%}
+    {%- set outer_classes = 'bw-anchor bw-anchor-' ~ size ~ ' ' ~ color_class ~ underline_class ~ (' is-disabled' if disabled else '') ~ (' ' ~ classes if classes else '') -%}
+    <a{% if id %} id="{{ id }}"{% endif %}
+       href="{{ href }}"
+       class="{{ outer_classes }}"
+       {%- if external %} target="_blank" rel="noopener noreferrer"{% endif %}
+       {%- if disabled %} aria-disabled="true" tabindex="-1"{% endif %}
+       {%- if aria_label %} aria-label="{{ aria_label }}"{% endif %}>{% if left_icon %}<i class="bx {{ left_icon }}" aria-hidden="true"></i>{% endif %}<span{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</span>{% if right_icon %}<i class="bx {{ right_icon }}" aria-hidden="true"></i>{% endif %}{% if external %}<span class="visually-hidden" data-i18n="link.opens_new_tab">(opens in a new tab)</span>{% endif %}</a>
+{%- endmacro %}

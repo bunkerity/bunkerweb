@@ -1,0 +1,111 @@
+{# usage: {% from "components/accordion.html" import accordion, accordion_item %}
+          {% call accordion(id="waf-help") %}
+            {% call accordion_item(id="waf-help-tls", parent_id="waf-help", title="TLS & certificates", title_i18n="accordion.title.tls", icon="bx-lock-alt", subtitle="AUTO_LETS_ENCRYPT", open=true) %}
+              <p data-i18n="accordion.body.tls">Issue and renew certificates automatically.</p>
+            {% endcall %}
+          {% endcall %} #}
+
+{# Collapsible section group -- there is no existing hand-rolled equivalent to dedupe in the
+   real app today (grepped templates/ for "accordion"/".collapse": setup.html's
+   #advanced-settings-content, dashboard.html's #mode-selection-floating and
+   plugins_settings.html's #multiple-... blocks are all bare single-trigger
+   `.collapse` show/hide toggles, never the full `.accordion`/`.accordion-item` structure --
+   out of scope here, they stay as they are). This is a net-new component for grouped,
+   multi-section disclosure (settings help panels, FAQ-style content, grouped advanced
+   options), built entirely on Bootstrap 5.3's own accordion contract already vendored and
+   loaded on every page -- no companion JS file, no custom CSS. core.css already themes
+   every `.accordion*` class (colors, radii, the chevron icon, dark mode via the
+   `--bs-accordion-*` vars), so this macro only emits the standard markup Bootstrap's own
+   collapse plugin (`data-bs-toggle="collapse"`) and its CSS already know how to drive.
+
+   Two macros, always used together:
+
+     accordion(id, ...)            the outer ".accordion" wrapper. Body via {% call %},
+                                    containing one or more accordion_item() calls.
+     accordion_item(id, title, ...) one collapsible section. Body via {% call %} -- any
+                                    markup or other component is fair game inside.
+
+   Pass the SAME id you gave accordion() as `parent_id` on each accordion_item() to get
+   single-open-at-a-time behaviour (opening one section closes its siblings, via Bootstrap's
+   `data-bs-parent`). Omit `parent_id` on an item and it toggles independently of the others,
+   any number open at once -- both behaviours coexist inside one accordion() if you mix it.
+
+   Params -- accordion():
+     id          required -- id on the outer .accordion div. Pass this same value as
+                 accordion_item()'s `parent_id` for single-open-at-a-time behaviour.
+     flush       strip the outer border/rounded corners for edge-to-edge dividers
+                 (accordion-flush), the look used when the accordion sits directly inside
+                 a card/panel that already has its own border. Default false.
+     classes     extra utility classes on the outer wrapper.
+
+   Params -- accordion_item():
+     id          required -- unique id for the collapsible panel. Builds "{id}-header" for
+                 the heading/aria-labelledby link and is the data-bs-target the button
+                 points at.
+     title       required -- English fallback header text (the always-visible trigger copy).
+     title_i18n  data-i18n key for title.
+     parent_id   accordion() id to close sibling sections on open (data-bs-parent). Omit
+                 for a section that toggles independently of the rest of the group.
+     open        start expanded. Default false.
+     icon        optional leading Boxicons class, e.g. "bx-lock-alt".
+     subtitle    optional trailing caption before the chevron -- e.g. a SETTING name,
+                 rendered in the app's existing courier-prime monospace face (see
+                 components/secret-field.html) since that's what it's for here too.
+     subtitle_i18n  data-i18n key for subtitle.
+     disabled    render the trigger inert (disabled button, can't be toggled). Default false.
+     heading     heading tag wrapping the button, for correct document outline in whatever
+                 context the accordion is embedded ("h2" | "h3" | "h4" ...). Default "h2",
+                 matching Bootstrap's own accordion markup.
+     classes     extra utility classes on the .accordion-item wrapper.
+
+   Not covered: the design kit's standalone reveal() macro (a single "show more / show
+   details" trigger + panel with no accordion chrome around it) -- that is a different,
+   simpler component (one disclosure, not a group of sections) and wasn't asked for here;
+   build it as its own components/collapse.html if/when a page needs that shape. Also not
+   covered: the design kit's ~150-line no-Bootstrap `BWCollapse` JS engine
+   (`window.BWCollapse`) -- it exists there only because that prototype ships no Bootstrap
+   JS. This app already has Bootstrap 5.3.3's real collapse plugin on every page, wired
+   automatically off the `data-bs-toggle="collapse"` markup below, so there is nothing for a
+   companion JS file to do. #}
+{% macro accordion(id, flush=false, classes="") -%}
+    <div class="accordion{% if flush %} accordion-flush{% endif %}{% if classes %} {{ classes }}{% endif %}" id="{{ id }}">
+        {{ caller() }}
+    </div>
+{%- endmacro %}
+{% macro accordion_item(
+    id,
+    title,
+    title_i18n=none,
+    parent_id=none,
+    open=false,
+    icon=none,
+    subtitle=none,
+    subtitle_i18n=none,
+    disabled=false,
+    heading="h2",
+    classes=""
+) -%}
+    <div class="accordion-item{% if classes %} {{ classes }}{% endif %}">
+        <{{ heading }} class="accordion-header" id="{{ id }}-header">
+            <button type="button"
+                    class="accordion-button{% if not open %} collapsed{% endif %}"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#{{ id }}"
+                    aria-expanded="{{ 'true' if open else 'false' }}"
+                    aria-controls="{{ id }}"
+                    {% if disabled %}disabled{% endif %}>
+                {%- if icon %}<i class="bx {{ icon }} me-2" aria-hidden="true"></i>{% endif %}
+                <span class="flex-grow-1 text-truncate"{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</span>
+                {%- if subtitle %}<span class="courier-prime text-muted small me-2"{% if subtitle_i18n %} data-i18n="{{ subtitle_i18n }}"{% endif %}>{{ subtitle }}</span>{% endif %}
+            </button>
+        </{{ heading }}>
+        <div id="{{ id }}"
+             class="accordion-collapse collapse{% if open %} show{% endif %}"
+             aria-labelledby="{{ id }}-header"
+             {% if parent_id %}data-bs-parent="#{{ parent_id }}"{% endif %}>
+            <div class="accordion-body">
+                {{ caller() }}
+            </div>
+        </div>
+    </div>
+{%- endmacro %}

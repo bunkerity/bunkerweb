@@ -1,0 +1,192 @@
+{# usage: {% from "components/select.html" import select %}
+          {{ select(id="region", options=[
+                { "value": "eu-west-1", "text": "EU (Ireland)", "description": "Lowest latency for FR / DE", "icon": "bx-globe" },
+                { "value": "us-east-1", "text": "US (Virginia)", "description": "Largest pool of regions", "icon": "bx-globe" }
+              ], value="eu-west-1", label="Region", label_i18n="form.label.region") }} #}
+
+{# Custom single-select combobox -- a styled trigger + floating listbox (optional icon and
+   description per option, optional live filter) backed by a hidden native <input> so the
+   value still POSTs with a normal <form>, same contract as every other input in this
+   directory. Distinct from components/native-select.html, which stays a bare, JS-free
+   `<select class="form-select">` on purpose -- that macro's own doc comment already flags
+   the gap this one fills ("Not covered: ... the rich icon/description/search dropdown the
+   design kit calls Select"). Reach for native-select.html first; reach for this one only
+   when a plain `<option>` can't carry what the row needs to show (an icon, a description
+   line, a live filter over a long list).
+
+   Superset of the two settings-specific pickers already hand-rolled in this app, generalized
+   for any page (not just the plugin-settings form contract):
+     - models/multiselect_setting.html: `<button class="form-control form-select
+       dropdown-toggle multiselect-toggle">` + `.dropdown-menu` + a search box + a hidden
+       `<input>` -- same overall shape, but MULTI-select (checkboxes, a comma/space-joined
+       hidden value) and tied to the plugin-setting contract (data-original/data-default/
+       data-method, reset-to-default). Multi-select stays out of scope here, same call
+       native-select.html already made for select_setting.html -- pass single values only.
+       Also: that toggle needs a `::after`/`::before` CSS hack (overrides.css
+       ".multiselect-toggle.dropdown-toggle::before") to hide the double caret that comes
+       from combining `.form-select`'s own background-image chevron with `.dropdown-toggle`'s
+       pseudo-element triangle. This macro sidesteps that hack entirely by never adding the
+       `.dropdown-toggle` class -- Bootstrap's dropdown JS only keys off the
+       `data-bs-toggle="dropdown"` attribute, `.dropdown-toggle` is purely cosmetic, so
+       leaving it off keeps the single `.form-select` chevron and needs no override.
+     - models/select_setting.html: a bare settings `<select>` -- already out of scope per
+       native-select.html's own note; not touched here either.
+     - template_edit.html's #setting-selector-results (the "Add setting" modal): a much
+       bigger bespoke picker -- full-screen modal, plugin/type filters, multi-add with its
+       own apply button. Not a single-value combobox and not superseded by this macro.
+
+   Wiring reuses components/dropdown-menu.html's own open/close/positioning mechanism
+   verbatim -- the same `data-bs-toggle="dropdown"` + `.dropdown-menu` markup, so Bootstrap's
+   already-vendored dropdown plugin (open/close, outside-click dismissal, Popper positioning)
+   and its built-in keyboard handling (ArrowUp/ArrowDown cycles focus across `.dropdown-item`,
+   Escape closes and refocuses the trigger) come for free, identically. What's different from
+   dropdown-menu.html on purpose: this is a single-select LISTBOX, not an action menu, so the
+   list gets `role="listbox"` / `role="option"` (WAI-ARIA "select-only listbox button"
+   pattern: aria-haspopup="listbox" + aria-expanded + aria-controls on the trigger,
+   aria-selected on the chosen option) instead of dropdown-menu.html's `role="menu"` /
+   `role="menuitem"`. The optional in-menu search box is a plain filter, not
+   aria-activedescendant typeahead -- this is not a full role="combobox" widget.
+
+   static/js/components/select.js adds only what Bootstrap's dropdown plugin doesn't already
+   do: sync the hidden input + trigger label/icon when an option is picked (firing a real
+   `change` event so existing `$(...).on('change', ...)` page code keeps working), and the
+   live search filter. Enter-to-pick and Esc-to-close need no extra code -- options are real
+   `<button>`s, so a focused one already fires `click` on Enter, and dropdown.js's own
+   Escape handling already runs even while focus sits in the search input.
+
+   Params:
+     id               (required) id on the hidden value input (kept stable so existing code
+                      that does `document.getElementById(id).value` -- the native <select>
+                      convention -- still works). Also the base for "{id}-trigger" and
+                      "{id}-list".
+     options          (required) list of dicts: {value, text, i18n_key=none, icon=none,
+                      description=none, description_i18n=none, disabled=false,
+                      selected=false}. `value`/`text` are required per option; `text` is the
+                      English fallback shown before i18next rewrites it via `i18n_key`.
+     name             form field name. Defaults to id.
+     value            currently selected value, matched against each option's `value`. When
+                      no option matches (and `selected` isn't set on any option either), the
+                      first option is preselected -- the same implicit default a bare
+                      `<select>` gives you -- unless `placeholder` is set, in which case
+                      nothing is preselected and the placeholder shows instead.
+     label            optional visible caption above the field (English fallback). Rendered
+                      via components/label.html (variant="default"), `for` pointed at the
+                      trigger button (the hidden input isn't focusable).
+     label_i18n       data-i18n key for label.
+     placeholder      optional English fallback text shown on the trigger when nothing is
+                      selected. Leaves the hidden input's value empty until a real pick is
+                      made.
+     placeholder_i18n data-i18n key for placeholder.
+     searchable       show a live filter box (components/search.html, variant="flat") as the
+                      first row of the menu. Default true.
+     size             'sm' | 'md' | 'lg'. Adds form-select-sm/form-select-lg to the trigger
+                      and is forwarded to components/label.html's own `size`. Default 'md'.
+     disabled         disable the trigger and hidden input. Default false.
+     required         aria-required="true" on the trigger. Default false -- a hidden input's
+                      own `required` attribute is not enforced by the browser's constraint
+                      validation (type=hidden is exempt), so this is presentational only; if
+                      a caller truly needs to block submission on an empty pick, wire that on
+                      the surrounding `<form>`'s submit handler.
+     aria_label       accessible name for the trigger when `label` is omitted. Ignored when
+                      `label` is set.
+     help_text        optional line under the field ("form-text text-muted"), same markup
+                      components/label.html / components/checkbox.html already use.
+     help_i18n        data-i18n key for help_text.
+     select_classes   extra classes appended to the trigger button.
+     classes          extra utility classes on the root wrapper.
+
+   Not covered: multi-select (see models/multiselect_setting.html above), option groups
+   (optgroup), and a no-JS fallback -- like every other JS-driven macro in this directory
+   (file-upload, secret-field), the trigger only opens the menu once select.js has run. #}
+{% from "components/label.html" import label as ui_label %}
+{% from "components/search.html" import search as ui_search %}
+{% macro select(
+    id,
+    options,
+    name=none,
+    value=none,
+    label=none,
+    label_i18n=none,
+    placeholder=none,
+    placeholder_i18n=none,
+    searchable=true,
+    size='md',
+    disabled=false,
+    required=false,
+    aria_label=none,
+    help_text=none,
+    help_i18n=none,
+    select_classes='',
+    classes=''
+) -%}
+{%- set help_id = (id ~ "-help") if help_text else none -%}
+{%- set _value_match = (options | selectattr('value', 'equalto', value) | list | first) if (value is not none and options) else none -%}
+{%- set _flag_match = (options | selectattr('selected') | list | first) if options else none -%}
+{%- set _selected = _value_match or _flag_match or ((options | first) if (options and not placeholder) else none) -%}
+<div{% if classes %} class="{{ classes }}"{% endif %}>
+    {%- if label %}
+        {{ ui_label(for_id=id ~ '-trigger', text=label, text_i18n=label_i18n, size=size, required=required) }}
+    {%- endif %}
+    <div class="dropdown bw-select" data-bw-select>
+        <button type="button"
+                id="{{ id }}-trigger"
+                class="form-select d-flex align-items-center gap-2 text-start{% if size == 'sm' %} form-select-sm{% elif size == 'lg' %} form-select-lg{% endif %}{% if select_classes %} {{ select_classes }}{% endif %}"
+                data-bs-toggle="dropdown"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="{{ id }}-list"
+                {%- if not label and aria_label %} aria-label="{{ aria_label }}"{% endif %}
+                {%- if disabled %} disabled{% endif %}
+                {%- if required %} aria-required="true"{% endif %}
+                {%- if help_id %} aria-describedby="{{ help_id }}"{% endif %}>
+            <i class="bx{% if _selected and _selected.icon %} {{ _selected.icon }}{% endif %} bw-select-trigger-icon{% if not (_selected and _selected.icon) %} d-none{% endif %}"
+               data-select-trigger-icon
+               aria-hidden="true"></i>
+            <span class="flex-grow-1 text-truncate"
+                  data-select-trigger-label
+                  {%- if _selected and _selected.i18n_key %} data-i18n="{{ _selected.i18n_key }}"
+                  {%- elif not _selected and placeholder_i18n %} data-i18n="{{ placeholder_i18n }}"{% endif %}>{{ _selected.text if _selected else (placeholder or '') }}</span>
+        </button>
+        <ul id="{{ id }}-list" class="dropdown-menu bw-select-list" role="listbox" aria-labelledby="{{ id }}-trigger">
+            {%- if searchable %}
+            <li role="presentation" class="px-2 pt-2 pb-1">
+                {{ ui_search(id=id ~ '-search', variant='flat', size='sm', input_classes='bw-select-search') }}
+            </li>
+            {%- endif %}
+            {%- for option in options %}
+            {%- set is_selected = _selected and option.value == _selected.value %}
+            <li role="presentation">
+                <button type="button"
+                        class="dropdown-item d-flex align-items-center gap-2{% if is_selected %} active{% endif %}"
+                        role="option"
+                        id="{{ id }}-opt-{{ loop.index0 }}"
+                        data-select-option
+                        data-value="{{ option.value }}"
+                        data-label="{{ option.text }}"
+                        {%- if option.icon %} data-icon="{{ option.icon }}"{% endif %}
+                        aria-selected="{{ 'true' if is_selected else 'false' }}"
+                        {%- if option.disabled %} disabled{% endif %}>
+                    {%- if option.icon %}<i class="bx {{ option.icon }}" aria-hidden="true"></i>{% endif %}
+                    <span class="flex-grow-1 text-truncate">
+                        <span class="select-option-label"{% if option.i18n_key %} data-i18n="{{ option.i18n_key }}"{% endif %}>{{ option.text }}</span>
+                        {%- if option.description %}
+                        <span class="d-block small text-muted"{% if option.description_i18n %} data-i18n="{{ option.description_i18n }}"{% endif %}>{{ option.description }}</span>
+                        {%- endif %}
+                    </span>
+                </button>
+            </li>
+            {%- endfor %}
+            <li class="dropdown-item-text text-muted small d-none" data-select-no-results data-i18n="status.no_search_results">No items found.</li>
+        </ul>
+        <input type="hidden"
+               id="{{ id }}"
+               name="{{ name if name else id }}"
+               value="{{ _selected.value if _selected else '' }}"
+               data-select-value
+               {%- if disabled %} disabled{% endif %}>
+    </div>
+    {%- if help_text %}
+    <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+    {%- endif %}
+</div>
+{%- endmacro %}
