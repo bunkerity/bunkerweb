@@ -8,21 +8,26 @@
                      alt="BunkerWeb logo">
             </span>
         </a>
-        <a href="javascript:void(0);"
-           class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-            <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
-        </a>
+        <button type="button"
+                class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none border-0 bg-transparent"
+                aria-label="Close navigation"
+                aria-controls="layout-menu">
+            <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"
+               aria-hidden="true"></i>
+        </button>
     </div>
     {% with menu_items = {
         "home": {"url": url_for('home'), "icon": "bx-home-smile"},
         "instances": {"url": url_for('instances'), "icon": "bx-server"},
         "global-settings": {"url": url_for('global_settings'), "icon": "bx-cog"},
         "services": {"url": url_for('services'), "icon": "bx-cube"},
+        "groups": {"url": url_for('resource_groups'), "icon": "bx-collection"},
         "configs": {"url": url_for('configs'), "icon": "bx-file-blank"},
         "templates": {"url": url_for('templates.templates_page'), "icon": "bx-layout"},
         "plugins": {"url": url_for('plugins'), "icon": "bx-extension"},
         "cache": {"url": url_for('cache'), "icon": "bx-data"},
         "web-cache": {"url": url_for('web_cache'), "icon": "bx-cloud"},
+        "certificates": {"url": url_for('certificates'), "icon": "bx-certification"},
         "reports": {"url": url_for("reports"), "icon": "bxs-flag-checkered"},
         "bans": {"url": url_for('bans'), "icon": "bx-block"},
         "jobs": {"url": url_for('jobs'), "icon": "bx-task"},
@@ -41,7 +46,8 @@
                            id="csrf_token"
                            name="csrf_token"
                            value="{{ csrf_token() }}" />
-                    <i class="menu-icon tf-icons dark-mode-toggle-icon bx bx-{% if theme == "light" %}sun{% else %}moon{% endif %}"></i>
+                    <i class="menu-icon tf-icons dark-mode-toggle-icon bx bx-{% if theme == "light" %}sun{% else %}moon{% endif %}"
+                       aria-hidden="true"></i>
                     <div class="d-flex align-items-center justify-content-center w-100 h-100">
                         <label class="setting-checkbox-label me-2 mb-0"
                                for="dark-mode-toggle"
@@ -63,10 +69,12 @@
             </li>
             <!--/ Dark mode toggle -->
             {% for endpoint, item in menu_items.items() %}
-                <li class="menu-item{% if endpoint == current_endpoint or endpoint != 'plugins' and endpoint in request.path.split('/')[1] %} active{% endif %}{% if item.get('sub') and item.get('open', True) %} open{% endif %}">
+                {% set is_active = endpoint == current_endpoint or endpoint != 'plugins' and endpoint == request.path.split('/')[1] %}
+                <li class="menu-item{% if is_active %} active{% endif %}{% if item.get('sub') and item.get('open', True) %} open{% endif %}">
                     <a href="{{ item['url'] }}"
-                       class="menu-link{% if item.get('sub') %} menu-toggle{% endif %}">
-                        <i class="menu-icon tf-icons bx {{ item['icon'] }}"></i>
+                       class="menu-link{% if item.get('sub') %} menu-toggle{% endif %}"
+                       {% if is_active %}aria-current="page"{% endif %}>
+                        <i class="menu-icon tf-icons bx {{ item['icon'] }}" aria-hidden="true"></i>
                         <div class="text-truncate"
                              data-i18n="navigation.{{ endpoint | replace('-', '_') }}">
                             {{ endpoint | replace('-', ' ') |title }}
@@ -76,7 +84,9 @@
                         <ul class="menu-sub">
                             {% for sub in item['sub'][:item.get('max', 5)] %}
                                 <li class="menu-item{% if current_endpoint == sub %} active{% endif %}">
-                                    <a href="{{ item['url'] }}/{{ sub }}" class="menu-link">
+                                    <a href="{{ item['url'] }}/{{ sub }}"
+                                       class="menu-link"
+                                       {% if current_endpoint == sub %}aria-current="page"{% endif %}>
                                         <div class="text-truncate" data-i18n="navigation.{{ sub }}">{{ sub }}</div>
                                     </a>
                                 </li>
@@ -93,28 +103,33 @@
                 </li>
             {% endfor %}
             <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
-                <a href="{{ url_for('pro') }}" class="menu-link">
+                <a href="{{ url_for('pro') }}"
+                   class="menu-link"
+                   {% if current_endpoint == 'pro' %}aria-current="page"{% endif %}>
                     <img class="menu-icon tf-icons"
                          src="{{ pro_diamond_url }}"
-                         alt="Pro plugin">
+                         alt=""
+                         aria-hidden="true">
                     <div class="text-truncate" data-i18n="navigation.pro">Pro</div>
                 </a>
             </li>
             <li class="menu-item{% if current_endpoint == 'support' %} active{% endif %}">
-                <a href="{{ url_for('support') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-support"></i>
+                <a href="{{ url_for('support') }}"
+                   class="menu-link"
+                   {% if current_endpoint == 'support' %}aria-current="page"{% endif %}>
+                    <i class="menu-icon tf-icons bx bx-support" aria-hidden="true"></i>
                     <div class="text-truncate" data-i18n="navigation.support">Support</div>
                 </a>
             </li>
             {% set menu_plugin_types = {
                 "core": {
-                    "icon": "<i class=\"menu-icon tf-icons bx bx-shield me-0\"></i>"
+                    "icon": "<i class=\"menu-icon tf-icons bx bx-shield me-0\" aria-hidden=\"true\"></i>"
                 },
                 "external": {
-                    "icon": "<i class=\"menu-icon tf-icons bx bx-plug me-0\"></i>"
+                    "icon": "<i class=\"menu-icon tf-icons bx bx-plug me-0\" aria-hidden=\"true\"></i>"
                 },
                 "ui": {
-                    "icon": "<i class=\"menu-icon tf-icons bx bx-cloud-upload me-0\"></i>"
+                    "icon": "<i class=\"menu-icon tf-icons bx bx-cloud-upload me-0\" aria-hidden=\"true\"></i>"
                 }
             } %}
             {% set extra_plugin_lookup = {} %}
@@ -128,7 +143,8 @@
                     {% set _ = extra_plugin_lookup.update({_pdata['name'] | replace(' ', '-') | lower: _pdata}) %}
                 {% endif %}
             {% endfor %}
-            {% if extra_pages %}
+            {% set visible_extra_pages = extra_pages | reject("equalto", "letsencrypt") | list %}
+            {% if visible_extra_pages %}
                 <!-- Extra Pages -->
                 <li class="menu-header text-uppercase align-items-center mb-0">
                     <span class="menu-header-text" data-i18n="navigation.extra_pages">Extra Pages</span>
@@ -138,25 +154,28 @@
                             data-bs-target="#extraPagesCollapse"
                             aria-expanded="true"
                             aria-controls="extraPagesCollapse">
-                        <i class="bx bx-chevron-right chevron-icon chevron-rotate"></i>
+                        <i class="bx bx-chevron-right chevron-icon chevron-rotate" aria-hidden="true"></i>
                     </button>
                 </li>
                 <div class="collapse py-1 show" id="extraPagesCollapse">
                     <div class="menu-inner">
-                        {% for page in extra_pages %}
+                        {% for page in visible_extra_pages %}
                             {% set extra_plugin_data = extra_plugin_lookup.get(page) or extra_plugin_lookup.get(page | lower) or extra_plugin_lookup.get(page | replace('-', '_') | lower) or extra_plugin_lookup.get(page | replace('_', '-') | lower) %}
-                            <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}"{% if extra_plugin_data and not is_pro_version and extra_plugin_data['type'] == "pro" %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"{% endif %}>
-                                <a href="{{ url_for(page) }}" class="menu-link">
+                            <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}"{% if extra_plugin_data and not is_pro_version and extra_plugin_data['type'] == "pro" %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"{% endif %}>
+                                <a href="{{ url_for(page) }}"
+                                   class="menu-link"
+                                   {% if current_endpoint == page|lower %}aria-current="page"{% endif %}>
                                     {% if extra_plugin_data %}
                                         {{ menu_plugin_types.get(extra_plugin_data["type"], {}).get('icon', '<img src="' + pro_diamond_url + '"
-     alt="Pro plugin"
+     alt=""
+     aria-hidden="true"
      width="20px"
      height="17.2px">') |safe }}
                                         <div class="text-truncate pe-2{% if extra_plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">
                                             {{ extra_plugin_data['name'] }}
                                         </div>
                                     {% else %}
-                                        <i class="menu-icon tf-icons bx bx-extension"></i>
+                                        <i class="menu-icon tf-icons bx bx-extension" aria-hidden="true"></i>
                                         <div class="text-truncate">{{ page | replace('-', ' ') | replace('_', ' ') |title }}</div>
                                     {% endif %}
                                 </a>
@@ -174,7 +193,7 @@
                         data-bs-target="#pluginsCollapse"
                         aria-expanded="true"
                         aria-controls="pluginsCollapse">
-                    <i class="bx bx-chevron-right chevron-icon chevron-rotate"></i>
+                    <i class="bx bx-chevron-right chevron-icon chevron-rotate" aria-hidden="true"></i>
                 </button>
             </li>
             <div class="collapse py-1 show" id="pluginsCollapse">
@@ -182,13 +201,15 @@
                     {% for plugin, plugin_data in plugins.items() %}
                         {% with not_pro_pro_plugin = not is_pro_version and plugin_data['type'] == "pro" %}
                             {% if (not_pro_pro_plugin or plugin_data['page']) and url_for(plugin) == "#" %}
-                                <li class="menu-item{% if current_endpoint == plugin|lower %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"
+                                <li class="menu-item{% if current_endpoint == plugin|lower %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"
                                 {% endif %}
                                 >
                                 <a href="{% if not_pro_pro_plugin %}{{ url_for('pro') }}{% else %}{{ url_for("plugins") }}/{{ plugin }}{% endif %}"
-                                   class="menu-link">
+                                   class="menu-link"
+                                   {% if current_endpoint == plugin|lower %}aria-current="page"{% endif %}>
                                     {{ menu_plugin_types.get(plugin_data["type"], {}).get('icon', '<img src="' + pro_diamond_url + '"
-     alt="Pro plugin"
+     alt=""
+     aria-hidden="true"
      width="20px"
      height="17.2px">') |safe }}
                                     <div class="text-truncate pe-2{% if plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">
@@ -207,8 +228,10 @@
             <span class="menu-header-text" data-i18n="navigation.misc">Misc</span>
         </li>
         <li class="menu-item{% if current_endpoint == 'about' %} active{% endif %}">
-            <a href="{{ url_for('about') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-info-circle"></i>
+            <a href="{{ url_for('about') }}"
+               class="menu-link"
+               {% if current_endpoint == 'about' %}aria-current="page"{% endif %}>
+                <i class="menu-icon tf-icons bx bx-info-circle" aria-hidden="true"></i>
                 <div class="text-truncate" data-i18n="navigation.about">About</div>
             </a>
         </li>

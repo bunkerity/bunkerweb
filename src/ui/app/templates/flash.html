@@ -1,5 +1,51 @@
+{# usage: {% include "flash.html" %}
+          (non-default variant) {% with flash_position="top-right", flash_size="lg" %}{% include "flash.html" %}{% endwith %} #}
+
+{# The site-wide toast feed: every flash() call from app/utils.py (see its `category` ->
+   `error`/`warning`/`message`/`pro`/`success` contract, and the i18n_key -> data-i18n span it
+   wraps the message in) lands here as a Bootstrap 5 "bs-toast", rendered once per page by
+   base.html's `{% include "flash.html" %}` (right before `{% block page %}`, on every
+   authenticated, non-"loading" page). The read-only-mode banner injected via
+   `messages.append(...)` and the `unique_messages` de-dupe are pre-existing behavior, untouched.
+
+   This file is a plain include, not a `components/*.html` macro -- there is exactly one call
+   site (base.html) and it renders from `get_flashed_messages()` (Flask's session-backed flash
+   queue), not from caller-supplied args, so a macro signature would not fit. `flash_position`
+   and `flash_size` below are therefore read as optional context variables (Jinja `default()`),
+   not macro params: a page that needs a non-default variant sets them via `{% with %}` around
+   its own `{% include "flash.html" %}` (Jinja's `with` creates the scoped context an include
+   picks up) -- base.html's existing bare include is untouched and keeps today's exact look
+   (bottom-right / md) since both defaults match the classes that were already hardcoded here.
+
+   Superset of what's already hand-rolled elsewhere: configs.html, instances.html,
+   service_settings.html, services.html, setup.html and templates.html each carry their own
+   hidden `#feedback-toast` template (`.bs-toast.toast.fade...d-none`) that page JS
+   (static/js/plugins-settings.js) clones and `.appendTo("#feedback-toast-container")` for
+   client-only toasts (e.g. "Global settings applied"). Those page-owned templates are left
+   alone -- but because `flash_position`/`flash_size` are applied to the shared
+   `#feedback-toast-container` and the size rule targets `.bs-toast` by descendant selector
+   (see overrides.css), those JS-cloned toasts pick up the same position/size variant for free,
+   with no second styling path to keep in sync.
+
+   Params (context variables, see above -- not macro args):
+     flash_position   "bottom-right" (default, matches the pre-existing bottom-0/end-0 corner)
+                      or "top-right". Anything else falls back to bottom-right.
+     flash_size       "sm" | "md" (default, matches the pre-existing 350px bs-toast width --
+                      renders no extra class) | "lg". Scales every toast's width/font-size via
+                      the `.toast-container-sm`/`.toast-container-lg` rules in overrides.css.
+
+   Not covered: per-toast size/position (this is a page-level feed, not an individual-toast
+   prop -- the design kit's notification.html ships size/position per-toast since each is
+   triggered standalone; here every toast in the feed shares one corner/scale, matching how
+   `data-bs-autohide`/`data-bs-delay` are already decided per-category, not per-toast-instance).
+   Also not covered: templates/sidebar-notifications.html's `#notifications-toast-container` --
+   that's the separate notification-center drawer feature, not this toast feed. #}
+{% set flash_position = flash_position|default('bottom-right') %}
+{% set flash_size = flash_size|default('md') %}
+{% set _flash_position_classes = 'top-0 mt-3' if flash_position == 'top-right' else 'bottom-0 mb-3' %}
+{% set _flash_size_class = ' toast-container-' ~ flash_size if flash_size in ('sm', 'lg') else '' %}
 <div id="feedback-toast-container"
-     class="toast-container position-fixed bottom-0 end-0 mb-3 me-3">
+     class="toast-container position-fixed end-0 me-3 {{ _flash_position_classes }}{{ _flash_size_class }}">
     <!-- prettier-ignore -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if user_readonly and current_endpoint != "profile" %}

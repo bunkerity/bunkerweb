@@ -1,52 +1,5 @@
-<div class="offcanvas offcanvas-end"
-     tabindex="-1"
-     id="side-offcanvas-notifications"
-     data-bs-keyboard="false"
-     data-bs-backdrop="false">
-    <div class="offcanvas-header">
-        <div class="social-buttons">
-            <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noopener">
-                <i class='bx bxl-discord-alt bx-sm'></i>
-            </a>
-            <a href="https://www.linkedin.com/company/bunkerity/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <i class='bx bxl-linkedin bx-sm'></i>
-            </a>
-            <a href="https://www.reddit.com/r/BunkerWeb/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <i class='bx bxl-reddit bx-sm'></i>
-            </a>
-            <a href="https://www.instagram.com/bunkerweb/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <i class='bx bxl-instagram bx-sm'></i>
-            </a>
-            <a href="https://x.com/bunkerity/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <img src="{{ url_for('static', filename='img/brands/Twitter-X-Logo.svg') }}"
-                     class="x-logo"
-                     alt="X logo"
-                     width="20px"
-                     height="20px"
-                     loading="lazy" />
-            </a>
-        </div>
-        <button type="button"
-                class="btn-close text-reset"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-                data-i18n="aria.label.close"></button>
-    </div>
+{% from "components/drawer.html" import drawer %}
+{% call drawer(id="side-offcanvas-notifications", theme=theme, newsletter=false) %}
     <div class="d-flex justify-content-between align-items-center mb-2 ps-3 pe-3 w-100">
         <span class="badge rounded-pill bg-secondary">
             TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
@@ -84,11 +37,14 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="g-3 text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+            <p class="g-3 text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
                data-i18n="status.no_notifications">No notifications to show</p>
         {% endif %}
     </div>
-    <!-- Newsletter Signup Section -->
+    <!-- Newsletter Signup Section: rendered here (newsletter=false above) instead of via the
+         macro's own newsletter slot, because static/js/i18n.js hardcodes the literal ids
+         "#newsletter-email-check"/"#newsletter-locale" -- the macro's built-in slot namespaces
+         them as "{{ id }}-newsletter-locale" etc, which would silently break that JS hook. -->
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
         <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
         <form action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
@@ -127,4 +83,4 @@
         </form>
     </div>
     <!-- End Newsletter Signup Section -->
-</div>
+{% endcall %}

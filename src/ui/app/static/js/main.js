@@ -6,6 +6,15 @@
 
 let menu, animate;
 
+window.bwPrefersReducedMotion = () =>
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+
+if (window.bwPrefersReducedMotion()) {
+  document.querySelectorAll("lottie-player[autoplay]").forEach((player) => {
+    player.removeAttribute("autoplay");
+  });
+}
+
 (function () {
   // Initialize menu
   //-----------------
@@ -29,6 +38,92 @@ let menu, animate;
       window.Helpers.toggleCollapsed();
     });
   });
+
+  const syncMenuToggles = () => {
+    const expanded = !window.Helpers.isCollapsed();
+    document.querySelectorAll("button.layout-menu-toggle").forEach((toggle) => {
+      toggle.setAttribute("aria-expanded", String(expanded));
+      const desktopIcon = toggle.querySelector(
+        ".bx-chevrons-left, .bx-chevrons-right",
+      );
+      if (desktopIcon) {
+        desktopIcon.classList.toggle("bx-chevrons-left", expanded);
+        desktopIcon.classList.toggle("bx-chevrons-right", !expanded);
+      }
+    });
+  };
+  window.Helpers.on("toggle.adminShell", syncMenuToggles);
+  syncMenuToggles();
+
+  const navSearch = document.getElementById("admin-nav-search");
+  const navSearchResults = document.getElementById("admin-nav-search-results");
+  if (navSearch && navSearchResults) {
+    const closeSearch = () => {
+      navSearchResults.classList.add("d-none");
+      navSearch.setAttribute("aria-expanded", "false");
+    };
+    const renderSearch = () => {
+      const query = navSearch.value.trim().toLocaleLowerCase();
+      navSearchResults.replaceChildren();
+      if (!query) {
+        closeSearch();
+        return;
+      }
+      const seen = new Set();
+      const matches = Array.from(
+        document.querySelectorAll("#layout-menu a.menu-link[href]"),
+      )
+        .map((link) => ({
+          href: link.href,
+          label: link.textContent.trim().replace(/\s+/g, " "),
+        }))
+        .filter(
+          ({ href, label }) =>
+            label &&
+            label.toLocaleLowerCase().includes(query) &&
+            !seen.has(href) &&
+            seen.add(href),
+        )
+        .slice(0, 8);
+
+      matches.forEach(({ href, label }) => {
+        const link = document.createElement("a");
+        link.className = "list-group-item list-group-item-action";
+        link.href = href;
+        link.textContent = label;
+        navSearchResults.append(link);
+      });
+      if (!matches.length) {
+        const empty = document.createElement("span");
+        empty.className = "list-group-item text-muted";
+        empty.dataset.i18n = "status.no_search_results";
+        empty.textContent =
+          typeof i18next === "undefined"
+            ? "No items found."
+            : i18next.t("status.no_search_results", {
+                defaultValue: "No items found.",
+              });
+        navSearchResults.append(empty);
+      }
+      navSearchResults.classList.remove("d-none");
+      navSearch.setAttribute("aria-expanded", "true");
+    };
+
+    navSearch.addEventListener("input", renderSearch);
+    navSearch.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeSearch();
+      if (event.key === "Enter") {
+        const first = navSearchResults.querySelector("a");
+        if (first) {
+          event.preventDefault();
+          first.click();
+        }
+      }
+    });
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".bw-navbar-search")) closeSearch();
+    });
+  }
 
   // Display menu toggle (layout-menu-toggle) on hover with delay
   let delay = function (elem, callback) {
@@ -123,8 +218,9 @@ let menu, animate;
 
   // If current layout is vertical and current window screen is > small
 
-  // Auto update menu collapsed/expanded based on the themeConfig
-  window.Helpers.setCollapsed(true, false);
+  // Keep the design-system default: expanded on desktop.
+  window.Helpers.setCollapsed(false, false);
+  syncMenuToggles();
 })();
 
 /**

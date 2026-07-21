@@ -1,5 +1,5 @@
-<nav class="d-flex align-items-center" aria-label="breadcrumb">
-    <ol class="breadcrumb mb-0">
+<nav class="bw-breadcrumbs d-flex align-items-center flex-wrap" aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-style1 mb-0">
         <!-- prettier-ignore -->
         {% with breadcrumbs = request.path.split("/") %}
             {% set breadcrumbs_ns = namespace(working_url="") %}

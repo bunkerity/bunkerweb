@@ -78,15 +78,15 @@ class News {
     const orderedNews = [...lastNews].reverse();
     const lastItem = orderedNews[orderedNews.length - 1];
 
+    // The data-news-row(-home) attribute lives on each card so any number of
+    // cards can be dropped into whatever Bootstrap grid the caller uses.
     const newsRow = $("<div>", {
-      "data-news-row": "",
       class: "row g-6 justify-content-center",
     }).appendTo(newsContainer);
     let homeNewsRow;
 
     if (homeNewsContainer) {
       homeNewsRow = $("<div>", {
-        "data-news-row-home": "",
         class: "row g-2 justify-content-center",
       }).appendTo(homeNewsContainer);
     }
@@ -145,15 +145,66 @@ class News {
     });
   }
 
+  // This markup is built client-side because the content comes from the news
+  // API after the page has rendered.
   template(title, link, img, imgAlt, excerpt, tags, date, last, isHome) {
-    const colClass = !isHome && last ? "" : "mb-1";
-    const colSize = isHome ? "col-md-12 col-xl-12" : "col-md-11 col-xl-11";
-    const col = $("<div>", {
-      class: `${colSize} ${colClass}`,
-    });
-
-    const card = $("<div>", { class: "card" });
+    const href = `${link}?utm_campaign=self&utm_source=ui`;
+    const wrapper = $("<div>").attr(
+      isHome ? "data-news-row-home" : "data-news-row",
+      "",
+    );
+    const cardClasses = isHome || !last ? "card mb-1" : "card";
+    const card = $("<div>", { class: cardClasses });
     const imageSrc = img ?? null;
+
+    const validTags = tags.filter((tag) => tag?.slug && tag?.name);
+    const tagLinks = validTags.map((tag) => ({
+      name: tag.name,
+      href: `${this.BASE_URL}category/${tag.slug}?utm_campaign=self&utm_source=ui`,
+    }));
+
+    // Same "Posted on: <date>" line for both variants -- translatable prefix
+    // (news.posted_on) + caller-formatted date, matching the macro.
+    const buildDateParagraph = () =>
+      $("<p>", { class: "card-text mb-0" }).append(
+        $("<small>", { class: "text-muted courier-prime" }).append(
+          $("<span>", { "data-i18n": "news.posted_on" }).text(
+            this.t("news.posted_on"),
+          ),
+          document.createTextNode(`: ${date}`),
+        ),
+      );
+
+    // Same tag pills for both variants -- <i aria-hidden> icon, plain link (no
+    // role="button"/aria-pressed -- these are category links, not toggles).
+    const buildTagsParagraph = (btnClass, iconClass) =>
+      $("<p>", { class: "d-flex flex-wrap m-0 gap-1" }).append(
+        tagLinks.map((tag) =>
+          $("<a>", {
+            href: tag.href,
+            class: btnClass,
+            target: "_blank",
+            rel: "noopener",
+          }).append(
+            $("<i>", { class: iconClass, "aria-hidden": "true" }),
+            document.createTextNode(tag.name),
+          ),
+        ),
+      );
+
+    // Same footer for both variants (date left, tags right) -- the macro
+    // deliberately unifies what used to be two divergent layouts.
+    const buildFooter = (btnClass, iconClass) => {
+      if (!date && !tagLinks.length) return null;
+      const footer = $("<div>", {
+        class:
+          "card-footer p-0 mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2",
+      });
+      if (date) footer.append(buildDateParagraph());
+      if (tagLinks.length)
+        footer.append(buildTagsParagraph(btnClass, iconClass));
+      return footer;
+    };
 
     if (isHome) {
       // Home page layout with image on the left
@@ -165,14 +216,14 @@ class News {
         const imgCol = $("<div>", { class: "col-md-5" }).appendTo(row);
         const imgLink = $("<a>", {
           class: "w-100",
-          href: `${link}?utm_campaign=self&utm_source=ui`,
+          href,
           target: "_blank",
           rel: "noopener",
         }).append(
           $("<img>", {
             class: "card-img card-img-left",
             src: imageSrc,
-            alt: imgAlt,
+            alt: imgAlt || "",
             loading: "lazy",
           }),
         );
@@ -186,70 +237,34 @@ class News {
       );
 
       const cardTitle = $("<h6>", { class: "card-title lh-sm mb-2" }).append(
-        $("<a>", {
-          href: `${link}?utm_campaign=self&utm_source=ui`,
-          target: "_blank",
-          rel: "noopener",
-          text: title,
-        }),
+        $("<a>", { href, target: "_blank", rel: "noopener", text: title }),
       );
 
-      const cardText = $("<small>", {
-        class: "card-text lh-1 courier-prime",
-        text: excerpt,
-      });
+      const cardText = $("<p>", {
+        class: "card-text lh-1 courier-prime mb-0",
+      }).append($("<small>", { text: excerpt }));
 
-      const cardFooter = $("<div>", {
-        class:
-          "card-footer p-0 mt-3 d-flex justify-content-between align-items-center",
-      });
-      $("<p>", { class: "card-text mb-0" })
-        .append(
-          $("<small>", {
-            class: "text-muted courier-prime",
-            text: `Posted on: ${date}`,
-          }),
-        )
-        .appendTo(cardFooter);
+      cardBody.append(cardTitle, cardText);
 
-      const tagsContainer = $("<p>", { class: "d-flex flex-wrap m-0" });
-      const validTags = tags.filter((tag) => tag?.slug && tag?.name);
-      validTags.forEach((tag) => {
-        $("<a>", {
-          role: "button",
-          href: `${this.BASE_URL}category/${tag.slug}?utm_campaign=self&utm_source=ui`,
-          "aria-pressed": "true",
-          class: "btn btn-xs btn-outline-primary",
-          target: "_blank",
-          rel: "noopener",
-        })
-          .append(
-            $("<span>", {
-              class: "tf-icons bx bx-xs bx-purchase-tag me-1",
-            }),
-            tag.name,
-          )
-          .appendTo(tagsContainer);
-      });
+      const footer = buildFooter(
+        "btn btn-xs btn-outline-primary",
+        "tf-icons bx bx-xs bx-purchase-tag me-1",
+      );
+      if (footer) cardBody.append(footer);
 
-      if (validTags.length) {
-        tagsContainer.appendTo(cardFooter);
-      }
-
-      cardBody.append(cardTitle, cardText, cardFooter);
       card.append(row);
     } else {
       // Sidebar/news page layout with image on top
       if (imageSrc) {
         const imgLink = $("<a>", {
-          href: `${link}?utm_campaign=self&utm_source=ui`,
+          href,
           target: "_blank",
           rel: "noopener",
         }).append(
           $("<img>", {
             class: "card-img-top",
             src: imageSrc,
-            alt: imgAlt,
+            alt: imgAlt || "",
             loading: "lazy",
           }),
         );
@@ -258,60 +273,26 @@ class News {
 
       const cardBody = $("<div>", { class: "card-body" });
       const cardTitle = $("<h5>", { class: "card-title" }).append(
-        $("<a>", {
-          href: `${link}?utm_campaign=self&utm_source=ui`,
-          target: "_blank",
-          rel: "noopener",
-          text: title,
-        }),
+        $("<a>", { href, target: "_blank", rel: "noopener", text: title }),
       );
       const cardText = $("<p>", {
         class: "card-text courier-prime",
         text: excerpt,
       });
 
-      const tagsContainer = $("<p>", { class: "d-flex flex-wrap" });
-      const validTags = tags.filter((tag) => tag?.slug && tag?.name);
-      validTags.forEach((tag) => {
-        $("<a>", {
-          role: "button",
-          href: `${this.BASE_URL}category/${tag.slug}?utm_campaign=self&utm_source=ui`,
-          "aria-pressed": "true",
-          class: "btn btn-sm btn-outline-primary",
-          target: "_blank",
-          rel: "noopener",
-        })
-          .append(
-            $("<span>", {
-              class: "tf-icons bx bx-xs bx-purchase-tag bx-18px me-2",
-            }),
-            tag.name,
-          )
-          .appendTo(tagsContainer);
-      });
+      cardBody.append(cardTitle, cardText);
 
-      const dateText = $("<p>", { class: "card-text" }).append(
-        $("<small>", {
-          class: "text-muted courier-prime",
-          text: `Posted on: ${date}`,
-        }),
+      const footer = buildFooter(
+        "btn btn-sm btn-outline-primary",
+        "tf-icons bx bx-xs bx-purchase-tag bx-18px me-2",
       );
+      if (footer) cardBody.append(footer);
 
-      if (validTags.length) {
-        cardBody.append(cardTitle, cardText, tagsContainer, dateText);
-      } else {
-        cardBody.append(cardTitle, cardText, dateText);
-      }
       card.append(cardBody);
     }
 
-    if (isHome) {
-      col.append(card);
-    } else {
-      col.append(card);
-    }
-
-    return col;
+    wrapper.append(card);
+    return wrapper;
   }
 
   extractTerms(news) {

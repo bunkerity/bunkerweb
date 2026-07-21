@@ -1,11 +1,20 @@
 {% from 'macros/docs_link.html' import docs_url %}
+{% from 'components/search.html' import search %}
 <!-- Navbar -->
 <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
      id="layout-navbar">
-    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
-        <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
-            <i class="bx bx-menu bx-md"></i>
-        </a>
+    <button type="button"
+            class="layout-menu-toggle btn btn-sm btn-outline-secondary btn-icon me-3"
+            aria-label="Toggle navigation"
+            aria-controls="layout-menu">
+        <i class="bx bx-menu bx-md d-xl-none" aria-hidden="true"></i>
+        <i class="bx bx-chevrons-left bx-sm d-none d-xl-inline" aria-hidden="true"></i>
+    </button>
+    <div class="bw-navbar-search d-none d-xxl-block position-relative me-3">
+        {{ search(id="admin-nav-search", placeholder="Search...", variant="flat", classes="bg-body-tertiary rounded-3", attrs='aria-controls="admin-nav-search-results" aria-expanded="false"') }}
+        <div id="admin-nav-search-results"
+             class="list-group position-absolute top-100 start-0 end-0 mt-2 d-none shadow"
+             aria-live="polite"></div>
     </div>
     <div class="navbar-collapse collapse navbar-nav-right d-flex align-items-center"
          id="navbar-collapse">
@@ -52,7 +61,7 @@
                    rel="noopener"
                    data-endpoint="{{ documentation_endpoint }}"
                    data-fragment="{{ documentation_fragment or '' }}">
-                    <span class="tf-icons bx bx-file me-md-2"></span>
+                    <span class="tf-icons bx bx-file me-md-2" aria-hidden="true"></span>
                     <span class="d-none d-lg-inline" data-i18n="navbar.link.documentation">Documentation</span>
                 </a>
                 <a role="button"
@@ -61,7 +70,7 @@
                    href="https://github.com/bunkerity/bunkerweb/?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noreferrer">
-                    <i class="tf-icons bx bxl-github me-md-2"></i>
+                    <i class="tf-icons bx bxl-github me-md-2" aria-hidden="true"></i>
                     <span class="d-none d-lg-inline">Github</span>
                 </a>
                 <a role="button"
@@ -70,7 +79,7 @@
                    href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener">
-                    <i class="tf-icons bx bxl-discord me-md-2"></i>
+                    <i class="tf-icons bx bxl-discord me-md-2" aria-hidden="true"></i>
                     <span class="d-none d-lg-inline">Discord</span>
                 </a>
             </div>
@@ -130,7 +139,9 @@
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow p-0 d-flex align-items-center"
                    href="javascript:void(0);"
-                   data-bs-toggle="dropdown">
+                   data-bs-toggle="dropdown"
+                   aria-label="Open user menu"
+                   aria-expanded="false">
                     <div class="avatar avatar-online">
                         <img src="{{ avatar_url }}"
                              alt="User Avatar"
@@ -161,7 +172,7 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center"
                            href="{{ url_for('logout') }}">
-                            <i class="bx bx-power-off bx-sm me-2"></i><span data-i18n="navbar.dropdown.logout">Log Out</span>
+                            <i class="bx bx-power-off bx-sm me-2" aria-hidden="true"></i><span data-i18n="navbar.dropdown.logout">Log Out</span>
                         </a>
                     </li>
                 </ul>

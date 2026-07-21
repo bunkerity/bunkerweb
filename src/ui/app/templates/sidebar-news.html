@@ -1,64 +1,20 @@
-<div class="offcanvas offcanvas-end"
-     tabindex="-1"
-     id="side-offcanvas-news"
-     data-bs-keyboard="false"
-     data-bs-backdrop="false">
-    <div class="offcanvas-header">
-        <div class="social-buttons">
-            <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noopener">
-                <i class='bx bxl-discord-alt bx-sm'></i>
-            </a>
-            <a href="https://www.linkedin.com/company/bunkerity/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <i class='bx bxl-linkedin bx-sm'></i>
-            </a>
-            <a href="https://www.reddit.com/r/BunkerWeb/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <i class='bx bxl-reddit bx-sm'></i>
-            </a>
-            <a href="https://www.instagram.com/bunkerweb/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <i class='bx bxl-instagram bx-sm'></i>
-            </a>
-            <a href="https://x.com/bunkerity/"
-               class="btn btn-sm btn-link"
-               target="_blank"
-               rel="noreferrer">
-                <img src="{{ url_for('static', filename='img/brands/Twitter-X-Logo.svg') }}"
-                     class="x-logo"
-                     alt="X logo"
-                     width="20px"
-                     height="20px">
-            </a>
-        </div>
-        <button type="button"
-                class="btn-close text-reset"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-                data-i18n="aria.label.close"></button>
-    </div>
+{% from "components/drawer.html" import drawer %}
+{% call drawer(id="side-offcanvas-news", theme=theme, newsletter=false) %}
     <div class="offcanvas-body position-relative ps-3 pe-3">
         <div id="data-news-container">
-            <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+            <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
                data-i18n="status.blog_connection_fail">Impossible to connect to blog news.</p>
         </div>
-        <div class="text-center relative w-full p-2 text-primary rounded-lg fw-bold mt-4">
+        <div class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold mt-4">
             <a href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
                class="text-decoration-underline link-underline-primary position-relative pe-4"
                target="_blank"
                rel="noopener"><span data-i18n="link.more_news">More news</span> <i class="bx bx-xs bx-right-arrow-alt position-absolute end-0 top-0 mt-0_5"></i></a>
         </div>
     </div>
-    <!-- Newsletter Signup Section -->
+    <!-- Newsletter Signup Section: rendered here (newsletter=false above) instead of via the
+         macro's own newsletter slot -- see sidebar-notifications.html for why (i18n.js hardcodes
+         the literal "#newsletter-email-check"/"#newsletter-locale" ids). -->
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
         <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
         <form action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
@@ -97,4 +53,4 @@
         </form>
     </div>
     <!-- End Newsletter Signup Section -->
-</div>
+{% endcall %}

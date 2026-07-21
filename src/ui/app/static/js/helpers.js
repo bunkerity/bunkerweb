@@ -342,6 +342,8 @@ const Helpers = {
           this._redrawLayoutMenu() ? 5 : 0,
         );
       }
+    } else {
+      this[collapsed ? "_addClass" : "_removeClass"]("layout-menu-collapsed");
     }
   },
 
@@ -536,7 +538,7 @@ const Helpers = {
       this._bindLayoutAnimationEndEvent(
         () => {
           // Collapse / Expand
-          if (this.isSmallScreen) this._setCollapsed(collapsed);
+          this._setCollapsed(collapsed);
         },
         () => {
           this._removeClass("layout-transitioning");

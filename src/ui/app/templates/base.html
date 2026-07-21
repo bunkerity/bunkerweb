@@ -3,16 +3,16 @@
 {% set avatar_url = url_for('static', filename='img/avatar_profil_BW.png' if theme == 'light' else 'img/avatar_profil_BW-white.png') %}
 {% set plugin_types = {
     "core": {
-        "icon": "<i class=\"bx bx-shield bx-xs\"></i>",
+        "icon": "<i class=\"bx bx-shield bx-xs\" aria-hidden=\"true\"></i>",
         "title-class": " border-dark"
     },
     "external": {
-        "icon": "<i class=\"bx bx-plug bx-xs\"></i>",
+        "icon": "<i class=\"bx bx-plug bx-xs\" aria-hidden=\"true\"></i>",
         "title-class": " border-secondary",
         "text-class": " text-secondary fw-bold"
     },
     "ui": {
-        "icon": "<i class=\"bx bx-cloud-upload bx-xs\"></i>",
+        "icon": "<i class=\"bx bx-cloud-upload bx-xs\" aria-hidden=\"true\"></i>",
         "title-class": " border-secondary",
         "text-class": " text-secondary"
     },
@@ -25,7 +25,7 @@
 <html lang="en"
       class="{{ theme }}-style layout-navbar-fixed layout-menu-fixed{% if theme == 'dark' %} dark{% endif %}"
       data-theme="theme-default"
-      {% if theme == 'dark' %}data-bs-theme="dark"{% endif %}>
+      data-bs-theme="{{ theme }}">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport"
