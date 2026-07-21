@@ -3588,6 +3588,11 @@ class Database:
                             session.query(Templates).filter(Templates.id == plugin_template.id).delete()
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
+                        # Pro license loss/downgrade: drop the custom UI page so the stale DB blob
+                        # (template.html + actions.py) can no longer be served or executed.
+                        # Settings, Global_values, Services_settings, Jobs, Jobs_cache and Templates
+                        # are deliberately preserved so user values survive a re-license.
+                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
 
                     if per_plugin_commit:
                         try:
