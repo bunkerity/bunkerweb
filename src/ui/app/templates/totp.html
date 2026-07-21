@@ -6,27 +6,30 @@
 {% endblock %}
 {% block page %}
     <!-- Content -->
-    <!-- Dark Mode Toggle - Enhanced Floating Button -->
-    <div class="theme-toggle position-fixed top-0 end-0 p-6"
-         style="z-index: 1030">
-        <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
-            <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
-                   for="dark-mode-toggle"
-                   data-i18n="theme.light">Light</label>
-            <div class="form-switch">
-                <input id="dark-mode-toggle"
-                       name="dark-mode-toggle"
-                       class="form-check-input"
-                       type="checkbox"
-                       role="switch"
-                       {% if theme == "dark" %}checked{% endif %} />
+    <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1030">
+        <div class="d-flex justify-content-end align-items-center">
+            <!-- Language Selector -->
+            <div class="me-3">{% include "language-selector.html" %}</div>
+            <!-- Theme Toggle -->
+            <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
+                <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
+                       for="dark-mode-toggle"
+                       data-i18n="theme.light">Light</label>
+                <div class="form-switch">
+                    <input id="dark-mode-toggle"
+                           name="dark-mode-toggle"
+                           class="form-check-input"
+                           type="checkbox"
+                           role="switch"
+                           {% if theme == "dark" %}checked{% endif %} />
+                </div>
+                <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
+                       for="dark-mode-toggle"
+                       data-i18n="theme.dark">Dark</label>
             </div>
-            <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
-                   for="dark-mode-toggle"
-                   data-i18n="theme.dark">Dark</label>
         </div>
     </div>
-    <!-- /Dark Mode Toggle -->
+    <!-- /Theme + Language Toggle -->
     <div class="theme-bg-surface">
         <div class="login-background">
             <div class="container-xxl">
@@ -62,16 +65,18 @@
                                            name="next"
                                            value="{{ request.values.get('next', '') }}" />
                                     <div class="mb-6">
-                                        <label class="form-label" for="totp_token" data-i18n="form.label.2fa_code">2FA Code</label>
-                                        <div class="input-group input-group-merge">
+                                        <label class="form-label"
+                                               for="totp_token"
+                                               data-i18n="form.label.2fa_code_or_recovery">2FA Code or Recovery Code</label>
+                                        <div class="input-group">
                                             <input type="text"
                                                    id="totp_token"
                                                    class="form-control"
                                                    name="totp_token"
-                                                   placeholder="2FA Code"
-                                                   data-i18n="form.placeholder.2fa_code"
-                                                   aria-describedby="2FA Code"
+                                                   placeholder="Enter code"
+                                                   data-i18n="form.placeholder.2fa_or_recovery"
                                                    autocomplete="one-time-code"
+                                                   autofocus
                                                    required />
                                         </div>
                                     </div>

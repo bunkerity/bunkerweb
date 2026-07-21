@@ -1047,13 +1047,15 @@
       "ip_address": "Adresse IP",
       "last_activity": "Dernière Activité",
       "os": "Système d'Exploitation",
-      "title": "Session"
+      "title": "Session",
+      "wipe_help": "Terminer toutes les autres sessions actives sur votre compte. Vous resterez connecté ici."
     },
     "tab": {
       "profile": "Profil",
       "security": "Sécurité",
       "sessions": "Sessions"
-    }
+    },
+    "subtitle": "Gérer votre compte, la sécurité et les sessions actives."
   },
   "reports": {
     "security_incident": "Incident de sécurité",
@@ -1977,5 +1979,8 @@
   },
   "templates": {
     "subtitle": "Modèles de configuration réutilisables pour vos services : regrouper les paramètres, les étapes et les configurations personnalisées, puis les créer, les cloner ou les supprimer."
+  },
+  "login": {
+    "subtitle": "Connectez-vous à votre compte BunkerWeb"
   }
 }

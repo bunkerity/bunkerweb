@@ -1045,13 +1045,15 @@
       "ip_address": "IP 주소",
       "last_activity": "마지막 활동",
       "os": "운영 체제",
-      "title": "세션"
+      "title": "세션",
+      "wipe_help": "계정의 모든 활성 세션을 종료합니다. 여기에서 계속 로그인됩니다."
     },
     "tab": {
       "profile": "프로필",
       "security": "보안",
       "sessions": "세션"
-    }
+    },
+    "subtitle": "계정, 보안 및 활성 세션을 관리합니다."
   },
   "reports": {
     "security_incident": "보안 사고",
@@ -1975,5 +1977,8 @@
   },
   "templates": {
     "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다."
+  },
+  "login": {
+    "subtitle": "BunkerWeb 계정에 로그인"
   }
 }

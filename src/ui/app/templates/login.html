@@ -35,8 +35,8 @@
             <div class="container-xxl">
                 <div class="authentication-wrapper authentication-basic container-p-y">
                     <div class="authentication-inner">
-                        <!-- Register -->
-                        <div class="card px-sm-6 px-0">
+                        <!-- Login -->
+                        <div class="card px-sm-6 px-0 shadow-sm rounded-3">
                             <div class="card-body">
                                 <!-- Logo -->
                                 <div class="app-brand justify-content-center">
@@ -55,6 +55,7 @@
                                     </a>
                                 </div>
                                 <!-- /Logo -->
+                                <p class="text-center text-muted mb-6" data-i18n="login.subtitle">Sign in to your BunkerWeb account</p>
                                 <form method="POST" id="login-form">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden"
@@ -115,7 +116,7 @@
                                 </form>
                             </div>
                         </div>
-                        <!-- /Register -->
+                        <!-- /Login -->
                     </div>
                 </div>
             </div>

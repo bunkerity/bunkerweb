@@ -1045,13 +1045,15 @@
       "ip_address": "Endereço IP",
       "last_activity": "Última Atividade",
       "os": "Sistema Operacional",
-      "title": "Sessão"
+      "title": "Sessão",
+      "wipe_help": "Terminar todas as outras sessões ativas na sua conta. Permanecerá logado aqui."
     },
     "tab": {
       "profile": "Perfil",
       "security": "Segurança",
       "sessions": "Sessões"
-    }
+    },
+    "subtitle": "Gerir a sua conta, segurança e sessões ativas."
   },
   "reports": {
     "security_incident": "Incidente de Segurança",
@@ -1975,5 +1977,8 @@
   },
   "templates": {
     "subtitle": "Modelos de configuração reutilizáveis para os seus serviços — agrupe as configurações, os passos e as configurações personalizadas, e depois crie, clone ou elimine-os."
+  },
+  "login": {
+    "subtitle": "Iniciar sessão na sua conta do BunkerWeb"
   }
 }

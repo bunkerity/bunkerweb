@@ -107,6 +107,38 @@ $(document).ready(() => {
   };
 
   /**
+   * Resolves the element invalid-feedback should be appended to/found in:
+   * the closest .input-group root when the field has one (wrapping-tolerant
+   * -- walks ancestors instead of assuming $input.parent() IS the group),
+   * otherwise the field's own parent.
+   * @param {jQuery} $input - The form field.
+   * @returns {jQuery} The feedback container.
+   */
+  const feedbackContainer = ($input) => {
+    const $group = $input.closest(".input-group");
+    return $group.length ? $group : $input.parent();
+  };
+
+  /**
+   * Sets (or clears) the Bootstrap invalid-feedback message for a field,
+   * creating the .invalid-feedback element on first use.
+   * @param {jQuery} $input - The form field.
+   * @param {string} msg - Feedback text ("" clears it).
+   * @returns {jQuery} The feedback element.
+   */
+  const setFeedback = ($input, msg) => {
+    const $container = feedbackContainer($input);
+    let $feedback = $container.children(".invalid-feedback");
+    if (!$feedback.length) {
+      $feedback = $('<div class="invalid-feedback"></div>').appendTo(
+        $container,
+      );
+    }
+    $feedback.text(msg);
+    return $feedback;
+  };
+
+  /**
    * Performs a DNS check by fetching the given URL.
    * @param {string} url - The URL to fetch.
    * @returns {Promise<boolean>} True if the check is successful, else false.
@@ -156,19 +188,10 @@ $(document).ready(() => {
     // Toggle valid/invalid classes
     $input.toggleClass("is-invalid", !isValid);
 
-    // Manage the invalid-feedback element
-    let $feedback = $input.siblings(".invalid-feedback");
-    if (!$feedback.length) {
-      const $textSpan = $input.parent().find("span.input-group-text");
-      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-        $textSpan.length ? $textSpan : $input,
-      );
-    }
-
     const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
     feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the toast
     if (!isValid) {
-      $feedback.text("Server name is not unique.");
+      setFeedback($input, "Server name is not unique.");
       feedbackToast.addClass("border-danger");
       feedbackToast.find(".toast-header").addClass("text-danger");
       feedbackToast.find("span").text("Server name is not unique.");
@@ -184,7 +207,7 @@ $(document).ready(() => {
           )
           .toggleClass("bx-x text-danger", true);
     } else {
-      $feedback.text("");
+      setFeedback($input, "");
       feedbackToast.addClass("border-primary");
       feedbackToast.find(".toast-header").addClass("text-primary");
       feedbackToast.find("span").text("Server name is unique.");
@@ -316,21 +339,8 @@ $(document).ready(() => {
       // Toggle valid/invalid classes
       $input.toggleClass("is-invalid", !isValid);
 
-      // Manage the invalid-feedback element
-      let $feedback = $input.siblings(".invalid-feedback");
-      if (!$feedback.length) {
-        const $textSpan = $input.parent().find("span.input-group-text");
-        $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-          $textSpan.length ? $textSpan : $input,
-        );
-      }
-
-      if (!isValid) {
-        $feedback.text(errorMessage);
-        isStepValid = false;
-      } else {
-        $feedback.text("");
-      }
+      setFeedback($input, isValid ? "" : errorMessage);
+      if (!isValid) isStepValid = false;
     });
 
     if (!isStepValid) {
@@ -371,7 +381,7 @@ $(document).ready(() => {
 
     // Scroll into view
     $newTabTrigger[0].scrollIntoView({
-      behavior: "smooth",
+      behavior: window.bwPrefersReducedMotion() ? "auto" : "smooth",
       block: "nearest",
       inline: "center",
     });
@@ -454,21 +464,11 @@ $(document).ready(() => {
 
         if (password !== confirmPassword) {
           $confirmPasswordInput.addClass("is-invalid");
-          let $feedback = $confirmPasswordInput.siblings(".invalid-feedback");
-          if (!$feedback.length) {
-            const $textSpan = $confirmPasswordInput
-              .parent()
-              .find("span.input-group-text");
-            $feedback = $(
-              '<div class="invalid-feedback">Passwords do not match.</div>',
-            ).insertAfter($textSpan.length ? $textSpan : $confirmPasswordInput);
-          } else {
-            $feedback.text("Passwords do not match.");
-          }
+          setFeedback($confirmPasswordInput, "Passwords do not match.");
           isStepValid = false;
         } else {
           $confirmPasswordInput.removeClass("is-invalid");
-          $confirmPasswordInput.siblings(".invalid-feedback").text("");
+          setFeedback($confirmPasswordInput, "");
         }
 
         const $subscribeNewsletter = $("#setup-subscribe-newsletter");
@@ -477,20 +477,11 @@ $(document).ready(() => {
           $subscribeNewsletter.prop("checked") &&
           (!$email.val() || !$email.get(0).checkValidity())
         ) {
-          $("#email").addClass("is-invalid");
-          let $feedback = $("#email").siblings(".invalid-feedback");
-          if (!$feedback.length) {
-            const $textSpan = $("#email")
-              .parent()
-              .find("span.input-group-text");
-            $feedback = $(
-              '<div class="invalid-feedback">This field is required if you want to subscribe to the newsletter.</div>',
-            ).insertAfter($textSpan.length ? $textSpan : $("#email"));
-          } else {
-            $feedback.text(
-              "This field is required if you want to subscribe to the newsletter.",
-            );
-          }
+          $email.addClass("is-invalid");
+          setFeedback(
+            $email,
+            "This field is required if you want to subscribe to the newsletter.",
+          );
           isStepValid = false;
         }
       } else if (!uiReverseProxy && currentStep === 2) {
@@ -508,40 +499,18 @@ $(document).ready(() => {
           );
           if (!$email.val().trim() && !$zerosslApiKey.val().trim()) {
             $zerosslApiKey.addClass("is-invalid");
-            let $feedback = $zerosslApiKey.siblings(".invalid-feedback");
-            if (!$feedback.length) {
-              const $textSpan = $zerosslApiKey
-                .parent()
-                .find("span.input-group-text");
-              $feedback = $(
-                `<div class="invalid-feedback">${zerosslValidationMessage}</div>`,
-              ).insertAfter($textSpan.length ? $textSpan : $zerosslApiKey);
-            } else {
-              $feedback.text(zerosslValidationMessage);
-            }
+            setFeedback($zerosslApiKey, zerosslValidationMessage);
             return;
           }
         }
 
         if (autoLetsEncrypt && letsEncryptChallenge === "dns") {
           const $letsEncryptProvider = $("#LETS_ENCRYPT_DNS_PROVIDER");
+          const dnsRequiredMessage =
+            "This field is required when using DNS challenge.";
           if (!$letsEncryptProvider.find(":selected").val()) {
             $letsEncryptProvider.addClass("is-invalid");
-            let $feedback = $letsEncryptProvider.siblings(".invalid-feedback");
-            if (!$feedback.length) {
-              const $textSpan = $letsEncryptProvider
-                .parent()
-                .find("span.input-group-text");
-              $feedback = $(
-                '<div class="invalid-feedback">This field is required when using DNS challenge.</div>',
-              ).insertAfter(
-                $textSpan.length ? $textSpan : $letsEncryptProvider,
-              );
-            } else {
-              $feedback.text(
-                "This field is required when using DNS challenge.",
-              );
-            }
+            setFeedback($letsEncryptProvider, dnsRequiredMessage);
             return;
           }
 
@@ -550,22 +519,7 @@ $(document).ready(() => {
           );
           if (!$letsEncryptCredentialItems.val()) {
             $letsEncryptCredentialItems.addClass("is-invalid");
-            let $feedback =
-              $letsEncryptCredentialItems.siblings(".invalid-feedback");
-            if (!$feedback.length) {
-              const $textSpan = $letsEncryptCredentialItems
-                .parent()
-                .find("span.input-group-text");
-              $feedback = $(
-                '<div class="invalid-feedback">This field is required when using DNS challenge.</div>',
-              ).insertAfter(
-                $textSpan.length ? $textSpan : $letsEncryptCredentialItems,
-              );
-            } else {
-              $feedback.text(
-                "This field is required when using DNS challenge.",
-              );
-            }
+            setFeedback($letsEncryptCredentialItems, dnsRequiredMessage);
             return;
           }
         }
@@ -587,31 +541,11 @@ $(document).ready(() => {
               "When using custom SSL, you must set both the certificate and the key (via file path or data upload).";
             if (!hasPathCert) {
               $customSslCert.addClass("is-invalid");
-              let $feedback = $customSslCert.siblings(".invalid-feedback");
-              if (!$feedback.length) {
-                const $textSpan = $customSslCert
-                  .parent()
-                  .find("span.input-group-text");
-                $feedback = $(
-                  `<div class="invalid-feedback">${errorMsg}</div>`,
-                ).insertAfter($textSpan.length ? $textSpan : $customSslCert);
-              } else {
-                $feedback.text(errorMsg);
-              }
+              setFeedback($customSslCert, errorMsg);
             }
             if (!hasPathKey) {
               $customSslKey.addClass("is-invalid");
-              let $feedback = $customSslKey.siblings(".invalid-feedback");
-              if (!$feedback.length) {
-                const $textSpan = $customSslKey
-                  .parent()
-                  .find("span.input-group-text");
-                $feedback = $(
-                  `<div class="invalid-feedback">${errorMsg}</div>`,
-                ).insertAfter($textSpan.length ? $textSpan : $customSslKey);
-              } else {
-                $feedback.text(errorMsg);
-              }
+              setFeedback($customSslKey, errorMsg);
             }
             return;
           }
@@ -625,13 +559,13 @@ $(document).ready(() => {
         isStepValid = false;
 
         if (typeof result === "string") {
-          $("#dns-check-title").text("Error");
+          $("#modal-confirm-dns-title").text("Error");
           $("#dns-check-result").html(
             `Are you sure you want to proceed to the next step?<br/>Error: ${result}`,
           );
           modal.modal("show");
         } else if (!result) {
-          $("#dns-check-title").text("Server name is not unique");
+          $("#modal-confirm-dns-title").text("Server name is not unique");
           $("#dns-check-result").html(
             `Are you sure you want to proceed to the next step?<br/>Server name "${serverName}" is not unique.`,
           );

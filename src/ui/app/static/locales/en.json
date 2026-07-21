@@ -1047,13 +1047,15 @@
       "ip_address": "IP Address",
       "last_activity": "Last Activity",
       "os": "Operating System",
-      "title": "Session"
+      "title": "Session",
+      "wipe_help": "End every other active session on your account. You'll stay signed in here."
     },
     "tab": {
       "profile": "Profile",
       "security": "Security",
       "sessions": "Sessions"
-    }
+    },
+    "subtitle": "Manage your account, security and active sessions."
   },
   "range_picker": {
     "1h": "Last hour",
@@ -2049,5 +2051,8 @@
   },
   "templates": {
     "subtitle": "Reusable configuration templates for your services — bundle settings, steps, and custom configs, then create, clone, or delete them."
+  },
+  "login": {
+    "subtitle": "Sign in to your BunkerWeb account"
   }
 }
