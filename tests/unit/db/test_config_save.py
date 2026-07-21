@@ -167,10 +167,48 @@ class TestSaveConfigGlobal:
             seeded.readonly = False
 
 
+class TestSaveConfigResourceGroups:
+    @pytest.fixture
+    def resource_groups_db(self, db):
+        settings = {
+            "BLACKLIST_IP": _list("blacklist-ip", "global"),
+            "BLACKLIST_COUNTRY": _list("blacklist-country", "global"),
+        }
+        db.init_tables([make_general_settings(), make_core_plugin("blacklist", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+        db.create_resource_group("office", name="office", entries=[{"kind": "ip", "value": "192.0.2.1"}])
+        db.create_resource_group("countries", name="countries", entries=[{"kind": "country", "value": "FR"}])
+        return db
+
+    def test_unknown_group_is_rejected_before_save(self, resource_groups_db):
+        result = resource_groups_db.save_config({"BLACKLIST_IP": "@typo"}, "ui", skip_service_management=True)
+        assert result == "Unknown resource group @typo referenced by BLACKLIST_IP"
+        assert resource_groups_db.get_config()["BLACKLIST_IP"] == ""
+
+    def test_wrong_kind_group_is_rejected_before_save(self, resource_groups_db):
+        result = resource_groups_db.save_config({"BLACKLIST_IP": "@countries"}, "ui", skip_service_management=True)
+        assert result == "Resource group @countries has no ip entries required by BLACKLIST_IP"
+        assert resource_groups_db.get_config()["BLACKLIST_IP"] == ""
+
+    def test_valid_group_is_saved(self, resource_groups_db):
+        result = resource_groups_db.save_config({"BLACKLIST_IP": "@office"}, "ui", skip_service_management=True)
+        assert isinstance(result, set)
+        assert resource_groups_db.get_config()["BLACKLIST_IP"] == "@office"
+
+    def test_reserved_country_alias_is_saved_without_seeded_group(self, resource_groups_db):
+        result = resource_groups_db.save_config({"BLACKLIST_COUNTRY": "@EU"}, "ui", skip_service_management=True)
+        assert isinstance(result, set)
+        assert resource_groups_db.get_config()["BLACKLIST_COUNTRY"] == "@EU"
+
+
 class TestSaveConfigMultisite:
     def test_service_created_and_setting_persisted(self, seeded):
         result = seeded.save_config(
-            {"MULTISITE": "yes", "SERVER_NAME": "app1.example.com", "app1.example.com_ALPHA_MS": "v1"},
+            {
+                "MULTISITE": "yes",
+                "SERVER_NAME": "app1.example.com",
+                "app1.example.com_ALPHA_MS": "v1",
+            },
             "scheduler",
         )
         assert isinstance(result, set)

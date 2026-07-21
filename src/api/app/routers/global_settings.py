@@ -80,7 +80,7 @@ def save_config(req: SaveConfigRequest) -> JSONResponse:
     """
     ret = get_db().save_config(req.config, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup)
     if isinstance(ret, str):
-        code = 400 if "read-only" in ret else 500
+        code = 400 if "read-only" in ret.lower() or "resource group" in ret.lower() else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
     # ret is a set of changed plugin IDs
     return JSONResponse(
@@ -106,8 +106,24 @@ def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
     base.update(to_set)
     ret = get_db().save_config(base, "api", changed=True, skip_service_management=True)
     if isinstance(ret, str):
-        code = 400 if ret and ("read-only" in ret or "already exists" in ret or "doesn't exist" in ret) else (200 if ret == "" else 500)
+        code = (
+            400
+            if ret
+            and any(
+                hint in ret.lower()
+                for hint in (
+                    "read-only",
+                    "already exists",
+                    "doesn't exist",
+                    "resource group",
+                )
+            )
+            else (200 if ret == "" else 500)
+        )
         status = "success" if code == 200 else "error"
-        return JSONResponse(status_code=code, content={"status": status, "message": ret} if status == "error" else {"status": status})
+        return JSONResponse(
+            status_code=code,
+            content={"status": status, "message": ret} if status == "error" else {"status": status},
+        )
     # Success: return list of plugins impacted (may be empty set)
     return JSONResponse(status_code=200, content={"status": "success"})
