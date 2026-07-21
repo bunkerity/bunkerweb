@@ -36,7 +36,8 @@
       "services_dropzone": "Hizmet dışa aktarma dosyası seçin veya buraya bırakın",
       "hide_value": "Değeri gizle",
       "reveal_value": "Değeri göster",
-      "user_avatar": "Kullanıcı avatarı"
+      "user_avatar": "Kullanıcı avatarı",
+      "remove_value": "Değeri kaldır"
     }
   },
   "badge": {

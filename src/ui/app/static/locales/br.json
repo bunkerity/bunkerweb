@@ -36,7 +36,8 @@
       "services_dropzone": "Selecione um arquivo de exportação de serviços ou solte-o aqui",
       "hide_value": "Ocultar valor",
       "reveal_value": "Mostrar valor",
-      "user_avatar": "Avatar do usuário"
+      "user_avatar": "Avatar do usuário",
+      "remove_value": "Remover valor"
     }
   },
   "badge": {

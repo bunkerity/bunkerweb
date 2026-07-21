@@ -36,7 +36,8 @@
       "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا",
       "hide_value": "إخفاء القيمة",
       "reveal_value": "إظهار القيمة",
-      "user_avatar": "صورة المستخدم"
+      "user_avatar": "صورة المستخدم",
+      "remove_value": "حذف القيمة"
     }
   },
   "badge": {

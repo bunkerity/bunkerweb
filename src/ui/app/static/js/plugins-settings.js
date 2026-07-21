@@ -714,47 +714,17 @@ $(document).ready(() => {
         $dropdown.find("[data-selected-badge]").text(checkedCount);
       });
 
-    // Reset multivalue fields (hidden input + visible text inputs)
+    // Reset multivalue fields (hidden input + visible chip rows)
     templateContainer.find(".multivalue-hidden-input").each(function () {
       const $input = $(this);
       if ($input.prop("disabled")) return;
       const templateValue = resolveTemplateValue($input, this.id);
       if (templateValue === undefined) return;
 
-      const $container = $input.closest(".multivalue-container");
-      const separator = $container.data("separator") || " ";
-      const values = templateValue ? templateValue.split(separator) : [""];
-      $container.find(".multivalue-input-group").remove();
-      $container.find(".multivalue-toggle").remove();
-
-      const $inputsContainer = $container.find(".multivalue-inputs");
-      values.forEach((value, index) => {
-        const $inputGroup = $("<div>", {
-          class: "input-group mb-2 multivalue-input-group",
-        });
-        const $input = $("<input>", {
-          type: "text",
-          class: "form-control multivalue-input",
-        });
-        $input.val(value.trim());
-        $inputGroup.append($input);
-        $inputGroup.append(
-          `<button type="button"
-                    class="btn btn-outline-success add-multivalue-item">
-              <i class="bx bx-plus"></i>
-            </button>`,
-        );
-        if (index > 0 || values.length > 1) {
-          $inputGroup.append(
-            `<button type="button"
-                    class="btn btn-outline-danger remove-multivalue-item">
-              <i class="bx bx-x"></i>
-            </button>`,
-          );
-        }
-        $inputsContainer.append($inputGroup);
-      });
-      updateMultivalueHiddenInput($container);
+      rebuildMultivalueRows(
+        $input.closest(".multivalue-container"),
+        templateValue,
+      );
     });
 
     templateContainer.find(".ace-editor").each(function () {
@@ -2379,42 +2349,10 @@ $(document).ready(() => {
               syncFileSettingManualInput($input);
               setFileSettingStatus($input);
             } else if ($input.hasClass("multivalue-hidden-input")) {
-              const $container = $input.closest(".multivalue-container");
-              const separator = $container.data("separator") || " ";
-              const values = settingValue
-                ? settingValue.split(separator)
-                : [""];
-              $container.find(".multivalue-input-group").remove();
-              $container.find(".multivalue-toggle").remove();
-
-              const $inputsContainer = $container.find(".multivalue-inputs");
-              values.forEach((value, index) => {
-                const $inputGroup = $("<div>", {
-                  class: "input-group mb-2 multivalue-input-group",
-                });
-                const $input = $("<input>", {
-                  type: "text",
-                  class: "form-control multivalue-input",
-                });
-                $input.val(value.trim());
-                $inputGroup.append($input);
-                $inputGroup.append(
-                  `<button type="button"
-                            class="btn btn-outline-success add-multivalue-item">
-                      <i class="bx bx-plus"></i>
-                    </button>`,
-                );
-                if (index > 0 || values.length > 1) {
-                  $inputGroup.append(
-                    `<button type="button"
-                            class="btn btn-outline-danger remove-multivalue-item">
-                      <i class="bx bx-x"></i>
-                    </button>`,
-                  );
-                }
-                $inputsContainer.append($inputGroup);
-              });
-              updateMultivalueHiddenInput($container);
+              rebuildMultivalueRows(
+                $input.closest(".multivalue-container"),
+                settingValue,
+              );
             } else if (
               $input.is('input[type="hidden"]') &&
               $input.closest(".dropdown").find(".multiselect-toggle").length
@@ -3171,42 +3109,10 @@ $(document).ready(() => {
       setFileSettingStatus($settingField);
     } else if ($settingField.hasClass("multivalue-hidden-input")) {
       // Handle multivalue reset
-      const $container = $settingField.closest(".multivalue-container");
-      const separator = $container.data("separator") || " ";
-      const values = valueToSet ? valueToSet.split(separator) : [""]; // Clear existing inputs and toggle
-      $container.find(".multivalue-input-group").remove();
-      $container.find(".multivalue-toggle").remove();
-
-      // Add inputs for each value
-      const $inputsContainer = $container.find(".multivalue-inputs");
-      values.forEach((value, index) => {
-        const $inputGroup = $("<div>", {
-          class: "input-group mb-2 multivalue-input-group",
-        });
-        const $input = $("<input>", {
-          type: "text",
-          class: "form-control multivalue-input",
-        });
-        $input.val(value.trim());
-        $inputGroup.append($input);
-        $inputGroup.append(
-          `<button type="button"
-                    class="btn btn-outline-success add-multivalue-item">
-              <i class="bx bx-plus"></i>
-            </button>`,
-        );
-        if (index > 0 || values.length > 1) {
-          $inputGroup.append(
-            `<button type="button"
-                    class="btn btn-outline-danger remove-multivalue-item">
-              <i class="bx bx-x"></i>
-            </button>`,
-          );
-        }
-        $inputsContainer.append($inputGroup);
-      });
-
-      updateMultivalueHiddenInput($container);
+      rebuildMultivalueRows(
+        $settingField.closest(".multivalue-container"),
+        valueToSet,
+      );
     } else if (
       $settingField.closest(".dropdown").find(".multiselect-toggle").length
     ) {
@@ -3353,32 +3259,27 @@ $(document).ready(() => {
 
   isInit = false;
 
-  // Multivalue functionality
+  // Multivalue functionality -- chip/tag rows (type + Enter adds a chip,
+  // click the x removes one; see models/multivalue_setting.html for the
+  // markup + why). Rows are plain divs now, no per-row <label> (that
+  // duplicated the field's own name -- plugins_settings.html already
+  // renders one label above this whole field), so updateMultivalueLabels
+  // only has ids left to resync after an add/remove shifts indices.
   const updateMultivalueLabels = ($container) => {
     const $hiddenInput = $container.find(".multivalue-hidden-input");
-    const settingName = $hiddenInput.attr("name");
     const baseId = $hiddenInput.attr("id");
 
     $container.find(".multivalue-input-group").each(function (index) {
-      const $group = $(this);
-      const $input = $group.find(".multivalue-input");
-      const $label = $group.find("label");
-      const newIndex = index + 1;
-      const newId = `${baseId}_${newIndex}`;
-
-      $input.attr("id", newId);
-
-      // First item has no index, subsequent items have #1, #2, etc.
-      if (index === 0) {
-        $label.attr("for", newId).text(settingName);
-      } else {
-        $label.attr("for", newId).text(`${settingName} #${index}`);
-      }
+      $(this)
+        .find(".multivalue-input")
+        .attr("id", `${baseId}_${index + 1}`);
     });
   };
 
+  // Toggles ".has-value", which the chip CSS keys its filled/empty look and
+  // remove-button visibility off. Named for its earlier form-floating-label
+  // duty; kept as-is since it still does exactly what its callers need.
   const updateMultivalueFloatingLabel = ($container) => {
-    // Update floating label state for each input based on its value
     $container.find(".multivalue-input-group").each(function () {
       const $inputGroup = $(this);
       const $input = $inputGroup.find(".multivalue-input");
@@ -3402,6 +3303,12 @@ $(document).ready(() => {
   });
   const moreValuesLabel = t("plugins.multivalue.more_values", {
     defaultValue: "more values",
+  });
+  const multivalueEnterPlaceholder = t("placeholder.multivalue_enter_value", {
+    defaultValue: "Enter value...",
+  });
+  const multivalueRemoveLabel = t("aria.label.remove_value", {
+    defaultValue: "Remove value",
   });
 
   const toggleMultivalueVisibility = ($container, isToggleAction = false) => {
@@ -3469,70 +3376,56 @@ $(document).ready(() => {
     $hiddenInput.trigger("change");
   };
 
-  const addMultivalueItem = ($container, value = "", $insertAfter = null) => {
-    const isDisabled = $container
-      .find(".multivalue-hidden-input")
-      .prop("disabled");
-
-    if (isDisabled) return;
-
-    // Get the base ID and setting name from the hidden input
-    const $hiddenInput = $container.find(".multivalue-hidden-input");
-    const baseId = $hiddenInput.attr("id");
-    const settingName = $hiddenInput.attr("name");
-
-    // Calculate the index for the new input
-    const currentCount = $container.find(".multivalue-input-group").length;
-    const newIndex = currentCount + 1;
-    const inputId = `${baseId}_${newIndex}`;
-
-    const $inputGroup = $("<div>", {
-      class: "form-floating multivalue-input-group",
-    });
-    const $innerGroup = $("<div>", { class: "input-group" });
+  // Builds one chip row: a borderless text input plus (unless disabled) an
+  // inline x button. Shared by addMultivalueItem (single row) and
+  // rebuildMultivalueRows (full rebuild) so both stay in sync instead of
+  // hand-rolling their own copy of the markup.
+  const buildMultivalueChip = (id, value, disabled) => {
+    const $inputGroup = $("<div>", { class: "multivalue-input-group" });
     const $input = $("<input>", {
       type: "text",
-      class: "form-control multivalue-input",
-      id: inputId,
+      class: "form-control form-control-sm multivalue-input",
+      id,
+      placeholder: multivalueEnterPlaceholder,
     });
     $input.val(value);
-    $innerGroup.append($input);
-    $innerGroup.append(
-      `<button type="button"
-                class="btn btn-outline-success add-multivalue-item">
-            <i class="bx bx-plus"></i>
-          </button>
-          <button type="button"
-                class="btn btn-outline-danger remove-multivalue-item">
-            <i class="bx bx-x"></i>
+    if (disabled) $input.prop("disabled", true);
+    $inputGroup.append($input);
+
+    if (!disabled) {
+      $inputGroup.append(
+        `<button type="button"
+                class="multivalue-chip-remove remove-multivalue-item"
+                aria-label="${escapeAttr(multivalueRemoveLabel)}">
+            <i class="bx bx-x" aria-hidden="true"></i>
           </button>`,
-    );
-    $inputGroup.append($innerGroup);
-    $inputGroup.append(
-      $("<label>", { for: inputId, class: "text-truncate", text: "Temporary" }),
+      );
+    }
+    return $inputGroup;
+  };
+
+  const addMultivalueItem = ($container, value = "", $insertAfter = null) => {
+    const $hiddenInput = $container.find(".multivalue-hidden-input");
+    if ($hiddenInput.prop("disabled")) return;
+
+    const baseId = $hiddenInput.attr("id");
+    const currentCount = $container.find(".multivalue-input-group").length;
+    const $inputGroup = buildMultivalueChip(
+      `${baseId}_${currentCount + 1}`,
+      value,
+      false,
     );
 
     if ($insertAfter && $insertAfter.length) {
       $insertAfter.after($inputGroup);
     } else {
-      const $inputsContainer = $container.find(".multivalue-inputs");
-      $inputsContainer.append($inputGroup);
+      $container.find(".multivalue-inputs").append($inputGroup);
     }
 
-    // Update margin bottom for all input groups
-    const $allGroups = $container.find(".multivalue-input-group");
-    $allGroups.removeClass("mb-2");
-    $allGroups.not(":last").addClass("mb-2");
-
-    // Update all labels with correct indices
+    // Renumber ids -- insertAfter can land this row mid-list, not just last
     updateMultivalueLabels($container);
-
-    const $newInput = $container.find(".multivalue-input").last();
-    $newInput.focus();
-
-    // Update floating label behavior when new input is added
+    $inputGroup.find(".multivalue-input").focus();
     updateMultivalueFloatingLabel($container);
-
     updateMultivalueHiddenInput($container);
     toggleMultivalueVisibility($container, false);
 
@@ -3543,6 +3436,54 @@ $(document).ready(() => {
         toggleMultivalueVisibility($container, true);
       }
     }
+  };
+
+  // Keeps exactly one empty trailing chip available to type into.
+  // addMultivalueItem/the Enter handler below already preserve this
+  // invariant when THEY add a row; this covers the resource-group-picker
+  // path, which fills a row's value directly instead of going through
+  // addMultivalueItem.
+  const ensureMultivalueTrailingSlot = ($container) => {
+    const $hiddenInput = $container.find(".multivalue-hidden-input");
+    if ($hiddenInput.prop("disabled")) return;
+    const $groups = $container.find(".multivalue-input-group");
+    const lastValue = (
+      $groups.last().find(".multivalue-input").val() || ""
+    ).trim();
+    if ($groups.length === 0 || lastValue !== "") {
+      addMultivalueItem($container, "");
+    }
+  };
+
+  // Rebuilds every chip row of a multivalue field from a raw separator-joined
+  // string, padding a trailing empty slot -- shared by reset-to-default,
+  // apply-template and fetch-global-config so they stay in sync with
+  // addMultivalueItem's markup instead of each hand-rolling its own.
+  const rebuildMultivalueRows = ($container, rawValue) => {
+    const separator = $container.data("separator") || " ";
+    const $hiddenInput = $container.find(".multivalue-hidden-input");
+    const disabled = $hiddenInput.prop("disabled");
+    const baseId = $hiddenInput.attr("id");
+    let values = (rawValue ? rawValue.split(separator) : [""]).map((v) =>
+      v.trim(),
+    );
+    if (!disabled && values[values.length - 1] !== "") {
+      values = values.concat([""]);
+    }
+
+    $container.find(".multivalue-input-group").remove();
+    $container.find(".multivalue-toggle").remove();
+
+    const $inputsContainer = $container.find(".multivalue-inputs");
+    values.forEach((value, index) => {
+      $inputsContainer.append(
+        buildMultivalueChip(`${baseId}_${index + 1}`, value, disabled),
+      );
+    });
+
+    updateMultivalueHiddenInput($container);
+    updateMultivalueFloatingLabel($container);
+    toggleMultivalueVisibility($container, false);
   };
 
   const removeMultivalueItem = ($inputGroup, $container) => {
@@ -3559,14 +3500,7 @@ $(document).ready(() => {
 
     $inputGroup.remove();
 
-    // Update margin bottom for remaining input groups
-    const $allGroups = $container.find(".multivalue-input-group");
-    $allGroups.removeClass("mb-2");
-    $allGroups.not(":last").addClass("mb-2");
-
-    // Update all labels with correct indices
     updateMultivalueLabels($container);
-
     updateMultivalueHiddenInput($container);
     updateMultivalueFloatingLabel($container);
     toggleMultivalueVisibility($container, false);
@@ -3593,14 +3527,9 @@ $(document).ready(() => {
     toggleMultivalueVisibility($container, true);
   });
 
-  // Handle add button clicks
-  $(document).on("click", ".add-multivalue-item", function () {
-    const $container = $(this).closest(".multivalue-container");
-    const $currentInputGroup = $(this).closest(".multivalue-input-group");
-    addMultivalueItem($container, "", $currentInputGroup);
-  });
-
-  // Handle remove button clicks
+  // Handle remove (x) button clicks -- the only add gesture left is typing +
+  // Enter in the trailing empty chip (see the keydown handler below), so
+  // there's no more "add" button/handler to wire up here.
   $(document).on("click", ".remove-multivalue-item", function () {
     const $inputGroup = $(this).closest(".multivalue-input-group");
     const $container = $(this).closest(".multivalue-container");
@@ -3614,11 +3543,47 @@ $(document).ready(() => {
     updateMultivalueFloatingLabel($container);
   });
 
-  // Handle focus/blur for floating label behavior
+  // Insert compatible resource groups as canonical @alias values. The
+  // generator expands them by setting kind; literal values remain untouched.
+  $(document).on("change", ".resource-group-picker", function () {
+    const token = String($(this).val() || "").trim();
+    if (!token) return;
+
+    const $hiddenInput = $($(this).data("target"));
+    const $container = $hiddenInput.closest(".multivalue-container");
+    const exists = $container
+      .find(".multivalue-input")
+      .toArray()
+      .some((input) => String($(input).val() || "").trim() === token);
+
+    if (!exists) {
+      const $emptyInput = $container
+        .find(".multivalue-input")
+        .filter(function () {
+          return String($(this).val() || "").trim() === "";
+        })
+        .first();
+      if ($emptyInput.length) {
+        $emptyInput.val(token);
+        updateMultivalueHiddenInput($container);
+        updateMultivalueFloatingLabel($container);
+      } else {
+        addMultivalueItem($container, token);
+      }
+      ensureMultivalueTrailingSlot($container);
+    }
+
+    $(this).val("");
+  });
+
+  // Handle focus/blur for chip focus styling
   $(document).on("focus blur", ".multivalue-input", function () {
     const $container = $(this).closest(".multivalue-container");
     updateMultivalueFloatingLabel($container);
-  }); // Handle Enter key in multivalue inputs to add new item
+  });
+
+  // Handle Enter key in multivalue inputs: commits the current chip and
+  // opens a fresh empty one right after it (type-and-press-enter-to-add).
   $(document).on("keydown", ".multivalue-input", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -3630,6 +3595,87 @@ $(document).ready(() => {
         addMultivalueItem($container, "", $currentInputGroup);
       }
     }
+  });
+
+  // Rebuild the removable-chip row + linked "view selected" modal body that
+  // models/multiselect_setting.html renders when it opts into
+  // `multiselect_chips`. Fast no-op (two empty-selector lookups) for every
+  // other multiselect -- those don't render [data-multiselect-chips] or a
+  // linked "[data-multiselect-target]" modal body, so both come back empty.
+  const renderMultiselectChips = ($dropdown) => {
+    const $chipsRow = $dropdown.find("[data-multiselect-chips]");
+    const dropdownId = $dropdown.attr("id");
+    const $modalBody = dropdownId
+      ? $(`[data-multiselect-target="#${dropdownId}"]`)
+      : $();
+    if (!$chipsRow.length && !$modalBody.length) return;
+
+    const selected = $dropdown
+      .find('.multiselect-options input[type="checkbox"]:checked')
+      .map(function () {
+        // Read raw attributes, not jQuery .data() -- it coerces numeric-looking
+        // values (e.g. bad-behavior's "400"/"401" status-code option ids) and
+        // caches the first read, silently corrupting them on later lookups.
+        return {
+          value: String(this.getAttribute("value") ?? ""),
+          label: String(this.getAttribute("data-label") ?? this.value ?? ""),
+        };
+      })
+      .get();
+
+    const chipHtml = (item) =>
+      `<span class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center gap-1 multiselect-chip" data-chip-value="${escapeAttr(item.value)}">` +
+      `<span class="multiselect-chip-label">${escapeAttr(item.label)}</span>` +
+      `<button type="button" class="btn-close multiselect-chip-remove" data-remove-value="${escapeAttr(item.value)}" aria-label="Remove ${escapeAttr(item.label)}"></button>` +
+      `</span>`;
+
+    if ($chipsRow.length) {
+      $chipsRow
+        .toggleClass("d-none", selected.length === 0)
+        .html(selected.map(chipHtml).join(""));
+    }
+
+    $dropdown
+      .find(".multiselect-eye")
+      .toggleClass("d-none", selected.length === 0);
+
+    if ($modalBody.length) {
+      $modalBody
+        .find("[data-multiselect-selected-list]")
+        .html(selected.map(chipHtml).join(""));
+      $modalBody
+        .find(".multiselect-selected-empty")
+        .toggleClass("d-none", selected.length > 0);
+    }
+  };
+
+  // Handle removing a selected option from either the trigger-chips row or
+  // the linked "view selected" modal -- both share the same
+  // .multiselect-chip-remove markup (models/multiselect_setting.html).
+  // Unchecking + triggering "change" reuses the existing checkbox-change
+  // handler below (updates the hidden input, badge, footer count and, via
+  // renderMultiselectChips, both chip surfaces) instead of duplicating that
+  // bookkeeping here.
+  $(document).on("click", ".multiselect-chip-remove", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const value = String(this.getAttribute("data-remove-value") ?? "");
+    const $dropdown = $(this).closest(".multiselect-container");
+    const $scope = $dropdown.length
+      ? $dropdown
+      : $(
+          $(this)
+            .closest("[data-multiselect-target]")
+            .attr("data-multiselect-target") || "__none__",
+        );
+    if (!$scope.length) return;
+    $scope
+      .find('.multiselect-options input[type="checkbox"]')
+      .filter(function () {
+        return String(this.getAttribute("value")) === value;
+      })
+      .prop("checked", false)
+      .trigger("change");
   });
 
   // Multiselect dropdown functionality with search
@@ -3688,6 +3734,9 @@ $(document).ready(() => {
 
     // Trigger change event for validation
     $hiddenInput.trigger("change");
+
+    // No-op unless this control opted into multiselect_chips (see helper doc).
+    renderMultiselectChips($dropdown);
   };
 
   // Filter multiselect options based on search input and selected-only mode

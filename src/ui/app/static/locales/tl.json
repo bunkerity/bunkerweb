@@ -36,7 +36,8 @@
       "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito",
       "hide_value": "Itago ang halaga",
       "reveal_value": "Ipakita ang halaga",
-      "user_avatar": "Avatar ng gumagamit"
+      "user_avatar": "Avatar ng gumagamit",
+      "remove_value": "Alisin ang halaga"
     }
   },
   "badge": {

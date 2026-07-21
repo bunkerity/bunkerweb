@@ -36,7 +36,8 @@
       "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요",
       "hide_value": "값 숨기기",
       "reveal_value": "값 표시",
-      "user_avatar": "사용자 프로필"
+      "user_avatar": "사용자 프로필",
+      "remove_value": "값 제거"
     }
   },
   "badge": {

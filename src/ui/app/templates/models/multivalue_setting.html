@@ -1,8 +1,87 @@
-<!-- Multivalue Setting Template -->
+{# usage: {% include "models/multivalue_setting.html" %}
+          -- included from the per-setting loop in plugins_settings.html /
+          plugins_settings_easy.html once setting_data["type"] == "multivalue". #}
+
+{# Repeatable-value input for BunkerWeb's "multivalue" setting type -- the
+   space- (or custom-separator-) joined lists like DNS_RESOLVERS,
+   API_WHITELIST_IP, BUNKERWEB_INSTANCES and the PLUGINS_ORDER_* family. One
+   hidden input holds the real separator-joined string submitted as
+   `setting`; the visible rows are kept in sync with it by
+   static/js/plugins-settings.js's multivalue block (addMultivalueItem /
+   removeMultivalueItem / updateMultivalueHiddenInput /
+   toggleMultivalueVisibility, plus the reset-to-default, apply-template and
+   resource-group-picker code paths that rebuild the same rows via
+   rebuildMultivalueRows). This is a real settings-form-coupled template
+   (setting_id_prefix / data-method / .plugin-setting wiring) that is
+   `{% include %}`-d straight into the settings loop and reads that loop's
+   context by name -- it does not take macro params like the components/
+   partials do.
+
+   Rows render as a chip/tag row (flex-wrap pills with an inline x) instead
+   of the previous stack of full-width floating-label inputs -- the shape is
+   ported from the design kit's Inputs/Tags component (type + Enter commits a
+   chip, click x removes one), layered onto the EXISTING repeatable-rows
+   mechanism rather than the kit's own combobox/dropdown/modal chrome (see
+   "Not covered" below). `setting_values` is padded with one trailing empty
+   slot (mirrored by JS's ensureMultivalueTrailingSlot after any
+   programmatic fill) so there is always somewhere to type the next value --
+   the old per-row "+" button is gone, Enter is the only add gesture now,
+   matching the kit and every other tag input (Gmail's To: field, GitHub
+   topics). Removing is still one click on a chip's x, same
+   `.remove-multivalue-item` hook as before. The per-row visible <label> is
+   gone too -- it only ever repeated the field's own name ("SETTING #1",
+   "SETTING #2", ...), which plugins_settings.html/plugins_settings_easy.html
+   already render once above this include (`label-{{ setting_id_prefix }}...`);
+   each chip input now points at that existing label via aria-labelledby
+   instead of duplicating it.
+
+   Params (ambient context set by the including loop, not macro args):
+     setting              required -- raw setting name/key; hidden input's
+                          `name` attribute.
+     setting_data         required -- the plugin.json setting dict. `id`
+                          builds element ids, `separator` (default " ")
+                          joins/splits the stored value, `regex` (if present)
+                          becomes the hidden input's `pattern`.
+     setting_value        required -- current stored value (already a
+                          separator-joined string).
+     setting_default      required -- default value, written to
+                          `data-default` for the reset-to-default button.
+     setting_config        optional -- per-service override info; only its
+                          `value` (falls back to setting_default) seeds
+                          `data-original` for the reset-to-global button.
+     setting_method        required -- provenance string ("ui", "api", ...)
+                          written to `data-method`.
+     setting_id_prefix     required -- id namespace, e.g. "setting-<plugin>-"
+                          or "multiple-setting-<plugin>-".
+     setting_id_suffix     optional -- extra id suffix (multiple-settings
+                          groups). Omit for singular settings.
+     disabled              optional, default false -- readonly/pro-locked
+                          state; suppresses remove buttons and the trailing
+                          empty compose slot (nothing to add).
+     required              optional, default false -- adds `required` to the
+                          hidden input only, matching every other setting
+                          template in this directory.
+     resource_groups / resource_kind_for_setting(setting)
+                           optional -- when the setting has a matching
+                          resource-group kind, renders
+                          components/resource-group-picker.html underneath so
+                          values can be inserted as `@alias` tokens.
+
+   Not covered: the design kit's search/filter box, "view all" eye button and
+   modal (tags.js's bw-tags-search / bw-ms-eye / openTagsModal). Those
+   settings typically hold a handful of IPs/plugin names, not enough to
+   justify a separate browse-and-search surface -- components/modal.html
+   would be the composition point if that ever changes. Also not covered:
+   per-chip drag-to-reorder -- order is preserved (rows keep DOM order), just
+   not user-reorderable. #}
+{% from "components/resource-group-picker.html" import resource_group_picker %}
 {% set setting_separator = setting_data.get("separator", " ") %}
 {% set setting_values = setting_value.split(setting_separator) if setting_value else [""] %}
 {% set setting_values = setting_values if setting_values != [""] else [""] %}
-<div class="multivalue-container mt-1 overflow-hidden position-relative"
+{% if not disabled and (setting_values | last) != "" %}
+    {% set setting_values = setting_values + [""] %}
+{% endif %}
+<div class="multivalue-container mt-1 position-relative"
      data-separator="{{ setting_separator }}">
     <!-- Hidden input to store the final multivalue string -->
     <input type="hidden"
@@ -16,38 +95,32 @@
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}
            {% if setting_data.get('regex') %}pattern="{{ setting_data['regex'] }}"{% endif %}>
-    <div class="multivalue-inputs">
+    <div class="multivalue-inputs d-flex flex-wrap align-items-center gap-2">
         {% for value in setting_values %}
-            <div class="form-floating{% if not loop.last %} mb-2{% endif %} multivalue-input-group">
-                <div class="input-group">
-                    <input type="text"
-                           class="form-control multivalue-input"
-                           value="{{ value }}"
-                           id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}_{{ loop.index }}"
-                           {% if disabled %}disabled{% endif %}>
-                    {% if not disabled %}
-                        <button type="button" class="btn btn-outline-success add-multivalue-item">
-                            <i class="bx bx-plus"></i>
-                        </button>
-                        {% if loop.index > 1 %}
-                            <button type="button" class="btn btn-outline-danger remove-multivalue-item">
-                                <i class="bx bx-x"></i>
-                            </button>
-                        {% endif %}
-                    {% endif %}
-                </div>
-                <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}_{{ loop.index }}"
-                       class="text-truncate">
-                    {{ setting }}
-                    {% if loop.index > 1 %}#{{ loop.index - 1 }}{% endif %}
-                </label>
+            <div class="multivalue-input-group{% if value %} has-value{% endif %}">
+                <input type="text"
+                       class="form-control form-control-sm multivalue-input"
+                       value="{{ value }}"
+                       id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}_{{ loop.index }}"
+                       placeholder="Enter value..."
+                       data-i18n="form.placeholder.multivalue_enter_value"
+                       aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}"
+                       {% if disabled %}disabled{% endif %}>
+                {% if not disabled %}
+                    <button type="button"
+                            class="multivalue-chip-remove remove-multivalue-item"
+                            aria-label="Remove value"
+                            data-i18n="aria.label.remove_value">
+                        <i class="bx bx-x" aria-hidden="true"></i>
+                    </button>
+                {% endif %}
             </div>
         {% endfor %}
     </div>
     {% if not disabled %}
         <div class="mt-2">
             <small class="text-muted">
-                <i class="bx bx-info-circle me-1"></i>
+                <i class="bx bx-info-circle me-1" aria-hidden="true"></i>
                 <span data-i18n="form.help.multivalue_separator">Values are separated by:</span>
                 <code>
                     {% if setting_separator == " " %}
@@ -58,5 +131,14 @@
                 </code>
             </small>
         </div>
+    {% endif %}
+    {% set resource_kind = resource_kind_for_setting(setting) %}
+    {% if resource_kind %}
+        {{ resource_group_picker(
+            target_id=setting_id_prefix ~ setting_data['id'] ~ (setting_id_suffix if setting_id_suffix is defined else ''),
+            groups=resource_groups | default({}),
+            kind=resource_kind,
+            disabled=disabled
+        ) }}
     {% endif %}
 </div>

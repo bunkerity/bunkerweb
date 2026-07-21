@@ -36,7 +36,8 @@
       "services_dropzone": "选择服务导出文件或将其拖放到此处",
       "hide_value": "隐藏值",
       "reveal_value": "显示值",
-      "user_avatar": "用户头像"
+      "user_avatar": "用户头像",
+      "remove_value": "删除值"
     }
   },
   "badge": {
