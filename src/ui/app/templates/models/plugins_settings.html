@@ -1,4 +1,6 @@
 {% from 'macros/docs_link.html' import docs_url %}
+{% from "components/search.html" import search %}
+{% from "components/button.html" import button %}
 <input type="hidden"
        id="selected-type"
        name="selected_type"
@@ -126,15 +128,7 @@
     <div class="steps-nav-container col-12 col-md-3 col-lg-2">
         <nav class="pe-2 plugin-steps-container align-items-center"
              aria-label="plugins">
-            <div class="input-group input-group-merge mb-2">
-                <span class="input-group-text p-2 border-0 border-primary border-bottom shadow-none"><i class="bx fs-6 bx-search"></i></span>
-                <input id="plugin-keyword-search"
-                       type="text"
-                       class="form-control border-0 border-primary border-bottom shadow-none"
-                       placeholder="Search for plugins..."
-                       aria-label="Search for plugins..."
-                       data-i18n="form.placeholder.plugin_search">
-            </div>
+            {{ search(id="plugin-keyword-search", placeholder="Search for plugins...", i18n_key="form.placeholder.plugin_search", variant="merge", classes="mb-2") }}
             <ol class="list-group step-navigation-list" role="tablist">
                 <li class="list-group-item no-plugin-items border-0 p-2"
                     style="display: none">
@@ -377,18 +371,10 @@
                                                             <div class="me-1"
                                                                  {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
                                                                  {% endif %}>
-                                                                <button id="add-multiple-{{ plugin }}-{{ multiple }}"
-                                                                        type="button"
-                                                                        class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if is_readonly %} disabled{% endif %}">
-                                                                    <i class="bx bx-plus-circle bx-sm"></i>&nbsp;<span data-i18n="button.multiple_add">ADD</span>
-                                                                </button>
+                                                                {{ button(id="add-multiple-" + plugin + "-" + multiple, label="ADD", i18n_key="button.multiple_add", variant="text-bw-green", icon="bx-plus-circle bx-sm", disabled=is_readonly, classes="btn-xs rounded-pill add-multiple p-0 pe-2") }}
                                                             </div>
                                                         {% else %}
-                                                            <button id="remove-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                                    type="button"
-                                                                    class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
-                                                                <i class="bx bx-trash bx-sm"></i>&nbsp;<span data-i18n="button.multiple_remove">REMOVE</span>
-                                                            </button>
+                                                            {{ button(id="remove-multiple-" + plugin + "-" + multiple + "-" + setting_suffix, label="REMOVE", i18n_key="button.multiple_remove", variant="text-danger", icon="bx-trash bx-sm", classes="btn-xs rounded-pill remove-multiple p-0 pe-2") }}
                                                         {% endif %}
                                                         <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
                                                                 type="button"

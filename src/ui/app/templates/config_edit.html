@@ -172,7 +172,7 @@
     <div class="card position-relative p-4 min-vh-70"
          {% if (not config_editable) or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ editor_tooltip_key }}" data-i18n-options='{{ editor_tooltip_options }}' {% endif %}>
         <p id="config-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
            data-i18n="status.loading_custom_config">Loading custom configuration...</p>
         <div id="config-value"
              data-language="{% if type and type.startswith(('CRS', 'MODSEC')) %}ModSecurity{% else %}NGINX{% endif %}"

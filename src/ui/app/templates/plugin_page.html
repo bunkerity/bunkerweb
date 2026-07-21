@@ -47,7 +47,7 @@
     {% if not is_used %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
                    data-i18n="plugin.page.status.deactivated">
                     Plugin is deactivated, therefore no information is available.
                 </p>
@@ -56,7 +56,7 @@
     {% elif not is_metrics %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
                    data-i18n="plugin.page.status.metrics_deactivated">
                     Metrics plugin isn't activated, therefore no information is available.
                 </p>
@@ -65,7 +65,7 @@
     {% elif no_page %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
                    data-i18n="plugin.page.status.dedicated_page_unavailable">
                     This plugin is managed on a dedicated page that isn't loaded yet. Restart the web UI to access it.
                 </p>
@@ -77,7 +77,7 @@
         (pre_render.get("data") is mapping and "error" in pre_render.get("data")) %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold">
                     <span data-i18n="plugin.page.status.pre_render_error">Pre-rendering error</span>
                     {% set pre_render_detail = pre_render.get("data", {}).get("error") if pre_render.get("data") is mapping else none %}
                     {% if pre_render_detail or pre_render.get("message") %}: {{ pre_render_detail or pre_render.get("message") }}{% endif %}
@@ -95,7 +95,7 @@
                         {% set up = value.get("value") in ('up', 'yes',
                                                 'success', 'true') %}
                         <div class="{{ value.get('col-size', 'col-12 col-md-4') }}">
-                            <div class="card p-4 position-relative shadow-md rounded-3 {{ value.get('card-classes', '') }}">
+                            <div class="card p-4 position-relative shadow-sm rounded-3 {{ value.get('card-classes', '') }}">
                                 <i class="bx bx-{% if up %}up{% else %}down{% endif %}-arrow-circle bx-sm position-absolute top-0 end-0 m-3 text-{% if up %}success{% else %}danger{% endif %}"></i>
                                 <div class="card-header p-1">
                                     <div class="card-title mb-0">
@@ -105,7 +105,7 @@
                                 <div class="card-body position-relative pb-0">
                                     <div class="d-flex align-items-center justify-content-center h-100">
                                         <div class="text-center mt-2">
-                                            <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-lg fw-bold mb-0">
+                                            <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-3 fw-bold mb-0">
                                                 {{ 'Active' if up else 'Inactive' }}
                                             </p>
                                             {% set ping_subtitle = value.get("subtitle") %}
@@ -119,7 +119,7 @@
                         </div>
                     {% elif key.startswith(("info_", "date_", "count_", "counter_")) %}
                         <div class="{{ value.get('col-size', 'col-12 col-md-4') }}">
-                            <div class="card p-4 position-relative shadow-md rounded-3 {{ value.get('card-classes', '') }}">
+                            <div class="card p-4 position-relative shadow-sm rounded-3 {{ value.get('card-classes', '') }}">
                                 {% set svg_color = value.get("svg_color") %}
                                 <i class='bx bx-{% if key.startswith("info_") %}info-circle{% elif key.startswith("date_") %}calendar{% else %}slider-alt{% endif %} bx-sm position-absolute top-0 end-0 m-3{% if svg_color %} text-{{ svg_color }}{% endif %}'></i>
                                 <div class="card-header p-1">
@@ -151,7 +151,7 @@
                                     {% elif key.startswith("date_") %}
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">
-                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold date-field">{{ value.get("value") }}</p>
+                                                <p class="g-3 p-2 text-primary rounded-3 fw-bold date-field">{{ value.get("value") }}</p>
                                             </div>
                                         </div>
                                     {% else %}
@@ -176,7 +176,7 @@
                         </div>
                     {% elif key.startswith(("top_", "list_")) %}
                         <div class="{{ value.get('col-size', 'col-12 col-md-8') }}">
-                            <div class="card p-4 position-relative shadow-md rounded-3 h-100 {{ value.get('card-classes', '') }}">
+                            <div class="card p-4 position-relative shadow-sm rounded-3 h-100 {{ value.get('card-classes', '') }}">
                                 {% set svg_color = value.get("svg_color") %}
                                 <i class='bx bx-list-{% if key.startswith("top_") %}ol{% else %}ul{% endif %} bx-sm position-absolute top-0 end-0 m-3{% if svg_color %} text-{{ svg_color }}{% endif %}'></i>
                                 <div class="card-header p-1">
@@ -228,7 +228,7 @@
                                     {% else %}
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">
-                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold"
+                                                <p class="g-3 p-2 text-primary rounded-3 fw-bold"
                                                    data-i18n="status.no_data">No data to show</p>
                                             </div>
                                         </div>
@@ -242,7 +242,7 @@
         {% else %}
             <div class="d-flex align-items-center justify-content-center">
                 <div class="text-center text-primary">
-                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                    <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
                        data-i18n="plugin.page.status.no_content">
                         This plugin does not provide an embedded page.
                     </p>

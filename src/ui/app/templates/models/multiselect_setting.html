@@ -1,9 +1,88 @@
+{# usage (default, unchanged): {% include "models/multiselect_setting.html" %}
+          (opt into chips + eye modal): {% set multiselect_chips = true %}
+                                        {% include "models/multiselect_setting.html" %} #}
+
+{# Dropdown+search+checkbox control for a single "multiselect" plugin setting, shared by
+   models/plugins_settings.html (both the regular and "multiple" settings sections) and
+   models/plugins_settings_easy.html. This is an `{% include %}`, not a components/*.html
+   macro -- like models/select_setting.html, models/checkbox_setting.html and models/
+   multivalue_setting.html, it reads its inputs straight off the caller's own render
+   context (setting, setting_data, setting_value, setting_default, setting_method,
+   setting_id_prefix, setting_id_suffix, disabled) rather than declared params, because
+   those five templates are settings-form-coupled (data-method, plugin-setting class, the
+   disabled-by-method tooltip on the wrapping .col all live on the *caller's* side) and
+   not standalone reusable UI.
+
+   Every class/data-* attribute already here (multiselect-container, multiselect-toggle,
+   [data-selected-badge], multiselect-menu, multiselect-search, multiselect-search-container,
+   multiselect-selected-only-btn, multiselect-options, multiselect-option, [data-option-id],
+   no-options-message, [data-selected-count]) is read by static/js/plugins-settings.js's
+   ".multiselect-container" init block -- that file, not this one, owns dropdown open/close,
+   search/filter and "show selected only" behaviour. Untouched below.
+
+   `multiselect_chips` -- optional context var, `false` when the caller never sets it (every
+   existing call site keeps rendering byte-identical output) -- layers two ideas from the
+   BunkerWeb Design System kit's MultiSelect component on top, additively:
+     1. a removable-chip row under the closed control: one badge per currently selected
+        option, each with a small "x" that unchecks it without opening the dropdown.
+        Rendered server-side from `selected_values` for a correct first paint, then kept in
+        sync by the same JS that already reruns on every checkbox change
+        (static/js/plugins-settings.js's updateMultiselectDisplay -> renderMultiselectChips).
+     2. an "eye" button next to the toggle that opens a components/modal.html instance
+        showing the same chips at a more readable size/width -- useful once a setting has
+        more selected options (or longer labels, e.g. antibot's country list) than
+        comfortably fit in the chip row before it wraps to several lines.
+   Both are opt-in via the same flag (not two separate flags) because the task that
+   introduced them treats "chips + eye modal" as one UI, not two independently toggleable
+   ones -- see static/js/plugins-settings.js's renderMultiselectChips for the shared JS.
+
+   Deliberately NOT composed:
+     - components/badge.html -- its <span> macro has no slot for a nested dismiss control,
+       so the chip markup below hand-rolls the same "badge rounded-pill bg-label-<variant>"
+       classes it defines instead of calling it.
+     - components/selected-list.html -- a read-only bulk-action recap (confirm-before-delete
+       chrome): no per-item removal, and its window.BWSelectedList.render() replaces content
+       wholesale from a JS array rather than staying wired to live checkbox state. Doesn't
+       fit an always-editable control like this one.
+     - components/button.html for the chip "x" itself -- same reasoning components/
+       secret-field.html and components/input-list.html already document for their own
+       trigger buttons: it needs a `data-remove-value` attribute button.html's fixed param
+       surface has no hook for. The "eye" button has no such need (icon_only + modal_target
+       cover it exactly), so IT is composed with components/button.html below.
+
+   Not covered: keyboard reordering of chips; virtualizing the chip row for settings with
+   very large selections (e.g. antibot's ~250-country lists selected in bulk) -- the row
+   just wraps (flex-wrap), which is fine for the selection sizes these settings see in
+   practice. #}
+{% set multiselect_chips = multiselect_chips if multiselect_chips is defined else false %}
+{% set control_id = setting_id_prefix ~ setting_data['id'] ~ setting_id_suffix %}
+{% set render_value = setting_value if setting_value is not none else setting_default %}
+{% set separator = setting_data.get('separator', ' ') %}
+{% if separator == '' %}
+    {% set selected_values = render_value if render_value else [] %}
+{% else %}
+    {% set selected_values = render_value.split(separator) if render_value else [] %}
+{% endif %}
+{# Fallback: if space-split produced no matching option IDs, try character-by-character.
+   This handles the case where DB separator is NULL but plugin.json intended "". #}
+{% if selected_values and separator != '' %}
+    {% set option_ids = setting_data.multiselect | map(attribute='id') | list %}
+    {% set has_match = [] %}
+    {% for val in selected_values %}
+        {% if val in option_ids %}
+            {% if has_match.append(true) %}{% endif %}
+        {% endif %}
+    {% endfor %}
+    {% if not has_match and render_value %}
+        {% set selected_values = render_value %}
+    {% endif %}
+{% endif %}
 <div class="form-floating mt-1">
     <div class="dropdown multiselect-container"
-         data-separator="{{ setting_data.get('separator', ' ') }}">
-        {% set render_value = setting_value if setting_value is not none else setting_default %}
+         data-separator="{{ separator }}"
+         {% if multiselect_chips %}id="{{ control_id }}_ms"{% endif %}>
         <input type="hidden"
-               id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+               id="{{ control_id }}"
                name="{{ setting }}"
                class="plugin-setting"
                value="{{ render_value }}"
@@ -11,19 +90,31 @@
                data-default="{{ setting_default }}"
                data-method="{{ setting_method }}"
                {% if disabled %}disabled{% endif %}>
-        <button class="form-control form-select dropdown-toggle multiselect-toggle"
-                type="button"
-                id="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                {% if disabled %}disabled{% endif %}>
-            <span class="multiselect-text d-flex justify-content-between align-items-center gap-2 flex-grow-1">
-                <span class="text-truncate flex-grow-1">{{ setting }}</span>
-                <span class="badge bg-primary" data-selected-badge>0</span>
-            </span>
-        </button>
+        {% if multiselect_chips %}<div class="d-flex align-items-center gap-2">{% endif %}
+            <button class="form-control form-select dropdown-toggle multiselect-toggle{% if multiselect_chips %} flex-grow-1{% endif %}"
+                    type="button"
+                    id="{{ control_id }}_toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    {% if disabled %}disabled{% endif %}>
+                <span class="multiselect-text d-flex justify-content-between align-items-center gap-2 flex-grow-1">
+                    <span class="text-truncate flex-grow-1">{{ setting }}</span>
+                    <span class="badge bg-primary" data-selected-badge>0</span>
+                </span>
+            </button>
+        {% if multiselect_chips %}
+            {% from "components/button.html" import button %}
+            {{ button(icon="bx-show",
+                      icon_only=true,
+                      variant="outline-secondary",
+                      aria_label="View selected items",
+                      aria_i18n_key="aria.label.view_selected_items",
+                      modal_target=control_id ~ "_selected_modal",
+                      classes="multiselect-eye" ~ ("" if selected_values else " d-none")) }}
+        </div>
+        {% endif %}
         <div class="dropdown-menu multiselect-menu"
-             aria-labelledby="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle">
+             aria-labelledby="{{ control_id }}_toggle">
             <div class="p-2 border-bottom position-sticky top-0 bg-white multiselect-search-container{% if setting_data.multiselect | length <= 10 %} d-none{% endif %}">
                 <div class="d-flex align-items-center gap-2">
                     <div class="input-group input-group-sm flex-grow-1">
@@ -46,37 +137,17 @@
                 </div>
             </div>
             <div class="multiselect-options">
-                {% set separator = setting_data.get('separator', ' ') %}
-                {% if separator == '' %}
-                    {% set selected_values = render_value if render_value else [] %}
-                {% else %}
-                    {% set selected_values = render_value.split(separator) if render_value else [] %}
-                {% endif %}
-                {# Fallback: if space-split produced no matching option IDs, try character-by-character.
-                   This handles the case where DB separator is NULL but plugin.json intended "". #}
-                {% if selected_values and separator != '' %}
-                    {% set option_ids = setting_data.multiselect | map(attribute='id') | list %}
-                    {% set has_match = [] %}
-                    {% for val in selected_values %}
-                        {% if val in option_ids %}
-                            {% if has_match.append(true) %}{% endif %}
-                        {% endif %}
-                    {% endfor %}
-                    {% if not has_match and render_value %}
-                        {% set selected_values = render_value %}
-                    {% endif %}
-                {% endif %}
                 {% for option in setting_data.multiselect %}
                     <label class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 cursor-pointer multiselect-option"
                            role="menuitemcheckbox"
                            data-option-id="{{ option.id }}"
-                           for="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_opt_{{ loop.index }}"
+                           for="{{ control_id }}_opt_{{ loop.index }}"
                            title="{{ option.label }}">
                         <input class="form-check-input m-0"
                                type="checkbox"
                                value="{{ option.id }}"
                                data-label="{{ option.label }}"
-                               id="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_opt_{{ loop.index }}"
+                               id="{{ control_id }}_opt_{{ loop.index }}"
                                {% if option.id in selected_values %}checked{% endif %}>
                         <span class="flex-grow-1 small">{{ option.label }}</span>
                     </label>
@@ -92,5 +163,47 @@
                        data-i18n-options='{"count": 0}'>0 selected</small>
             </div>
         </div>
+        {% if multiselect_chips %}
+        <div class="multiselect-chips d-flex flex-wrap gap-2 mt-2{% if not selected_values %} d-none{% endif %}"
+             data-multiselect-chips>
+            {% for option in setting_data.multiselect if option.id in selected_values %}
+                <span class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center gap-1 multiselect-chip"
+                      data-chip-value="{{ option.id }}">
+                    <span class="multiselect-chip-label">{{ option.label }}</span>
+                    <button type="button"
+                            class="btn-close multiselect-chip-remove"
+                            data-remove-value="{{ option.id }}"
+                            aria-label="Remove {{ option.label }}"></button>
+                </span>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
+    {% if multiselect_chips %}
+        {% from "components/modal.html" import modal %}
+        {% call modal(id=control_id ~ "_selected_modal",
+                       title_key="modal.title.multiselect_selected",
+                       title="Selected items",
+                       size="sm",
+                       static_backdrop=false) %}
+            <div class="modal-body" data-multiselect-target="#{{ control_id }}_ms">
+                <p class="text-muted small mb-3">{{ setting_data.get('label', setting) }}</p>
+                <div class="d-flex flex-wrap gap-2" data-multiselect-selected-list>
+                    {% for option in setting_data.multiselect if option.id in selected_values %}
+                        <span class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center gap-1 multiselect-chip"
+                              data-chip-value="{{ option.id }}">
+                            <span class="multiselect-chip-label">{{ option.label }}</span>
+                            <button type="button"
+                                    class="btn-close multiselect-chip-remove"
+                                    data-remove-value="{{ option.id }}"
+                                    aria-label="Remove {{ option.label }}"></button>
+                        </span>
+                    {% endfor %}
+                </div>
+                <p class="text-muted mb-0 multiselect-selected-empty{% if selected_values %} d-none{% endif %}"
+                   data-i18n="datatable.selected_list_empty"
+                   data-i18n-options='{"entity": "items"}'>No items selected.</p>
+            </div>
+        {% endcall %}
+    {% endif %}
 </div>
