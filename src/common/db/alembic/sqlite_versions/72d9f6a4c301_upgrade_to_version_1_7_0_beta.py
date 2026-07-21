@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 
 revision: str = "72d9f6a4c301"
-down_revision: Union[str, None] = "f9c3d7b2dba8"
+down_revision: Union[str, None] = "f46c56af5b20"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -115,4 +115,4 @@ def downgrade() -> None:
     for table in ("bw_resource_attachments", "bw_certificates", "bw_resources", "bw_resource_group_entries", "bw_resource_groups"):
         if table in tables:
             op.drop_table(table)
-    op.execute("UPDATE bw_metadata SET version = '1.6.12' WHERE id = 1")
+    op.execute("UPDATE bw_metadata SET version = '1.6.13' WHERE id = 1")

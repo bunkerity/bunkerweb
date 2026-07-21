@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 revision: str = "c41a6e9d2b70"
-down_revision: Union[str, None] = "0fe0711317f9"
+down_revision: Union[str, None] = "5412d3de3f3f"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -135,4 +135,4 @@ def downgrade() -> None:
             type_=sa.Enum(*OLD_RESOURCES, name="api_resource_enum"),
             existing_nullable=False,
         )
-    op.execute("UPDATE bw_metadata SET version = '1.6.12' WHERE id = 1")
+    op.execute("UPDATE bw_metadata SET version = '1.6.13' WHERE id = 1")

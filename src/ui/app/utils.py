@@ -2,7 +2,6 @@
 
 from contextlib import suppress
 from datetime import datetime
-from ipaddress import ip_address
 from os import _exit
 from os.path import sep
 from pathlib import Path
@@ -38,30 +37,6 @@ LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 LOGGER = getLogger("UI")
 
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
-
-# A single DNS label: 1-63 chars of [A-Za-z0-9_-], no leading/trailing hyphen. Underscore is
-# permitted (RFC1123 forbids it, but Docker/internal DNS routinely uses it for container names).
-_HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
-
-
-def is_valid_host(host) -> bool:
-    """Return True if ``host`` is a valid IP address (v4/v6) or DNS hostname.
-
-    Positive validation (not a metacharacter blocklist): rejects ``;``, ``@``, ``%``, spaces,
-    empty/over-long labels, ``..``, etc. Accepts bare IPv4/IPv6 literals via the stdlib
-    ``ipaddress`` parser and hostnames as dot-separated RFC1123-ish labels (underscores allowed,
-    optional trailing root dot). Callers should pass an already-parsed host (no scheme/port).
-    """
-    if not host or not isinstance(host, str) or len(host) > 253:
-        return False
-    with suppress(ValueError):
-        ip_address(host)  # IPv4/IPv6 literal
-        return True
-    hostname = host.removesuffix(".")  # tolerate FQDN root dot
-    if not hostname or len(hostname) > 253:
-        return False
-    return all(_HOSTNAME_LABEL_RX.match(label) for label in hostname.split("."))
-
 
 # Static-asset URL prefixes served by Flask that never carry privilege (no auth/authz needed).
 # Single source of truth shared by main.py (before_request fast-paths) and the Biscuit

@@ -1,18 +1,76 @@
 from contextlib import suppress
 from gzip import GzipFile
 from hashlib import new as new_hash
+from ipaddress import ip_address
 from io import BytesIO
 from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
 from os.path import join as path_join, normpath
 from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
+from re import compile as re_compile
 from tarfile import open as tar_open
 from typing import Dict, List, Optional, Union, Any
+from urllib.parse import urlsplit
 from math import ceil
 import logging
 
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
+# Underscores are accepted because Docker/internal DNS commonly uses them in container names.
+_HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
+
+
+def has_url_userinfo(value: Any) -> bool:
+    """Return whether a hostname or URL contains a userinfo delimiter."""
+    return isinstance(value, str) and "@" in value
+
+
+def normalize_host(host: Any) -> str:
+    """Return a canonical IP literal or IDNA DNS hostname."""
+    if not isinstance(host, str) or not host or has_url_userinfo(host):
+        raise ValueError("Invalid hostname")
+    with suppress(ValueError):
+        return str(ip_address(host))
+
+    trailing_dot = host.endswith(".")
+    try:
+        hostname = host.removesuffix(".").encode("idna").decode("ascii").lower()
+    except UnicodeError as e:
+        raise ValueError("Invalid hostname") from e
+    if not hostname or len(hostname) > 253 or not all(_HOSTNAME_LABEL_RX.fullmatch(label) for label in hostname.split(".")):
+        raise ValueError("Invalid hostname")
+    return f"{hostname}{'.' if trailing_dot else ''}"
+
+
+def is_valid_host(host: Any) -> bool:
+    """Validate a parsed IPv4/IPv6 literal or DNS-style hostname without scheme or port."""
+    with suppress(ValueError):
+        normalize_host(host)
+        return True
+    return False
+
+
+def parse_host(value: Any) -> tuple[str, str, Optional[int]]:
+    """Parse a hostname or HTTP(S) URL into scheme, canonical host and port."""
+    if not isinstance(value, str) or not value or has_url_userinfo(value):
+        raise ValueError("Invalid hostname")
+
+    with suppress(ValueError):
+        return "", normalize_host(value), None
+
+    has_scheme = "://" in value
+    try:
+        parsed = urlsplit(value if has_scheme else f"//{value}")
+        port = parsed.port
+    except ValueError as e:
+        raise ValueError(f"Invalid hostname: {e}") from e
+    if has_scheme and parsed.scheme.lower() not in ("http", "https"):
+        raise ValueError("Invalid hostname: only HTTP(S) URLs are supported")
+    if parsed.path not in ("", "/") or parsed.query or parsed.fragment:
+        raise ValueError("Invalid hostname: paths, queries and fragments are not allowed")
+    if port is not None and not 1 <= port <= 65535:
+        raise ValueError("Invalid hostname: port must be between 1 and 65535")
+    return parsed.scheme.lower(), normalize_host(parsed.hostname), port
 
 
 def getenv_bool(name: str, default: str = "no") -> bool:

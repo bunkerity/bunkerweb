@@ -31,6 +31,7 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 | `ANTIBOT_URI`          | `/challenge`      | multisite | no       | **URL del desafío:** La URL a la que se redirigirá a los usuarios para completar el desafío. Asegúrese de que esta URL no se utilice para nada más en su sitio.        |
 | `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío. |
 | `ANTIBOT_TIME_VALID`   | `86400`           | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío.      |
+| `ANTIBOT_SUCCESS_URI`  |                   | multisite | no       | **URL de redirección tras el éxito:** Una URL fija a la que redirigir a los usuarios después de que resuelvan correctamente el desafío, en lugar de la página que solicitaron originalmente. Déjelo vacío para devolver a los usuarios a su destino original.      |
 
 ### Excluir tráfico de los desafíos
 
@@ -64,6 +65,10 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
   Esto excluirá del desafío antibot la red interna `192.168.1.0/24` y la IP específica `10.0.0.1`.
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Esto excluirá del desafío antibot las solicitudes de hosts con DNS inverso que terminen en `googlebot.com` o `bingbot.com`.
+
+!!! info "DNS inverso con confirmación directa (FCrDNS)"
+    Los sufijos de `ANTIBOT_IGNORE_RDNS` se confirman de forma directa: el nombre de host PTR coincidente se resuelve de nuevo a una IP y el desafío solo se omite cuando coincide con la IP del cliente. Un PTR que no puede confirmarse de forma directa se trata como una posible suplantación y el desafío se sigue aplicando. Esto evita que un atacante que controla su propio registro PTR lo configure con un sufijo ignorado (por ejemplo `.googlebot.com`) para omitir el desafío.
+
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Esto excluirá del desafío antibot las solicitudes de los ASN 15169 (Google) y 8075 (Microsoft).
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`

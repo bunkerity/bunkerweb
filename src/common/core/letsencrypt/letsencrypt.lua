@@ -523,8 +523,17 @@ function letsencrypt:api()
 	if not ret then
 		return self:ret(true, "json body decoding failed", HTTP_BAD_REQUEST)
 	end
+	-- ACME HTTP-01 tokens are base64url ([A-Za-z0-9_-]+, RFC 8555 §8.3); reject
+	-- anything else so an attacker-controlled token cannot escape acme_folder
+	-- via "/", "\" or "..".
+	if type(data) ~= "table" or type(data.token) ~= "string" or not match(data.token, "^[A-Za-z0-9_%-]+$") then
+		return self:ret(true, "invalid challenge token", HTTP_BAD_REQUEST)
+	end
 	execute("mkdir -p " .. acme_folder)
 	if self.ctx.bw.request_method == "POST" then
+		if type(data.validation) ~= "string" then
+			return self:ret(true, "invalid challenge validation", HTTP_BAD_REQUEST)
+		end
 		local file, err = open(acme_folder .. data.token, "w+")
 		if not file then
 			return self:ret(true, "can't write validation token : " .. err, HTTP_INTERNAL_SERVER_ERROR)

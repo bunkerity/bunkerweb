@@ -130,5 +130,209 @@
       "SecRule REQUEST_FILENAME \"@endsWith /wp-login.php\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetByTag=CRS;ARGS\"",
       "SecRule ARGS_NAMES \"@contains whee\" \"id:1,phase:3,t:none,nolog,pass,tag:'CRS2'\""
     ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetByTag syntax I. (Issue 3565)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/index.html?@foo=attack",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {},
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "parser_error": "Line: 2. Column: 47. CRS is not a valid 'TAG;VARIABLE'"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@endsWith /index.html\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetByTag=CRS,ARGS\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,t:none,status:403,block,deny,tag:'CRS'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetByTag syntax II. (Issue 3565)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/index.html?@foo=attack",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {},
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "parser_error": "Line: 2. Column: 123. Expecting an action, got:  ctl:ruleRemoveTargetByTag,CRS;ARGS"
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@endsWith /index.html\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetByTag,CRS;ARGS\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,t:none,status:403,block,deny,tag:'CRS'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetByTag with @ character (Issue 3565)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/index.html?@foo=attack",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {},
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@endsWith /index.html\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetByTag=CRS;ARGS:@foo\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,t:none,status:403,block,deny,tag:'CRS'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetByTag with = character",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*"
+      },
+      "uri": "/index.html?foo%3Dbar=attack",
+      "method": "GET"
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:9002100,phase:2,pass,ctl:ruleRemoveTargetByTag=CRS;ARGS:foo=bar\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,status:403,block,deny,tag:'CRS'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetByTag with ( and ) characters",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*"
+      },
+      "uri": "/index.html?foo(bar)=attack",
+      "method": "GET"
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:9002100,phase:2,pass,ctl:ruleRemoveTargetByTag=CRS;ARGS:foo(bar)\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,status:403,block,deny,tag:'CRS'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing CtlRuleRemoveTargetByTag with ' character",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Accept": "*/*"
+      },
+      "uri": "/index.html?foo'bar=attack",
+      "method": "GET"
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:9002100,phase:2,pass,ctl:ruleRemoveTargetByTag=CRS;ARGS:foo'bar\"",
+      "SecRule ARGS \"@contains attack\" \"id:1,phase:3,status:403,block,deny,tag:'CRS'\""
+    ]
   }
 ]

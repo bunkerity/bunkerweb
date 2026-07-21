@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 revision: str = "e8b4d91f6a20"
-down_revision: Union[str, None] = "b4e0d05e52e7"
+down_revision: Union[str, None] = "65d50a8bc50b"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -138,4 +138,4 @@ def downgrade() -> None:
     postgresql.ENUM("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum").drop(bind, checkfirst=True)
     op.execute("DELETE FROM bw_api_user_permissions WHERE resource_type IN ('web_cache', 'resource_groups', 'certificates')")
     # PostgreSQL cannot safely remove enum labels in place; retaining them is harmless.
-    op.execute("UPDATE bw_metadata SET version = '1.6.12' WHERE id = 1")
+    op.execute("UPDATE bw_metadata SET version = '1.6.13' WHERE id = 1")

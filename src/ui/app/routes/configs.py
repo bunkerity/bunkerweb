@@ -391,59 +391,36 @@ def configs_delete():
         return handle_error("Invalid configs parameter on /configs/delete.", "configs", True)
     DATA.load_from_file()
 
-    def delete_configs(configs: Dict[str, str]):
+    def delete_configs(configs: List[Dict[str, str]]):
         wait_applying()
 
-        api_configs = API_CLIENT.get_configs(with_drafts=True, with_data=True)
-        configs_to_delete = set()
-        non_editable_configs = set()
-        remaining_configs_by_method: Dict[str, List[Dict[str, str]]] = {"ui": [], "api": []}
+        # Delete exactly the selected keys via the API (which routes to
+        # db.delete_custom_configs) instead of the old method-wide re-save. Only UI/API
+        # method configs are removable; the API reports the rest as skipped.
+        try:
+            resp = API_CLIENT.delete_configs(configs)
+        except Exception as e:
+            DATA["TO_FLASH"].append({"content": f"An error occurred while deleting the custom configs: {e}", "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
 
-        for api_config in api_configs:
-            config_service_id = api_config.get("service") or None
-            config_service_id = None if config_service_id in ("global", "") else config_service_id
-            key = f"{(config_service_id + '/') if config_service_id else ''}{api_config['type']}/{api_config['name']}"
-            keep = True
-            for config in configs:
-                config_service = config["service"] if config["service"] != "global" else None
-                if api_config["name"] == config["name"] and config_service_id == config_service and api_config["type"] == config["type"]:
-                    config_method = api_config.get("method")
-                    if config_method not in remaining_configs_by_method:
-                        non_editable_configs.add(key)
-                        continue
-                    configs_to_delete.add(key)
-                    keep = False
-                    break
-            if api_config.get("template") or not keep:
-                continue
-            config_without_template = {k: v for k, v in api_config.items() if k != "template"}
-            config_without_template["service_id"] = config_service_id
-            config_without_template.pop("service", None)
-            config_method = config_without_template.get("method")
-            if config_method in remaining_configs_by_method:
-                remaining_configs_by_method[config_method].append(config_without_template)
+        deleted = resp.get("deleted", []) if isinstance(resp, dict) else []
+        skipped = resp.get("skipped", []) if isinstance(resp, dict) else []
 
-        for non_editable_config in non_editable_configs:
+        for skipped_config in skipped:
             DATA["TO_FLASH"].append(
                 {
-                    "content": f"Custom config {non_editable_config} is not a UI/API custom config and will not be deleted.",
+                    "content": f"Custom config {skipped_config} is not a UI/API custom config and will not be deleted.",
                     "type": "error",
                 }
             )
 
-        if not configs_to_delete:
+        if not deleted:
             DATA["TO_FLASH"].append({"content": "All selected custom configs could not be found or are not UI/API custom configs.", "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
-        for method, configs_for_method in remaining_configs_by_method.items():
-            try:
-                API_CLIENT.bulk_save_configs(configs_for_method, method)
-            except Exception as e:
-                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
-                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-                return
-        DATA["TO_FLASH"].append({"content": f"Deleted config{'s' if len(configs_to_delete) > 1 else ''}: {', '.join(configs_to_delete)}", "type": "success"})
+        DATA["TO_FLASH"].append({"content": f"Deleted config{'s' if len(deleted) > 1 else ''}: {', '.join(sorted(deleted))}", "type": "success"})
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})

@@ -25,7 +25,7 @@
     },
     "ALLOWED_METHODS": {
       "context": "multisite",
-      "default": "GET|POST|HEAD",
+      "default": "GET|POST|HEAD|QUERY",
       "help": "Allowed HTTP and WebDAV methods, separated with pipes. Custom uppercase methods may include underscores and dashes.",
       "id": "allowed-methods",
       "label": "Allowed methods",

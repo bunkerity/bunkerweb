@@ -22,7 +22,7 @@ from tarfile import open as tar_open
 from threading import Event, Lock
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Union
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 
@@ -319,10 +319,12 @@ def generate_caches():
 
     job_cache_files = API_CLIENT.get_jobs_cache_files()
     plugin_cache_files = set()
+    plugin_dirs: Set[Path] = set()
     ignored_dirs = set()
 
     for job_cache_file in job_cache_files:
         job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
+        plugin_dirs.add(job_path)
         cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
         plugin_cache_files.add(cache_path)
 
@@ -349,8 +351,10 @@ def generate_caches():
         except BaseException as e:
             LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
 
-    if job_path.is_dir():
-        for resource_path in list(job_path.rglob("*")):
+    for plugin_path in plugin_dirs:
+        if not plugin_path.is_dir():
+            continue
+        for resource_path in list(plugin_path.rglob("*")):
             if resource_path.as_posix().startswith(tuple(ignored_dirs)):
                 continue
 
@@ -361,7 +365,7 @@ def generate_caches():
                 if resource_path.parent.is_dir() and not list(resource_path.parent.iterdir()):
                     LOGGER.debug(f"Removing empty directory {resource_path.parent}")
                     rmtree(resource_path.parent, ignore_errors=True)
-                    if resource_path.parent == job_path:
+                    if resource_path.parent == plugin_path:
                         break
                 continue
             elif resource_path.is_dir() and not list(resource_path.iterdir()):

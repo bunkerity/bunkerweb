@@ -1254,7 +1254,7 @@ static int ccall_set_args(lua_State *L, CTState *cts, CType *ct,
     if (CCALL_ALIGN_STACKARG) {  /* Align argument on stack. */
       MSize align = (1u << ctype_align(ccall_struct_align(cts, d))) - 1;
 #if LJ_TARGET_ARM64 && LJ_TARGET_OSX
-      isva = ctype_isstruct(d->info);
+      isva |= ctype_isstruct(d->info);
 #endif
       if (rp || (CCALL_PACK_STACKARG && isva && align < CTSIZE_PTR-1))
 	align = CTSIZE_PTR-1;

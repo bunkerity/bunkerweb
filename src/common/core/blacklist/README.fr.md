@@ -78,6 +78,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
 
     Le paramètre par défaut `BLACKLIST_RDNS` inclut des domaines de scanners courants comme **Shodan** et **Censys**. Ils sont souvent utilisés par des chercheurs en sécurité et des scanners pour identifier des sites vulnérables.
 
+    !!! info "DNS inversé confirmé (FCrDNS)"
+        Les suffixes `BLACKLIST_IGNORE_RDNS` sont confirmés par résolution directe : le nom d’hôte PTR correspondant est résolu à nouveau en une IP et le contournement ne s’applique que lorsqu’elle correspond à l’IP du client. Un PTR qui ne peut pas être confirmé par résolution directe est considéré comme une possible usurpation et le contournement n’est pas accordé. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe ignoré (par exemple `.googlebot.com`) pour contourner les vérifications de la liste noire rDNS.
+
 === "ASN"
     **Ce que ça fait :** Bloque les visiteurs provenant de fournisseurs de réseaux spécifiques. Les ASN sont comme des codes postaux pour Internet—ils identifient à quel fournisseur ou organisation une IP appartient.
 

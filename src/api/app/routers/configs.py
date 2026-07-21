@@ -396,43 +396,25 @@ def delete_configs(req: ConfigsDeleteRequest) -> JSONResponse:
         return JSONResponse(status_code=422, content={"status": "error", "message": "No valid configs to delete"})
 
     db = get_db()
-    # Keep only UI/API-managed configs not in to_del
-    current = db.get_custom_configs(with_drafts=True, with_data=True)
-    keep_by_method: Dict[str, List[Dict[str, Any]]] = {"api": [], "ui": []}
-    skipped: List[str] = []
-    deleted: List[str] = []
-    for it in current:
-        key = (it.get("service_id"), it.get("type"), it.get("name"))
-        method = it.get("method")
-        if method not in keep_by_method:
-            if key in to_del:
-                skipped.append(f"{(it.get('service_id') or 'global')}/{it.get('type')}/{it.get('name')}")
-            continue
-        if key in to_del:
-            # delete -> skip adding to keep
-            deleted.append(f"{(it.get('service_id') or 'global')}/{it.get('type')}/{it.get('name')}")
-            continue
-        keep_by_method[method].append(
-            {
-                "service_id": it.get("service_id") or None,
-                "type": it.get("type"),
-                "name": it.get("name"),
-                "data": it.get("data") or b"",
-                "method": method,
-                "is_draft": bool(it.get("is_draft", False)),
-            }
-        )
+    error, deleted_keys, protected_keys = db.delete_custom_configs(to_del)
+    missing_keys = to_del - deleted_keys - protected_keys
+    skipped_keys = protected_keys | missing_keys
+    deleted = [
+        f"{service_id or 'global'}/{config_type}/{name}"
+        for service_id, config_type, name in sorted(deleted_keys, key=lambda key: (key[0] or "", key[1], key[2]))
+    ]
+    skipped = [
+        f"{service_id or 'global'}/{config_type}/{name}"
+        for service_id, config_type, name in sorted(skipped_keys, key=lambda key: (key[0] or "", key[1], key[2]))
+    ]
+
+    if error:
+        return JSONResponse(status_code=500, content={"status": "error", "message": error, "skipped": skipped})
 
     if not deleted:
         return JSONResponse(status_code=404, content={"status": "error", "message": "No deletable UI/API configs found among selection", "skipped": skipped})
 
-    for method, keep in keep_by_method.items():
-        err = db.save_custom_configs(keep, method)
-        if err:
-            return JSONResponse(status_code=500, content={"status": "error", "message": err, "skipped": skipped})
-
-    content: Dict[str, Any] = {"status": "success"}
-    content["deleted"] = deleted
+    content: Dict[str, Any] = {"status": "success", "deleted": deleted}
     if skipped:
         content["skipped"] = skipped
     return JSONResponse(status_code=200, content=content)

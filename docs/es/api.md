@@ -190,6 +190,16 @@ Elige el sabor que encaje con tu entorno.
 - `resource_id` suele ser el segundo componente del path (ej. `/services/{id}`); "*" da acceso global.
 - Inicializa usuarios no admin y permisos con `API_ACL_BOOTSTRAP_FILE` o un `/var/lib/bunkerweb/api_acl_bootstrap.json` montado. Cada usuario admite una `password` en texto plano o un `password_hash`/`password_bcrypt` pre-hasheado (ver el consejo a continuación).
 
+!!! danger "These write permissions are admin-equivalent"
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+
+    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `services`: `service_create`, `service_update`, `service_convert`
+    - `plugins`: `plugin_create`
+    - `global_settings`: `global_settings_update`
+
+    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+
 !!! tip "Contraseñas de arranque pre-hasheadas"
     Reemplaza la `password` en texto plano de un usuario por un **hash bcrypt** mediante `password_hash` (o `password_bcrypt`) para que las credenciales nunca queden en el archivo como texto plano. El hash debe ser un hash bcrypt válido (`$2a$`/`$2b$`/`$2y$`) cuyo factor de coste sea al menos `10` (se recomienda `12`+). Un hash malformado o demasiado débil se **ignora**: el cargador recurre a la `password` en texto plano del usuario si existe; de lo contrario, un usuario nuevo recibe una contraseña aleatoria segura que no conocerás, y un usuario existente conserva la suya actual. Una `password` en texto plano se somete a una comprobación de robustez (8+ caracteres con mayúsculas/minúsculas/dígito/carácter especial). La variable de entorno `API_PASSWORD` del admin solo acepta texto plano — el pre-hasheo se aplica a estos usuarios de la ACL.
 

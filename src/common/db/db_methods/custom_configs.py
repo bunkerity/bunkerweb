@@ -374,3 +374,49 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
                 return str(e)
 
         return ""
+
+    def delete_custom_configs(
+        self, keys: Set[Tuple[Optional[str], str, str]]
+    ) -> Tuple[str, Set[Tuple[Optional[str], str, str]], Set[Tuple[Optional[str], str, str]]]:
+        """Delete exact UI/API custom config keys.
+
+        Each key is ``(service_id, config_type, name)``. Only rows written by the UI or API
+        method are removable; a matching row owned by any other method is reported as
+        protected instead of deleted. Returns ``(error, deleted_keys, protected_keys)``.
+        """
+        normalized_keys = {
+            (None if service_id in (None, "", "global") else service_id, config_type.strip().replace("-", "_").lower(), name)
+            for service_id, config_type, name in keys
+        }
+        deleted_keys: Set[Tuple[Optional[str], str, str]] = set()
+        protected_keys: Set[Tuple[Optional[str], str, str]] = set()
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved", deleted_keys, protected_keys
+
+            try:
+                for key in normalized_keys:
+                    service_id, config_type, name = key
+                    filters = {"service_id": service_id, "type": config_type, "name": name}
+                    deleted = session.execute(
+                        delete(Custom_configs).filter_by(**filters).where(Custom_configs.method.in_(("ui", "api"))),
+                        execution_options={"synchronize_session": False},
+                    ).rowcount
+                    if deleted:
+                        deleted_keys.add(key)
+                    elif session.scalars(select(Custom_configs.id).filter_by(**filters).limit(1)).first() is not None:
+                        protected_keys.add(key)
+
+                if deleted_keys:
+                    metadata = session.get(Metadata, 1)
+                    if metadata is not None:
+                        metadata.custom_configs_changed = True
+                        metadata.last_custom_configs_change = datetime.now().astimezone()
+
+                session.commit()
+            except BaseException as e:
+                session.rollback()
+                return str(e), set(), set()
+
+        return "", deleted_keys, protected_keys

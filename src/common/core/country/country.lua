@@ -7,6 +7,7 @@ local country = class("country", plugin)
 
 local get_country = utils.get_country
 local get_deny_status = utils.get_deny_status
+local regex_match = utils.regex_match
 local decode = cjson.decode
 local encode = cjson.encode
 local WARN = ngx.WARN
@@ -39,12 +40,46 @@ function country:initialize(ctx)
 	-- Initialize whitelist and blacklist sets once
 	self.whitelist = string_to_set(self.variables["WHITELIST_COUNTRY"], self.logger)
 	self.blacklist = string_to_set(self.variables["BLACKLIST_COUNTRY"], self.logger)
+
+	-- Initialize ignore URI list once
+	self.ignore_uri = {}
+	local ignore_uri_var = self.variables["COUNTRY_IGNORE_URI"]
+	if ignore_uri_var and ignore_uri_var ~= "" then
+		for pattern in ignore_uri_var:gmatch("%S+") do
+			table.insert(self.ignore_uri, pattern)
+		end
+	end
+end
+
+function country:is_ignored_uri()
+	local uri = self.ctx.bw.uri
+	if not uri then
+		return false
+	end
+	local request_uri = self.ctx.bw.request_uri
+	for _, pattern in ipairs(self.ignore_uri) do
+		if regex_match(uri, pattern) then
+			return true, pattern
+		end
+		if request_uri and request_uri ~= uri and regex_match(request_uri, pattern) then
+			return true, pattern
+		end
+	end
+	return false
 end
 
 function country:access()
 	-- Don't go further if nothing is enabled
 	if self.variables["WHITELIST_COUNTRY"] == "" and self.variables["BLACKLIST_COUNTRY"] == "" then
 		return self:ret(true, "country not activated")
+	end
+
+	-- Skip check if URI is ignored
+	if #self.ignore_uri > 0 then
+		local ignored, pattern = self:is_ignored_uri()
+		if ignored then
+			return self:ret(true, "URI " .. self.ctx.bw.uri .. " is ignored (pattern = " .. pattern .. ")")
+		end
 	end
 
 	-- Check if IP is in cache

@@ -216,6 +216,11 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                         session.execute(delete(Templates).where(Templates.id.in_(template_ids)))
                 else:
                     session.execute(update(Plugins).where(Plugins.id.in_(missing_ids)).values({Plugins.data: None, Plugins.checksum: None}))
+                    # Pro license loss/downgrade: drop the custom UI page so the stale DB blob
+                    # (template.html + actions.py) can no longer be served or executed. Settings,
+                    # Global_values, Services_settings, Jobs, Jobs_cache and Templates are
+                    # deliberately preserved so user values survive a re-license.
+                    session.execute(delete(Plugin_pages).where(Plugin_pages.plugin_id.in_(missing_ids)))
 
                 return True, False
 

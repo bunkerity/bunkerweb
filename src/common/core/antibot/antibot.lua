@@ -29,6 +29,7 @@ local http_new = http.new
 local decode = cjson.decode
 local encode = cjson.encode
 local get_rdns = utils.get_rdns
+local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local get_country = utils.get_country
 local regex_match = utils.regex_match
@@ -212,7 +213,9 @@ function antibot:header()
 		return self:ret(false, "can't get session data", HTTP_INTERNAL_SERVER_ERROR)
 	end
 
-	-- Don't go further if client resolved the challenge
+	-- Don't go further if client resolved the challenge. The header_filter phase
+	-- cannot issue a redirect (access() already did); this arg is informational
+	-- only, so keep it side-effect-free and don't run get_success_uri() here.
 	if self.session_data.resolved then
 		return self:ret(
 			true,
@@ -402,7 +405,9 @@ function antibot:access()
 				true,
 				"client already resolved the challenge",
 				nil,
-				is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"]) or "/"
+				self:get_success_uri()
+					or is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"])
+					or "/"
 			)
 		end
 		return self:ret(true, "client already resolved the challenge")
@@ -430,7 +435,9 @@ function antibot:access()
 			true,
 			"client already resolved the challenge",
 			nil,
-			is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"]) or "/"
+			self:get_success_uri()
+				or is_safe_relative_path(self.session_data.original_uri, self.variables["ANTIBOT_URI"])
+				or "/"
 		)
 	end
 
@@ -1034,9 +1041,37 @@ function antibot:get_original_uri()
 	return "/"
 end
 
--- Post-solve target: prefer the POSTed "next", restoring the query from the session.
+-- Optional fixed post-solve destination. When ANTIBOT_SUCCESS_URI holds a safe
+-- same-origin relative path, every solved / already-resolved redirect lands there
+-- instead of the originally requested page. Empty keeps the original-URI behavior.
+-- Validated through the same open-redirect guard as every other redirect target,
+-- so a bad value fails closed to nil (falls back to the original behavior).
+function antibot:get_success_uri()
+	local success_uri = self.variables["ANTIBOT_SUCCESS_URI"]
+	if not success_uri or success_uri == "" then
+		return nil
+	end
+	local safe = is_safe_relative_path(success_uri, self.variables["ANTIBOT_URI"])
+	if not safe then
+		-- Set but unusable (protocol-relative, embedded scheme, control bytes, or equal
+		-- to ANTIBOT_URI): fall back to the original destination and tell the operator why.
+		-- The raw value is not echoed to avoid log injection from an already-suspect string.
+		self.logger:log(
+			ngx.WARN,
+			"ignoring unsafe ANTIBOT_SUCCESS_URI, redirecting to the original destination instead"
+		)
+	end
+	return safe
+end
+
+-- Post-solve target: honor a configured success URI, else prefer the POSTed
+-- "next", restoring the query from the session.
 function antibot:resolve_redirect_target(args)
 	local antibot_uri = self.variables["ANTIBOT_URI"]
+	local forced = self:get_success_uri()
+	if forced then
+		return forced
+	end
 	local session_full = is_safe_relative_path(self.session_data.original_uri, antibot_uri)
 	local posted
 	if args and args["next"] then
@@ -1153,13 +1188,16 @@ function antibot:is_ignored_ip()
 		-- luacheck: ignore 421
 		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
 		if rdns_list then
-			-- Check if rDNS is in ignore list
-			for _, rdns in ipairs(rdns_list) do
-				for _, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
-						return true, "rDNS " .. suffix
-					end
-				end
+			-- Check if rDNS is in ignore list (forward-confirmed before ignoring)
+			local rdns_suffix = rdns_forward_confirmed(
+				rdns_list,
+				self.lists["IGNORE_RDNS"],
+				self.ctx,
+				self.ctx.bw.remote_addr,
+				self.logger
+			)
+			if rdns_suffix then
+				return true, "rDNS " .. rdns_suffix
 			end
 		else
 			self.logger:log(ERR, "error while getting rdns : " .. err)

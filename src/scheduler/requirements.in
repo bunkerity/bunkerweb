@@ -1,4 +1,4 @@
-cffi==2.0.0
+cffi==2.1.0
 cryptography==49.0.0
 importlib-metadata==9.0.0
 pydantic==2.13.4

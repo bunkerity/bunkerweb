@@ -78,6 +78,9 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
 
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        Die `BLACKLIST_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der übereinstimmende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Umgehung wird nur angewendet, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Umgehung wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die rDNS-Blacklist-Überprüfungen zu umgehen.
+
 === "ASN"
     **Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 

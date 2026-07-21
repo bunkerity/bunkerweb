@@ -229,6 +229,10 @@ BunkerWeb leverages the power of templates to simplify the configuration process
 
 - **Custom templates**: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.
 
+!!! tip "Ready-to-use community templates"
+
+    Browse the [BunkerWeb templates repository](https://github.com/bunkerity/bunkerweb-templates#installing-templates) and follow its installation guide. The web UI method is recommended for most users; a plugin layout is also documented for managed deployments. Once installed, select the template through easy mode or with the `USE_TEMPLATE` setting.
+
 With the web User Interface, templates are available through **easy mode** when you add or edit a service:
 
 <figure markdown>

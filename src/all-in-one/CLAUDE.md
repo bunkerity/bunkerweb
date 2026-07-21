@@ -18,7 +18,7 @@ docker build -f src/all-in-one/Dockerfile -t bunkerweb:dev .
 docker build -f src/all-in-one/Dockerfile --build-arg SKIP_MINIFY=yes -t bunkerweb:dev .
 ```
 
-The Dockerfile is a multi-stage build: a `builder` stage compiles Go (for CrowdSec), re2, CrowdSec, NGINX deps, and Python packages; the final stage is `nginx:1.30.3` (Debian/trixie — migrated off Alpine because the certbot-dns-multi lego bridge is glibc-only). `procps` is required (the supervisord→main-app handoff and `healthcheck-all-in-one.sh` use `kill`/`pgrep`/`pkill`).
+The Dockerfile is a multi-stage build: a `builder` stage compiles Go (for CrowdSec), re2, CrowdSec, NGINX deps, and Python packages; the final stage is `nginx:1.30.4` (Debian/trixie — migrated off Alpine because the certbot-dns-multi lego bridge is glibc-only). `procps` is required (the supervisord→main-app handoff and `healthcheck-all-in-one.sh` use `kill`/`pgrep`/`pkill`).
 
 ## Run (Dev)
 

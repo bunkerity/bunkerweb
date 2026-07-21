@@ -52,6 +52,9 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | `GREYLIST_RDNS_GLOBAL` | `yes`    | multisite | nein     | **Nur globales rDNS:** Führt rDNS-Greylist-Prüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt.                                    |
     | `GREYLIST_RDNS_URLS`   |          | multisite | nein     | **rDNS-Greylist-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        `GREYLIST_RDNS`-Suffixe werden forward-bestätigt: Der übereinstimmende PTR-Hostname wird zu einer IP zurückaufgelöst, und die Greylist-Freigabe gilt nur, wenn dieser mit der Client-IP übereinstimmt. Ein PTR, der nicht forward-bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und der Zugriff wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein auf die Greylist gesetztes Suffix setzt, um Zugriff zu erlangen.
+
 === "ASN"
     **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 

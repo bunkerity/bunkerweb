@@ -2,19 +2,22 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
 
 - **Número de conexiones por dirección IP** (soporte para STREAM :white_check_mark:)
 - **Número de solicitudes por dirección IP y URL dentro de un período de tiempo específico** (soporte para STREAM :x:)
+- **Tasa de solicitudes agregada (global) por servicio, combinando todos los clientes y URL** (soporte para STREAM :x:)
 
 ### Cómo funciona
 
 1.  **Limitación de Tasa de Solicitudes:** Rastrea el número de solicitudes de cada dirección IP del cliente a URL específicas. Si un cliente excede el límite de tasa configurado, las solicitudes posteriores son denegadas temporalmente.
-2.  **Limitación de Conexiones:** Monitorea y restringe el número de conexiones concurrentes de cada dirección IP del cliente. Se pueden aplicar diferentes límites de conexión según el protocolo utilizado (HTTP/1, HTTP/2, HTTP/3 o stream).
-3.  En ambos casos, los clientes que exceden los límites definidos reciben un código de estado HTTP **"429 - Demasiadas Solicitudes"**, lo que ayuda a prevenir la sobrecarga del servidor.
+2.  **Limitación de Tasa Global:** Rastrea el número total de solicitudes a un servicio independientemente de la IP del cliente o la URL, protegiendo la capacidad del origen/backend de picos de tráfico agregados. Esto es independiente de la limitación por IP/URL y se evalúa antes que esta.
+3.  **Limitación de Conexiones:** Monitorea y restringe el número de conexiones concurrentes de cada dirección IP del cliente. Se pueden aplicar diferentes límites de conexión según el protocolo utilizado (HTTP/1, HTTP/2, HTTP/3 o stream).
+4.  En todos los casos, los clientes que exceden los límites definidos reciben un código de estado HTTP **"429 - Demasiadas Solicitudes"**, lo que ayuda a prevenir la sobrecarga del servidor.
 
 ### Pasos para usar
 
 1.  **Habilitar la Limitación de Tasa de Solicitudes:** Use `USE_LIMIT_REQ` para habilitar la limitación de tasa de solicitudes y defina patrones de URL junto con sus correspondientes límites de tasa.
-2.  **Habilitar la Limitación de Conexiones:** Use `USE_LIMIT_CONN` para habilitar la limitación de conexiones y establezca el número máximo de conexiones concurrentes para diferentes protocolos.
-3.  **Aplicar Control Granular:** Cree múltiples reglas de límite de tasa para diferentes URL para proporcionar diferentes niveles de protección en su sitio.
-4.  **Monitorear la Efectividad:** Use la [interfaz de usuario web](web-ui.md) para ver estadísticas sobre las solicitudes y conexiones limitadas.
+2.  **Habilitar la Limitación de Tasa Global:** Use `USE_LIMIT_REQ_GLOBAL` para limitar la tasa total agregada de solicitudes de un servicio, independientemente de la IP del cliente o la URL, cuando proteger la capacidad del origen importe más que la equidad por cliente.
+3.  **Habilitar la Limitación de Conexiones:** Use `USE_LIMIT_CONN` para habilitar la limitación de conexiones y establezca el número máximo de conexiones concurrentes para diferentes protocolos.
+4.  **Aplicar Control Granular:** Cree múltiples reglas de límite de tasa para diferentes URL para proporcionar diferentes niveles de protección en su sitio.
+5.  **Monitorear la Efectividad:** Use la [interfaz de usuario web](web-ui.md) para ver estadísticas sobre las solicitudes y conexiones limitadas.
 
 ### Ajustes de Configuración
 
@@ -35,6 +38,16 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
         -   `t` es la unidad de tiempo: `s` (segundo), `m` (minuto), `h` (hora) o `d` (día)
 
         Por ejemplo, `5r/m` significa que se permiten 5 solicitudes por minuto desde cada dirección IP.
+
+=== "Limitación de Tasa Global"
+
+    | Ajuste                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                       |
+    | ----------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`              | multisite | no       | **Habilitar Limitación de Tasa Global:** Establezca en `yes` para limitar la tasa total agregada de solicitudes del servicio (todos los clientes, todas las URL). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s`         | multisite | no       | **Límite de Tasa Global:** Tasa máxima agregada de solicitudes en el formato `Nr/t`, misma sintaxis que `LIMIT_REQ_RATE`.                                         |
+
+    !!! tip "Cuándo usar la limitación de tasa global"
+        La limitación por IP/URL protege contra un único cliente abusivo. La limitación de tasa global protege al propio servidor de origen: limita el rendimiento total hacia un servicio sin importar quién lo solicite. Úsela cuando su backend tenga un límite de capacidad conocido (por ejemplo, un pool de conexiones de base de datos o una API de terceros lenta) que deba proteger de cualquier pico de tráfico, legítimo o no. Se evalúa antes que las reglas por IP/URL, por lo que es la primera línea de defensa bajo carga.
 
 === "Limitación de Conexiones"
 

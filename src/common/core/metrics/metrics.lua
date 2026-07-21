@@ -9,6 +9,7 @@ local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
+local WARN = ngx.WARN
 local null = ngx.null
 local unescape_uri = ngx.unescape_uri
 
@@ -35,6 +36,7 @@ local get_country = utils.get_country
 local get_asn = utils.get_asn
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
+local is_oom_error = utils.is_oom_error
 local encode = cjson.encode
 local decode = cjson.decode
 
@@ -59,6 +61,82 @@ local CACHE_STATUS_VALUES = {
 	UPDATING = true,
 	REVALIDATED = true,
 }
+
+-- RPUSH is denyoom and first: under OOM nothing is written, so the entry stays
+-- unsynced with no partial facets. ARGV[1]=json, ARGV[2..9]=facet values.
+local PUSH_SCRIPT = [==[
+  local pushed = redis.pcall('RPUSH', KEYS[1], ARGV[1])
+  if type(pushed) == 'table' and pushed.err then
+    return pushed
+  end
+  local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  for i = 1, #fields do
+    -- never abort after RPUSH: a pushed-but-unsynced entry would duplicate on retry
+    redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], ARGV[1 + i], 1)
+  end
+  return pushed
+]==]
+
+-- OOM probe bails before any destructive op so a popped entry never loses its
+-- facet decrement. ARGV[1]=max_requests.
+local TRIM_SCRIPT = [==[
+  local max = tonumber(ARGV[1])
+  if not max or max < 0 then max = 0 end
+  local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  if max == 0 then
+    redis.call('DEL', KEYS[1])
+    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+    redis.call('SET', 'requests:facets:initialized', '1')
+    return 0
+  end
+  local nb = redis.call('LLEN', KEYS[1])
+  if nb <= max then return 0 end
+  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  if type(probe) == 'table' and probe.err then
+    return probe
+  end
+  local to_remove = nb - max
+  local items = redis.call('LRANGE', KEYS[1], 0, to_remove - 1)
+  for _, raw in ipairs(items) do
+    local ok, req = pcall(cjson.decode, raw)
+    if ok and type(req) == 'table' then
+      for i = 1, #fields do
+        local v = req[fields[i]]
+        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+        local n = redis.call('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
+        if n <= 0 then redis.call('HDEL', 'requests:facet:' .. fields[i], v) end
+      end
+    end
+  end
+  redis.call('LTRIM', KEYS[1], to_remove, -1)
+  return to_remove
+]==]
+
+-- Marker invalidated up-front so an OOM-aborted rebuild retries next cycle instead
+-- of latching a partial result.
+-- ponytail: one atomic LRANGE + 8xN HINCRBY blocks Redis; fine as it only fires on
+-- rare facet desync, and chunking would break atomicity.
+local REBUILD_SCRIPT = [==[
+  local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  if type(probe) == 'table' and probe.err then return probe end
+  redis.call('DEL', 'requests:facets:initialized')
+  for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+  local items = redis.call('LRANGE', KEYS[1], 0, -1)
+  for _, raw in ipairs(items) do
+    local ok, req = pcall(cjson.decode, raw)
+    if ok and type(req) == 'table' then
+      for i = 1, #fields do
+        local v = req[fields[i]]
+        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+        local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
+        if type(r) == 'table' and r.err then return r end
+      end
+    end
+  end
+  redis.call('SET', 'requests:facets:initialized', '1')
+  return #items
+]==]
 
 -- Parse a count value with optional SI shorthand suffix: "100", "1k", "10K", "1m", "5M".
 -- k/K = x1000, m/M = x1_000_000. Returns the integer count, or nil if value is missing
@@ -91,185 +169,77 @@ local function get_request_facet_value(request, field)
 	return tostring(value)
 end
 
-local function clear_request_facets(self, set_initialized)
-	if set_initialized == nil then
-		set_initialized = true
-	end
-
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		local _, err = self:redis_call("del", "requests:facet:" .. field)
-		if err then
-			self:log_throttled(ERR, "facet_clear", "Can't clear request facet " .. field .. ": " .. err)
-		end
-	end
-
-	if set_initialized then
-		local ok, err = self:redis_call("set", "requests:facets:initialized", "1")
-		if not ok then
-			self:log_throttled(
-				ERR,
-				"facet_init_set",
-				"Can't mark request facets as initialized: " .. (err or "unknown error")
-			)
-		end
-	end
-end
-
-local function incr_request_facets(self, request)
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		local facet_key = "requests:facet:" .. field
-		local facet_value = get_request_facet_value(request, field)
-		local count_raw, err = self:redis_call("hincrby", facet_key, facet_value, 1)
-		if count_raw == nil or count_raw == false then
-			self:log_throttled(
-				ERR,
-				"facet_incr",
-				"Can't increment request facet " .. field .. "=" .. facet_value .. ": " .. (err or "unknown error")
-			)
-		end
-	end
-end
-
-local function decr_request_facets(self, request)
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		local facet_key = "requests:facet:" .. field
-		local facet_value = get_request_facet_value(request, field)
-		local count_raw, err = self:redis_call("hincrby", facet_key, facet_value, -1)
-		if count_raw == nil or count_raw == false then
-			self:log_throttled(
-				ERR,
-				"facet_decr",
-				"Can't decrement request facet " .. field .. "=" .. facet_value .. ": " .. (err or "unknown error")
-			)
-		else
-			local count = tonumber(count_raw)
-			if count and count <= 0 then
-				local ok, hdel_err = self:redis_call("hdel", facet_key, facet_value)
-				if ok == nil or ok == false then
-					self:log_throttled(
-						ERR,
-						"facet_hdel",
-						"Can't remove empty request facet "
-							.. field
-							.. "="
-							.. facet_value
-							.. ": "
-							.. (hdel_err or "unknown error")
-					)
-				end
-			end
-		end
-	end
-end
-
-local function initialize_request_facets(self)
-	local initialized_raw, _ = self:redis_call("get", "requests:facets:initialized")
-	if
-		initialized_raw ~= nil
-		and initialized_raw ~= false
-		and initialized_raw ~= null
-		and tostring(initialized_raw) == "1"
-	then
-		return
-	end
-
-	clear_request_facets(self, false)
-
-	local nb_requests_raw, len_err = self:redis_call("llen", "requests")
-	if nb_requests_raw == nil or nb_requests_raw == false then
-		self:log_throttled(
-			ERR,
-			"facet_init_llen",
-			"Can't initialize request facets, failed to get requests length: " .. (len_err or "unknown error")
-		)
-		return
-	end
-
-	local nb_requests = tonumber(nb_requests_raw) or 0
-	if nb_requests > 0 then
-		local chunk_size = 1000
-		for start_idx = 0, nb_requests - 1, chunk_size do
-			local stop_idx = start_idx + chunk_size - 1
-			local chunk, range_err = self:redis_call("lrange", "requests", start_idx, stop_idx)
-			if chunk == nil or chunk == false then
-				self:log_throttled(
-					ERR,
-					"facet_init_lrange",
-					"Can't initialize request facets, failed to read requests chunk: " .. (range_err or "unknown error")
-				)
-				break
-			end
-			for _, request_raw in ipairs(chunk) do
-				if request_raw ~= nil and request_raw ~= false and request_raw ~= null then
-					local ok, request = pcall(decode, request_raw)
-					if ok and type(request) == "table" then
-						incr_request_facets(self, request)
-					end
-				end
-			end
-		end
-	end
-
-	local ok, set_err = self:redis_call("set", "requests:facets:initialized", "1")
-	if not ok then
-		self:log_throttled(
-			ERR,
-			"facet_init_final",
-			"Can't finalize request facets initialization: " .. (set_err or "unknown error")
-		)
-	end
-end
-
 local function enforce_redis_requests_cap(self)
-	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"]) or 0
-	if max_requests < 0 then
-		max_requests = 0
-	end
-
-	local nb_requests_raw, err = self:redis_call("llen", "requests")
-	if nb_requests_raw == nil or nb_requests_raw == false then
-		self:log_throttled(ERR, "cap_llen", "Can't get Redis requests length: " .. (err or "unknown error"))
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"])
+	if not max_requests then
+		-- Unparsable cap must not become 0: cap 0 wipes the list and facets.
 		return
 	end
-
-	local nb_requests = tonumber(nb_requests_raw)
-	if not nb_requests then
-		self:log_throttled(ERR, "cap_parse", "Can't parse Redis requests length: " .. tostring(nb_requests_raw))
-		return
+	local _, err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", tostring(max_requests))
+	if err then
+		self:log_throttled(ERR, "cap_enforce", "Can't enforce Redis requests cap: " .. err)
 	end
+end
 
-	if nb_requests <= max_requests then
-		return
-	end
-
-	local ok
-	if max_requests == 0 then
-		ok, err = self:redis_call("del", "requests")
-		if ok then
-			clear_request_facets(self)
-		end
-	else
-		local to_remove = nb_requests - max_requests
-		ok = true
-		for _ = 1, to_remove do
-			local removed_raw, pop_err = self:redis_call("lpop", "requests")
-			if removed_raw == nil or removed_raw == false then
-				self:log_throttled(ERR, "cap_lpop", "Can't trim Redis requests list: " .. (pop_err or "unknown error"))
-				ok = false
-				break
+-- Read-only probe (never denyoom), so it runs even under OOM. Invariant: every
+-- stored request contributes one facet:ip value, so HLEN(facet:ip)==0 with LLEN>0
+-- reliably flags a facet/list desync.
+local function self_heal_request_facets(self)
+	local nb_raw = self:redis_call("llen", "requests")
+	local nb = tonumber(nb_raw) or 0
+	local marker = self:redis_call("get", "requests:facets:initialized")
+	local marked = marker ~= nil and marker ~= false and marker ~= null and tostring(marker) == "1"
+	if nb == 0 then
+		if not marked then
+			local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", "0")
+			if clear_err then
+				self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 			end
-			if removed_raw == null then
-				break
-			end
-			local decoded_ok, removed_request = pcall(decode, removed_raw)
-			if decoded_ok and type(removed_request) == "table" then
-				decr_request_facets(self, removed_request)
+		else
+			local ip_len_raw = self:redis_call("hlen", "requests:facet:ip")
+			local ip_len = tonumber(ip_len_raw) or 0
+			if ip_len > 0 then
+				local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", "0")
+				if clear_err then
+					self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
+				end
 			end
 		end
+		return
 	end
+	local ip_len_raw = self:redis_call("hlen", "requests:facet:ip")
+	local ip_len = tonumber(ip_len_raw) or 0
+	if ip_len == 0 then
+		local _, err = self:redis_call("eval", REBUILD_SCRIPT, 1, "requests")
+		if err then
+			self:log_throttled(ERR, "facet_rebuild", "Can't rebuild request facets: " .. err)
+		end
+	elseif not marked then
+		local _, err = self:redis_call("set", "requests:facets:initialized", "1")
+		if err then
+			self:log_throttled(ERR, "facet_mark", "Can't mark request facets as initialized: " .. err)
+		end
+	end
+end
 
-	if not ok then
-		self:log_throttled(ERR, "cap_enforce", "Can't enforce Redis requests cap: " .. (err or "unknown error"))
+-- EXPIRE is denyoom-safe, so it must run under OOM to make these pinning keys
+-- and this worker's metrics keys evictable; it bypasses the redis_ok breaker
+-- (dead socket returns an ignored error).
+local function refresh_request_ttls(self, ttl, wid)
+	if not ttl or ttl <= 0 then
+		return
+	end
+	self.clusterstore:call("expire", "requests", ttl)
+	for _, field in ipairs(REQUEST_FACET_FIELDS) do
+		self.clusterstore:call("expire", "requests:facet:" .. field, ttl)
+	end
+	self.clusterstore:call("expire", "requests:facets:initialized", ttl)
+	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+		for _, key in ipairs(lru:get_keys()) do
+			if key ~= "setup" and key ~= "requests" then
+				self.clusterstore:call("expire", "metrics:" .. key .. ":" .. wid, ttl)
+			end
+		end
 	end
 end
 
@@ -315,6 +285,10 @@ function metrics:redis_call(method, ...)
 		return false, "Redis unavailable for this cycle"
 	end
 	local res, call_err = self.clusterstore:call(method, ...)
+	if not res and call_err and is_oom_error(call_err) then
+		self.redis_ok = false
+		return false, call_err -- no reconnect: the connection is healthy under OOM
+	end
 	if not res and call_err and is_connection_error(call_err) then
 		self.clusterstore:close()
 		local ok, reconnect_err = self.clusterstore:connect()
@@ -381,7 +355,14 @@ function metrics:log(bypass_checks)
 		-- Remove old requests if needed
 		local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
 		while #requests > max_requests do
-			table_remove(requests, 1)
+			local dropped = table_remove(requests, 1)
+			if dropped and not dropped.synced then
+				self:log_throttled(
+					WARN,
+					"buffer_drop",
+					"Blocked-request buffer full, dropping unsynced report (Redis down or OOM?)"
+				)
+			end
 		end
 
 		-- Update worker cache
@@ -491,6 +472,9 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
+	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"]) or 0
+	-- Stays true after the OOM breaker trips redis_ok, so the TTL refresh still runs.
+	local redis_connected = false
 	if self.use_redis then
 		self.redis_ok, err = self.clusterstore:connect()
 		if not self.redis_ok then
@@ -502,7 +486,8 @@ function metrics:timer()
 					.. " - requests will be stored in datastore"
 			)
 		else
-			initialize_request_facets(self)
+			redis_connected = true
+			self_heal_request_facets(self)
 		end
 	end
 
@@ -514,15 +499,35 @@ function metrics:timer()
 			if key == "requests" then
 				for _, request in ipairs(value) do
 					if not request.synced then
-						-- Add only unsynced requests
+						local v = {}
+						for i, field in ipairs(REQUEST_FACET_FIELDS) do
+							v[i] = get_request_facet_value(request, field)
+						end
 						local ok
-						ok, err = self:redis_call("rpush", "requests", encode(request))
+						ok, err = self:redis_call(
+							"eval",
+							PUSH_SCRIPT,
+							1,
+							"requests",
+							encode(request),
+							v[1],
+							v[2],
+							v[3],
+							v[4],
+							v[5],
+							v[6],
+							v[7],
+							v[8]
+						)
 						if not ok then
-							self:log_throttled(ERR, "sync_request", "Can't sync request to Redis: " .. err)
+							self:log_throttled(
+								ERR,
+								"sync_request",
+								"Can't sync request to Redis: " .. (err or "unknown error")
+							)
 							break
 						end
-						request.synced = true -- Mark as synced
-						incr_request_facets(self, request)
+						request.synced = true
 					end
 				end
 
@@ -595,6 +600,9 @@ function metrics:timer()
 
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
+	end
+	if redis_connected and ttl > 0 then
+		refresh_request_ttls(self, ttl, wid)
 	end
 	-- Always attempt cleanup when Redis was used, even if connection dropped mid-cycle.
 	-- clusterstore:close() handles the "client is not instantiated" case gracefully.

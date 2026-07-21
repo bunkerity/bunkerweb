@@ -10,7 +10,10 @@ $(document).ready(function () {
   const fileInput = $("#file-input");
   const fileList = $("#file-list");
   const pluginNumber = parseInt($("#plugins_number").val());
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  // Plugin management (upload/refresh/delete/actions) is admin-only server-side; treat
+  // non-admins like read-only on this page so those controls are disabled, not just 403'd.
+  const isAdmin = ($("#is-admin").val() || "True").trim() === "True";
+  const isReadOnly = $("#is-read-only").val().trim() === "True" || !isAdmin;
   const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   // Columns/rows for the #selected-plugins-delete recap list --

@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional
 
 from model import Instances, Metadata  # type: ignore
 
+from common_utils import is_valid_host  # type: ignore
+
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
@@ -27,6 +29,9 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
         https_port: int = 5443,
     ) -> str:
         """Add instance."""
+        if not is_valid_host(hostname):
+            return f"Invalid instance hostname: {hostname}"
+
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -122,6 +127,11 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
 
     def update_instances(self, instances: List[Dict[str, Any]], method: str, changed: Optional[bool] = True) -> str:
         """Update instances."""
+        for instance in instances:
+            hostname = instance.get("hostname")
+            if hostname is not None and not is_valid_host(hostname):
+                return f"Invalid instance hostname: {hostname}"
+
         to_put = []
         with self._db_session() as session:
             if self.readonly:

@@ -27,13 +27,13 @@ namespace modsecurity_test {
 
 class UnitTestResult {
  public:
-    int ret;
+    int ret = 0;
     std::string output;
 };
 
 class UnitTest {
  public:
-    static std::unique_ptr<UnitTest> from_yajl_node(const yajl_val &);
+    static std::unique_ptr<UnitTest> from_yajl_node(const yajl_val &node);
 
     std::string print() const;
 
@@ -45,9 +45,9 @@ class UnitTest {
     std::string filename;
     std::string output;
     std::string libinjection_override;
-    int ret;
-    int capture;
-    int skipped;
+    int ret = 0;
+    int capture = 0;
+    int skipped = 0;
     UnitTestResult result;
 };
 

@@ -1,5 +1,81 @@
 // dataTableInit.js
 
+function collectDataTableSearchPaneEntries(requestData) {
+  if (!requestData || typeof requestData !== "object") return [];
+
+  const entries = Object.keys(requestData)
+    .filter((key) => key.startsWith("searchPanes["))
+    .map((key) => [key, String(requestData[key] || "")]);
+
+  const flatten = (value, path) => {
+    if (value === null || typeof value === "undefined") return;
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => flatten(item, `${path}[${index}]`));
+      return;
+    }
+
+    if (typeof value === "object") {
+      Object.keys(value)
+        .sort((a, b) => a.localeCompare(b))
+        .forEach((key) => flatten(value[key], `${path}[${String(key)}]`));
+      return;
+    }
+
+    entries.push([path, String(value)]);
+  };
+
+  if (requestData.searchPanes && typeof requestData.searchPanes === "object") {
+    flatten(requestData.searchPanes, "searchPanes");
+  }
+
+  const seen = new Set();
+  return entries
+    .filter(([key, value]) => {
+      const signature = `${key}=${value}`;
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    })
+    .sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function getDataTableStateParams(dataTable) {
+  const params = dataTable.ajax.params() || {};
+  const state = {
+    search: params.search ? params.search.value : "",
+    order_column:
+      params.order && params.order.length > 0
+        ? params.columns[params.order[0].column].data
+        : "",
+    order_dir:
+      params.order && params.order.length > 0 ? params.order[0].dir : "",
+  };
+
+  collectDataTableSearchPaneEntries(params).forEach(([key, value]) => {
+    state[key] = value;
+  });
+
+  return state;
+}
+
+function appendDataTableParamsInputs(form, params, inputClass = "") {
+  Object.entries(params).forEach(([name, value]) => {
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: name,
+        value: value,
+        class: inputClass,
+      }),
+    );
+  });
+}
+
+function appendDataTableStateInputs(form, dataTable) {
+  appendDataTableParamsInputs(form, getDataTableStateParams(dataTable));
+}
+
 /**
  * Escape a single cell value against spreadsheet formula injection (CWE-1236).
  *

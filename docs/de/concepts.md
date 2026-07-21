@@ -229,6 +229,10 @@ BunkerWeb nutzt die Leistungsfähigkeit von Vorlagen, um den Konfigurationsproze
 
 -   **Benutzerdefinierte Vorlagen**: Zusätzlich zu den vordefinierten Vorlagen ermöglicht BunkerWeb den Benutzern, benutzerdefinierte Vorlagen zu erstellen, die auf ihre spezifischen Anforderungen zugeschnitten sind. Benutzerdefinierte Vorlagen ermöglichen die Feinabstimmung von Einstellungen und benutzerdefinierten Konfigurationen und stellen sicher, dass BunkerWeb perfekt auf die Bedürfnisse des Benutzers abgestimmt ist.
 
+!!! tip "Sofort einsatzbereite Community-Vorlagen"
+
+    Durchsuchen Sie das [BunkerWeb-Vorlagen-Repository](https://github.com/bunkerity/bunkerweb-templates#installing-templates) und folgen Sie der Installationsanleitung. Die Web-UI-Methode wird für die meisten Benutzer empfohlen; für verwaltete Bereitstellungen ist außerdem eine Plugin-Struktur dokumentiert. Wählen Sie die Vorlage nach der Installation im Einfachmodus oder über die Einstellung `USE_TEMPLATE` aus.
+
 Mit der Web-Benutzeroberfläche sind Vorlagen über den **Einfachmodus** verfügbar, wenn Sie einen Dienst hinzufügen oder bearbeiten:
 
 <figure markdown>

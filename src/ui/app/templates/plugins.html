@@ -158,7 +158,7 @@
             </tbody>
         {% endcall %}
     {% endcall %}
-    {% if not is_readonly %}
+    {% if not is_readonly and user_admin %}
         {% call modal(id="modal-add-plugins", title_key="modal.title.add_plugins", title="Add plugins", size="xl") %}
             <form id="form-add-plugins"
                   action="{{ url_for("plugins") }}/refresh"

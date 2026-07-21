@@ -6,6 +6,13 @@ from traceback import format_exc
 def pre_render(**kwargs):
     logger = getLogger("UI")
     ret = {
+        "counter_limited_global": {
+            "value": 0,
+            "title": "Global limit",
+            "subtitle": "Requests blocked",
+            "subtitle_color": "amber",
+            "svg_color": "amber",
+        },
         "top_limit": {
             "data": {},
             "order": {
@@ -16,9 +23,12 @@ def pre_render(**kwargs):
         },
     }
     try:
+        metrics = kwargs["bw_instances_utils"].get_metrics("limit")
+        ret["counter_limited_global"]["value"] = int(metrics.get("counter_limited_global", 0))
         format_data = [
             {"URL": f"/{key.split('/', 1)[1] if '/' in key else ''}", "count": int(value)}
-            for key, value in kwargs["bw_instances_utils"].get_metrics("limit").items()
+            for key, value in metrics.items()
+            if key.startswith("counter_limited_uri_")
         ]
         format_data.sort(key=itemgetter("count"), reverse=True)
         data = {"URL": [], "count": []}

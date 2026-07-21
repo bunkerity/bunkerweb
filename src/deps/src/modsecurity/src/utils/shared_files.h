@@ -55,11 +55,11 @@ private:
     void operator=(SharedFiles const&) = delete;
 
      struct handler_info {
-         FILE* fp;
+         FILE* fp = nullptr;
 #ifdef WIN32
-         HANDLE hMutex;
+         HANDLE hMutex = nullptr;
 #endif
-         unsigned int cnt;
+         unsigned int cnt = 0;
      };
 
     using handlers_map = std::unordered_map<std::string, handler_info>;

@@ -297,4 +297,59 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
 # so the UI blueprint and the scheduler jobs share one source of truth. The previous
 # byte-identical UI copy already drifted multiple times — that bug class is closed by
 # re-exporting from a single module instead of maintaining parallel implementations.
-from letsencrypt_consistency import le_cache_write_lock, letsencrypt_cache_consistent  # noqa: E402,F401
+from letsencrypt_consistency import (  # noqa: E402,F401
+    detect_broken_lineages,
+    le_cache_write_lock,
+    letsencrypt_cache_consistent,
+    purge_lineage,
+    sanitize_le_cache,
+)
+
+# Sentinel distinguishing "cache-row lookup failed" (degrade to persisting) from "row absent"
+# (checksum None, a legitimate value) in the optimistic-concurrency check below.
+_LE_READ_ERROR = object()
+
+
+def _le_cache_checksum(job, file_name: str):
+    """Return the LE cache row's current DB checksum, None if the row is absent, or
+    _LE_READ_ERROR if the lookup itself failed (caller then degrades to persisting)."""
+    try:
+        info = job.db.get_job_cache_file(job.job_name, file_name, with_info=True, with_data=False)
+    except BaseException:
+        return _LE_READ_ERROR
+    if isinstance(info, dict):
+        return info.get("checksum")
+    return None
+
+
+def sanitize_and_persist(job, data_path: Path, logger) -> List[str]:
+    """Quarantine broken renewal lineages and persist the cleaned tree back to the DB cache.
+
+    A broken lineage (see detect_broken_lineages) makes `certbot certificates`/`renew` fail to
+    parse, and because the whole etc/ tree is one DB cache blob restored on every job start, the
+    break reappears forever unless it is both removed AND written back. When something was
+    quarantined and the initial restore succeeded, re-cache immediately so the fix survives the
+    next restore. Returns the quarantined cert names.
+    """
+    # Snapshot the cache-row checksum BEFORE sanitizing. Job.__init__ restored data_path OUTSIDE
+    # le_cache_write_lock, so a UI heal that rewrites the row after our restore must not be
+    # clobbered by persisting our stale pre-heal snapshot (which would resurrect a healed orphan).
+    file_name = f"folder:{data_path.as_posix()}.tgz"
+    before = _le_cache_checksum(job, file_name)
+    names = sanitize_le_cache(data_path, logger)
+    if names and getattr(job, "restore_ok", False):
+        try:
+            with le_cache_write_lock():
+                # Re-read under the lock: if the row changed since our restore, our tree is stale.
+                current = _le_cache_checksum(job, file_name)
+                if _LE_READ_ERROR not in (before, current) and before != current:
+                    logger.warning("LE cache row changed since restore; skipping sanitize persist, will retry next run")
+                    return names
+                if _LE_READ_ERROR in (before, current):
+                    logger.debug("LE cache checksum unavailable; persisting sanitized cache without concurrency check")
+                cached, err = job.cache_dir(data_path)
+            if not cached:
+                logger.error(f"Failed to persist sanitized Let's Encrypt cache: {err}")
+        except BaseException as e:
+            logger.error(f"Exception while persisting sanitized Let's Encrypt cache: {e}")
+    return names

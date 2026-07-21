@@ -352,7 +352,6 @@ log {
 
 
 <figure markdown>
-<figure markdown>
   ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
 </figure>
 
