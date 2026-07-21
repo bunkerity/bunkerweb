@@ -209,19 +209,26 @@
 
 #requests-blocking {
   border-radius: 14px;
-  background: linear-gradient(
-    180deg,
-    rgba(47, 128, 186, 0.08) 0%,
-    rgba(47, 128, 186, 0.01) 100%
-  );
+  background: rgba(47, 128, 186, 0.04);
 }
 
 .dark-style #requests-blocking {
-  background: linear-gradient(
-    180deg,
-    rgba(115, 179, 226, 0.1) 0%,
-    rgba(115, 179, 226, 0.02) 100%
-  );
+  background: rgba(115, 179, 226, 0.06);
+}
+
+/* Instances/Services/Plugins/Blocked-Requests KPI tiles compose
+   components/tile.html (which always renders its own <div class="card">)
+   inside a click-through <a role="button">. That breaks the shared
+   `[role="button"].card:hover` selector in overrides.css -- it requires
+   both attributes on the SAME element. Recreate the identical text-shift
+   affordance here, scoped to home.html, reusing the same tokens/!important
+   the shared rule uses so the effect is visually identical. */
+.home-nav-tile:hover .card {
+  color: var(--bs-secondary) !important;
+}
+
+.home-nav-tile-danger:hover .card {
+  color: var(--bs-danger) !important;
 }
 
 .home-period-floating {

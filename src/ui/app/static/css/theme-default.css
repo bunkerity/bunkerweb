@@ -1001,3 +1001,125 @@ html:not(.layout-menu-collapsed)
 .bg-footer-theme hr {
   border-color: rgba(11, 85, 119, 0.075);
 }
+
+/* Admin design-system shell */
+.layout-menu {
+  border-right: 1px solid var(--bw-border);
+}
+
+.layout-menu .app-brand.main {
+  border-bottom: 1px solid var(--bw-border);
+  height: 4rem;
+  margin-bottom: 0 !important;
+  padding: 0 1.25rem;
+}
+
+.layout-menu .app-brand-link {
+  padding: 0 !important;
+}
+
+.layout-menu .app-brand-logo img {
+  max-height: 1.875rem;
+}
+
+.layout-menu .menu-inner-shadow {
+  top: 4rem;
+}
+
+.layout-menu .menu-inner {
+  padding: 0.875rem 0.625rem !important;
+}
+
+.layout-menu .menu-header {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  margin-top: 0.65rem;
+  padding: 0.75rem 0.75rem 0.35rem;
+}
+
+.layout-menu .menu-header::before,
+.layout-wrapper:not(.layout-horizontal)
+  .bg-menu-theme
+  .menu-inner
+  > .menu-item.active::before {
+  display: none;
+}
+
+.layout-menu .menu-item {
+  margin: 0.125rem 0;
+}
+
+.layout-wrapper:not(.layout-horizontal)
+  .layout-menu
+  .menu-inner
+  .menu-item
+  .menu-link {
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  min-height: 2.5rem;
+  padding-block: 0.5rem;
+}
+
+.layout-menu .menu-link:focus-visible {
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25);
+  outline-offset: -3px;
+}
+
+.layout-menu .menu-item.active > .menu-link:not(.menu-toggle) {
+  border-left: 3px solid var(--bs-primary);
+  padding-left: calc(1rem - 2px);
+}
+
+.layout-menu .menu-icon {
+  font-size: 1.25rem;
+}
+
+.layout-navbar.navbar-detached {
+  border-bottom: 1px solid var(--bw-border);
+  border-radius: 0;
+  box-shadow: var(--bw-shadow-md);
+  height: 4rem;
+  margin: 0;
+  padding: 0 1.5rem;
+}
+
+.bw-navbar-search {
+  flex: 1 1 20rem;
+  max-width: 30rem;
+}
+
+.bw-navbar-search .input-group {
+  min-height: 2.5rem;
+}
+
+.bw-navbar-search .form-control:focus {
+  box-shadow: none;
+}
+
+.bw-navbar-search .input-group:focus-within {
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.bw-navbar-search .list-group {
+  max-height: min(24rem, 70vh);
+  overflow-y: auto;
+  z-index: 1090;
+}
+
+@media (min-width: 1200px) {
+  .layout-navbar-fixed .layout-navbar.navbar-detached {
+    width: calc(100% - 16.25rem);
+  }
+
+  .layout-navbar-fixed.layout-menu-collapsed .layout-navbar.navbar-detached {
+    width: calc(100% - 5.25rem);
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .layout-navbar.navbar-detached {
+    width: 100% !important;
+  }
+}
