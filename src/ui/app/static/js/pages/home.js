@@ -578,7 +578,7 @@ $(function () {
 
   // Requests stats chart
 
-  const requestsDataRaw = JSON.parse($("#requests-data").text());
+  const requestsDataRaw = JSON.parse($("#requests-stats-data").text());
   const requestStatusEntries = Object.entries(requestsDataRaw)
     .map(([status, count]) => [String(status), parseInt(count, 10) || 0])
     .filter(([, count]) => count > 0);
@@ -662,7 +662,7 @@ $(function () {
       chart: {
         type: "donut",
         animations: {
-          enabled: true,
+          enabled: !window.bwPrefersReducedMotion(),
           easing: "easeinout",
           speed: 520,
         },
@@ -691,6 +691,9 @@ $(function () {
       labels: requestStatusLabels,
       series: requestStatusSeries,
       colors: requestStatusColors,
+      noData: {
+        text: t("status.no_data"),
+      },
       responsive: [
         {
           breakpoint: 480,
@@ -871,7 +874,7 @@ $(function () {
       chart: {
         type: "donut",
         animations: {
-          enabled: true,
+          enabled: !window.bwPrefersReducedMotion(),
           easing: "easeinout",
           speed: 520,
         },
@@ -1064,7 +1067,7 @@ $(function () {
           enabled: false,
         },
         animations: {
-          enabled: true,
+          enabled: !window.bwPrefersReducedMotion(),
           easing: "easeinout",
           speed: 520,
         },
@@ -1277,7 +1280,6 @@ $(function () {
     // Update map labels
     if (map) {
       try {
-        info.update();
         // Remove and re-add legend to update translations
         if (legend) {
           map.removeControl(legend);
