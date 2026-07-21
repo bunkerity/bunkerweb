@@ -444,7 +444,7 @@ const updateMissingConfigItem = (configRef, status) => {
 
   if (status === "uploaded") {
     badge.className = "badge bg-success";
-    badge.textContent = "✓ Uploaded";
+    badge.textContent = "Uploaded";
   } else if (status === "missing") {
     badge.className = "badge bg-warning text-dark";
     badge.textContent = "Missing";
@@ -916,6 +916,11 @@ const ensureRawEditor = () => {
   }
 
   if (!dom.rawTemplateEditor || typeof window.ace === "undefined") return null;
+
+  // components/code-editor.html renders the mount point with "visually-hidden"
+  // (revealed by the loading caller, same convention as pages/logs.js) --
+  // strip it right as we mount so the ACE instance gets real dimensions.
+  dom.rawTemplateEditor.classList.remove("visually-hidden");
 
   const editor = window.ace.edit(dom.rawTemplateEditor);
   editor.setOptions({
@@ -1726,7 +1731,10 @@ const addSettingFromCatalog = (entry, { keepOpen = false } = {}) => {
     keyInput.select();
   }
 
-  newRow.scrollIntoView({ behavior: "smooth", block: "center" });
+  newRow.scrollIntoView({
+    behavior: window.bwPrefersReducedMotion() ? "auto" : "smooth",
+    block: "center",
+  });
   sortSettingRows();
   return true;
 };
@@ -2482,7 +2490,10 @@ const showFeedback = (type, messages) => {
     dom.feedback.innerHTML = list[0];
   }
   dom.feedback.classList.remove("d-none");
-  dom.feedback.scrollIntoView({ behavior: "smooth", block: "center" });
+  dom.feedback.scrollIntoView({
+    behavior: window.bwPrefersReducedMotion() ? "auto" : "smooth",
+    block: "center",
+  });
 };
 
 const clearFeedback = () => {
@@ -2518,7 +2529,10 @@ const smoothScrollTo = (selector) => {
   const headerOffset = 100;
   const position =
     target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
-  window.scrollTo({ top: position < 0 ? 0 : position, behavior: "smooth" });
+  window.scrollTo({
+    top: position < 0 ? 0 : position,
+    behavior: window.bwPrefersReducedMotion() ? "auto" : "smooth",
+  });
 };
 
 const updateSettingRowMeta = (container, entry) => {

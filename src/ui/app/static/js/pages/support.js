@@ -1,9 +1,9 @@
 $(document).ready(function () {
   const $serviceSearch = $("#service-search");
   const $serviceDropdownMenu = $("#services-dropdown-menu");
-  const $serviceDropdownItems = $("#services-dropdown-menu li.nav-item");
+  const $serviceDropdownItems = $("#services-dropdown-menu li");
 
-  $("#select-service").on("click", () => $serviceSearch.focus());
+  $("#services-dropdown-menu-toggle").on("click", () => $serviceSearch.focus());
 
   $serviceSearch.on(
     "input",
@@ -25,7 +25,7 @@ $(document).ready(function () {
       if (visibleItems === 0) {
         if ($serviceDropdownMenu.find(".no-service-items").length === 0) {
           $serviceDropdownMenu.append(
-            '<li class="no-service-items dropdown-item text-muted">No Item</li>',
+            '<li class="no-service-items dropdown-item text-muted" data-i18n="status.no_item">No Item</li>',
           );
         }
       } else {
@@ -34,7 +34,11 @@ $(document).ready(function () {
     }, 50),
   );
 
-  $(document).on("hidden.bs.dropdown", "#select-service", function () {
-    $("#service-search").val("").trigger("input");
-  });
+  $(document).on(
+    "hidden.bs.dropdown",
+    "#services-dropdown-menu-toggle",
+    function () {
+      $("#service-search").val("").trigger("input");
+    },
+  );
 });

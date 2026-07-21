@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "Link Supporto"
       }
-    }
+    },
+    "subtitle": "Scarica i log di debug, estrai la tua configurazione e richiedi assistenza al team BunkerWeb."
   },
   "tab": {
     "custom_certificate": "Certificato Personalizzato",
@@ -1661,7 +1662,8 @@
         "job_name": "Processo che ha generato questo file cache",
         "last_update": "Data e ora dell'ultimo aggiornamento del file cache",
         "plugin": "Plugin associato al processo che ha generato questo file cache",
-        "service": "Servizio associato a questo file cache (o Globale)"
+        "service": "Servizio associato a questo file cache (o Globale)",
+        "select_all": "Seleziona tutti i file Cache"
       },
       "configs": {
         "actions": "Azioni disponibili per questa Configurazione Personalizzata",

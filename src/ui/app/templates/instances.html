@@ -1,4 +1,7 @@
 {% extends "dashboard.html" %}
+{% from "components/card.html" import card %}
+{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/title.html" import title %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -10,6 +13,33 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
+    {{ title(label="Instances", i18n_key="navigation.instances", level="h1", icon="bx-server", subtitle="Manage the BunkerWeb instances connected to this UI: create, ping, reload, stop or remove them.", subtitle_i18n_key="instances.subtitle", classes="mb-4") }}
+    {% set ns = namespace(up_instances=0, down_instances=0, loading_instances=0) %}
+    {% for instance in instances %}
+        {% if instance['status'] == 'up' %}
+            {% set ns.up_instances = ns.up_instances + 1 %}
+        {% elif instance['status'] == 'down' %}
+            {% set ns.down_instances = ns.down_instances + 1 %}
+        {% else %}
+            {% set ns.loading_instances = ns.loading_instances + 1 %}
+        {% endif %}
+    {% endfor %}
+    <!-- KPI tiles -->
+    {% from "components/tile.html" import tile %}
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="Total instances", value=instances|length, title_i18n="instances.total", color="primary", icon="bx-server") }}
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="Up", value=ns.up_instances, title_i18n="instances.up", color="bw-green", icon="bx-up-arrow-alt") }}
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="Down", value=ns.down_instances, title_i18n="instances.down", color="danger", icon="bx-down-arrow-alt") }}
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="Loading", value=ns.loading_instances, title_i18n="instances.loading", color="warning", icon="bxs-hourglass") }}
+        </div>
+    </div>
     <div class="modal fade"
          id="loadingModal"
          data-bs-backdrop="static"
@@ -27,21 +57,8 @@
             </div>
         </div>
     </div>
-    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
-        <input type="hidden" id="instances_number" value="{{ instances|length }}" />
-        <textarea type="hidden"
-                  id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['instances']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
-        <input type="hidden"
-               id="csrf_token"
-               name="csrf_token"
-               value="{{ csrf_token() }}" />
-        <p id="instances-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-           data-i18n="status.loading_instances">Loading instances...</p>
-        <table id="instances"
-               class="table responsive nowrap position-relative w-100 d-none">
+    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
+        {% call table_toolbar(id="instances", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_instances", loading_default="Loading instances...", number=instances|length) %}
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
@@ -191,11 +208,11 @@
                     </tr>
                 {% endfor %}
             </tbody>
-            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-            </span>
-        </table>
-    </div>
+        {% endcall %}
+        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+        </span>
+    {% endcall %}
     <div id="feedback-toast"
          class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
          role="alert"
@@ -212,7 +229,7 @@
                     aria-label="Close"
                     data-i18n="aria.label.close"></button>
         </div>
-        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
+        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
     </div>
     {% if not is_readonly %}
         <div class="modal fade"

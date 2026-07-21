@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "支援連結"
       }
-    }
+    },
+    "subtitle": "下載偵錯記錄、提取您的設定，並向 BunkerWeb 團隊尋求協助。"
   },
   "tab": {
     "custom_certificate": "自訂憑證",
@@ -1661,7 +1662,8 @@
         "job_name": "產生此快取檔案的任務",
         "last_update": "快取檔案最後更新的日期和時間",
         "plugin": "與產生此快取檔案的任務關聯的外掛程式",
-        "service": "與此快取檔案關聯的服務（或全域）"
+        "service": "與此快取檔案關聯的服務（或全域）",
+        "select_all": "選擇所有快取檔案"
       },
       "configs": {
         "actions": "此自訂設定可用的操作",

@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "기술 지원 링크"
       }
-    }
+    },
+    "subtitle": "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요."
   },
   "tab": {
     "custom_certificate": "사용자 정의 인증서",
@@ -1661,7 +1662,8 @@
         "job_name": "이 파일을 생성한 작업",
         "last_update": "캐시 파일 마지막 업데이트 날짜 및 시간",
         "plugin": "이 파일을 생성한 작업 관련 플러그인",
-        "service": "이 파일과 관련된 서비스 (또는 전역)"
+        "service": "이 파일과 관련된 서비스 (또는 전역)",
+        "select_all": "모든 캐시 파일 선택"
       },
       "configs": {
         "actions": "이 사용자 정의 설정에 사용 가능한 작업",

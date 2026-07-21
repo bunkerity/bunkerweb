@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "支持链接"
       }
-    }
+    },
+    "subtitle": "下载调试日志，提取您的配置，并向 BunkerWeb 团队寻求帮助。"
   },
   "tab": {
     "custom_certificate": "自定义证书",
@@ -1661,7 +1662,8 @@
         "job_name": "生成此缓存文件的任务",
         "last_update": "缓存文件最后更新的日期和时间",
         "plugin": "与生成此缓存文件的任务关联的插件",
-        "service": "与此缓存文件关联的服务（或全局）"
+        "service": "与此缓存文件关联的服务（或全局）",
+        "select_all": "选择所有缓存文件"
       },
       "configs": {
         "actions": "此自定义配置可用的操作",

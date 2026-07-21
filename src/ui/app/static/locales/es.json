@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "Enlace de Soporte"
       }
-    }
+    },
+    "subtitle": "Descargar los registros de depuración, extraer su configuración y obtener ayuda del equipo de BunkerWeb."
   },
   "tab": {
     "custom_certificate": "Certificado Personalizado",
@@ -1661,7 +1662,8 @@
         "job_name": "Tarea que generó este archivo de caché",
         "last_update": "Fecha y hora de la última actualización del archivo de caché",
         "plugin": "Plugin asociado a la tarea que generó este archivo de caché",
-        "service": "Servicio asociado a este archivo de caché (o Global)"
+        "service": "Servicio asociado a este archivo de caché (o Global)",
+        "select_all": "Seleccionar todos los archivos de caché"
       },
       "configs": {
         "actions": "Acciones disponibles para esta Configuración Personalizada",

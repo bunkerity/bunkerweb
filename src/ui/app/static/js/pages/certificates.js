@@ -191,11 +191,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!actionModal) return;
     const label = certificate?.common_name || certificate?.name || "";
     const copies = {
-      renew: translate(
-        "certificates.confirm_renew",
-        `Renew “${label}”?`,
-        { name: label },
-      ),
+      renew: translate("certificates.confirm_renew", `Renew “${label}”?`, {
+        name: label,
+      }),
       delete: translate(
         "certificates.confirm_delete",
         `Delete “${label}”? This cannot be undone.`,

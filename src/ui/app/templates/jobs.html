@@ -1,4 +1,12 @@
 {% extends "dashboard.html" %}
+{% from "components/title.html" import title %}
+{% from "components/tile.html" import tile %}
+{% from "components/card.html" import card %}
+{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/badge.html" import badge %}
+{% from "components/tooltip.html" import tooltip %}
+{% from "components/dropdown-menu.html" import dropdown_menu %}
+{% from "components/modal.html" import modal %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -10,20 +18,31 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 min-vh-70">
-        <input type="hidden" id="job_number" value="{{ jobs|length }}" />
-        <textarea type="hidden"
-                  id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['jobs']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
-        <input type="hidden"
-               id="csrf_token"
-               name="csrf_token"
-               value="{{ csrf_token() }}" />
-        <p id="jobs-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-           data-i18n="status.loading_jobs">Loading jobs...</p>
-        <table id="jobs" class="table responsive nowrap w-100 d-none">
+    {{ title(label="Jobs", i18n_key="navigation.jobs", level="h1", icon="bx-task", subtitle="Scheduled and one-off tasks run by the BunkerWeb scheduler — track their status and run them on demand.", subtitle_i18n_key="jobs.subtitle", classes="mb-4") }}
+    {% set interval_icons = {'once': 'bx-revision', 'day': 'bx-calendar-event', 'week': 'bx-calendar-week'} %}
+    {% set interval_variants = {'once': 'secondary', 'day': 'primary', 'week': 'warning'} %}
+    {% set stats = namespace(reload=0, async=0, failed=0) %}
+    {% for job, job_data in jobs.items() %}
+        {% if job_data['reload'] %}{% set stats.reload = stats.reload + 1 %}{% endif %}
+        {% if job_data['async'] %}{% set stats.async = stats.async + 1 %}{% endif %}
+        {% if job_data['history'] and not job_data['history'][0]['success'] %}{% set stats.failed = stats.failed + 1 %}{% endif %}
+    {% endfor %}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            {{ tile(title="Total jobs", title_i18n="jobs.tile.total", value=jobs|length, color="primary", icon="bx-list-check") }}
+        </div>
+        <div class="col-6 col-md-3">
+            {{ tile(title="Reload required", title_i18n="jobs.tile.reload_required", value=stats.reload, color="warning", icon="bx-refresh") }}
+        </div>
+        <div class="col-6 col-md-3">
+            {{ tile(title="Asynchronous", title_i18n="jobs.tile.async", value=stats.async, color="secondary", icon="bx-shuffle") }}
+        </div>
+        <div class="col-6 col-md-3">
+            {{ tile(title="Failed last run", title_i18n="jobs.tile.failed_last_run", value=stats.failed, color="danger", icon="bx-error-circle") }}
+        </div>
+    </div>
+    {% call card(classes="table-responsive text-nowrap p-4 min-vh-70") %}
+        {% call table_toolbar(id="jobs", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_jobs", loading_default="Loading jobs...", number=jobs|length, number_id="job_number") %}
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
@@ -86,19 +105,29 @@
                         <td>{{ job }}</td>
                         <td>{{ job_data["plugin_id"] }}</td>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;<span data-i18n="interval.{{ job_data['every'] }}">{{ job_data["every"] }}</span>
-                            </div>
+                            {{ badge(text=job_data['every'], i18n_key="interval." ~ job_data['every'], variant=interval_variants.get(job_data['every'], 'info'), icon=interval_icons.get(job_data['every'], 'bxs-hourglass')) }}
                         </td>
                         <td class="text-center">
-                            <i class="bx bx-sm bx-{% if job_data['reload'] %}check text-success{% else %}x text-danger{% endif %}"></i>
+                            {% if job_data['reload'] %}
+                                {{ badge(text="Yes", i18n_key="status.yes", variant="success", icon="bx-check") }}
+                            {% else %}
+                                {{ badge(text="No", i18n_key="status.no", variant="danger", icon="bx-x") }}
+                            {% endif %}
                         </td>
                         <td class="text-center">
-                            <i class="bx bx-sm bx-{% if job_data['async'] %}check text-success{% else %}x text-danger{% endif %}"></i>
+                            {% if job_data['async'] %}
+                                {{ badge(text="Yes", i18n_key="status.yes", variant="success", icon="bx-check") }}
+                            {% else %}
+                                {{ badge(text="No", i18n_key="status.no", variant="danger", icon="bx-x") }}
+                            {% endif %}
                         </td>
                         <td class="text-center">
                             {% if job_data['history'] %}
-                                <i class="bx bx-sm bx-{% if job_data['history'][0]['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
+                                {% if job_data['history'][0]['success'] %}
+                                    {{ badge(text="Success", i18n_key="status.success", variant="success", icon="bx-check") }}
+                                {% else %}
+                                    {{ badge(text="Failed", i18n_key="status.failed", variant="danger", icon="bx-x") }}
+                                {% endif %}
                             {% else %}
                                 <span data-i18n="status.no_history">No history</span>
                             {% endif %}
@@ -150,70 +179,50 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                <div {% if not job_data['history'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No history" data-i18n="tooltip.no_history"{% endif %}>
+                                {% if job_data['history'] %}
                                     <button type="button"
                                             data-job="{{ job }}"
                                             data-plugin="{{ job_data['plugin_id'] }}"
-                                            class="btn btn-outline-primary btn-sm me-1 show-history{% if not job_data['history'] %} disabled{% endif %}">
+                                            class="btn btn-outline-primary btn-sm me-1 show-history">
                                         <i class="bx bx-history bx-xs"></i>&nbsp;<span data-i18n="button.history">History</span>
                                     </button>
-                                </div>
-                                <div class="dropdown btn-group"
-                                     {% if not job_data['cache'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No cache" data-i18n="tooltip.no_cache"{% endif %}>
-                                    <button type="button"
-                                            class="btn btn-outline-secondary btn-sm dropdown-toggle{% if not job_data['cache'] %} disabled{% endif %}"
-                                            data-bs-toggle="dropdown"
-                                            aria-haspopup="true"
-                                            aria-expanded="false">
-                                        <i class="bx bx-data"></i>
-                                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.cache">Cache</span></span>
-                                    </button>
-                                    <ul class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0 pb-0"
-                                        role="tablist">
-                                        {% for cache in job_data['cache'] %}
-                                            {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
-                                            <li class="nav-item">
-                                                <a role="button"
-                                                   class="dropdown-item"
-                                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ job_data['plugin_id'] }}/{{ job }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
-                                                   target="_blank"
-                                                   rel="noreferrer">
-                                                    <i class="tf-icons bx bx-download bx-xs me-1"></i>{{ service_id + " / " if cache['service_id'] else '' }}{{ cache["file_name"] }}
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
+                                {% else %}
+                                    {% call tooltip(text="No execution history found for this job.", i18n_key="tooltip.no_history", placement="bottom", disabled=true) %}
+                                        <button type="button"
+                                                data-job="{{ job }}"
+                                                data-plugin="{{ job_data['plugin_id'] }}"
+                                                class="btn btn-outline-primary btn-sm me-1 show-history disabled">
+                                            <i class="bx bx-history bx-xs"></i>&nbsp;<span data-i18n="button.history">History</span>
+                                        </button>
+                                    {% endcall %}
+                                {% endif %}
+                                {% call dropdown_menu(id="job-" ~ job ~ "-" ~ job_data['plugin_id'] ~ "-cache", items=[], label="Cache", i18n_key="button.cache", label_classes="d-none d-md-inline", icon="bx-data", variant="outline-secondary", size="sm", disabled=(not job_data['cache']), menu_classes="nav-pills max-vh-60 overflow-auto pt-0 pb-0", attrs=('data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No cache files found for this job." data-i18n="tooltip.no_cache"' if not job_data['cache'] else '')) %}
+                                    {% for cache in job_data['cache'] %}
+                                        {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
+                                        <li role="presentation">
+                                            <a role="menuitem"
+                                               class="dropdown-item"
+                                               href="{{ url_for("cache") }}/{{ service_id }}/{{ job_data['plugin_id'] }}/{{ job }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
+                                               target="_blank"
+                                               rel="noreferrer">
+                                                <i class="tf-icons bx bx-download bx-xs me-1"></i>{{ service_id + " / " if cache['service_id'] else '' }}{{ cache["file_name"] }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                {% endcall %}
                             </div>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
-        </table>
-    </div>
-    <div class="modal modal-xl fade"
-         id="modal-job-history"
-         data-bs-backdrop="static"
-         tabindex="-1"
-         aria-hidden="true"
-         role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content position-relative">
-                <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="modal.title.job_history">Last 10 Job's executions</h5>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                            data-i18n="aria.label.close"></button>
-                </div>
-                <div class="modal-body mb-2"></div>
-                <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                    TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-                </span>
-            </div>
-        </div>
-    </div>
+        {% endcall %}
+    {% endcall %}
+    {% call modal(id="modal-job-history", title_key="modal.title.job_history", title="Last 10 Job Executions", size="xl") %}
+        <div class="modal-body mb-2"></div>
+        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+        </span>
+    {% endcall %}
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}

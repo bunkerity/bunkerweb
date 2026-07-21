@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "Link pomocy technicznej"
       }
-    }
+    },
+    "subtitle": "Pobierz pliki dziennika debugowania, wyodrębnij swoją konfigurację i skontaktuj się z zespołem BunkerWeb."
   },
   "tab": {
     "custom_certificate": "Certyfikat niestandardowy",
@@ -1661,7 +1662,8 @@
         "job_name": "Zadanie, które wygenerowało ten plik pamięci podręcznej",
         "last_update": "Data i godzina ostatniej aktualizacji pliku pamięci podręcznej",
         "plugin": "Wtyczka powiązana z zadaniem, które wygenerowało ten plik pamięci podręcznej",
-        "service": "Usługa powiązana z tym plikiem pamięci podręcznej (lub globalna)"
+        "service": "Usługa powiązana z tym plikiem pamięci podręcznej (lub globalna)",
+        "select_all": "Wybierz wszystkie pliki Cache"
       },
       "configs": {
         "actions": "Dostępne działania dla tej konfiguracji niestandardowej",

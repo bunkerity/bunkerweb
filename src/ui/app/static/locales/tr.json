@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "Destek Bağlantısı"
       }
-    }
+    },
+    "subtitle": "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın."
   },
   "tab": {
     "custom_certificate": "Özel Sertifika",
@@ -1661,7 +1662,8 @@
         "job_name": "Bu önbellek dosyasını oluşturan iş",
         "last_update": "Önbellek dosyasının son güncellenme tarihi ve saati",
         "plugin": "Önbellek dosyasını oluşturan işle ilişkili eklenti",
-        "service": "Bu önbellek dosyasıyla ilişkili servis (veya Küresel)"
+        "service": "Bu önbellek dosyasıyla ilişkili servis (veya Küresel)",
+        "select_all": "Tüm Cache dosyalarını seçin"
       },
       "configs": {
         "actions": "Bu Özel Yapılandırma için mevcut aksiyonlar",

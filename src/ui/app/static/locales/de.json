@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "Support-Link"
       }
-    }
+    },
+    "subtitle": "Laden Sie Debug-Logs herunter, extrahieren Sie Ihre Konfiguration und holen Sie sich Hilfe vom BunkerWeb-Team."
   },
   "tab": {
     "custom_certificate": "Benutzerdefiniertes Zertifikat",
@@ -1661,7 +1662,8 @@
         "job_name": "Auftrag, der diese Cache-Datei generiert hat",
         "last_update": "Datum und Uhrzeit der letzten Aktualisierung der Cache-Datei",
         "plugin": "Plugin, das mit dem Auftrag verbunden ist, der diese Cache-Datei generiert hat",
-        "service": "Dienst, der mit dieser Cache-Datei verbunden ist (oder Global)"
+        "service": "Dienst, der mit dieser Cache-Datei verbunden ist (oder Global)",
+        "select_all": "Alle Cache-Dateien auswählen"
       },
       "configs": {
         "actions": "Für diese benutzerdefinierte Konfiguration verfügbare Aktionen",

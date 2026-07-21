@@ -1264,7 +1264,8 @@
       "support_link": {
         "title": "Link ng Suporta"
       }
-    }
+    },
+    "subtitle": "I-download ang mga log ng debug, i-extract ang iyong configuration, at humingi ng tulong sa team ng BunkerWeb."
   },
   "tab": {
     "custom_certificate": "Custom na Certificate",
@@ -1661,7 +1662,8 @@
         "job_name": "Trabaho na lumikha ng cache file na ito",
         "last_update": "Petsa at oras kung kailan huling na-update ang cache file",
         "plugin": "Plugin na nauugnay sa trabaho na lumikha ng cache file na ito",
-        "service": "Serbisyo na nauugnay sa cache file na ito (o Pandaigdigang)"
+        "service": "Serbisyo na nauugnay sa cache file na ito (o Pandaigdigang)",
+        "select_all": "Piliin ang lahat ng file ng Cache"
       },
       "configs": {
         "actions": "Mga aksyon na available para sa Custom Config na ito",

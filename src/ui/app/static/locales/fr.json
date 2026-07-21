@@ -1266,7 +1266,8 @@
       "support_link": {
         "title": "Lien de Support"
       }
-    }
+    },
+    "subtitle": "Télécharger les journaux de débogage, extraire votre configuration et obtenir de l'aide de l'équipe BunkerWeb."
   },
   "tab": {
     "custom_certificate": "Certificat Personnalisé",
@@ -1663,7 +1664,8 @@
         "job_name": "Tâche ayant généré ce fichier cache",
         "last_update": "Date et heure de la dernière mise à jour du fichier cache",
         "plugin": "Plugin associé à la tâche ayant généré ce fichier cache",
-        "service": "Service associé à ce fichier cache (ou Global)"
+        "service": "Service associé à ce fichier cache (ou Global)",
+        "select_all": "Sélectionner tous les fichiers Cache"
       },
       "configs": {
         "actions": "Actions disponibles pour cette Config Perso",

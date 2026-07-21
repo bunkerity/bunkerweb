@@ -1337,7 +1337,8 @@
       "support_link": {
         "title": "Support Link"
       }
-    }
+    },
+    "subtitle": "Download debug logs, extract your configuration, and get help from the BunkerWeb team."
   },
   "tab": {
     "custom_certificate": "Custom Certificate",
@@ -1735,7 +1736,8 @@
         "job_name": "Job that generated this cache file",
         "last_update": "Date and time when the cache file was last updated",
         "plugin": "Plugin associated with the job that generated this cache file",
-        "service": "Service associated with this cache file (or Global)"
+        "service": "Service associated with this cache file (or Global)",
+        "select_all": "Select all Cache files"
       },
       "configs": {
         "actions": "Actions available for this Custom Config",

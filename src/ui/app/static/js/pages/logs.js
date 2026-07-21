@@ -595,6 +595,10 @@ $(document).ready(function () {
   // Smooth scroll to bottom after content is loaded
   setTimeout(() => {
     const totalLines = editor.session.getLength();
+    if (window.bwPrefersReducedMotion()) {
+      editor.gotoLine(totalLines, 0, false);
+      return;
+    }
     const duration = 1000;
     const startTime = Date.now();
     function smoothScroll() {
