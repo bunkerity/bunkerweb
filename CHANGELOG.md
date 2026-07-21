@@ -2,8 +2,11 @@
 
 ## v1.6.14~rc1 - 2026/07/??
 
-- [FEATURE] `metrics`: keep blocked-request reports flowing when Redis is full — an OOM-aware circuit breaker stops the log storm, timer stall, and report destruction previously triggered at `maxmemory`; reports blocked during the OOM window stay buffered per worker and sync once memory frees; list/facet updates are now atomic server-side scripts with per-cycle self-healing of facet counters; new `METRICS_REDIS_TTL` setting (default 30 days, `0` to disable) gives metrics keys a TTL refreshed on every sync. Note for `volatile-lru` operators: metrics keys previously had no TTL and were immune to eviction; they are now evictable under sustained memory pressure so Redis can recover instead of rejecting writes forever.
-- [FEATURE] `headers`: deny the Chrome built-in AI APIs by default — add `language-detector`, `language-model`, `proofreader`, `rewriter`, `translator` and `writer` to the default `PERMISSIONS_POLICY`, the high/medium service templates, and the Permissions-Policy header BunkerWeb sets on its own pages (web UI, error pages, default-server and loading pages).
+- [BUGFIX] `ui`: fix plugin hook loading and chaining, and purge unavailable PRO plugin pages after license loss.
+- [BUGFIX] `letsencrypt`: quarantine broken renewal lineages and persist the cleaned cache before Certbot runs. (Fixes #3733)
+- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683, #3685)
+- [FEATURE] `metrics`: buffer reports during Redis OOM events, make list and facet updates atomic, and add the `METRICS_REDIS_TTL` setting.
+- [FEATURE] `headers`: deny Chrome built-in AI APIs in the default `PERMISSIONS_POLICY`.
 - [FEATURE] `misc`: allow the `QUERY` HTTP method by default in `ALLOWED_METHODS` and bundled service templates.
 
 ## v1.6.13 - 2026/07/16
