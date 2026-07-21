@@ -246,6 +246,21 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
 
+### Certificate manager
+
+| Setting                                | Description                                                                 | Accepted values                         | Default |
+| -------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------- | ------- |
+| `CERTIFICATE_ENCRYPTION_KEYS`          | Keyring used to encrypt stored certificate private keys with AES-256-GCM    | JSON object of key IDs to base64 32-byte keys | unset   |
+| `CERTIFICATE_ENCRYPTION_ACTIVE_KEY`    | Key ID used for newly imported or generated private keys                    | A key present in the keyring            | unset   |
+
+Both variables are required for certificate create, import, and self-signed renewal operations. Keep old key IDs in the keyring while any stored certificate still uses them, and provide the same keyring to every API or worker process that handles certificates. Private keys are never available through certificate download endpoints.
+
+The API keeps shared inventory operations under `/certificates` (list, metadata, assignments, unmanaged deletion, and public downloads). Certificate lifecycle operations are owned by their provider plugins: `/selfsigned/certificates` creates and renews self-signed certificates, `/customcert/certificates/upload` imports PEM material, and `/letsencrypt/certificates` schedules ACME work and exposes read-only orphan-state inspection. This keeps provider behavior extensible without letting the UI bypass the API.
+
+Service assignments in the certificate manager organise the central inventory; they do not replace the existing per-service Let's Encrypt or custom-certificate settings that control live TLS deployment.
+
+Let's Encrypt inventory records are synchronized from the certbot cache. Provider-owned deletion is intentionally unavailable until the certificate worker can durably confirm and retry targeted cache operations; removing ACME state therefore does not yet delete its managed inventory record automatically.
+
 ### Logging
 
 | Setting                         | Description                                                   | Accepted values                                 | Default                                       |
