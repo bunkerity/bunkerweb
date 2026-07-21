@@ -86,24 +86,9 @@ $(document).ready(function () {
     },
   ];
 
-  // Batch update tooltips
-  const updateCountryTooltips = () => {
-    $("[data-country]").each(function () {
-      const $elem = $(this);
-      const countryCode = $elem.data("country");
-
-      const countryName = t(
-        countryCode === "unknown" || countryCode === "local"
-          ? "country.not_applicable"
-          : `country.${countryCode}`,
-        "Unknown",
-      );
-      if (countryName && countryName !== "country.not_applicable") {
-        $elem.attr("data-bs-original-title", countryName);
-      }
-    });
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
-  };
+  // Country-flag cell rendering + tooltip retranslation now live in the shared
+  // components/country-flag.html / static/js/components/country-flag.js helper
+  // (window.BWCountryFlag) -- see that file's doc comment.
 
   // Utility functions
   function addDays(date, days) {
@@ -886,27 +871,12 @@ $(document).ready(function () {
             header: t("searchpane.country", "Country"),
           },
           targets: 4,
+          // This cell is rendered client-side by DataTables via the shared
+          // window.BWCountryFlag helper (static/js/components/country-flag.js). Its
+          // markup keeps data-country so BWCountryFlag.updateTooltips() can retranslate
+          // it after each redraw.
           render: function (data) {
-            const countryCode = data.toLowerCase();
-            const isNotApplicable =
-              countryCode === "unknown" ||
-              countryCode === "local" ||
-              countryCode === "n/a";
-            const tooltipContent = "N/A";
-            return `
-              <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
-              }" data-country="${
-                isNotApplicable ? "unknown" : countryCode.toUpperCase()
-              }">
-              <img src="${baseFlagsUrl}/${
-                isNotApplicable ? "zz" : countryCode
-              }.svg"
-                 class="border border-1 p-0 me-1"
-                 height="17"
-                 loading="lazy" />
-              &nbsp;－&nbsp;${isNotApplicable ? "N/A" : data}
-              </span>`;
+            return window.BWCountryFlag.html(data, { flagBase: baseFlagsUrl });
           },
         },
         {
@@ -1155,7 +1125,7 @@ $(document).ready(function () {
             .attr("data-bs-placement", "right")
             .tooltip();
         }
-        throttle(updateCountryTooltips, 200);
+        throttle(window.BWCountryFlag.updateTooltips, 200);
       },
       headerCallback: function (thead) {
         throttle(updateHeaderTooltips, 200, thead, headers);
@@ -1193,7 +1163,7 @@ $(document).ready(function () {
     }).then(() => {
       const dt = initializeDataTable(bans_config);
       dt.on("draw.dt", function () {
-        throttle(updateCountryTooltips, 200);
+        throttle(window.BWCountryFlag.updateTooltips, 200);
         throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
         $(".tooltip").remove();
         // Hide waiting message and show table

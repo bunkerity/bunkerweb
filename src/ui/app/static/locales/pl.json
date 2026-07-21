@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "Wyświetl wszystkie {{count}} ustawień"
+  },
+  "templates": {
+    "subtitle": "Ponowne użycie szablonów konfiguracji dla swoich usług — grupowanie ustawień, kroków i niestandardowych konfiguracji, a następnie twórz, kopiuj lub usuwaj je."
   }
 }

@@ -77,72 +77,47 @@ $(document).ready(function () {
     return normalized;
   };
 
-  const buildConfigsList = (configs, $container) => {
-    $container.empty();
+  // Confirmation lists use text-only values from the live table. The shared
+  // selected-list component deliberately never inserts row HTML.
+  const configsListColumns = [
+    {
+      key: "name",
+      i18n: "table.header.name",
+      label: t("table.header.name", "Name"),
+      bold: true,
+    },
+    {
+      key: "type",
+      i18n: "table.header.type",
+      label: t("table.header.type", "Type"),
+    },
+    {
+      key: "service",
+      i18n: "table.header.service",
+      label: t("table.header.service", "Service"),
+    },
+  ];
 
-    const $header = $(`
-      <ul class="list-group list-group-horizontal w-100">
-        <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold" data-i18n="table.header.name">${t(
-              "table.header.name",
-              "Name",
-            )}</div>
-          </div>
-        </li>
-        <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-          <div class="fw-bold" data-i18n="table.header.type">${t(
-            "table.header.type",
-            "Type",
-          )}</div>
-        </li>
-        <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-          <div class="fw-bold" data-i18n="table.header.service">${t(
-            "table.header.service",
-            "Service",
-          )}</div>
-        </li>
-      </ul>`);
-    $container.append($header);
-
-    configs.forEach((config) => {
-      const list = $(
-        `<ul class="list-group list-group-horizontal w-100"></ul>`,
-      );
-      const listItem = $(`<li class="list-group-item" style="flex: 1 1 0;">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold">${config.name}</div>
-          </div>
-        </li>`);
-      list.append(listItem);
-
+  const buildConfigsRows = (configs) =>
+    configs.map((config) => {
       const id = getConfigId(config);
-
-      const typeClone = $(`#type-${id}`).clone();
-      const typeListItem = $(
-        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
-      );
-      typeListItem.append(typeClone.removeClass("highlight"));
-      list.append(typeListItem);
-
-      const serviceClone = $(`#service-${id}`).clone();
-      const serviceListItem = $(
-        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
-      );
-      serviceListItem.append(serviceClone.removeClass("highlight"));
-      list.append(serviceListItem);
-      serviceClone
-        .find('[data-bs-toggle="tooltip"]')
-        .tooltip("dispose")
-        .tooltip();
-
-      $container.append(list);
+      return {
+        name: config.name,
+        type: $(`#type-${id}`).text().trim(),
+        service: $(`#service-${id}`).text().trim(),
+      };
     });
-  };
+
+  const renderSelectedConfigs = (hostSelector, configs) =>
+    BWSelectedList.render(hostSelector, buildConfigsRows(configs), {
+      entity: "configs",
+      hiddenMode: "none",
+      columns: configsListColumns,
+    });
 
   const setupConversionModal = (configs, conversionType = "draft") => {
     const convertModal = $("#modal-convert-configs");
-    buildConfigsList(configs, $("#selected-configs-convert"));
+    renderSelectedConfigs("#selected-configs-convert", configs);
 
     const alertText = t(
       "modal.body.confirm_configs_conversion_to",
@@ -173,7 +148,7 @@ $(document).ready(function () {
 
   const setupDeletionModal = (configs) => {
     const delete_modal = $("#modal-delete-configs");
-    buildConfigsList(configs, $("#selected-configs-delete"));
+    renderSelectedConfigs("#selected-configs-delete", configs);
 
     const modalInstance = new bootstrap.Modal(delete_modal[0]);
 
@@ -356,10 +331,13 @@ $(document).ready(function () {
     }
   });
 
+  // The visible recap list (#selected-configs-delete/-convert) is a
+  // components/selected-list.html host -- static/js/components/selected-list.js
+  // clears it back to its empty state on "hidden.bs.modal" itself, so this
+  // handler only needs to reset the fields that macro doesn't own.
   $("#modal-delete-configs, #modal-convert-configs").on(
     "hidden.bs.modal",
     function () {
-      $("#selected-configs-delete, #selected-configs-convert").empty();
       $("#selected-configs-input-delete, #selected-configs-input-convert").val(
         "",
       );

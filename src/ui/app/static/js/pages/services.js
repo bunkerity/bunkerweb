@@ -13,6 +13,7 @@ $(document).ready(function () {
           return translated;
         };
 
+  const BWSelectedList = window.BWSelectedList;
   let toastNum = 0;
   let actionLock = false;
   const serviceNumber = parseInt($("#services_number").val(), 10) || 0;
@@ -42,52 +43,34 @@ $(document).ready(function () {
     }
   });
 
-  const setupModal = (services, modal) => {
-    const headerList = $(`
-      <ul class="list-group list-group-horizontal w-100">
-        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold">Service name</div>
-          </div>
-        </li>
-        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
-          <div class="fw-bold">Type</div>
-        </li>
-      </ul>
-    `);
-    modal.append(headerList);
+  // components/selected-list.html "columns" mode -- id_key "name" + hidden_mode
+  // "csv" reproduces the old services.join(",") hidden value verbatim.
+  const serviceColumns = [
+    { key: "name", i18n: "table.header.name", label: "Name", bold: true },
+    { key: "type", i18n: "table.header.type", label: "Type", safe: true },
+  ];
 
-    services.forEach((service) => {
+  // Clone each row's live status badge for the confirm-list "Type" column,
+  // stripping any DataTables search-highlight marks first.
+  const serviceRows = (services) =>
+    services.map((service) => {
       const sanitizedService = service.replace(/\./g, "-");
-      const serviceList = $(
-        '<ul class="list-group list-group-horizontal w-100"></ul>',
-      );
-
-      const listItem = $(`
-        <li class="list-group-item" style="flex: 1 0;">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold">${service}</div>
-          </div>
-        </li>
-      `);
-      serviceList.append(listItem);
-
       const typeClone = $(`#type-${sanitizedService}`)
         .clone()
         .removeClass("highlight");
-      const typeListItem = $(`
-        <li class="list-group-item" style="flex: 1 0;"></li>
-      `);
-      typeListItem.append(typeClone);
-      serviceList.append(typeListItem);
-
-      modal.append(serviceList);
+      return {
+        name: service,
+        type: typeClone.length ? typeClone[0].outerHTML : "",
+      };
     });
-  };
 
   const setupConversionModal = (services, conversionType = "draft") => {
-    $("#selected-services-input-convert").val(services.join(","));
-    setupModal(services, $("#selected-services-convert"));
+    BWSelectedList.render("#selected-services-convert", serviceRows(services), {
+      entity: "services",
+      idKey: "name",
+      hiddenMode: "csv",
+      columns: serviceColumns,
+    });
 
     const convertModal = $("#modal-convert-services");
     convertModal
@@ -107,8 +90,12 @@ $(document).ready(function () {
   };
 
   const setupDeletionModal = (services) => {
-    $("#selected-services-input-delete").val(services.join(","));
-    setupModal(services, $("#selected-services-delete"));
+    BWSelectedList.render("#selected-services-delete", serviceRows(services), {
+      entity: "services",
+      idKey: "name",
+      hiddenMode: "csv",
+      columns: serviceColumns,
+    });
 
     const deleteModal = $("#modal-delete-services");
     deleteModal
@@ -274,19 +261,9 @@ $(document).ready(function () {
     }
   });
 
-  $("#modal-delete-services, #modal-convert-services").on(
-    "hidden.bs.modal",
-    function () {
-      $(this)
-        .find("#selected-services-convert, #selected-services-delete")
-        .empty();
-      $(this)
-        .find(
-          "#selected-services-input-convert, #selected-services-input-delete",
-        )
-        .val("");
-    },
-  );
+  // #selected-services-{convert,delete,export} rows + hidden input are
+  // auto-cleared by static/js/components/selected-list.js's global
+  // hidden.bs.modal listener (targets every [data-selected-host]).
   $("#modal-import-services").on("hidden.bs.modal", function () {
     importFileInput.val("");
     importFileList.empty();
@@ -298,13 +275,12 @@ $(document).ready(function () {
   });
 
   $("#modal-export-services").on("hidden.bs.modal", function () {
-    $("#selected-services-export").empty();
     $("#services-export-include-configs").prop("checked", false);
   });
 
   $("#services-export-confirm").on("click", function () {
     const $modal = $("#modal-export-services");
-    const services = ($modal.data("services") || []).filter(Boolean);
+    const services = BWSelectedList.getIds("#selected-services-export");
     if (services.length === 0) return;
     const includeConfigs = $("#services-export-include-configs").is(":checked");
     window.open(buildExportUrl(services, includeConfigs), "_blank");
@@ -445,17 +421,15 @@ $(document).ready(function () {
       window.open(buildExportUrl(services, false), "_blank");
       return;
     }
-    const $modal = $("#modal-export-services");
-    $modal.data("services", services);
-    const $list = $("#selected-services-export");
-    $list.empty();
-    services.forEach((service) => {
-      $list.append(
-        `<span class="badge rounded-pill bg-label-primary me-1 mb-1">${service}</span>`,
-      );
-    });
+    BWSelectedList.render(
+      "#selected-services-export",
+      services.map((service) => ({ id: service, label: service })),
+      { entity: "services", idKey: "id", hiddenMode: "csv" },
+    );
     $("#services-export-include-configs").prop("checked", false);
-    new bootstrap.Modal($modal[0]).show();
+    new bootstrap.Modal(
+      document.getElementById("modal-export-services"),
+    ).show();
   };
 
   $.fn.dataTable.ext.buttons.export_services = {

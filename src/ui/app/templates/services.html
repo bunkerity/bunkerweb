@@ -1,4 +1,14 @@
 {% extends "dashboard.html" %}
+{% from "components/card.html" import card %}
+{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/badge.html" import badge %}
+{% from "components/tile.html" import tile %}
+{% from "components/modal.html" import modal %}
+{% from "components/selected-list.html" import selected_list %}
+{% from "components/alert.html" import alert %}
+{% from "components/checkbox.html" import checkbox %}
+{% from "components/button.html" import button %}
+{% from "components/title.html" import title %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -10,25 +20,36 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
-        <input type="hidden" id="services_number" value="{{ services|length }}" />
+    {{ title(label="Services", i18n_key="navigation.services", level="h1", icon="bx-cube", subtitle="Manage the multisite services protected by BunkerWeb: create, edit, convert to draft, or delete them.", subtitle_i18n_key="services.subtitle", classes="mb-4") }}
+    {% set ns = namespace(online_services=0, draft_services=0) %}
+    {% for service in services %}
+        {% if service['is_draft'] %}
+            {% set ns.draft_services = ns.draft_services + 1 %}
+        {% else %}
+            {% set ns.online_services = ns.online_services + 1 %}
+        {% endif %}
+    {% endfor %}
+    <!-- KPI tiles -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="Total services", value=services|length, title_i18n="services.total", color="primary", icon="bx-server") }}
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="Online", value=ns.online_services, title_i18n="services.online", color="bw-green", icon="bx-globe") }}
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="Draft services", value=ns.draft_services, title_i18n="services.draft", color="warning", icon="bx-file-blank") }}
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            {{ tile(title="With custom configs", value=services_with_configs|length, title_i18n="services.with_configs", color="info", icon="bx-code-alt") }}
+        </div>
+    </div>
+    {% call card(classes="table-responsive text-nowrap p-4 min-vh-70") %}
         <input type="hidden" id="templates" value="{{ templates|join(' ') }}" />
         <input type="hidden"
                id="services_with_configs"
                value="{{ services_with_configs|join(' ') }}" />
-        <textarea type="hidden"
-                  id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['services']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
-        <input type="hidden"
-               id="csrf_token"
-               name="csrf_token"
-               value="{{ csrf_token() }}" />
-        <p id="services-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-           data-i18n="status.loading_services">Loading services...</p>
-        <table id="services"
-               class="table responsive nowrap position-relative w-100 d-none">
+        {% call table_toolbar(id="services", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_services", loading_default="Loading services...", number=services|length) %}
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
@@ -103,29 +124,17 @@
                         </td>
                         <td>
                             {% if service['is_draft'] %}
-                                <span id="type-{{ service['id'].replace('.', '-') }}"
-                                      data-value="draft"
-                                      class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center">
-                                    <i class="bx bx-file-blank me-1"></i><span data-i18n="status.draft">Draft</span>
-                                </span>
+                                {{ badge(text="Draft", i18n_key="status.draft", variant="secondary", icon="bx-file-blank", id="type-" ~ service['id'].replace('.', '-'), data_value="draft") }}
                             {% else %}
-                                <span id="type-{{ service['id'].replace('.', '-') }}"
-                                      data-value="online"
-                                      class="badge rounded-pill bg-label-primary d-inline-flex align-items-center">
-                                    <i class="bx bx-globe me-1"></i><span data-i18n="status.online">Online</span>
-                                </span>
+                                {{ badge(text="Online", i18n_key="status.online", variant="primary", icon="bx-globe", id="type-" ~ service['id'].replace('.', '-'), data_value="online") }}
                             {% endif %}
                         </td>
                         <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
                         <td>
                             {% if service['security_mode'] == 'detect' %}
-                                <span class="badge rounded-pill bg-label-warning d-inline-flex align-items-center">
-                                    <i class="bx bx-show me-1"></i><span data-i18n="security_mode.detect">Detect</span>
-                                </span>
+                                {{ badge(text="Detect", i18n_key="security_mode.detect", variant="warning", icon="bx-show") }}
                             {% else %}
-                                <span class="badge rounded-pill bg-label-primary d-inline-flex align-items-center">
-                                    <i class="bx bx-shield-alt-2 me-1"></i><span data-i18n="security_mode.block">Block</span>
-                                </span>
+                                {{ badge(text="Block", i18n_key="security_mode.block", variant="primary", icon="bx-shield-alt-2") }}
                             {% endif %}
                         </td>
                         <td>
@@ -136,8 +145,7 @@
                                    data-bs-placement="bottom"
                                    data-bs-original-title="{% if is_readonly or service["template"] in ["low", "medium", "high", "ui", "api"] %}View{% else %}Edit{% endif %} template {{ service["template"] }}"><i class="bx bx-{% if is_readonly or service["template"] in ["low", "medium", "high", "ui", "api"] %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ service["template"] }}</a>
                             {% else %}
-                                <span class="badge rounded-pill bg-label-secondary"
-                                      data-i18n="badge.no_template">No template</span>
+                                {{ badge(text="No template", i18n_key="badge.no_template", variant="secondary") }}
                             {% endif %}
                         </td>
                         <td class="service-creation-date">{{ service['creation_date'] | to_iso }}</td>
@@ -222,11 +230,16 @@
                     </tr>
                 {% endfor %}
             </tbody>
-            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-            </span>
-        </table>
-    </div>
+        {% endcall %}
+        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
+            <div class="flex-grow-1 text-center">
+                <span class="badge rounded-pill bg-secondary">
+                    TZ:
+                    <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                </span>
+            </div>
+        </div>
+    {% endcall %}
     <div id="feedback-toast"
          class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border border-warning"
          role="alert"
@@ -243,214 +256,93 @@
                     aria-label="Close"
                     data-i18n="aria.label.close"></button>
         </div>
-        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
+        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
     </div>
     {% if not is_readonly %}
-        <div class="modal modal-xl fade"
-             id="modal-import-services"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.import_services">Import services</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
+        {% call modal(id="modal-import-services", title_key="modal.title.import_services", title="Import services", size="xl") %}
+            <form action="{{ url_for("services") }}/import"
+                  method="POST"
+                  enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div role="button"
+                         id="services-drag-area"
+                         tabindex="0"
+                         aria-controls="services-import-file"
+                         aria-label="Select a services export file or drop one here"
+                         data-i18n-aria-label="aria.label.services_dropzone"
+                         class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
+                        <div class="text-center">
+                            <i class="bx bx-lg bxs-cloud-upload text-primary" aria-hidden="true"></i>
+                            <p class="mt-3 fs-5" data-i18n="modal.body.import_services_dropzone">
+                                Drag and drop your services export file here or click to select a file.
+                            </p>
+                        </div>
                     </div>
-                    <form action="{{ url_for("services") }}/import"
-                          method="POST"
-                          enctype="multipart/form-data">
-                        <div class="modal-body">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <div role="button"
-                                 id="services-drag-area"
-                                 tabindex="0"
-                                 aria-controls="services-import-file"
-                                 aria-label="Select a services export file or drop one here"
-                                 data-i18n-aria-label="aria.label.services_dropzone"
-                                 class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
-                                <div class="text-center">
-                                    <i class="bx bx-lg bxs-cloud-upload text-primary" aria-hidden="true"></i>
-                                    <p class="mt-3 fs-5" data-i18n="modal.body.import_services_dropzone">
-                                        Drag and drop your services export file here or click to select a file.
-                                    </p>
-                                </div>
-                            </div>
-                            <input type="file"
-                                   id="services-import-file"
-                                   name="services_file"
-                                   accept=".env,.zip,text/plain,application/zip"
-                                   class="visually-hidden"
-                                   required />
-                            <div id="services-import-file-list" class="mt-3"></div>
-                            <div id="services-import-configs-options" class="form-check mt-3 d-none">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="overwrite_configs"
-                                       value="yes"
-                                       id="services-import-overwrite-configs" />
-                                <label class="form-check-label"
-                                       for="services-import-overwrite-configs"
-                                       data-i18n="form.checkbox.overwrite_existing_configs">
-                                    Overwrite existing UI/API custom configurations
-                                </label>
-                            </div>
-                            <div class="alert alert-warning text-center mt-3"
-                                 role="alert"
-                                 data-i18n="modal.body.import_services_warning">
-                                Importing services will create new UI services from the export file. Existing services are skipped. A .zip archive exported with custom configurations is also accepted.
-                            </div>
-                        </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit"
-                                    class="btn btn-outline-primary me-2"
-                                    data-i18n="button.import_services">Import services</button>
-                            <button type="reset"
-                                    class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal"
-                                    data-i18n="button.cancel">Cancel</button>
-                        </div>
-                    </form>
+                    <input type="file"
+                           id="services-import-file"
+                           name="services_file"
+                           accept=".env,.zip,text/plain,application/zip"
+                           class="visually-hidden"
+                           required />
+                    <div id="services-import-file-list" class="mt-3"></div>
+                    <div id="services-import-configs-options" class="mt-3 d-none">
+                        {{ checkbox(id="services-import-overwrite-configs", name="overwrite_configs", value="yes", label="Overwrite existing UI/API custom configurations", i18n_key="form.checkbox.overwrite_existing_configs") }}
+                    </div>
+                    {{ alert(message="Importing services will create new UI services from the export file. Existing services are skipped. A .zip archive exported with custom configurations is also accepted.", message_key="modal.body.import_services_warning", variant="warning", classes="text-center mt-3") }}
                 </div>
-            </div>
-        </div>
-        <div class="modal fade"
-             id="modal-export-services"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.export_services">Export services</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p data-i18n="modal.body.export_services_intro">
-                            The selected services will be exported. Enable the option below to bundle their attached custom configurations into a .zip archive.
-                        </p>
-                        <div id="selected-services-export" class="mb-3"></div>
-                        <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="services-export-include-configs" />
-                            <label class="form-check-label"
-                                   for="services-export-include-configs"
-                                   data-i18n="form.checkbox.include_attached_configs">
-                                Include attached custom configurations
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-footer justify-content-center">
-                        <button type="button"
-                                id="services-export-confirm"
-                                class="btn btn-outline-primary me-2"
-                                data-i18n="button.export">Export</button>
-                        <button type="button"
-                                class="btn btn-outline-secondary"
-                                data-bs-dismiss="modal"
-                                data-i18n="button.cancel">Cancel</button>
-                    </div>
+                <div class="modal-footer justify-content-center">
+                    {{ button(label="Import services", i18n_key="button.import_services", variant="outline-primary", type="submit", classes="me-2") }}
+                    {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
                 </div>
+            </form>
+        {% endcall %}
+        {% call modal(id="modal-export-services", title_key="modal.title.export_services", title="Export services") %}
+            <div class="modal-body">
+                <p data-i18n="modal.body.export_services_intro">
+                    The selected services will be exported. Enable the option below to bundle their attached custom configurations into a .zip archive.
+                </p>
+                {{ selected_list(name="services", items=[], entity="services", id_key="id", hidden_mode="csv", id="selected-services-export", classes="mb-3") }}
+                {{ checkbox(id="services-export-include-configs", label="Include attached custom configurations", i18n_key="form.checkbox.include_attached_configs") }}
             </div>
-        </div>
-        <div class="modal fade"
-             id="modal-convert-services"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.confirm_conversion">Confirm Conversion</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
-                    </div>
-                    <form action="{{ url_for("services") }}/convert" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <input type="hidden" id="convertion-type" name="convert_to" value="draft" />
-                            <input type="hidden"
-                                   id="selected-services-input-convert"
-                                   name="services"
-                                   value="" />
-                            <div class="alert alert-danger text-center"
-                                 role="alert"
-                                 data-i18n="modal.body.services_conversion_confirmation">
-                                Are you sure you want to convert the selected services?
-                            </div>
-                            <div id="selected-services-convert" class="mb-3"></div>
-                        </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit"
-                                    class="btn btn-outline-primary me-2"
-                                    data-i18n="button.convert_services">Convert services</button>
-                            <button type="reset"
-                                    class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal"
-                                    data-i18n="button.cancel">Cancel</button>
-                        </div>
-                    </form>
+            <div class="modal-footer justify-content-center">
+                {{ button(id="services-export-confirm", label="Export", i18n_key="button.export", variant="outline-primary", classes="me-2") }}
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+            </div>
+        {% endcall %}
+        {% call modal(id="modal-convert-services", title_key="modal.title.confirm_conversion", title="Confirm Conversion") %}
+            <form action="{{ url_for("services") }}/convert" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" id="convertion-type" name="convert_to" value="draft" />
+                    {{ alert(message="Are you sure you want to convert the selected services?", message_key="modal.body.services_conversion_confirmation", variant="danger", classes="text-center") }}
+                    {{ selected_list(name="services", items=[], entity="services", id_key="name", hidden_mode="csv", id="selected-services-convert", classes="mb-3", columns=[
+                        {"key": "name", "i18n": "table.header.name", "label": "Name", "bold": true},
+                        {"key": "type", "i18n": "table.header.type", "label": "Type", "safe": true}
+                    ]) }}
                 </div>
-            </div>
-        </div>
-        <div class="modal fade"
-             id="modal-delete-services"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
-                    </div>
-                    <form action="{{ url_for("services") }}/delete" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <input type="hidden"
-                                   id="selected-services-input-delete"
-                                   name="services"
-                                   value="" />
-                            <div class="alert alert-danger text-center"
-                                 role="alert"
-                                 data-i18n="modal.body.services_deletion_confirmation">
-                                Are you sure you want to delete the selected services?
-                            </div>
-                            <div id="selected-services-delete" class="mb-3"></div>
-                        </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit"
-                                    class="btn btn-outline-danger me-2"
-                                    data-i18n="button.delete">Delete</button>
-                            <button type="reset"
-                                    class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal"
-                                    data-i18n="button.cancel">Cancel</button>
-                        </div>
-                    </form>
+                <div class="modal-footer justify-content-center">
+                    {{ button(label="Convert services", i18n_key="button.convert_services", variant="outline-primary", type="submit", classes="me-2") }}
+                    {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
                 </div>
-            </div>
-        </div>
+            </form>
+        {% endcall %}
+        {% call modal(id="modal-delete-services", title_key="modal.title.confirm_deletion", title="Confirm deletion") %}
+            <form action="{{ url_for("services") }}/delete" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    {{ alert(message="Are you sure you want to delete the selected services?", message_key="modal.body.services_deletion_confirmation", variant="danger", classes="text-center") }}
+                    {{ selected_list(name="services", items=[], entity="services", id_key="name", hidden_mode="csv", id="selected-services-delete", classes="mb-3", columns=[
+                        {"key": "name", "i18n": "table.header.name", "label": "Name", "bold": true},
+                        {"key": "type", "i18n": "table.header.type", "label": "Type", "safe": true}
+                    ]) }}
+                </div>
+                <div class="modal-footer justify-content-center">
+                    {{ button(label="Delete", i18n_key="button.delete", variant="outline-danger", type="submit", classes="me-2") }}
+                    {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
+                </div>
+            </form>
+        {% endcall %}
     {% endif %}
     <!-- / Content -->
 {% endblock %}
@@ -462,6 +354,9 @@
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/selected-list.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/pages/services.js') }}"

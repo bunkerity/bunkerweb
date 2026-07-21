@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "모든 {{count}} 설정 보기"
+  },
+  "templates": {
+    "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다."
   }
 }

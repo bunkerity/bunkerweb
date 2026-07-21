@@ -1,4 +1,10 @@
 {% extends "dashboard.html" %}
+{% from "components/card.html" import card %}
+{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/modal.html" import modal %}
+{% from "components/alert.html" import alert %}
+{% from "components/button.html" import button %}
+{% from "components/selected-list.html" import selected_list %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -9,23 +15,13 @@
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
+    <p class="text-muted mb-4" data-i18n="templates.subtitle">
+        Reusable configuration templates for your services — bundle settings, steps, and custom configs, then create, clone, or delete them.
+    </p>
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
-        <input type="hidden" id="templates_number" value="{{ templates|length }}" />
-        <textarea type="hidden"
-                  id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['templates']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
         <textarea type="hidden" id="templates-usage" class="visually-hidden">{{ template_usage|default({})|tojson }}</textarea>
-        <input type="hidden"
-               id="csrf_token"
-               name="csrf_token"
-               value="{{ csrf_token() }}" />
-        <p id="templates-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-           data-i18n="status.loading_templates">Loading templates...</p>
-        <table id="templates"
-               class="table responsive nowrap position-relative w-100 d-none">
+        {% call table_toolbar(id="templates", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_templates", loading_default="Loading templates...", number=templates|length) %}
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
@@ -160,11 +156,16 @@
                     </tr>
                 {% endfor %}
             </tbody>
-            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-            </span>
-        </table>
-    </div>
+        {% endcall %}
+        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
+            <div class="flex-grow-1 text-center">
+                <span class="badge rounded-pill bg-secondary">
+                    TZ:
+                    <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                </span>
+            </div>
+        </div>
+    {% endcall %}
     <div id="feedback-toast"
          class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
          role="alert"
@@ -181,51 +182,23 @@
                     aria-label="Close"
                     data-i18n="aria.label.close"></button>
         </div>
-        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
+        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
     </div>
     {% if not is_readonly %}
-        <div class="modal fade"
-             id="modal-delete-templates"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.delete_template">Delete templates</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
-                    </div>
-                    <form action="{{ url_for("templates.templates_page") }}/delete"
-                          method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <input type="hidden" id="selected-templates-input" name="templates" value="" />
-                            <input type="hidden" id="force-delete-input" name="force" value="false" />
-                            <div class="alert alert-danger text-center"
-                                 role="alert"
-                                 data-i18n="modal.body.delete_confirmation_alert">
-                                Are you sure you want to delete the selected templates?
-                            </div>
-                            <div id="selected-templates" class="mb-3"></div>
-                        </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit"
-                                    class="btn btn-outline-danger me-2"
-                                    data-i18n="button.delete">Delete</button>
-                            <button type="reset"
-                                    class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal"
-                                    data-i18n="button.close">Close</button>
-                        </div>
-                    </form>
+        {% call modal(id="modal-delete-templates", title_key="modal.title.delete_template", title="Delete templates") %}
+            <form action="{{ url_for("templates.templates_page") }}/delete" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" id="force-delete-input" name="force" value="false" />
+                    {{ alert(message="Are you sure you want to delete the selected templates?", message_key="modal.body.delete_confirmation_alert", variant="danger", classes="text-center") }}
+                    {{ selected_list(id="selected-templates", name="templates", items=[], entity="templates", columns=[{"key": "id", "i18n": "table.header.id", "label": "ID", "bold": true}], hidden_mode="csv", id_key="id", classes="mb-3") }}
                 </div>
-            </div>
-        </div>
+                <div class="modal-footer justify-content-center">
+                    {{ button(label="Delete", i18n_key="button.delete", variant="outline-danger", type="submit", classes="me-2") }}
+                    {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", type="reset", dismiss="modal") }}
+                </div>
+            </form>
+        {% endcall %}
     {% endif %}
     <!-- / Content -->
 {% endblock %}
@@ -237,6 +210,9 @@
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/selected-list.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/pages/templates.js') }}"

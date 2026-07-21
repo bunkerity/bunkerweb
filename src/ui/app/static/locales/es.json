@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "Ver todas las {{count}} configuraciones"
+  },
+  "templates": {
+    "subtitle": "Plantillas de configuración reutilizables para sus servicios: agrupar configuraciones, pasos y configuraciones personalizadas, y luego crearlas, clonarlas o eliminarlas."
   }
 }

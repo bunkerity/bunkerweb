@@ -2045,5 +2045,8 @@
   },
   "input_list": {
     "view_all_settings": "View all {{count}} settings"
+  },
+  "templates": {
+    "subtitle": "Reusable configuration templates for your services — bundle settings, steps, and custom configs, then create, clone, or delete them."
   }
 }

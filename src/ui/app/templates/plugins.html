@@ -1,4 +1,10 @@
 {% extends "dashboard.html" %}
+{% from "components/card.html" import card %}
+{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/modal.html" import modal %}
+{% from "components/button.html" import button %}
+{% from "components/selected-list.html" import selected_list %}
+{% from "components/title.html" import title %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -9,22 +15,11 @@
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
+    {{ title(label="Plugins", i18n_key="navigation.plugins", level="h1", icon="bx-extension", classes="mb-4") }}
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 min-vh-70">
-        <input type="hidden" id="plugins_number" value="{{ plugins|length }}" />
+    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
         <input type="hidden" id="pro_diamond_url" value="{{ pro_diamond_url }}" />
-        <textarea type="hidden"
-                  id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['plugins']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
-        <input type="hidden"
-               id="csrf_token"
-               name="csrf_token"
-               value="{{ csrf_token() }}" />
-        <p id="plugins-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-           data-i18n="status.loading_plugins">Loading plugins...</p>
-        <table id="plugins" class="table responsive nowrap w-100 d-none">
+        {% call table_toolbar(id="plugins", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_plugins", loading_default="Loading plugins...", number=plugins|length) %}
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
@@ -106,8 +101,8 @@
                                  data-bs-original-title="..."
                                  data-i18n="tooltip.stream_support.{{ plugin_data['stream'] }}">
                                 <i class="bx bx-sm bx-{% if plugin_data['stream'] == 'yes' %}check text-success{% elif plugin_data['stream'] == 'partial' %}minus text-warning{% else %}x text-danger{% endif %}"></i>
-                            </td>
-                        </div>
+                            </div>
+                        </td>
                         <td id="type-{{ plugin }}">
                             <div class="d-flex align-items-center" {% if not is_pro_version and plugin_data['type'] == "pro" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"
                             {% endif %}
@@ -161,104 +156,63 @@
                     </tr>
                 {% endfor %}
             </tbody>
-        </table>
-    </div>
+        {% endcall %}
+    {% endcall %}
     {% if not is_readonly %}
-        <div class="modal modal-xl fade"
-             id="modal-add-plugins"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.add_plugins">Add plugins</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
+        {% call modal(id="modal-add-plugins", title_key="modal.title.add_plugins", title="Add plugins", size="xl") %}
+            <form id="form-add-plugins"
+                  action="{{ url_for("plugins") }}/refresh"
+                  method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div role="button"
+                         id="drag-area"
+                         tabindex="0"
+                         aria-controls="file-input"
+                         aria-label="Select plugin archives or drop them here"
+                         data-i18n="aria.label.select_file"
+                         class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
+                        <div class="text-center">
+                            <i class="bx bx-lg bxs-cloud-upload text-primary" aria-hidden="true"></i>
+                            <p class="mt-3 fs-5" data-i18n="modal.body.add_plugin_dropzone">
+                                Drag and drop your plugin here or click to select files.
+                            </p>
+                        </div>
                     </div>
-                    <form id="form-add-plugins"
-                          action="{{ url_for("plugins") }}/refresh"
-                          method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <div role="button"
-                                 id="drag-area"
-                                 class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
-                                <div class="text-center">
-                                    <i class="bx bx-lg bxs-cloud-upload text-primary"></i>
-                                    <p class="mt-3 fs-5" data-i18n="modal.body.add_plugin_dropzone">
-                                        Drag and drop your plugin here or click to select files.
-                                    </p>
-                                </div>
-                            </div>
-                            <input type="file"
-                                   id="file-input"
-                                   multiple
-                                   accept=".zip,.tar.gz,.tar.xz"
-                                   class="visually-hidden" />
-                            <div id="file-list" class="mt-3"></div>
-                        </div>
-                        <div class="modal-footer justify-content-center">
-                            <button id="add-plugins-submit"
-                                    type="submit"
-                                    class="btn btn-bw-green me-2 disabled"
-                                    data-i18n="button.add_plugins">Add plugins</button>
-                            <button type="reset"
-                                    class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal"
-                                    data-i18n="button.cancel">Cancel</button>
-                        </div>
-                    </form>
+                    <input type="file"
+                           id="file-input"
+                           multiple
+                           accept=".zip,.tar.gz,.tar.xz"
+                           class="visually-hidden" />
+                    <div id="file-list" class="mt-3"></div>
                 </div>
-            </div>
-        </div>
-        <div class="modal modal-lg fade"
-             id="modal-delete-plugins"
-             data-bs-backdrop="static"
-             tabindex="-1"
-             aria-hidden="true"
-             role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
+                <div class="modal-footer justify-content-center">
+                    {{ button(id="add-plugins-submit", label="Add plugins", i18n_key="button.add_plugins", variant="bw-green", type="submit", classes="me-2 disabled") }}
+                    {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
+                </div>
+            </form>
+        {% endcall %}
+        {% call modal(id="modal-delete-plugins", title_key="modal.title.confirm_deletion", title="Confirm deletion", size="lg") %}
+            <form action="{{ url_for("plugins") }}/delete" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div class="alert alert-danger text-center"
+                         role="alert"
+                         data-i18n="modal.body.confirm_plugin_deletion">
+                        Are you sure you want to delete the selected plugins?
                     </div>
-                    <form action="{{ url_for("plugins") }}/delete" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <input type="hidden"
-                                   id="selected-plugins-input-delete"
-                                   name="plugins"
-                                   value="" />
-                            <div class="alert alert-danger text-center"
-                                 role="alert"
-                                 data-i18n="modal.body.confirm_plugin_deletion">
-                                Are you sure you want to delete the selected plugins?
-                            </div>
-                            <div id="selected-plugins-delete" class="mb-3"></div>
-                        </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit"
-                                    class="btn btn-outline-danger me-2"
-                                    data-i18n="button.delete">Delete</button>
-                            <button type="reset"
-                                    class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal"
-                                    data-i18n="button.cancel">Cancel</button>
-                        </div>
-                    </form>
+                    {{ selected_list(id="selected-plugins-delete", name="plugins", entity="plugins", hidden_mode="csv", classes="mb-3", columns=[
+                        {"key": "name", "i18n": "table.header.name", "label": "Name", "bold": true},
+                        {"key": "version", "i18n": "table.header.version", "label": "Version"},
+                        {"key": "type", "i18n": "table.header.type", "label": "Type"}
+                    ]) }}
                 </div>
-            </div>
-        </div>
+                <div class="modal-footer justify-content-center">
+                    {{ button(label="Delete", i18n_key="button.delete", variant="outline-danger", type="submit", classes="me-2") }}
+                    {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
+                </div>
+            </form>
+        {% endcall %}
     {% endif %}
     <!-- / Content -->
 {% endblock %}
@@ -270,6 +224,9 @@
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/selected-list.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/pages/plugins.js') }}"

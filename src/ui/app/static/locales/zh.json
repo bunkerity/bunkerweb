@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "查看所有 {{count}} 设置"
+  },
+  "templates": {
+    "subtitle": "可重用配置模板，用于您的服务：捆绑设置、步骤和自定义配置，然后创建、克隆或删除它们。"
   }
 }

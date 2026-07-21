@@ -1,4 +1,7 @@
 {% extends "dashboard.html" %}
+{% from "components/card.html" import card %}
+{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/title.html" import title %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -25,27 +28,21 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
+    {{ title(label="Bans", i18n_key="navigation.bans", level="h1", icon="bx-block", subtitle="Banned IP addresses across your BunkerWeb instances — add, remove, or adjust ban durations.", subtitle_i18n_key="bans.subtitle", classes="mb-4") }}
+    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
         {% set base_flags_url = url_for('static', filename='img/flags') %}
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
-        <textarea type="hidden"
-                  id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['bans']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
-        <input type="hidden"
-               id="csrf_token"
-               name="csrf_token"
-               value="{{ csrf_token() }}" />
-        <p id="bans-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-           data-i18n="status.loading_bans">Loading bans...</p>
-        <table id="bans"
-               class="table responsive nowrap position-relative w-100 d-none">
-        </table>
-        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-        </span>
-    </div>
+        {% call table_toolbar(id="bans", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_bans", loading_default="Loading bans...") %}
+        {% endcall %}
+        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
+            <div class="flex-grow-1 text-center">
+                <span class="badge rounded-pill bg-secondary">
+                    TZ:
+                    <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                </span>
+            </div>
+        </div>
+    {% endcall %}
     {% if not is_readonly %}
         <div class="modal modal-xl fade"
              id="modal-ban-ips"
@@ -311,6 +308,9 @@
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='libs/ipaddr.js/ipaddr.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/country-flag.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/pages/bans.js') }}"

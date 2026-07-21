@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "Alle {{count}} Einstellungen anzeigen"
+  },
+  "templates": {
+    "subtitle": "Wiederverwendbare Konfigurationsvorlagen für Ihre Dienste — bündeln Sie Einstellungen, Schritte und benutzerdefinierte Konfigurationen, erstellen, klonen oder löschen Sie sie."
   }
 }

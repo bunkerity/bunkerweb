@@ -23,39 +23,19 @@ $(document).ready(function () {
 
   const setupDeletionModal = (templates) => {
     const delete_modal = $("#modal-delete-templates");
-    const $modalBody = $("#selected-templates");
-    $modalBody.empty(); // Clear previous content
 
-    $("#selected-templates-input").val(templates.join(","));
-
-    const $header = $(`
-      <ul class="list-group list-group-horizontal w-100">
-        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold" data-i18n="table.header.id">${t(
-              "table.header.id",
-              "ID",
-            )}</div>
-          </div>
-        </li>
-      </ul>`);
-    $modalBody.append($header);
-
-    templates.forEach((templateId) => {
-      const $row = $(
-        `<ul class="list-group list-group-horizontal w-100"></ul>`,
-      );
-
-      // ID item
-      const $idItem = $(`<li class="list-group-item" style="flex: 1 0;">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold">${templateId}</div>
-          </div>
-        </li>`);
-      $row.append($idItem);
-
-      $modalBody.append($row);
-    });
+    window.BWSelectedList.render(
+      "#selected-templates",
+      templates.map((templateId) => ({ id: templateId })),
+      {
+        entity: "templates",
+        idKey: "id",
+        hiddenMode: "csv",
+        columns: [
+          { key: "id", i18n: "table.header.id", label: "ID", bold: true },
+        ],
+      },
+    );
 
     // Use plural/singular i18n key for alert
     const alertTextKey =
@@ -231,11 +211,10 @@ $(document).ready(function () {
     },
   ];
 
-  // Modal cleanup
-  $("#modal-delete-templates").on("hidden.bs.modal", function () {
-    $("#selected-templates").empty();
-    $("#selected-templates-input").val("");
-  });
+  // Modal cleanup: js/components/selected-list.js clears any
+  // [data-selected-host] (the #selected-templates macro output, including its
+  // hidden input) on every "hidden.bs.modal" globally, so no page-specific
+  // handler is needed here.
 
   // Function to get selected template ids
   const getSelectedTemplates = () => {

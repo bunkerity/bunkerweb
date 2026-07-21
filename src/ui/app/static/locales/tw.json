@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "檢視所有 {{count}} 設定"
+  },
+  "templates": {
+    "subtitle": "可重複使用的服務設定範本 — 包含設定、步驟和自訂設定，然後建立、複製或刪除。"
   }
 }

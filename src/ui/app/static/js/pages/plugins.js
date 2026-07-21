@@ -13,68 +13,50 @@ $(document).ready(function () {
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
 
+  // Columns/rows for the #selected-plugins-delete recap list --
+  // components/selected-list.html host populated via BWSelectedList (see
+  // static/js/components/selected-list.js). Text-only, same contract as
+  // configs.js/services.js/templates.js's own buildXRows helpers.
+  const pluginsListColumns = [
+    {
+      key: "name",
+      i18n: "table.header.name",
+      label: t("table.header.name", "Name"),
+      bold: true,
+    },
+    {
+      key: "version",
+      i18n: "table.header.version",
+      label: t("table.header.version", "Version"),
+    },
+    {
+      key: "type",
+      i18n: "table.header.type",
+      label: t("table.header.type", "Type"),
+    },
+  ];
+
+  const buildPluginsRows = (plugins) =>
+    plugins.map((plugin) => ({
+      id: plugin,
+      name: $(`#name-${plugin}`).text().trim(),
+      version: $(`#version-${plugin}`).text().trim(),
+      type: $(`#type-${plugin}`).text().trim(),
+    }));
+
   const setupDeletionModal = (plugins) => {
     const delete_modal = $("#modal-delete-plugins");
-    const list = $(
-      `<ul class="list-group list-group-horizontal w-100">
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="ms-2 me-auto">
-          <div class="fw-bold" data-i18n="table.header.name">${t(
-            "table.header.name",
-            "Name",
-          )}</div>
-        </div>
-      </li>
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="fw-bold" data-i18n="table.header.version">${t(
-          "table.header.version",
-          "Version",
-        )}</div>
-      </li>
-      <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
-        <div class="fw-bold" data-i18n="table.header.type">${t(
-          "table.header.type",
-          "Type",
-        )}</div>
-      </li>
-      </ul>`,
+    BWSelectedList.render(
+      "#selected-plugins-delete",
+      buildPluginsRows(plugins),
+      {
+        entity: "plugins",
+        hiddenMode: "csv",
+        columns: pluginsListColumns,
+      },
     );
-    $("#selected-plugins-delete").append(list);
 
-    plugins.forEach((plugin) => {
-      const list = $(
-        `<ul class="list-group list-group-horizontal w-100"></ul>`,
-      );
-
-      // Create the list item using template literals
-      const listItem = $(`<li class="list-group-item" style="flex: 1 1 0;">
-  <div class="ms-2 me-auto">
-    ${$(`#name-${plugin}`).html()}
-  </div>
-</li>`);
-      list.append(listItem);
-
-      // Clone the version element and append it to the list item
-      const versionClone = $(`#version-${plugin}`).clone();
-      const versionListItem = $(
-        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
-      );
-      versionListItem.append(versionClone.removeClass("highlight"));
-      list.append(versionListItem);
-
-      // Clone the type element and append it to the list item
-      const typeClone = $(`#type-${plugin}`).clone();
-      const typeListItem = $(
-        `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
-      );
-      typeListItem.append(typeClone.removeClass("highlight"));
-      list.append(typeListItem);
-      typeClone.find('[data-bs-toggle="tooltip"]').tooltip();
-
-      $("#selected-plugins-delete").append(list);
-    });
-
-    const modal = new bootstrap.Modal(delete_modal);
+    const modal = new bootstrap.Modal(delete_modal[0]);
     delete_modal
       .find(".alert")
       .text(
@@ -88,8 +70,6 @@ $(document).ready(function () {
         ),
       );
     modal.show();
-
-    $("#selected-plugins-input-delete").val(plugins.join(","));
   };
 
   // Function to validate plugin files
@@ -304,10 +284,10 @@ $(document).ready(function () {
     },
   ];
 
-  $("#modal-delete-plugins").on("hidden.bs.modal", function () {
-    $("#selected-plugins-delete").empty();
-    $("#selected-plugins-input-delete").val("");
-  });
+  // The visible recap list (#selected-plugins-delete) is a
+  // components/selected-list.html host -- static/js/components/selected-list.js
+  // clears it back to its empty state (and resets its own hidden input) on
+  // "hidden.bs.modal" itself, so no page-specific reset is needed here.
 
   const getSelectedPlugins = () => {
     const plugins = [];
@@ -318,7 +298,7 @@ $(document).ready(function () {
       .nodes()
       .to$()
       .each(function () {
-        const plugin = $(this).find("td:eq(2)").data("id");
+        const plugin = $(this).find("td:eq(3)").data("id");
         if (plugin) {
           plugins.push(plugin);
         }
@@ -569,6 +549,13 @@ $(document).ready(function () {
   // Open file dialog on click
   dragArea.on("click", function () {
     fileInput.click();
+  });
+
+  dragArea.on("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      fileInput.click();
+    }
   });
 
   // Handle drag over

@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "Ver todas as {{count}} configurações"
+  },
+  "templates": {
+    "subtitle": "Modelos de configuração reutilizáveis para os seus serviços — agrupe as configurações, os passos e as configurações personalizadas, e depois crie, clone ou elimine-os."
   }
 }

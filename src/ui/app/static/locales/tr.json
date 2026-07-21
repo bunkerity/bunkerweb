@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "Tüm {{count}} ayarları görüntüle"
+  },
+  "templates": {
+    "subtitle": "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin."
   }
 }

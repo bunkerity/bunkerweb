@@ -1971,5 +1971,8 @@
   },
   "input_list": {
     "view_all_settings": "Tingnan ang lahat ng {{count}} setting"
+  },
+  "templates": {
+    "subtitle": "Mga reusable na template ng configuration para sa iyong mga serbisyo — i-bundle ang mga setting, hakbang, at custom na configuration, pagkatapos ay lumikha, kopyahin, o tanggalin ang mga ito."
   }
 }

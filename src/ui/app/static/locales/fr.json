@@ -1973,5 +1973,8 @@
   },
   "input_list": {
     "view_all_settings": "Afficher tous les {{count}} paramètres"
+  },
+  "templates": {
+    "subtitle": "Modèles de configuration réutilisables pour vos services : regrouper les paramètres, les étapes et les configurations personnalisées, puis les créer, les cloner ou les supprimer."
   }
 }
