@@ -2,12 +2,12 @@ bcrypt==5.0.0
 https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
 cryptography==49.0.0
 email-validator==2.3.0
-fastapi==0.139.0
+fastapi==0.139.2
 gunicorn[gthread,http2]==26.0.0
 pydantic==2.13.4
 pydantic_settings==2.14.2
 python-multipart==0.0.32
 PyYAML==6.0.3
-regex==2026.7.10
+regex==2026.7.19
 slowapi==0.1.10
 uvicorn[standard]==0.51.0

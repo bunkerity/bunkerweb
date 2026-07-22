@@ -1,5 +1,5 @@
 importlib-metadata==9.0.0
 pip==26.1.2
-pip-tools==7.5.3
+pip-tools==7.6.0
 setuptools<81
 wheel==0.47.0
