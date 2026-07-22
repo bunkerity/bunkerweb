@@ -1868,7 +1868,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.13-rc1
+        image: bunkerity/bunkerweb:1.6.14-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1885,7 +1885,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -3819,18 +3819,18 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 
     Restringir los métodos HTTP solo a los requeridos por su aplicación es una medida de seguridad fundamental que se adhiere al principio de privilegio mínimo. Al definir explícitamente los métodos HTTP aceptables, puede minimizar el riesgo de explotación a través de métodos no utilizados o peligrosos.
 
-    Esta característica se configura utilizando el ajuste `ALLOWED_METHODS`, donde los métodos se enumeran y se separan por un `|` (predeterminado: `GET|POST|HEAD`). Si un cliente intenta utilizar un método no listado, el servidor responderá con un estado **405 - Método No Permitido**.
+    Esta característica se configura utilizando el ajuste `ALLOWED_METHODS`, donde los métodos se enumeran y se separan por un `|` (predeterminado: `GET|POST|HEAD|QUERY`). Si un cliente intenta utilizar un método no listado, el servidor responderá con un estado **405 - Método No Permitido**.
 
-    Para la mayoría de los sitios web, el predeterminado `GET|POST|HEAD` es suficiente. Si su aplicación utiliza API RESTful, es posible que deba incluir métodos como `PUT` y `DELETE`. Los métodos personalizados en mayúsculas también pueden contener guiones bajos y guiones para la compatibilidad con protocolos no estándar (p. ej., `CCM_POST`, `M-SEARCH`).
+    Para la mayoría de los sitios web, el predeterminado `GET|POST|HEAD|QUERY` es suficiente. Si su aplicación utiliza API RESTful, es posible que deba incluir métodos como `PUT` y `DELETE`. Los métodos personalizados en mayúsculas también pueden contener guiones bajos y guiones para la compatibilidad con protocolos no estándar (p. ej., `CCM_POST`, `M-SEARCH`).
 
     !!! success "Beneficios de Seguridad"
         -   Previene la explotación de métodos HTTP no utilizados o innecesarios
         -   Reduce la superficie de ataque al deshabilitar métodos potencialmente dañinos
         -   Bloquea las técnicas de enumeración de métodos HTTP utilizadas por los atacantes
 
-| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                       |
-| ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. Los métodos personalizados en mayúsculas pueden contener guiones bajos y guiones. |
+| Ajuste            | Valor por defecto        | Contexto  | Múltiple | Descripción                                                                                                                                                                       |
+| ----------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. Los métodos personalizados en mayúsculas pueden contener guiones bajos y guiones. |
 
     !!! abstract "CORS y Solicitudes de Pre-vuelo"
         Si su aplicación admite [Intercambio de Recursos de Origen Cruzado (CORS)](#cors), debe incluir el método `OPTIONS` en el ajuste `ALLOWED_METHODS` para manejar las solicitudes de pre-vuelo. Esto garantiza la funcionalidad adecuada para los navegadores que realizan solicitudes de origen cruzado.
@@ -4305,29 +4305,33 @@ BunkerWeb evalúa cada handshake TLS con base en el paquete de CA y en la polít
 Siga estos pasos para desplegar Mutual TLS con confianza:
 
 1. **Active la función:** Establezca `USE_MTLS` en `yes` en los sitios que necesitan autenticación por certificado.
-2. **Aporte el paquete de CA:** Guarde los emisores de confianza en un archivo PEM y apunte `MTLS_CA_CERTIFICATE` a su ruta absoluta.
+2. **Aporte el paquete de CA:** Configure `MTLS_CA_CERTIFICATE` con la ruta a un archivo PEM legible por el Scheduler, o proporcione el paquete directamente como datos base64/PEM con `MTLS_CA_CERTIFICATE_DATA`. El Scheduler valida, almacena en caché y distribuye el paquete a cada instancia, por lo que no es necesario montarlo en cada una.
 3. **Elija el modo de verificación:** Use `on` para exigir certificados, `optional` para permitir una ruta alternativa u `optional_no_ca` de manera temporal para diagnosticar.
 4. **Ajuste la profundidad de la cadena:** Modifique `MTLS_VERIFY_DEPTH` si su PKI incorpora varios intermedios.
 5. **Reenvíe resultados (opcional):** Mantenga `MTLS_FORWARD_CLIENT_HEADERS` en `yes` si los servicios posteriores necesitan inspeccionar el certificado.
-6. **Mantenga la revocación:** Si publica una CRL, configure `MTLS_CRL` para que BunkerWeb rechace certificados revocados.
+6. **Mantenga la revocación:** Si publica una CRL, configure `MTLS_CRL` (o `MTLS_CRL_DATA`) para que BunkerWeb rechace los certificados revocados.
 
 ### Parámetros de configuración
 
-| Parámetro                     | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                        |
-| ----------------------------- | -------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`                 | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                                                                                                                                              |
-| `MTLS_CA_CERTIFICATE`         |                      | multisite | no       | **Paquete de CA de clientes:** ruta absoluta al paquete de CA de confianza (PEM). Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`; debe ser legible.                                                                                                                  |
-| `MTLS_VERIFY_CLIENT`          | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`).                                                                                                                          |
-| `MTLS_URL`                    |                      | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio. |
-| `MTLS_VERIFY_DEPTH`           | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                                                                                                                                                        |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`                | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez).                                                                                                                       |
-| `MTLS_CRL`                    |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM. Solo se aplica cuando el paquete de CA se carga correctamente.                                                                                                             |
+| Parámetro                      | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                       |
+| ------------------------------ | -------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`                 | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                                                                                                                                                             |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`               | multisite | no       | **Prioridad del paquete de CA de clientes:** origen del paquete de CA de clientes: `file` (ruta) o `data` (base64/PEM).                                                                                                                                                                           |
+| `MTLS_CA_CERTIFICATE`          |                      | multisite | no       | **Ruta del paquete de CA de clientes:** ruta al paquete de CA de confianza (PEM), legible por el Scheduler. Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`.                                                                                                                         |
+| `MTLS_CA_CERTIFICATE_DATA`     |                      | multisite | no       | **Datos del paquete de CA de clientes:** paquete de CA de confianza aportado directamente como base64 o PEM (p. ej. mediante la interfaz web).                                                                                                                                                    |
+| `MTLS_VERIFY_CLIENT`           | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`).                                                                                                                                         |
+| `MTLS_URL`                     |                      | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio.                |
+| `MTLS_VERIFY_DEPTH`            | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                                                                                                                                                                       |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`                | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez).                                                                                                                                      |
+| `MTLS_CRL_PRIORITY`            | `file`               | multisite | no       | **Prioridad de la CRL de clientes:** origen de la CRL: `file` (ruta) o `data` (base64/PEM).                                                                                                                                                                                                       |
+| `MTLS_CRL`                     |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM, legible por el Scheduler. Solo se aplica cuando el paquete de CA se carga correctamente. NGINX requiere que el archivo de CRL contenga una CRL para cada CA de la cadena de verificación. |
+| `MTLS_CRL_DATA`                |                      | multisite | no       | **Datos de la CRL de clientes:** lista de revocación aportada directamente como base64 o PEM.                                                                                                                                                                                                     |
 
-!!! tip "Mantén los certificados actualizados"
-    Guarde los paquetes de CA y las listas de revocación en un volumen montado que el Scheduler pueda leer, de modo que cada reinicio recupere los últimos anclajes de confianza.
+!!! tip "Configúralo una vez, distribuido en todas partes"
+    Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
 
 !!! warning "Paquete de CA obligatorio en modos estrictos"
-    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el archivo de CA debe existir en tiempo de ejecución. Si falta, BunkerWeb omite las directivas de mTLS para evitar que el servicio arranque con una ruta no válida. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación.
+    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el Scheduler debe poder validar y almacenar en caché un paquete de CA de clientes. Si no hay ninguno disponible, BunkerWeb omite las directivas de mTLS en cada instancia para que el servicio no se ejecute con una referencia de certificado inválida o inexistente. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación. Tras un reinicio del Scheduler con un `/var/cache/bunkerweb` no persistente, el mTLS permanece deshabilitado hasta que se complete la primera ejecución del job y redistribuya el paquete de CA; utilice por tanto un volumen de caché persistente cuando se requiera una postura de aplicación estricta.
 
 !!! info "Certificado confiable y verificación"
     BunkerWeb reutiliza el mismo paquete de CA tanto para comprobar clientes como para construir la cadena de confianza, manteniendo coherentes las verificaciones de revocación y el handshake.

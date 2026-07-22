@@ -1,9 +1,19 @@
 # Changelog
 
-## v1.6.13~rc2 - 2026/07/??
+## v1.6.14~rc1 - 2026/07/??
+
+- [BUGFIX] `mtls`: the Scheduler now validates the client CA bundle and CRL, caches them, and distributes them to every instance instead of shipping the raw configured path straight into the NGINX configuration, so a Scheduler-only mount works as documented instead of causing "cannot load certificate" errors on instances that cannot read that path. Adds `MTLS_CA_CERTIFICATE_DATA` and `MTLS_CRL_DATA` to supply either file inline as base64 or plaintext PEM.
+- [BUGFIX] `ui`: fix plugin hook loading and chaining, and purge unavailable PRO plugin pages after license loss.
+- [BUGFIX] `letsencrypt`: quarantine broken renewal lineages and persist the cleaned cache before Certbot runs. (Fixes #3733)
+- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683, #3685)
+- [FEATURE] `metrics`: buffer reports during Redis OOM events, make list and facet updates atomic, and add the `METRICS_REDIS_TTL` setting.
+- [FEATURE] `headers`: deny Chrome built-in AI APIs in the default `PERMISSIONS_POLICY`.
+- [FEATURE] `misc`: allow the `QUERY` HTTP method by default in `ALLOWED_METHODS` and bundled service templates.
+
+## v1.6.13 - 2026/07/16
 
 - [SECURITY] `nginx`: update nginx to 1.30.4 (except for Fedora, which stays on 1.30.3 until it is available in its repositories) to fix CVE-2026-42533, a heap buffer overflow in the `map` directive's regex matching; CVE-2026-60005, uninitialized memory access in the `slice` directive/background cache update that can disclose worker-process memory or crash a worker; and CVE-2026-56434, a use-after-free in `ngx_http_ssi_filter_module`.
-- [SECURITY] `instances`: validate registered destinations as IPv4/IPv6 literals or DNS hostnames at every input and outbound-client boundary, reject URL userinfo such as `A@B`, and allow only HTTP(S) endpoint schemes. (Refs GHSA-rwch-jhxx-cx5f) Thanks to @adilkhan7546 for the report.
+- [SECURITY] `instances`: validate registered destinations as IPv4/IPv6 literals or IDNA-normalized DNS hostnames at every input and outbound-client boundary; preserve trailing-dot FQDNs; reject URL userinfo, paths, queries, fragments, malformed ports, and non-HTTP(S) schemes with a validation error instead of an internal server error. (Refs GHSA-rwch-jhxx-cx5f) Thanks to @adilkhan7546 for the report.
 - [SECURITY] `ui`: enforce TOTP validation using the exact verification endpoint instead of a `/totp` path substring, preventing password-only sessions from reaching `/profile/totp-refresh` and rotating recovery codes before completing the second factor. (Fixes GHSA-j63f-j59c-q626) Thanks to @de3erve-hunter for the report.
 - [BUGFIX] `ui`, `api`: delete custom configurations by exact key so removing the last UI/API-managed config no longer requires a method-wide replacement that can race with concurrent updates.
 - [BUGFIX] `authbasic`: fix `access()` erroring on every successful basic-auth login — it wrote to `$auth_user`, an nginx variable never declared anywhere (its `confs/` templates were removed in an earlier refactor), and to `$remote_user`, a core nginx variable with no set handler (`variable "remote_user" not changeable`) that always self-populates from the client's `Authorization` header. Both dead writes are removed; `$remote_user` still reflects the authenticated user with no write needed.

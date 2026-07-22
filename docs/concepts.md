@@ -105,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) directory of the repository.
 
 ## Custom configurations {#custom-configurations}
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) directory of the repository.
 
 ## Database
 
@@ -228,6 +228,10 @@ BunkerWeb leverages the power of templates to simplify the configuration process
     - **high**: An advanced template that focuses on robust security measures and comprehensive protection.
 
 - **Custom templates**: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.
+
+!!! tip "Ready-to-use community templates"
+
+    Browse the [BunkerWeb templates repository](https://github.com/bunkerity/bunkerweb-templates#installing-templates) and follow its installation guide. The web UI method is recommended for most users; a plugin layout is also documented for managed deployments. Once installed, select the template through easy mode or with the `USE_TEMPLATE` setting.
 
 With the web User Interface, templates are available through **easy mode** when you add or edit a service:
 

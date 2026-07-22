@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 from io import BytesIO
 from os import sep
-from os.path import join
+from os.path import join, realpath
 from sys import path as sys_path
 from tarfile import open as tar_open
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
@@ -76,8 +76,9 @@ class ApiCaller:
 
     def send_files(self, path: str, url: str, timeout=(5, 10), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         with BytesIO() as tgz:
-            with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
-                tf.add(path, arcname=".")
+            with tar_open(mode="w:gz", fileobj=tgz, compresslevel=3) as tf:
+                # top-level path may itself be a symlink (resolve it); nested symlinks must stay symlinks (no dereference)
+                tf.add(realpath(path), arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
             ret = self.send_to_apis("POST", url, files=files, timeout=timeout, response=response)

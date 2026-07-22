@@ -2,7 +2,7 @@
   "id": "mtls",
   "name": "Mutual TLS",
   "description": "Require client certificates using mutual TLS (mTLS).",
-  "version": "1.0",
+  "version": "1.1",
   "stream": "partial",
   "settings": {
     "USE_MTLS": {
@@ -14,14 +14,34 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "MTLS_CA_CERTIFICATE_PRIORITY": {
+      "context": "multisite",
+      "default": "file",
+      "help": "Source of the client CA bundle: file path or base64/PEM data (file or data).",
+      "id": "mtls-ca-certificate-priority",
+      "label": "Client CA bundle priority",
+      "regex": "^(file|data)$",
+      "type": "select",
+      "select": ["file", "data"]
+    },
     "MTLS_CA_CERTIFICATE": {
       "context": "multisite",
       "default": "",
-      "help": "Absolute path to the trusted client CA bundle (PEM). Required when MTLS_VERIFY_CLIENT is set to on or optional.",
+      "help": "Path to the trusted client CA bundle (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). Required when MTLS_VERIFY_CLIENT is set to on or optional.",
       "id": "mtls-ca-certificate",
       "label": "Client CA bundle",
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
+    },
+    "MTLS_CA_CERTIFICATE_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Client CA bundle as base64 or plaintext PEM (priority 'data').",
+      "id": "mtls-ca-certificate-data",
+      "label": "Client CA bundle data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crt,.cer,.txt"
     },
     "MTLS_VERIFY_CLIENT": {
       "context": "multisite",
@@ -64,11 +84,40 @@
     "MTLS_CRL": {
       "context": "multisite",
       "default": "",
-      "help": "Optional absolute path to a certificate revocation list (PEM). Leave empty to skip CRL checks.",
+      "help": "Optional path to a certificate revocation list (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). Leave empty to skip CRL checks.",
       "id": "mtls-crl",
       "label": "Client CRL path",
       "regex": "^$|^(/[\\w. \\-]+)+/?$",
       "type": "text"
+    },
+    "MTLS_CRL_PRIORITY": {
+      "context": "multisite",
+      "default": "file",
+      "help": "Source of the CRL: file path or base64/PEM data (file or data).",
+      "id": "mtls-crl-priority",
+      "label": "Client CRL priority",
+      "regex": "^(file|data)$",
+      "type": "select",
+      "select": ["file", "data"]
+    },
+    "MTLS_CRL_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "CRL as base64 or plaintext PEM (priority 'data').",
+      "id": "mtls-crl-data",
+      "label": "Client CRL data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crl,.txt"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "client-cert",
+      "file": "client-cert.py",
+      "every": "day",
+      "reload": true,
+      "async": true
+    }
+  ]
 }

@@ -16,7 +16,7 @@ from openpyxl.styles import Font, PatternFill
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
 from app.utils import LOGGER, csv_safe, csv_writer
 
-from app.routes.utils import cors_required, parse_search_panes
+from app.routes.utils import cors_required, get_default_ban_time, parse_search_panes
 
 reports = Blueprint("reports", __name__)
 REPORTS_FILTERS_CACHE_TTL_SECONDS = 5.0
@@ -109,20 +109,6 @@ def reports_fetch():
         db_config = BW_CONFIG.get_config(methods=False, with_drafts=True) if BW_CONFIG else {}
     except Exception:
         db_config = {}
-
-    def get_default_ban_time(server_name: str) -> int:
-        try:
-            if not db_config:
-                return 86400
-            # Prefer service-specific value when available
-            if server_name and server_name not in ("_", ""):
-                service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
-                if service_key in db_config:
-                    return int(db_config[service_key])
-            # Fallback to global default from config, or plugin default (24h)
-            return int(db_config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
-        except Exception:
-            return 86400
 
     # Extract DataTables parameters
     draw = int(request.form.get("draw", 1))
@@ -239,7 +225,7 @@ def reports_fetch():
                 "has_data": has_data,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
                 # default ban duration in seconds for quick-ban action
-                "ban_default_exp": get_default_ban_time(server_name),
+                "ban_default_exp": get_default_ban_time(db_config, server_name),
                 # Placeholder for UI actions column
                 "actions": "",
             }

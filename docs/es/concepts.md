@@ -105,7 +105,7 @@ Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) del repositorio.
+    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) del repositorio.
 
 ## Configuraciones personalizadas {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestión de configuraciones personalizadas desde la interfaz de usuario web s
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) del repositorio.
+    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) del repositorio.
 
 ## Base de datos
 
@@ -228,6 +228,10 @@ BunkerWeb aprovecha el poder de las plantillas para simplificar el proceso de co
     - **high**: Una plantilla avanzada que se centra en medidas de seguridad robustas y protección integral.
 
 - **Plantillas personalizadas**: Además de las plantillas predefinidas, BunkerWeb permite a los usuarios crear plantillas personalizadas adaptadas a sus requisitos específicos. Las plantillas personalizadas permiten un ajuste fino de las configuraciones y configuraciones personalizadas, asegurando que BunkerWeb se alinee perfectamente con las necesidades del usuario.
+
+!!! tip "Plantillas comunitarias listas para usar"
+
+    Consulta el [repositorio de plantillas de BunkerWeb](https://github.com/bunkerity/bunkerweb-templates#installing-templates) y sigue su guía de instalación. El método de la interfaz web se recomienda para la mayoría de los usuarios; también se documenta una estructura de plugin para despliegues gestionados. Tras la instalación, selecciona la plantilla mediante el modo fácil o con la configuración `USE_TEMPLATE`.
 
 Con la interfaz de usuario web, las plantillas están disponibles a través del **modo fácil** cuando agregas o editas un servicio:
 

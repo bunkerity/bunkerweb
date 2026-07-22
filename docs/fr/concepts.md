@@ -105,7 +105,7 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) du dépôt.
+    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) du dépôt.
 
 ## Configurations personnalisées {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestion des configurations personnalisées à partir de l'interface utilisate
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) du dépôt.
+    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) du dépôt.
 
 ## Base de données
 
@@ -228,6 +228,10 @@ BunkerWeb exploite la puissance des modèles pour simplifier le processus de con
     - **élevé**: modèle avancé qui met l'accent sur des mesures de sécurité robustes et une protection complète.
 
 - **Modèles personnalisés**: En plus des modèles prédéfinis, BunkerWeb permet aux utilisateurs de créer des modèles personnalisés adaptés à leurs besoins spécifiques. Les modèles personnalisés permettent d'affiner les paramètres et les configurations personnalisées, garantissant que BunkerWeb s'aligne parfaitement sur les besoins de l'utilisateur.
+
+!!! tip "Modèles communautaires prêts à l'emploi"
+
+    Consultez le [dépôt de modèles BunkerWeb](https://github.com/bunkerity/bunkerweb-templates#installing-templates) et suivez son guide d'installation. La méthode via l'interface Web est recommandée pour la plupart des utilisateurs ; une arborescence de plugin est également documentée pour les déploiements gérés. Après l'installation, sélectionnez le modèle en mode facile ou avec le paramètre `USE_TEMPLATE`.
 
 Avec l'interface utilisateur Web, les modèles sont disponibles en **mode facile** lorsque vous ajoutez ou modifiez un service:
 

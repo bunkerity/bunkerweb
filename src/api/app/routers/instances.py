@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from typing import Optional, List, Tuple
-from urllib.parse import urlsplit
+from typing import Optional, List
 
-from common_utils import is_valid_host  # type: ignore
+from common_utils import parse_host  # type: ignore
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller, get_api_for_hostname
 from ..schemas import InstanceCreateRequest, InstancesDeleteRequest, InstanceUpdateRequest
@@ -84,14 +83,6 @@ def stop_one(hostname: str, api=Depends(get_api_for_hostname)) -> JSONResponse:
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 
-# -------------------- CRUD over BunkerWeb instances --------------------
-def _normalize_hostname_and_port(hostname: str, port: Optional[int]) -> Tuple[str, Optional[int]]:
-    if is_valid_host(hostname):
-        return hostname.lower(), port
-    parsed = urlsplit(hostname if "://" in hostname else f"//{hostname}")
-    return (parsed.hostname or "").lower(), parsed.port or port
-
-
 def _validate_port(port: Optional[int]) -> Optional[int]:
     """Validate a TCP port (1..65535). Returns the int or raises ValueError."""
     if port is None:
@@ -128,21 +119,19 @@ def create_instance(req: InstanceCreateRequest) -> JSONResponse:
     # Derive defaults from api_config when not provided
     name = req.name or "manual instance"
     method = req.method or "api"
-    parsed = urlsplit(req.hostname)
-    if "://" in req.hostname and parsed.scheme not in ("http", "https"):
-        return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid hostname: only HTTP(S) URLs are supported"})
-    hostname, port = _normalize_hostname_and_port(req.hostname, req.port)
-
-    if not is_valid_host(hostname):
-        return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid hostname: {hostname}"})
+    try:
+        scheme, hostname, provided_port = parse_host(req.hostname)
+    except ValueError as e:
+        return JSONResponse(status_code=422, content={"status": "error", "message": str(e)})
 
     server_name = req.server_name or api_config.internal_api_host_header
 
     # Determine scheme and ports
     # Infer HTTPS if scheme is https and listen_https not explicitly provided
-    inferred_https = parsed.scheme.lower() == "https"
+    inferred_https = scheme == "https"
     listen_https = bool(req.listen_https) if req.listen_https is not None else inferred_https
-    https_port: Optional[int] = req.https_port if req.https_port is not None else (parsed.port if inferred_https else None)
+    port = provided_port if provided_port is not None and not inferred_https else req.port
+    https_port: Optional[int] = provided_port if provided_port is not None and inferred_https else req.https_port
 
     # Validate provided ports or use defaults
     if port is not None:
