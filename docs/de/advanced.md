@@ -3261,39 +3261,9 @@ Sie können auch einen benutzerdefinierten S3-Bucket für die Sicherung angeben,
     docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save
     ```
 
-!!! note "Spezifikationen für MariaDB/MySQL"
+!!! note "MariaDB/MySQL-Client-Kompatibilität"
 
-    Falls Sie MariaDB/MySQL verwenden, kann beim Versuch, Ihre Datenbank zu sichern, der folgende Fehler auftreten:
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    Um dieses Problem zu lösen, können Sie den folgenden Befehl ausführen, um das Authentifizierungs-Plugin auf `mysql_native_password` zu ändern:
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur `docker-compose.yml`-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
+    Die Docker-Images von BunkerWeb enthalten die von MySQLs `caching_sha2_password` benötigten Authentifizierungs-Plugins von MariaDB Connector/C. Wenn der Client unter Linux meldet, dass `caching_sha2_password` nicht geladen werden konnte, installieren Sie die MariaDB Connector/C-Authentifizierungs-Plugins Ihrer Distribution oder einen kompatiblen MySQL-Client. Stellen Sie das Datenbankkonto nicht auf `mysql_native_password` um, da dieses Plugin in MySQL `v9` nicht verfügbar ist.
 
 #### Manuelle Wiederherstellung
 
@@ -3523,39 +3493,9 @@ Um eine Migrationsdatei manuell zu erstellen, führen Sie den folgenden Befehl a
 
 Dieser Befehl erstellt eine Sicherung Ihrer Datenbank und speichert sie im im Befehl angegebenen Sicherungsverzeichnis.
 
-!!! note "Spezifikationen für MariaDB/MySQL"
+!!! note "MariaDB/MySQL-Client-Kompatibilität"
 
-    Falls Sie MariaDB/MySQL verwenden, kann beim Versuch, Ihre Datenbank zu sichern, der folgende Fehler auftreten:
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    Um dieses Problem zu lösen, können Sie den folgenden Befehl ausführen, um das Authentifizierungs-Plugin auf `mysql_native_password` zu ändern:
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur `docker-compose.yml`-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
+    Die Docker-Images von BunkerWeb enthalten die von MySQLs `caching_sha2_password` benötigten Authentifizierungs-Plugins von MariaDB Connector/C. Wenn der Client unter Linux meldet, dass `caching_sha2_password` nicht geladen werden konnte, installieren Sie die MariaDB Connector/C-Authentifizierungs-Plugins Ihrer Distribution oder einen kompatiblen MySQL-Client. Stellen Sie das Datenbankkonto nicht auf `mysql_native_password` um, da dieses Plugin in MySQL `v9` nicht verfügbar ist.
 
 ### Eine Migration initialisieren
 
