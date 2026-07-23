@@ -14,10 +14,10 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
-from ..schemas import UpdateExternalPluginsRequest
+from ..schemas import PluginEnabledRequest, UpdateExternalPluginsRequest
 from ..utils import get_db
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, plugin_icon_content_type, read_local_plugin_icon, read_plugin_icon  # type: ignore
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 
@@ -25,6 +25,23 @@ _PLUGIN_ID_RX = re_compile(r"^[\w.-]{4,64}$")
 _RECOGNIZED_TYPES = {"all", "external", "ui", "pro"}
 
 TMP_UI_ROOT = Path(sep, "var", "tmp", "bunkerweb", "ui")
+# Core plugins ship their icon in-dir; the API container carries the core plugin tree here
+# (see src/api/Dockerfile `COPY src/common/core core`).
+CORE_PLUGINS_ROOT = Path(sep, "usr", "share", "bunkerweb", "core")
+
+
+def _icon_response_headers(name: str) -> Dict[str, str]:
+    """Response headers for a served plugin icon. The bytes are attacker-controlled for
+    external/pro plugins, so on top of ``<img src>``-only intended usage we neutralize direct
+    navigation: ``default-src 'none'; sandbox`` stops any script embedded in an SVG from
+    executing when the endpoint URL is opened in a browser tab (CSP response headers never
+    affect the page that embeds the image), ``nosniff`` blocks MIME confusion, and the filename
+    is quoted. There is no path-traversal surface — ``name`` is one of the fixed allowlist."""
+    return {
+        "Content-Disposition": f'inline; filename="{name}"',
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'none'; sandbox",
+    }
 
 
 def _safe_member_path(root: Path, member_name: str) -> Optional[Path]:
@@ -129,16 +146,17 @@ def update_external_plugins(payload: UpdateExternalPluginsRequest) -> JSONRespon
 
 
 @router.get("", dependencies=[Depends(guard)])
-def list_plugins(type: str = "all", with_data: bool = False) -> JSONResponse:  # noqa: A002
+def list_plugins(type: str = "all", with_data: bool = False, only_enabled: bool = False) -> JSONResponse:  # noqa: A002
     """List plugins of specified type.
 
     Args:
         type: Plugin type filter ("all", "external", "ui", "pro")
         with_data: Include plugin data/content
+        only_enabled: Exclude disabled external/ui/pro plugins (scheduler materialization)
     """
     if type not in _RECOGNIZED_TYPES:
         return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid type"})
-    plugins = get_db().get_plugins(_type=type, with_data=with_data)
+    plugins = get_db().get_plugins(_type=type, with_data=with_data, only_enabled=only_enabled)
     if with_data:
         for plugin in plugins:
             if isinstance(plugin.get("data"), bytes):
@@ -161,6 +179,30 @@ def delete_plugin(plugin_id: str) -> JSONResponse:
     return JSONResponse(status_code=200, content={"status": "success"})
 
 
+@router.patch("/{plugin_id}", dependencies=[Depends(guard)])
+def set_plugin_enabled(plugin_id: str, payload: PluginEnabledRequest) -> JSONResponse:
+    """Enable or disable an external/ui/pro plugin.
+
+    Core plugins are structurally required (baked into the image, listed in order.json)
+    and cannot be toggled — the DB layer refuses them and the endpoint maps that refusal
+    to 422. A missing plugin maps to 404.
+
+    Args:
+        plugin_id: ID of the plugin to toggle
+        payload: ``{"enabled": bool}``
+    """
+    if not _PLUGIN_ID_RX.match(plugin_id):
+        return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid plugin id"})
+    err = get_db().set_plugin_enabled(plugin_id, payload.enabled)
+    if err:
+        if "not found" in err.lower():
+            return JSONResponse(status_code=404, content={"status": "error", "message": err})
+        if "core plugin" in err.lower():
+            return JSONResponse(status_code=422, content={"status": "error", "message": err})
+        return JSONResponse(status_code=500, content={"status": "error", "message": err})
+    return JSONResponse(status_code=200, content={"status": "success"})
+
+
 @router.get("/{plugin_id}/page", dependencies=[Depends(guard)], response_model=None)
 def get_plugin_page(plugin_id: str):
     """Get plugin UI page data (tar.gz blob).
@@ -176,6 +218,53 @@ def get_plugin_page(plugin_id: str):
     from fastapi.responses import Response
 
     return Response(content=page, media_type="application/gzip")
+
+
+@router.get("/{plugin_id}/icon", dependencies=[Depends(guard)], response_model=None)
+def get_plugin_icon(plugin_id: str):
+    """Serve a plugin's shipped icon file (allowlisted root-level icon.svg/png or logo.svg/png).
+
+    Only plugins whose stored icon is an ``@file/<name>`` marker have a servable file; anything
+    else (a ``*.svg`` static-asset name, a boxicon class, or absent) returns 404. Two source
+    branches, chosen by the plugin ``type`` the DB returns:
+
+    - **core** — the icon ships inside the plugin's on-disk directory (no data blob), so the file
+      is read straight from ``CORE_PLUGINS_ROOT/<plugin_id>/<name>`` via ``read_local_plugin_icon``;
+    - **external/ui/pro** — the icon lives in the plugin archive, so it is extracted from the
+      stored ``data`` blob via ``read_plugin_icon``.
+
+    Every response carries the three neutralizing headers from ``_icon_response_headers`` —
+    ``Content-Security-Policy: default-src 'none'; sandbox`` (kills any script in an SVG opened by
+    direct navigation), ``Content-Disposition: inline; filename="<name>"`` (quoted), and
+    ``X-Content-Type-Options: nosniff`` — with the correct image Content-Type. The fixed 4-name
+    allowlist (root only) means there is no path-traversal surface. Files over 512KB return 413.
+
+    Args:
+        plugin_id: ID of the plugin
+    """
+    if not _PLUGIN_ID_RX.match(plugin_id):
+        return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid plugin id"})
+    row = get_db().get_plugin_icon(plugin_id)
+    if row is None:
+        return JSONResponse(status_code=404, content={"status": "error", "message": "Plugin not found"})
+    plugin_type, icon, data = row
+    if not (isinstance(icon, str) and icon.startswith("@file/")):
+        return JSONResponse(status_code=404, content={"status": "error", "message": "Plugin has no shipped icon"})
+    name = icon[len("@file/") :]  # noqa: E203
+    if plugin_type == "core":
+        result = read_local_plugin_icon(CORE_PLUGINS_ROOT / plugin_id, name)
+    elif isinstance(data, (bytes, bytearray)):
+        result = read_plugin_icon(bytes(data), name)
+    else:
+        result = None
+    if result is None:
+        return JSONResponse(status_code=404, content={"status": "error", "message": "Plugin icon not found"})
+    payload, oversized = result
+    if oversized:
+        return JSONResponse(status_code=413, content={"status": "error", "message": "Plugin icon exceeds the 512KB limit"})
+    from fastapi.responses import Response
+
+    return Response(content=payload, media_type=plugin_icon_content_type(name), headers=_icon_response_headers(name))
 
 
 @router.post("/upload", dependencies=[Depends(guard)])

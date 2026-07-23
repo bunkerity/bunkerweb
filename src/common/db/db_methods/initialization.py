@@ -8,7 +8,7 @@ from typing import List, Tuple
 
 from model import Base, Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Multiselects, Plugin_pages, Plugins, ResourceGroup_entries, ResourceGroups, Selects, Services, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, resolve_plugin_icon  # type: ignore
 from resource_validation import validate_resource_value  # type: ignore
 
 from sqlalchemy import delete, select, update
@@ -49,6 +49,11 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             desired = self._it_build_desired_plugins(default_plugins, old["plugins"])
             desired.update(self._it_build_desired_templates(default_plugins, desired["saved_settings"]))
             desired.update(self._it_build_desired_resource_groups(default_plugins))
+
+            # Data-loss guard: hide disabled plugins that are absent from the FS-derived desired
+            # set (and every child row they own) from the diff, so they are neither updated nor
+            # deleted — frozen exactly as stored until the plugin is re-enabled.
+            self._it_freeze_disabled_plugins(old, desired)
 
             # Compute differences between old and desired data
             self._it_diff_plugins(old, desired, to_put, to_update, to_delete)
@@ -143,6 +148,8 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                     Plugins.checksum,
                     Plugins.config_changed,
                     Plugins.last_config_change,
+                    Plugins.enabled,
+                    Plugins.icon,
                 )
             ).all(),
             # bw_settings: full column set (small table).
@@ -322,6 +329,7 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                         "method": "manual",
                         "data": None,
                         "checksum": None,
+                        "icon": None,
                     }
                     settings = plugin
                     jobs = []
@@ -335,16 +343,37 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                     if not isinstance(commands, dict):
                         commands = {}
 
+                    plugin_type = plugin.get("type", "core")
+                    # On-disk plugin directory (same derivation the pages/templates/resource-group
+                    # scans below use). Passed to resolve_plugin_icon so core plugins — which carry
+                    # no data blob — auto-detect their icon from this dir (<dir>/icon.svg etc.),
+                    # symmetric with the archive-blob detection used for external/pro. The plugin.json
+                    # ``icon`` field is an optional override (honored only when the named file really
+                    # exists in-dir); otherwise it is a static-asset name / boxicon class stored
+                    # verbatim. Deterministic per dir contents so a reboot recomputes the same marker
+                    # (icon is diffed in attrs_to_check) -> no spurious update. External/pro have a
+                    # data blob, so dir_path is ignored for them (the blob detection wins).
+                    plugin_dir = (
+                        Path("/", "usr", "share", "bunkerweb", "core", plugin["id"])
+                        if plugin_type == "core"
+                        else (
+                            Path("/", "etc", "bunkerweb", "plugins", plugin["id"])
+                            if plugin_type == "external"
+                            else Path("/", "etc", "bunkerweb", "pro", "plugins", plugin["id"])
+                        )
+                    )
+
                     base_plugin = {
                         "id": plugin["id"],
                         "name": plugin["name"],
                         "description": plugin["description"],
                         "version": plugin["version"],
                         "stream": plugin["stream"],
-                        "type": plugin.get("type", "core"),
+                        "type": plugin_type,
                         "method": plugin.get("method", "manual"),
                         "data": plugin.get("data"),
                         "checksum": plugin.get("checksum"),
+                        "icon": resolve_plugin_icon(plugin.get("data"), plugin.get("icon"), dir_path=plugin_dir),
                     }
 
                 # Skip unsupported plugin
@@ -671,6 +700,45 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
 
         return {"resource_groups": desired_groups, "resource_group_entries": desired_entries}
 
+    def _it_freeze_disabled_plugins(self, old: dict, desired: dict) -> None:
+        """Remove disabled-and-absent plugins (and all their child rows) from ``old`` in place.
+
+        A plugin whose ``enabled`` flag is False has its filesystem directory removed by the
+        scheduler's materialization skip, so it is legitimately absent from the desired
+        (FS-derived) set. Without this, every ``_it_diff_*`` pass would see its rows in
+        ``old - desired`` and cascade-delete them (row + settings + selects + jobs + pages +
+        cli + templates + resource groups), losing the user's stored configuration.
+
+        Dropping those rows from ``old`` makes the diff blind to them: not in ``old - desired``
+        (no delete) and not in ``old & desired`` (no update). Plugins that are disabled but
+        still present on disk stay in ``old`` and follow the normal diff (safe — the ``enabled``
+        column is never part of a diff update, so a disabled plugin is never silently re-enabled).
+        """
+        old_plugins = old["plugins"]
+        desired_plugins = desired["plugins"]
+        frozen = {pid for pid, row in old_plugins.items() if not getattr(row, "enabled", True) and pid not in desired_plugins}
+        if not frozen:
+            return
+
+        frozen_setting_ids = {key[1] for key in old["settings"] if key[0] in frozen}
+        frozen_template_ids = {key[1] for key in old["templates"] if key[0] in frozen}
+        frozen_group_ids = {key[1] for key in old["resource_groups"] if key[0] in frozen}
+
+        old["plugins"] = {k: v for k, v in old_plugins.items() if k not in frozen}
+        old["settings"] = {k: v for k, v in old["settings"].items() if k[0] not in frozen}
+        old["jobs"] = {k: v for k, v in old["jobs"].items() if k[0] not in frozen}
+        old["plugin_pages"] = {k: v for k, v in old["plugin_pages"].items() if k not in frozen}
+        old["cli_commands"] = {k: v for k, v in old["cli_commands"].items() if k[0] not in frozen}
+        old["templates"] = {k: v for k, v in old["templates"].items() if k[0] not in frozen}
+        old["resource_groups"] = {k: v for k, v in old["resource_groups"].items() if k[0] not in frozen}
+        # Child rows keyed by setting/template/group id (their parent's id is not in the key).
+        old["selects"] = {k: v for k, v in old["selects"].items() if k[0] not in frozen_setting_ids}
+        old["multiselects"] = {k: v for k, v in old["multiselects"].items() if k[0] not in frozen_setting_ids}
+        old["template_steps"] = {k: v for k, v in old["template_steps"].items() if k[0] not in frozen_template_ids}
+        old["template_settings"] = {k: v for k, v in old["template_settings"].items() if k[0] not in frozen_template_ids}
+        old["template_configs"] = {k: v for k, v in old["template_configs"].items() if k[0] not in frozen_template_ids}
+        old["resource_group_entries"] = {k: v for k, v in old["resource_group_entries"].items() if k[0] not in frozen_group_ids}
+
     def _it_diff_plugins(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list) -> None:
         """Compute differences for PLUGINS."""
         old_plugins = old["plugins"]
@@ -688,11 +756,13 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
         for pid in old_plugin_ids & new_plugin_ids:
             old_p = old_plugins[pid]
             new_p = desired_plugins[pid]
-            attrs_to_check = ("name", "description", "version", "stream", "type", "method", "data", "checksum")
+            attrs_to_check = ("name", "description", "version", "stream", "type", "method", "data", "checksum", "icon")
             if any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check) and old_p.method == new_p.get("method", "manual"):
                 to_update.append({"type": "plugin", "filter": {"id": pid}, "data": {k: new_p[k] for k in attrs_to_check if k in new_p}})
 
-        # Plugins to delete
+        # Plugins to delete. Disabled plugins that are absent from the desired (FS-derived) set
+        # are never reached here: `_it_freeze_disabled_plugins` removed them (and every child
+        # row) from `old` before the diff, so they survive intact until re-enable.
         for pid in old_plugin_ids - new_plugin_ids:
             old_p = old_plugins[pid]
             if old_p.method == "manual":

@@ -550,6 +550,11 @@ class UpdateExternalPluginsRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+# Plugins (enable/disable a single plugin)
+class PluginEnabledRequest(BaseModel):
+    enabled: bool
+
+
 # Instance status
 class InstanceStatusRequest(BaseModel):
     status: str = Field(..., pattern="^(up|down|failover)$")

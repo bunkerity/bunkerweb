@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from contextlib import suppress
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from model import Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Metadata, Multiselects, Plugin_pages, Plugins, Selects, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
@@ -63,9 +63,58 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                 return str(e)
         return ""
 
+    def set_plugin_enabled(self, plugin_id: str, enabled: bool) -> str:
+        """Enable or disable a single external/ui/pro plugin.
+
+        Returns "" on success (including a same-value no-op), or an error string:
+        - ``"...not found"`` when no plugin matches ``plugin_id``;
+        - ``"...is a core plugin..."`` when the plugin is a structurally-required core
+          plugin (core plugins are baked into the image and can never be disabled).
+
+        Flipping the flag marks the matching Metadata change flags so the scheduler
+        re-materializes the plugin filesystem (mirrors ``delete_plugin``'s signalling).
+        """
+        with self._db_session() as session:
+            plugin = session.scalars(select(Plugins).filter_by(id=plugin_id).limit(1)).first()
+            if not plugin:
+                return f"Plugin with id {plugin_id} not found"
+            if plugin.type == "core":
+                return f"Plugin {plugin_id} is a core plugin and cannot be disabled"
+
+            if plugin.enabled == enabled:
+                return ""
+
+            plugin.enabled = enabled
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.get(Metadata, 1)
+                if metadata is not None:
+                    if plugin.type in ("external", "ui"):
+                        metadata.external_plugins_changed = True
+                        metadata.last_external_plugins_change = datetime.now().astimezone()
+                        metadata.reload_ui_plugins = True
+                    elif plugin.type == "pro":
+                        metadata.pro_plugins_changed = True
+                        metadata.last_pro_plugins_change = datetime.now().astimezone()
+                        metadata.reload_ui_plugins = True
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+        return ""
+
     @retry_on_transient_db_errors
-    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
-        """Get all plugins from the database using batched queries to avoid N+1 issues."""
+    def get_plugins(
+        self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False, only_enabled: bool = False
+    ) -> List[Dict[str, Any]]:
+        """Get all plugins from the database using batched queries to avoid N+1 issues.
+
+        ``only_enabled`` filters out plugins whose ``enabled`` flag is False — used by the
+        scheduler's materialization path so disabled external/ui/pro plugins are not written
+        to the filesystem (and therefore excluded from every runtime glob). Core plugins are
+        always ``enabled`` so this never hides them.
+        """
         with self._db_session() as session:
             # Build the base query.
             entities = [
@@ -77,6 +126,8 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                 Plugins.type,
                 Plugins.method,
                 Plugins.checksum,
+                Plugins.enabled,
+                Plugins.icon,
             ]
             if with_data:
                 entities.append(Plugins.data)
@@ -86,6 +137,8 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                 query = query.filter(Plugins.type.in_(["external", "ui"]))
             elif _type != "all":
                 query = query.filter_by(type=_type)
+            if only_enabled:
+                query = query.filter(Plugins.enabled.is_(True))
             query = query.order_by(Plugins.id.asc())
 
             plugins = session.execute(query).all()
@@ -144,6 +197,8 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                     "page": pages_map.get(plugin.id, False),
                     "settings": {},
                     "checksum": plugin.checksum,
+                    "enabled": plugin.enabled,
+                    "icon": plugin.icon,
                 }
                 if with_data:
                     plugin_data["data"] = plugin.data
@@ -207,3 +262,17 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                 return None
 
             return page.data
+
+    def get_plugin_icon(self, plugin_id: str) -> Optional[Tuple[str, Optional[str], Optional[bytes]]]:
+        """Return ``(type, icon, data)`` for one plugin, or None when the plugin does not exist.
+
+        ``type`` is the plugin type (``core``/``external``/``ui``/``pro``); ``icon`` is the stored
+        marker/value (e.g. ``@file/icon.svg``, a boxicon class, or None); ``data`` is the plugin
+        archive blob (None for core plugins). The icon endpoint serves ``@file/...`` markers,
+        reading the file from the core plugins directory on disk when ``type == "core"`` and out of
+        ``data`` otherwise. Fetches just these three columns (no full-list scan)."""
+        with self._db_session() as session:
+            row = session.execute(select(Plugins.type, Plugins.icon, Plugins.data).filter_by(id=plugin_id).limit(1)).first()
+            if row is None:
+                return None
+            return row.type, row.icon, row.data

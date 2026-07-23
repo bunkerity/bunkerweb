@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Literal, Set, Tuple
 
 from model import Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Metadata, Multiselects, Plugin_pages, Plugins, Selects, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, resolve_plugin_icon  # type: ignore
 
 from sqlalchemy import delete, select, update
 
@@ -58,6 +58,10 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                 if not isinstance(commands, dict):
                     commands = {}
                 plugin["type"] = _type
+                # Resolve the effective icon once for both the update and insert branches: a
+                # shipped allowlisted icon file inside the archive wins over the plugin.json
+                # ``icon`` string. Re-run every sync so a changed icon propagates.
+                plugin["icon"] = self._uep_effective_icon(plugin)
                 db_plugin = session.execute(
                     select(
                         Plugins.name,
@@ -67,6 +71,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                         Plugins.method,
                         Plugins.checksum,
                         Plugins.type,
+                        Plugins.icon,
                     )
                     .filter_by(id=plugin["id"])
                     .limit(1)
@@ -150,13 +155,19 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
         when the empty-list data-loss guard fired (the caller must return "").
         Never commits.
         """
-        db_plugins = session.execute(select(Plugins.id).filter_by(type=_type)).all()
+        db_plugins = session.execute(select(Plugins.id, Plugins.enabled).filter_by(type=_type)).all()
 
         db_ids = []
         if delete_missing and db_plugins:
             db_ids = [plugin.id for plugin in db_plugins]
+            # Disabled plugins are intentionally NOT materialized on the filesystem (see the
+            # scheduler's `generate_external_plugins` only_enabled skip), so their absence from
+            # the incoming `plugins` list is expected and MUST NOT trigger the destructive
+            # plugin-wide cascade. Excluding them here keeps the DB row + settings/Global_values
+            # intact so re-enabling restores the plugin with its stored configuration.
+            disabled_ids = {plugin.id for plugin in db_plugins if not plugin.enabled}
             ids = [plugin["id"] for plugin in plugins]
-            missing_ids = [plugin for plugin in db_ids if plugin not in ids]
+            missing_ids = [plugin for plugin in db_ids if plugin not in ids and plugin not in disabled_ids]
 
             if missing_ids:
                 # Data-loss guard: refuse the destructive plugin-wide cascade (Settings +
@@ -226,6 +237,11 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
         return False, False
 
+    def _uep_effective_icon(self, plugin: Dict[str, Any]) -> Any:
+        """Icon to persist for an external/ui/pro plugin: a shipped allowlisted archive icon
+        (``@file/<name>``) beats the plugin.json ``icon`` string. See ``resolve_plugin_icon``."""
+        return resolve_plugin_icon(plugin.get("data"), plugin.get("icon"))
+
     def _uep_sync_plugin_row(self, session, plugin: Dict[str, Any], db_plugin: Any, _type: str) -> Tuple[bool, bool]:
         """Sync the Plugins row of an existing plugin.
 
@@ -266,6 +282,9 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
         if plugin.get("type") != db_plugin.type:
             updates[Plugins.type] = plugin.get("type")
+
+        if plugin.get("icon") != db_plugin.icon:
+            updates[Plugins.icon] = plugin.get("icon")
 
         if updates:
             session.execute(update(Plugins).where(Plugins.id == plugin["id"]).values(updates))
@@ -936,6 +955,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                 method=plugin["method"],
                 data=plugin.get("data"),
                 checksum=plugin.get("checksum"),
+                icon=plugin.get("icon"),
             )
         )
 

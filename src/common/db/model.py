@@ -3,7 +3,7 @@
 from datetime import datetime
 from json import dumps, loads
 from typing import Any, ClassVar, List, Optional
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText, false
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText, false, true
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -70,6 +70,14 @@ class Plugins(Base):
     checksum: Mapped[Optional[str]] = mapped_column(String(128), default=None, nullable=True)
     config_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True, index=True)
     last_config_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true(), nullable=False)
+    # Optional display icon (1.7). Convention: "@file/<name>" -> allowlisted icon file the plugin
+    # ships (core: auto-detected in its own dir, served off disk from CORE_PLUGINS_ROOT/<id>/<name>;
+    # external/ui/pro: inside the archive blob) via GET /plugins/{id}/icon; "*.svg" -> a shipped static
+    # asset under the UI's img/plugins/; otherwise a Boxicons class name. NULL -> the consumer falls
+    # back. Core plugins auto-detect the marker from their directory; the plugin.json ``icon`` field is
+    # an optional override (fixed 4-name root-only allowlist -> no path-traversal surface).
+    icon: Mapped[Optional[str]] = mapped_column(String(256), default=None, nullable=True)
 
     settings: Mapped[List["Settings"]] = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
     jobs: Mapped[List["Jobs"]] = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")

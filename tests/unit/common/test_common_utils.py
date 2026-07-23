@@ -15,6 +15,7 @@ from common_utils import (  # type: ignore
     _validate_tar_members,
     bytes_hash,
     create_plugin_tar_gz,
+    detect_local_plugin_icon,
     dict_to_frozenset,
     effective_cpu_count,
     file_hash,
@@ -25,6 +26,7 @@ from common_utils import (  # type: ignore
     normalize_select_value,
     plugin_tar_exclude,
     plugin_tar_filter,
+    resolve_plugin_icon,
     safe_zip_extractall,
     trim_scalar_value,
 )
@@ -301,3 +303,88 @@ class TestTarZipSafety:
         with zipfile.ZipFile(z) as zf:
             safe_zip_extractall(zf, out)
         assert (out / "a" / "b.txt").read_text() == "hi"
+
+
+class TestDetectLocalPluginIcon:
+    """First allowlisted icon file present directly in a dir, in priority order, else None."""
+
+    def test_priority_order_icon_svg_wins(self, tmp_path):
+        (tmp_path / "logo.png").write_bytes(b"x")
+        (tmp_path / "icon.svg").write_bytes(b"<svg/>")
+        assert detect_local_plugin_icon(tmp_path) == "icon.svg"
+
+    def test_falls_back_down_the_list(self, tmp_path):
+        (tmp_path / "logo.png").write_bytes(b"x")
+        assert detect_local_plugin_icon(tmp_path) == "logo.png"
+
+    def test_empty_dir_is_none(self, tmp_path):
+        assert detect_local_plugin_icon(tmp_path) is None
+
+    def test_missing_dir_is_none(self, tmp_path):
+        assert detect_local_plugin_icon(tmp_path / "nope") is None
+
+    def test_ignores_subdir_and_directory_named_like_icon(self, tmp_path):
+        (tmp_path / "ui").mkdir()
+        (tmp_path / "ui" / "icon.svg").write_bytes(b"<svg/>")  # nested, not root-level
+        (tmp_path / "logo.svg").mkdir()  # a directory, not a regular file
+        assert detect_local_plugin_icon(tmp_path) is None
+
+
+class TestResolvePluginIcon:
+    """Effective Plugins.icon marker across the blob path, the core dir_path path and back-compat."""
+
+    def _blob(self, tmp_path, files):
+        d = tmp_path / "arc"
+        d.mkdir()
+        (d / "plugin.json").write_text('{"id":"p"}')
+        for name, content in files.items():
+            (d / name).write_bytes(content)
+        return create_plugin_tar_gz(d, arc_root=d.name).getvalue()
+
+    # ── blob path (external/ui/pro) — unchanged by dir_path ──────────────────────────────
+    def test_blob_shipped_file_wins_over_field(self, tmp_path):
+        blob = self._blob(tmp_path, {"icon.svg": b"<svg/>"})
+        assert resolve_plugin_icon(blob, "bx-shield") == "@file/icon.svg"
+
+    def test_blob_without_file_keeps_field_verbatim_never_promoted(self, tmp_path):
+        # plugin.json names icon.svg but the archive lacks it -> not promoted to an @file marker.
+        blob = self._blob(tmp_path, {"readme.md": b"x"})
+        assert resolve_plugin_icon(blob, "icon.svg") == "icon.svg"
+
+    # ── core dir_path path ───────────────────────────────────────────────────────────────
+    def test_dir_detected_promotion(self, tmp_path):
+        (tmp_path / "icon.svg").write_bytes(b"<svg/>")
+        assert resolve_plugin_icon(None, None, dir_path=tmp_path) == "@file/icon.svg"
+
+    def test_dir_explicit_override_honored_when_present(self, tmp_path):
+        # icon.svg also present, but the field explicitly names logo.png which really exists.
+        (tmp_path / "icon.svg").write_bytes(b"<svg/>")
+        (tmp_path / "logo.png").write_bytes(b"x")
+        assert resolve_plugin_icon(None, "logo.png", dir_path=tmp_path) == "@file/logo.png"
+
+    def test_dir_no_promotion_when_field_file_absent(self, tmp_path):
+        # field names an allowlisted file that is NOT on disk, and nothing else is either ->
+        # the string is returned verbatim, never an @file marker that would 404.
+        assert resolve_plugin_icon(None, "icon.svg", dir_path=tmp_path) == "icon.svg"
+
+    def test_dir_detected_wins_over_absent_field_file(self, tmp_path):
+        # field names logo.png (absent) but icon.svg is present -> detection promotes icon.svg.
+        (tmp_path / "icon.svg").write_bytes(b"<svg/>")
+        assert resolve_plugin_icon(None, "logo.png", dir_path=tmp_path) == "@file/icon.svg"
+
+    def test_dir_verbatim_fallthrough(self, tmp_path):
+        # boxicon class, empty dir -> nothing to detect -> returned verbatim.
+        assert resolve_plugin_icon(None, "bx-shield", dir_path=tmp_path) == "bx-shield"
+
+    def test_dir_none_field_empty_dir_is_none(self, tmp_path):
+        assert resolve_plugin_icon(None, None, dir_path=tmp_path) is None
+
+    # ── back-compat: no data, no dir_path ────────────────────────────────────────────────
+    def test_backcompat_field_allowlisted_promoted(self):
+        assert resolve_plugin_icon(None, "icon.svg") == "@file/icon.svg"
+
+    def test_backcompat_boxicon_verbatim(self):
+        assert resolve_plugin_icon(None, "bx-shield") == "bx-shield"
+
+    def test_backcompat_none_is_none(self):
+        assert resolve_plugin_icon(None, None) is None

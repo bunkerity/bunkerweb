@@ -248,7 +248,11 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
     pro = original_path.as_posix().endswith("/pro/plugins")
 
     assert API_CLIENT is not None
-    plugins = API_CLIENT.get_plugins(_type="pro" if pro else "external", with_data=True)
+    # only_enabled=True: disabled plugins are skipped so they are never written to the
+    # filesystem. The removal loop below then deletes any leftover dir of a newly-disabled
+    # plugin (absent from `plugins`), removing it from every runtime glob (Configurator,
+    # Templator, JobScheduler, Lua loader). Re-enabling re-materializes it from the DB.
+    plugins = API_CLIENT.get_plugins(_type="pro" if pro else "external", with_data=True, only_enabled=True)
     assert plugins is not None, "Couldn't get plugins from API"
 
     # Remove old external/pro plugins files

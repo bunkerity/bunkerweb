@@ -1,0 +1,45 @@
+/* ============================================================================
+   Plugins marketplace page — page-scoped chrome (kit configure.js:418 grid).
+   Rounds out the per-card status control so the enable switch, the "always on"
+   lock chip and the active/inactive state badge all sit on a consistent footer
+   row. Visual only — the .plugin-switch / .plugin-state hooks are untouched.
+   ============================================================================ */
+
+/* Keep every card's status/actions footer aligned to the same baseline height,
+   whether it carries a toggle switch or a static chip. */
+#plugin-grid .plugin-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+/* Enable switch reads as the primary control: slightly larger track, navy when on. */
+#plugin-grid .plugin-switch.form-check-input {
+  width: 2.1em;
+  height: 1.15em;
+  cursor: pointer;
+}
+#plugin-grid .plugin-switch.form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+#plugin-grid .plugin-switch-label {
+  color: var(--bw-fg-2);
+}
+
+/* Lock / state chips: keep the pill shape consistent with the switch height. */
+#plugin-grid .plugin-state .badge {
+  border-radius: 999px;
+}
+
+/* Card lifts a touch on hover so the grid feels interactive. */
+#plugin-grid .plugin-card-col .card {
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+#plugin-grid .plugin-card-col .card:hover {
+  border-color: var(--bw-fg-3);
+  box-shadow: 0 4px 14px -8px rgba(0, 0, 0, 0.25);
+}

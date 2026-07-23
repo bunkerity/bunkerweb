@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.7.0-beta - 2026/07/??
+
+- [FEATURE] `ui`: new Reports dashboard — a 4-tab view (Overview, Top offenders, Rules, Requests) over the persisted blocked-request metrics, with a shared range picker driving the timeseries, top-offenders, and top-rules queries.
+- [FEATURE] `metrics`: attribute each blocked-request report to its origin network — new `asn_number` and `asn_org` columns on `bw_metrics_requests` surface the offending ASN in the Reports dashboard.
+- [FEATURE] `ui`: the Templates page gained a card gallery — icon, real per-template usage count, plugin/config/feature badges, and View/Edit/Clone/Delete actions — replacing the flat DataTable; bulk delete is preserved via a card selection toggle feeding the existing confirmation flow.
+- [FEATURE] `ui`: the Bans page gained a KPI header — active, expiring (≤1h), distinct countries and permanent-ban tiles, plus a "bans by reason" breakdown card and a non-persistence notice shown when Redis is disabled — above the unchanged bans table.
+- [FEATURE] `ui`: the Home dashboard gained a range-picker-driven trend chart and mini-tiles, a "top reasons for blocks" card, and a "Getting started" checklist (install BunkerWeb, register a service, activate MFA, activate PRO) that hides itself once every step is complete.
+- [FEATURE] `ui`: `/logs` now opens on a live, multi-source tailing dashboard — level filter, grep, pause/resume, expand — aggregating every syslog-forwarded instance log file on the shared logs volume; the per-file ACE viewer, download and pagination are unchanged.
+- [FEATURE] `plugins`: external, UI and PRO plugins can now be disabled without uninstalling them — a DB-backed `enabled` flag drops them from FS materialization (Configurator, Templator, JobScheduler, Lua plugin loader) while keeping their settings and jobs intact for re-enabling; core plugins remain bound to their `USE_*` master switch and cannot be disabled through the API. The Plugins page gained a marketplace-style card grid with tier chips, tabs (All/Enabled/Disabled/Community/PRO) and search.
+- [FEATURE] `ui`: the Services, Instances, Configs, Cache and Jobs pages now share a neutral icon-button action row (`.icon-btn`/`.row-actions`) with colored hover states in place of colored outline buttons, and live health/job-status pills use a shared status-dot component.
+- [UI] `plugins`: curated brand icon set (Tabler-derived, MIT) for plugin marketplace cards with light/dark variants.
+- [FEATURE] `plugins`: plugins can now ship their own icon — an allowlisted `icon.svg`/`icon.png`/`logo.svg`/`logo.png` (core plugins in-dir, external/UI/PRO in their archive) is recorded on the `Plugins.icon` field and served via `GET /plugins/{id}/icon` (API, with `default-src 'none'; sandbox` CSP + `nosniff` + quoted inline filename, 512KB cap) through a login-gated UI proxy; marketplace cards resolve their icon field-first (shipped file → plugin.json icon string → boxicon fallback).
+
 ## v1.6.14~rc1 - 2026/07/??
 
 - [FEATURE] `metrics`: keep blocked-request reports flowing when Redis is full — an OOM-aware circuit breaker stops the log storm, timer stall, and report destruction previously triggered at `maxmemory`; reports blocked during the OOM window stay buffered per worker and sync once memory frees; list/facet updates are now atomic server-side scripts with per-cycle self-healing of facet counters; new `METRICS_REDIS_TTL` setting (default 30 days, `0` to disable) gives metrics keys a TTL refreshed on every sync. Note for `volatile-lru` operators: metrics keys previously had no TTL and were immune to eviction; they are now evictable under sustained memory pressure so Redis can recover instead of rejecting writes forever.

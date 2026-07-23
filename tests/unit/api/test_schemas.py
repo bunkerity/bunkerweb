@@ -93,6 +93,14 @@ class TestPatternsAndAliases:
         with pytest.raises(ValidationError):
             schemas.UpdateExternalPluginsRequest(plugins=[], **{"_type": "bogus"})
 
+    def test_plugin_enabled_request_bool(self):
+        assert schemas.PluginEnabledRequest(enabled=True).enabled is True
+        assert schemas.PluginEnabledRequest(enabled=False).enabled is False
+
+    def test_plugin_enabled_request_requires_enabled(self):
+        with pytest.raises(ValidationError):
+            schemas.PluginEnabledRequest()
+
 
 class TestGlobalSettingsUpdate:
     def test_scalars_ok(self):

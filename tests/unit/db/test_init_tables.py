@@ -38,6 +38,32 @@ class TestInitTables:
         ids = {p["id"] for p in db.get_plugins()}
         assert "alpha" in ids and "beta" not in ids
 
+    def _external_manual(self, plugin_id):
+        # An external, method="manual" plugin: the init-diff delete branch fires for method=="manual"
+        # rows, so this is exactly the shape whose FS dir vanishing on disable would trigger deletion.
+        p = make_core_plugin(plugin_id)
+        p["type"] = "external"
+        p["method"] = "manual"
+        return p
+
+    def test_disabled_plugin_absent_from_desired_is_retained(self, db):
+        # Disabling an external/pro plugin removes its FS dir, so it is absent from the desired
+        # (FS-derived) set on the next init_tables. The disabled guard must skip the delete so the
+        # row AND its settings survive until re-enable.
+        db.init_tables([make_core_plugin("alpha"), self._external_manual("extp")])
+        assert db.set_plugin_enabled("extp", False) == ""
+        db.init_tables([make_core_plugin("alpha")])  # extp dropped from desired (dir gone)
+        plugins = {p["id"]: p for p in db.get_plugins()}
+        assert "extp" in plugins  # retained despite absence
+        assert "EXTP_GLOBAL" in plugins["extp"]["settings"]  # settings survived
+        assert plugins["extp"]["enabled"] is False
+
+    def test_enabled_plugin_absent_from_desired_still_deleted(self, db):
+        # Control: an ENABLED external/manual plugin dropped from desired is still pruned.
+        db.init_tables([make_core_plugin("alpha"), self._external_manual("extp")])
+        db.init_tables([make_core_plugin("alpha")])
+        assert "extp" not in {p["id"] for p in db.get_plugins()}
+
     def test_jobs_created(self, db):
         db.init_tables([make_core_plugin("alpha", jobs=[{"name": "alphajob", "file": "alphajob.py", "every": "hour", "reload": False}])])
         assert "alphajob" in db.get_jobs()

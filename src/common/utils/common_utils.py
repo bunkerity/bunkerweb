@@ -10,7 +10,7 @@ from pathlib import Path
 from platform import machine
 from re import compile as re_compile
 from tarfile import open as tar_open
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Tuple, Union, Any
 from urllib.parse import urlsplit
 from math import ceil
 import logging
@@ -417,6 +417,164 @@ def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = N
         gz.write(raw_bytes)
     result.seek(0)
     return result
+
+
+# Allowlisted, root-level icon files a plugin may ship inside its own archive, in
+# resolution-priority order. When one is present it is recorded in Plugins.icon as a
+# "@file/<name>" marker and served (never inlined) via GET /plugins/{id}/icon. Fixed names
+# + root-only membership means there is no path-traversal surface to serve them.
+PLUGIN_ICON_FILES = ("icon.svg", "icon.png", "logo.svg", "logo.png")
+_PLUGIN_ICON_CONTENT_TYPES = {".svg": "image/svg+xml", ".png": "image/png"}
+
+
+def plugin_icon_content_type(name: str) -> str:
+    """Content-Type for an allowlisted plugin icon file name (defaults to octet-stream)."""
+    return _PLUGIN_ICON_CONTENT_TYPES.get(Path(name).suffix.lower(), "application/octet-stream")
+
+
+def _root_level_icon_name(member_name: str, allowed: set) -> Optional[str]:
+    """Return the allowlisted basename when ``member_name`` is a root-level icon inside a
+    plugin archive (at the archive root, or directly under its single top-level dir), else
+    None. Deeper paths (e.g. ``<id>/ui/icon.svg``) are intentionally not matched."""
+    parts = member_name.strip("/").split("/")
+    if 1 <= len(parts) <= 2 and parts[-1] in allowed:
+        return parts[-1]
+    return None
+
+
+def detect_plugin_icon(data: Union[bytes, bytearray, BytesIO]) -> Optional[str]:
+    """First allowlisted root-level icon file name shipped in a plugin ``tar.gz`` blob, in
+    PLUGIN_ICON_FILES priority order (icon.svg > icon.png > logo.svg > logo.png), or None.
+    Deterministic; swallows any archive error and returns None (bad/foreign blob -> no icon)."""
+    if isinstance(data, (bytes, bytearray)):
+        data = BytesIO(bytes(data))
+    allowed = set(PLUGIN_ICON_FILES)
+    found = set()
+    try:
+        data.seek(0)
+        with tar_open(fileobj=data, mode="r:*") as tar:
+            for member in tar.getmembers():
+                if not member.isfile():
+                    continue
+                name = _root_level_icon_name(member.name, allowed)
+                if name:
+                    found.add(name)
+    except Exception:
+        return None
+    for candidate in PLUGIN_ICON_FILES:
+        if candidate in found:
+            return candidate
+    return None
+
+
+def read_plugin_icon(data: Union[bytes, bytearray, BytesIO], name: str, *, max_bytes: int = 512 * 1024) -> Optional[Tuple[Optional[bytes], bool]]:
+    """Extract allowlisted root-level file ``name`` from a plugin ``tar.gz`` blob.
+
+    Returns:
+      - ``None`` when ``name`` is not allowlisted or not present in the archive (caller -> 404);
+      - ``(None, True)`` when the stored file exceeds ``max_bytes`` (caller -> 413) — at most
+        ``max_bytes + 1`` bytes are ever read, so a huge member never loads fully into memory;
+      - ``(payload, False)`` with the file bytes otherwise.
+    """
+    if name not in PLUGIN_ICON_FILES:
+        return None
+    if isinstance(data, (bytes, bytearray)):
+        data = BytesIO(bytes(data))
+    allowed = {name}
+    try:
+        data.seek(0)
+        with tar_open(fileobj=data, mode="r:*") as tar:
+            for member in tar.getmembers():
+                if not member.isfile() or _root_level_icon_name(member.name, allowed) != name:
+                    continue
+                extracted = tar.extractfile(member)
+                if extracted is None:
+                    return None
+                chunk = extracted.read(max_bytes + 1)
+                if len(chunk) > max_bytes:
+                    return None, True
+                return chunk, False
+    except Exception:
+        return None
+    return None
+
+
+def read_local_plugin_icon(dir_path: Union[str, Path], name: str, *, max_bytes: int = 512 * 1024) -> Optional[Tuple[Optional[bytes], bool]]:
+    """Read allowlisted icon file ``name`` directly from a plugin directory on disk.
+
+    Core plugins ship their icon in-dir (``<core>/<id>/icon.svg``) and carry no data blob, so the
+    icon endpoint reads them straight off the filesystem. Same return contract as
+    ``read_plugin_icon``: ``None`` (absent / not allowlisted / read error) -> 404,
+    ``(None, True)`` (over ``max_bytes``) -> 413, ``(payload, False)`` -> the bytes. ``name`` is
+    constrained to the fixed 4-name allowlist (no slashes), so there is no path-traversal surface."""
+    if name not in PLUGIN_ICON_FILES:
+        return None
+    path = Path(dir_path) / name
+    try:
+        if not path.is_file():
+            return None
+        if path.stat().st_size > max_bytes:
+            return None, True
+        return path.read_bytes(), False
+    except OSError:
+        return None
+
+
+def detect_local_plugin_icon(dir_path: Union[str, Path]) -> Optional[str]:
+    """First allowlisted icon file present as a regular file directly in ``dir_path``, in
+    PLUGIN_ICON_FILES priority order (icon.svg > icon.png > logo.svg > logo.png), or None.
+    On-disk sibling of ``detect_plugin_icon`` for core plugins, which ship their icon in their
+    own directory (``<core>/<id>/icon.svg``) instead of an archive blob."""
+    base = Path(dir_path)
+    for candidate in PLUGIN_ICON_FILES:
+        if (base / candidate).is_file():
+            return candidate
+    return None
+
+
+def resolve_plugin_icon(data: Optional[Union[bytes, bytearray, BytesIO]], icon_field: Any, *, dir_path: Optional[Union[str, Path]] = None) -> Optional[str]:
+    """Effective ``Plugins.icon`` value for a plugin, applying the resolution order:
+
+      1. an allowlisted icon file shipped in the archive ``data`` blob -> ``@file/<name>``
+         (external/ui/pro plugins, whose files live in the tarball);
+      2. no ``data`` blob and a ``dir_path`` was given (the core-plugin path: icons ship in-dir,
+         auto-detected from the plugin's own directory):
+           a. the plugin.json ``icon`` names an allowlisted file that actually exists in
+              ``dir_path`` -> ``@file/<field>`` (explicit override, honored only when real);
+           b. else the first allowlisted file found in ``dir_path``
+              (``detect_local_plugin_icon``) -> ``@file/<detected>``;
+           c. else the ``icon`` string verbatim (a ``*.svg`` static-asset name or a boxicon
+              class) or None;
+      3. no ``data`` blob and NO ``dir_path`` (back-compat for callers without a path): the
+         plugin.json ``icon`` names an allowlisted file -> ``@file/<field>``;
+      4. any other plugin.json ``icon`` string -> returned verbatim. This also covers a ``data``
+         blob that was checked and did NOT contain the icon file its own plugin.json names: the
+         string is not promoted to an ``@file/`` marker, because that marker would point at a file
+         that isn't actually present (browser -> 404);
+      5. None.
+
+    A ``@file/`` marker is never emitted for an allowlisted name whose file is actually absent
+    (broken-marker hardening, symmetric between the blob and dir paths). Used by both ingestion
+    paths (init_tables core/external/pro seeding and update_external_plugins) so a rebooted
+    scheduler cannot overwrite a detected/declared marker with a stale value."""
+    has_data = isinstance(data, (bytes, bytearray, BytesIO))
+    if has_data:
+        name = detect_plugin_icon(data)
+        if name:
+            return f"@file/{name}"
+    field = icon_field if isinstance(icon_field, str) and icon_field else None
+    if not has_data and dir_path is not None:
+        if field and field in PLUGIN_ICON_FILES and (Path(dir_path) / field).is_file():
+            return f"@file/{field}"
+        detected = detect_local_plugin_icon(dir_path)
+        if detected:
+            return f"@file/{detected}"
+        return field
+    if field:
+        if not has_data and field in PLUGIN_ICON_FILES:
+            return f"@file/{field}"
+        return field
+    return None
 
 
 def _validate_tar_members(members, *, allow_symlinks=False):

@@ -340,10 +340,12 @@ class ApiClient(BaseApiClient):
 
     # ── Plugins ─────────────────────────────────────────────────────────
 
-    def get_plugins(self, type="all", with_data=False):
+    def get_plugins(self, type="all", with_data=False, only_enabled=False):
         params = {"type": type}
         if with_data:
             params["with_data"] = "true"
+        if only_enabled:
+            params["only_enabled"] = "true"
         plugins = self._get("/plugins", params=params).get("plugins", [])
         if with_data:
             from base64 import b64decode
@@ -356,6 +358,9 @@ class ApiClient(BaseApiClient):
     def delete_plugin(self, plugin_id):
         return self._delete(f"/plugins/{plugin_id}")
 
+    def set_plugin_enabled(self, plugin_id, enabled):
+        return self._patch(f"/plugins/{plugin_id}", json={"enabled": bool(enabled)})
+
     def upload_plugins(self, files, method="ui"):
         # files should be a list of (filename, file_obj) tuples
         # Remove Content-Type header for multipart upload
@@ -365,6 +370,12 @@ class ApiClient(BaseApiClient):
     def get_plugin_page(self, plugin_id):
         resp = self._raw_request("GET", f"/plugins/{plugin_id}/page")
         return resp.content
+
+    def get_plugin_icon(self, plugin_id):
+        """Fetch a plugin's shipped icon bytes + content type from the API (browsers can't auth
+        to the API directly, so the UI proxies this). Returns ``(bytes, content_type)``."""
+        resp = self._raw_request("GET", f"/plugins/{plugin_id}/icon")
+        return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
 
     # ── Users ───────────────────────────────────────────────────────────
 

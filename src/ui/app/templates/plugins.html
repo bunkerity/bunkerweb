@@ -1,163 +1,190 @@
 {% extends "dashboard.html" %}
 {% from "components/card.html" import card %}
-{% from "components/table-toolbar.html" import table_toolbar %}
-{% from "components/modal.html" import modal %}
+{% from "components/badge.html" import badge %}
 {% from "components/button.html" import button %}
+{% from "components/modal.html" import modal %}
+{% from "components/search.html" import search %}
 {% from "components/selected-list.html" import selected_list %}
-{% from "components/title.html" import title %}
+{% from "components/page-head.html" import page_head %}
+{% from "components/empty-state.html" import empty_state %}
+{# page-head band owns the breadcrumb + H1, so drop the dashboard shell's legacy header row. #}
+{% block page_head %}{% endblock %}
 {% block head %}
-    <!-- Datatables -->
-    <link rel="preload"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
-          as="style" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename='css/pages/plugins.css') }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
-    {{ title(label="Plugins", i18n_key="navigation.plugins", level="h1", icon="bx-extension", classes="mb-4") }}
-    <!-- Content -->
-    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
-        <input type="hidden" id="pro_diamond_url" value="{{ pro_diamond_url }}" />
-        {% call table_toolbar(id="plugins", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_plugins", loading_default="Loading plugins...", number=plugins|length) %}
-            <thead>
-                <tr>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Show the Plugins' details"
-                        data-i18n="tooltip.table.plugins.details"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Select all Plugins"
-                        data-i18n="tooltip.table.plugins.select_all"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's ID"
-                        data-i18n="tooltip.table.plugins.id">
-                        <span data-i18n="table.header.id">ID</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's Name"
-                        data-i18n="tooltip.table.plugins.name">
-                        <span data-i18n="table.header.name">Name</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's description"
-                        data-i18n="tooltip.table.plugins.description">
-                        <span data-i18n="table.header.description">Description</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's version"
-                        data-i18n="tooltip.table.plugins.version">
-                        <span data-i18n="table.header.version">Version</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Does the plugin supports stream?"
-                        data-i18n="tooltip.table.plugins.stream">
-                        <span data-i18n="table.header.stream">Stream</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's type"
-                        data-i18n="tooltip.table.plugins.type">
-                        <span data-i18n="table.header.type">Type</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The method used to create the plugin"
-                        data-i18n="tooltip.table.plugins.method">
-                        <span data-i18n="table.header.method">Method</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Plugin"
-                        data-i18n="tooltip.table.plugins.actions">
-                        <span data-i18n="table.header.actions">Actions</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for plugin, plugin_data in plugins.items() %}
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <div class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">{{ plugin }}</div>
-                        </td>
-                        <td id="name-{{ plugin }}" data-id="{{ plugin }}">
-                            <div class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">{{ plugin_data["name"] }}</div>
-                        </td>
-                        <td>{{ plugin_data["description"] }}</td>
-                        <td id="version-{{ plugin }}">
-                            <div class="{{ plugin_types[plugin_data['type']].get('text-class', '') }}">v{{ plugin_data["version"] }}</div>
-                        </td>
-                        <td class="text-center">
-                            <div data-bs-toggle="tooltip"
-                                 data-bs-placement="top"
-                                 data-bs-original-title="..."
-                                 data-i18n="tooltip.stream_support.{{ plugin_data['stream'] }}">
-                                <i class="bx bx-sm bx-{% if plugin_data['stream'] == 'yes' %}check text-success{% elif plugin_data['stream'] == 'partial' %}minus text-warning{% else %}x text-danger{% endif %}"></i>
-                            </div>
-                        </td>
-                        <td id="type-{{ plugin }}">
-                            <div class="d-flex align-items-center" {% if not is_pro_version and plugin_data['type'] == "pro" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"
-                            {% endif %}
-                            >
-                            {% if plugin_data["type"] == "pro" %}
-                                <a href="{{ url_for('pro') }}" target="_blank" rel="noopener" {% else %}
-                                    <div {% endif %}
-                                         class="d-flex align-items-center{{ plugin_types[plugin_data['type']].get('text-class', '') }}">
-                                        {{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
-                                             alt="Pro plugin"
-                                             width="16px"
-                                             height="12.9125px">') |safe }}&nbsp;－&nbsp;<span data-i18n="plugin.type.{{ plugin_data['type'] }}">{{ plugin_data["type"]|upper }}</span>
-                                        {% if plugin_data["type"] == "pro" %}
-                                        </a>
-                                    {% else %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td>{{ plugin_data["method"] }}</td>
-                        <td>
-                            <div class="d-flex justify-content-evenly">
-                                <div {% if not plugin_data['page'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No page available" data-i18n="tooltip.no_page_available"{% endif %}>
-                                    {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
-                                    <a role="button"
-                                       class="btn btn-outline-primary btn-sm me-1{% if not plugin_data['page'] %} disabled{% endif %}"
-                                       href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
-                                       data-bs-toggle="tooltip"
-                                       data-bs-placement="bottom"
-                                       data-bs-original-title="Access {{ plugin_data['name'] }} page"
-                                       data-i18n="tooltip.link.access_plugin_page"
-                                       data-i18n-options='{"name": "{{ plugin_data['name'] }}"}'>
-                                        <i class="bx bx-link-external bx-xs"></i>
-                                    </a>
-                                </div>
-                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if plugin_data['method'] != 'ui' else 'tooltip.button.delete_plugin')) %}
-                                {% set delete_tooltip_options = '{"method": "' ~ plugin_data['method'] ~ '"}' if plugin_data['method'] != 'ui' and not is_readonly else '{"name": "' ~ plugin_data['name'] ~ '"}' %}
-                                <div data-bs-toggle="tooltip"
-                                     data-bs-placement="bottom"
-                                     data-bs-original-title="..."
-                                     data-i18n="{{ delete_tooltip_key }}"
-                                     data-i18n-options='{{ delete_tooltip_options }}'>
-                                    <button type="button"
-                                            data-plugin-id="{{ plugin }}"
-                                            class="btn btn-outline-danger btn-sm me-1 delete-plugin{% if plugin_data['method'] != 'ui' %} disabled{% endif %}">
-                                        <i class="bx bx-trash bx-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        {% endcall %}
+    <input type="hidden" id="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" id="is-admin" value="{{ 'True' if user_admin else 'False' }}" />
+    <input type="hidden" id="is-read-only" value="{{ 'True' if is_readonly else 'False' }}" />
+    <input type="hidden" id="user-read-only" value="{{ 'True' if user_readonly else 'False' }}" />
+    <!-- Head -->
+    {% call page_head(title="Plugins", title_i18n="navigation.plugins",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Plugins", "navigation.plugins", none)]) %}
+        {% if not is_readonly and user_admin %}
+            {{ button(id="open-add-plugins", label="Add plugin(s)", i18n_key="button.add_plugin_plural", variant="primary", size="sm", icon="bx-plus", modal_target="modal-add-plugins") }}
+        {% endif %}
     {% endcall %}
+    <!-- Filters -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <ul class="nav nav-pills plugin-filter-tabs gap-1" id="plugin-filter-tabs" role="tablist" aria-label="Plugin filters">
+            {% set filters = [
+                ("all", "All", "plugins.marketplace.tab_all"),
+                ("enabled", "Enabled", "plugins.marketplace.tab_enabled"),
+                ("disabled", "Disabled", "plugins.marketplace.tab_disabled"),
+                ("core", "Core", "plugin.type.core"),
+                ("community", "Community", "plugins.marketplace.tab_community"),
+                ("pro", "PRO", "plugin.type.pro"),
+            ] %}
+            {% for value, label, key in filters %}
+                <li class="nav-item" role="presentation">
+                    <button type="button"
+                            class="nav-link plugin-filter{% if value == 'all' %} active{% endif %}"
+                            data-filter="{{ value }}"
+                            role="tab"
+                            aria-selected="{{ 'true' if value == 'all' else 'false' }}">
+                        <span data-i18n="{{ key }}">{{ label }}</span>
+                        <span class="badge rounded-pill bg-label-secondary ms-1 plugin-filter-count" data-filter-count="{{ value }}">0</span>
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="plugin-search-wrap" style="min-width: 240px">
+            {{ search(id="plugin-search", placeholder="Search plugins...", i18n_key="plugins.marketplace.search", variant="merge") }}
+        </div>
+    </div>
+    <!-- Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3" id="plugin-grid">
+        {% for plugin, plugin_data in plugins.items() if plugin_data %}
+            {% set ptype = plugin_data.get('type', 'core') %}
+            {% set tier = 'core' if ptype == 'core' else ('pro' if ptype == 'pro' else 'community') %}
+            {% set pname = plugin_data.get('name', plugin) %}
+            {% set pmethod = plugin_data.get('method', 'manual') %}
+            {% set has_page = plugin_data.get('page') %}
+            {% set is_core = (ptype == 'core') %}
+            {% set is_always = plugin in always_used_plugins %}
+            {% set use_key = 'USE_' ~ plugin|upper %}
+            {% if use_key not in config %}{% set use_key = 'USE_' ~ pname|replace(' ', '_')|upper %}{% endif %}
+            {% set core_specific = plugin|upper in plugins_specifics %}
+            {% set core_toggleable = is_core and not is_always and not core_specific and use_key in config %}
+            {% if is_core %}
+                {% set state_on = true if is_always else is_plugin_active(plugin, pname, config) %}
+            {% else %}
+                {% set state_on = plugin_data.get('enabled', True) %}
+            {% endif %}
+            {% set icon = 'bx-shield' if ptype == 'core' else ('bx-diamond' if ptype == 'pro' else ('bx-cloud-upload' if ptype == 'ui' else 'bx-plug')) %}
+            {% set picon = plugin_data.get('icon') %}
+            <div class="col plugin-card-col"
+                 data-plugin="{{ plugin }}"
+                 data-plugin-name="{{ pname }}"
+                 data-tier="{{ tier }}"
+                 data-type="{{ ptype }}"
+                 data-enabled="{{ 'true' if state_on else 'false' }}"
+                 data-name="{{ pname|lower }}"
+                 data-description="{{ plugin_data.get('description', '')|lower }}">
+                {% call card(classes="h-100 p-3 d-flex flex-column") %}
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        {# Resolution order: the curated brand pair (both navy + -white variants ship,
+                           id-keyed, existence-checked) wins first, because only it gives a light+dark
+                           variant pair for the theme swap - plugin_data.icon can't offer that. Then,
+                           off plugin_data.icon: an @file/<name> marker -> the UI proxy route (browsers
+                           can't auth to the API); a bare *.svg naming a static asset that exists -> that
+                           asset; a boxicon class string -> the icon font; anything else (incl. NULL) ->
+                           the type default boxicon. #}
+                        {% if plugin in (custom_icons|default([])) %}
+                            {# Curated brand mark (Tabler-derived): both variants ship, CSS swaps navy<->white by theme. #}
+                            <img class="plugin-mark plugin-mark-light" src="{{ url_for('static', filename='img/plugins/plugin-' ~ plugin ~ '.svg') }}" width="20" height="20" alt="" aria-hidden="true" />
+                            <img class="plugin-mark plugin-mark-dark" src="{{ url_for('static', filename='img/plugins/plugin-' ~ plugin ~ '-white.svg') }}" width="20" height="20" alt="" aria-hidden="true" />
+                        {% elif picon and picon.startswith('@file/') %}
+                            <img class="plugin-mark" src="{{ url_for('plugins.plugin_icon', plugin=plugin) }}" width="20" height="20" alt="" aria-hidden="true" />
+                        {% elif picon and picon.endswith('.svg') and picon in (static_icons|default([])) %}
+                            <img class="plugin-mark" src="{{ url_for('static', filename='img/plugins/' ~ picon) }}" width="20" height="20" alt="" aria-hidden="true" />
+                        {% elif picon and picon.startswith('bx') %}
+                            <i class="bx {{ picon }} bx-sm text-primary" aria-hidden="true"></i>
+                        {% else %}
+                            <i class="bx {{ icon }} bx-sm text-primary" aria-hidden="true"></i>
+                        {% endif %}
+                        <span class="fw-bold text-truncate" title="{{ pname }}">{{ pname }}</span>
+                        <span class="ms-auto">
+                            {% if tier == 'pro' %}
+                                {{ badge(text="PRO", i18n_key="plugin.type.pro", variant="bw-green", icon="bx-crown") }}
+                            {% elif tier == 'core' %}
+                                {{ badge(text="Core", i18n_key="plugin.type.core", variant="secondary", icon="bx-shield") }}
+                            {% elif ptype == 'ui' %}
+                                {{ badge(text="UI", i18n_key="plugin.type.ui", variant="secondary", icon="bx-cloud-upload") }}
+                            {% else %}
+                                {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", variant="secondary", icon="bx-plug") }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-3" style="min-height: 40px">{{ plugin_data.get('description', '') }}</p>
+                    <div class="d-flex align-items-center justify-content-between gap-2 mt-auto">
+                        <div class="plugin-state">
+                            {% if is_core and is_always %}
+                                {{ badge(text="Core / always on", i18n_key="plugins.marketplace.always_on", variant="secondary", icon="bx-lock-alt") }}
+                            {% elif is_core and not core_toggleable %}
+                                {% if state_on %}
+                                    {{ badge(text="Active", i18n_key="plugins.marketplace.active", variant="success", icon="bx-check") }}
+                                {% else %}
+                                    {{ badge(text="Inactive", i18n_key="plugins.marketplace.inactive", variant="secondary", icon="bx-minus") }}
+                                {% endif %}
+                            {% else %}
+                                <form method="POST"
+                                      action="{{ url_for('plugins') }}/enable"
+                                      class="plugin-toggle-form mb-0">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <input type="hidden" name="plugin" value="{{ plugin }}" />
+                                    {% if core_toggleable %}<input type="hidden" name="setting" value="{{ use_key }}" />{% endif %}
+                                    <input type="hidden" name="enabled" value="{{ 'yes' if state_on else 'no' }}" class="plugin-enabled-field" />
+                                    <label class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                        <input class="form-check-input plugin-switch mt-0"
+                                               type="checkbox"
+                                               role="switch"
+                                               data-plugin="{{ plugin }}"
+                                               {% if state_on %}checked{% endif %}
+                                               {% if is_readonly or not user_admin %}disabled{% endif %}
+                                               aria-label="Toggle {{ pname }}" />
+                                        <span class="small plugin-switch-label"
+                                              data-i18n="{{ 'plugins.marketplace.enabled' if state_on else 'plugins.marketplace.disabled' }}">{{ 'Enabled' if state_on else 'Disabled' }}</span>
+                                    </label>
+                                </form>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if not is_readonly and user_admin and pmethod == 'ui' %}
+                                <button type="button"
+                                        class="btn btn-icon btn-outline-danger btn-sm delete-plugin"
+                                        data-plugin-id="{{ plugin }}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        data-bs-original-title="Uninstall {{ pname }}"
+                                        data-i18n="tooltip.button.delete_plugin"
+                                        data-i18n-options='{"name": "{{ pname }}"}'>
+                                    <i class="bx bx-trash bx-xs" aria-hidden="true"></i>
+                                </button>
+                            {% endif %}
+                            {% if is_core or has_page %}
+                                <a role="button"
+                                   class="btn btn-icon btn-outline-primary btn-sm plugin-configure"
+                                   href="{{ url_for('plugins') }}/{{ plugin }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   data-bs-original-title="Configure {{ pname }}"
+                                   data-i18n="tooltip.link.access_plugin_page"
+                                   data-i18n-options='{"name": "{{ pname }}"}'>
+                                    <i class="bx bx-cog bx-xs" aria-hidden="true"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endcall %}
+            </div>
+        {% endfor %}
+    </div>
+    {{ empty_state(id="plugin-grid-empty", title="No plugins match your filters", title_key="plugins.marketplace.no_match", icon="bx-extension", classes="d-none py-5") }}
+    <!-- Modals -->
     {% if not is_readonly and user_admin %}
         {% call modal(id="modal-add-plugins", title_key="modal.title.add_plugins", title="Add plugins", size="xl") %}
             <form id="form-add-plugins"
@@ -187,7 +214,7 @@
                     <div id="file-list" class="mt-3"></div>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    {{ button(id="add-plugins-submit", label="Add plugins", i18n_key="button.add_plugins", variant="bw-green", type="submit", classes="me-2 disabled") }}
+                    {{ button(id="add-plugins-submit", label="Add plugins", i18n_key="button.add_plugins", variant="primary", type="submit", classes="me-2 disabled") }}
                     {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
                 </div>
             </form>
@@ -203,7 +230,6 @@
                     </div>
                     {{ selected_list(id="selected-plugins-delete", name="plugins", entity="plugins", hidden_mode="csv", classes="mb-3", columns=[
                         {"key": "name", "i18n": "table.header.name", "label": "Name", "bold": true},
-                        {"key": "version", "i18n": "table.header.version", "label": "Version"},
                         {"key": "type", "i18n": "table.header.type", "label": "Type"}
                     ]) }}
                 </div>
@@ -217,20 +243,10 @@
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
-            nonce="{{ script_nonce }}"
-            defer></script>
-    <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
-            nonce="{{ script_nonce }}"
-            defer></script>
-    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
-            nonce="{{ script_nonce }}"
-            defer></script>
     <script src="{{ url_for('static', filename='js/components/selected-list.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
-    <script src="{{ url_for('static', filename='js/pages/plugins.js') }}"
+    <script src="{{ url_for('static', filename='js/pages/plugins-grid.js') }}"
             nonce="{{ script_nonce }}"
-            defer
-            type="module"></script>
+            defer></script>
 {% endblock %}

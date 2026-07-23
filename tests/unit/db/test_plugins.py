@@ -28,6 +28,54 @@ class TestGetPlugins:
         assert [p["id"] for p in db.get_plugins(_type="external")] == ["extplug"]  # external+ui bucket
         assert [p["id"] for p in db.get_plugins(_type="pro")] == ["proplug"]
 
+    def test_enabled_defaults_true_and_serialized(self, db):
+        seed_minimal(db)
+        assert db.get_plugins()[0]["enabled"] is True
+
+    def test_icon_serialized_and_defaults_none(self, db):
+        seed_minimal(db)  # 'general' seeded without an icon
+        assert db.get_plugins()[0]["icon"] is None
+        add_plugin(db, "iconplug", type="external", method="ui", icon="plugin-iconplug.svg")
+        assert next(p for p in db.get_plugins() if p["id"] == "iconplug")["icon"] == "plugin-iconplug.svg"
+
+    def test_only_enabled_filters_disabled(self, db):
+        seed_minimal(db)  # core 'general' (always enabled)
+        add_plugin(db, "extplug", type="external", method="ui")
+        assert db.set_plugin_enabled("extplug", False) == ""
+        # default: disabled plugin still listed
+        assert {p["id"] for p in db.get_plugins()} == {"general", "extplug"}
+        # only_enabled: disabled plugin excluded, core untouched
+        enabled_ids = {p["id"] for p in db.get_plugins(only_enabled=True)}
+        assert enabled_ids == {"general"}
+        assert "extplug" not in enabled_ids
+
+
+class TestSetPluginEnabled:
+    def test_toggle_round_trip(self, db):
+        seed_minimal(db)
+        add_plugin(db, "extplug", type="external", method="ui")
+        assert db.set_plugin_enabled("extplug", False) == ""
+        assert next(p for p in db.get_plugins() if p["id"] == "extplug")["enabled"] is False
+        assert db.set_plugin_enabled("extplug", True) == ""
+        assert next(p for p in db.get_plugins() if p["id"] == "extplug")["enabled"] is True
+
+    def test_refuses_core(self, db):
+        seed_minimal(db)  # 'general' is core
+        err = db.set_plugin_enabled("general", False)
+        assert "core plugin" in err.lower()
+        # unchanged: core stays enabled
+        assert db.get_plugins()[0]["enabled"] is True
+
+    def test_not_found(self, db):
+        seed_minimal(db)
+        assert "not found" in db.set_plugin_enabled("nope", False).lower()
+
+    def test_same_value_is_noop_success(self, db):
+        seed_minimal(db)
+        add_plugin(db, "extplug", type="external", method="ui")  # enabled=True by default
+        assert db.set_plugin_enabled("extplug", True) == ""
+        assert next(p for p in db.get_plugins() if p["id"] == "extplug")["enabled"] is True
+
 
 class TestDeletePlugin:
     def test_delete_cascades(self, db):

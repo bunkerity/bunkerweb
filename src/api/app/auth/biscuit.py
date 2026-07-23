@@ -218,9 +218,10 @@ def _resolve_plugins(path_normalized: str, method_u: str) -> tuple[Optional[str]
 
     Maps to: plugin_read, plugin_create, plugin_delete
     Examples:
-    - GET    /plugins or /plugins/{id}     -> plugin_read
-    - POST   /plugins/upload               -> plugin_create
-    - DELETE /plugins/{id}                 -> plugin_delete
+    - GET       /plugins or /plugins/{id}  -> plugin_read
+    - POST      /plugins/upload            -> plugin_create
+    - PATCH     /plugins/{id}              -> plugin_create (enable/disable toggle)
+    - DELETE    /plugins/{id}              -> plugin_delete
     """
     rtype = "plugins"
     p = path_normalized
@@ -230,6 +231,10 @@ def _resolve_plugins(path_normalized: str, method_u: str) -> tuple[Optional[str]
         if p == "/plugins" or (len(parts) == 2 and parts[0] == "plugins"):
             return rtype, "plugin_read"
     if method_u == "POST" and p == "/plugins/upload":
+        return rtype, "plugin_create"
+    if method_u == "PATCH" and len(parts) == 2 and parts[0] == "plugins":
+        # Toggling enable/disable is a mutation but there is no separate plugin_update
+        # permission — treat it as plugin_create, matching the verb-fallback below.
         return rtype, "plugin_create"
     if method_u == "DELETE" and len(parts) == 2 and parts[0] == "plugins":
         return rtype, "plugin_delete"

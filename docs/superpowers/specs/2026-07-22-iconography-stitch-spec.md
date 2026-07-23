@@ -315,12 +315,16 @@ remain the reference — only the origin of the geometry changed (Tabler, not St
 Beyond the curated static set, each plugin can ship **its own** icon, resolved through a fixed
 chain and persisted in `Plugins.icon` (`String(256)`, nullable):
 
-1. **Shipped file wins.** An allowlisted root-level icon in the plugin —
+1. **Shipped file wins (auto-detected).** An allowlisted root-level icon in the plugin —
    `icon.svg` / `icon.png` / `logo.svg` / `logo.png` (priority order,
    `common_utils.PLUGIN_ICON_FILES`) — is recorded as the marker **`@file/<name>`**. External/ui/pro
-   plugins ship it inside their archive blob; core plugins ship it in their own directory
-   (`src/common/core/<id>/icon.svg`, no data blob). `resolve_plugin_icon()` computes this at DB
-   sync (init + `update_external_plugins`) so a reboot never overwrites a detected marker.
+   plugins ship it inside their archive blob (`detect_plugin_icon`); core plugins ship it in their own
+   directory (`src/common/core/<id>/icon.svg`, no data blob) and it is auto-detected from that dir
+   (`detect_local_plugin_icon`) — **no `plugin.json` `icon` field required**. The field is an *optional
+   override*, honored only when it names an allowlisted file that actually exists (never promoted to a
+   marker that would 404). `resolve_plugin_icon(data, icon, dir_path=…)` computes this at DB sync
+   (init + `update_external_plugins`) — deterministic per dir/blob contents, so a reboot never
+   overwrites a detected marker.
 2. **plugin.json `icon` string.** A bare `*.svg` naming a UI static asset, or a boxicon class
    (e.g. `bx-shield`), is stored verbatim.
 3. **NULL** → the UI's type-based boxicon fallback.

@@ -122,10 +122,14 @@ class SchedulerApiClient(BaseApiClient):
 
     # ── Plugins ─────────────────────────────────────────────────────────
 
-    def get_plugins(self, _type: str = "all", with_data: bool = False) -> list:
+    def get_plugins(self, _type: str = "all", with_data: bool = False, only_enabled: bool = False) -> list:
         """Get plugins of the specified type. When with_data=True, API returns base64-encoded
-        bytes — decode them so callers can pass directly to BytesIO/tar_open."""
-        plugins = self._get("/plugins", params={"type": _type, "with_data": str(with_data).lower()}).get("plugins", [])
+        bytes — decode them so callers can pass directly to BytesIO/tar_open.
+        ``only_enabled`` excludes disabled external/ui/pro plugins (materialization skip)."""
+        params = {"type": _type, "with_data": str(with_data).lower()}
+        if only_enabled:
+            params["only_enabled"] = "true"
+        plugins = self._get("/plugins", params=params).get("plugins", [])
         if with_data:
             for p in plugins:
                 d = p.get("data")

@@ -220,9 +220,9 @@ def add_recovery_code(db, username, code) -> None:
         s.add(UserRecoveryCodes(user_name=username, code=code))
 
 
-def add_plugin(db, plugin_id, *, type="core", method="manual", version="1.0", name=None, description="d", checksum=None) -> None:
+def add_plugin(db, plugin_id, *, type="core", method="manual", version="1.0", name=None, description="d", checksum=None, icon=None) -> None:
     with session(db) as s:
-        s.add(Plugins(id=plugin_id, name=name or plugin_id, description=description, version=version, type=type, method=method, checksum=checksum))
+        s.add(Plugins(id=plugin_id, name=name or plugin_id, description=description, version=version, type=type, method=method, checksum=checksum, icon=icon))
 
 
 def add_plugin_page(db, plugin_id, *, data=b"<page>", checksum="pagesum") -> None:

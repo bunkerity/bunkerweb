@@ -6,6 +6,7 @@ from json import JSONDecodeError, loads as json_loads
 from os import listdir
 from os.path import basename, dirname, isabs, join, sep
 from pathlib import Path
+from re import compile as re_compile
 from shutil import move, rmtree
 from sys import path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
@@ -39,6 +40,25 @@ from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_da
 
 plugins = Blueprint("plugins", __name__)
 
+# Only a master USE_* toggle may be flipped through /plugins/enable's core path.
+USE_SETTING_RX = re_compile(r"^USE_[A-Z0-9_]+$")
+
+# Plugin ids that ship a curated brand icon (static/img/plugins/plugin-<id>.svg AND its
+# -white dark variant). Listed once at import time — these are shipped assets, not runtime
+# state. The marketplace card renders both <img> variants for ids in this set and falls back
+# to the boxicon for everything else, so no card can ever point at a missing file in either
+# theme (require both variants below). Kept independent of the DB `icon` field on purpose:
+# the card serves these static marks by id, so do NOT collapse this into plugin_data.icon —
+# that would reintroduce the missing-file / broken-image risk this existence check prevents.
+_ICON_DIR = Path(__file__).resolve().parent.parent / "static" / "img" / "plugins"
+_ICON_LIGHT = {p.stem.removeprefix("plugin-") for p in _ICON_DIR.glob("plugin-*.svg") if not p.stem.endswith("-white")}
+_ICON_DARK = {p.stem.removeprefix("plugin-").removesuffix("-white") for p in _ICON_DIR.glob("plugin-*-white.svg")}
+CUSTOM_PLUGIN_ICONS = frozenset(_ICON_LIGHT & _ICON_DARK)
+# Every static icon filename actually on disk, so the field-first template can serve a plugin.json
+# ``icon`` that names a bare ``*.svg`` static asset only when the file exists (no broken <img>),
+# and otherwise fall back to a boxicon. Existence-checked at import for the same reason as above.
+STATIC_PLUGIN_ICONS = frozenset(p.name for p in _ICON_DIR.glob("*.svg"))
+
 
 @plugins.route("/plugins", methods=["GET"])
 @login_required
@@ -47,7 +67,52 @@ def plugins_page():
     # Remove everything in the tmp folder
     rmtree(tmp_ui_path, ignore_errors=True)
     tmp_ui_path.mkdir(parents=True, exist_ok=True)
-    return render_template("plugins.html")
+    # `plugins`/`config` come from the global before_request context; pass the two lookup
+    # tables the marketplace grid needs to decide how each core card's switch behaves
+    # (locked "always on" chip vs. a USE_*-bound toggle).
+    return render_template(
+        "plugins.html",
+        always_used_plugins=ALWAYS_USED_PLUGINS,
+        plugins_specifics=PLUGINS_SPECIFICS,
+        custom_icons=CUSTOM_PLUGIN_ICONS,
+        static_icons=STATIC_PLUGIN_ICONS,
+    )
+
+
+# Same three neutralizing headers the API sets on an icon response: the bytes are
+# attacker-controlled for external/pro plugins, so on top of <img src>-only intended usage we
+# stop any script in an SVG from executing on direct navigation (CSP default-src 'none'; sandbox),
+# block MIME confusion (nosniff), and quote the filename. Serving name is fixed to icon.<ext>.
+def _icon_response_headers(content_type: str) -> dict:
+    ext = "png" if content_type == "image/png" else "svg"
+    return {
+        "Content-Type": content_type,
+        "Content-Disposition": f'inline; filename="icon.{ext}"',
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'none'; sandbox",
+        "Cache-Control": "private, max-age=3600",
+    }
+
+
+@plugins.route("/plugins/<string:plugin>/icon", methods=["GET"])
+@login_required
+def plugin_icon(plugin: str):
+    """Proxy a plugin's shipped icon from the API (browsers can't authenticate to the API).
+
+    The marketplace card's ``@file/<name>`` icons point here. ``plugin`` is validated against the
+    same id regex as every other plugin route (no slashes -> no traversal), the bytes come from
+    ``GET /plugins/<id>/icon`` on the API, and the response re-serves them with the same security
+    headers plus a short private cache. A missing/unservable icon maps to 404, an unreachable API
+    to 502."""
+    if not PLUGIN_NAME_RX.match(plugin):
+        return Response("Invalid plugin id", 404)
+    try:
+        content, content_type = API_CLIENT.get_plugin_icon(plugin)
+    except ApiClientError as e:
+        return Response("Plugin icon not found", e.status_code or 404)
+    except ApiUnavailableError:
+        return Response("Plugin icon unavailable", 502)
+    return Response(content, headers=_icon_response_headers(content_type))
 
 
 @plugins.route("/plugins/delete", methods=["POST"])
@@ -98,6 +163,61 @@ def delete_plugin():
     CONFIG_TASKS_EXECUTOR.submit(update_plugins, plugins)
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
+
+
+@plugins.route("/plugins/enable", methods=["POST"])
+@login_required
+def enable_plugin():
+    if API_CLIENT.readonly:
+        return Response("Database is in read-only mode", 403)
+
+    if not current_user.admin:
+        return Response("Plugin management is restricted to administrators", 403)
+
+    verify_data_in_form(
+        data={"plugin": None, "enabled": None},
+        err_message="Missing plugin or enabled parameter on /plugins/enable.",
+        redirect_url="plugins",
+        next=True,
+    )
+    DATA.load_from_file()
+
+    plugin = request.form["plugin"]
+    enabled = request.form["enabled"].strip().lower() in ("1", "true", "yes", "on")
+    # Core plugins can't be DB-toggled (structurally required); the grid instead binds their
+    # switch to a master USE_* setting and passes its name here. Anything else is rejected so
+    # this endpoint can never write an arbitrary global setting.
+    setting = request.form.get("setting", "").strip()
+    if setting and not USE_SETTING_RX.match(setting):
+        return handle_error("Invalid setting parameter on /plugins/enable.", "plugins", True)
+
+    def toggle_plugin(plugin: str, enabled: bool, setting: str):
+        wait_applying()
+
+        try:
+            if setting:
+                # Core plugin: flip the master USE_* global setting (save_config marks changes).
+                API_CLIENT.update_global_settings({setting: "yes" if enabled else "no"})
+            else:
+                # External/ui/pro plugin: flip the DB `enabled` flag.
+                API_CLIENT.set_plugin_enabled(plugin, enabled)
+                with suppress(ApiClientError, ApiUnavailableError):
+                    API_CLIENT.checked_changes(["config"], plugins_changes=[plugin], value=True)
+            state = "enabled" if enabled else "disabled"
+            DATA["TO_FLASH"].append({"content": f"Plugin {plugin} {state} successfully", "type": "success"})
+        except ApiClientError as e:
+            DATA["TO_FLASH"].append({"content": f"Couldn't update plugin {plugin}: {e.message}", "type": "error"})
+        except ApiUnavailableError as e:
+            DATA["TO_FLASH"].append({"content": f"Couldn't update plugin {plugin}: {e.message}", "type": "error"})
+
+        DATA["RELOADING"] = False
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
+
+    CONFIG_TASKS_EXECUTOR.submit(toggle_plugin, plugin, enabled, setting)
+
+    action = "Enabling" if enabled else "Disabling"
+    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"{action} plugin: {plugin}"))
 
 
 def get_plugin_path(plugin_id: str) -> Optional[Path]:
