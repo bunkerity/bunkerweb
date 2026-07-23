@@ -8,9 +8,10 @@ This document covers:
 
 - Community container images (`bunkerweb`, `scheduler`, `autoconf`, `ui`, `api`, `all-in-one`)
 - Linux packages (`.deb`, `.rpm`)
-- FreeBSD package (`.pkg`)
 
 All commands are expected to be run from the repository root.
+
+FreeBSD users: BunkerWeb is available as an official port, see <https://www.freshports.org/www/bunkerweb/>.
 
 ## Build Standards
 
@@ -23,8 +24,6 @@ All commands are expected to be run from the repository root.
 
 - For containers and Linux packages:
   - Docker (Buildx recommended)
-- For FreeBSD package:
-  - A native FreeBSD 14 host or VM
 
 ## Artifact Matrix
 
@@ -32,7 +31,6 @@ All commands are expected to be run from the repository root.
 | ---------------------------- | ------------------------------------------------- | ----------------------------------------- |
 | Community container images   | `src/*/Dockerfile`                                | `docker build -f <Dockerfile> -t <tag> .` |
 | Linux packages (`deb`/`rpm`) | `src/linux/Dockerfile-*` + `src/linux/package.sh` | `./src/linux/package.sh <linux> <arch>`   |
-| FreeBSD package (`pkg`)      | `src/linux/build-freebsd.sh`                      | `bash src/linux/build-freebsd.sh`         |
 
 ## Build Community Container Images
 
@@ -199,64 +197,9 @@ Notes:
 - For RPM, use Linux arch naming (`x86_64`, `aarch64`, ...).
 - For DEB, use Debian arch naming (`amd64`, `arm64`, ...).
 - `curl` is a runtime requirement for scheduler ACME integrations (notably ZeroSSL/EAB flows).
-- `package.sh` intentionally does not build FreeBSD packages in Docker.
 - Dockerfiles for Linux package builders are preconfigured with their package type:
   - Debian/Ubuntu Dockerfiles run `fpm.sh deb`
   - Fedora/RHEL Dockerfiles run `fpm.sh rpm`
-
-## Build FreeBSD Package (`.pkg`)
-
-FreeBSD packages must be built on FreeBSD.
-
-### Preflight requirements
-
-- Use a native FreeBSD 14 host/VM.
-- Run the build as `root` (or with equivalent privileges), because the build script installs packages and stages files under system paths.
-- Ensure dependency sources are initialized:
-
-```sh
-bash src/deps/init_deps.sh
-```
-
-- Install build prerequisites:
-
-```sh
-pkg bootstrap -f
-pkg update -f
-pkg install -y bash git wget curl gtar pigz gmake pkgconf autoconf automake libtool \
-  rust ruby rubygem-fpm nginx sudo lsof unzip openssl sqlite3 pcre2 lmdb ssdeep \
-  libxml2 yajl libgd libmaxminddb libffi python311 py311-pip py311-setuptools \
-  py311-wheel py311-sqlite3 postgresql18-client
-```
-
-**Security Note**: The final package has **zero runtime dependencies on compiler toolchains**. Only security-relevant libraries (TLS, XML parsing, GeoIP, etc.) are required at runtime, meeting security requirements for production firewall appliances.
-
-### Quick build (recommended)
-
-```sh
-bash src/linux/build-freebsd.sh
-```
-
-Output:
-
-- `bunkerweb-<VERSION>.pkg` (or `bunkerweb-dev.pkg`, depending on `src/VERSION`) in the repository root
-
-### Installing the package
-
-Before installing the BunkerWeb package on a production system, ensure runtime dependencies are installed:
-
-```sh
-pkg install -y bash nginx python311 py311-sqlite3 curl libxml2 yajl libgd \
-  sudo lsof libmaxminddb libffi openssl sqlite3 unzip pcre2 lmdb ssdeep
-```
-
-**Note**: No compiler packages (gcc, clang, etc.) are required at runtime.
-
-Then install BunkerWeb:
-
-```sh
-pkg install -y ./bunkerweb-<VERSION>.pkg
-```
 
 ## CI Parity (Reference)
 
