@@ -64,7 +64,6 @@ def dispatch_jobs(payload: DispatchJobsRequest) -> JSONResponse:
             "bunkernet-register",
             "certbot-auth",
             "certbot-cleanup",
-            "certbot-deploy",
             "certbot-new",
             "certbot-renew",
             "coreruleset-nightly",

@@ -48,7 +48,6 @@ HEAVY_JOBS = {
     "bunkernet-register",
     "certbot-auth",
     "certbot-cleanup",
-    "certbot-deploy",
     "certbot-new",
     "certbot-renew",
     "coreruleset-nightly",

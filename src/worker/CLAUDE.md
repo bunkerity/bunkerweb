@@ -36,7 +36,7 @@ Two queues are declared in `app.py`:
 
 ```
 backup-data, bunkernet-data, bunkernet-register,
-certbot-auth, certbot-cleanup, certbot-deploy, certbot-new, certbot-renew,
+certbot-auth, certbot-cleanup, certbot-new, certbot-renew,
 coreruleset-nightly,
 download-crs-plugins, download-plugins, download-pro-plugins,
 push-configs
