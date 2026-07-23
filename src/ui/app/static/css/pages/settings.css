@@ -1,0 +1,73 @@
+/* ============================================================================
+   Global config (settings) page — page-scoped chrome.
+   Loaded only by global_settings.html, so the selectors below (which also match
+   the shared models/plugins_settings.html partial used by service_settings.html)
+   restyle the settings page WITHOUT leaking to the service config pages.
+
+   Mirrors the kit's Global-config layout (ui_kits/admin/settings.css +
+   configure.js:59-200): each setting sits in a bordered card, and the plugin
+   sidebar reads as a clean category list. No markup/JS-hook changes — the only
+   template addition is the additive `.bw-setting-frame` wrapper, which every
+   .closest(".col-12") / .setting-highlight hook still resolves through.
+   ============================================================================ */
+
+/* ---- Setting card (kit .bw-input-wrap.is-setting .bw-input-setting-box) ----- */
+.bw-setting-frame {
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  padding: 12px 14px 14px;
+  background: var(--bw-bg-card);
+  height: 100%;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 2s ease;
+}
+.bw-setting-frame:hover {
+  border-color: var(--bw-fg-3);
+}
+/* The setting label reads as the card title (kit .bw-input-setting-title). */
+.bw-setting-frame .form-label {
+  color: var(--bs-primary);
+  margin-bottom: 0.35rem;
+}
+[data-bs-theme="dark"] .bw-setting-frame .form-label {
+  color: var(--bw-fg-1, #e4ebf0);
+}
+
+/* highlightSettings() paints .setting-highlight on the .col-12; the opaque frame
+   sits above it, so re-paint the frame itself to keep the flash visible. */
+.setting-highlight .bw-setting-frame {
+  background-color: rgba(var(--bs-bw-green-rgb), 0.5);
+}
+.setting-highlight-fade .bw-setting-frame {
+  background-color: var(--bw-bg-card);
+}
+
+/* ---- Plugin sidebar (kit .split-list category list) ------------------------- */
+.plugin-steps-container {
+  position: sticky;
+  top: 150px;
+}
+.plugin-steps-container .step-navigation-list {
+  border: 1px solid var(--bw-border);
+  border-radius: 10px;
+  background: var(--bw-bg-card);
+  padding: 6px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+.plugin-steps-container .plugin-navigation-item {
+  margin-bottom: 0.25rem;
+  border-radius: 0.5rem;
+}
+.plugin-steps-container .plugin-navigation-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Save bar: the navy CTA already comes from btn-primary don-jose; keep the
+   sticky bar reading as the kit page-head actions strip. --------------------- */
+.sticky-card .save-settings {
+  min-width: 96px;
+  justify-content: center;
+}

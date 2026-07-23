@@ -8,7 +8,10 @@
 {% from "components/modal.html" import modal %}
 {% from "components/search.html" import search %}
 {% from "components/tile.html" import tile %}
-{% from "components/title.html" import title %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/pages/certificates.css') }}"
@@ -74,7 +77,15 @@
     } %}
     {% set source_variants = {"letsencrypt": "primary", "customcert": "secondary", "selfsigned": "warning"} %}
     {% set certificates_url = url_for("certificates") %}
-    {{ title(label="Certificates", i18n_key="navigation.certificates", level="h1", icon="bxs-certification", subtitle="Issue, upload, assign, renew, and inspect certificates in the central inventory.", subtitle_i18n_key="certificates.subtitle", classes="mb-4") }}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {% call page_head(title="Certificates", title_i18n="navigation.certificates",
+                      breadcrumb=[("Overview", "navigation.overview", none),
+                                  ("Certificates", "navigation.certificates", none)]) %}
+        {{ button(id="certificates-renew-due", label="Check/renew due", i18n_key="certificates.renew_due", variant="outline-secondary", size="sm", icon="bx-refresh", disabled=readonly) }}
+        {{ button(label="Upload custom", i18n_key="certificates.upload_custom", variant="outline-primary", size="sm", icon="bx-upload", modal_target="certificate-upload-modal", disabled=readonly) }}
+        {{ button(label="Schedule ACME", i18n_key="certificates.schedule_acme", variant="outline-primary", size="sm", icon="bx-cloud", modal_target="certificate-acme-modal", disabled=readonly) }}
+        {{ button(label="New self-signed", i18n_key="certificates.new_selfsigned", size="sm", icon="bx-plus", modal_target="certificate-selfsigned-modal", disabled=readonly, classes="don-jose") }}
+    {% endcall %}
     {% if readonly %}
         {{ alert(message="The database is read-only. Certificates can be inspected and downloaded, but not changed.", message_key="certificates.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
     {% endif %}
@@ -83,13 +94,6 @@
     {% endif %}
     {{ alert(message="Assignments organise the central inventory; TLS deployment remains controlled by each service's certificate settings.", message_key="certificates.assignment_notice", variant="info", icon="bx-info-circle", role=none, classes="mb-4") }}
     <textarea id="certificates-data" hidden readonly>{{ certificate_context | tojson }}</textarea>
-
-    <div class="d-flex flex-wrap justify-content-end gap-2 mb-4">
-        {{ button(id="certificates-renew-due", label="Check/renew due", i18n_key="certificates.renew_due", variant="outline-secondary", size="sm", icon="bx-refresh", disabled=readonly) }}
-        {{ button(label="Upload custom", i18n_key="certificates.upload_custom", variant="outline-primary", size="sm", icon="bx-upload", modal_target="certificate-upload-modal", disabled=readonly) }}
-        {{ button(label="Schedule ACME", i18n_key="certificates.schedule_acme", variant="outline-primary", size="sm", icon="bx-cloud", modal_target="certificate-acme-modal", disabled=readonly) }}
-        {{ button(label="New self-signed", i18n_key="certificates.new_selfsigned", size="sm", icon="bx-plus", modal_target="certificate-selfsigned-modal", disabled=readonly, classes="don-jose") }}
-    </div>
 
     <div class="row g-3 mb-4">
         <div class="col-6 col-xl-3">

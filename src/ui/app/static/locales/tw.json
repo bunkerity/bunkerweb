@@ -5,6 +5,7 @@
     "license_title": "授權",
     "socials": "社群媒體",
     "tagline": "強大保護，化繁為簡",
+    "title": "About BunkerWeb",
     "version": "版本：{{version}}"
   },
   "accordion": {
@@ -68,7 +69,25 @@
     "support": "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
   },
   "bans": {
-    "subtitle": "跨您所有 BunkerWeb 實例的封鎖 IP 位址 — 建立、移除或調整封鎖期限。"
+    "subtitle": "跨您所有 BunkerWeb 實例的封鎖 IP 位址 — 建立、移除或調整封鎖期限。",
+    "stats": {
+      "alert": {
+        "body_after": "is enabled.",
+        "body_before": "Bans made here expire on instance restart unless",
+        "title": "Non-persisted edits."
+      },
+      "card": {
+        "by_reason": "Bans by reason"
+      },
+      "tile": {
+        "active": "Active bans",
+        "active_caption": "IPs + CIDRs",
+        "countries": "Countries",
+        "expiring": "Expiring ≤ 1 h",
+        "expiring_caption": "Auto-rotating",
+        "permanent": "Permanent bans"
+      }
+    }
   },
   "breadcrumb": {
     "about": "關於",
@@ -78,6 +97,7 @@
     "configs": "設定",
     "extra_pages": "附加頁面",
     "global_settings": "全域設定",
+    "global_config": "Global config",
     "home": "首頁",
     "instances": "執行個體",
     "jobs": "任務",
@@ -156,6 +176,7 @@
     "ping": "Ping",
     "plugin_page": "外掛程式頁面",
     "proceed": "繼續",
+    "refresh": "Refresh",
     "refresh_recovery_codes": "重新整理復原碼",
     "reload": "重新載入",
     "reset": "重設",
@@ -187,10 +208,20 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段"
+    "wipe_other_sessions": "清除其他工作階段",
+    "ban_all_filtered": "Ban all matching reports",
+    "filtered_actions": "Filtered actions",
+    "unban_all_filtered": "Unban all matching bans",
+    "update_duration_all_filtered": "Update duration for all matching bans",
+    "use_template": "Use template",
+    "edit": "Edit",
+    "view": "View"
   },
   "cache": {
-    "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。"
+    "kpi_files": "Files",
+    "kpi_per_service": "Per-service",
+    "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。",
+    "title": "Cache files"
   },
   "configs": {
     "subtitle": "針對您服務的自定義 NGINX 配置片段 — 建立、編輯和管理 HTTP、ModSecurity 和流層過濾。"
@@ -485,6 +516,9 @@
       },
       "total_requests": {
         "title": "總請求數"
+      },
+      "top_reasons": {
+        "title": "Top reasons for blocks"
       }
     },
     "chart": {
@@ -505,6 +539,10 @@
       "top_blocked_ips": {
         "most_blocked": "被封鎖最多的 IP",
         "title": "前 10 名被封鎖的 IP"
+      },
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time (selected range)"
       }
     },
     "map": {
@@ -516,6 +554,23 @@
     "window": {
       "last_days": "最近 {{days}} 天",
       "title": "儀表板視窗"
+    },
+    "tile": {
+      "bans_active": "Bans active",
+      "jobs": "Scheduled jobs",
+      "trend": "Blocked requests trend"
+    },
+    "welcome": {
+      "title": "Welcome back, {{user}}",
+      "greeting": "Welcome back,"
+    },
+    "panel": {
+      "timeseries_sub": "Selected range",
+      "top_ips_sub": "By request count",
+      "status_sub": "HTTP response codes",
+      "reasons_sub": "By trigger rule",
+      "map_sub": "Hover for details",
+      "blocking_sub": "Blocked vs allowed"
     }
   },
   "datatable": {
@@ -829,7 +884,8 @@
     "privacy_policy": "隱私權政策",
     "read_more": "閱讀更多",
     "see_more": "查看更多",
-    "upgrade": "升級？"
+    "upgrade": "升級？",
+    "get_support": "Get support"
   },
   "login": {
     "subtitle": "登入您的 BunkerWeb 帳戶"
@@ -856,7 +912,19 @@
     "showing_all": "{{total}} 行",
     "showing_some": "顯示 {{shown}} / {{total}}",
     "select_file_prompt": "選擇一個記錄檔案以檢視其內容",
-    "trimmed_notice": "--- 為了效能，已移除 {{count}} 筆較舊的日誌行 ---"
+    "trimmed_notice": "--- 為了效能，已移除 {{count}} 筆較舊的日誌行 ---",
+    "all_sources": "All sources (live)",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "grep_placeholder": "grep…",
+    "level_all": "All logs",
+    "level_errors_only": "Errors only",
+    "level_security_only": "Security only",
+    "live_title": "Live logs",
+    "pause": "Pause",
+    "resume": "Resume",
+    "tailing_sources": "Tailing · {{count}} sources",
+    "taller": "Taller"
   },
   "modal": {
     "body": {
@@ -899,7 +967,10 @@
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
-      "update_duration_alert": "請為選定的封鎖選擇新的期限："
+      "update_duration_alert": "請為選定的封鎖選擇新的期限：",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "套用全域設定",
@@ -982,7 +1053,13 @@
     "reports": "報告",
     "services": "服務",
     "support": "支援",
-    "templates": "範本"
+    "templates": "範本",
+    "overview": "Overview",
+    "configure": "Configure",
+    "operate": "Operate",
+    "system": "System",
+    "edition_community": "Community",
+    "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "新聞圖片",
@@ -1023,6 +1100,19 @@
       "more_value": "更多值",
       "more_values": "更多值",
       "show_less": "顯示較少"
+    },
+    "marketplace": {
+      "active": "Active",
+      "always_on": "Core / always on",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "inactive": "Inactive",
+      "no_match": "No plugins match your filters",
+      "search": "Search plugins...",
+      "tab_all": "All",
+      "tab_community": "Community",
+      "tab_disabled": "Disabled",
+      "tab_enabled": "Enabled"
     }
   },
   "pro": {
@@ -1069,7 +1159,8 @@
       "services_count": "{{online_services}} 個線上服務 / {{pro_services}} 個 PRO 服務",
       "suspended": "已暫停",
       "title": "狀態"
-    }
+    },
+    "title": "Pro license"
   },
   "profile": {
     "2fa": {
@@ -1414,7 +1505,8 @@
         "title": "支援連結"
       }
     },
-    "subtitle": "下載偵錯記錄、提取您的設定，並向 BunkerWeb 團隊尋求協助。"
+    "subtitle": "下載偵錯記錄、提取您的設定，並向 BunkerWeb 團隊尋求協助。",
+    "title": "Support"
   },
   "tab": {
     "custom_certificate": "自訂憑證",
@@ -1638,7 +1730,27 @@
     "none": "無範本"
   },
   "templates": {
-    "subtitle": "可重複使用的服務設定範本 — 包含設定、步驟和自訂設定，然後建立、複製或刪除。"
+    "subtitle": "可重複使用的服務設定範本 — 包含設定、步驟和自訂設定，然後建立、複製或刪除。",
+    "gallery": {
+      "delete_selected": "Delete selected",
+      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
+      "empty_title": "No templates yet",
+      "select": "Select",
+      "svc_suffix": "svc"
+    },
+    "name": {
+      "api": "API",
+      "high": "High security",
+      "low": "Low security",
+      "medium": "Medium security",
+      "ui": "Web UI"
+    },
+    "tag": {
+      "config": "Custom config: {{name}}",
+      "feature": "Built-in feature: {{name}}",
+      "plugin": "Plugin: {{name}}"
+    },
+    "title": "Service templates"
   },
   "theme": {
     "dark": "深色",
@@ -2055,6 +2167,7 @@
     "kinds": "種類",
     "loading_references": "正在載入參考資料...",
     "max_entries": "一個資源群組不能包含超過 {{max}} 個項目。",
+    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
     "new": "建立新群組",
     "new_alias": "建立新別名",
     "no_entries": "沒有項目",
@@ -2116,5 +2229,14 @@
     "services": "服務啟用",
     "status": "實例儲存",
     "subtitle": "反向代理緩存狀態，匯總命中率指標和即時清除控制。"
+  },
+  "onboarding": {
+    "item": {
+      "install": "Install BunkerWeb on 1+ host",
+      "mfa": "Activate MFA",
+      "pro": "Activate BunkerWeb PRO",
+      "service": "Register your first service"
+    },
+    "title": "Getting started"
   }
 }

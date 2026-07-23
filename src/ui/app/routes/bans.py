@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import Counter, defaultdict
 from contextlib import suppress
 from datetime import datetime
 from io import BytesIO, StringIO
@@ -310,6 +310,43 @@ def bans_page():
         services = services.split()
 
     return render_template("bans.html", services=services)
+
+
+_BANS_STATS_TOP_REASONS = 5
+
+
+@bans.route("/bans/stats", methods=["POST"])
+@login_required
+@cors_required
+def bans_stats():
+    """Summary tiles + "bans by reason" breakdown for the bans dashboard header."""
+    try:
+        all_bans = _collect_all_bans()
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Couldn't get bans from redis: {e}")
+        all_bans = []
+
+    active = len(all_bans)
+    expiring_1h = sum(1 for ban in all_bans if not ban.get("permanent", False) and 0 < ban.get("exp", 0) <= 3600)
+    countries = len({ban.get("country") for ban in all_bans if ban.get("country")})
+    permanent = sum(1 for ban in all_bans if ban.get("permanent", False))
+
+    reason_counts = Counter(str(ban.get("reason") or "unknown") for ban in all_bans)
+    reason_breakdown = [
+        {"reason": reason, "count": count, "pct": round(count / active * 100) if active else 0}
+        for reason, count in reason_counts.most_common(_BANS_STATS_TOP_REASONS)
+    ]
+
+    return jsonify(
+        {
+            "active": active,
+            "expiring_1h": expiring_1h,
+            "countries": countries,
+            "permanent": permanent,
+            "reason_breakdown": reason_breakdown,
+        }
+    )
 
 
 @bans.route("/bans/fetch", methods=["POST"])

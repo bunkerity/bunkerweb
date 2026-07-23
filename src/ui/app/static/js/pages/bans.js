@@ -522,7 +522,6 @@ $(document).ready(function () {
   };
 
   layout.topStart.buttons = [
-    { extend: "add_ban" },
     {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3))",
@@ -851,29 +850,23 @@ $(document).ready(function () {
   };
 
   // Custom Button Definitions
-  $.fn.dataTable.ext.buttons.add_ban = {
-    text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.add_ban_plural"> ${t(
-      "button.add_ban_plural",
-      "Add ban(s)",
-    )}</span>`,
-    className: `btn btn-sm rounded me-4 btn-bw-green${
-      isReadOnly ? " disabled" : ""
-    }`,
-    action: function (e, dt, node, config) {
-      if (isReadOnly) {
-        alert(
-          t(
-            "alert.readonly_mode",
-            "This action is not allowed in read-only mode.",
-          ),
-        );
-        return;
-      }
-      const ban_modal = $("#modal-ban-ips");
-      const modal = new bootstrap.Modal(ban_modal);
-      modal.show();
-    },
+  // "Add ban(s)" moved from the DataTables toolbar to the page-head band
+  // (#bans-add-btn); the action itself is unchanged and reused as-is.
+  const addBanAction = function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    const ban_modal = $("#modal-ban-ips");
+    const modal = new bootstrap.Modal(ban_modal);
+    modal.show();
   };
+  $("#bans-add-btn").on("click", addBanAction);
 
   $.fn.dataTable.ext.buttons.unban_ips = {
     text: `<span class="tf-icons bx bxs-buoy bx-18px me-2"></span><span data-i18n="button.unban">${t(

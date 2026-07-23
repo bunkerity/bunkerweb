@@ -1299,6 +1299,17 @@ a.courier-prime:hover {
   font-family: var(--font-don-jose);
 }
 
+/* Don Jose is an all-caps display face: its lowercase codepoints carry capital
+   letterforms, so pairing it with a button label renders ALL-CAPS (verified in-browser:
+   text-transform is "none", yet lowercase glyph widths match uppercase). The kit reads
+   sentence case only because it never loads the display font (body-font fallback). Match
+   the kit on primary CTAs -- keep the tracking accent (admin.css:155), drop the all-caps
+   face on button labels only. Numeric values elsewhere keep Don Jose (digits unaffected). */
+.btn.don-jose {
+  font-family: var(--bs-body-font-family);
+  letter-spacing: 0.06em;
+}
+
 .courier-prime {
   font-family: var(--font-courier-prime);
 }
@@ -3896,48 +3907,214 @@ code.bad-behavior-event__value {
   text-transform: uppercase;
 }
 
+/* Row-action icon buttons -- small, neutral by default, colored on hover/variant
+   for the action's intent (danger/success/info/ban). Ported from the design-system
+   kit (ui_kits/admin/app.css:372-397) and adapted to this app's shipped tokens
+   (kit's --bw-theme -> --bs-primary, kit's :root[data-theme="dark"] ->
+   [data-bs-theme="dark"], the attribute this app's theme toggle actually sets). */
+.icon-btn {
+  align-items: center;
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 6px;
+  color: var(--bw-fg-2);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  height: 34px;
+  justify-content: center;
+  transition: all 0.15s;
+  width: 34px;
+}
+
+.icon-btn:hover {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+/* Not part of the kit port (its static mockup never renders a disabled row-action) --
+   added so the draft/readonly-gated actions this app already has (Access while
+   draft, Clone/Convert/Delete while readonly) keep behaving once they lose the
+   `.btn` class that used to carry Bootstrap's `.btn.disabled` pointer-events rule. */
+.icon-btn.disabled,
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+[data-bs-theme="dark"] .icon-btn {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* .icon-btn.primary -- solid CTA treatment (not used by the row-actions swapped
+   in this pass, which all map to the neutral default per the kit's own
+   tables.js row-actions examples; kept available for future callers). */
+.icon-btn.primary {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+
+.icon-btn.primary:hover {
+  background: var(--bs-bw-green);
+  border-color: var(--bs-bw-green);
+}
+
+[data-bs-theme="dark"] .icon-btn.primary {
+  background: #2c5d78;
+  border-color: #2c5d78;
+  color: #d6ecf5;
+}
+
+[data-bs-theme="dark"] .icon-btn.primary:hover {
+  background: #36748f;
+  border-color: #36748f;
+  color: #ecf6fb;
+}
+
+.icon-btn.danger {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+}
+
+.icon-btn.danger:hover {
+  background: var(--bs-danger);
+  border-color: var(--bs-danger);
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.danger {
+  border-color: var(--bs-danger);
+}
+
+/* .icon-btn.ban -- Ban action: a distinct deeper crimson, so it reads apart
+   from the bright delete/trash red. */
+.icon-btn.ban {
+  border-color: #a11043;
+  color: #a11043;
+}
+
+.icon-btn.ban:hover {
+  background: #a11043;
+  border-color: #a11043;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.ban {
+  border-color: rgba(255, 125, 166, 0.5);
+  color: #ff7da6;
+}
+
+[data-bs-theme="dark"] .icon-btn.ban:hover {
+  background: #a11043;
+  border-color: #a11043;
+  color: #fff;
+}
+
+/* .icon-btn.success -- green action (e.g. Reload/Run) */
+.icon-btn.success {
+  border-color: color-mix(in srgb, #137a4c 55%, var(--bw-border));
+  color: #137a4c;
+}
+
+.icon-btn.success:hover {
+  background: #137a4c;
+  border-color: #137a4c;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.success {
+  border-color: rgba(140, 224, 168, 0.45);
+  color: #8ce0a8;
+}
+
+[data-bs-theme="dark"] .icon-btn.success:hover {
+  background: #137a4c;
+  border-color: #137a4c;
+  color: #fff;
+}
+
+/* .icon-btn.info -- blue action (e.g. Download/Export) */
+.icon-btn.info {
+  border-color: color-mix(in srgb, var(--bs-primary) 55%, var(--bw-border));
+  color: var(--bs-primary);
+}
+
+.icon-btn.info:hover {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.info {
+  border-color: rgba(125, 196, 230, 0.45);
+  color: #7dc4e6;
+}
+
+[data-bs-theme="dark"] .icon-btn.info:hover {
+  background: #2c5d78;
+  border-color: #2c5d78;
+  color: #ecf6fb;
+}
+
+/* Unified row-actions cell layout (used in every table with an "Actions" column) --
+   ported from kit app.css:1218. */
+.table .row-actions {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.table th.actions-col,
+.table td.actions-col {
+  text-align: right;
+}
+
+.table td.actions-col {
+  white-space: nowrap;
+}
+
+/* KPI tile -- kit .mini-tile anatomy (app.css:259-262): uppercase muted label, plain
+   navy Don Jose value, muted caption. The round-2 accent top-border + colour-coded
+   value are gone; the bw-kpi-tile-<color> modifier classes the macro still emits are
+   now inert hooks (kept for backward-compatible callers). */
 .bw-kpi-tile {
-  --bw-kpi-accent: var(--bs-primary);
   background: var(--bw-bg-card);
   overflow: hidden;
 }
 
-.bw-kpi-tile::before {
-  background: var(--bw-kpi-accent);
-  content: "";
-  height: 0.2rem;
-  inset: 0 0 auto;
-  position: absolute;
+.bw-kpi-label {
+  align-items: center;
+  color: var(--bw-fg-3);
+  display: flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  gap: 0.375rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
 }
 
-.bw-kpi-tile-primary {
-  --bw-kpi-accent: var(--bs-primary);
+.bw-kpi-label .bx {
+  font-size: 0.95rem;
 }
 
-.bw-kpi-tile-secondary {
-  --bw-kpi-accent: var(--bs-secondary);
-}
-
-.bw-kpi-tile-bw-green,
-.bw-kpi-tile-success {
-  --bw-kpi-accent: var(--bs-success);
-}
-
-.bw-kpi-tile-warning {
-  --bw-kpi-accent: var(--bs-warning);
-}
-
-.bw-kpi-tile-danger {
-  --bw-kpi-accent: var(--bs-danger);
-}
-
-.bw-kpi-tile-info {
-  --bw-kpi-accent: var(--bs-info);
-}
-
-.bw-kpi-tile > .bx,
 .bw-kpi-value {
-  color: var(--bw-kpi-accent);
+  color: var(--bs-primary);
+  font-size: 1.75rem;
+  line-height: 1.05;
+}
+
+.bw-kpi-caption {
+  color: var(--bw-fg-3);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+[data-bs-theme="dark"] .bw-kpi-value {
+  color: #6fa8c4;
 }
 
 .bw-stat-pct {
@@ -4279,4 +4456,370 @@ code.bad-behavior-event__value {
 
 .bw-input-list-modal-scroll {
   max-height: 60vh;
+}
+
+/* ============================================================================
+   Design-kit fidelity pass — sidebar + templates page
+   Ports component rules from ui_kits/admin/{admin.css,app.css}, remapped to this
+   app's shipped tokens (kit --bw-theme -> --bs-primary, kit :root[data-theme=dark]
+   -> [data-bs-theme="dark"], the attribute this app's theme toggle actually sets).
+   ============================================================================ */
+
+/* --- Sidebar active item: kit treatment (admin.css:56-62). The 3px navy
+   left accent + padding compensation already ship in theme-default.css:1069;
+   here we only align the fill + weight to the kit (bg rgba(11,53,74,.08),
+   font-weight 600). Extra .bg-menu-theme on .layout-menu (same element) lifts
+   specificity above theme-default's !important fill. */
+.layout-menu.bg-menu-theme
+  .menu-inner
+  > .menu-item.active
+  > .menu-link:not(.menu-toggle) {
+  background-color: rgba(11, 53, 74, 0.08) !important;
+  font-weight: 600;
+}
+[data-bs-theme="dark"]
+  .layout-menu.bg-menu-theme
+  .menu-inner
+  > .menu-item.active
+  > .menu-link:not(.menu-toggle) {
+  background-color: rgba(106, 193, 224, 0.1) !important;
+}
+
+/* --- Sidebar footer: version + edition line (kit .menu-footer, admin.css:99-104).
+   Pinned to the bottom of the flex-column aside (menu-inner is flex:1). */
+.layout-menu .menu-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 12px 20px;
+  border-top: 1px solid var(--bw-border);
+  font-size: 11px;
+  color: var(--bw-fg-3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.layout-menu .menu-footer .bx {
+  font-size: 15px;
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .layout-menu .menu-footer .bx {
+  color: #6fa8c4;
+}
+
+/* --- Page-head band (kit .page-head, admin.css:138-142): breadcrumb + H1. */
+.bw-page-head-crumbs {
+  font-size: 12px;
+  color: var(--bw-fg-3);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.bw-page-head-crumbs .sep {
+  opacity: 0.6;
+}
+.bw-page-head-crumbs .is-current {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+.bw-page-head-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .bw-page-head-title,
+[data-bs-theme="dark"] .bw-page-head-crumbs .is-current {
+  color: #6fa8c4;
+}
+.bw-page-head-crumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+.bw-page-head-crumbs a:hover {
+  color: var(--bs-primary);
+  text-decoration: underline;
+}
+[data-bs-theme="dark"] .bw-page-head-crumbs a:hover {
+  color: #6fa8c4;
+}
+
+/* --- Panel/chart header (kit .chart-card h3 + .sub, app.css:336-339): opt-in via the
+   card() macro's uppercase=true. Small UPPERCASE muted label + muted subtitle line. */
+.bw-panel-title {
+  color: var(--bw-fg-3);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.bw-panel-sub {
+  color: var(--bw-fg-3);
+  font-size: 0.75rem;
+}
+[data-bs-theme="dark"] .bw-panel-title {
+  color: #d6dee5;
+  font-weight: 600;
+}
+[data-bs-theme="dark"] .bw-panel-sub {
+  color: #8fa0ad;
+}
+
+/* --- Plugin marketplace identity marks (curated Tabler-derived set, src/ui/app/static/img/plugins/).
+   Two <img> ship per card: the navy mark shows in light theme, the -white mark in dark. Mirrors the
+   bw-logo-light/dark pattern, hooked on [data-bs-theme="dark"] like the rest of this fidelity block. */
+.plugin-mark {
+  flex-shrink: 0;
+}
+.plugin-mark-dark {
+  display: none;
+}
+[data-bs-theme="dark"] .plugin-mark-light {
+  display: none;
+}
+[data-bs-theme="dark"] .plugin-mark-dark {
+  display: inline-block;
+}
+
+/* --- Topbar icon buttons (kit .topbar-btn, admin.css:127-133): compact ghost square
+   used by the help "?" dropdown, notifications bell and news icon in navbar.html. */
+.bw-topbar-btn {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0.5rem;
+  color: var(--bw-fg-2);
+  cursor: pointer;
+  display: inline-flex;
+  height: 2rem;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  width: 2rem;
+}
+.bw-topbar-btn:hover,
+.bw-topbar-btn:focus-visible,
+.bw-topbar-btn.show {
+  background: rgba(11, 53, 74, 0.06);
+  color: var(--bs-primary);
+}
+.bw-topbar-btn .bx {
+  font-size: 1.35rem;
+}
+[data-bs-theme="dark"] .bw-topbar-btn {
+  color: var(--bw-fg-2);
+}
+[data-bs-theme="dark"] .bw-topbar-btn:hover,
+[data-bs-theme="dark"] .bw-topbar-btn:focus-visible,
+[data-bs-theme="dark"] .bw-topbar-btn.show {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfe3ee;
+}
+
+/* --- Upgrade-to-PRO chip (subtle green accent per brand rule: green only for PRO/link
+   accents, never generic primary). Replaces the loud buy-now pill in the topbar. */
+.bw-pro-chip {
+  align-items: center;
+  background: rgba(46, 172, 104, 0.1);
+  border: 1px solid rgba(46, 172, 104, 0.32);
+  border-radius: 999px;
+  color: var(--bs-bw-green);
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 600;
+  gap: 0.35rem;
+  line-height: 1.3;
+  padding: 0.25rem 0.7rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.bw-pro-chip:hover,
+.bw-pro-chip:focus-visible {
+  background: rgba(46, 172, 104, 0.18);
+  color: var(--bs-bw-green);
+}
+[data-bs-theme="dark"] .bw-pro-chip {
+  color: #8ce0a8;
+}
+
+/* --- Template card presentation (kit tplCard, configure.js:1317-1333). */
+.bw-tpl-icon {
+  font-size: 22px;
+  color: var(--bs-primary);
+  line-height: 1.3;
+}
+[data-bs-theme="dark"] .bw-tpl-icon {
+  color: #6fa8c4;
+}
+.bw-tpl-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--bw-fg-1);
+  line-height: 1.3;
+  word-break: break-word;
+}
+.bw-tpl-desc {
+  font-size: 13px;
+  color: var(--bw-fg-3);
+  min-height: 40px;
+  margin-top: 2px;
+}
+
+/* --- Typed template tag badges (kit .tpl-badge, app.css:2007-2032). */
+.tpl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  border: 1px solid var(--bw-border);
+  background: var(--bw-bg-subtle);
+  color: var(--bw-fg-2);
+  cursor: default;
+}
+.tpl-badge .bx {
+  font-size: 13px;
+}
+.tpl-badge-config {
+  color: var(--bs-primary);
+  border-color: rgba(11, 53, 74, 0.3);
+  background: rgba(11, 53, 74, 0.08);
+}
+.tpl-badge-plugin {
+  color: var(--bs-bw-green);
+  border-color: rgba(46, 172, 104, 0.32);
+  background: rgba(46, 172, 104, 0.1);
+}
+.tpl-badge-feature {
+  color: #a86400;
+  border-color: rgba(255, 171, 0, 0.45);
+  background: rgba(255, 171, 0, 0.14);
+}
+[data-bs-theme="dark"] .tpl-badge-config {
+  color: #8fc4e2;
+}
+[data-bs-theme="dark"] .tpl-badge-plugin {
+  color: #8ce0a8;
+}
+[data-bs-theme="dark"] .tpl-badge-feature {
+  color: #ffcd6b;
+}
+
+/* --- Tag chips: navy outline, uppercase (kit .tag-chip, admin.css:265-268).
+   Used for the "N svc" usage chip and the "+N" badge-overflow chip. */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--bs-primary);
+  color: var(--bs-primary);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--bw-bg-card);
+}
+.tag-chip.green {
+  border-color: var(--bs-bw-green);
+  color: var(--bs-bw-green);
+}
+.tag-chip.muted {
+  border-color: var(--bw-border);
+  color: var(--bw-fg-3);
+}
+.tag-chip .bx {
+  font-size: 12px;
+}
+[data-bs-theme="dark"] .tag-chip {
+  color: #8fc4e2;
+  border-color: rgba(143, 196, 226, 0.5);
+}
+[data-bs-theme="dark"] .tag-chip.muted {
+  color: var(--bw-fg-3);
+  border-color: var(--bw-border);
+}
+
+/* --- Kit btn-light (admin.css:152-153), scoped to the templates grid so the
+   card "Edit"/"View" action reads as a subtle navy-tinted button without
+   touching Bootstrap's global .btn-light. */
+#templates-grid .btn-light {
+  background: rgba(11, 53, 74, 0.05);
+  color: var(--bs-primary);
+  border-color: rgba(11, 53, 74, 0.1);
+}
+#templates-grid .btn-light:hover {
+  background: rgba(11, 53, 74, 0.1);
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] #templates-grid .btn-light {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cfe3ee;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+[data-bs-theme="dark"] #templates-grid .btn-light:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #eaf4fa;
+}
+
+/* --- Card anatomy: header band (icon + short title + SVC chip) split from the body
+   by a divider, then a padded body (kit tplCard .card-header / .card-body,
+   configure.js:1318-1332). The card() macro renders content flush inside .card, so
+   padding lives on these two children. */
+.bw-tpl-card {
+  display: flex;
+  flex-direction: column;
+}
+.bw-tpl-header {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--bw-border);
+}
+.bw-tpl-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding: 1rem;
+}
+/* Description grows so the action row sits flush at the card bottom across the grid. */
+.bw-tpl-body .bw-tpl-desc {
+  flex: 1 0 auto;
+}
+
+/* --- Neutral card icon buttons (clone / delete): muted ghost at rest, tinted on
+   hover, delete goes danger-red only on hover -- replaces the loud red/blue outlined
+   boxes that broke the kit look. */
+#templates-grid .bw-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid var(--bw-border);
+  background: transparent;
+  color: var(--bw-fg-3);
+  line-height: 1;
+}
+#templates-grid .bw-icon-btn:hover {
+  background: rgba(11, 53, 74, 0.06);
+  color: var(--bs-primary);
+  border-color: rgba(11, 53, 74, 0.22);
+}
+#templates-grid .bw-icon-btn-danger:hover {
+  background: rgba(214, 57, 57, 0.08);
+  color: var(--bs-danger);
+  border-color: rgba(214, 57, 57, 0.35);
+}
+[data-bs-theme="dark"] #templates-grid .bw-icon-btn {
+  color: var(--bw-fg-3);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+[data-bs-theme="dark"] #templates-grid .bw-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfe3ee;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+[data-bs-theme="dark"] #templates-grid .bw-icon-btn-danger:hover {
+  background: rgba(255, 99, 99, 0.14);
+  color: #ff8a8a;
+  border-color: rgba(255, 99, 99, 0.4);
 }

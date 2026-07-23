@@ -3,11 +3,14 @@
 {% from "components/table-toolbar.html" import table_toolbar %}
 {% from "components/modal.html" import modal %}
 {% from "components/button.html" import button %}
-{% from "components/title.html" import title %}
 {% from "components/tabs.html" import tabs, tab_pane %}
 {% from "components/range-picker.html" import range_picker %}
 {% from "components/tile.html" import tile %}
 {% from "components/chart-area.html" import chart_area %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -40,7 +43,10 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    {{ title(label="Reports", i18n_key="navigation.reports", level="h1", icon="bxs-flag-checkered", subtitle="Security reports generated from blocked requests across your BunkerWeb instances — search, filter, export, and ban offending IPs directly from the table.", subtitle_i18n_key="reports.subtitle", classes="mb-4") }}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {{ page_head(title="Reports", title_i18n="navigation.reports",
+                breadcrumb=[("Overview", "navigation.overview", none),
+                            ("Reports", "navigation.reports", none)]) }}
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         {{ tabs(id="reports-tabs", items=[
             {"id": "overview", "i18n": "reports.tab.overview", "label": "Overview", "icon": "bx-line-chart"},

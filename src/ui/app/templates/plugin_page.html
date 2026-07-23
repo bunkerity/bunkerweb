@@ -1,5 +1,8 @@
 {% from 'macros/docs_link.html' import docs_url %}
+{% from "components/page-head.html" import page_head %}
 {% extends "dashboard.html" %}
+{# page-head band owns the breadcrumb + plugin H1, so drop the dashboard shell's legacy header row. #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -11,37 +14,29 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    <div class="card p-1 mb-4 sticky-card text-nowrap">
-        <div class="card-header d-flex justify-content-between align-items-center mw-100">
-            <div class="pt-1 flex-grow-1 me-2" style="min-width: 0">
-                <h5 class="card-title d-inline don-jose{{ plugin_types[plugin['type']].get('text-class', '') }}{{ plugin_types[plugin['type']].get('title-class', '') }}">
-                    {{ plugin["name"] }}&nbsp;－&nbsp;v{{ plugin["version"]
-                    }}&nbsp;－&nbsp;{{ plugin_types[plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '"
-     alt="Pro plugin"
-     width="18px"
-     height="15.5px" />') |safe }}
-                </h5>
-                <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin["description"] }}</p>
-            </div>
-            <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
-                {% if plugin['type'] == 'core' %}
-                    {% set plugin_endpoint = "/features" %}
-                    {% set plugin_fragment = '#' + ('global-settings' if plugin['id'] == 'general' else plugin['id']) %}
-                {% else %}
-                    {% set plugin_endpoint = "/plugins" %}
-                    {% set plugin_fragment = "" %}
-                {% endif %}
-                <a href="{{ docs_url(plugin_endpoint, plugin_fragment) }}"
-                   class="btn btn-sm btn-primary rounded-pill ms-2 docs-link"
-                   target="_blank"
-                   rel="noopener"
-                   data-endpoint="{{ plugin_endpoint }}"
-                   data-fragment="{{ plugin_fragment }}">
-                    <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
-                </a>
-            </div>
-        </div>
-    </div>
+    {% if plugin['type'] == 'core' %}
+        {% set plugin_endpoint = "/features" %}
+        {% set plugin_fragment = '#' + ('global-settings' if plugin['id'] == 'general' else plugin['id']) %}
+    {% else %}
+        {% set plugin_endpoint = "/plugins" %}
+        {% set plugin_fragment = "" %}
+    {% endif %}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {% call page_head(title=plugin["name"],
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Plugins", "navigation.plugins", url_for("plugins")),
+                                  (plugin["name"], none, none)]) %}
+        <span class="text-muted small courier-prime me-1">v{{ plugin["version"] }}</span>
+        <span class="d-inline-flex align-items-center me-1">{{ plugin_types[plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '" alt="Pro plugin" width="18px" height="15.5px" />') |safe }}</span>
+        <a href="{{ docs_url(plugin_endpoint, plugin_fragment) }}"
+           class="btn btn-sm btn-primary rounded-pill docs-link"
+           target="_blank"
+           rel="noopener"
+           data-endpoint="{{ plugin_endpoint }}"
+           data-fragment="{{ plugin_fragment }}">
+            <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
+        </a>
+    {% endcall %}
     {% set base_flags_url = url_for('static', filename='img/flags') %}
     <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
     {% if not is_used %}

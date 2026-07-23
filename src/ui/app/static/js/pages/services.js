@@ -149,12 +149,6 @@ $(document).ready(function () {
 
   layout.topStart.buttons = [
     {
-      extend: "create_service",
-    },
-    {
-      extend: "import_services",
-    },
-    {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3)):not(:last-child)",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
@@ -300,54 +294,27 @@ $(document).ready(function () {
       .get();
   };
 
-  $.fn.dataTable.ext.buttons.create_service = {
-    text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.create_service"> ${t(
-      "button.create_service",
-      "Create new service",
-    )}</span>`,
-    className: `btn btn-sm rounded me-2 btn-bw-green${
-      isReadOnly ? " disabled" : ""
-    }`,
-    action: function () {
-      if (isReadOnly) {
-        alert(
-          t(
-            "alert.readonly_mode",
-            "This action is not allowed in read-only mode.",
-          ),
-        );
-        return;
-      }
-      window.location.href = `${window.location.href}/new`;
-    },
-  };
-
-  $.fn.dataTable.ext.buttons.import_services = {
-    text: `<span class="tf-icons bx bx-import bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.import_services">${t(
-      "button.import_services",
-      "Import services",
-    )}</span>`,
-    className: `btn btn-sm rounded btn-outline-bw-green me-2${
-      isReadOnly ? " disabled" : ""
-    }`,
-    action: function () {
-      if (isReadOnly) {
-        alert(
-          t(
-            "alert.readonly_mode",
-            "This action is not allowed in read-only mode.",
-          ),
-        );
-        return;
-      }
-      importFileInput.val("");
-      importFileList.empty();
-      const modalInstance = new bootstrap.Modal(
-        document.getElementById("modal-import-services"),
+  // "Create service" moved to the page-head band as a real link (#services-create-btn,
+  // href="{{ url_for('services.services_service_page', service='new') }}") -- no JS needed.
+  // "Import services" moved to the page-head band (#services-import-btn); the action
+  // itself is unchanged and reused as-is.
+  $("#services-import-btn").on("click", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
       );
-      modalInstance.show();
-    },
-  };
+      return;
+    }
+    importFileInput.val("");
+    importFileList.empty();
+    const modalInstance = new bootstrap.Modal(
+      document.getElementById("modal-import-services"),
+    );
+    modalInstance.show();
+  });
 
   $.fn.dataTable.ext.buttons.convert_services = {
     action: function (e, dt, node) {

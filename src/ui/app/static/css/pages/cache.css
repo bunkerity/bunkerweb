@@ -1,0 +1,25 @@
+/* Cache page — scope + job pills (kit pages/operate.js cacheScopeCell / job chips).
+ *
+ * The Global scope badge carries data-i18n="scope.global"; i18next rewrites its
+ * text with jQuery .text(), which would wipe a real <i> child. So its globe icon
+ * is drawn as a ::before pseudo-element instead — generated content survives the
+ * text rewrite, and the badge stays the single <span> the cache.js delete-select
+ * normalization looks for ($cell.find("span").attr("data-i18n") === "scope.global").
+ */
+.cache-scope-global::before {
+  font-family: "boxicons";
+  font-weight: 400;
+  font-style: normal;
+  content: "\eaf8"; /* bx-globe */
+  margin-right: 0.35em;
+  font-size: 0.95em;
+  line-height: 1;
+  vertical-align: -0.05em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Job name reads as a subtle pill; keep it monospace-ish and unobtrusive so the
+ * file name stays the row's primary anchor. */
+.cache-job-pill {
+  font-weight: 500;
+}

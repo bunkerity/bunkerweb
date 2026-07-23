@@ -213,9 +213,7 @@ $(document).ready(function () {
   }
 
   layout.topStart.buttons = [
-    {
-      extend: "create_config",
-    },
+    // "Create custom config" moved to the page-head band (configs.html); import stays here.
     {
       extend: "import_configs",
     },

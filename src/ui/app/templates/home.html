@@ -4,6 +4,12 @@
 {% from "components/chart-area.html" import chart_area %}
 {% from "components/chart-donut.html" import chart_donut %}
 {% from "components/geo-map.html" import geo_map %}
+{% from "components/range-picker.html" import range_picker %}
+{% from "components/checklist.html" import checklist %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the title + head actions, so suppress the dashboard
+   shell's legacy breadcrumb/mode row (kills the duplicated header). #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <link rel="preload"
           href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
@@ -17,84 +23,89 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
           nonce="{{ style_nonce }}" />
+    <!-- Flatpickr (range-picker.js "Custom" range) -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
+          nonce="{{ style_nonce }}" />
+    {% if theme == 'dark' %}
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
+              nonce="{{ style_nonce }}" />
+    {% endif %}
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/pages/home.css') }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    <div class="home-period-floating" role="status" aria-live="polite">
-        <div class="home-period-floating__card shadow-sm">
-            <i class='bx bx-calendar-event home-period-floating__icon'></i>
-            <div class="home-period-floating__text">
-                <span class="home-period-floating__label"
-                      data-i18n="dashboard.window.title">Dashboard window</span>
-                <strong data-i18n="dashboard.window.last_days"
-                        data-i18n-options='{"days": {{ home_stats_days }}}'>Last {{ home_stats_days }} days</strong>
+    {# Page-head band: welcome title (name in the Don Jose accent span -- kept a sibling of
+       the data-i18n greeting span, since i18n.js applyTranslations() sets .text() and would
+       otherwise flatten the accent span away) + head actions (Reload / range-picker / Get
+       support). #}
+    {% set welcome_title %}<span data-i18n="dashboard.welcome.greeting">Welcome back,</span> <span class="don-jose">{{ current_user.get_id() }}</span>{% endset %}
+    {% call page_head(title=welcome_title) %}
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary d-flex align-items-center">
+            <i class="bx bx-refresh" aria-hidden="true"></i>&nbsp;<span data-i18n="button.reload">Reload</span>
+        </a>
+        {{ range_picker(id="home-range", active="7d") }}
+        <a href="{{ url_for('support') }}" class="btn btn-primary don-jose d-flex align-items-center">
+            <i class="bx bx-support" aria-hidden="true"></i>&nbsp;<span data-i18n="link.get_support">Get support</span>
+        </a>
+    {% endcall %}
+    {# Hero band: Plan / System RAM / Requests-blocked trend -- the single source of truth
+       for these three headline stats (the duplicated lower Plan + RAM cards are gone). #}
+    {% set ram_color = "danger" if memory_info.memory_state == "danger" else "warning" if memory_info.memory_state == "low" else "secondary" if memory_info.memory_state == "medium" else "bw-green" %}
+    {% set ram_caption %}
+        <span data-i18n="dashboard.card.ram.usage"
+              data-i18n-options='{"percent": {{ memory_info.used_percent|round(1) }}}'>{{ memory_info.used_percent|round(1) }}% used</span>
+        {% if memory_info.memory_state == 'danger' %}
+            <br />
+            <i class='bx bxs-radiation'></i> <span data-i18n="dashboard.card.ram.critical_high">Critical: System is running out of memory!</span>
+        {% elif memory_info.memory_state == 'low' %}
+            <br />
+            <i class='bx bx-error-alt'></i> <span data-i18n="dashboard.card.ram.warning_low">Warning: Low memory may affect performance</span>
+        {% elif memory_info.memory_state == 'medium' %}
+            <br />
+            <i class='bx bx-info-circle'></i> <span data-i18n="dashboard.card.ram.info_medium">Consider upgrading to 16GB+ for production use</span>
+        {% else %}
+            <br />
+            <i class='bx bx-check-circle'></i> <span data-i18n="dashboard.card.ram.good_high">Excellent memory for production environments</span>
+        {% endif %}
+    {% endset %}
+    {% set plan_caption %}<a class="link-underline-primary" href="{{ url_for('pro') }}">{% if is_pro_version %}<span data-i18n="link.more_info">More info</span>{% else %}<span data-i18n="link.upgrade">Upgrade?</span>{% endif %}</a>{% endset %}
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            {{ tile(title="Plan", value=("PRO" if is_pro_version else "FREE"), title_i18n="dashboard.card.plan.title", color=("primary" if is_pro_version else "bw-green"), icon="bxs-rocket", caption=plan_caption) }}
+        </div>
+        <div class="col-md-4">
+            {{ tile(title="System RAM", value=memory_info.used_gb ~ "GB / " ~ memory_info.total_gb ~ "GB", title_i18n="dashboard.card.ram.title", color=ram_color, icon="bx-chip", caption=ram_caption) }}
+        </div>
+        <div class="col-md-4">
+            <div id="home-tile-trend">
+                {{ tile(title="Blocked requests trend", value="—", title_i18n="dashboard.tile.trend", color="secondary", icon="bx-line-chart") }}
             </div>
         </div>
     </div>
-    <div class="row g-4">
-        <div class="col-md-3 mb-2">
-            <div class="card p-4 position-relative shadow-sm rounded-3 h-100 text-white {% if is_pro_version %}bg-primary{% else %}bg-bw-green{% endif %}">
-                {% if is_pro_version %}
-                    <img class='position-absolute top-0 end-0 m-3'
-                         src="{{ pro_diamond_url }}"
-                         alt="Pro plugin"
-                         width="24px">
-                {% else %}
-                    <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3'></i>
-                {% endif %}
-                <p class="ps-4 fs-4 mb-2 text-white h-100">
-                    <span data-i18n="dashboard.card.plan.title">Plan</span>
-                    <br />
-                    <span class="fs-3 fw-bold don-jose">
-                        {% if is_pro_version %}
-                            <span data-i18n="plan.pro">PRO</span>
-                        {% else %}
-                            <span data-i18n="plan.free">FREE</span>
-                        {% endif %}
-                    </span>
-                </p>
-                <a class="ps-4 text-decoration-underline text-white-80" href="{{ url_for('pro') }}">
-                    {% if is_pro_version %}
-                        <span data-i18n="link.more_info">More info</span>
-                    {% else %}
-                        <span data-i18n="link.upgrade">Upgrade?</span>
-                    {% endif %}
-                </a>
-            </div>
-        </div>
-        <div class="col-md-3 mb-2">
-            {% set ram_color = "danger" if memory_info.memory_state == "danger" else "warning" if memory_info.memory_state == "low" else "secondary" if memory_info.memory_state == "medium" else "bw-green" %}
-            {% set ram_caption %}
-                <span data-i18n="dashboard.card.ram.usage"
-                      data-i18n-options='{"percent": {{ memory_info.used_percent|round(1) }}}'>{{ memory_info.used_percent|round(1) }}% used</span>
-                {% if memory_info.memory_state == 'danger' %}
-                    <br />
-                    <i class='bx bxs-radiation'></i> <span data-i18n="dashboard.card.ram.critical_high">Critical: System is running out of memory!</span>
-                {% elif memory_info.memory_state == 'low' %}
-                    <br />
-                    <i class='bx bx-error-alt'></i> <span data-i18n="dashboard.card.ram.warning_low">Warning: Low memory may affect performance</span>
-                {% elif memory_info.memory_state == 'medium' %}
-                    <br />
-                    <i class='bx bx-info-circle'></i> <span data-i18n="dashboard.card.ram.info_medium">Consider upgrading to 16GB+ for production use</span>
-                {% else %}
-                    <br />
-                    <i class='bx bx-check-circle'></i> <span data-i18n="dashboard.card.ram.good_high">Excellent memory for production environments</span>
-                {% endif %}
-            {% endset %}
-            {{ tile(title="System RAM", value=memory_info.used_gb ~ "GB / " ~ memory_info.total_gb ~ "GB", title_i18n="dashboard.card.ram.title", color=ram_color, icon="bx-chip", caption=ram_caption) }}
-        </div>
-        <div class="col-md-2 mb-2">
+    {# Picker-driven blocked-requests timeline (home-dashboard.js). #}
+    {{ chart_area(id="home-timeseries-chart", title="Blocked requests over time (selected range)", title_key="dashboard.chart.timeseries.title", subtitle="Selected range", subtitle_key="dashboard.panel.timeseries_sub", uppercase=true, height=280, card_classes="mb-4") }}
+    {# Primary KPI cluster -- one clean 4-tile row of navigable counts. #}
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
             {% set ns = namespace(up_instances=0, down_instances=0, loading_instances=0) %}
+            {# Only status 'up' is healthy; 'down' and 'failover' (degraded nginx) both count as unhealthy, matching the ban/unban propagation filter. #}
             {% for instance in instances %}
                 {% if instance['status'] == 'up' %}
                     {% set ns.up_instances = ns.up_instances + 1 %}
-                {% elif instance['status'] == 'down' %}
-                    {% set ns.down_instances = ns.down_instances + 1 %}
-                {% else %}
+                {% elif instance['status'] == 'loading' %}
                     {% set ns.loading_instances = ns.loading_instances + 1 %}
+                {% else %}
+                    {% set ns.down_instances = ns.down_instances + 1 %}
                 {% endif %}
             {% endfor %}
             {% set instances_caption %}<span data-i18n="dashboard.card.instances.status" data-i18n-options='{"up": {{ ns.up_instances }}, "down": {{ ns.down_instances }}, "loading": {{ ns.loading_instances }}}'>{{ ns.up_instances }} up / {{ ns.down_instances }} down / {{ ns.loading_instances }} loading</span>{% endset %}
@@ -102,7 +113,7 @@
                 {{ tile(title="Instances", value=('0' if instances|length < 10 else '') ~ instances|length, title_i18n="dashboard.card.instances.title", color="", icon="bx-server", icon_color="text-secondary", caption=instances_caption) }}
             </a>
         </div>
-        <div class="col-md-2 mb-2">
+        <div class="col-md-3">
             {% set ns = namespace(online_services=0, draft_services=0) %}
             {% for service in services %}
                 {% if service['is_draft'] %}
@@ -116,7 +127,7 @@
                 {{ tile(title="Services", value=('0' if services|length < 10 else '') ~ services|length, title_i18n="dashboard.card.services.title", color="", icon="bx-cube", icon_color="text-secondary", caption=services_caption) }}
             </a>
         </div>
-        <div class="col-md-2 mb-2">
+        <div class="col-md-3">
             {% set ns = namespace(core_plugins=0, external_plugins=0, pro_plugins=0) %}
             {% for plugin in plugins.values() %}
                 {% if plugin['type'] == 'core' %}
@@ -132,48 +143,103 @@
                 {{ tile(title="Plugins", value=('0' if plugins|length < 10 else '') ~ plugins|length, title_i18n="dashboard.card.plugins.title", color="", icon="bx-plug", icon_color="text-secondary", caption=plugins_caption) }}
             </a>
         </div>
-        <div class="col-md-6 mb-2">
+        <div class="col-md-3">
+            <a role="button" href="{{ url_for('jobs') }}" class="home-nav-tile d-block h-100">
+                {{ tile(title="Scheduled jobs", value=jobs_count, title_i18n="dashboard.tile.jobs", color=none, icon="bx-task", icon_color="text-secondary") }}
+            </a>
+        </div>
+    </div>
+    {# Security KPI cluster -- one clean 4-tile row of block/ban/request totals. #}
+    {% set ns = namespace(blocked_requests=0) %}
+    {% for status, count in request_errors.items() %}
+        {% if status in (403, 429, 444) %}
+            {% set ns.blocked_requests = ns.blocked_requests + count %}
+        {% endif %}
+    {% endfor %}
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            {{ tile(title="Bans active", value=human_readable_number(bans_active), title_i18n="dashboard.tile.bans_active", color=none, icon="bx-block", icon_color="text-danger") }}
+        </div>
+        <div class="col-md-3">
+            {{ tile(title="Blocked Unique IPs", value=human_readable_number(blocked_unique_ips), title_i18n="dashboard.card.blocked_unique_ips.title", color=none, icon="bx-globe", icon_color="text-danger") }}
+        </div>
+        <div class="col-md-3">
             {{ tile(title="Total Requests", value=human_readable_number(request_errors.values() |sum), title_i18n="dashboard.card.total_requests.title", color="secondary", icon="bx-broadcast") }}
         </div>
-        <div class="col-md-3 mb-2">
-            {% set ns = namespace(blocked_requests=0) %}
-            {% for status, count in request_errors.items() %}
-                {% if status in (403, 429, 444) %}
-                    {% set ns.blocked_requests = ns.blocked_requests + count %}
-                {% endif %}
-            {% endfor %}
+        <div class="col-md-3">
             <a role="button"
                href="{{ url_for('loading', next=url_for('reports') ) }}"
                class="home-nav-tile home-nav-tile-danger d-block h-100">
                 {{ tile(title="Blocked Requests", value=human_readable_number(ns.blocked_requests), title_i18n="dashboard.card.blocked_requests.title", color="", icon="bx-block", icon_color="text-danger") }}
             </a>
         </div>
-        <div class="col-md-3 mb-2">
-            {{ tile(title="Blocked Unique IPs", value=human_readable_number(blocked_unique_ips), title_i18n="dashboard.card.blocked_unique_ips.title", color=none, icon="bx-globe", icon_color="text-danger") }}
-        </div>
-        <div class="col-md-7 row g-4 m-0 p-0">
-            <div class="col-12 col-lg-6 mt-2 mb-2">
-                {{ chart_donut(id="requests-stats", title="Request Status Distribution", title_key="dashboard.chart.request_status.title", series=request_errors, card_classes="h-100") }}
-            </div>
-            <div class="col-12 col-lg-6 mt-2 mb-2">
-                {% if request_ips %}
-                    {{ chart_donut(id="requests-ips", title="Top 10 Blocked IPs", title_key="dashboard.chart.top_blocked_ips.title", series=request_ips, card_classes="h-100") }}
-                {% else %}
-                    {% call card(classes="h-100", title="Top 10 Blocked IPs", title_key="dashboard.chart.top_blocked_ips.title", separator=false) %}
-                        <div class="d-flex align-items-center justify-content-center h-100">
-                            <div class="text-center mt-2">
-                                <p class="g-3 p-2 text-primary rounded-3 fw-bold"
-                                   data-i18n="status.no_data">No data to show</p>
-                            </div>
+    </div>
+    {# The legacy widgets below stay a fixed home_stats_days aggregate (only the hero trend
+       tile + timeline chart above are picker-driven), so keep the honest window caption. #}
+    <p class="text-muted small mb-3"
+       data-i18n="dashboard.window.last_days"
+       data-i18n-options='{"days": {{ home_stats_days }}}'>Last {{ home_stats_days }} days</p>
+    {# Distribution + top IPs + top reasons. #}
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-4">
+            {% if request_ips %}
+                {{ chart_donut(id="requests-ips", title="Top 10 Blocked IPs", title_key="dashboard.chart.top_blocked_ips.title", subtitle="By request count", subtitle_key="dashboard.panel.top_ips_sub", uppercase=true, series=request_ips, card_classes="h-100") }}
+            {% else %}
+                {% call card(classes="h-100", title="Top 10 Blocked IPs", title_key="dashboard.chart.top_blocked_ips.title", subtitle="By request count", subtitle_key="dashboard.panel.top_ips_sub", uppercase=true, separator=false) %}
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="text-center mt-2">
+                            <p class="g-3 p-2 text-primary rounded-3 fw-bold"
+                               data-i18n="status.no_data">No data to show</p>
                         </div>
-                    {% endcall %}
-                {% endif %}
-            </div>
-            <div class="col-12 mt-2 mb-2">
-                {{ geo_map(id="requests-map", title="Blocked Requests by Country", title_key="dashboard.chart.blocked_request_countries.title", data=request_countries) }}
-            </div>
+                    </div>
+                {% endcall %}
+            {% endif %}
         </div>
-        <div class="col-md-5 mt-2 mb-2">
+        <div class="col-12 col-lg-4">
+            {{ chart_donut(id="requests-stats", title="Request Status Distribution", title_key="dashboard.chart.request_status.title", subtitle="HTTP response codes", subtitle_key="dashboard.panel.status_sub", uppercase=true, series=request_errors, card_classes="h-100") }}
+        </div>
+        <div class="col-12 col-lg-4">
+            {% call card(classes="h-100", title="Top reasons for blocks", title_key="dashboard.card.top_reasons.title", subtitle="By trigger rule", subtitle_key="dashboard.panel.reasons_sub", uppercase=true, separator=false) %}
+                {% if top_reasons %}
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            {% for row in top_reasons %}
+                                <tr>
+                                    <td><i class="bx bx-shield-quarter me-1 text-danger" aria-hidden="true"></i>{{ row.reason }}</td>
+                                    <td class="text-end font-monospace">{{ human_readable_number(row.count) }}</td>
+                                    <td class="text-end" style="width: 4.5rem">
+                                        <span class="badge bg-label-secondary">{{ row.pct }}%</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted mb-0" data-i18n="status.no_data">No data to show</p>
+                {% endif %}
+            {% endcall %}
+        </div>
+    </div>
+    {# Blocked requests world map. #}
+    {{ geo_map(id="requests-map", title="Blocked Requests by Country", title_key="dashboard.chart.blocked_request_countries.title", subtitle="Hover for details", subtitle_key="dashboard.panel.map_sub", uppercase=true, data=request_countries, card_classes="mb-4") }}
+    {# Blocking status over time (legacy stacked blocked-vs-allowed timeline). #}
+    {{ chart_area(id="requests-blocking", title="Blocking Status Over Time", title_key="dashboard.chart.blocking_status.title", subtitle="Blocked vs allowed", subtitle_key="dashboard.panel.blocking_sub", uppercase=true, series=time_buckets, height=400, card_classes="mb-4") }}
+    {# Onboarding checklist (hides once complete) + news. #}
+    {% set onboarding_done = is_initialized and first_config_saved and (services | length > 0) and mfa_enabled and is_pro_version %}
+    <div class="row g-4">
+        {% if not onboarding_done %}
+            <div class="col-lg-6">
+                {% call card(classes="h-100", title="Getting started", title_key="onboarding.title", icon="bx-rocket") %}
+                    {{ checklist(items=[
+                        {"text": "Install BunkerWeb on 1+ host", "i18n_key": "onboarding.item.install", "done": is_initialized and first_config_saved},
+                        {"text": "Register your first service", "i18n_key": "onboarding.item.service", "done": services | length > 0},
+                        {"text": "Activate MFA", "i18n_key": "onboarding.item.mfa", "done": mfa_enabled},
+                        {"text": "Activate BunkerWeb PRO", "i18n_key": "onboarding.item.pro", "done": is_pro_version},
+                    ]) }}
+                {% endcall %}
+            </div>
+        {% endif %}
+        <div class="col-lg-6">
             {% set news_header_right %}<a class="text-decoration-underline link-underline-primary"
    href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
    target="_blank"
@@ -208,9 +274,6 @@
                 </div>
             {% endcall %}
         </div>
-        <div class="col-12 mt-2 mb-2">
-            {{ chart_area(id="requests-blocking", title="Blocking Status Over Time", title_key="dashboard.chart.blocking_status.title", series=time_buckets, height=400, card_classes="") }}
-        </div>
     </div>
     <!-- / Content -->
 {% endblock %}
@@ -228,4 +291,13 @@
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/range-picker.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/home-dashboard.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

@@ -6,16 +6,25 @@
 {% from "components/empty-state.html" import empty_state %}
 {% from "components/modal.html" import modal %}
 {% from "components/search.html" import search %}
-{% from "components/title.html" import title %}
+{% from "components/page-head.html" import page_head %}
 {% block head %}
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/pages/groups.css') }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
+{# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
+   legacy breadcrumb row for this page. #}
+{% block page_head %}{% endblock %}
 {% block content %}
     {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
     {% set resource_groups_url = url_for("resource_groups") %}
-    {{ title(label="Resource groups", i18n_key="navigation.groups", level="h1", icon="bx-collection", subtitle="Reusable typed aliases for IPs, countries, ASNs, reverse DNS names, user agents, and URIs.", subtitle_i18n_key="resource_groups.subtitle", classes="mb-4") }}
+    {% set kind_icons = {"ip": "bx-network-chart", "country": "bx-flag", "asn": "bx-sitemap", "rdns": "bx-server", "user_agent": "bx-bot", "uri": "bx-link"} %}
+    {% call page_head(title="Resource groups", title_i18n="navigation.groups",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Resource groups", "navigation.groups", none)]) %}
+        {{ button(id="resource-group-new", label="Add group", i18n_key="resource_groups.new", size="sm", icon="bx-plus", disabled=readonly) }}
+    {% endcall %}
+    <p class="text-muted mb-4" data-i18n="resource_groups.subtitle">Reusable typed aliases for IPs, countries, ASNs, reverse DNS names, user agents, and URIs.</p>
     {% if readonly %}
         {{ alert(message="The database is read-only. Resource groups can be inspected and exported, but not changed.", message_key="resource_groups.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
     {% endif %}
@@ -28,7 +37,6 @@
             <div class="d-flex flex-wrap gap-2 ms-lg-auto">
                 {{ button(id="resource-groups-expand-all", label="Expand all", i18n_key="resource_groups.expand_all", variant="outline-secondary", size="sm", icon="bx-expand-vertical") }}
                 {{ button(label="Export", i18n_key="button.export", variant="outline-secondary", size="sm", icon="bx-download", tag="a", href=resource_groups_url ~ "/export") }}
-                {{ button(id="resource-group-new", label="New group", i18n_key="resource_groups.new", size="sm", icon="bx-plus", disabled=readonly) }}
             </div>
         </div>
         {% if resource_groups %}
@@ -55,13 +63,21 @@
                                 <td>
                                     {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label="Show details for @" ~ group.name, classes="resource-group-toggle p-0") }}
                                 </td>
-                                <td><code>@{{ group.name }}</code></td>
+                                <td>
+                                    <code>@{{ group.name }}</code>
+                                    {% set kinds_n = group.entries | map(attribute='kind') | unique | list | length %}
+                                    {% set values_n = group.entries | length %}
+                                    {% set usages_n = group.usage_count or 0 %}
+                                    <small class="d-block text-muted resource-group-meta"
+                                           data-i18n="resource_groups.meta_line"
+                                           data-i18n-options='{{ {"kinds": kinds_n, "values": values_n, "usages": usages_n} | tojson }}'>{{ kinds_n }} kinds · {{ values_n }} values · {{ usages_n }} usages</small>
+                                </td>
                                 <td class="resource-group-description text-wrap">{{ group.description or "—" }}</td>
                                 <td>
                                     <div class="d-flex flex-wrap gap-1">
                                         {% for kind in resource_kinds %}
                                             {% set kind_entries = group.entries | selectattr("kind", "equalto", kind) | list %}
-                                            {% if kind_entries %}{{ badge(text=kind, variant="secondary", classes="resource-kind-badge") }}{% endif %}
+                                            {% if kind_entries %}{{ badge(text=kind, variant="secondary", icon=kind_icons.get(kind, "bx-layer"), classes="resource-kind-badge") }}{% endif %}
                                         {% endfor %}
                                     </div>
                                 </td>
@@ -101,7 +117,7 @@
                                                 <div class="col-12 col-xl-6">
                                                     <section class="resource-kind-panel h-100" aria-label="{{ kind }} entries">
                                                         <div class="d-flex align-items-center justify-content-between mb-2">
-                                                            {{ badge(text=kind, variant="primary", icon="bx-layer") }}
+                                                            {{ badge(text=kind, variant="primary", icon=kind_icons.get(kind, "bx-layer")) }}
                                                             <span class="text-muted small">{{ kind_entries | length }} value{{ "s" if kind_entries | length != 1 else "" }}</span>
                                                         </div>
                                                         <ol class="resource-entry-list mb-0">
@@ -133,7 +149,7 @@
                       data-i18n-options='{{ {"visible": resource_groups | length, "total": resource_groups | length} | tojson }}'>Showing {{ resource_groups | length }} of {{ resource_groups | length }} groups</span>
             </p>
         {% else %}
-            {{ empty_state(title="No resource groups", title_key="resource_groups.empty", message="Create a reusable alias to share typed values across compatible settings.", message_key="resource_groups.empty_help", icon="bx-collection", bordered=true, action_label=none if readonly else "New group", action_key="resource_groups.new", action_icon="bx-plus", action_id="resource-group-empty-new") }}
+            {{ empty_state(title="No resource groups", title_key="resource_groups.empty", message="Create a reusable alias to share typed values across compatible settings.", message_key="resource_groups.empty_help", icon="bx-collection", bordered=true, action_label=none if readonly else "Add group", action_key="resource_groups.new", action_icon="bx-plus", action_id="resource-group-empty-new") }}
         {% endif %}
     {% endcall %}
 

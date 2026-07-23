@@ -208,7 +208,10 @@ def test_table_toolbar_number_id_override_for_jobs():
 
 
 def test_bans_instances_plugins_do_not_nest_toolbar_or_card_twice():
-    for page in ("bans.html", "instances.html", "plugins.html"):
+    # plugins.html moved from a DataTable to the marketplace card grid (Phase 4), so it no
+    # longer carries a table_toolbar / table-responsive card — it's covered by
+    # test_plugins_marketplace.py instead.
+    for page in ("bans.html", "instances.html"):
         source = (TEMPLATES / page).read_text(encoding="utf-8")
 
         assert source.count("{% call table_toolbar(") == 1, page
@@ -231,33 +234,6 @@ def test_instances_timezone_renders_outside_table():
 
     assert "TZ:" not in table
     assert html.index("</table>") < html.index("TZ:")
-
-
-def test_plugins_stream_tooltip_has_valid_cell_nesting():
-    html = _render_dashboard_page(
-        "plugins.html",
-        columns_preferences_defaults={"plugins": {}},
-        columns_preferences={},
-        plugins={
-            "demo": {
-                "type": "core",
-                "name": "Demo",
-                "description": "Demo plugin",
-                "version": "1.0",
-                "stream": "yes",
-                "method": "manual",
-                "page": False,
-            }
-        },
-        plugin_types={"core": {"text-class": "", "icon": '<i class="bx bx-cube"></i>'}},
-        pro_diamond_url="/diamond.svg",
-        is_pro_version=False,
-        is_readonly=True,
-        user_readonly=False,
-        theme="light",
-    )
-
-    assert re.search(r'tooltip\.stream_support\.yes"[^>]*>\s*<i[^>]*></i>\s*</div>\s*</td>', html)
 
 
 def test_reports_page_renders_four_tabs_with_event_log_table_intact():
@@ -733,6 +709,7 @@ def test_motion_sensitive_javascript_honours_reduced_motion():
 
 
 def test_production_pages_use_vendored_datatables_and_apexcharts():
+    # plugins.html moved to the marketplace card grid (Phase 4) and no longer uses DataTables.
     datatable_pages = (
         "bans.html",
         "cache.html",
@@ -740,10 +717,8 @@ def test_production_pages_use_vendored_datatables_and_apexcharts():
         "instances.html",
         "jobs.html",
         "plugin_page.html",
-        "plugins.html",
         "reports.html",
         "services.html",
-        "templates.html",
     )
     for name in datatable_pages:
         source = (TEMPLATES / name).read_text(encoding="utf-8")
@@ -767,7 +742,8 @@ def test_product_copy_does_not_use_emoji_as_icons():
 
 def test_plugin_dropzone_is_keyboard_operable():
     template = (TEMPLATES / "plugins.html").read_text(encoding="utf-8")
-    script = (STATIC / "js" / "pages" / "plugins.js").read_text(encoding="utf-8")
+    # Phase 4: the upload flow (drag-drop + keyboard handler) moved to plugins-grid.js.
+    script = (STATIC / "js" / "pages" / "plugins-grid.js").read_text(encoding="utf-8")
 
     dropzone = template.split('id="drag-area"', 1)[1].split(">", 1)[0]
     assert 'tabindex="0"' in dropzone

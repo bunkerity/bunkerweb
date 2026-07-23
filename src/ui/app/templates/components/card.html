@@ -33,9 +33,13 @@
                   caller is responsible for escaping/rendering it; passed through | safe.
      separator    when false, drops the header's bottom border (border-0) -- useful for
                   chart-style cards where the divider looks heavy.
+     uppercase    when true, renders the header in the kit's chart/panel style -- a small
+                  UPPERCASE muted label (kit .chart-card h3) with the subtitle as the
+                  muted ".sub" line under it (app.css:336-339). Backward-compatible:
+                  omit it and the header keeps the default h5 card-title look.
 
    No companion JS -- this is a static wrapper, there is no interaction to wire up. #}
-{% macro card(id=none, classes="", title=none, title_key=none, subtitle=none, subtitle_key=none, icon=none, header_right=none, separator=true) -%}
+{% macro card(id=none, classes="", title=none, title_key=none, subtitle=none, subtitle_key=none, icon=none, header_right=none, separator=true, uppercase=false) -%}
     {%- set has_header = title or icon or header_right -%}
     <div{% if id %} id="{{ id }}"{% endif %}
          class="card{% if classes %} {{ classes }}{% endif %}"
@@ -46,8 +50,8 @@
                     {%- if icon %}<i class="bx {{ icon }}" aria-hidden="true"></i>{% endif %}
                     {%- if title %}
                         <div class="d-flex flex-column">
-                            <h5 class="card-title mb-0"{% if title_key %} data-i18n="{{ title_key }}"{% endif %}>{{ title }}</h5>
-                            {%- if subtitle %}<p class="card-subtitle text-muted mb-0"{% if subtitle_key %} data-i18n="{{ subtitle_key }}"{% endif %}>{{ subtitle }}</p>{% endif -%}
+                            <h5 class="card-title mb-0{% if uppercase %} bw-panel-title{% endif %}"{% if title_key %} data-i18n="{{ title_key }}"{% endif %}>{{ title }}</h5>
+                            {%- if subtitle %}<p class="card-subtitle text-muted mb-0{% if uppercase %} bw-panel-sub{% endif %}"{% if subtitle_key %} data-i18n="{{ subtitle_key }}"{% endif %}>{{ subtitle }}</p>{% endif -%}
                         </div>
                     {%- endif %}
                 </div>

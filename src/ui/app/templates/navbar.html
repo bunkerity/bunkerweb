@@ -50,91 +50,125 @@
         {% elif current_endpoint == 'about' %}
             {% set documentation_endpoint = "/about" %}
         {% endif %}
-        <div class="d-none d-md-inline navbar-nav align-items-center">
-            <div class="nav-item d-flex align-items-center">
-                <a id="documentation-link"
-                   role="button"
-                   class="btn btn-text-secondary p-1 p-md-2 docs-link"
-                   aria-pressed="true"
-                   href="{{ docs_url(documentation_endpoint, documentation_fragment) }}"
-                   target="_blank"
-                   rel="noopener"
-                   data-endpoint="{{ documentation_endpoint }}"
-                   data-fragment="{{ documentation_fragment or '' }}">
-                    <span class="tf-icons bx bx-file me-md-2" aria-hidden="true"></span>
-                    <span class="d-none d-lg-inline" data-i18n="navbar.link.documentation">Documentation</span>
-                </a>
-                <a role="button"
-                   class="btn btn-outline-github p-1 p-md-2 ms-1 ms-md-2"
-                   aria-pressed="true"
-                   href="https://github.com/bunkerity/bunkerweb/?utm_campaign=self&utm_source=ui"
-                   target="_blank"
-                   rel="noreferrer">
-                    <i class="tf-icons bx bxl-github me-md-2" aria-hidden="true"></i>
-                    <span class="d-none d-lg-inline">Github</span>
-                </a>
-                <a role="button"
-                   class="btn btn-outline-discord p-1 p-md-2 ms-1 ms-md-2"
-                   aria-pressed="true"
-                   href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
-                   target="_blank"
-                   rel="noopener">
-                    <i class="tf-icons bx bxl-discord me-md-2" aria-hidden="true"></i>
-                    <span class="d-none d-lg-inline">Discord</span>
-                </a>
-            </div>
-        </div>
         <!-- /Buttons -->
         <ul class="navbar-nav flex-row align-items-center ms-auto">
             {% if not is_pro_version %}
-                <li class="nav-item lh-1 me-4">
-                    <div class="buy-now courier-prime">
-                        <a class="btn btn-responsive btn-buy-now"
-                           role="button"
-                           aria-pressed="true"
-                           href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
-                           target="_blank"
-                           rel="noopener">
-                            <span class="me-1 me-md-2 d-flex h-100 justify-content-center align-items-center">
-                                <img src="{{ url_for('static', filename='img/diamond-white.svg') }}"
-                                     alt="Pro plugin"
-                                     width="18px"
-                                     height="15.5px">
-                            </span>
-                            <span data-i18n="navbar.button.upgrade_to_pro">Upgrade to PRO</span></a>
-                    </div>
+                <!-- Upgrade to PRO (subtle green-accent chip, kit brand rule) -->
+                <li class="nav-item lh-1 me-2 me-md-3">
+                    <a class="bw-pro-chip"
+                       role="button"
+                       aria-pressed="true"
+                       href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
+                       target="_blank"
+                       rel="noopener">
+                        <img src="{{ url_for('static', filename='img/diamond.svg') }}"
+                             alt=""
+                             aria-hidden="true"
+                             width="15px"
+                             height="13px">
+                        <span data-i18n="navbar.button.upgrade_to_pro">Upgrade to PRO</span></a>
                 </li>
             {% endif %}
-            <!-- Stars -->
-            <li class="d-none d-md-inline nav-item lh-1 me-4">
-                <a class="github-button"
-                   href="https://github.com/bunkerity/bunkerweb"
-                   data-icon="octicon-star"
-                   data-size="large"
-                   data-show-count="true"
-                   aria-label="Star bunkerity/bunkerweb on GitHub"
-                   data-i18n="button.github_stars">Stars</a>
+            <!-- Help (documentation / GitHub / Discord folded into a "?" dropdown) -->
+            <li class="nav-item navbar-dropdown dropdown lh-1 me-1 me-md-2">
+                <button type="button"
+                        class="bw-topbar-btn"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Help">
+                    <i class="bx bx-help-circle" aria-hidden="true"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a id="documentation-link"
+                           class="dropdown-item d-flex align-items-center docs-link"
+                           href="{{ docs_url(documentation_endpoint, documentation_fragment) }}"
+                           target="_blank"
+                           rel="noopener"
+                           data-endpoint="{{ documentation_endpoint }}"
+                           data-fragment="{{ documentation_fragment or '' }}">
+                            <i class="bx bx-file bx-sm me-2" aria-hidden="true"></i><span data-i18n="navbar.link.documentation">Documentation</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center"
+                           href="https://github.com/bunkerity/bunkerweb/?utm_campaign=self&utm_source=ui"
+                           target="_blank"
+                           rel="noreferrer">
+                            <i class="bx bxl-github bx-sm me-2" aria-hidden="true"></i><span>GitHub</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center"
+                           href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
+                           target="_blank"
+                           rel="noopener">
+                            <i class="bx bxl-discord bx-sm me-2" aria-hidden="true"></i><span>Discord</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
-            <!--/ Stars -->
-            <!-- Version -->
-            <li class="nav-item lh-1 me-2 me-md-4">
-                <a role="button"
-                   class="btn btn-sm btn-outline-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} px-2 px-md-3 position-relative"
-                   aria-pressed="true"
-                   href="https://github.com/bunkerity/bunkerweb/releases/latest"
-                   target="_blank"
-                   rel="noreferrer"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="bottom"
-                   data-bs-original-title="..."
-                   data-i18n="{% if new_version_available %}tooltip.new_version_available{% else %}tooltip.latest_version_installed{% endif %}">
-                    <span data-i18n="navbar.version">Version</span>: {{ bw_version }}
-                    <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-{% if new_version_available %}danger{% else %}success{% endif %} border border-light rounded-circle">
-                        <span class="visually-hidden" data-i18n="badge.new_version">New version</span>
+            <!-- Notifications (compact icon button; relocated from the shell header) -->
+            <li class="nav-item lh-1 me-1 me-md-2 position-relative">
+                <button id="notifications-button"
+                        type="button"
+                        class="bw-topbar-btn"
+                        aria-label="Notifications"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#side-offcanvas-notifications"
+                        aria-controls="side-offcanvas-notifications">
+                    <i class="bx bx-bell" aria-hidden="true"></i>
+                </button>
+                {% if flash_messages %}
+                    <span id="unread-notifications"
+                          class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                        {{ flash_messages|length }}
+                        <span class="visually-hidden" data-i18n="badge.unread_notifications">unread notifications</span>
                     </span>
-                </a>
+                {% endif %}
             </li>
-            <!--/ Version -->
+            <!-- News (compact icon button; relocated from the shell header) -->
+            <li class="nav-item lh-1 me-2 me-md-3 position-relative">
+                <button id="news-button"
+                        type="button"
+                        class="bw-topbar-btn"
+                        aria-label="News"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#side-offcanvas-news"
+                        aria-controls="side-offcanvas-news">
+                    <i class="bx bx-news" aria-hidden="true"></i>
+                </button>
+            </li>
+            <!-- Language selector (relocated from sidebar; keeps language-selector.html ids/hooks) -->
+            <li class="nav-item lh-1 me-2 me-md-3">{% include "language-selector.html" %}</li>
+            <!--/ Language selector -->
+            <!-- Theme toggle (relocated from sidebar; keeps #dark-mode-toggle + #csrf_token hooks) -->
+            <li class="nav-item lh-1 me-2 me-md-4">
+                <input type="hidden"
+                       id="csrf_token"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}" />
+                <div class="d-flex align-items-center">
+                    <i class="dark-mode-toggle-icon bx bx-{% if theme == "light" %}sun{% else %}moon{% endif %} fs-5 me-2"
+                       aria-hidden="true"></i>
+                    <label class="setting-checkbox-label mb-0 me-2 d-none d-lg-inline"
+                           for="dark-mode-toggle"
+                           data-i18n="theme.light">Light</label>
+                    <div class="form-check form-switch mb-0">
+                        <input id="dark-mode-toggle"
+                               name="dark-mode-toggle"
+                               class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               data-root-url="{{ url_for('profile') }}"
+                               {% if theme == "dark" %}checked{% endif %} />
+                    </div>
+                    <label class="setting-checkbox-label mb-0 d-none d-lg-inline"
+                           for="dark-mode-toggle"
+                           data-i18n="theme.dark">Dark</label>
+                </div>
+            </li>
+            <!--/ Theme toggle -->
             <!-- User -->
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow p-0 d-flex align-items-center"

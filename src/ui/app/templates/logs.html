@@ -6,13 +6,33 @@
 {% from "components/code-editor.html" import code_editor %}
 {% from "components/empty-state.html" import empty_state %}
 {% from "components/native-select.html" import native_select %}
+{% from "components/page-head.html" import page_head %}
 {% block head %}
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/pages/logs.css') }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
+{# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
+   legacy breadcrumb row for this page. #}
+{% block page_head %}{% endblock %}
 {% block content %}
     {% set display_file = current_file.replace('letsencrypt_', '') if current_file else '' %}
+    <!-- Page head band (components/page-head.html; kit .page-head). The primary
+         live control (Pause / Download) is relocated here from the toolbar. -->
+    {% call page_head(title="Live logs", title_i18n="logs.live_title",
+                      breadcrumb=[("Operate", "navigation.operate", none),
+                                  ("Logs", "breadcrumb.logs", none)]) %}
+        {% if current_file %}
+            {{ button(id="logs-download", tag="a", href="#", variant="outline-secondary", size="sm", icon="bx-download", label="Download", i18n_key="button.download", label_classes="d-none d-md-inline", tooltip_text="Download this log file", tooltip_i18n_key="tooltip.download_log", aria_label="Download this log file") }}
+        {% elif files.main %}
+            <button type="button"
+                    id="log-pause"
+                    class="btn btn-sm btn-outline-secondary"
+                    aria-pressed="false">
+                <i class="bx bx-pause" aria-hidden="true"></i>&nbsp;<span class="log-pause-label" data-i18n="logs.pause">Pause</span>
+            </button>
+        {% endif %}
+    {% endcall %}
     <!-- Content -->
     {% call card(classes="p-1 mb-4 sticky-card") %}
         <div class="d-flex flex-wrap justify-content-around align-items-center logs-toolbar">
@@ -34,6 +54,17 @@
                         role="menu"
                         aria-labelledby="types-dropdown-menu-toggle">
                         {% if files.main %}
+                            <li role="presentation">
+                                <a role="menuitem"
+                                   href="{{ url_for('logs') }}"
+                                   class="dropdown-item{% if not current_file %} active{% endif %}"
+                                   {% if not current_file %}aria-current="true"{% endif %}>
+                                    <i class="bx bx-broadcast" aria-hidden="true"></i>&nbsp;<span data-i18n="logs.all_sources">All sources (live)</span>
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <hr class="dropdown-divider">
+                            </li>
                             <li role="presentation">
                                 <h6 class="dropdown-header" data-i18n="logs.main_logs">Main Logs</h6>
                             </li>
@@ -94,6 +125,7 @@
                     {% endcall %}
                 {% endif %}
             </div>
+            {% if current_file %}
             <div class="d-flex flex-wrap align-items-center justify-content-end my-1 logs-toolbar-actions">
                 <div class="btn-group me-2 my-1"
                      role="group"
@@ -145,9 +177,6 @@
                     </button>
                 </div>
                 <div class="vr mx-2 my-1 d-none d-md-block"></div>
-                <div class="my-1">
-                    {{ button(id="logs-download", tag="a", href="#", variant="outline-secondary", icon="bx-download", label="Download", i18n_key="button.download", label_classes="d-none d-md-inline", disabled=(not current_file), tooltip_text="Download this log file", tooltip_i18n_key="tooltip.download_log", aria_label="Download this log file") }}
-                </div>
                 {% if not request.is_secure %}
                     {% call tooltip(text="The copy feature is only available over HTTPS", i18n_key="tooltip.copy_https_only", tag="div", classes="my-1", disabled=true) %}
                         {{ button(id="copy-logs", variant="outline-secondary", icon="bx-copy-alt", label="Copy", i18n_key="button.copy", label_classes="d-none d-md-inline", disabled=true, aria_label="Copy logs", classes="ms-2") }}
@@ -171,6 +200,7 @@
                     </div>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
         {% if current_file %}
         <div class="d-flex flex-wrap align-items-center gap-2 px-2 pb-1 pt-2 mt-1 border-top logs-filterbar">
@@ -228,16 +258,10 @@
         </div>
         {% endif %}
     {% endcall %}
+    {% if current_file %}
     {% call card(classes="p-4 min-vh-70 position-relative") %}
         {{ empty_state(id="logs-waiting", state="loading", title="Loading logs...", title_key="status.loading_logs", classes="w-100 p-2 rounded-3") }}
-        {{ code_editor(id="raw-logs", value=(logs if current_file else ""), language="bunkerweb_log", read_only=true, height="fill", aria_label="Logs") }}
-        {% if not current_file %}
-            {{ empty_state(state="empty",
-                           icon="bx-file-find" if (files.main or files.letsencrypt) else "bx-folder-open",
-                           title=logs,
-                           title_key="logs.select_file_prompt" if (files.main or files.letsencrypt) else "logs.no_log_files",
-                           classes="logs-empty position-absolute top-50 start-50 translate-middle px-3") }}
-        {% endif %}
+        {{ code_editor(id="raw-logs", value=logs, language="bunkerweb_log", read_only=true, height="fill", aria_label="Logs") }}
         <button id="logs-new-pill"
                 type="button"
                 class="logs-new-pill btn btn-sm btn-primary shadow d-none">
@@ -252,9 +276,63 @@
              class="logs-statusbar small text-muted"
              aria-hidden="true"></div>
     {% endcall %}
+    {% elif files.main %}
+    {% call card(classes="p-3 min-vh-70 logs-live-card") %}
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3 logs-live-toolbar">
+            <span class="badge rounded-pill text-bg-primary d-inline-flex align-items-center gap-1">
+                <i class="bx bx-broadcast" aria-hidden="true"></i>
+                <span data-i18n="logs.all_sources">All sources (live)</span>
+            </span>
+            {{ native_select(id="log-level-filter",
+                             options=[{"value": "all", "text": "All logs", "i18n_key": "logs.level_all"},
+                                      {"value": "errors", "text": "Errors only", "i18n_key": "logs.level_errors_only"},
+                                      {"value": "security", "text": "Security only", "i18n_key": "logs.level_security_only"}],
+                             size="sm",
+                             select_classes="w-auto",
+                             aria_label="Filter logs by type") }}
+            <div class="input-group input-group-sm logs-live-search">
+                <span class="input-group-text"><i class="bx bx-search" aria-hidden="true"></i></span>
+                <input type="search"
+                       id="log-grep"
+                       class="form-control"
+                       placeholder="grep…"
+                       data-i18n="logs.grep_placeholder"
+                       aria-label="Filter log lines">
+            </div>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <span class="btn btn-sm btn-light logs-tailing d-inline-flex align-items-center gap-2 pe-none">
+                    <span class="status-dot status-dot-pulse text-success" aria-hidden="true"></span>
+                    <span id="log-source-count">Tailing · {{ files.main | length }} sources</span>
+                </span>
+                <button type="button"
+                        id="log-expand"
+                        class="btn btn-sm btn-outline-secondary"
+                        aria-label="Expand log window">
+                    <i class="bx bx-expand" aria-hidden="true"></i>&nbsp;<span data-i18n="logs.expand">Expand</span>
+                </button>
+            </div>
+        </div>
+        <div id="log-stream"
+             class="log-stream"
+             data-sources="{{ files.main | join(',') }}"
+             role="log"
+             aria-live="polite"
+             aria-label="Live logs"
+             data-i18n="logs.live_title"></div>
+    {% endcall %}
+    {% else %}
+    {% call card(classes="p-4 min-vh-70 position-relative") %}
+        {{ empty_state(state="empty",
+                       icon="bx-folder-open",
+                       title=logs,
+                       title_key="logs.no_log_files",
+                       classes="logs-empty position-absolute top-50 start-50 translate-middle px-3") }}
+    {% endcall %}
+    {% endif %}
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}
+    {% if current_file %}
     <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
@@ -274,4 +352,10 @@
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    {% else %}
+    <script src="{{ url_for('static', filename='js/pages/logs-live.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
+    {% endif %}
 {% endblock %}

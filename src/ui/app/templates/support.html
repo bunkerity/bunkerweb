@@ -3,14 +3,34 @@
 {% from "components/dropdown-menu.html" import dropdown_menu %}
 {% from "components/search.html" import search %}
 {% from "components/badge.html" import badge %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block content %}
-    <p class="text-muted mb-4" data-i18n="support.subtitle">
-        Download debug logs, extract your configuration, and get help from the BunkerWeb team.
-    </p>
-    <!-- Content -->
     {% set support_url = url_for('support') %}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {% call page_head(title="Support", title_i18n="support.title",
+                      breadcrumb=[("System", "navigation.system", none),
+                                  ("Support", "navigation.support", none)]) %}
+        {{ badge(text="PRO", i18n_key="plan.pro", variant="bw-green", pill=true, icon="bx-crown") }}
+        <a href="{% if is_pro_version %}https://panel.bunkerweb.io/submitticket.php?utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui{% endif %}"
+           role="button"
+           aria-pressed="true"
+           class="btn btn-primary btn-sm don-jose"
+           target="_blank"
+           rel="noopener">
+            <i class="bx bx-support bx-xs me-1"></i>
+            {% if pro_status == "inactive" %}
+                <span data-i18n="button.open_support_ticket">Open a Support Ticket</span>
+            {% else %}
+                <span data-i18n="button.order_support">Order Support</span>
+            {% endif %}
+        </a>
+    {% endcall %}
+    <!-- Content -->
     <div class="row g-3">
-        <div class="col-6 col-xl-3">
+        <div class="col-6 col-xl-4">
             {% call card(classes="p-4 h-100", icon="bxs-file-txt", title="Download Logs", title_key="support.card.download_logs.title") %}
                 <div class="d-flex flex-column align-items-center justify-content-center text-center gap-2 h-100">
                     <a href="{{ support_url }}/logs"
@@ -26,7 +46,7 @@
                 </div>
             {% endcall %}
         </div>
-        <div class="col-6 col-xl-5">
+        <div class="col-6 col-xl-8">
             {% call card(classes="p-4 h-100", icon="bxs-file-json", title="Extract Configuration", title_key="support.card.extract_config.title") %}
                 {% set service_items = [] %}
                 {% for service in services %}
@@ -45,30 +65,6 @@
                     {% call dropdown_menu(id="services-dropdown-menu", items=service_items, label="Service", i18n_key="button.service", icon="bx-cube", variant="outline-primary", label_classes="d-none d-md-inline", menu_classes="nav-pills max-vh-60 overflow-auto pt-0") %}
                         {{ search(id="service-search", i18n_key="form.placeholder.search", variant="merge", classes="mb-2") }}
                     {% endcall %}
-                </div>
-            {% endcall %}
-        </div>
-        <div class="col-12 col-xl-4">
-            {% call card(classes="p-4 h-100", icon="bx-help-circle", title="Support Link", title_key="support.card.support_link.title", header_right=badge(text="PRO", i18n_key="plan.pro", variant="bw-green", pill=true, icon="bx-crown")) %}
-                <div class="d-flex align-items-center justify-content-center h-100">
-                    <a href="{% if is_pro_version %}https://panel.bunkerweb.io/submitticket.php?utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui{% endif %}"
-                       role="button"
-                       aria-pressed="true"
-                       class="btn btn-pro-now courier-prime"
-                       target="_blank"
-                       rel="noopener">
-                        <span class="me-1 me-md-2 d-flex h-100">
-                            <img src="{{ url_for('static', filename='img/diamond-blue.svg') }}"
-                                 alt="Pro plugin"
-                                 width="18px"
-                                 height="15.5px">
-                        </span>
-                        {% if pro_status == "inactive" %}
-                            <span data-i18n="button.open_support_ticket">Open a Support Ticket</span>
-                        {% else %}
-                            <span data-i18n="button.order_support">Order Support</span>
-                        {% endif %}
-                    </a>
                 </div>
             {% endcall %}
         </div>

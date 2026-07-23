@@ -1,12 +1,16 @@
 {% extends "dashboard.html" %}
-{% from "components/title.html" import title %}
 {% from "components/tile.html" import tile %}
 {% from "components/card.html" import card %}
 {% from "components/table-toolbar.html" import table_toolbar %}
 {% from "components/badge.html" import badge %}
+{% from "components/status.html" import status %}
 {% from "components/tooltip.html" import tooltip %}
 {% from "components/dropdown-menu.html" import dropdown_menu %}
 {% from "components/modal.html" import modal %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -18,7 +22,10 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    {{ title(label="Jobs", i18n_key="navigation.jobs", level="h1", icon="bx-task", subtitle="Scheduled and one-off tasks run by the BunkerWeb scheduler — track their status and run them on demand.", subtitle_i18n_key="jobs.subtitle", classes="mb-4") }}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {{ page_head(title="Jobs", title_i18n="navigation.jobs",
+                breadcrumb=[("Operate", "navigation.operate", none),
+                            ("Jobs", "navigation.jobs", none)]) }}
     {% set interval_icons = {'once': 'bx-revision', 'day': 'bx-calendar-event', 'week': 'bx-calendar-week'} %}
     {% set interval_variants = {'once': 'secondary', 'day': 'primary', 'week': 'warning'} %}
     {% set stats = namespace(reload=0, async=0, failed=0) %}
@@ -89,7 +96,8 @@
                         data-i18n="tooltip.table.jobs.last_run">
                         <span data-i18n="table.header.last_run">Last run</span>
                     </th>
-                    <th data-bs-toggle="tooltip"
+                    <th class="actions-col"
+                        data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The actions that can be performed on the Job"
                         data-i18n="tooltip.table.jobs.actions">
@@ -124,16 +132,21 @@
                         <td class="text-center">
                             {% if job_data['history'] %}
                                 {% if job_data['history'][0]['success'] %}
-                                    {{ badge(text="Success", i18n_key="status.success", variant="success", icon="bx-check") }}
+                                    {# The trailing hidden icon isn't part of the visual pill -- static/js/pages/jobs.js's
+                                       searchPanes filter for this column matches on the raw cell HTML containing
+                                       "bx-check"/"bx-x" (jobs.js:365-372), which the old badge(icon=...) markup provided
+                                       and components/status.html's pill has no slot for. Kept so that filter keeps
+                                       working without touching jobs.js (not owned by this pass). #}
+                                    {{ status(type="success") }}<i class="bx bx-check d-none" aria-hidden="true"></i>
                                 {% else %}
-                                    {{ badge(text="Failed", i18n_key="status.failed", variant="danger", icon="bx-x") }}
+                                    {{ status(type="failed") }}<i class="bx bx-x d-none" aria-hidden="true"></i>
                                 {% endif %}
                             {% else %}
                                 <span data-i18n="status.no_history">No history</span>
                             {% endif %}
                         </td>
-                        <td>
-                            <div class="d-flex justify-content-evenly">
+                        <td class="actions-col">
+                            <div class="row-actions">
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
                                      data-bs-original-title="..."
@@ -142,8 +155,8 @@
                                     <button type="button"
                                             data-job="{{ job }}"
                                             data-plugin="{{ job_data['plugin_id'] }}"
-                                            class="btn btn-primary btn-sm me-1 run-job{% if is_readonly %} disabled{% endif %}">
-                                        <i class="bx bx-play bx-xs"></i>&nbsp;<span data-i18n="button.run">Run</span>
+                                            class="icon-btn run-job{% if is_readonly %} disabled{% endif %}">
+                                        <i class="bx bx-play"></i>
                                     </button>
                                 </div>
                                 {% if job_data['history'] %}
@@ -183,16 +196,20 @@
                                     <button type="button"
                                             data-job="{{ job }}"
                                             data-plugin="{{ job_data['plugin_id'] }}"
-                                            class="btn btn-outline-primary btn-sm me-1 show-history">
-                                        <i class="bx bx-history bx-xs"></i>&nbsp;<span data-i18n="button.history">History</span>
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom"
+                                            data-bs-original-title="..."
+                                            data-i18n="button.history"
+                                            class="icon-btn show-history">
+                                        <i class="bx bx-history"></i>
                                     </button>
                                 {% else %}
                                     {% call tooltip(text="No execution history found for this job.", i18n_key="tooltip.no_history", placement="bottom", disabled=true) %}
                                         <button type="button"
                                                 data-job="{{ job }}"
                                                 data-plugin="{{ job_data['plugin_id'] }}"
-                                                class="btn btn-outline-primary btn-sm me-1 show-history disabled">
-                                            <i class="bx bx-history bx-xs"></i>&nbsp;<span data-i18n="button.history">History</span>
+                                                class="icon-btn show-history disabled">
+                                            <i class="bx bx-history"></i>
                                         </button>
                                     {% endcall %}
                                 {% endif %}

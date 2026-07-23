@@ -10,6 +10,12 @@
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <div class="flex-grow-1 container-p-y ps-6 pe-6">
+                        {# Legacy shell header: breadcrumb + mode-selection pills. Pages that adopt
+                           components/page-head.html override this block (empty) and render their own
+                           page-head band inside {% block content %} instead. Kept here so pages not
+                           yet migrated keep their breadcrumb + mode switcher. The help / notifications
+                           / news controls moved to the topbar (navbar.html). #}
+                        {% block page_head %}
                         <!-- prettier-ignore -->
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             {% include "breadcrumb.html" %}
@@ -124,51 +130,8 @@
                                     </li>
                                 </ul>
                             {% endif %}
-                            <ul class="d-flex mb-0 list-unstyled">
-                                <li class="me-3">
-                                    <a role="button"
-                                       class="btn btn-sm btn-outline-{% if theme == 'light' %}dark{% else %}light{% endif %} d-flex align-items-center h-100"
-                                       aria-pressed="true"
-                                       href="https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui"
-                                       target="_blank"
-                                       rel="noopener">
-                                        <span class="bx bx-help-circle me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline" data-i18n="button.need_help">Need help?</span>
-                                    </a>
-                                </li>
-                                <li class="me-3 position-relative">
-                                    <button id="notifications-button"
-                                            type="button"
-                                            class="btn btn-sm btn-primary text-uppercase d-flex align-items-center"
-                                            aria-pressed="true"
-                                            data-bs-toggle="offcanvas"
-                                            data-bs-target="#side-offcanvas-notifications"
-                                            aria-controls="side-offcanvas-notifications">
-                                        <span class="bx bx-bell me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline" data-i18n="button.notifications">Notifications</span>
-                                    </button>
-                                    {% if flash_messages %}
-                                        <span id="unread-notifications"
-                                              class="badge-dot-text position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
-                                            {{ flash_messages|length }}
-                                            <span class="visually-hidden" data-i18n="badge.unread_notifications">unread notifications</span>
-                                        </span>
-                                    {% endif %}
-                                </li>
-                                <li class="position-relative">
-                                    <button id="news-button"
-                                            type="button"
-                                            class="btn btn-sm btn-{% if theme == 'light' %}dark{% else %}light{% endif %} text-uppercase d-flex align-items-center"
-                                            aria-pressed="true"
-                                            data-bs-toggle="offcanvas"
-                                            data-bs-target="#side-offcanvas-news"
-                                            aria-controls="side-offcanvas-news">
-                                        <span class="bx bx-news me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline" data-i18n="button.news">News</span>
-                                    </button>
-                                </li>
-                            </ul>
                         </div>
+                        {% endblock %}
                         {% block content %}{% endblock %}
                     </div>
                     <!-- prettier-ignore -->

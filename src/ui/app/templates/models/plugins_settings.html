@@ -77,7 +77,7 @@
             <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"  data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
                  {% endif %}>
                 <button type="button"
-                        class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
+                        class="btn btn-sm btn-primary don-jose save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
                     <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
                 </button>
@@ -118,7 +118,7 @@
     <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
          {% endif %}>
         <button type="button"
-                class="btn btn-sm btn-bw-green save-settings p-1_5{% if is_readonly %} disabled{% endif %}">
+                class="btn btn-sm btn-primary don-jose save-settings p-1_5{% if is_readonly %} disabled{% endif %}">
             <i class="bx bx-save bx-xs"></i>
             &nbsp;<span data-i18n="button.save">Save</span>
         </button>
@@ -262,6 +262,8 @@
                                 {% endif %}
                                 <div class="col-12 col-sm-6 col-lg-4 pb-3"
                                      {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                    {# bw-setting-frame: kit .bw-input-wrap.is-setting bordered box (settings.css, settings page only). Additive wrapper -- .closest(".col-12") / .setting-highlight still anchor on the col. #}
+                                    <div class="bw-setting-frame">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <label id="label-setting-{{ plugin }}-{{ setting_data['id'] }}"
                                                for="setting-{{ plugin }}-{{ setting_data['id'] }}"
@@ -340,6 +342,7 @@
                                         {% endif %}
                                         {% include "models/input_setting.html" %}
                                     {% endif %}
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>

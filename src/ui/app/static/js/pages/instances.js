@@ -227,9 +227,6 @@ $(document).ready(function () {
 
   layout.topStart.buttons = [
     {
-      extend: "create_instance",
-    },
-    {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3)):not(:last-child)",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
@@ -359,32 +356,26 @@ $(document).ready(function () {
   };
 
   // Custom Button Definitions
-  $.fn.dataTable.ext.buttons.create_instance = {
-    text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.create_instance"> ${t(
-      "button.create_instance",
-      "Create new instance",
-    )}</span>`,
-    className: `btn btn-sm rounded me-4 btn-bw-green${
-      isReadOnly ? " disabled" : ""
-    }`,
-    action: function (e, dt, node, config) {
-      if (isReadOnly) {
-        alert(
-          t(
-            "alert.readonly_mode",
-            "This action is not allowed in read-only mode.",
-          ),
-        );
-        return;
-      }
-      const modal = new bootstrap.Modal($("#modal-create-instance"));
-      modal.show();
+  // "Create instance" moved from the DataTables toolbar to the page-head band
+  // (#instances-create-btn); the action itself is unchanged and reused as-is.
+  const createInstanceAction = function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    const modal = new bootstrap.Modal($("#modal-create-instance"));
+    modal.show();
 
-      $("#modal-create-instance").on("shown.bs.modal", function () {
-        $(this).find("#hostname").focus();
-      });
-    },
+    $("#modal-create-instance").on("shown.bs.modal", function () {
+      $(this).find("#hostname").focus();
+    });
   };
+  $("#instances-create-btn").on("click", createInstanceAction);
 
   $.fn.dataTable.ext.buttons.ping_instances = {
     text: `<span class="tf-icons bx bx-bell bx-18px me-2"></span><span data-i18n="button.ping">${t(

@@ -23,3 +23,11 @@
     {%- set outer_classes = 'badge' ~ (' rounded-pill' if pill else '') ~ ' bg-label-' ~ variant ~ (' d-inline-flex align-items-center' if icon else '') ~ (' ' ~ classes if classes else '') -%}
     <span{% if id %} id="{{ id }}"{% endif %} class="{{ outer_classes }}"{% if data_value %} data-value="{{ data_value }}"{% endif %}{% if not icon and i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{% if icon %}<i class="bx {{ icon }} me-1" aria-hidden="true"></i><span{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ text }}</span>{% else %}{{ text }}{% endif %}</span>
 {%- endmacro %}
+
+{# Typed template tag badge (design kit .tpl-badge, app.css:2007-2032). Bordered,
+   color-typed outline pill with a per-type icon. `type` is one of
+   plugin | config | feature (green / navy / amber). Presentation-only wrapper —
+   the tooltip + data-i18n live on the caller's outer span (templates.html). #}
+{% macro tpl_badge(text, type='feature', icon='bx-package') -%}
+    <span class="tpl-badge tpl-badge-{{ type }}"><i class="bx {{ icon }}" aria-hidden="true"></i>{{ text }}</span>
+{%- endmacro %}

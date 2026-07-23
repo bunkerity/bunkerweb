@@ -8,7 +8,10 @@
 {% from "components/alert.html" import alert %}
 {% from "components/checkbox.html" import checkbox %}
 {% from "components/button.html" import button %}
-{% from "components/title.html" import title %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -20,7 +23,17 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    {{ title(label="Services", i18n_key="navigation.services", level="h1", icon="bx-cube", subtitle="Manage the multisite services protected by BunkerWeb: create, edit, convert to draft, or delete them.", subtitle_i18n_key="services.subtitle", classes="mb-4") }}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {% call page_head(title="Services", title_i18n="navigation.services",
+                      breadcrumb=[("Overview", "navigation.overview", none),
+                                  ("Services", "navigation.services", none)]) %}
+        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
+            {{ button(id="services-import-btn", label="Import services", i18n_key="button.import_services", size="sm", icon="bx-import", variant="outline-primary", disabled=is_readonly) }}
+        </div>
+        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
+            {{ button(id="services-create-btn", label="Create service", i18n_key="button.create_service", size="sm", icon="bx-plus", tag="a", href=url_for('services.services_service_page', service='new'), disabled=is_readonly) }}
+        </div>
+    {% endcall %}
     {% set ns = namespace(online_services=0, draft_services=0) %}
     {% for service in services %}
         {% if service['is_draft'] %}
@@ -102,7 +115,8 @@
                         data-i18n="tooltip.table.services.last_update">
                         <span data-i18n="table.header.last_update">Last update</span>
                     </th>
-                    <th data-bs-toggle="tooltip"
+                    <th class="actions-col"
+                        data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The actions that can be performed on the Service"
                         data-i18n="tooltip.table.services.actions">
@@ -150,12 +164,12 @@
                         </td>
                         <td class="service-creation-date">{{ service['creation_date'] | to_iso }}</td>
                         <td class="service-last-update-date">{{ service['last_update'] | to_iso }}</td>
-                        <td>
-                            <div class="d-flex justify-content-evenly">
+                        <td class="actions-col">
+                            <div class="row-actions">
                                 {% set can_delete = can_delete_service(service) %}
                                 <div {% if service['is_draft'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by draft mode" data-i18n="tooltip.disabled_draft"{% endif %}>
                                     <a role="button"
-                                       class="btn btn-outline-primary btn-sm me-1{% if service['is_draft'] %} disabled{% endif %}"
+                                       class="icon-btn{% if service['is_draft'] %} disabled{% endif %}"
                                        href="https://{{ service['id'] }}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
@@ -164,34 +178,34 @@
                                        data-i18n-options='{"name": "{{ service['id'] }}"}'
                                        target="_blank"
                                        rel="noreferrer">
-                                        <i class="bx bx-link-external bx-xs"></i>
+                                        <i class="bx bx-link-external"></i>
                                     </a>
                                 </div>
                                 <a role="button"
-                                   class="btn btn-primary btn-sm me-1"
+                                   class="icon-btn"
                                    href="{{ url_for("services") }}/{{ service['id'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="..."
                                    data-i18n="{% if is_readonly %}tooltip.link.view_service{% else %}tooltip.link.edit_service{% endif %}"
                                    data-i18n-options='{"service": "{{ service['id'] }}"}'>
-                                    <i class="bx bx-{% if is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                    <i class="bx bx-{% if is_readonly %}show{% else %}edit{% endif %}"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
                                     <a role="button"
-                                       class="btn btn-outline-secondary btn-sm me-1{% if is_readonly %} disabled{% endif %}"
+                                       class="icon-btn{% if is_readonly %} disabled{% endif %}"
                                        href="{{ url_for("services") }}/new?clone={{ service['id'] }}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
                                        data-bs-original-title="Clone service {{ service['id'] }}"
                                        data-i18n="tooltip.link.clone_service"
                                        data-i18n-options='{"name": "{{ service['id'] }}"}'>
-                                        <i class="bx bx-copy-alt bx-xs"></i>
+                                        <i class="bx bx-copy-alt"></i>
                                     </a>
                                 </div>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
                                     <button type="button"
-                                            class="btn btn-outline-secondary btn-sm me-1 convert-service{% if is_readonly %} disabled{% endif %}"
+                                            class="icon-btn convert-service{% if is_readonly %} disabled{% endif %}"
                                             data-service-id="{{ service['id'] }}"
                                             data-value="{{ 'online' if service['is_draft'] else 'draft' }}"
                                             data-bs-toggle="tooltip"
@@ -199,18 +213,18 @@
                                             data-bs-original-title="..."
                                             data-i18n="tooltip.button.convert_service_to_{{ 'online' if service['is_draft'] else 'draft' }}"
                                             data-i18n-options='{"name": "{{ service['id'] }}"}'>
-                                        <i class="bx bx-transfer bx-xs"></i>
+                                        <i class="bx bx-transfer"></i>
                                     </button>
                                 </div>
                                 <button type="button"
-                                        class="btn btn-outline-secondary btn-sm me-1 export-service"
+                                        class="icon-btn info export-service"
                                         data-service-id="{{ service['id'] }}"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="bottom"
                                         data-bs-original-title="Export service {{ service['id'] }} configuration"
                                         data-i18n="tooltip.link.export_service"
                                         data-i18n-options='{"service": "{{ service['id'] }}"}'>
-                                    <i class="bx bx-export bx-xs" aria-hidden="true"></i>
+                                    <i class="bx bx-export" aria-hidden="true"></i>
                                 </button>
                                 {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_delete else 'tooltip.button.delete_service')) %}
                                 {% set delete_tooltip_options = '{"method": "' ~ service['method'] ~ '"}' if not can_delete and not is_readonly else '{"name": "' ~ service['id'] ~ '"}' %}
@@ -221,8 +235,8 @@
                                      data-i18n-options='{{ delete_tooltip_options }}'>
                                     <button type="button"
                                             data-service-id="{{ service['id'] }}"
-                                            class="btn btn-outline-danger btn-sm me-1 delete-service{% if not can_delete %} disabled{% endif %}">
-                                        <i class="bx bx-trash bx-xs"></i>
+                                            class="icon-btn danger delete-service{% if not can_delete %} disabled{% endif %}">
+                                        <i class="bx bx-trash"></i>
                                     </button>
                                 </div>
                             </div>

@@ -1,6 +1,14 @@
 {% extends "dashboard.html" %}
 {% from "components/card.html" import card %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block content %}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {{ page_head(title="About BunkerWeb", title_i18n="about.title",
+                 breadcrumb=[("System", "navigation.system", none),
+                             ("About", "navigation.about", none)]) }}
     <!-- Content -->
     <div class="row g-3">
         <div class="col-12 col-md-6 col-lg-4">

@@ -5,6 +5,7 @@
     "license_title": "Licencia",
     "socials": "Redes Sociales",
     "tagline": "Protección Potente, Simplificada",
+    "title": "About BunkerWeb",
     "version": "Versión: {{version}}"
   },
   "accordion": {
@@ -68,7 +69,25 @@
     "support": "¿Necesitas soporte premium o consultoría personalizada para BunkerWeb? Consulta nuestros <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">servicios profesionales</a>."
   },
   "bans": {
-    "subtitle": "Direcciones IP bloqueadas en sus instancias de BunkerWeb — agregue, elimine o ajuste las duraciones de bloqueo."
+    "subtitle": "Direcciones IP bloqueadas en sus instancias de BunkerWeb — agregue, elimine o ajuste las duraciones de bloqueo.",
+    "stats": {
+      "alert": {
+        "body_after": "is enabled.",
+        "body_before": "Bans made here expire on instance restart unless",
+        "title": "Non-persisted edits."
+      },
+      "card": {
+        "by_reason": "Bans by reason"
+      },
+      "tile": {
+        "active": "Active bans",
+        "active_caption": "IPs + CIDRs",
+        "countries": "Countries",
+        "expiring": "Expiring ≤ 1 h",
+        "expiring_caption": "Auto-rotating",
+        "permanent": "Permanent bans"
+      }
+    }
   },
   "breadcrumb": {
     "about": "Acerca de",
@@ -78,6 +97,7 @@
     "configs": "Configuraciones",
     "extra_pages": "Páginas Adicionales",
     "global_settings": "Ajustes globales",
+    "global_config": "Global config",
     "home": "Inicio",
     "instances": "Instancias",
     "jobs": "Tareas",
@@ -156,6 +176,7 @@
     "ping": "Ping",
     "plugin_page": "Página del Plugin",
     "proceed": "Continuar",
+    "refresh": "Refresh",
     "refresh_recovery_codes": "Actualizar Códigos de Recuperación",
     "reload": "Recargar",
     "reset": "Restablecer",
@@ -187,10 +208,20 @@
     "upload_photo": "Subir Nueva Foto",
     "view_details": "Ver Detalles",
     "view_raw_data": "Ver Datos sin Procesar",
-    "wipe_other_sessions": "Limpiar Otras Sesiones"
+    "wipe_other_sessions": "Limpiar Otras Sesiones",
+    "ban_all_filtered": "Ban all matching reports",
+    "filtered_actions": "Filtered actions",
+    "unban_all_filtered": "Unban all matching bans",
+    "update_duration_all_filtered": "Update duration for all matching bans",
+    "use_template": "Use template",
+    "edit": "Edit",
+    "view": "View"
   },
   "cache": {
-    "subtitle": "Archivos de caché generados por trabajos programados (listas negras, bases de datos GeoIP, etc.) — inspeccione, descargue o elimine los archivos por servicio y plugin."
+    "kpi_files": "Files",
+    "kpi_per_service": "Per-service",
+    "subtitle": "Archivos de caché generados por trabajos programados (listas negras, bases de datos GeoIP, etc.) — inspeccione, descargue o elimine los archivos por servicio y plugin.",
+    "title": "Cache files"
   },
   "configs": {
     "subtitle": "Fragmentos de configuración NGINX personalizados para sus servicios — cree, edite y gestione las sobrecargas de HTTP, ModSecurity y a nivel de flujo."
@@ -485,6 +516,9 @@
       },
       "total_requests": {
         "title": "Solicitudes Totales"
+      },
+      "top_reasons": {
+        "title": "Top reasons for blocks"
       }
     },
     "chart": {
@@ -505,6 +539,10 @@
       "top_blocked_ips": {
         "most_blocked": "IP más bloqueada",
         "title": "Top 10 IP Bloqueadas"
+      },
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time (selected range)"
       }
     },
     "map": {
@@ -516,6 +554,23 @@
     "window": {
       "last_days": "Últimos {{days}} días",
       "title": "Ventana del panel"
+    },
+    "tile": {
+      "bans_active": "Bans active",
+      "jobs": "Scheduled jobs",
+      "trend": "Blocked requests trend"
+    },
+    "welcome": {
+      "title": "Welcome back, {{user}}",
+      "greeting": "Welcome back,"
+    },
+    "panel": {
+      "timeseries_sub": "Selected range",
+      "top_ips_sub": "By request count",
+      "status_sub": "HTTP response codes",
+      "reasons_sub": "By trigger rule",
+      "map_sub": "Hover for details",
+      "blocking_sub": "Blocked vs allowed"
     }
   },
   "datatable": {
@@ -829,7 +884,8 @@
     "privacy_policy": "Política de Privacidad",
     "read_more": "Leer Más",
     "see_more": "Ver Más",
-    "upgrade": "¿Actualizar?"
+    "upgrade": "¿Actualizar?",
+    "get_support": "Get support"
   },
   "login": {
     "subtitle": "Inicie sesión en su cuenta de BunkerWeb"
@@ -856,7 +912,19 @@
     "showing_all": "{{total}} líneas",
     "showing_some": "mostrando {{shown}} de {{total}}",
     "select_file_prompt": "Seleccione un archivo de registro para ver su contenido",
-    "trimmed_notice": "--- {{count}} líneas de registro antiguas fueron eliminadas por rendimiento ---"
+    "trimmed_notice": "--- {{count}} líneas de registro antiguas fueron eliminadas por rendimiento ---",
+    "all_sources": "All sources (live)",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "grep_placeholder": "grep…",
+    "level_all": "All logs",
+    "level_errors_only": "Errors only",
+    "level_security_only": "Security only",
+    "live_title": "Live logs",
+    "pause": "Pause",
+    "resume": "Resume",
+    "tailing_sources": "Tailing · {{count}} sources",
+    "taller": "Taller"
   },
   "modal": {
     "body": {
@@ -899,7 +967,10 @@
       "services_deletion_confirmation": "¿Estás seguro de que quieres eliminar los servicios seleccionados?",
       "unban_confirmation_alert": "¿Estás seguro de que quieres desbloquear la dirección IP seleccionada?",
       "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?",
-      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:"
+      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "Aplicar ajustes globales",
@@ -982,7 +1053,13 @@
     "reports": "Informes",
     "services": "Servicios",
     "support": "Soporte",
-    "templates": "Plantillas"
+    "templates": "Plantillas",
+    "overview": "Overview",
+    "configure": "Configure",
+    "operate": "Operate",
+    "system": "System",
+    "edition_community": "Community",
+    "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "Imagen de noticia",
@@ -1023,6 +1100,19 @@
       "more_value": "más valor",
       "more_values": "más valores",
       "show_less": "Mostrar menos"
+    },
+    "marketplace": {
+      "active": "Active",
+      "always_on": "Core / always on",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "inactive": "Inactive",
+      "no_match": "No plugins match your filters",
+      "search": "Search plugins...",
+      "tab_all": "All",
+      "tab_community": "Community",
+      "tab_disabled": "Disabled",
+      "tab_enabled": "Enabled"
     }
   },
   "pro": {
@@ -1069,7 +1159,8 @@
       "services_count": "{{online_services}} Servicio(s) en Línea / {{pro_services}} Servicio(s) PRO",
       "suspended": "SUSPENDIDO",
       "title": "Estado"
-    }
+    },
+    "title": "Pro license"
   },
   "profile": {
     "2fa": {
@@ -1414,7 +1505,8 @@
         "title": "Enlace de Soporte"
       }
     },
-    "subtitle": "Descargar los registros de depuración, extraer su configuración y obtener ayuda del equipo de BunkerWeb."
+    "subtitle": "Descargar los registros de depuración, extraer su configuración y obtener ayuda del equipo de BunkerWeb.",
+    "title": "Support"
   },
   "tab": {
     "custom_certificate": "Certificado Personalizado",
@@ -1638,7 +1730,27 @@
     "none": "Ninguna plantilla"
   },
   "templates": {
-    "subtitle": "Plantillas de configuración reutilizables para sus servicios: agrupar configuraciones, pasos y configuraciones personalizadas, y luego crearlas, clonarlas o eliminarlas."
+    "subtitle": "Plantillas de configuración reutilizables para sus servicios: agrupar configuraciones, pasos y configuraciones personalizadas, y luego crearlas, clonarlas o eliminarlas.",
+    "gallery": {
+      "delete_selected": "Delete selected",
+      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
+      "empty_title": "No templates yet",
+      "select": "Select",
+      "svc_suffix": "svc"
+    },
+    "name": {
+      "api": "API",
+      "high": "High security",
+      "low": "Low security",
+      "medium": "Medium security",
+      "ui": "Web UI"
+    },
+    "tag": {
+      "config": "Custom config: {{name}}",
+      "feature": "Built-in feature: {{name}}",
+      "plugin": "Plugin: {{name}}"
+    },
+    "title": "Service templates"
   },
   "theme": {
     "dark": "Oscuro",
@@ -2055,6 +2167,7 @@
     "kinds": "Tipos",
     "loading_references": "Cargando referencias...",
     "max_entries": "Un grupo de recursos no puede contener más de {{max}} entradas.",
+    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
     "new": "Nuevo grupo",
     "new_alias": "Nuevo alias",
     "no_entries": "Sin entradas",
@@ -2116,5 +2229,14 @@
     "services": "Habilitar servicio",
     "status": "Almacenamiento de instancia",
     "subtitle": "Estado de caché del proxy inverso, métricas de tasa de aciertos y controles de eliminación inmediata."
+  },
+  "onboarding": {
+    "item": {
+      "install": "Install BunkerWeb on 1+ host",
+      "mfa": "Activate MFA",
+      "pro": "Activate BunkerWeb PRO",
+      "service": "Register your first service"
+    },
+    "title": "Getting started"
   }
 }

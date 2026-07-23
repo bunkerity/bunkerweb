@@ -1,0 +1,52 @@
+{# usage: {% from "components/page-head.html" import page_head %}
+          {% call page_head(title="Service templates", title_i18n="templates.title",
+                            breadcrumb=[("Configure", "navigation.configure", none),
+                                        ("Templates", "navigation.templates", none)]) %}
+            ...right-aligned action buttons...
+          {% endcall %} #}
+
+{# Systemic page-head band (kit .page-head, admin.css:138-142): one aligned row with a
+   breadcrumb line and a bare H1 on the left, and a right-aligned actions slot. This is
+   the chrome every page adopts in place of the ad-hoc "d-flex justify-content-between"
+   header + duplicated breadcrumb the dashboard shell used to print. Deliberately a BARE
+   H1 -- no leading icon, no subtitle paragraph -- per the kit.
+
+   Params:
+     title        (required) English fallback for the H1 shown before i18next rewrites it.
+     title_i18n   data-i18n key for the H1, e.g. "templates.title". Omit for untranslated
+                  text (rare).
+     breadcrumb   list of (label, i18n_key, url) tuples, root -> current. i18n_key may be
+                  none (untranslated crumb); url may be none (plain text crumb -- the last
+                  crumb is always rendered as the current page, no link). e.g.
+                  [("Configure", "navigation.configure", none),
+                   ("Templates", "navigation.templates", none)]. Empty list = no crumbs.
+     classes      extra utility classes appended to the band wrapper, e.g. "mb-4".
+
+   Actions slot: pass right-aligned buttons via {% call %}...{% endcall %}. When the macro
+   is invoked with {{ page_head(...) }} (no call block) the actions column is omitted. #}
+{% macro page_head(title, title_i18n=none, breadcrumb=[], classes='') -%}
+    <div class="bw-page-head d-flex align-items-end justify-content-between gap-3 flex-wrap mb-3{% if classes %} {{ classes }}{% endif %}">
+        <div>
+            {%- if breadcrumb %}
+                <nav class="bw-page-head-crumbs d-flex gap-1" aria-label="Breadcrumb">
+                    {%- for label, crumb_i18n, url in breadcrumb %}
+                        {%- if loop.last %}
+                            <span class="is-current" aria-current="page"{% if crumb_i18n %} data-i18n="{{ crumb_i18n }}"{% endif %}>{{ label }}</span>
+                        {%- else %}
+                            {%- if url %}
+                                <a href="{{ url }}"{% if crumb_i18n %} data-i18n="{{ crumb_i18n }}"{% endif %}>{{ label }}</a>
+                            {%- else %}
+                                <span{% if crumb_i18n %} data-i18n="{{ crumb_i18n }}"{% endif %}>{{ label }}</span>
+                            {%- endif %}
+                            <span class="sep" aria-hidden="true">/</span>
+                        {%- endif %}
+                    {%- endfor %}
+                </nav>
+            {%- endif %}
+            <h1 class="bw-page-head-title mb-0"{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</h1>
+        </div>
+        {%- if caller %}
+            <div class="bw-page-head-actions d-flex align-items-center gap-2 flex-wrap">{{ caller() }}</div>
+        {%- endif %}
+    </div>
+{%- endmacro %}

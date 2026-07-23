@@ -4,6 +4,10 @@
 {% from "components/button.html" import button %}
 {% from "components/alert.html" import alert %}
 {% from "components/label.html" import label %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <!-- Flatpickr -->
     <link rel="preload"
@@ -22,6 +26,10 @@
     {% endif %}
 {% endblock %}
 {% block content %}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {{ page_head(title="Pro license", title_i18n="pro.title",
+                 breadcrumb=[("System", "navigation.system", none),
+                             ("Pro", "navigation.pro", none)]) }}
     <!-- Content -->
     {% set is_overlapped = pro_status == "active" and pro_overlapped %}
     {% set is_expired = pro_status == "expired" %}

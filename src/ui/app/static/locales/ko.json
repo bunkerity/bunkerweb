@@ -5,6 +5,7 @@
     "license_title": "라이선스",
     "socials": "소셜 미디어",
     "tagline": "단순함 속에 담긴 강력한 보안",
+    "title": "About BunkerWeb",
     "version": "버전: {{version}}"
   },
   "accordion": {
@@ -68,7 +69,25 @@
     "support": "BunkerWeb에 대한 프리미엄 기술 지원이나 맞춤형 컨설팅이 필요하신가요? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">전문 서비스</a>를 확인해 보세요."
   },
   "bans": {
-    "subtitle": "BunkerWeb 인스턴스 전반에 걸쳐 차단된 IP 주소 — 차단 기간을 추가, 제거 또는 조정합니다."
+    "subtitle": "BunkerWeb 인스턴스 전반에 걸쳐 차단된 IP 주소 — 차단 기간을 추가, 제거 또는 조정합니다.",
+    "stats": {
+      "alert": {
+        "body_after": "is enabled.",
+        "body_before": "Bans made here expire on instance restart unless",
+        "title": "Non-persisted edits."
+      },
+      "card": {
+        "by_reason": "Bans by reason"
+      },
+      "tile": {
+        "active": "Active bans",
+        "active_caption": "IPs + CIDRs",
+        "countries": "Countries",
+        "expiring": "Expiring ≤ 1 h",
+        "expiring_caption": "Auto-rotating",
+        "permanent": "Permanent bans"
+      }
+    }
   },
   "breadcrumb": {
     "about": "정보",
@@ -78,6 +97,7 @@
     "configs": "설정",
     "extra_pages": "추가 페이지",
     "global_settings": "전역 설정",
+    "global_config": "Global config",
     "home": "홈",
     "instances": "인스턴스",
     "jobs": "작업",
@@ -156,6 +176,7 @@
     "ping": "핑(Ping)",
     "plugin_page": "플러그인 페이지",
     "proceed": "계속",
+    "refresh": "Refresh",
     "refresh_recovery_codes": "복구 코드 갱신",
     "reload": "새로고침",
     "reset": "초기화",
@@ -187,10 +208,20 @@
     "upload_photo": "새 사진 업로드",
     "view_details": "상세 보기",
     "view_raw_data": "원본 데이터 보기",
-    "wipe_other_sessions": "다른 세션 로그아웃"
+    "wipe_other_sessions": "다른 세션 로그아웃",
+    "ban_all_filtered": "Ban all matching reports",
+    "filtered_actions": "Filtered actions",
+    "unban_all_filtered": "Unban all matching bans",
+    "update_duration_all_filtered": "Update duration for all matching bans",
+    "use_template": "Use template",
+    "edit": "Edit",
+    "view": "View"
   },
   "cache": {
-    "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다."
+    "kpi_files": "Files",
+    "kpi_per_service": "Per-service",
+    "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다.",
+    "title": "Cache files"
   },
   "configs": {
     "subtitle": "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다."
@@ -485,6 +516,9 @@
       },
       "total_requests": {
         "title": "전체 요청"
+      },
+      "top_reasons": {
+        "title": "Top reasons for blocks"
       }
     },
     "chart": {
@@ -505,6 +539,10 @@
       "top_blocked_ips": {
         "most_blocked": "최다 차단 IP",
         "title": "최다 차단 IP Top 10"
+      },
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time (selected range)"
       }
     },
     "map": {
@@ -516,6 +554,23 @@
     "window": {
       "last_days": "지난 {{days}}일",
       "title": "대시보드 창"
+    },
+    "tile": {
+      "bans_active": "Bans active",
+      "jobs": "Scheduled jobs",
+      "trend": "Blocked requests trend"
+    },
+    "welcome": {
+      "title": "Welcome back, {{user}}",
+      "greeting": "Welcome back,"
+    },
+    "panel": {
+      "timeseries_sub": "Selected range",
+      "top_ips_sub": "By request count",
+      "status_sub": "HTTP response codes",
+      "reasons_sub": "By trigger rule",
+      "map_sub": "Hover for details",
+      "blocking_sub": "Blocked vs allowed"
     }
   },
   "datatable": {
@@ -829,7 +884,8 @@
     "privacy_policy": "개인정보 처리방침",
     "read_more": "더 읽어보기",
     "see_more": "더 보기",
-    "upgrade": "업그레이드하시겠습니까?"
+    "upgrade": "업그레이드하시겠습니까?",
+    "get_support": "Get support"
   },
   "login": {
     "subtitle": "BunkerWeb 계정에 로그인"
@@ -856,7 +912,19 @@
     "showing_all": "{{total}}줄",
     "showing_some": "{{total}}개 중 {{shown}}개 표시",
     "select_file_prompt": "로그 파일 선택하여 내용을 보기",
-    "trimmed_notice": "--- 성능을 위해 {{count}}개의 오래된 로그 라인을 제거했습니다 ---"
+    "trimmed_notice": "--- 성능을 위해 {{count}}개의 오래된 로그 라인을 제거했습니다 ---",
+    "all_sources": "All sources (live)",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "grep_placeholder": "grep…",
+    "level_all": "All logs",
+    "level_errors_only": "Errors only",
+    "level_security_only": "Security only",
+    "live_title": "Live logs",
+    "pause": "Pause",
+    "resume": "Resume",
+    "tailing_sources": "Tailing · {{count}} sources",
+    "taller": "Taller"
   },
   "modal": {
     "body": {
@@ -899,7 +967,10 @@
       "services_deletion_confirmation": "선택한 서비스를 삭제하시겠습니까?",
       "unban_confirmation_alert": "선택한 IP 주소의 차단을 해제하시겠습니까?",
       "unban_confirmation_alert_plural": "선택한 IP 주소들의 차단을 해제하시겠습니까?",
-      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:"
+      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "전역 설정 적용",
@@ -982,7 +1053,13 @@
     "reports": "보고서",
     "services": "서비스",
     "support": "지원",
-    "templates": "템플릿"
+    "templates": "템플릿",
+    "overview": "Overview",
+    "configure": "Configure",
+    "operate": "Operate",
+    "system": "System",
+    "edition_community": "Community",
+    "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "소식 이미지",
@@ -1023,6 +1100,19 @@
       "more_value": "더 보기",
       "more_values": "더 많은 값",
       "show_less": "덜 표시"
+    },
+    "marketplace": {
+      "active": "Active",
+      "always_on": "Core / always on",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "inactive": "Inactive",
+      "no_match": "No plugins match your filters",
+      "search": "Search plugins...",
+      "tab_all": "All",
+      "tab_community": "Community",
+      "tab_disabled": "Disabled",
+      "tab_enabled": "Enabled"
     }
   },
   "pro": {
@@ -1069,7 +1159,8 @@
       "services_count": "{{online_services}}개 온라인 서비스 / {{pro_services}}개 PRO 서비스",
       "suspended": "일시 정지됨",
       "title": "상태"
-    }
+    },
+    "title": "Pro license"
   },
   "profile": {
     "2fa": {
@@ -1414,7 +1505,8 @@
         "title": "기술 지원 링크"
       }
     },
-    "subtitle": "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요."
+    "subtitle": "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요.",
+    "title": "Support"
   },
   "tab": {
     "custom_certificate": "사용자 정의 인증서",
@@ -1638,7 +1730,27 @@
     "none": "템플릿 없음"
   },
   "templates": {
-    "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다."
+    "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다.",
+    "gallery": {
+      "delete_selected": "Delete selected",
+      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
+      "empty_title": "No templates yet",
+      "select": "Select",
+      "svc_suffix": "svc"
+    },
+    "name": {
+      "api": "API",
+      "high": "High security",
+      "low": "Low security",
+      "medium": "Medium security",
+      "ui": "Web UI"
+    },
+    "tag": {
+      "config": "Custom config: {{name}}",
+      "feature": "Built-in feature: {{name}}",
+      "plugin": "Plugin: {{name}}"
+    },
+    "title": "Service templates"
   },
   "theme": {
     "dark": "어둡게",
@@ -2055,6 +2167,7 @@
     "kinds": "종류",
     "loading_references": "참조 로딩 중...",
     "max_entries": "리소스 그룹은 {{max}}개 항목 이상을 포함할 수 없습니다.",
+    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
     "new": "새 그룹",
     "new_alias": "새 별칭",
     "no_entries": "항목 없음",
@@ -2116,5 +2229,14 @@
     "services": "서비스 활성화",
     "status": "인스턴스 저장",
     "subtitle": "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어."
+  },
+  "onboarding": {
+    "item": {
+      "install": "Install BunkerWeb on 1+ host",
+      "mfa": "Activate MFA",
+      "pro": "Activate BunkerWeb PRO",
+      "service": "Register your first service"
+    },
+    "title": "Getting started"
   }
 }

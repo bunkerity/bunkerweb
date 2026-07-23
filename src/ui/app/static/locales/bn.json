@@ -5,6 +5,7 @@
     "license_title": "লাইসেন্স",
     "socials": "সামাজিক মাধ্যম",
     "tagline": "শক্তিশালী সুরক্ষা, সরলীকৃত",
+    "title": "About BunkerWeb",
     "version": "সংস্করণ: {{version}}"
   },
   "accordion": {
@@ -68,7 +69,25 @@
     "support": "BunkerWeb-এর জন্য প্রিমিয়াম সমর্থন বা কাস্টমাইজড পরামর্শ প্রয়োজন? আমাদের <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">পেশাদার পরিষেবাগুলি</a> দেখুন।"
   },
   "bans": {
-    "subtitle": "আপনার BunkerWeb ইনস্ট্যান্স জুড়ে নিষিদ্ধ IP ঠিকানা — যোগ, অপসারণ, অথবা নিষিদ্ধ সময়কাল পরিবর্তন করুন।"
+    "subtitle": "আপনার BunkerWeb ইনস্ট্যান্স জুড়ে নিষিদ্ধ IP ঠিকানা — যোগ, অপসারণ, অথবা নিষিদ্ধ সময়কাল পরিবর্তন করুন।",
+    "stats": {
+      "alert": {
+        "body_after": "is enabled.",
+        "body_before": "Bans made here expire on instance restart unless",
+        "title": "Non-persisted edits."
+      },
+      "card": {
+        "by_reason": "Bans by reason"
+      },
+      "tile": {
+        "active": "Active bans",
+        "active_caption": "IPs + CIDRs",
+        "countries": "Countries",
+        "expiring": "Expiring ≤ 1 h",
+        "expiring_caption": "Auto-rotating",
+        "permanent": "Permanent bans"
+      }
+    }
   },
   "breadcrumb": {
     "about": "সম্পর্কে",
@@ -78,6 +97,7 @@
     "configs": "কনফিগারেশন",
     "extra_pages": "অতিরিক্ত পৃষ্ঠা",
     "global_settings": "গ্লোবাল সেটিংস",
+    "global_config": "Global config",
     "home": "হোম",
     "instances": "ইনস্ট্যান্স",
     "jobs": "কার্য",
@@ -156,6 +176,7 @@
     "ping": "পিং",
     "plugin_page": "প্লাগইন পৃষ্ঠা",
     "proceed": "এগিয়ে যান",
+    "refresh": "Refresh",
     "refresh_recovery_codes": "পুনরুদ্ধার কোড রিফ্রেশ করুন",
     "reload": "পুনরায় লোড করুন",
     "reset": "রিসেট করুন",
@@ -187,10 +208,20 @@
     "upload_photo": "নতুন ছবি আপলোড করুন",
     "view_details": "বিস্তারিত দেখুন",
     "view_raw_data": "কাঁচা ডেটা দেখুন",
-    "wipe_other_sessions": "অন্যান্য সেশন মুছুন"
+    "wipe_other_sessions": "অন্যান্য সেশন মুছুন",
+    "ban_all_filtered": "Ban all matching reports",
+    "filtered_actions": "Filtered actions",
+    "unban_all_filtered": "Unban all matching bans",
+    "update_duration_all_filtered": "Update duration for all matching bans",
+    "use_template": "Use template",
+    "edit": "Edit",
+    "view": "View"
   },
   "cache": {
-    "subtitle": "পরিকল্পিত কাজের দ্বারা তৈরি ক্যাশে ফাইল (ব্লকলিস্ট, জিওআইপি ডাটাবেস, এবং আরও) — প্রতিটি পরিষেবার জন্য এবং প্লাগিনের জন্য পরিদর্শন, ডাউনলোড, অথবা মুছে ফেলুন।"
+    "kpi_files": "Files",
+    "kpi_per_service": "Per-service",
+    "subtitle": "পরিকল্পিত কাজের দ্বারা তৈরি ক্যাশে ফাইল (ব্লকলিস্ট, জিওআইপি ডাটাবেস, এবং আরও) — প্রতিটি পরিষেবার জন্য এবং প্লাগিনের জন্য পরিদর্শন, ডাউনলোড, অথবা মুছে ফেলুন।",
+    "title": "Cache files"
   },
   "configs": {
     "subtitle": "আপনার পরিষেবাগুলির জন্য কাস্টম NGINX কনফিগারেশন স্নিপেট — তৈরি, সম্পাদনা, এবং HTTP, ModSecurity, এবং স্ট্রিম-লেভেল ওভাররাইডগুলি পরিচালনা করুন।"
@@ -485,6 +516,9 @@
       },
       "total_requests": {
         "title": "মোট অনুরোধ"
+      },
+      "top_reasons": {
+        "title": "Top reasons for blocks"
       }
     },
     "chart": {
@@ -505,6 +539,10 @@
       "top_blocked_ips": {
         "most_blocked": "সবচেয়ে বেশি অবরুদ্ধ আইপি",
         "title": "শীর্ষ ১০ অবরুদ্ধ আইপি"
+      },
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time (selected range)"
       }
     },
     "map": {
@@ -516,6 +554,23 @@
     "window": {
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
+    },
+    "tile": {
+      "bans_active": "Bans active",
+      "jobs": "Scheduled jobs",
+      "trend": "Blocked requests trend"
+    },
+    "welcome": {
+      "title": "Welcome back, {{user}}",
+      "greeting": "Welcome back,"
+    },
+    "panel": {
+      "timeseries_sub": "Selected range",
+      "top_ips_sub": "By request count",
+      "status_sub": "HTTP response codes",
+      "reasons_sub": "By trigger rule",
+      "map_sub": "Hover for details",
+      "blocking_sub": "Blocked vs allowed"
     }
   },
   "datatable": {
@@ -829,7 +884,8 @@
     "privacy_policy": "গোপনীয়তা নীতি",
     "read_more": "আরও পড়ুন",
     "see_more": "আরও দেখুন",
-    "upgrade": "আপগ্রেড করবেন?"
+    "upgrade": "আপগ্রেড করবেন?",
+    "get_support": "Get support"
   },
   "login": {
     "subtitle": "আপনার BunkerWeb অ্যাকাউন্টে সাইন ইন করুন"
@@ -856,7 +912,19 @@
     "showing_all": "{{total}} লাইন",
     "showing_some": "{{total}} এর মধ্যে {{shown}} দেখানো হচ্ছে",
     "select_file_prompt": "একটি লগ ফাইল নির্বাচন করে তার বিষয়বস্তু দেখুন",
-    "trimmed_notice": "--- {{count}} পুরানো লগ লাইন পারফরম্যান্সের জন্য সরানো হয়েছে ---"
+    "trimmed_notice": "--- {{count}} পুরানো লগ লাইন পারফরম্যান্সের জন্য সরানো হয়েছে ---",
+    "all_sources": "All sources (live)",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "grep_placeholder": "grep…",
+    "level_all": "All logs",
+    "level_errors_only": "Errors only",
+    "level_security_only": "Security only",
+    "live_title": "Live logs",
+    "pause": "Pause",
+    "resume": "Resume",
+    "tailing_sources": "Tailing · {{count}} sources",
+    "taller": "Taller"
   },
   "modal": {
     "body": {
@@ -899,7 +967,10 @@
       "services_deletion_confirmation": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি মুছতে চান?",
       "unban_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানা থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
       "unban_confirmation_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানাগুলি থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
-      "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:"
+      "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "গ্লোবাল সেটিংস প্রয়োগ করুন",
@@ -982,7 +1053,13 @@
     "reports": "রিপোর্ট",
     "services": "পরিষেবা",
     "support": "সমর্থন",
-    "templates": "টেমপ্লেট"
+    "templates": "টেমপ্লেট",
+    "overview": "Overview",
+    "configure": "Configure",
+    "operate": "Operate",
+    "system": "System",
+    "edition_community": "Community",
+    "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "সংবাদের ছবি",
@@ -1023,6 +1100,19 @@
       "more_value": "আরও মান",
       "more_values": "আরও মান",
       "show_less": "কম দেখান"
+    },
+    "marketplace": {
+      "active": "Active",
+      "always_on": "Core / always on",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "inactive": "Inactive",
+      "no_match": "No plugins match your filters",
+      "search": "Search plugins...",
+      "tab_all": "All",
+      "tab_community": "Community",
+      "tab_disabled": "Disabled",
+      "tab_enabled": "Enabled"
     }
   },
   "pro": {
@@ -1069,7 +1159,8 @@
       "services_count": "{{online_services}} অনলাইন পরিষেবা(গুলি) / {{pro_services}} প্রো পরিষেবা(গুলি)",
       "suspended": "স্থগিত",
       "title": "অবস্থা"
-    }
+    },
+    "title": "Pro license"
   },
   "profile": {
     "2fa": {
@@ -1414,7 +1505,8 @@
         "title": "সমর্থন লিঙ্ক"
       }
     },
-    "subtitle": "ডিবাগ লগ ডাউনলোড করুন, আপনার কনফিগারেশন নিষ্কাশন করুন এবং BunkerWeb টিমের কাছ থেকে সহায়তা নিন।"
+    "subtitle": "ডিবাগ লগ ডাউনলোড করুন, আপনার কনফিগারেশন নিষ্কাশন করুন এবং BunkerWeb টিমের কাছ থেকে সহায়তা নিন।",
+    "title": "Support"
   },
   "tab": {
     "custom_certificate": "কাস্টম শংসাপত্র",
@@ -1638,7 +1730,27 @@
     "none": "কোন টেমপ্লেট নেই"
   },
   "templates": {
-    "subtitle": "আপনার পরিষেবাগুলির জন্য পুনরায় ব্যবহারযোগ্য কনফিগারেশন টেমপ্লেট — সেটিংস, পদক্ষেপ এবং কাস্টম কনফিগারেশন একত্রিত করুন, তারপর তৈরি করুন, ক্লোন করুন অথবা মুছে ফেলুন।"
+    "subtitle": "আপনার পরিষেবাগুলির জন্য পুনরায় ব্যবহারযোগ্য কনফিগারেশন টেমপ্লেট — সেটিংস, পদক্ষেপ এবং কাস্টম কনফিগারেশন একত্রিত করুন, তারপর তৈরি করুন, ক্লোন করুন অথবা মুছে ফেলুন।",
+    "gallery": {
+      "delete_selected": "Delete selected",
+      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
+      "empty_title": "No templates yet",
+      "select": "Select",
+      "svc_suffix": "svc"
+    },
+    "name": {
+      "api": "API",
+      "high": "High security",
+      "low": "Low security",
+      "medium": "Medium security",
+      "ui": "Web UI"
+    },
+    "tag": {
+      "config": "Custom config: {{name}}",
+      "feature": "Built-in feature: {{name}}",
+      "plugin": "Plugin: {{name}}"
+    },
+    "title": "Service templates"
   },
   "theme": {
     "dark": "ডার্ক",
@@ -2055,6 +2167,7 @@
     "kinds": "প্রকারসমূহ",
     "loading_references": "রেফারেন্স লোড হচ্ছে...",
     "max_entries": "একটি রিসোর্স গ্রুপে {{max}} এর বেশি এন্ট্রি থাকতে পারবে না।",
+    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
     "new": "নতুন গ্রুপ",
     "new_alias": "নতুন অ্যালাইস",
     "no_entries": "কোন এন্ট্রি নেই",
@@ -2116,5 +2229,14 @@
     "services": "সার্ভিস সক্রিয়করণ",
     "status": "ইনস্ট্যান্স স্টোরেজ",
     "subtitle": "Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls."
+  },
+  "onboarding": {
+    "item": {
+      "install": "Install BunkerWeb on 1+ host",
+      "mfa": "Activate MFA",
+      "pro": "Activate BunkerWeb PRO",
+      "service": "Register your first service"
+    },
+    "title": "Getting started"
   }
 }

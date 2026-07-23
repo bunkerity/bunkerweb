@@ -15,6 +15,48 @@ templates = Blueprint("templates", __name__)
 
 VIEW_MODES = {"easy", "raw"}
 
+# Human-readable labels for custom-config types (config keys stored as "type/name.conf" --
+# see db_methods/templates.py's get_templates()). Falls back to a titleized type when a
+# CUSTOM_CONFIGS_TYPES_ENUM value isn't listed here (e.g. a future type).
+_CONFIG_TYPE_LABELS: Dict[str, str] = {
+    "http": "HTTP",
+    "stream": "Stream",
+    "server_http": "Server HTTP",
+    "server_stream": "Server stream",
+    "default_server_http": "Default server",
+    "modsec": "ModSecurity",
+    "modsec_crs": "CRS",
+    "crs_plugins_before": "CRS plugins (before)",
+    "crs_plugins_after": "CRS plugins (after)",
+}
+
+# Rank + Bootstrap styling for each badge type, mirroring the design kit's tplTagRank
+# (plugin -> config -> feature) ordering -- see _template_tag_badges().
+_BADGE_TYPE_META: Dict[str, Dict[str, Any]] = {
+    "plugin": {"rank": 0, "variant": "primary", "icon": "bx-plug"},
+    "config": {"rank": 1, "variant": "secondary", "icon": "bx-file-blank"},
+    "feature": {"rank": 2, "variant": "success", "icon": "bx-package"},
+}
+
+# Kit tplCard cards show a small MIX of chip colors, not a monochrome flood of one type.
+# Classify each owning plugin so a template's chips read as a mix: security plugins stay
+# green ("plugin"), header/rule/CORS config surfaces go navy ("config"), and performance
+# behaviors go amber ("feature"). Security plugins not listed here default to "plugin".
+# Internal / always-on infra plugins are too generic to badge and are dropped entirely.
+_PLUGIN_BADGE_TYPE: Dict[str, str] = {
+    "gzip": "feature",
+    "brotli": "feature",
+    "clientcache": "feature",
+    "limit": "feature",
+    "headers": "config",
+    "cors": "config",
+    "modsecurity": "config",
+    "inject": "config",
+    "robotstxt": "config",
+    "securitytxt": "config",
+}
+_BADGE_SKIP_PLUGINS = frozenset({"general", "errors", "misc", "pro", "sessions", "db", "jobs", "metrics", "redis", "ui", "templates", "backup", "realip"})
+
 
 def _normalize_view_mode(raw: Optional[str]) -> str:
     if not isinstance(raw, str):
@@ -177,6 +219,83 @@ def _build_multisite_settings_catalog() -> List[Dict[str, Any]]:
     return catalog
 
 
+def _compute_template_usage(templates_index: Dict[str, Dict[str, Any]]) -> Dict[str, int]:
+    """Count, per template id, how many services (including drafts) have USE_TEMPLATE set to it.
+
+    Real usage data for the gallery's "N svc" chip -- never fabricated. Falls back to all-zero
+    counts (chip omitted) if the services list can't be fetched, rather than failing the page."""
+    usage: Dict[str, int] = {template_id: 0 for template_id in templates_index}
+    try:
+        services = API_CLIENT.get_services(with_drafts=True)
+    except Exception as exc:  # pragma: no cover - defensive
+        LOGGER.warning("Unable to load services for template usage counts: %s", exc)
+        return usage
+
+    for service in services or []:
+        template_id = (service or {}).get("template") or ""
+        if template_id in usage:
+            usage[template_id] += 1
+    return usage
+
+
+def _template_tag_badges(template_data: Dict[str, Any], catalog: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    """Derive typed feature badges for a template gallery card from the settings/custom-configs
+    it actually bundles -- no fake tag list, no catalog shipped to the client.
+
+    Mirrors the design kit's tplTagRank ordering (plugin -> config -> feature) but is data-driven,
+    typed via ``_PLUGIN_BADGE_TYPE`` so a card reads as a MIX of chip colors rather than a flood
+    of one type:
+      - "plugin"  security plugin the template touches (green) -- antibot, blacklist, country...
+      - "config"  header/rule/CORS config surface (navy) -- headers, cors, modsecurity plus every
+                  distinct custom-config type (http/modsec_crs/...) the template bundles.
+      - "feature" performance behavior (amber) -- gzip, brotli, client cache, limit.
+    Internal / always-on infra plugins (``_BADGE_SKIP_PLUGINS``) are too generic to badge.
+    """
+    catalog_by_key = {entry["key"]: entry for entry in catalog}
+
+    typed_names: Dict[str, Dict[str, str]] = {"plugin": {}, "config": {}, "feature": {}}
+    for key in template_data.get("settings") or {}:
+        entry = catalog_by_key.get(key)
+        if not entry:
+            continue
+        plugin = entry.get("plugin") or {}
+        plugin_id = plugin.get("id", "")
+        if not plugin_id or plugin_id in _BADGE_SKIP_PLUGINS:
+            continue
+        badge_type = _PLUGIN_BADGE_TYPE.get(plugin_id, "plugin")
+        typed_names[badge_type][plugin_id] = plugin.get("name") or plugin_id
+
+    for config_key in template_data.get("configs") or {}:
+        config_type = config_key.split("/", 1)[0] if "/" in config_key else config_key
+        typed_names["config"][f"config:{config_type}"] = _CONFIG_TYPE_LABELS.get(config_type, config_type.replace("_", " ").title())
+
+    badges: List[Dict[str, str]] = []
+    for badge_type in ("plugin", "config", "feature"):
+        meta = _BADGE_TYPE_META[badge_type]
+        for name in sorted(typed_names[badge_type].values()):
+            badges.append({"text": name, "type": badge_type, "variant": meta["variant"], "icon": meta["icon"]})
+    return badges
+
+
+def _split_badges(badges: List[Dict[str, str]], limit: int = 3) -> Dict[str, List[Dict[str, str]]]:
+    """Split a ranked badge list into a capped ``visible`` head + an ``overflow`` tail for the
+    card. Prefers one chip per type first so the visible set reads as a MIX (kit tplCard shows
+    1-3 mixed-color chips), then backfills spare slots by rank; overflow becomes the "+N" chip."""
+    visible: List[Dict[str, str]] = []
+    overflow: List[Dict[str, str]] = []
+    seen: Set[str] = set()
+    for badge in badges:
+        if badge["type"] not in seen and len(visible) < limit:
+            seen.add(badge["type"])
+            visible.append(badge)
+        else:
+            overflow.append(badge)
+    while len(visible) < limit and overflow:
+        visible.append(overflow.pop(0))
+    visible.sort(key=lambda badge: _BADGE_TYPE_META[badge["type"]]["rank"])
+    return {"visible": visible, "overflow": overflow}
+
+
 def _convert_template_details(details: Dict[str, Any]) -> Dict[str, Any]:
     raw_settings = details.get("settings", {})
     if isinstance(raw_settings, dict):
@@ -320,7 +439,10 @@ def _build_editor_context(
 @login_required
 def templates_page():
     db_templates = API_CLIENT.get_templates()
-    return render_template("templates.html", templates=db_templates)
+    template_usage = _compute_template_usage(db_templates)
+    catalog = _build_multisite_settings_catalog()
+    template_badges = {template_id: _split_badges(_template_tag_badges(template_data, catalog)) for template_id, template_data in db_templates.items()}
+    return render_template("templates.html", templates=db_templates, template_usage=template_usage, template_badges=template_badges)
 
 
 @templates.route("/templates/new", methods=["GET"])

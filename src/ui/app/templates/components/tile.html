@@ -1,25 +1,24 @@
 {# usage: {% from "components/tile.html" import tile %}
           {{ tile(title="Cache enabled", value=summary.enabled_count ~ "/" ~ summary.total_instances, title_i18n="web_cache.enabled_instances", color="bw-green", icon="bx-check-shield") }} #}
 
-{# KPI tile -- superset of the "card p-4 position-relative shadow-sm rounded-3 h-100
-   bg-<color> text-white" block duplicated across web_cache.html, home.html and
-   instances.html (top-right icon + title + big value + optional caption).
+{# KPI tile -- kit .mini-tile anatomy (app.css:259-262): a plain card with a small
+   UPPERCASE muted label, a plain navy Don Jose value, and an optional muted caption
+   line. No colour-coded value, no accent top-border (killed in the round-3 restyle).
 
    Params:
      title        (required) English fallback label shown before i18next rewrites it.
-     value        (required) big number/string rendered in Don Jose. Caller pre-formats
-                  it (filters, string concat, conditional "--", etc.) -- the macro never
-                  touches formatting/i18n of the value itself.
-     title_i18n   data-i18n key for the title, e.g. "web_cache.hit_rate". Omit for the
+     value        (required) big number/string rendered in navy Don Jose. Caller
+                  pre-formats it (filters, string concat, conditional "--", etc.) -- the
+                  macro never touches formatting/i18n of the value itself.
+     title_i18n   data-i18n key for the label, e.g. "web_cache.hit_rate". Omit for the
                   rare case of untranslated text.
-     color        Bootstrap bg-<color> suffix tinting the whole card + text white, e.g.
-                  "primary", "secondary", "warning", "danger", "bw-green". Empty/none
-                  renders a plain white card instead (pair with icon_color then).
-     icon         optional Boxicons class, e.g. "bx-check-shield", "bx-server". Rendered
-                  top-right, absolutely positioned.
-     icon_color   extra class on the icon, e.g. "text-danger", "text-secondary" -- only
-                  needed on a plain (color="") card, where the icon doesn't already
-                  inherit text-white from the card background.
+     color        retained for backward compatibility (callers still pass "primary",
+                  "danger", etc.). Emitted as a bw-kpi-tile-<color> hook class but no
+                  longer tints the value -- the kit tile is monochrome navy.
+     icon         optional Boxicons class, e.g. "bx-check-shield", rendered inline before
+                  the label (kit .mini-tile .lbl .bx).
+     icon_color   optional extra class on the icon, e.g. "text-danger"; defaults to the
+                  muted label colour when omitted.
      caption      optional small caption line under the value, e.g. "IPs + CIDRs".
      caption_i18n data-i18n key for the caption.
      id           optional id attribute on the outer card, e.g. for JS to target/update
@@ -33,11 +32,10 @@
 {% macro tile(title, value, title_i18n=none, color='primary', icon=none, icon_color=none, caption=none, caption_i18n=none, id=none, classes='') -%}
     <div{% if id %} id="{{ id }}"{% endif %}
          class="card bw-kpi-tile p-4 position-relative h-100{% if color %} bw-kpi-tile-{{ color }}{% endif %}{% if classes %} {{ classes }}{% endif %}">
-        {% if icon %}<i class="bx {{ icon }} bx-sm position-absolute top-0 end-0 m-3{% if icon_color %} {{ icon_color }}{% endif %}" aria-hidden="true"></i>{% endif %}
-        <p class="ps-1 fs-4 mb-2"{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</p>
-        <span class="fs-3 don-jose bw-kpi-value">{{ value }}</span>
+        <p class="bw-kpi-label mb-0">{% if icon %}<i class="bx {{ icon }}{% if icon_color %} {{ icon_color }}{% endif %}" aria-hidden="true"></i>{% endif %}<span{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</span></p>
+        <span class="don-jose bw-kpi-value">{{ value }}</span>
         {% if caption %}
-            <small class="ps-1 d-block mt-1 text-muted"{% if caption_i18n %} data-i18n="{{ caption_i18n }}"{% endif %}>{{ caption }}</small>
+            <small class="bw-kpi-caption d-block"{% if caption_i18n %} data-i18n="{{ caption_i18n }}"{% endif %}>{{ caption }}</small>
         {% endif %}
     </div>
 {%- endmacro %}

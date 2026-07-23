@@ -1,4 +1,9 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/settings.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <input type="hidden"

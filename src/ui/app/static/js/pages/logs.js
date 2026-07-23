@@ -1,3 +1,11 @@
+import {
+  LEVELS,
+  levelOf,
+  classifyLine,
+  localizeLine,
+  fmtLocal,
+} from "./logs-classify.js";
+
 $(document).ready(function () {
   // Ensure i18next is loaded before using it
   const t =
@@ -91,106 +99,9 @@ $(document).ready(function () {
   }
   syncLines();
 
-  // ---- Level detection (mirrors the ACE mode's matchers, all formats) ----
-  const LEVELS = [
-    { key: "critical", cls: "danger", icon: "bx-error", label: "Critical" },
-    { key: "error", cls: "danger", icon: "bx-error-circle", label: "Error" },
-    { key: "warning", cls: "warning", icon: "bx-error", label: "Warning" },
-    { key: "notice", cls: "info", icon: "bx-info-circle", label: "Notice" },
-    { key: "info", cls: "info", icon: "bx-info-circle", label: "Info" },
-    { key: "debug", cls: "secondary", icon: "bx-bug", label: "Debug" },
-  ];
-  const LEVEL_RES = {
-    critical: /\[\s*(?:CRITICAL|🚨)\s*\]|:CRITICAL:|\s\[emerg\]\s/u,
-    error: /\[\s*(?:ERROR|❌)\s*\]|:ERROR:|\s\[(?:error|alert|crit)\]\s/u,
-    warning: /\[\s*(?:WARNING|⚠️?)\s*\]|:WARNING:|\s\[warn\]\s/u,
-    notice: /\s\[notice\]\s/u,
-    info: /\[\s*(?:INFO|ℹ️?)\s*\]|:INFO:/u,
-    debug: /\[\s*(?:DEBUG|🐛)\s*\]|:DEBUG:/u,
-  };
-  function levelOf(line) {
-    // Only inspect the structured prefix (before the first quote). Access-log
-    // request / referer / user-agent fields are quoted and attacker-controlled,
-    // so a "[ERROR]" injected into a URL must not classify the line as an error.
-    const q = line.indexOf('"');
-    const head = q === -1 ? line : line.slice(0, q);
-    for (const L of LEVELS) if (LEVEL_RES[L.key].test(head)) return L.key;
-    return null;
-  }
-  function classifyLine(line) {
-    const lv = levelOf(line);
-    if (lv === "critical" || lv === "error") return "error";
-    if (lv === "warning") return "warning";
-    return null;
-  }
-
-  // ---- Optional local-time rewrite of leading timestamps (opt-in) ----
-  const pad = (n) => String(n).padStart(2, "0");
-  function localOffset(d) {
-    const off = -d.getTimezoneOffset();
-    const a = Math.abs(off);
-    return (off >= 0 ? "+" : "-") + pad(Math.floor(a / 60)) + pad(a % 60);
-  }
-  function fmtLocal(d) {
-    return (
-      d.getFullYear() +
-      "-" +
-      pad(d.getMonth() + 1) +
-      "-" +
-      pad(d.getDate()) +
-      " " +
-      pad(d.getHours()) +
-      ":" +
-      pad(d.getMinutes()) +
-      ":" +
-      pad(d.getSeconds())
-    );
-  }
-  const TS_BRACKET = /^\[(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4})\]/;
-  const TS_PLAIN = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})(,\d+)?(?=[:\s])/;
-  const TS_NGINX = /^(\d{4})\/(\d{2})\/(\d{2}) (\d{2}:\d{2}:\d{2})(?=\s)/;
-  function localizeLine(line) {
-    let m = TS_BRACKET.exec(line);
-    if (m) {
-      const tz = m[3].slice(0, 3) + ":" + m[3].slice(3);
-      const d = new Date(m[1] + "T" + m[2] + tz);
-      return isNaN(d)
-        ? line
-        : "[" +
-            fmtLocal(d) +
-            " " +
-            localOffset(d) +
-            "]" +
-            line.slice(m[0].length);
-    }
-    m = TS_PLAIN.exec(line);
-    if (m) {
-      const d = new Date(m[1] + "T" + m[2] + "Z"); // tz-less logs assumed UTC
-      return isNaN(d)
-        ? line
-        : fmtLocal(d) + (m[3] || "") + line.slice(m[0].length);
-    }
-    m = TS_NGINX.exec(line);
-    if (m) {
-      const d = new Date(m[1] + "-" + m[2] + "-" + m[3] + "T" + m[4] + "Z");
-      if (isNaN(d)) return line;
-      return (
-        d.getFullYear() +
-        "/" +
-        pad(d.getMonth() + 1) +
-        "/" +
-        pad(d.getDate()) +
-        " " +
-        pad(d.getHours()) +
-        ":" +
-        pad(d.getMinutes()) +
-        ":" +
-        pad(d.getSeconds()) +
-        line.slice(m[0].length)
-      );
-    }
-    return line;
-  }
+  // Level detection + local-time helpers live in ./logs-classify.js (imported
+  // above) so logs.js and logs-live.js classify lines identically — the
+  // pre-quote-prefix guard in levelOf() is security-sensitive; keep it there.
 
   function computeVisible() {
     let lines = state.allLines;

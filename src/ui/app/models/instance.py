@@ -54,7 +54,9 @@ class Instance:
     hostname: str
     name: str
     method: Literal["ui", "scheduler", "autoconf", "manual"]
-    status: Literal["loading", "up", "down"]
+    # "failover" = up-but-degraded nginx (see push-configs.py); treated as
+    # unhealthy: not counted as "up" and excluded from ban/unban propagation.
+    status: Literal["loading", "up", "down", "failover"]
     type: Literal["static", "container", "pod"]
     creation_date: datetime
     last_seen: datetime
@@ -65,7 +67,7 @@ class Instance:
         hostname: str,
         name: str,
         method: Literal["ui", "scheduler", "autoconf", "manual"],
-        status: Literal["loading", "up", "down"],
+        status: Literal["loading", "up", "down", "failover"],
         type: Literal["static", "container", "pod"],
         creation_date: datetime,
         last_seen: datetime,
@@ -465,7 +467,7 @@ class InstancesUtils:
             return datetime.fromisoformat(val)
         return val
 
-    def get_instances(self, status: Optional[Literal["loading", "up", "down"]] = None) -> List[Instance]:
+    def get_instances(self, status: Optional[Literal["loading", "up", "down", "failover"]] = None) -> List[Instance]:
         instances_data = self.__api_client.get_instances()
         return [
             Instance(
@@ -490,16 +492,22 @@ class InstancesUtils:
     def ban(
         self, ip: str, exp: float, reason: str, service: str, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None
     ) -> Union[list[str], str]:
-        return [
-            instance.name
-            for instance in instances or self.get_instances(status="up")
-            if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")
-        ] or ""
+        # Propagation rule: only healthy ("up") instances receive bans. A
+        # "failover" instance runs a broken/degraded config (its last-known-good
+        # restore failed too), so its ban state is untrustworthy -> excluded.
+        targets = instances or self.get_instances(status="up")
+        if not targets:
+            # Zero targets means the ban reached nothing; report failure instead
+            # of the "" success sentinel so the UI surfaces it (a truthy return).
+            return f"No instances available to ban {ip}"
+        return [instance.name for instance in targets if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")] or ""
 
     def unban(self, ip: str, service: Optional[str] = None, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [
-            instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service, ban_scope).startswith("Can't unban")
-        ] or ""
+        # Same propagation rule as ban(): only "up" instances, failover excluded.
+        targets = instances or self.get_instances(status="up")
+        if not targets:
+            return f"No instances available to unban {ip}"
+        return [instance.name for instance in targets if instance.unban(ip, service, ban_scope).startswith("Can't unban")] or ""
 
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""

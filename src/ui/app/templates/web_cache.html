@@ -4,17 +4,24 @@
 {% from "components/card.html" import card %}
 {% from "components/empty-state.html" import empty_state %}
 {% from "components/modal.html" import modal %}
+{% from "components/page-head.html" import page_head %}
 {% from "components/tile.html" import tile %}
-{% from "components/title.html" import title %}
 
+{# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
+   legacy breadcrumb row for this page. #}
+{% block page_head %}{% endblock %}
 {% block content %}
     {% set web_cache_url = url_for("web_cache") %}
     {% set status_colors = {"HIT": "success", "MISS": "secondary", "BYPASS": "secondary", "EXPIRED": "warning", "STALE": "danger", "UPDATING": "info", "REVALIDATED": "primary"} %}
-    {{ title(label="Web cache", i18n_key="breadcrumb.web_cache", level="h1", subtitle="Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls.", subtitle_i18n_key="web_cache.subtitle", icon="bx-cloud", classes="mb-4") }}
+    <!-- Page head band (components/page-head.html; kit .page-head) -->
+    {{ page_head(title="Web cache", title_i18n="breadcrumb.web_cache",
+                 breadcrumb=[("Operate", "navigation.operate", none),
+                             ("Web cache", "breadcrumb.web_cache", none)]) }}
+    <p class="text-muted mb-4" data-i18n="web_cache.subtitle">Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls.</p>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-3 mb-4">
         <div class="col">
-            {{ tile(title="Enabled services", value=summary.enabled_services ~ "/" ~ summary.active_services, title_i18n="web_cache.enabled_services", color="", icon="bx-check-shield", icon_color="text-bw-green") }}
+            {{ tile(title="Enabled services", value=summary.enabled_services ~ "/" ~ summary.active_services, title_i18n="web_cache.enabled_services", color="", icon="bx-check-shield", icon_color="text-primary") }}
         </div>
         <div class="col">
             {{ tile(title="Reporting instances", value=summary.reporting_count ~ "/" ~ summary.total_instances, title_i18n="web_cache.reporting_instances", color="", icon="bx-server", icon_color="text-primary") }}
@@ -32,42 +39,50 @@
 
     {% call card(classes="p-4 mb-4", title="Purge cached responses", title_key="web_cache.purge", icon="bx-eraser") %}
         <p class="text-muted" data-i18n="web_cache.purge_help">Purge actions run immediately on reachable instances. Unreachable instances are skipped and no action is queued.</p>
-        <div class="d-flex flex-column flex-lg-row align-items-lg-start gap-3">
-            {{ button(label="Purge all", i18n_key="web_cache.purge_all", variant="danger", icon="bx-trash", modal_target="purge-all", disabled=is_readonly) }}
-            <form method="POST"
-                  action="{{ web_cache_url }}/purge"
-                  class="row g-2 flex-grow-1">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                <input type="hidden" name="scope" value="url" />
-                <div class="col-12 col-md">
-                    <label for="web-cache-purge-url" class="visually-hidden" data-i18n="web_cache.purge_url">Purge URL</label>
-                    <input id="web-cache-purge-url"
-                           type="url"
-                           name="url"
-                           class="form-control"
-                           maxlength="8192"
-                           data-i18n="web_cache.purge_url_placeholder"
-                           placeholder="https://www.example.com/asset.js"
-                           {% if is_readonly %}disabled{% endif %}
-                           required />
-                </div>
-                <div class="col-12 col-md">
-                    <label for="web-cache-purge-key" class="visually-hidden" data-i18n="web_cache.purge_key">Effective cache key</label>
-                    <input id="web-cache-purge-key"
-                           type="text"
-                           name="key"
-                           class="form-control font-monospace"
-                           maxlength="4096"
-                           data-i18n="web_cache.purge_key_placeholder"
-                           placeholder="Effective PROXY_CACHE_KEY (optional)"
-                           {% if is_readonly %}disabled{% endif %} />
-                </div>
-                <div class="col-12 col-md-auto">
-                    {{ button(label="Purge URL", i18n_key="web_cache.purge_url", variant="warning", icon="bx-eraser", type="submit", disabled=is_readonly, classes="w-100") }}
-                </div>
-            </form>
-        </div>
+        <form method="POST"
+              action="{{ web_cache_url }}/purge"
+              class="row g-2 align-items-start">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="scope" value="url" />
+            <div class="col-12 col-md">
+                <label for="web-cache-purge-url" class="visually-hidden" data-i18n="web_cache.purge_url">Purge URL</label>
+                <input id="web-cache-purge-url"
+                       type="url"
+                       name="url"
+                       class="form-control"
+                       maxlength="8192"
+                       data-i18n="web_cache.purge_url_placeholder"
+                       placeholder="https://www.example.com/asset.js"
+                       {% if is_readonly %}disabled{% endif %}
+                       required />
+            </div>
+            <div class="col-12 col-md">
+                <label for="web-cache-purge-key" class="visually-hidden" data-i18n="web_cache.purge_key">Effective cache key</label>
+                <input id="web-cache-purge-key"
+                       type="text"
+                       name="key"
+                       class="form-control font-monospace"
+                       maxlength="4096"
+                       data-i18n="web_cache.purge_key_placeholder"
+                       placeholder="Effective PROXY_CACHE_KEY (optional)"
+                       {% if is_readonly %}disabled{% endif %} />
+            </div>
+            <div class="col-12 col-md-auto">
+                {{ button(label="Purge URL", i18n_key="web_cache.purge_url", variant="primary", icon="bx-eraser", type="submit", disabled=is_readonly, classes="w-100") }}
+            </div>
+        </form>
         <p class="text-muted small mt-3 mb-0" data-i18n="web_cache.purge_key_help">Leave the cache key empty only for the default <code>$scheme$host$request_uri</code>. If the service overrides PROXY_CACHE_KEY, paste its effective value here; unsupported request-only variables are rejected instead of purging a different entry.</p>
+        <!-- Isolated danger zone: bulk purge is destructive and irreversible, so it
+             lives apart from the routine single-URL purge above. -->
+        <div class="web-cache-danger mt-4 pt-3 border-top d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+            <div>
+                <h6 class="mb-1 text-danger d-flex align-items-center gap-1">
+                    <i class="bx bx-error-circle" aria-hidden="true"></i><span data-i18n="web_cache.purge_all">Purge all</span>
+                </h6>
+                <p class="text-muted small mb-0" data-i18n="web_cache.purge_all_confirm_body">This deletes every cached response for every service on every reachable instance. This cannot be undone.</p>
+            </div>
+            {{ button(label="Purge all", i18n_key="web_cache.purge_all", variant="danger", icon="bx-trash", modal_target="purge-all", disabled=is_readonly, classes="flex-shrink-0") }}
+        </div>
     {% endcall %}
 
     {% call modal(id="purge-all", title_key="web_cache.purge_all_confirm_title", title="Purge entire cache?") %}

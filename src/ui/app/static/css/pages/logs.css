@@ -322,3 +322,76 @@
     min-height: 40px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Live multi-source tail dashboard (the /logs landing when no file is picked).
+ * Ported from the design kit's terminal stream (ui_kits/admin/app.css). The
+ * stream is a dark "terminal" in BOTH themes (a terminal is conventionally
+ * dark), so the token colors are tuned once against the dark background rather
+ * than duplicated per data-bs-theme.
+ * ------------------------------------------------------------------------- */
+.log-stream {
+  font-family:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  background: #0a1926;
+  color: #cfe3f2;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.125rem;
+  overflow: auto;
+  max-height: 32rem;
+  border: 1px solid #0c2335;
+  transition: max-height 0.2s ease;
+}
+.log-stream.tall {
+  max-height: 75vh;
+}
+.log-stream.fullview {
+  max-height: calc(100vh - 180px);
+}
+/* Each SSE line is a plain <div> whose text is set via textContent (never
+   innerHTML — log content is attacker-influenced). Wrap long lines. */
+.log-stream > div {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.log-stream .lg-time {
+  color: #7c9cb3;
+}
+/* Severity emphasis (security-ops palette): routine INFO is quiet grey so that
+   WARN (amber) and DENY/ERROR (red) are the lines that visually pop. The kit
+   tints INFO blue, but a firewall log reads better when only the security events
+   draw the eye. Classification (which line is info/warn/error) is owned by
+   logs-classify.js and is unchanged — this is purely the color of each class. */
+.log-stream .lg-info {
+  color: #adb5bd;
+}
+.log-stream .lg-warn {
+  color: #ffcd6b;
+}
+.log-stream .lg-err {
+  color: #ff8873;
+  font-weight: 700;
+}
+.log-stream .lg-ok {
+  color: #7bd48e;
+}
+.log-stream .lg-dim {
+  color: #8aa0ad;
+}
+
+/* Grep box in the live toolbar — keep it compact next to the level select. */
+.logs-live-search {
+  max-width: 16rem;
+}
+
+/* "Tailing · N sources" live chip: the pulsing dot reuses .status-dot /
+   .status-dot-pulse from overrides.css (which already honors
+   prefers-reduced-motion via the global reduced-motion reset). Kill the
+   stream's max-height transition too when the user prefers reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .log-stream {
+    transition: none;
+  }
+}

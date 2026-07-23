@@ -6,7 +6,9 @@
 {% from "components/button.html" import button %}
 {% from "components/checkbox.html" import checkbox %}
 {% from "components/selected-list.html" import selected_list %}
-{% from "components/title.html" import title %}
+{% from "components/page-head.html" import page_head %}
+{# page-head band owns the breadcrumb + H1, so drop the dashboard shell's legacy header row. #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -17,7 +19,19 @@
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
-    {{ title(label="Configs", i18n_key="navigation.configs", level="h1", icon="bx-file-blank", subtitle="Custom NGINX configuration snippets for your services — create, edit, and manage HTTP, ModSecurity, and stream-level overrides.", subtitle_i18n_key="configs.subtitle", classes="mb-4") }}
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142). The
+         "Create custom config" action moves here from the DataTable toolbar as the navy CTA. -->
+    {% call page_head(title="Configs", title_i18n="navigation.configs",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Configs", "navigation.configs", none)]) %}
+        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
+            <a role="button"
+               class="btn btn-primary don-jose btn-sm{% if is_readonly %} disabled{% endif %}"
+               href="{{ url_for('configs') }}/new">
+                <i class="bx bx-plus bx-xs me-1"></i><span data-i18n="button.create_config">Create custom config</span>
+            </a>
+        </div>
+    {% endcall %}
     <!-- Content -->
     {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
         <input type="hidden" id="services" value="{{ services }}" />
@@ -79,7 +93,8 @@
                         data-i18n="tooltip.table.configs.checksum">
                         <span data-i18n="table.header.checksum">Checksum</span>
                     </th>
-                    <th data-bs-toggle="tooltip"
+                    <th class="actions-col"
+                        data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         data-bs-original-title="The actions that can be performed on the Custom config"
                         data-i18n="tooltip.table.configs.actions">
@@ -161,34 +176,34 @@
                             {% endif %}
                         </td>
                         <td>{{ config["checksum"] }}</td>
-                        <td>
-                            <div class="d-flex justify-content-evenly">
+                        <td class="actions-col">
+                            <div class="row-actions">
                                 {% set can_edit_config = config['template'] or is_editable_method(config['method']) %}
                                 <a role="button"
-                                   class="btn btn-primary btn-sm me-1"
+                                   class="icon-btn"
                                    href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="..."
                                    data-i18n="{% if not can_edit_config or is_readonly %}tooltip.link.view_config{% else %}tooltip.link.edit_config{% endif %}"
                                    data-i18n-options='{"name": "{{ config['name'] }}"}'>
-                                    <i class="bx bx-{% if not can_edit_config or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                    <i class="bx bx-{% if not can_edit_config or is_readonly %}show{% else %}edit{% endif %}"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
                                     <a role="button"
-                                       class="btn btn-outline-secondary btn-sm me-1{% if is_readonly %} disabled{% endif %}"
+                                       class="icon-btn{% if is_readonly %} disabled{% endif %}"
                                        href="{{ url_for("configs") }}/new?clone={{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
                                        data-bs-original-title="Clone custom config {{ config['name'] }}"
                                        data-i18n="tooltip.link.clone_config"
                                        data-i18n-options='{"name": "{{ config['name'] }}"}'>
-                                        <i class="bx bx-copy-alt bx-xs"></i>
+                                        <i class="bx bx-copy-alt"></i>
                                     </a>
                                 </div>
                                 {% set row_selection = [{"service": service_id, "type": config['type'], "name": config['name']}] | tojson %}
                                 <a role="button"
-                                   class="btn btn-outline-secondary btn-sm me-1 export-config"
+                                   class="icon-btn info export-config"
                                    href="{{ url_for("configs") }}/export?configs={{ row_selection | urlencode }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
@@ -197,7 +212,7 @@
                                    data-i18n-options='{"name": "{{ config['name'] }}"}'
                                    target="_blank"
                                    rel="noreferrer">
-                                    <i class="bx bx-export bx-xs"></i>
+                                    <i class="bx bx-export"></i>
                                 </a>
                                 {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_edit_config else 'tooltip.button.delete_config')) %}
                                 {% set delete_tooltip_options = '{"method": "' ~ config['method'] ~ '"}' if not can_edit_config and not is_readonly else '{"name": "' ~ config['name'] ~ '"}' %}
@@ -207,13 +222,13 @@
                                             data-config-type="{{ config['type'] }}"
                                             data-config-service="{{ config['service_id'] or 'global' }}"
                                             data-value="{{ 'online' if config.get('is_draft') else 'draft' }}"
-                                            class="btn btn-outline-secondary btn-sm me-1 convert-config{% if is_readonly %} disabled{% endif %}"
+                                            class="icon-btn convert-config{% if is_readonly %} disabled{% endif %}"
                                             data-bs-toggle="tooltip"
                                             data-bs-placement="bottom"
                                             data-bs-original-title="..."
                                             data-i18n="tooltip.button.convert_config_to_{{ 'online' if config.get('is_draft') else 'draft' }}"
                                             data-i18n-options='{"name": "{{ config['name'] }}"}'>
-                                        <i class="bx bx-transfer bx-xs"></i>
+                                        <i class="bx bx-transfer"></i>
                                     </button>
                                 </div>
                                 <div data-bs-toggle="tooltip"
@@ -225,8 +240,8 @@
                                             data-config-name="{{ config['name'] }}"
                                             data-config-type="{{ config['type'] }}"
                                             data-config-service="{{ config['service_id'] or 'global' }}"
-                                            class="btn btn-outline-danger btn-sm me-1 delete-config{% if not can_edit_config or is_readonly %} disabled{% endif %}">
-                                        <i class="bx bx-trash bx-xs"></i>
+                                            class="icon-btn danger delete-config{% if not can_edit_config or is_readonly %} disabled{% endif %}">
+                                        <i class="bx bx-trash"></i>
                                     </button>
                                 </div>
                             </div>

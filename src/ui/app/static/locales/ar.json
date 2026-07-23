@@ -5,6 +5,7 @@
     "license_title": "الترخيص",
     "socials": "وسائل التواصل الاجتماعي",
     "tagline": "حماية قوية، مبسطة",
+    "title": "About BunkerWeb",
     "version": "الإصدار: {{version}}"
   },
   "accordion": {
@@ -68,7 +69,25 @@
     "support": "هل تحتاج إلى دعم متميز أو استشارات مخصصة لـ BunkerWeb؟ تحقق من <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">خدماتنا الاحترافية</a>."
   },
   "bans": {
-    "subtitle": "عناوين IP المحظورة عبر مثيلات BunkerWeb الخاصة بك — أضف، أو احذف، أو اضبط مدة الحظر."
+    "subtitle": "عناوين IP المحظورة عبر مثيلات BunkerWeb الخاصة بك — أضف، أو احذف، أو اضبط مدة الحظر.",
+    "stats": {
+      "alert": {
+        "body_after": "is enabled.",
+        "body_before": "Bans made here expire on instance restart unless",
+        "title": "Non-persisted edits."
+      },
+      "card": {
+        "by_reason": "Bans by reason"
+      },
+      "tile": {
+        "active": "Active bans",
+        "active_caption": "IPs + CIDRs",
+        "countries": "Countries",
+        "expiring": "Expiring ≤ 1 h",
+        "expiring_caption": "Auto-rotating",
+        "permanent": "Permanent bans"
+      }
+    }
   },
   "breadcrumb": {
     "about": "حول",
@@ -78,6 +97,7 @@
     "configs": "التكوينات",
     "extra_pages": "صفحات إضافية",
     "global_settings": "الإعدادات العامة",
+    "global_config": "Global config",
     "home": "الرئيسية",
     "instances": "المثيلات",
     "jobs": "المهام",
@@ -156,6 +176,7 @@
     "ping": "Ping",
     "plugin_page": "صفحة الإضافة",
     "proceed": "متابعة",
+    "refresh": "Refresh",
     "refresh_recovery_codes": "تحديث رموز الاسترداد",
     "reload": "إعادة تحميل",
     "reset": "إعادة تعيين",
@@ -187,10 +208,20 @@
     "upload_photo": "تحميل صورة جديدة",
     "view_details": "عرض التفاصيل",
     "view_raw_data": "عرض البيانات الخام",
-    "wipe_other_sessions": "مسح الجلسات الأخرى"
+    "wipe_other_sessions": "مسح الجلسات الأخرى",
+    "ban_all_filtered": "Ban all matching reports",
+    "filtered_actions": "Filtered actions",
+    "unban_all_filtered": "Unban all matching bans",
+    "update_duration_all_filtered": "Update duration for all matching bans",
+    "use_template": "Use template",
+    "edit": "Edit",
+    "view": "View"
   },
   "cache": {
-    "subtitle": "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة."
+    "kpi_files": "Files",
+    "kpi_per_service": "Per-service",
+    "subtitle": "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة.",
+    "title": "Cache files"
   },
   "configs": {
     "subtitle": "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق."
@@ -485,6 +516,9 @@
       },
       "total_requests": {
         "title": "إجمالي الطلبات"
+      },
+      "top_reasons": {
+        "title": "Top reasons for blocks"
       }
     },
     "chart": {
@@ -505,6 +539,10 @@
       "top_blocked_ips": {
         "most_blocked": "IP الأكثر حظرًا",
         "title": "أعلى 10 IP محظورة"
+      },
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time (selected range)"
       }
     },
     "map": {
@@ -516,6 +554,23 @@
     "window": {
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
+    },
+    "tile": {
+      "bans_active": "Bans active",
+      "jobs": "Scheduled jobs",
+      "trend": "Blocked requests trend"
+    },
+    "welcome": {
+      "title": "Welcome back, {{user}}",
+      "greeting": "Welcome back,"
+    },
+    "panel": {
+      "timeseries_sub": "Selected range",
+      "top_ips_sub": "By request count",
+      "status_sub": "HTTP response codes",
+      "reasons_sub": "By trigger rule",
+      "map_sub": "Hover for details",
+      "blocking_sub": "Blocked vs allowed"
     }
   },
   "datatable": {
@@ -829,7 +884,8 @@
     "privacy_policy": "سياسة الخصوصية",
     "read_more": "اقرأ المزيد",
     "see_more": "شاهد المزيد",
-    "upgrade": "ترقية؟"
+    "upgrade": "ترقية؟",
+    "get_support": "Get support"
   },
   "login": {
     "subtitle": "تسجيل الدخول إلى حساب BunkerWeb الخاص بك"
@@ -856,7 +912,19 @@
     "showing_all": "{{total}} أسطر",
     "showing_some": "عرض {{shown}} من {{total}}",
     "select_file_prompt": "حدد ملف السجل لعرض محتواه",
-    "trimmed_notice": "--- تم إزالة {{count}} سطر من السجلات القديمة لتحسين الأداء ---"
+    "trimmed_notice": "--- تم إزالة {{count}} سطر من السجلات القديمة لتحسين الأداء ---",
+    "all_sources": "All sources (live)",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "grep_placeholder": "grep…",
+    "level_all": "All logs",
+    "level_errors_only": "Errors only",
+    "level_security_only": "Security only",
+    "live_title": "Live logs",
+    "pause": "Pause",
+    "resume": "Resume",
+    "tailing_sources": "Tailing · {{count}} sources",
+    "taller": "Taller"
   },
   "modal": {
     "body": {
@@ -899,7 +967,10 @@
       "services_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟",
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
       "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",
-      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:"
+      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "تطبيق الإعدادات العامة",
@@ -982,7 +1053,13 @@
     "reports": "التقارير",
     "services": "الخدمات",
     "support": "الدعم",
-    "templates": "القوالب"
+    "templates": "القوالب",
+    "overview": "Overview",
+    "configure": "Configure",
+    "operate": "Operate",
+    "system": "System",
+    "edition_community": "Community",
+    "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "صورة الخبر",
@@ -1023,6 +1100,19 @@
       "more_value": "قيمة أخرى",
       "more_values": "قيم أخرى",
       "show_less": "إظهار أقل"
+    },
+    "marketplace": {
+      "active": "Active",
+      "always_on": "Core / always on",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "inactive": "Inactive",
+      "no_match": "No plugins match your filters",
+      "search": "Search plugins...",
+      "tab_all": "All",
+      "tab_community": "Community",
+      "tab_disabled": "Disabled",
+      "tab_enabled": "Enabled"
     }
   },
   "pro": {
@@ -1069,7 +1159,8 @@
       "services_count": "{{online_services}} خدمة (خدمات) متصلة / {{pro_services}} خدمة (خدمات) PRO",
       "suspended": "معلق",
       "title": "الحالة"
-    }
+    },
+    "title": "Pro license"
   },
   "profile": {
     "2fa": {
@@ -1414,7 +1505,8 @@
         "title": "رابط الدعم"
       }
     },
-    "subtitle": "تنزيل سجلات التصحيح، واستخراج تكوينك، والحصول على المساعدة من فريق BunkerWeb."
+    "subtitle": "تنزيل سجلات التصحيح، واستخراج تكوينك، والحصول على المساعدة من فريق BunkerWeb.",
+    "title": "Support"
   },
   "tab": {
     "custom_certificate": "شهادة مخصصة",
@@ -1638,7 +1730,27 @@
     "none": "لا يوجد قالب"
   },
   "templates": {
-    "subtitle": "قوالب تكوين قابلة لإعادة الاستخدام لخدماتك — تجميع الإعدادات، والخطوات، والتكوينات المخصصة، ثم إنشاءها أو نسخها أو حذفها."
+    "subtitle": "قوالب تكوين قابلة لإعادة الاستخدام لخدماتك — تجميع الإعدادات، والخطوات، والتكوينات المخصصة، ثم إنشاءها أو نسخها أو حذفها.",
+    "gallery": {
+      "delete_selected": "Delete selected",
+      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
+      "empty_title": "No templates yet",
+      "select": "Select",
+      "svc_suffix": "svc"
+    },
+    "name": {
+      "api": "API",
+      "high": "High security",
+      "low": "Low security",
+      "medium": "Medium security",
+      "ui": "Web UI"
+    },
+    "tag": {
+      "config": "Custom config: {{name}}",
+      "feature": "Built-in feature: {{name}}",
+      "plugin": "Plugin: {{name}}"
+    },
+    "title": "Service templates"
   },
   "theme": {
     "dark": "داكن",
@@ -2055,6 +2167,7 @@
     "kinds": "أنواع",
     "loading_references": "جاري التحميل...",
     "max_entries": "لا يمكن لمجموعة الموارد أن تحتوي على أكثر من {{max}} إدخال.",
+    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
     "new": "مجموعة جديدة",
     "new_alias": "اسم مستعار جديد",
     "no_entries": "لا توجد إدخالات",
@@ -2116,5 +2229,14 @@
     "services": "تمكين الخدمة",
     "status": "تخزين المثيل",
     "subtitle": "حالة ذاكرة التخزين المؤقت لـ Reverse-proxy، مقاييس معدل الضربة الإجمالية والتحكم في المسح الفوري."
+  },
+  "onboarding": {
+    "item": {
+      "install": "Install BunkerWeb on 1+ host",
+      "mfa": "Activate MFA",
+      "pro": "Activate BunkerWeb PRO",
+      "service": "Register your first service"
+    },
+    "title": "Getting started"
   }
 }

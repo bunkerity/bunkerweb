@@ -5,6 +5,7 @@
     "license_title": "Lisans",
     "socials": "Sosyal Medya",
     "tagline": "Güçlü Koruma, Basitlik",
+    "title": "About BunkerWeb",
     "version": "Versiyon: {{version}}"
   },
   "accordion": {
@@ -68,7 +69,25 @@
     "support": "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
   },
   "bans": {
-    "subtitle": "BunkerWeb örneklerinizdeki engellenmiş IP adresleri — engelleme sürelerini ekleyin, kaldırın veya ayarlayın."
+    "subtitle": "BunkerWeb örneklerinizdeki engellenmiş IP adresleri — engelleme sürelerini ekleyin, kaldırın veya ayarlayın.",
+    "stats": {
+      "alert": {
+        "body_after": "is enabled.",
+        "body_before": "Bans made here expire on instance restart unless",
+        "title": "Non-persisted edits."
+      },
+      "card": {
+        "by_reason": "Bans by reason"
+      },
+      "tile": {
+        "active": "Active bans",
+        "active_caption": "IPs + CIDRs",
+        "countries": "Countries",
+        "expiring": "Expiring ≤ 1 h",
+        "expiring_caption": "Auto-rotating",
+        "permanent": "Permanent bans"
+      }
+    }
   },
   "breadcrumb": {
     "about": "Hakkında",
@@ -78,6 +97,7 @@
     "configs": "Yapılandırmalar",
     "extra_pages": "Ekstra Sayfalar",
     "global_settings": "Genel Ayarlar",
+    "global_config": "Global config",
     "home": "Ana Sayfa",
     "instances": "Instanceslar",
     "jobs": "İşler",
@@ -156,6 +176,7 @@
     "ping": "Ping",
     "plugin_page": "Eklenti Sayfası",
     "proceed": "Devam Et",
+    "refresh": "Refresh",
     "refresh_recovery_codes": "Kurtarma Kodlarını Yenile",
     "reload": "Yeniden Yükle",
     "reset": "Sıfırla",
@@ -187,10 +208,20 @@
     "upload_photo": "Yeni Fotoğraf Yükle",
     "view_details": "Detayları Görüntüle",
     "view_raw_data": "Ham Veriyi Görüntüle",
-    "wipe_other_sessions": "Diğer Oturumları Sonlandır"
+    "wipe_other_sessions": "Diğer Oturumları Sonlandır",
+    "ban_all_filtered": "Ban all matching reports",
+    "filtered_actions": "Filtered actions",
+    "unban_all_filtered": "Unban all matching bans",
+    "update_duration_all_filtered": "Update duration for all matching bans",
+    "use_template": "Use template",
+    "edit": "Edit",
+    "view": "View"
   },
   "cache": {
-    "subtitle": "Planlı işler tarafından oluşturulan önbellek dosyaları (blok listeleri, GeoIP veritabanları ve daha fazlası) — hizmet ve eklenti başına inceleyin, indirin veya silin."
+    "kpi_files": "Files",
+    "kpi_per_service": "Per-service",
+    "subtitle": "Planlı işler tarafından oluşturulan önbellek dosyaları (blok listeleri, GeoIP veritabanları ve daha fazlası) — hizmet ve eklenti başına inceleyin, indirin veya silin.",
+    "title": "Cache files"
   },
   "configs": {
     "subtitle": "Hizmetleriniz için özel NGINX yapılandırma parçacıkları — HTTP, ModSecurity ve akış düzeyinde geçersiz kılmalar için oluşturun, düzenleyin ve yönetin."
@@ -485,6 +516,9 @@
       },
       "total_requests": {
         "title": "Toplam İstekler"
+      },
+      "top_reasons": {
+        "title": "Top reasons for blocks"
       }
     },
     "chart": {
@@ -505,6 +539,10 @@
       "top_blocked_ips": {
         "most_blocked": "En Çok Engellenen IP",
         "title": "En Çok Engellenen 10 IP"
+      },
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time (selected range)"
       }
     },
     "map": {
@@ -516,6 +554,23 @@
     "window": {
       "last_days": "Son {{days}} gün",
       "title": "Panel penceresi"
+    },
+    "tile": {
+      "bans_active": "Bans active",
+      "jobs": "Scheduled jobs",
+      "trend": "Blocked requests trend"
+    },
+    "welcome": {
+      "title": "Welcome back, {{user}}",
+      "greeting": "Welcome back,"
+    },
+    "panel": {
+      "timeseries_sub": "Selected range",
+      "top_ips_sub": "By request count",
+      "status_sub": "HTTP response codes",
+      "reasons_sub": "By trigger rule",
+      "map_sub": "Hover for details",
+      "blocking_sub": "Blocked vs allowed"
     }
   },
   "datatable": {
@@ -829,7 +884,8 @@
     "privacy_policy": "Gizlilik Politikası",
     "read_more": "Devamını Oku",
     "see_more": "Daha Fazlası",
-    "upgrade": "Yükselt?"
+    "upgrade": "Yükselt?",
+    "get_support": "Get support"
   },
   "login": {
     "subtitle": "BunkerWeb hesabınıza giriş yapın"
@@ -856,7 +912,19 @@
     "showing_all": "{{total}} satır",
     "showing_some": "{{total}} içinden {{shown}} gösteriliyor",
     "select_file_prompt": "İçeriğini görüntülemek için bir günlük dosyasını seçin",
-    "trimmed_notice": "--- Performans için {{count}} eski günlük satırı kaldırıldı ---"
+    "trimmed_notice": "--- Performans için {{count}} eski günlük satırı kaldırıldı ---",
+    "all_sources": "All sources (live)",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "grep_placeholder": "grep…",
+    "level_all": "All logs",
+    "level_errors_only": "Errors only",
+    "level_security_only": "Security only",
+    "live_title": "Live logs",
+    "pause": "Pause",
+    "resume": "Resume",
+    "tailing_sources": "Tailing · {{count}} sources",
+    "taller": "Taller"
   },
   "modal": {
     "body": {
@@ -899,7 +967,10 @@
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
       "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:"
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "Genel ayarları uygula",
@@ -982,7 +1053,13 @@
     "reports": "Raporlar",
     "services": "Servisler",
     "support": "Destek",
-    "templates": "Şablonlar"
+    "templates": "Şablonlar",
+    "overview": "Overview",
+    "configure": "Configure",
+    "operate": "Operate",
+    "system": "System",
+    "edition_community": "Community",
+    "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "Haber görseli",
@@ -1023,6 +1100,19 @@
       "more_value": "daha fazla değer",
       "more_values": "daha fazla değer",
       "show_less": "Daha az göster"
+    },
+    "marketplace": {
+      "active": "Active",
+      "always_on": "Core / always on",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "inactive": "Inactive",
+      "no_match": "No plugins match your filters",
+      "search": "Search plugins...",
+      "tab_all": "All",
+      "tab_community": "Community",
+      "tab_disabled": "Disabled",
+      "tab_enabled": "Enabled"
     }
   },
   "pro": {
@@ -1069,7 +1159,8 @@
       "services_count": "{{online_services}} Çevrimiçi Servis / {{pro_services}} PRO Servis",
       "suspended": "ASKIYA ALINDI",
       "title": "Durum"
-    }
+    },
+    "title": "Pro license"
   },
   "profile": {
     "2fa": {
@@ -1414,7 +1505,8 @@
         "title": "Destek Bağlantısı"
       }
     },
-    "subtitle": "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın."
+    "subtitle": "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın.",
+    "title": "Support"
   },
   "tab": {
     "custom_certificate": "Özel Sertifika",
@@ -1638,7 +1730,27 @@
     "none": "Şablon Yok"
   },
   "templates": {
-    "subtitle": "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin."
+    "subtitle": "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin.",
+    "gallery": {
+      "delete_selected": "Delete selected",
+      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
+      "empty_title": "No templates yet",
+      "select": "Select",
+      "svc_suffix": "svc"
+    },
+    "name": {
+      "api": "API",
+      "high": "High security",
+      "low": "Low security",
+      "medium": "Medium security",
+      "ui": "Web UI"
+    },
+    "tag": {
+      "config": "Custom config: {{name}}",
+      "feature": "Built-in feature: {{name}}",
+      "plugin": "Plugin: {{name}}"
+    },
+    "title": "Service templates"
   },
   "theme": {
     "dark": "Koyu",
@@ -2055,6 +2167,7 @@
     "kinds": "Türler",
     "loading_references": "Referanslar yükleniyor...",
     "max_entries": "Bir kaynak grubu {{max}} girdiden fazla içermemelidir.",
+    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
     "new": "Yeni grup",
     "new_alias": "Yeni kısaltma",
     "no_entries": "Girdiler yok",
@@ -2116,5 +2229,14 @@
     "services": "Hizmetin etkinleştirilmesi",
     "status": "Örnek depolama",
     "subtitle": "Ters proxy önbelleği durumu, toplu olarak isabet oran metrikleri ve anında temizleme kontrolleri."
+  },
+  "onboarding": {
+    "item": {
+      "install": "Install BunkerWeb on 1+ host",
+      "mfa": "Activate MFA",
+      "pro": "Activate BunkerWeb PRO",
+      "service": "Register your first service"
+    },
+    "title": "Getting started"
   }
 }

@@ -1,7 +1,12 @@
 {% extends "dashboard.html" %}
 {% from "components/card.html" import card %}
 {% from "components/table-toolbar.html" import table_toolbar %}
-{% from "components/title.html" import title %}
+{% from "components/tile.html" import tile %}
+{% from "components/alert.html" import alert %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
@@ -28,21 +33,56 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    {{ title(label="Bans", i18n_key="navigation.bans", level="h1", icon="bx-block", subtitle="Banned IP addresses across your BunkerWeb instances — add, remove, or adjust ban durations.", subtitle_i18n_key="bans.subtitle", classes="mb-4") }}
-    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
-        {% set base_flags_url = url_for('static', filename='img/flags') %}
-        <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
-        {% call table_toolbar(id="bans", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_bans", loading_default="Loading bans...") %}
-        {% endcall %}
-        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
-            <div class="flex-grow-1 text-center">
-                <span class="badge rounded-pill bg-secondary">
-                    TZ:
-                    <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-                </span>
-            </div>
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {% call page_head(title="Bans", title_i18n="navigation.bans",
+                      breadcrumb=[("Overview", "navigation.overview", none),
+                                  ("Bans", "navigation.bans", none)]) %}
+        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
+            <button type="button"
+                    id="bans-add-btn"
+                    class="btn btn-primary btn-sm don-jose{% if is_readonly %} disabled{% endif %}">
+                <i class="bx bx-plus bx-xs me-1"></i><span data-i18n="button.add_ban_plural">Add ban(s)</span>
+            </button>
         </div>
     {% endcall %}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">{{ tile(id="bans-tile-active", title="Active bans", title_i18n="bans.stats.tile.active", value="—", color="danger", icon="bx-block", caption="IPs + CIDRs", caption_i18n="bans.stats.tile.active_caption") }}</div>
+        <div class="col-6 col-lg-3">{{ tile(id="bans-tile-expiring", title="Expiring ≤ 1 h", title_i18n="bans.stats.tile.expiring", value="—", color="warning", icon="bx-time-five", caption="Auto-rotating", caption_i18n="bans.stats.tile.expiring_caption") }}</div>
+        <div class="col-6 col-lg-3">{{ tile(id="bans-tile-countries", title="Countries", title_i18n="bans.stats.tile.countries", value="—", color="secondary", icon="bx-globe") }}</div>
+        <div class="col-6 col-lg-3">{{ tile(id="bans-tile-permanent", title="Permanent bans", title_i18n="bans.stats.tile.permanent", value="—", color="secondary", icon="bx-lock") }}</div>
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-8">
+            {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
+                {% set base_flags_url = url_for('static', filename='img/flags') %}
+                <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
+                {% call table_toolbar(id="bans", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_bans", loading_default="Loading bans...") %}
+                {% endcall %}
+                <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
+                    <div class="flex-grow-1 text-center">
+                        <span class="badge rounded-pill bg-secondary">
+                            TZ:
+                            <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                        </span>
+                    </div>
+                </div>
+            {% endcall %}
+        </div>
+        <div class="col-lg-4 d-flex flex-column gap-3">
+            {% call card(title="Bans by reason", title_key="bans.stats.card.by_reason", icon="bx-pie-chart-alt-2") %}
+                <div id="bans-reason-breakdown"></div>
+            {% endcall %}
+            {% if config.USE_REDIS.value != 'yes' %}
+                {% call alert(variant="warning", icon="bx-error-circle", title="Non-persisted edits.", title_key="bans.stats.alert.title") %}
+                    <p class="mb-0">
+                        <span data-i18n="bans.stats.alert.body_before">Bans made here expire on instance restart unless</span>
+                        <code>USE_REDIS</code>
+                        <span data-i18n="bans.stats.alert.body_after">is enabled.</span>
+                    </p>
+                {% endcall %}
+            {% endif %}
+        </div>
+    </div>
     {% if not is_readonly %}
         <div class="modal modal-xl fade"
              id="modal-ban-ips"
@@ -317,4 +357,7 @@
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    <script src="{{ url_for('static', filename='js/pages/bans-stats.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

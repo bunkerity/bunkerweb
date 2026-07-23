@@ -1,171 +1,158 @@
 {% extends "dashboard.html" %}
 {% from "components/card.html" import card %}
-{% from "components/table-toolbar.html" import table_toolbar %}
+{% from "components/badge.html" import badge, tpl_badge %}
+{% from "components/empty-state.html" import empty_state %}
 {% from "components/modal.html" import modal %}
 {% from "components/alert.html" import alert %}
 {% from "components/button.html" import button %}
 {% from "components/selected-list.html" import selected_list %}
-{% block head %}
-    <!-- Datatables -->
-    <link rel="preload"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
-          as="style" />
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
-          nonce="{{ style_nonce }}" />
-{% endblock %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
+{% block page_head %}{% endblock %}
 {% block content %}
-    <p class="text-muted mb-4" data-i18n="templates.subtitle">
-        Reusable configuration templates for your services — bundle settings, steps, and custom configs, then create, clone, or delete them.
-    </p>
+    <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
+    {% call page_head(title="Service templates", title_i18n="templates.title",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Templates", "navigation.templates", none)]) %}
+        {% if not is_readonly and templates %}
+            <button type="button" id="templates-select-toggle" class="btn btn-outline-secondary btn-sm">
+                <i class="bx bx-list-check bx-xs me-1"></i><span data-i18n="templates.gallery.select">Select</span>
+            </button>
+            <button type="button" id="templates-delete-selected" class="btn btn-outline-danger btn-sm d-none" disabled>
+                <i class="bx bx-trash bx-xs me-1"></i><span data-i18n="templates.gallery.delete_selected">Delete selected</span>
+                <span id="templates-selected-count" class="badge rounded-pill bg-label-danger ms-1 d-none">0</span>
+            </button>
+        {% endif %}
+        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
+            <a role="button"
+               class="btn btn-primary btn-sm{% if is_readonly %} disabled{% endif %}"
+               href="{{ url_for('templates.template_create_page') }}">
+                <i class="bx bx-plus bx-xs me-1"></i><span data-i18n="button.create_template">Create template</span>
+            </a>
+        </div>
+    {% endcall %}
     <!-- Content -->
-    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
-        <textarea type="hidden" id="templates-usage" class="visually-hidden">{{ template_usage|default({})|tojson }}</textarea>
-        {% call table_toolbar(id="templates", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_templates", loading_default="Loading templates...", number=templates|length) %}
-            <thead>
-                <tr>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Show the templates' details"
-                        data-i18n="tooltip.table.templates.details"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Select all templates"
-                        data-i18n="tooltip.table.templates.select_all"></th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The ID of the Template"
-                        data-i18n="tooltip.table.templates.id">
-                        <span data-i18n="table.header.id">ID</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The user defined or auto-generated Template's name"
-                        data-i18n="tooltip.table.templates.name">
-                        <span data-i18n="table.header.name">Name</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The plugin containing the Template"
-                        data-i18n="tooltip.table.templates.plugin">
-                        <span data-i18n="table.header.plugin">Plugin</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Template's steps count"
-                        data-i18n="tooltip.table.templates.steps">
-                        <span data-i18n="table.header.steps">Steps</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Template's settings count"
-                        data-i18n="tooltip.table.templates.settings">
-                        <span data-i18n="table.header.settings">Settings</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Template's configs count"
-                        data-i18n="tooltip.table.templates.configs">
-                        <span data-i18n="table.header.configs">Configs</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The template's creation method"
-                        data-i18n="tooltip.table.templates.method">
-                        <span data-i18n="table.header.method">Method</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The template's creation date"
-                        data-i18n="tooltip.table.templates.created">
-                        <span data-i18n="table.header.created">Created</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The template's last update date"
-                        data-i18n="tooltip.table.templates.last_update">
-                        <span data-i18n="table.header.last_update">Last update</span>
-                    </th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Template"
-                        data-i18n="tooltip.table.templates.actions">
-                        <span data-i18n="table.header.actions">Actions</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for template, template_data in templates.items() %}
-                    <tr data-template-id="{{ template }}">
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <a href="{{ url_for("templates") }}/{{ template }}"
-                               class="d-flex align-items-center"
-                               data-bs-toggle="tooltip"
-                               data-bs-placement="bottom"
-                               data-bs-original-title="{% if template_data.method != 'ui' or is_readonly %}View{% else %}Edit{% endif %} template {{ template }}"><i class="bx bx-{% if template_data.method != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ template }}</a>
-                        </td>
-                        <td>{{ template_data.name }}</td>
-                        <td>{{ template_data.plugin_id or '-' }}</td>
-                        <td>{{ template_data.steps|length }}</td>
-                        <td>{{ template_data.settings|length }}</td>
-                        <td>{{ template_data.configs|length }}</td>
-                        <td id="method-{{ template }}">{{ template_data.method }}</td>
-                        <td class="template-creation-date">{{ template_data.creation_date | to_iso }}</td>
-                        <td class="template-last-update-date">{{ template_data.last_update | to_iso }}</td>
-                        <td>
-                            <div class="d-flex justify-content-evenly">
+
+    {% if not templates %}
+        {{ empty_state(id="templates-gallery-empty",
+                        title="No templates yet",
+                        title_key="templates.gallery.empty_title",
+                        message="Create your first template to bundle settings, steps and custom configs for reuse.",
+                        message_key="templates.gallery.empty_message",
+                        icon="bx-collection",
+                        bordered=true,
+                        action_label="Create template" if not is_readonly else none,
+                        action_key="button.create_template" if not is_readonly else none,
+                        action_icon="bx-plus",
+                        action_href=url_for('templates.template_create_page') if not is_readonly else none) }}
+    {% else %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="templates-grid">
+            {% for template, template_data in templates.items() %}
+                {% set usage_count = template_usage.get(template, 0) %}
+                {% set tag_badges = template_badges.get(template, {"visible": [], "overflow": []}) %}
+                {% set visible_badges = tag_badges.visible %}
+                {% set overflow_badges = tag_badges.overflow %}
+                {# Card title is the SHORT humanized id (kit tplCard anatomy); the long
+                   template_data.name sentence becomes the muted description below. Core
+                   ids carry an i18n key; custom ids fall back to the capitalized id with
+                   no data-i18n (i18next echoes missing keys, so we never attach one). #}
+                {% set core_names = {"low": "Low security", "medium": "Medium security", "high": "High security", "api": "API", "ui": "Web UI"} %}
+                {% set is_core_name = template in core_names %}
+                {# Keyword-map template id/name to a boxicon (presentation only, kit tplCard). #}
+                {% set tid = (template ~ ' ' ~ template_data.name) | lower %}
+                {% set tpl_icon = 'bx-collection' %}
+                {% if 'wordpress' in tid or 'wp-' in tid %}{% set tpl_icon = 'bxl-wordpress' %}
+                {% elif 'grpc' in tid %}{% set tpl_icon = 'bx-git-branch' %}
+                {% elif 'laravel' in tid or 'symfony' in tid or 'php' in tid %}{% set tpl_icon = 'bx-code-curly' %}
+                {% elif 'api' in tid or 'rest' in tid %}{% set tpl_icon = 'bx-code-alt' %}
+                {% elif 'static' in tid or 'cdn' in tid or 's3' in tid or 'cloud' in tid %}{% set tpl_icon = 'bx-cloud' %}
+                {% elif 'admin' in tid %}{% set tpl_icon = 'bx-user-circle' %}
+                {% endif %}
+                <div class="col" data-template-id="{{ template }}">
+                    {% call card(id="template-card-" ~ template, classes="h-100 bw-tpl-card") %}
+                        <div class="bw-tpl-header d-flex align-items-center gap-2">
+                            <div class="form-check template-select-check d-none flex-shrink-0 m-0">
+                                <input class="form-check-input template-checkbox"
+                                       type="checkbox"
+                                       data-template-id="{{ template }}"
+                                       id="template-check-{{ template }}"
+                                       aria-label="Select template {{ template }}" />
+                            </div>
+                            <i class="bx {{ tpl_icon }} bw-tpl-icon flex-shrink-0" aria-hidden="true"></i>
+                            <h6 class="bw-tpl-title mb-0 flex-grow-1"{% if is_core_name %} data-i18n="templates.name.{{ template }}"{% endif %}>{{ core_names[template] if is_core_name else template|capitalize }}</h6>
+                            <span class="tag-chip flex-shrink-0">{{ usage_count }}&nbsp;<span data-i18n="templates.gallery.svc_suffix">svc</span></span>
+                        </div>
+                        <div class="bw-tpl-body">
+                            <p class="bw-tpl-desc mb-3" title="{{ template_data.name }}">{{ template_data.name }}</p>
+                            {% if visible_badges %}
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    {% for tag in visible_badges %}
+                                        <span data-bs-toggle="tooltip"
+                                              data-bs-placement="top"
+                                              data-bs-original-title="..."
+                                              data-i18n="templates.tag.{{ tag.type }}"
+                                              data-i18n-options='{{ {"name": tag.text} | tojson }}'>
+                                            {{ tpl_badge(text=tag.text, type=tag.type, icon=tag.icon) }}
+                                        </span>
+                                    {% endfor %}
+                                    {% if overflow_badges %}
+                                        <span class="tag-chip muted"
+                                              title="{{ overflow_badges | map(attribute='text') | join(', ') }}">+{{ overflow_badges|length }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <div class="d-flex gap-2 flex-wrap align-items-center">
+                                {% set is_view = template_data.method != 'ui' or is_readonly %}
                                 <a role="button"
-                                   class="btn btn-primary btn-sm me-1"
+                                   class="btn btn-primary btn-sm"
+                                   href="{{ url_for('services.services_service_page', service='new', template=template) }}">
+                                    <i class="bx bx-rocket bx-xs"></i><span data-i18n="button.use_template">Use template</span>
+                                </a>
+                                <a role="button"
+                                   class="btn btn-light btn-sm"
                                    href="{{ url_for('templates.template_edit_page', template_id=template) }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="..."
-                                   data-i18n="{% if template_data.method != 'ui' or is_readonly %}tooltip.link.view_template{% else %}tooltip.link.edit_template{% endif %}"
+                                   data-i18n="{% if is_view %}tooltip.link.view_template{% else %}tooltip.link.edit_template{% endif %}"
                                    data-i18n-options='{"template": "{{ template }}"}'>
-                                    <i class="bx bx-{% if template_data.method != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                    <i class="bx bx-{% if is_view %}show{% else %}edit{% endif %} bx-xs"></i><span data-i18n="button.{% if is_view %}view{% else %}edit{% endif %}">{% if is_view %}View{% else %}Edit{% endif %}</span>
                                 </a>
-                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                    <a role="button"
-                                       class="btn btn-outline-secondary btn-sm me-1{% if is_readonly %} disabled{% endif %}"
-                                       href="{{ url_for("templates.template_create_page") }}?clone={{ template }}"
-                                       data-bs-toggle="tooltip"
-                                       data-bs-placement="bottom"
-                                       data-bs-original-title="Clone template {{ template }}"
-                                       data-i18n="tooltip.link.clone_template"
-                                       data-i18n-options='{"template": "{{ template }}"}'>
-                                        <i class="bx bx-copy-alt bx-xs"></i>
-                                    </a>
-                                </div>
-                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if template_data['method'] != 'ui' else 'tooltip.button.delete_template')) %}
-                                {% set delete_tooltip_options = '{"method": "' ~ template_data['method'] ~ '"}' if template_data['method'] != 'ui' and not is_readonly else '{"name": "' ~ template_data['id'] ~ '"}' %}
-                                <div data-bs-toggle="tooltip"
-                                     data-bs-placement="bottom"
-                                     data-bs-original-title="..."
-                                     data-i18n="{{ delete_tooltip_key }}"
-                                     data-i18n-options='{{ delete_tooltip_options }}'>
-                                    <button type="button"
-                                            data-template-id="{{ template }}"
-                                            class="btn btn-outline-danger btn-sm me-1 delete-template{% if template_data['method'] != 'ui' %} disabled{% endif %}">
-                                        <i class="bx bx-trash bx-xs"></i>
-                                    </button>
+                                <div class="row-actions d-flex gap-1 ms-auto">
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="tooltip.disabled_readonly"{% endif %}>
+                                        <a role="button"
+                                           class="btn btn-sm bw-icon-btn{% if is_readonly %} disabled{% endif %}"
+                                           href="{{ url_for("templates.template_create_page") }}?clone={{ template }}"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="bottom"
+                                           data-bs-original-title="..."
+                                           data-i18n="tooltip.link.clone_template"
+                                           data-i18n-options='{"template": "{{ template }}"}'>
+                                            <i class="bx bx-copy-alt bx-xs"></i>
+                                        </a>
+                                    </div>
+                                    {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if template_data['method'] != 'ui' else 'tooltip.button.delete_template')) %}
+                                    {% set delete_tooltip_options = '{"method": "' ~ template_data['method'] ~ '"}' if template_data['method'] != 'ui' and not is_readonly else '{"name": "' ~ template_data['id'] ~ '"}' %}
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="bottom"
+                                         data-bs-original-title="..."
+                                         data-i18n="{{ delete_tooltip_key }}"
+                                         data-i18n-options='{{ delete_tooltip_options }}'>
+                                        <button type="button"
+                                                data-template-id="{{ template }}"
+                                                class="btn btn-sm bw-icon-btn bw-icon-btn-danger delete-template{% if template_data['method'] != 'ui' %} disabled{% endif %}">
+                                            <i class="bx bx-trash bx-xs"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        {% endcall %}
-        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
-            <div class="flex-grow-1 text-center">
-                <span class="badge rounded-pill bg-secondary">
-                    TZ:
-                    <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-                </span>
-            </div>
+                        </div>
+                    {% endcall %}
+                </div>
+            {% endfor %}
         </div>
-    {% endcall %}
+    {% endif %}
     <div id="feedback-toast"
          class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
          role="alert"
@@ -203,15 +190,6 @@
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
-            nonce="{{ script_nonce }}"
-            defer></script>
-    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
-            nonce="{{ script_nonce }}"
-            defer></script>
-    <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
-            nonce="{{ script_nonce }}"
-            defer></script>
     <script src="{{ url_for('static', filename='js/components/selected-list.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>

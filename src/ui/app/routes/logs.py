@@ -19,6 +19,7 @@ PAGE_SIZE = 10000
 # --- SSE (live-follow) tuning ---
 REFRESH_TAIL_BYTES = 2 * 1024 * 1024  # cap the initial/rotated SSE payload to the last 2 MiB
 STREAM_MAX_SECONDS = 900  # bound a follow session; the client auto-reconnects and resumes via Last-Event-ID
+MAX_MULTI_SOURCES = 20  # cap the merged live-tail fan-in so one stream can't poll unbounded files
 # Cap concurrent live-follow streams PER WORKER so they can't exhaust the gthread
 # pool (effective global ceiling = gunicorn workers * _STREAM_LIMIT). The default
 # mirrors gunicorn.conf.py's threads default (MAX_WORKERS*2) when MAX_THREADS is unset.
@@ -290,6 +291,137 @@ def stream_logs():
             "Connection": "keep-alive",
             # Disable proxy buffering so events flush in real time behind nginx
             # (BunkerWeb's reverse proxy defaults to proxy_buffering on).
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@logs.route("/logs/stream/multi", methods=["GET"])
+@login_required
+def stream_multi():
+    """Server-merged live-tail of several log files over ONE EventSource.
+
+    The live dashboard tails N sources at once. Browsers cap concurrent
+    connections per host (~6) and each SSE eats a gthread slot, so N separate
+    /logs/stream connections are non-viable — one merged stream fans in here and
+    takes a single ``_active_streams`` slot. Every source name is validated
+    through the same ``_resolve_log_path`` allowlist as the single-file routes.
+
+    Frames are ``{"type": "refresh"|"append"|"rotated", "source": name,
+    "content": raw}``. No server-side classification (the client owns level
+    detection). Reconnect re-sends a bounded tail per source (no multi-offset
+    Last-Event-ID in v1); the client re-backfills on ``onopen``.
+    """
+    files = _list_log_files()
+
+    # Parse + validate the requested sources, preserving order and de-duping.
+    sources = []
+    seen = set()
+    for raw_name in request.args.get("sources", "").split(","):
+        name = secure_filename(raw_name.strip())
+        if not name or name in seen:
+            continue
+        file_path = _resolve_log_path(name, files)
+        if file_path is None or not file_path.is_file():
+            continue  # unknown / traversal / missing — silently drop, never leak
+        seen.add(name)
+        sources.append((name, file_path))
+        if len(sources) >= MAX_MULTI_SOURCES:
+            break
+
+    if not sources:
+        return Response("No such file", 404)
+
+    def generate():
+        global _active_streams
+        with _stream_lock:
+            if _active_streams >= _STREAM_LIMIT:
+                over_limit = True
+            else:
+                _active_streams += 1
+                over_limit = False
+        if over_limit:
+            yield f"data: {json.dumps({'type': 'error', 'message': 'Too many active log streams, please retry'})}\n\n"
+            return
+
+        started = time.monotonic()
+        heartbeat_counter = 0
+        try:
+            yield "retry: 5000\n\n"  # explicit reconnect interval
+
+            # Per-source [path, last_size, last_mtime]; seed with a bounded tail
+            # emitted as a `refresh` frame (the client backfills + sorts these).
+            state = {}
+            for name, file_path in sources:
+                size = 0
+                mtime = 0
+                with suppress(OSError):
+                    stat = file_path.stat()
+                    size = stat.st_size
+                    mtime = stat.st_mtime
+                content = ""
+                with suppress(OSError):
+                    content = _read_tail(file_path, size)
+                state[name] = [file_path, size, mtime]
+                yield f"data: {json.dumps({'type': 'refresh', 'source': name, 'content': content})}\n\n"
+
+            while True:
+                # Bound the session so a forgotten tab releases its thread; the
+                # client reconnects (retry) and re-backfills from onopen.
+                if time.monotonic() - started > STREAM_MAX_SECONDS:
+                    break
+
+                content_sent = False
+                for name, file_path in sources:
+                    st = state[name]
+                    last_size, last_mtime = st[1], st[2]
+                    try:
+                        current_stat = file_path.stat()
+                    except OSError:
+                        # Temporarily gone (rotation window / deleted) — skip this
+                        # tick and retry; don't tear the whole merged stream down.
+                        continue
+                    current_size = current_stat.st_size
+                    current_mtime = current_stat.st_mtime
+                    if current_mtime == last_mtime and current_size == last_size:
+                        continue
+
+                    if current_size < last_size:  # rotated / truncated
+                        content = ""
+                        with suppress(OSError):
+                            content = _read_tail(file_path, current_size)
+                        yield f"data: {json.dumps({'type': 'rotated', 'source': name, 'content': content})}\n\n"
+                        content_sent = True
+                    elif current_size > last_size:  # appended
+                        new_content = ""
+                        with suppress(OSError):
+                            with file_path.open(encoding="utf-8", errors="replace") as f:
+                                f.seek(last_size)
+                                new_content = f.read()
+                        if new_content:
+                            yield f"data: {json.dumps({'type': 'append', 'source': name, 'content': new_content})}\n\n"
+                            content_sent = True
+                    st[1] = current_size
+                    st[2] = current_mtime
+
+                # Comment-style keep-alive (~10s): resets the proxy read timeout
+                # without firing the client's onmessage (EventSource ignores comments).
+                heartbeat_counter = 0 if content_sent else heartbeat_counter + 1
+                if heartbeat_counter >= 10:
+                    yield ": keep-alive\n\n"
+                    heartbeat_counter = 0
+
+                time.sleep(1)
+        finally:
+            with _stream_lock:
+                _active_streams -= 1
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
         },
     )

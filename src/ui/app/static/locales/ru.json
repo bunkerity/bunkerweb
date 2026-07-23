@@ -5,6 +5,7 @@
     "license_title": "Лицензия",
     "socials": "Социальные сети",
     "tagline": "Мощная защита, упрощенная",
+    "title": "About BunkerWeb",
     "version": "Версия: {{version}}"
   },
   "accordion": {
@@ -68,7 +69,25 @@
     "support": "Нужна премиум-поддержка или индивидуальная консультация по BunkerWeb? Ознакомьтесь с нашими <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">профессиональными услугами</a>."
   },
   "bans": {
-    "subtitle": "Заблокированные IP-адреса для всех ваших экземпляров BunkerWeb — добавляйте, удаляйте или изменяйте длительность блокировки."
+    "subtitle": "Заблокированные IP-адреса для всех ваших экземпляров BunkerWeb — добавляйте, удаляйте или изменяйте длительность блокировки.",
+    "stats": {
+      "alert": {
+        "body_after": "is enabled.",
+        "body_before": "Bans made here expire on instance restart unless",
+        "title": "Non-persisted edits."
+      },
+      "card": {
+        "by_reason": "Bans by reason"
+      },
+      "tile": {
+        "active": "Active bans",
+        "active_caption": "IPs + CIDRs",
+        "countries": "Countries",
+        "expiring": "Expiring ≤ 1 h",
+        "expiring_caption": "Auto-rotating",
+        "permanent": "Permanent bans"
+      }
+    }
   },
   "breadcrumb": {
     "about": "О программе",
@@ -78,6 +97,7 @@
     "configs": "Конфигурации",
     "extra_pages": "Дополнительные страницы",
     "global_settings": "Глобальные настройки",
+    "global_config": "Global config",
     "home": "Главная",
     "instances": "Экземпляры",
     "jobs": "Задачи",
@@ -156,6 +176,7 @@
     "ping": "Пинг",
     "plugin_page": "Страница плагина",
     "proceed": "Продолжить",
+    "refresh": "Refresh",
     "refresh_recovery_codes": "Обновить коды восстановления",
     "reload": "Перезагрузить",
     "reset": "Сбросить",
@@ -187,10 +208,20 @@
     "upload_photo": "Загрузить новое фото",
     "view_details": "Просмотреть детали",
     "view_raw_data": "Просмотреть необработанные данные",
-    "wipe_other_sessions": "Очистить другие сессии"
+    "wipe_other_sessions": "Очистить другие сессии",
+    "ban_all_filtered": "Ban all matching reports",
+    "filtered_actions": "Filtered actions",
+    "unban_all_filtered": "Unban all matching bans",
+    "update_duration_all_filtered": "Update duration for all matching bans",
+    "use_template": "Use template",
+    "edit": "Edit",
+    "view": "View"
   },
   "cache": {
-    "subtitle": "Кэшированные файлы, созданные запланированными задачами (блоки, базы данных GeoIP и т.д.) — просматривайте, скачивайте или удаляйте их для каждого сервиса и плагина."
+    "kpi_files": "Files",
+    "kpi_per_service": "Per-service",
+    "subtitle": "Кэшированные файлы, созданные запланированными задачами (блоки, базы данных GeoIP и т.д.) — просматривайте, скачивайте или удаляйте их для каждого сервиса и плагина.",
+    "title": "Cache files"
   },
   "configs": {
     "subtitle": "Пользовательские фрагменты конфигурации NGINX для ваших сервисов — создавайте, редактируйте и управляйте HTTP, ModSecurity и переопределениями на уровне потока."
@@ -485,6 +516,9 @@
       },
       "total_requests": {
         "title": "Всего запросов"
+      },
+      "top_reasons": {
+        "title": "Top reasons for blocks"
       }
     },
     "chart": {
@@ -505,6 +539,10 @@
       "top_blocked_ips": {
         "most_blocked": "Самый блокируемый IP",
         "title": "Топ 10 заблокированных IP"
+      },
+      "timeseries": {
+        "series": "Blocked",
+        "title": "Blocked requests over time (selected range)"
       }
     },
     "map": {
@@ -516,6 +554,23 @@
     "window": {
       "last_days": "Последние {{days}} дней",
       "title": "Окно дашборда"
+    },
+    "tile": {
+      "bans_active": "Bans active",
+      "jobs": "Scheduled jobs",
+      "trend": "Blocked requests trend"
+    },
+    "welcome": {
+      "title": "Welcome back, {{user}}",
+      "greeting": "Welcome back,"
+    },
+    "panel": {
+      "timeseries_sub": "Selected range",
+      "top_ips_sub": "By request count",
+      "status_sub": "HTTP response codes",
+      "reasons_sub": "By trigger rule",
+      "map_sub": "Hover for details",
+      "blocking_sub": "Blocked vs allowed"
     }
   },
   "datatable": {
@@ -829,7 +884,8 @@
     "privacy_policy": "Политика конфиденциальности",
     "read_more": "Читать дальше",
     "see_more": "Смотреть больше",
-    "upgrade": "Обновить?"
+    "upgrade": "Обновить?",
+    "get_support": "Get support"
   },
   "login": {
     "subtitle": "Войти в свой аккаунт BunkerWeb"
@@ -856,7 +912,19 @@
     "showing_all": "{{total}} строк",
     "showing_some": "показано {{shown}} из {{total}}",
     "select_file_prompt": "Выберите файл журнала для просмотра его содержимого",
-    "trimmed_notice": "--- {{count}} старых строк лога были удалены для повышения производительности ---"
+    "trimmed_notice": "--- {{count}} старых строк лога были удалены для повышения производительности ---",
+    "all_sources": "All sources (live)",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "grep_placeholder": "grep…",
+    "level_all": "All logs",
+    "level_errors_only": "Errors only",
+    "level_security_only": "Security only",
+    "live_title": "Live logs",
+    "pause": "Pause",
+    "resume": "Resume",
+    "tailing_sources": "Tailing · {{count}} sources",
+    "taller": "Taller"
   },
   "modal": {
     "body": {
@@ -899,7 +967,10 @@
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
-      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "Применить глобальные настройки",
@@ -982,7 +1053,13 @@
     "reports": "Отчеты",
     "services": "Сервисы",
     "support": "Поддержка",
-    "templates": "Шаблоны"
+    "templates": "Шаблоны",
+    "overview": "Overview",
+    "configure": "Configure",
+    "operate": "Operate",
+    "system": "System",
+    "edition_community": "Community",
+    "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "Изображение новости",
@@ -1023,6 +1100,19 @@
       "more_value": "еще значение",
       "more_values": "еще значения",
       "show_less": "Показать меньше"
+    },
+    "marketplace": {
+      "active": "Active",
+      "always_on": "Core / always on",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "inactive": "Inactive",
+      "no_match": "No plugins match your filters",
+      "search": "Search plugins...",
+      "tab_all": "All",
+      "tab_community": "Community",
+      "tab_disabled": "Disabled",
+      "tab_enabled": "Enabled"
     }
   },
   "pro": {
@@ -1069,7 +1159,8 @@
       "services_count": "{{online_services}} сервис(ов) онлайн / {{pro_services}} сервис(ов) PRO",
       "suspended": "ПРИОСТАНОВЛЕНО",
       "title": "Статус"
-    }
+    },
+    "title": "Pro license"
   },
   "profile": {
     "2fa": {
@@ -1414,7 +1505,8 @@
         "title": "Ссылка на поддержку"
       }
     },
-    "subtitle": "Скачать логи отладки, извлечь конфигурацию и получить помощь от команды BunkerWeb."
+    "subtitle": "Скачать логи отладки, извлечь конфигурацию и получить помощь от команды BunkerWeb.",
+    "title": "Support"
   },
   "tab": {
     "custom_certificate": "Пользовательский сертификат",
@@ -1638,7 +1730,27 @@
     "none": "Нет шаблона"
   },
   "templates": {
-    "subtitle": "Переиспользуемые шаблоны конфигурации для ваших сервисов — объедините настройки, шаги и пользовательские конфигурации, затем создайте, клонируйте или удалите их."
+    "subtitle": "Переиспользуемые шаблоны конфигурации для ваших сервисов — объедините настройки, шаги и пользовательские конфигурации, затем создайте, клонируйте или удалите их.",
+    "gallery": {
+      "delete_selected": "Delete selected",
+      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
+      "empty_title": "No templates yet",
+      "select": "Select",
+      "svc_suffix": "svc"
+    },
+    "name": {
+      "api": "API",
+      "high": "High security",
+      "low": "Low security",
+      "medium": "Medium security",
+      "ui": "Web UI"
+    },
+    "tag": {
+      "config": "Custom config: {{name}}",
+      "feature": "Built-in feature: {{name}}",
+      "plugin": "Plugin: {{name}}"
+    },
+    "title": "Service templates"
   },
   "theme": {
     "dark": "Темная",
@@ -2055,6 +2167,7 @@
     "kinds": "Типы",
     "loading_references": "Загрузка ссылок...",
     "max_entries": "Группа ресурсов не может содержать более {{max}} записей.",
+    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
     "new": "Новая группа",
     "new_alias": "Новое алиас",
     "no_entries": "Нет записей",
@@ -2116,5 +2229,14 @@
     "services": "Включение сервиса",
     "status": "Хранилище экземпляра",
     "subtitle": "Статус кэша обратного прокси, агрегированные метрики частоты попадания и немедленные средства очистки."
+  },
+  "onboarding": {
+    "item": {
+      "install": "Install BunkerWeb on 1+ host",
+      "mfa": "Activate MFA",
+      "pro": "Activate BunkerWeb PRO",
+      "service": "Register your first service"
+    },
+    "title": "Getting started"
   }
 }

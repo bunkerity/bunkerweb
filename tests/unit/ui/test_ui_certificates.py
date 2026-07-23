@@ -499,7 +499,7 @@ def test_certificate_template_is_valid_jinja_and_uses_shared_components():
     assert 'from "components/file-upload.html" import file_upload' in source
     assert 'from "components/modal.html" import modal' in source
     assert "filename='js/components/file-upload.js'" in source
-    assert 'title(label="Certificates", i18n_key="navigation.certificates", level="h1"' in source
+    assert 'page_head(title="Certificates", title_i18n="navigation.certificates"' in source
     assert "certificates.assignment_notice" in source
     assert "certificate-edit-modal" in source
     assert "used by your services" not in source
