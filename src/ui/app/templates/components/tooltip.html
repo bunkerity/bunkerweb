@@ -93,7 +93,7 @@
         data-bs-toggle="tooltip"
         data-bs-original-title="{{ text }}"
         data-bs-placement="{{ placement }}"
-        {%- if i18n_key %} data-i18n="{{ i18n_key }}"{% else %} aria-label="{{ label or text }}"{% endif %}
+        {%- if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %} aria-label="{{ label or text }}"
         {%- if delay is not none %} data-bs-delay="{{ delay }}"{% endif %}
         {%- if variant == 'warning' %} data-bs-custom-class="warning-tooltip"{% endif %}>
   <i class="bx {{ glyph }}" aria-hidden="true"></i>

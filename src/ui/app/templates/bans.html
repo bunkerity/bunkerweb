@@ -86,6 +86,7 @@
     {% if not is_readonly %}
         <div class="modal modal-xl fade"
              id="modal-ban-ips"
+             aria-labelledby="modal-ban-ips-title"
              data-bs-backdrop="static"
              tabindex="-1"
              aria-hidden="true"
@@ -93,16 +94,16 @@
             <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.add_bans">Add Ban(s)</h5>
+                        <h5 class="modal-title" id="modal-ban-ips-title" data-i18n="modal.title.add_bans">Add Ban(s)</h5>
                         <button id="add-ban"
                                 type="button"
                                 class="btn btn-text-bw-green rounded-pill p-0 ms-4 me-2">
-                            <i class="bx bx-plus-circle"></i>&nbsp;<span data-i18n="button.add">INSERT</span>
+                            <i class="bx bx-plus-circle" aria-hidden="true"></i>&nbsp;<span data-i18n="button.add">INSERT</span>
                         </button>
                         <button id="clear-bans"
                                 type="button"
                                 class="btn btn-text-danger rounded-pill p-0 ms-4">
-                            <i class="bx bx-trash"></i>&nbsp;<span data-i18n="button.clear">CLEAR</span>
+                            <i class="bx bx-trash" aria-hidden="true"></i>&nbsp;<span data-i18n="button.clear">CLEAR</span>
                         </button>
                         <button type="button"
                                 class="btn-close"
@@ -219,6 +220,7 @@
         </div>
         <div class="modal modal-lg fade"
              id="modal-unban-ips"
+             aria-labelledby="modal-unban-ips-title"
              data-bs-backdrop="static"
              tabindex="-1"
              aria-hidden="true"
@@ -226,7 +228,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.confirm_unban">Confirm Unban</h5>
+                        <h5 class="modal-title" id="modal-unban-ips-title" data-i18n="modal.title.confirm_unban">Confirm Unban</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
@@ -258,6 +260,7 @@
         </div>
         <div class="modal modal-lg fade"
              id="modal-update-duration"
+             aria-labelledby="modal-update-duration-title"
              data-bs-backdrop="static"
              tabindex="-1"
              aria-hidden="true"
@@ -265,7 +268,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.update_duration">Update Ban Duration</h5>
+                        <h5 class="modal-title" id="modal-update-duration-title" data-i18n="modal.title.update_duration">Update Ban Duration</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"

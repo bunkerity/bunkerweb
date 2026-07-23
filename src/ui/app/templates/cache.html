@@ -142,7 +142,7 @@
                                    data-bs-placement="bottom"
                                    data-bs-original-title="Edit service {{ cache['service_id'] }}"
                                    data-i18n="tooltip.link.edit_service"
-                                   data-i18n-options='{"service": "{{ cache['service_id'] }}"}'><i class="bx bx-edit bx-xs me-1"></i>{{ cache["service_id"] }}</a>
+                                   data-i18n-options='{"service": "{{ cache['service_id'] }}"}'><i class="bx bx-edit bx-xs me-1" aria-hidden="true"></i>{{ cache["service_id"] }}</a>
                             {% else %}
                                 <span class="badge rounded-pill bg-label-secondary cache-scope-global" data-i18n="scope.global">Global</span>
                             {% endif %}
@@ -155,16 +155,20 @@
                             <div class="row-actions">
                                 <a role="button"
                                    class="icon-btn"
+                                   aria-label="View {{ cache['file_name'] }}"
+                                   data-i18n-aria-label="tooltip.link.view_file"
                                    href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="View {{ cache['file_name'] }}"
                                    data-i18n="tooltip.link.view_file"
                                    data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'>
-                                    <i class="bx bx-show"></i>
+                                    <i class="bx bx-show" aria-hidden="true"></i>
                                 </a>
                                 <a role="button"
                                    class="icon-btn info"
+                                   aria-label="Download {{ cache['file_name'] }}"
+                                   data-i18n-aria-label="tooltip.link.download_file"
                                    href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
@@ -173,11 +177,13 @@
                                    data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'
                                    target="_blank"
                                    rel="noreferrer">
-                                    <i class="bx bx-download"></i>
+                                    <i class="bx bx-download" aria-hidden="true"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
                                     <button type="button"
                                             class="icon-btn danger cache-delete-btn{% if is_readonly %} disabled{% endif %}"
+                                            aria-label="Delete cache file {{ cache['file_name'] }}"
+                                            data-i18n-aria-label="tooltip.button.delete_file"
                                             data-service="{{ service_id }}"
                                             data-plugin="{{ cache['plugin_id'] }}"
                                             data-job="{{ cache['job_name'] }}"
@@ -187,7 +193,7 @@
                                             data-bs-original-title="Delete Cache File: {{ cache['file_name'] }}"
                                             data-i18n="tooltip.button.delete_file"
                                             data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'>
-                                        <i class="bx bx-trash"></i>
+                                        <i class="bx bx-trash" aria-hidden="true"></i>
                                     </button>
                                 </div>
                             </div>

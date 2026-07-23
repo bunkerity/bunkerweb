@@ -26,7 +26,7 @@
         {% endif %}
         <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
             <a role="button"
-               class="btn btn-primary btn-sm{% if is_readonly %} disabled{% endif %}"
+               class="btn btn-primary btn-sm don-jose{% if is_readonly %} disabled{% endif %}"
                href="{{ url_for('templates.template_create_page') }}">
                 <i class="bx bx-plus bx-xs me-1"></i><span data-i18n="button.create_template">Create template</span>
             </a>
@@ -105,9 +105,9 @@
                             <div class="d-flex gap-2 flex-wrap align-items-center">
                                 {% set is_view = template_data.method != 'ui' or is_readonly %}
                                 <a role="button"
-                                   class="btn btn-primary btn-sm"
+                                   class="btn btn-primary btn-sm don-jose"
                                    href="{{ url_for('services.services_service_page', service='new', template=template) }}">
-                                    <i class="bx bx-rocket bx-xs"></i><span data-i18n="button.use_template">Use template</span>
+                                    <i class="bx bx-rocket bx-xs" aria-hidden="true"></i><span data-i18n="button.use_template">Use template</span>
                                 </a>
                                 <a role="button"
                                    class="btn btn-light btn-sm"
@@ -117,7 +117,7 @@
                                    data-bs-original-title="..."
                                    data-i18n="{% if is_view %}tooltip.link.view_template{% else %}tooltip.link.edit_template{% endif %}"
                                    data-i18n-options='{"template": "{{ template }}"}'>
-                                    <i class="bx bx-{% if is_view %}show{% else %}edit{% endif %} bx-xs"></i><span data-i18n="button.{% if is_view %}view{% else %}edit{% endif %}">{% if is_view %}View{% else %}Edit{% endif %}</span>
+                                    <i class="bx bx-{% if is_view %}show{% else %}edit{% endif %} bx-xs" aria-hidden="true"></i><span data-i18n="button.{% if is_view %}view{% else %}edit{% endif %}">{% if is_view %}View{% else %}Edit{% endif %}</span>
                                 </a>
                                 <div class="row-actions d-flex gap-1 ms-auto">
                                     <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="tooltip.disabled_readonly"{% endif %}>

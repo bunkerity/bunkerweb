@@ -3,6 +3,12 @@
     "build_with": "Built With",
     "gnu_license": "GNU Affero General Public License v3.0",
     "license_title": "License",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "reddit": "Reddit"
+    },
     "socials": "Socials",
     "tagline": "Powerful Protection, Simplified.",
     "title": "About BunkerWeb",

@@ -25,7 +25,7 @@
             <button type="button"
                     id="instances-create-btn"
                     class="btn btn-primary btn-sm don-jose{% if is_readonly %} disabled{% endif %}">
-                <i class="bx bx-plus bx-xs me-1"></i><span data-i18n="button.create_instance">Create instance</span>
+                <i class="bx bx-plus bx-xs me-1" aria-hidden="true"></i><span data-i18n="button.create_instance">Create instance</span>
             </button>
         </div>
     {% endcall %}
@@ -43,7 +43,7 @@
     {% from "components/tile.html" import tile %}
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
-            {{ tile(title="Total instances", value=instances|length, title_i18n="instances.total", color="primary", icon="bx-server") }}
+            {{ tile(title="Total instances", value=instances|length, title_i18n="instances.total", color="primary", icon="bx-box") }}
         </div>
         <div class="col-sm-6 col-xl-3">
             {{ tile(title="Up", value=ns.up_instances, title_i18n="instances.up", color="bw-green", icon="bx-up-arrow-alt") }}
@@ -171,12 +171,14 @@
                                 <button type="button"
                                         class="icon-btn ping-instance"
                                         data-instance="{{ instance['hostname'] }}"
+                                        aria-label="Ping instance {{ instance['hostname'] }}"
+                                        data-i18n-aria-label="tooltip.button.ping_instance"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="bottom"
                                         data-bs-original-title="Ping instance {{ instance['hostname'] }}"
                                         data-i18n="tooltip.button.ping_instance"
                                         data-i18n-options='{"hostname": "{{ instance['hostname'] }}"}'>
-                                    <i class="bx bx-bell"></i>
+                                    <i class="bx bx-bell" aria-hidden="true"></i>
                                 </button>
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
@@ -185,8 +187,10 @@
                                      data-i18n-options='{"hostname": "{{ instance['hostname'] }}"}'>
                                     <button type="button"
                                             class="icon-btn reload-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            aria-label="Reload instance {{ instance['hostname'] }}"
+                                            data-i18n-aria-label="tooltip.button.reload_instance"
                                             data-instance="{{ instance['hostname'] }}">
-                                        <i class="bx bx-refresh"></i>
+                                        <i class="bx bx-refresh" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 <div data-bs-toggle="tooltip"
@@ -196,8 +200,10 @@
                                      data-i18n-options='{"hostname": "{{ instance['hostname'] }}"}'>
                                     <button type="button"
                                             class="icon-btn stop-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            aria-label="Stop instance {{ instance['hostname'] }}"
+                                            data-i18n-aria-label="tooltip.button.stop_instance"
                                             data-instance="{{ instance['hostname'] }}">
-                                        <i class="bx bx-stop"></i>
+                                        <i class="bx bx-stop" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_delete_instance else 'tooltip.button.delete_instance')) %}
@@ -209,8 +215,10 @@
                                      data-i18n-options='{{ delete_tooltip_options }}'>
                                     <button type="button"
                                             data-instance="{{ instance['hostname'] }}"
-                                            class="icon-btn danger delete-instance{% if not can_delete_instance or is_readonly %} disabled{% endif %}">
-                                        <i class="bx bx-trash"></i>
+                                            class="icon-btn danger delete-instance{% if not can_delete_instance or is_readonly %} disabled{% endif %}"
+                                            aria-label="Delete instance {{ instance['hostname'] }}"
+                                            data-i18n-aria-label="tooltip.button.delete_instance">
+                                        <i class="bx bx-trash" aria-hidden="true"></i>
                                     </button>
                                 </div>
                             </div>
@@ -244,6 +252,7 @@
     {% if not is_readonly %}
         <div class="modal fade"
              id="modal-create-instance"
+             aria-labelledby="modal-create-instance-title"
              data-bs-backdrop="static"
              tabindex="-1"
              aria-hidden="true"
@@ -251,7 +260,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.create_new_instance">Create new instance</h5>
+                        <h5 class="modal-title" id="modal-create-instance-title" data-i18n="modal.title.create_new_instance">Create new instance</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
@@ -316,6 +325,7 @@
         </div>
         <div class="modal fade"
              id="modal-delete-instances"
+             aria-labelledby="modal-delete-instances-title"
              data-bs-backdrop="static"
              tabindex="-1"
              aria-hidden="true"
@@ -323,7 +333,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.delete_instance">Delete instances</h5>
+                        <h5 class="modal-title" id="modal-delete-instances-title" data-i18n="modal.title.delete_instance">Delete instances</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"

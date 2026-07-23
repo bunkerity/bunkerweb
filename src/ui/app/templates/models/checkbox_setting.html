@@ -26,8 +26,10 @@
                 data-bs-toggle="tooltip"
                 data-bs-placement="left"
                 data-bs-original-title="{{ tooltip_fallback }}"
-                data-i18n="{{ tooltip_key }}">
-            <i class="bx bx-sm bx-reset"></i>
+                data-i18n="{{ tooltip_key }}"
+                aria-label="{{ tooltip_fallback }}"
+                data-i18n-aria-label="{{ tooltip_key }}">
+            <i class="bx bx-sm bx-reset" aria-hidden="true"></i>
         </button>
     {% endif %}
 </div>

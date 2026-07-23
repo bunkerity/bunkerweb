@@ -143,7 +143,7 @@
         {% endif %}
         <div class="col-12 col-xl-4">
             {% call card(classes="p-4 position-relative h-100") %}
-                <i class="bx bx-calendar bx-sm position-absolute top-0 end-0 m-3 {% if is_expired %}text-warning{% else %}text-primary{% endif %}"></i>
+                <i class="bx bx-calendar bx-sm position-absolute top-0 end-0 m-3 {% if is_expired %}text-warning{% else %}text-primary{% endif %}" aria-hidden="true"></i>
                 {% if is_pro_version %}
                     <div class="card-header p-2">
                         <div class="card-title">
@@ -176,7 +176,7 @@
         <div class="col-12 row g-3 m-0 p-0">
             <div class="col-12 col-xl-8">
                 {% call card(classes="p-4 position-relative") %}
-                    <i class="bx bx-key bx-sm position-absolute top-0 end-0 m-3 {% if is_expired %}text-warning{% else %}text-primary{% endif %}"></i>
+                    <i class="bx bx-key bx-sm position-absolute top-0 end-0 m-3 {% if is_expired %}text-warning{% else %}text-primary{% endif %}" aria-hidden="true"></i>
                     <div class="card-header p-2">
                         <div class="card-title">
                             <h5 class="me-2 text-primary shine don-jose mb-0">
@@ -213,7 +213,7 @@
             </div>
             <div class="col-12 col-xl-4">
                 {% call card(classes="p-4 position-relative h-100") %}
-                    <i class="bx bx-revision bx-sm position-absolute top-0 end-0 m-3 text-primary"></i>
+                    <i class="bx bx-revision bx-sm position-absolute top-0 end-0 m-3 text-primary" aria-hidden="true"></i>
                     <div class="card-header p-2">
                         <div class="card-title">
                             <h5 class="me-2 text-primary shine don-jose mb-0">

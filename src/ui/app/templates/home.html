@@ -66,16 +66,16 @@
               data-i18n-options='{"percent": {{ memory_info.used_percent|round(1) }}}'>{{ memory_info.used_percent|round(1) }}% used</span>
         {% if memory_info.memory_state == 'danger' %}
             <br />
-            <i class='bx bxs-radiation'></i> <span data-i18n="dashboard.card.ram.critical_high">Critical: System is running out of memory!</span>
+            <i class='bx bxs-radiation' aria-hidden="true"></i> <span data-i18n="dashboard.card.ram.critical_high">Critical: System is running out of memory!</span>
         {% elif memory_info.memory_state == 'low' %}
             <br />
-            <i class='bx bx-error-alt'></i> <span data-i18n="dashboard.card.ram.warning_low">Warning: Low memory may affect performance</span>
+            <i class='bx bx-error-alt' aria-hidden="true"></i> <span data-i18n="dashboard.card.ram.warning_low">Warning: Low memory may affect performance</span>
         {% elif memory_info.memory_state == 'medium' %}
             <br />
-            <i class='bx bx-info-circle'></i> <span data-i18n="dashboard.card.ram.info_medium">Consider upgrading to 16GB+ for production use</span>
+            <i class='bx bx-info-circle' aria-hidden="true"></i> <span data-i18n="dashboard.card.ram.info_medium">Consider upgrading to 16GB+ for production use</span>
         {% else %}
             <br />
-            <i class='bx bx-check-circle'></i> <span data-i18n="dashboard.card.ram.good_high">Excellent memory for production environments</span>
+            <i class='bx bx-check-circle' aria-hidden="true"></i> <span data-i18n="dashboard.card.ram.good_high">Excellent memory for production environments</span>
         {% endif %}
     {% endset %}
     {% set plan_caption %}<a class="link-underline-primary" href="{{ url_for('pro') }}">{% if is_pro_version %}<span data-i18n="link.more_info">More info</span>{% else %}<span data-i18n="link.upgrade">Upgrade?</span>{% endif %}</a>{% endset %}
@@ -110,7 +110,7 @@
             {% endfor %}
             {% set instances_caption %}<span data-i18n="dashboard.card.instances.status" data-i18n-options='{"up": {{ ns.up_instances }}, "down": {{ ns.down_instances }}, "loading": {{ ns.loading_instances }}}'>{{ ns.up_instances }} up / {{ ns.down_instances }} down / {{ ns.loading_instances }} loading</span>{% endset %}
             <a role="button" href="{{ url_for('instances') }}" class="home-nav-tile d-block h-100">
-                {{ tile(title="Instances", value=('0' if instances|length < 10 else '') ~ instances|length, title_i18n="dashboard.card.instances.title", color="", icon="bx-server", icon_color="text-secondary", caption=instances_caption) }}
+                {{ tile(title="Instances", value=('0' if instances|length < 10 else '') ~ instances|length, title_i18n="dashboard.card.instances.title", color="", icon="bx-box", icon_color="text-secondary", caption=instances_caption) }}
             </a>
         </div>
         <div class="col-md-3">
@@ -124,7 +124,7 @@
             {% endfor %}
             {% set services_caption %}<span data-i18n="dashboard.card.services.status" data-i18n-options='{"online": {{ ns.online_services }}, "draft": {{ ns.draft_services }}}'>{{ ns.online_services }} online / {{ ns.draft_services }} draft</span>{% endset %}
             <a role="button" href="{{ url_for('services') }}" class="home-nav-tile d-block h-100">
-                {{ tile(title="Services", value=('0' if services|length < 10 else '') ~ services|length, title_i18n="dashboard.card.services.title", color="", icon="bx-cube", icon_color="text-secondary", caption=services_caption) }}
+                {{ tile(title="Services", value=('0' if services|length < 10 else '') ~ services|length, title_i18n="dashboard.card.services.title", color="", icon="bx-grid-alt", icon_color="text-secondary", caption=services_caption) }}
             </a>
         </div>
         <div class="col-md-3">

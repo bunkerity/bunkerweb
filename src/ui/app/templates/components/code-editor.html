@@ -7,5 +7,5 @@
          {% if read_only %}aria-readonly="true"{% endif %}
          role="textbox"
          aria-multiline="true"
-         {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}>{{ value | e }}</div>
+         {% if aria_label %}aria-label="{{ aria_label }}"{% else %}aria-label="{{ language ~ ' code editor' }}"{% endif %}>{{ value | e }}</div>
 {%- endmacro %}

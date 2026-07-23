@@ -13,7 +13,7 @@
     <div class="row g-3">
         <div class="col-12 col-md-6 col-lg-4">
             {% call card(classes="p-4 position-relative shadow-sm rounded-3 h-100") %}
-                <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3'></i>
+                <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3' aria-hidden="true"></i>
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-center h-100">
                         <div class="text-center text-primary">
@@ -31,7 +31,7 @@
                                 </a>
                             </div>
                             <h4 class="text-primary shine fw-bold mt-2 mb-2">BunkerWeb-UI</h4>
-                            <p class="fs-6 mt-2 mb-2" data-i18n="about.tagline">Powerful Protection, Simplified</p>
+                            <p class="fs-6 mt-2 mb-2" data-i18n="about.tagline">Powerful Protection, Simplified.</p>
                             <p class="mt-2 mb-2"
                                data-i18n="about.version"
                                data-i18n-options='{"version": "{{ bw_version }}"}'>Version: {{ bw_version }}</p>
@@ -170,29 +170,29 @@
                     {% call card(classes="p-2 shadow-sm rounded-3", title="Socials", title_key="about.socials", icon="bxs-megaphone") %}
                         <div class="text-center">
                             <div class="social-buttons">
-                                <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
+                                <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui" aria-label="Discord" data-i18n-aria-label="about.social.discord"
                                    class="btn btn-sm btn-link"
                                    target="_blank"
                                    rel="noopener">
-                                    <i class='bx bxl-discord-alt bx-sm'></i>
+                                    <i class='bx bxl-discord-alt bx-sm' aria-hidden="true"></i>
                                 </a>
-                                <a href="https://www.linkedin.com/company/bunkerity/"
+                                <a href="https://www.linkedin.com/company/bunkerity/" aria-label="LinkedIn" data-i18n-aria-label="about.social.linkedin"
                                    class="btn btn-sm btn-link"
                                    target="_blank"
                                    rel="noreferrer">
-                                    <i class='bx bxl-linkedin bx-sm'></i>
+                                    <i class='bx bxl-linkedin bx-sm' aria-hidden="true"></i>
                                 </a>
-                                <a href="https://www.reddit.com/r/BunkerWeb/"
+                                <a href="https://www.reddit.com/r/BunkerWeb/" aria-label="Reddit" data-i18n-aria-label="about.social.reddit"
                                    class="btn btn-sm btn-link"
                                    target="_blank"
                                    rel="noreferrer">
-                                    <i class='bx bxl-reddit bx-sm'></i>
+                                    <i class='bx bxl-reddit bx-sm' aria-hidden="true"></i>
                                 </a>
-                                <a href="https://www.instagram.com/bunkerweb/"
+                                <a href="https://www.instagram.com/bunkerweb/" aria-label="Instagram" data-i18n-aria-label="about.social.instagram"
                                    class="btn btn-sm btn-link"
                                    target="_blank"
                                    rel="noreferrer">
-                                    <i class='bx bxl-instagram bx-sm'></i>
+                                    <i class='bx bxl-instagram bx-sm' aria-hidden="true"></i>
                                 </a>
                                 <a href="https://x.com/bunkerity/"
                                    class="btn btn-sm btn-link"
@@ -214,29 +214,29 @@
             {% call card(classes="p-2 shadow-sm rounded-3", title="Socials", title_key="about.socials", icon="bxs-megaphone") %}
                 <div class="text-center">
                     <div class="social-buttons">
-                        <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
+                        <a href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui" aria-label="Discord" data-i18n-aria-label="about.social.discord"
                            class="btn btn-sm btn-link"
                            target="_blank"
                            rel="noopener">
-                            <i class='bx bxl-discord-alt bx-sm'></i>
+                            <i class='bx bxl-discord-alt bx-sm' aria-hidden="true"></i>
                         </a>
-                        <a href="https://www.linkedin.com/company/bunkerity/"
+                        <a href="https://www.linkedin.com/company/bunkerity/" aria-label="LinkedIn" data-i18n-aria-label="about.social.linkedin"
                            class="btn btn-sm btn-link"
                            target="_blank"
                            rel="noreferrer">
-                            <i class='bx bxl-linkedin bx-sm'></i>
+                            <i class='bx bxl-linkedin bx-sm' aria-hidden="true"></i>
                         </a>
-                        <a href="https://www.reddit.com/r/BunkerWeb/"
+                        <a href="https://www.reddit.com/r/BunkerWeb/" aria-label="Reddit" data-i18n-aria-label="about.social.reddit"
                            class="btn btn-sm btn-link"
                            target="_blank"
                            rel="noreferrer">
-                            <i class='bx bxl-reddit bx-sm'></i>
+                            <i class='bx bxl-reddit bx-sm' aria-hidden="true"></i>
                         </a>
-                        <a href="https://www.instagram.com/bunkerweb/"
+                        <a href="https://www.instagram.com/bunkerweb/" aria-label="Instagram" data-i18n-aria-label="about.social.instagram"
                            class="btn btn-sm btn-link"
                            target="_blank"
                            rel="noreferrer">
-                            <i class='bx bxl-instagram bx-sm'></i>
+                            <i class='bx bxl-instagram bx-sm' aria-hidden="true"></i>
                         </a>
                         <a href="https://x.com/bunkerity/"
                            class="btn btn-sm btn-link"

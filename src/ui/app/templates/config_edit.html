@@ -30,7 +30,7 @@
             <div class="d-flex">
                 {% if (not config_editable) or is_readonly %}
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
-                        <i class="bx bx-xs bx-cube"></i>
+                        <i class="bx bx-xs bx-cube" aria-hidden="true"></i>
                         &nbsp;<span data-i18n="button.service">Service</span>: {{ config_service or "Global" }}
                     </button>
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
