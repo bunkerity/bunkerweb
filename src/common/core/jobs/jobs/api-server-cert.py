@@ -26,7 +26,7 @@ try:
         LOGGER.info("Skipping the generation of self-signed certificate for API server (disabled)")
         sys_exit(status)
 
-    cert_path = Path(sep, "var", "cache", "bunkerweb", "misc")
+    cert_path = JOB.job_path
     if not JOB.is_cached_file("api-server-cert.pem", "month") or not JOB.is_cached_file("api-server-cert.key", "month"):
         LOGGER.info("Generating self-signed certificate for API server")
         cert_path.mkdir(parents=True, exist_ok=True)
