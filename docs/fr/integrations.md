@@ -2343,10 +2343,10 @@ Veuillez vous assurer que **NGINX 1.30.4 est installé avant d'installer BunkerW
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora fournit déjà NGINX 1.30.3, que nous prenons en charge
+    Fedora fournit déjà NGINX 1.30.4, que nous prenons en charge
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.3
+    sudo dnf install -y --allowerasing nginx-1.30.4
     ```
 
     !!! example "Désactiver l'assistant d'installation"
