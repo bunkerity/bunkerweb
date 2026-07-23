@@ -35,6 +35,32 @@ local lower = string.lower
 local gsub = string.gsub
 
 -- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
+-- Cert name prefix for wildcard certs (renewal/live/archive dirs), must match certbot-new.py.
+-- "_wildcard_" is not a valid hostname, so there will not be any overlaps.
+local WILDCARD_CERT_NAME_PREFIX = "_wildcard_."
+local LETSENCRYPT_LIVE = "/var/cache/bunkerweb/letsencrypt/etc/live/"
+
+-- Try reading wildcard cert files for a wildcard base.
+-- Certbot may suffix the cert_name based on key type/profile (-ecdsa/-rsa), so we attempt
+-- the unsuffixed dir first for backward compatibility, then the suffixed variants.
+local function read_wildcard_cert_files(base)
+	local cert_dir_base = WILDCARD_CERT_NAME_PREFIX .. base
+	local suffixes = { "", "-ecdsa", "-rsa" }
+	local last_err
+	for _, suffix in ipairs(suffixes) do
+		local cert_dir = cert_dir_base .. suffix
+		local check, data = read_files({
+			LETSENCRYPT_LIVE .. cert_dir .. "/fullchain.pem",
+			LETSENCRYPT_LIVE .. cert_dir .. "/privkey.pem",
+		})
+		if check then
+			return true, data
+		end
+		last_err = data
+	end
+	return false, last_err
+end
+
 local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
 		return nil
@@ -60,9 +86,7 @@ local function determine_wildcard_bases(labels_list)
 	end
 	if count == 1 then
 		local labels = labels_list[1]
-		if #labels > 2 then
-			return { table.concat(labels, ".", 2) }
-		end
+		-- Base = full cleaned domain so *.hosts.example.com -> hosts.example.com
 		return { table.concat(labels, ".") }
 	end
 	local min_len = #labels_list[1]
@@ -86,18 +110,26 @@ local function determine_wildcard_bases(labels_list)
 		end
 		insert(common_suffix, 1, label)
 	end
+	-- One base only when all entries are the same scope (e.g. *.example.com + example.com)
+	local common_base = table.concat(common_suffix, ".")
 	if #common_suffix >= 2 and #common_suffix >= (min_len - 1) then
-		return { table.concat(common_suffix, ".") }
+		local all_same = true
+		for _, labels in ipairs(labels_list) do
+			if table.concat(labels, ".") ~= common_base then
+				all_same = false
+				break
+			end
+		end
+		if all_same then
+			return { common_base }
+		end
 	end
+	-- Different scopes (e.g. *.hosts.example.com vs *.api.example.com) must not be merged;
+	-- emit one base per scope.
 	local bases = {}
 	local seen = {}
 	for _, labels in ipairs(labels_list) do
-		local base
-		if #labels > 2 then
-			base = table.concat(labels, ".", 2)
-		else
-			base = table.concat(labels, ".")
-		end
+		local base = table.concat(labels, ".")
 		if base ~= "" and not seen[base] then
 			seen[base] = true
 			insert(bases, base)
@@ -263,12 +295,9 @@ function letsencrypt:init()
 							data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
 							if not data then
 								local check
-								check, data = read_files({
-									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
-									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
-								})
+								check, data = read_wildcard_cert_files(base)
 								if not check then
-									self.logger:log(ERR, "error while reading files : " .. data)
+									self.logger:log(ERR, "error while reading wildcard cert files : " .. tostring(data))
 									ret_ok = false
 									ret_err = "error reading files"
 								else
@@ -357,12 +386,9 @@ function letsencrypt:init()
 					local data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
 					if not data then
 						local check
-						check, data = read_files({
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
-						})
+						check, data = read_wildcard_cert_files(base)
 						if not check then
-							self.logger:log(ERR, "error while reading files : " .. data)
+							self.logger:log(ERR, "error while reading wildcard cert files : " .. tostring(data))
 							ret_ok = false
 							ret_err = "error reading files"
 						else
