@@ -43,7 +43,7 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
 | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Evita que los navegadores realicen "MIME-sniffing", protegiendo contra ataques de descarga no autorizada (drive-by download).       |
 | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad.                     |
 | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Política de Referencia:** Controla la cantidad de información de referencia enviada, salvaguardando la privacidad del usuario.                                |
-| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
+| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
 | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
 
     !!! tip "Mejores Prácticas"
@@ -51,6 +51,7 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
         - Use herramientas como [Mozilla Observatory](https://observatory.mozilla.org/) para validar la configuración de sus cabeceras.
         - Pruebe el CSP en modo `Report-Only` antes de aplicarlo para evitar romper la funcionalidad.
         - En modo `Report-Only`, una cabecera `Content-Security-Policy` o `Content-Security-Policy-Report-Only` enviada por el origen se conserva de forma predeterminada (`KEEP_UPSTREAM_HEADERS`); elimine el nombre de la cabecera de ese ajuste para que la propia política de BunkerWeb tenga prioridad.
+        - La `PERMISSIONS_POLICY` predeterminada también bloquea los client hints (directivas `ch-*`); si un servicio depende de `Accept-CH` (por ejemplo, imágenes responsivas basadas en client hints o la detección del modo oscuro mediante `Sec-CH-Prefers-Color-Scheme`), anule `PERMISSIONS_POLICY` para volver a permitir las funciones `ch-*` necesarias (por ejemplo, `ch-dpr=(self)`).
 
 === "Configuración de Cookies"
 

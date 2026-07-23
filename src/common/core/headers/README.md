@@ -43,7 +43,7 @@ Follow these steps to configure and use the Headers feature:
     | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks.              |
     | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy.          |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Referrer Policy:** Controls the amount of referrer information sent, safeguarding user privacy.                            |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
     | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Keep Headers:** Preserves selected upstream headers, aiding legacy integration while maintaining security.                 |
 
     !!! tip "Best Practices"
@@ -51,6 +51,7 @@ Follow these steps to configure and use the Headers feature:
         - Use tools like [Mozilla Observatory](https://observatory.mozilla.org/) to validate your header configuration.
         - Test CSP in `Report-Only` mode before enforcing it to avoid breaking functionality.
         - In `Report-Only` mode, an upstream `Content-Security-Policy` or `Content-Security-Policy-Report-Only` header is preserved by default (`KEEP_UPSTREAM_HEADERS`); remove the header name from that setting for BunkerWeb's own policy to take precedence.
+        - The default `PERMISSIONS_POLICY` also blocks client hints (`ch-*` directives); if a service relies on `Accept-CH` (for example client-hint responsive images or `Sec-CH-Prefers-Color-Scheme` dark-mode detection), override `PERMISSIONS_POLICY` to re-allow the needed `ch-*` features (for example `ch-dpr=(self)`).
 
 === "Cookie Settings"
 

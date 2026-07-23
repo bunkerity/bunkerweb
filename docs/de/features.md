@@ -2875,7 +2875,7 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
     | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | nein     | **X-Content-Type-Options:** Verhindert, dass Browser MIME-Sniffing betreiben, und schützt so vor Drive-by-Download-Angriffen.                                   |
     | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | nein     | **X-DNS-Prefetch-Control:** Reguliert das DNS-Prefetching, um unbeabsichtigte Netzwerkanfragen zu reduzieren und die Privatsphäre zu verbessern.                |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | nein     | **Referrer Policy:** Steuert die Menge der gesendeten Referrer-Informationen und schützt die Privatsphäre der Benutzer.                                         |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | nein     | **Permissions Policy:** Beschränkt den Zugriff auf Browserfunktionen und reduziert potenzielle Angriffsvektoren.                                                |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | nein     | **Permissions Policy:** Beschränkt den Zugriff auf Browserfunktionen und reduziert potenzielle Angriffsvektoren.                                                |
     | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | nein     | **Header beibehalten:** Behält ausgewählte Upstream-Header bei, was die Integration von Altsystemen erleichtert und gleichzeitig die Sicherheit aufrechterhält. |
 
     !!! tip "Bewährte Praktiken"
@@ -2883,6 +2883,7 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
         - Verwenden Sie Tools wie das [Mozilla Observatory](https://observatory.mozilla.org/), um Ihre Header-Konfiguration zu validieren.
         - Testen Sie CSP im `Report-Only`-Modus, bevor Sie es erzwingen, um zu vermeiden, dass die Funktionalität beeinträchtigt wird.
         - Im `Report-Only`-Modus wird ein vom Upstream gesendeter `Content-Security-Policy`- oder `Content-Security-Policy-Report-Only`-Header standardmäßig beibehalten (`KEEP_UPSTREAM_HEADERS`); entfernen Sie den Header-Namen aus dieser Einstellung, damit die eigene Richtlinie von BunkerWeb Vorrang hat.
+        - Die standardmäßige `PERMISSIONS_POLICY` blockiert auch Client Hints (`ch-*`-Direktiven); wenn ein Dienst auf `Accept-CH` angewiesen ist (zum Beispiel Client-Hint-basierte responsive Bilder oder die Dunkelmodus-Erkennung über `Sec-CH-Prefers-Color-Scheme`), passen Sie `PERMISSIONS_POLICY` an, um die benötigten `ch-*`-Funktionen wieder zuzulassen (zum Beispiel `ch-dpr=(self)`).
 
 === "Cookie-Einstellungen"
 
