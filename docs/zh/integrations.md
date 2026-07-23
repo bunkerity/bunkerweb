@@ -2340,10 +2340,10 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.30.3
+    Fedora 已经提供了我们支持的 NGINX 1.30.4
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.3
+    sudo dnf install -y --allowerasing nginx-1.30.4
     ```
 
     !!! example "禁用设置向导"

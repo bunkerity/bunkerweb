@@ -6,10 +6,11 @@
 - [BUGFIX] `backup`: support MySQL 9 and MariaDB 12 backup/restore with current authentication, TLS, and privilege defaults while preserving compatibility with older servers; refresh the documented database compatibility matrix, including PostgreSQL 18.
 - [BUGFIX] `ui`: fix plugin hook loading and chaining, and purge unavailable PRO plugin pages after license loss.
 - [BUGFIX] `letsencrypt`: quarantine broken renewal lineages and persist the cleaned cache before Certbot runs. (Fixes #3733)
-- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683, #3685)
 - [FEATURE] `metrics`: buffer reports during Redis OOM events, make list and facet updates atomic, and add the `METRICS_REDIS_TTL` setting.
 - [FEATURE] `headers`: deny Chrome built-in AI APIs in the default `PERMISSIONS_POLICY`.
 - [FEATURE] `misc`: allow the `QUERY` HTTP method by default in `ALLOWED_METHODS` and bundled service templates.
+- [LINUX] Updated the NGINX version to v1.30.4 for Fedora 43 and 44 now that it is available in their repositories.
+- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683, #3685)
 
 ## v1.6.13 - 2026/07/16
 
