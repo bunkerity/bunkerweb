@@ -32,7 +32,7 @@ También puedes [contactarnos](https://panel.bunkerweb.io/contact.php?utm_campai
 
 Para obtener soporte gratuito de la comunidad, puedes utilizar los siguientes medios:
 
-- El canal #help de BunkerWeb en el [servidor de Discord](https.discord.com/invite/fTf46FmtyD)
+- El canal #help de BunkerWeb en el [servidor de Discord](https://discord.com/invite/fTf46FmtyD)
 - La categoría de ayuda de las [discusiones de GitHub](https://github.com/bunkerity/bunkerweb/discussions)
 - El subreddit [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb)
 - Los foros de [Server Fault](https://serverfault.com/) y [Super User](https://superuser.com/)

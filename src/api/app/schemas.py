@@ -116,6 +116,13 @@ class InstanceCreateRequest(BaseModel):
     server_name: Optional[str] = Field(None, description="API server_name/Host header; defaults if omitted")
     method: Optional[str] = Field("ui", description='Source method tag (defaults to "ui")')
 
+    @field_validator("hostname")
+    @classmethod
+    def validate_hostname(cls, value: str) -> str:
+        if "@" in value:
+            raise ValueError("hostname must not contain '@'")
+        return value
+
 
 class InstancesDeleteRequest(BaseModel):
     instances: List[str]

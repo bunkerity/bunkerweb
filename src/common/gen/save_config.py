@@ -22,8 +22,6 @@ from API import API  # type: ignore
 CUSTOM_CONF_RX = re_compile(
     r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
-BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(https?://)?(?P<hostname>(?<![:])\b[^:\s]+\b)(:(?P<port>\d+))?")
-
 LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
 
 
@@ -168,24 +166,22 @@ if __name__ == "__main__":
         apis = []
         hostnames = set()
         for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split():
-            match = BUNKERWEB_STATIC_INSTANCES_RX.search(bw_instance)
-            if match:
-                if match.group("hostname") in hostnames:
-                    LOGGER.warning(f"Duplicate BunkerWeb instance hostname {match.group('hostname')}, skipping it")
-
-                hostnames.add(match.group("hostname"))
-                # Use API builder to compute scheme and port from URL or parts
+            try:
                 endpoint = API.build_endpoint(
                     bw_instance,
                     port=settings.get("API_HTTP_PORT"),
                     listen_https=(settings.get("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
                     https_port=settings.get("API_HTTPS_PORT"),
                 )
-                apis.append(API(endpoint, host=settings.get("API_SERVER_NAME", "bwapi")))
-            else:
-                LOGGER.warning(
-                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: (http(s)://)<hostname>(:<port>) ({BUNKERWEB_STATIC_INSTANCES_RX.pattern}), skipping it"
-                )
+            except ValueError as e:
+                LOGGER.warning(f"Invalid BunkerWeb instance {bw_instance}: {e}, skipping it")
+                continue
+            hostname = urlsplit(endpoint).hostname
+            if hostname in hostnames:
+                LOGGER.warning(f"Duplicate BunkerWeb instance hostname {hostname}, skipping it")
+                continue
+            hostnames.add(hostname)
+            apis.append(API(endpoint, host=settings.get("API_SERVER_NAME", "bwapi")))
 
         changes = []
         changed_plugins = set()

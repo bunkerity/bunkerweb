@@ -1223,6 +1223,10 @@ utils.is_connection_error = function(err)
 		and (err:find("closed", 1, true) or err:find("broken pipe", 1, true) or err:find("connection reset", 1, true))
 end
 
+utils.is_oom_error = function(err)
+	return err and err:find("OOM", 1, true) ~= nil
+end
+
 utils.kill_all_threads = function(threads)
 	for _, thread in ipairs(threads) do
 		local ok, err = kill(thread)

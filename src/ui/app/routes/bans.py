@@ -19,11 +19,12 @@ from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flas
 
 from app.routes.utils import (
     cors_required,
+    get_default_ban_time,
     get_redis_client,
     get_remain,
     handle_error,
+    parse_search_panes,
     parse_search_panes_dict,
-    verify_data_in_form,
 )
 
 bans = Blueprint("bans", __name__)
@@ -244,6 +245,60 @@ def _filter_and_sort_bans(all_bans, search_value, search_panes, order_column_ind
             filtered_bans.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
 
     return filtered_bans
+
+
+def _get_filtered_bans(source):
+    return _filter_and_sort_bans(
+        _collect_all_bans(),
+        source.get("search", "").lower(),
+        parse_search_panes_dict(source),
+        0,
+        "desc",
+    )
+
+
+def _get_filtered_report_bans(source):
+    if not BW_INSTANCES_UTILS:
+        return []
+
+    try:
+        config = BW_CONFIG.get_config(methods=False, with_drafts=True) if BW_CONFIG else {}
+    except Exception:
+        config = {}
+
+    result = BW_INSTANCES_UTILS.get_reports_query(
+        start=0,
+        length=-1,
+        search=source.get("search", "").lower(),
+        order_column="date",
+        order_dir="desc",
+        search_panes=parse_search_panes(source),
+        count_only=False,
+        include_pane_counts=False,
+    )
+
+    targets = []
+    seen = set()
+    for report in result.get("data", []):
+        ip = report.get("ip")
+        server_name = str(report.get("server_name") or "_")
+        ban_scope = "global" if server_name == "_" else "service"
+        service = "" if ban_scope == "global" else server_name
+        key = (ip, ban_scope, service)
+        if key in seen:
+            continue
+        seen.add(key)
+        targets.append(
+            {
+                "ip": ip,
+                "reason": report.get("reason") or "ui",
+                "ban_scope": ban_scope,
+                "service": service,
+                "exp": get_default_ban_time(config, server_name),
+            }
+        )
+
+    return targets
 
 
 @bans.route("/bans", methods=["GET"])
@@ -622,20 +677,24 @@ def bans_ban():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "bans")
 
-    # Validate input parameters
-    verify_data_in_form(
-        data={"bans": None},
-        err_message="Missing bans parameter on /bans/ban.",
-        redirect_url="bans",
-        next=True,
-    )
-    bans = request.form["bans"]
+    selection_mode = request.form.get("selection_mode", "explicit")
+    if selection_mode == "filtered":
+        if request.form.get("source") != "reports":
+            return handle_error("Invalid filtered ban source.", "bans", True)
+        bans = _get_filtered_report_bans(request.form)
+    elif selection_mode == "explicit":
+        raw_bans = request.form.get("bans", "")
+        if not raw_bans:
+            return handle_error("No bans.", "bans", True)
+        try:
+            bans = loads(raw_bans)
+        except JSONDecodeError:
+            return handle_error("Invalid bans parameter on /bans/ban.", "bans", True)
+    else:
+        return handle_error("Invalid ban selection mode.", "bans", True)
+
     if not bans:
-        return handle_error("No bans.", "bans", True)
-    try:
-        bans = loads(bans)
-    except JSONDecodeError:
-        return handle_error("Invalid bans parameter on /bans/ban.", "bans", True)
+        return handle_error("No matching reports.", "bans", True)
 
     for ban in bans:
         # Validate ban structure
@@ -688,20 +747,31 @@ def bans_unban():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "bans")
 
-    # Validate input parameters
-    verify_data_in_form(
-        data={"ips": None},
-        err_message="Missing bans parameter on /bans/unban.",
-        redirect_url="bans",
-        next=True,
-    )
-    unbans = request.form["ips"]
+    selection_mode = request.form.get("selection_mode", "explicit")
+    if selection_mode == "filtered":
+        if request.form.get("source") != "bans":
+            return handle_error("Invalid filtered unban source.", "bans", True)
+        unbans = [
+            {
+                "ip": ban.get("ip"),
+                "ban_scope": ban.get("ban_scope", "global"),
+                "service": ban.get("service"),
+            }
+            for ban in _get_filtered_bans(request.form)
+        ]
+    elif selection_mode == "explicit":
+        raw_unbans = request.form.get("ips", "")
+        if not raw_unbans:
+            return handle_error("No bans.", "bans", True)
+        try:
+            unbans = loads(raw_unbans)
+        except JSONDecodeError:
+            return handle_error("Invalid ips parameter on /bans/unban.", "bans", True)
+    else:
+        return handle_error("Invalid unban selection mode.", "bans", True)
+
     if not unbans:
-        return handle_error("No bans.", "ips", True)
-    try:
-        unbans = loads(unbans)
-    except JSONDecodeError:
-        return handle_error("Invalid ips parameter on /bans/unban.", "bans", True)
+        return handle_error("No matching bans.", "bans", True)
 
     for unban in unbans:
         # Validate unban structure
@@ -744,20 +814,35 @@ def bans_update_duration():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "bans")
 
-    # Validate input parameters
-    verify_data_in_form(
-        data={"updates": None},
-        err_message="Missing updates parameter on /bans/update_duration.",
-        redirect_url="bans",
-        next=True,
-    )
-    updates = request.form["updates"]
+    selection_mode = request.form.get("selection_mode", "explicit")
+    if selection_mode == "filtered":
+        if request.form.get("source") != "bans":
+            return handle_error("Invalid filtered duration source.", "bans", True)
+        duration = request.form.get("duration", "")
+        updates = [
+            {
+                "ip": ban.get("ip"),
+                "duration": duration,
+                "ban_scope": ban.get("ban_scope", "global"),
+                "service": ban.get("service"),
+                "custom_exp": request.form.get("custom_exp"),
+                "end_date": request.form.get("end_date"),
+            }
+            for ban in _get_filtered_bans(request.form)
+        ]
+    elif selection_mode == "explicit":
+        raw_updates = request.form.get("updates", "")
+        if not raw_updates:
+            return handle_error("No updates.", "bans", True)
+        try:
+            updates = loads(raw_updates)
+        except JSONDecodeError:
+            return handle_error("Invalid updates parameter on /bans/update_duration.", "bans", True)
+    else:
+        return handle_error("Invalid duration selection mode.", "bans", True)
+
     if not updates:
-        return handle_error("No updates.", "bans", True)
-    try:
-        updates = loads(updates)
-    except JSONDecodeError:
-        return handle_error("Invalid updates parameter on /bans/update_duration.", "bans", True)
+        return handle_error("No matching bans.", "bans", True)
 
     # Fetch existing bans from instances to get original reasons
     instance_bans = BW_INSTANCES_UTILS.get_bans()
@@ -783,6 +868,10 @@ def bans_update_duration():
         ban_scope = update.get("ban_scope", "global")
         service = update.get("service", "")
 
+        if duration not in ("permanent", "1h", "24h", "1w", "custom"):
+            flash(f"Invalid ban duration: {escape(str(duration))}", "error")
+            continue
+
         # Validate IP address
         try:
             validate_ip_address(ip)
@@ -805,7 +894,8 @@ def bans_update_duration():
                 try:
                     new_exp = max(0, int(custom_exp))
                 except (TypeError, ValueError):
-                    new_exp = 0
+                    flash(f"Invalid custom ban duration for {escape(ip)}", "error")
+                    continue
             else:
                 custom_end_date = update.get("end_date")
                 if custom_end_date:
@@ -815,11 +905,11 @@ def bans_update_duration():
                             end_dt = end_dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
                         new_exp = max(0, int(end_dt.timestamp() - time()))
                     except (TypeError, ValueError):
-                        new_exp = 0
+                        flash(f"Invalid custom ban end date for {escape(ip)}", "error")
+                        continue
                 else:
-                    new_exp = 0
-        else:
-            new_exp = 0
+                    flash(f"Missing custom ban end date for {escape(ip)}", "error")
+                    continue
 
         # Validate service name for service-specific bans
         if ban_scope == "service":

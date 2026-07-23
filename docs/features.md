@@ -1692,10 +1692,11 @@ Follow these steps to configure and use the Country feature:
 
 ### Configuration Settings
 
-| Setting             | Default | Context   | Multiple | Description                                                                                                                     |
-| ------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed. |
-| `BLACKLIST_COUNTRY` |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.      |
+| Setting              | Default | Context   | Multiple | Description                                                                                                                                                                          |
+| -------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WHITELIST_COUNTRY`  |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.                                                      |
+| `BLACKLIST_COUNTRY`  |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.                                                           |
+| `COUNTRY_IGNORE_URI` |         | multisite | no       | **Ignored URI:** List of URI regex patterns separated by spaces that should bypass country checks. Patterns are checked against the path and the full request URI with query string. |
 
 ### Supported Country Groups
 
@@ -1879,7 +1880,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.13-rc1
+        image: bunkerity/bunkerweb:1.6.14-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1896,7 +1897,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -3392,19 +3393,22 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 
 - **Number of connections per IP address** (STREAM support :white_check_mark:)
 - **Number of requests per IP address and URL within a specific time period** (STREAM support :x:)
+- **Aggregate (global) request rate per service, across all clients and URLs combined** (STREAM support :x:)
 
 ### How it Works
 
 1. **Rate Limiting:** Tracks the number of requests from each client IP address to specific URLs. If a client exceeds the configured rate limit, subsequent requests are temporarily denied.
-2. **Connection Limiting:** Monitors and restricts the number of concurrent connections from each client IP address. Different connection limits can be applied based on the protocol used (HTTP/1, HTTP/2, HTTP/3, or stream).
-3. In both cases, clients that exceed the defined limits receive an HTTP status code **"429 - Too Many Requests"**, which helps prevent server overload.
+2. **Global Rate Limiting:** Tracks the total number of requests to a service regardless of client IP or URL, protecting origin/backend capacity from aggregate traffic spikes. This is independent from and evaluated before per-IP/per-URL rate limiting.
+3. **Connection Limiting:** Monitors and restricts the number of concurrent connections from each client IP address. Different connection limits can be applied based on the protocol used (HTTP/1, HTTP/2, HTTP/3, or stream).
+4. In all cases, clients that exceed the defined limits receive an HTTP status code **"429 - Too Many Requests"**, which helps prevent server overload.
 
 ### Steps to Use
 
 1. **Enable Request Rate Limiting:** Use `USE_LIMIT_REQ` to enable request rate limiting and define URL patterns along with their corresponding rate limits.
-2. **Enable Connection Limiting:** Use `USE_LIMIT_CONN` to enable connection limiting and set the maximum number of concurrent connections for different protocols.
-3. **Apply Granular Control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
-4. **Monitor Effectiveness:** Use the [web UI](web-ui.md) to view statistics on limited requests and connections.
+2. **Enable Global Rate Limiting:** Use `USE_LIMIT_REQ_GLOBAL` to cap the total aggregate request rate for a service, independent of client IP or URL, when protecting origin capacity matters more than per-client fairness.
+3. **Enable Connection Limiting:** Use `USE_LIMIT_CONN` to enable connection limiting and set the maximum number of concurrent connections for different protocols.
+4. **Apply Granular Control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
+5. **Monitor Effectiveness:** Use the [web UI](web-ui.md) to view statistics on limited requests and connections.
 
 ### Configuration Settings
 
@@ -3425,6 +3429,16 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
         - `t` is the time unit: `s` (second), `m` (minute), `h` (hour), or `d` (day)
 
         For example, `5r/m` means that 5 requests per minute are allowed from each IP address.
+
+=== "Global Rate Limiting"
+
+    | Setting                 | Default   | Context   | Multiple | Description                                                                                                                    |
+    | ----------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | no       | **Enable Global Rate Limiting:** Set to `yes` to cap the total aggregate request rate for the service (all clients, all URLs). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | no       | **Global Rate Limit:** Maximum aggregate request rate in the format `Nr/t`, same syntax as `LIMIT_REQ_RATE`.                   |
+
+    !!! tip "When to use global rate limiting"
+        Per-IP/per-URL rate limiting protects against a single abusive client. Global rate limiting protects the origin server itself: it caps total throughput to a service regardless of who's asking. Use it when your backend has a known capacity ceiling (e.g. a database connection pool, a slow third-party API) that you need to shield from any traffic spike, legitimate or not. It's checked before per-IP/per-URL rules, so it's the first line of defense under load.
 
 === "Connection Limiting"
 
@@ -3663,20 +3677,21 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ### Configuration Settings
 
-| Setting                              | Default | Context   | Multiple | Description                                                                                                                                      |
-| ------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_METRICS`                        | `yes`   | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                                                  |
-| `METRICS_MEMORY_SIZE`                | `16m`   | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                                                          |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`    | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.                                     |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`   | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.                                 |
-| `MAX_LRU_HISTORY`                    | `1k`    | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand. |
-| `METRICS_SAVE_TO_REDIS`              | `yes`   | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation.                             |
+| Setting                              | Default   | Context   | Multiple | Description                                                                                                                                                                                                                                                    |
+| ------------------------------------ | --------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`     | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                                                                                                                                                                |
+| `METRICS_MEMORY_SIZE`                | `16m`     | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                                                                                                                                                                        |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`      | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.                                                                                                                                                   |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`     | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.                                                                                                                                               |
+| `METRICS_REDIS_TTL`                  | `2592000` | global    | no       | **Metrics Redis TTL:** Seconds before Redis metrics keys expire (`0` = permanent); refreshed each sync so active data never expires, letting abandoned data become evictable under `volatile-lru` so Redis recovers from maxmemory. Accepts `k`/`m` shorthand. |
+| `MAX_LRU_HISTORY`                    | `1k`      | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand.                                                                                                               |
+| `METRICS_SAVE_TO_REDIS`              | `yes`     | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation.                                                                                                                                           |
 
 !!! tip "Sizing Memory Allocation"
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. Raw byte values and `k`/`m` suffixes are supported. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
 
 !!! info "Redis Integration"
-    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances.
+    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances. Under Redis `maxmemory` pressure, new reports are buffered per-worker and synced once memory frees, so blocked-request reports are not lost while Redis is full.
 
 !!! warning "Performance Considerations"
     Setting very high values for `METRICS_MAX_BLOCKED_REQUESTS` or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` can increase memory usage. Monitor your system resources and adjust these values according to your actual needs and available resources.
@@ -3820,18 +3835,18 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     Restricting HTTP methods to only those required by your application is a fundamental security measure that adheres to the principle of least privilege. By explicitly defining acceptable HTTP methods, you can minimize the risk of exploitation through unused or dangerous methods.
 
-    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
+    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD|QUERY`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
 
-    For most websites, the default `GET|POST|HEAD` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`. Custom uppercase methods may also contain underscores and dashes for compatibility with non-standard protocols (e.g. `CCM_POST`, `M-SEARCH`).
+    For most websites, the default `GET|POST|HEAD|QUERY` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`. Custom uppercase methods may also contain underscores and dashes for compatibility with non-standard protocols (e.g. `CCM_POST`, `M-SEARCH`).
 
     !!! success "Security Benefits"
         - Prevents exploitation of unused or unnecessary HTTP methods
         - Reduces the attack surface by disabling potentially harmful methods
         - Blocks HTTP method enumeration techniques used by attackers
 
-    | Setting           | Default           | Context   | Multiple | Description                                                                                                                                         |
-    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | no       | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. Custom uppercase methods may contain underscores and dashes. |
+    | Setting           | Default                  | Context   | Multiple | Description                                                                                                                                         |
+    | ----------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. Custom uppercase methods may contain underscores and dashes. |
 
     !!! abstract "CORS and Pre-flight Requests"
         If your application supports [Cross-Origin Resource Sharing (CORS)](#cors), you should include the `OPTIONS` method in the `ALLOWED_METHODS` setting to handle pre-flight requests. This ensures proper functionality for browsers making cross-origin requests.
@@ -4273,13 +4288,11 @@ STREAM support :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-| Setting                        | Default | Context | Multiple | Description                                                                                                                                                      |
-| ------------------------------ | ------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MONITORING`               | `yes`   | global  | no       | Enable monitoring of BunkerWeb.                                                                                                                                  |
-| `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics.                                                                                                                    |
-| `MONITORING_IGNORE_URLS`       |         | global  | no       | List of URLs to ignore when monitoring separated with spaces (e.g. /health)                                                                                      |
-| `MONITORING_TOP_N_DECAY_HOURS` | `6`     | global  | no       | How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer. |
-| `MONITORING_TOP_N_TRACK_MAX`   | `5000`  | global  | no       | Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.                   |
+| Setting                        | Default | Context | Multiple | Description                                                                 |
+| ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`   | global  | no       | Enable monitoring of BunkerWeb.                                             |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics.                               |
+| `MONITORING_IGNORE_URLS`       |         | global  | no       | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
 
 ## Mutual TLS
 
@@ -4308,29 +4321,33 @@ BunkerWeb evaluates each handshake against the CA bundle and policy you configur
 Follow these steps to deploy mutual TLS with confidence:
 
 1. **Enable the feature:** Set `USE_MTLS` to `yes` on the sites that require certificate authentication.
-2. **Provide the CA bundle:** Store the trusted issuers in a PEM file and point `MTLS_CA_CERTIFICATE` to its absolute path.
+2. **Provide the CA bundle:** Point `MTLS_CA_CERTIFICATE` at a PEM file readable by the Scheduler, or supply the bundle inline as base64/PEM data with `MTLS_CA_CERTIFICATE_DATA`. The Scheduler validates, caches, and distributes the bundle to every instance, so no per-instance mounting is needed.
 3. **Select the verification mode:** Pick `on` for mandatory certificates, `optional` to allow fallbacks, or `optional_no_ca` for temporary diagnostics.
 4. **Tune chain depth:** Adjust `MTLS_VERIFY_DEPTH` if your organization issues intermediate certificates beyond the default depth.
 5. **Forward results (optional):** Keep `MTLS_FORWARD_CLIENT_HEADERS` at `yes` when upstream services should inspect the presented certificate.
-6. **Maintain revocation data:** If you publish a CRL, set `MTLS_CRL` so BunkerWeb can deny revoked certificates.
+6. **Maintain revocation data:** If you publish a CRL, set `MTLS_CRL` (or `MTLS_CRL_DATA`) so BunkerWeb can deny revoked certificates.
 
 ### Configuration Settings
 
-| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                                                                       |
-| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                |
-| `MTLS_CA_CERTIFICATE`         |         | multisite | no       | **Client CA bundle:** Absolute path to the trusted client CA bundle (PEM). Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`; must be readable.                                                                                            |
-| `MTLS_VERIFY_CLIENT`          | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                             |
-| `MTLS_URL`                    |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site. |
-| `MTLS_VERIFY_DEPTH`           | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                               |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window).                                                                                              |
-| `MTLS_CRL`                    |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list. Applied only when the CA bundle is successfully loaded.                                                                                                          |
+| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                              |
+| ------------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                       |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                     |
+| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                              |
+| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                              |
+| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                    |
+| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.        |
+| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                      |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window).                                                                                                     |
+| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                        |
+| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain. |
+| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                           |
 
-!!! tip "Keep certificates up to date"
-    Store CA bundles and revocation lists in a mounted volume that the Scheduler can read so that restarts pick up the latest trust anchors.
+!!! tip "Configure once, distributed everywhere"
+    CA bundles and revocation lists do not need to be mounted into the BunkerWeb containers. Supply them to the Scheduler only, as a file path or inline data; the Scheduler validates them, caches them, and distributes them to every instance. Updates are picked up and redistributed automatically on the next job run.
 
 !!! warning "Provide the CA bundle for strict modes"
-    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the CA file must exist at runtime. If it is missing, BunkerWeb skips the mTLS directives so the service does not boot with an invalid path. Use `optional_no_ca` only for diagnostics because it weakens client authentication.
+    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the Scheduler must be able to validate and cache a client CA bundle. If none is available, BunkerWeb skips the mTLS directives on every instance so the service does not run with an invalid or missing certificate reference. Use `optional_no_ca` only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent `/var/cache/bunkerweb`, mTLS stays disabled until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.
 
 !!! info "Trusted certificate vs. verification"
     BunkerWeb reuses the same CA bundle for client verification and for building trust chains, keeping revocation checks and handshake validation consistent.

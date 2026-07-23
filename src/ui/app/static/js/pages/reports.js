@@ -11,56 +11,8 @@ $(document).ready(function () {
   const filtersStateTtlMs = 10000;
   const filtersStateMaxEntries = 100;
 
-  const collectSearchPaneEntries = (requestData) => {
-    if (!requestData || typeof requestData !== "object") return [];
-
-    const entries = Object.keys(requestData)
-      .filter((key) => key.startsWith("searchPanes["))
-      .map((key) => [key, String(requestData[key] || "")]);
-
-    const flattenNestedPanes = (value, path) => {
-      if (value === null || typeof value === "undefined") return;
-
-      if (Array.isArray(value)) {
-        value.forEach((item, index) =>
-          flattenNestedPanes(item, `${path}[${index}]`),
-        );
-        return;
-      }
-
-      if (typeof value === "object") {
-        Object.keys(value)
-          .sort((a, b) => a.localeCompare(b))
-          .forEach((key) =>
-            flattenNestedPanes(value[key], `${path}[${String(key)}]`),
-          );
-        return;
-      }
-
-      entries.push([path, String(value)]);
-    };
-
-    if (
-      requestData.searchPanes &&
-      typeof requestData.searchPanes === "object"
-    ) {
-      flattenNestedPanes(requestData.searchPanes, "searchPanes");
-    }
-
-    // Remove duplicates while keeping all distinct key/value pairs.
-    const seen = new Set();
-    return entries
-      .filter(([key, value]) => {
-        const signature = `${key}=${value}`;
-        if (seen.has(signature)) return false;
-        seen.add(signature);
-        return true;
-      })
-      .sort((a, b) => a[0].localeCompare(b[0]));
-  };
-
   const hasActiveSearchPaneSelections = (requestData) =>
-    collectSearchPaneEntries(requestData).some(
+    collectDataTableSearchPaneEntries(requestData).some(
       ([, value]) => value.trim() !== "",
     );
 
@@ -74,7 +26,7 @@ $(document).ready(function () {
             .toLowerCase()
         : "";
 
-    const paneEntries = collectSearchPaneEntries(requestData);
+    const paneEntries = collectDataTableSearchPaneEntries(requestData);
 
     return JSON.stringify({ search: searchValue, panes: paneEntries });
   };
@@ -117,23 +69,10 @@ $(document).ready(function () {
   // ordering, and any active SearchPanes selections so the file matches
   // what the user sees in the table.
   const buildReportsExportUrl = (dt, format) => {
-    const params = dt.ajax.params();
     const exportParams = {
+      ...getDataTableStateParams(dt),
       csrf_token: $("#csrf_token").val(),
-      search: params.search ? params.search.value : "",
-      order_column:
-        params.order && params.order.length > 0
-          ? params.columns[params.order[0].column].data
-          : "",
-      order_dir:
-        params.order && params.order.length > 0 ? params.order[0].dir : "",
     };
-
-    Object.keys(params).forEach((key) => {
-      if (key.startsWith("searchPanes[")) {
-        exportParams[key] = params[key];
-      }
-    });
 
     return `${window.location.pathname}/export/${format}?${$.param(
       exportParams,
@@ -336,6 +275,23 @@ $(document).ready(function () {
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [{ extend: "ban_selected", className: "text-danger" }],
     },
+    {
+      extend: "collection",
+      text: `<span class="tf-icons bx bx-filter-alt bx-18px me-md-2" aria-hidden="true"></span><span class="d-none d-md-inline" data-i18n="button.filtered_actions">${t(
+        "button.filtered_actions",
+        "Filtered actions",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary filtered-action-button",
+      buttons: [{ extend: "ban_filtered_reports", className: "text-danger" }],
+      init: function (dt, node) {
+        const updateState = () => {
+          const disabled = isReadOnly || dt.page.info().recordsDisplay === 0;
+          $(node).toggleClass("disabled", disabled).prop("disabled", disabled);
+        };
+        dt.on("draw.filteredReportActions", updateState);
+        updateState();
+      },
+    },
   ];
 
   // Define batch ban button similar to bans page actions
@@ -397,6 +353,63 @@ $(document).ready(function () {
           value: JSON.stringify(bans),
         }),
       );
+      form.appendTo("body").submit();
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.ban_filtered_reports = {
+    text: `<span class="tf-icons bx bx-block bx-18px me-2" aria-hidden="true"></span><span data-i18n="button.ban_all_filtered">${t(
+      "button.ban_all_filtered",
+      "Ban all matching reports",
+    )}</span>`,
+    action: function (e, dt) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+
+      const count = dt.page.info().recordsDisplay;
+      if (
+        count === 0 ||
+        !window.confirm(
+          t(
+            "modal.body.ban_filtered_confirmation",
+            "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+            { count: count },
+          ),
+        )
+      ) {
+        return;
+      }
+
+      const form = $("<form>", {
+        method: "POST",
+        action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
+        class: "visually-hidden",
+      });
+      form.append(
+        $("<input>", {
+          type: "hidden",
+          name: "csrf_token",
+          value: $("#csrf_token").val(),
+        }),
+        $("<input>", {
+          type: "hidden",
+          name: "selection_mode",
+          value: "filtered",
+        }),
+        $("<input>", {
+          type: "hidden",
+          name: "source",
+          value: "reports",
+        }),
+      );
+      appendDataTableStateInputs(form, dt);
       form.appendTo("body").submit();
     },
   };
@@ -483,24 +496,24 @@ $(document).ready(function () {
           targets: 5,
           render: function (data) {
             const countryCode = data.toLowerCase();
+            const isNotApplicable =
+              countryCode === "unknown" ||
+              countryCode === "local" ||
+              countryCode === "n/a";
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                countryCode === "local"
-                  ? "not_applicable"
-                  : countryCode.toUpperCase()
+                isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
               }" data-country="${
-                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+                isNotApplicable ? "unknown" : countryCode.toUpperCase()
               }">
                 <img src="${escapeHtml(baseFlagsUrl)}/${
-                  countryCode === "local" ? "zz" : escapeHtml(countryCode)
+                  isNotApplicable ? "zz" : escapeHtml(countryCode)
                 }.svg"
                      class="border border-1 p-0 me-1"
                      height="17"
                      loading="lazy" />
-                &nbsp;－&nbsp;${
-                  countryCode === "local" ? "N/A" : escapeHtml(data)
-                }
+                &nbsp;－&nbsp;${isNotApplicable ? "N/A" : escapeHtml(data)}
               </span>`;
           },
         },

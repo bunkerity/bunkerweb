@@ -1629,10 +1629,11 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                                |
-| ------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |        | multisite | non      | Liste blanche : codes pays et/ou tokens de groupe, séparés par des espaces. Seuls ces pays sont autorisés. |
-| `BLACKLIST_COUNTRY` |        | multisite | non      | Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.           |
+| Paramètre            | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                              |
+| -------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WHITELIST_COUNTRY`  |        | multisite | non      | Liste blanche : codes pays et/ou tokens de groupe, séparés par des espaces. Seuls ces pays sont autorisés.                                                                                                               |
+| `BLACKLIST_COUNTRY`  |        | multisite | non      | Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.                                                                                                                         |
+| `COUNTRY_IGNORE_URI` |        | multisite | non      | URI ignorée : liste de motifs regex PCRE, séparés par des espaces, pour les URI à exclure de la vérification du pays. Les motifs sont vérifiés sur le chemin et sur l'URI de requête complète avec la chaîne de requête. |
 
 ### Groupes de pays pris en charge
 
@@ -1804,7 +1805,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.13-rc1
+        image: bunkerity/bunkerweb:1.6.14-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1821,7 +1822,7 @@ Les sections suivantes détaillent chacune de ces étapes.
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -3277,19 +3278,22 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
 - **Le nombre de connexions simultanées par adresse IP** (support STREAM :white_check_mark:)
 - **Le nombre de requêtes par adresse IP et par URL sur une période donnée** (support STREAM :x:)
+- **Le débit de requêtes agrégé (global) par service, tous clients et URL confondus** (support STREAM :x:)
 
 ### Fonctionnement
 
 1.  **Limitation de débit :** Suit le nombre de requêtes de chaque adresse IP cliente vers des URL spécifiques. Si un client dépasse la limite de débit configurée, les requêtes suivantes sont temporairement refusées.
-2.  **Limitation de connexions :** Surveille et restreint le nombre de connexions simultanées de chaque adresse IP cliente. Différentes limites de connexion peuvent être appliquées en fonction du protocole utilisé (HTTP/1, HTTP/2, HTTP/3 ou stream).
-3.  Dans les deux cas, les clients qui dépassent les limites définies reçoivent un code de statut HTTP **« 429 - Too Many Requests »**, ce qui aide à prévenir la surcharge du serveur.
+2.  **Limitation de débit globale :** Suit le nombre total de requêtes vers un service, indépendamment de l'adresse IP cliente ou de l'URL, protégeant la capacité de l'origine/backend contre les pics de trafic agrégés. Cette limitation est indépendante de la limitation par IP/URL et est évaluée avant celle-ci.
+3.  **Limitation de connexions :** Surveille et restreint le nombre de connexions simultanées de chaque adresse IP cliente. Différentes limites de connexion peuvent être appliquées en fonction du protocole utilisé (HTTP/1, HTTP/2, HTTP/3 ou stream).
+4.  Dans tous les cas, les clients qui dépassent les limites définies reçoivent un code de statut HTTP **« 429 - Too Many Requests »**, ce qui aide à prévenir la surcharge du serveur.
 
 ### Utilisation
 
 1.  **Activer la limitation de débit de requêtes :** Utilisez `USE_LIMIT_REQ` pour activer la limitation de débit de requêtes et définissez des motifs d'URL avec leurs limites correspondantes.
-2.  **Activer la limitation de connexions :** Utilisez `USE_LIMIT_CONN` pour activer la limitation de connexions et définissez le nombre maximum de connexions simultanées pour différents protocoles.
-3.  **Appliquer un contrôle granulaire :** Créez plusieurs règles de limitation de débit pour différentes URL afin de fournir des niveaux de protection variés sur votre site.
-4.  **Suivre l'efficacité :** Utilisez l'[interface web](web-ui.md) pour consulter les statistiques sur les requêtes et les connexions limitées.
+2.  **Activer la limitation de débit globale :** Utilisez `USE_LIMIT_REQ_GLOBAL` pour plafonner le débit total agrégé de requêtes d'un service, indépendamment de l'adresse IP cliente ou de l'URL, lorsque la protection de la capacité de l'origine prime sur l'équité par client.
+3.  **Activer la limitation de connexions :** Utilisez `USE_LIMIT_CONN` pour activer la limitation de connexions et définissez le nombre maximum de connexions simultanées pour différents protocoles.
+4.  **Appliquer un contrôle granulaire :** Créez plusieurs règles de limitation de débit pour différentes URL afin de fournir des niveaux de protection variés sur votre site.
+5.  **Suivre l'efficacité :** Utilisez l'[interface web](web-ui.md) pour consulter les statistiques sur les requêtes et les connexions limitées.
 
 ### Paramètres
 
@@ -3310,6 +3314,16 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
         - `t` est l'unité de temps : `s` (seconde), `m` (minute), `h` (heure), ou `d` (jour)
 
         Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.
+
+=== "Limitation de débit globale"
+
+    | Paramètre               | Défaut    | Contexte  | Multiple | Description                                                                                                                                         |
+    | ----------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | non      | **Activer la limitation de débit globale :** Mettre à `yes` pour plafonner le débit total agrégé de requêtes du service (tous clients, toutes URL). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | non      | **Limite de débit globale :** Débit maximal agrégé de requêtes au format `Nr/t`, même syntaxe que `LIMIT_REQ_RATE`.                                 |
+
+    !!! tip "Quand utiliser la limitation de débit globale"
+        La limitation par IP/URL protège contre un client abusif isolé. La limitation de débit globale protège le serveur d'origine lui-même : elle plafonne le débit total vers un service, quel que soit le demandeur. Utilisez-la lorsque votre backend a une capacité maximale connue (par exemple un pool de connexions à une base de données, ou une API tierce lente) à protéger de tout pic de trafic, légitime ou non. Elle est évaluée avant les règles par IP/URL : c'est donc la première ligne de défense en cas de charge.
 
 === "Limitation de connexions"
 
@@ -3705,18 +3719,18 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
 
     Restreindre les méthodes HTTP à celles requises par votre application est une mesure de sécurité fondamentale qui respecte le principe du moindre privilège. En définissant explicitement les méthodes acceptables, vous minimisez le risque d'exploitation via des méthodes inutilisées ou dangereuses.
 
-    Cette fonctionnalité est configurée avec `ALLOWED_METHODS`, où les méthodes sont listées et séparées par un `|` (défaut : `GET|POST|HEAD`). Si un client tente une méthode non listée, le serveur répondra avec un statut **405 - Method Not Allowed**.
+    Cette fonctionnalité est configurée avec `ALLOWED_METHODS`, où les méthodes sont listées et séparées par un `|` (défaut : `GET|POST|HEAD|QUERY`). Si un client tente une méthode non listée, le serveur répondra avec un statut **405 - Method Not Allowed**.
 
-    Pour la plupart des sites web, le défaut `GET|POST|HEAD` est suffisant. Si votre application utilise des API RESTful, vous devrez peut-être inclure `PUT` et `DELETE`. Les méthodes personnalisées en majuscules peuvent également contenir des underscores et des tirets pour la compatibilité avec des protocoles non standards (ex. `CCM_POST`, `M-SEARCH`).
+    Pour la plupart des sites web, le défaut `GET|POST|HEAD|QUERY` est suffisant. Si votre application utilise des API RESTful, vous devrez peut-être inclure `PUT` et `DELETE`. Les méthodes personnalisées en majuscules peuvent également contenir des underscores et des tirets pour la compatibilité avec des protocoles non standards (ex. `CCM_POST`, `M-SEARCH`).
 
     !!! success "Avantages en matière de sécurité"
         - Empêche l'exploitation de méthodes HTTP inutilisées ou inutiles
         - Réduit la surface d'attaque en désactivant les méthodes potentiellement dangereuses
         - Bloque les techniques d'énumération de méthodes HTTP utilisées par les attaquants
 
-    | Paramètre         | Défaut            | Contexte  | Multiple | Description                                                                                   |
-    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
-    | `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | no       | **Méthodes HTTP :** Liste des méthodes HTTP autorisées, séparées par des barres verticales (` | `). Les méthodes personnalisées en majuscules peuvent contenir des underscores et des tirets. |
+    | Paramètre         | Défaut                   | Contexte  | Multiple | Description                                                                                   |
+    | ----------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------- |
+    | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **Méthodes HTTP :** Liste des méthodes HTTP autorisées, séparées par des barres verticales (` | `). Les méthodes personnalisées en majuscules peuvent contenir des underscores et des tirets. |
 
     !!! abstract "CORS et requêtes pre-flight"
         Si votre application prend en charge le [Cross-Origin Resource Sharing (CORS)](#cors), vous devriez inclure la méthode `OPTIONS` dans `ALLOWED_METHODS` pour gérer les requêtes pre-flight. Cela garantit le bon fonctionnement pour les navigateurs effectuant des requêtes inter-origines.
@@ -4157,13 +4171,11 @@ Prise en charge STREAM :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-| Paramètre                      | Valeur par défaut | Contexte | Multiple | Description                                                                                                                                                      |
-| ------------------------------ | ----------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MONITORING`               | `yes`             | global   | non      | Enable monitoring of BunkerWeb.                                                                                                                                  |
-| `MONITORING_METRICS_DICT_SIZE` | `10M`             | global   | non      | Size of the dict to store monitoring metrics.                                                                                                                    |
-| `MONITORING_IGNORE_URLS`       |                   | global   | non      | List of URLs to ignore when monitoring separated with spaces (e.g. /health)                                                                                      |
-| `MONITORING_TOP_N_DECAY_HOURS` | `6`               | global   | non      | How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer. |
-| `MONITORING_TOP_N_TRACK_MAX`   | `5000`            | global   | non      | Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.                   |
+| Paramètre                      | Valeur par défaut | Contexte | Multiple | Description                                                                 |
+| ------------------------------ | ----------------- | -------- | -------- | --------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`             | global   | non      | Enable monitoring of BunkerWeb.                                             |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`             | global   | non      | Size of the dict to store monitoring metrics.                               |
+| `MONITORING_IGNORE_URLS`       |                   | global   | non      | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
 
 ## Mutual TLS
 
@@ -4192,29 +4204,33 @@ BunkerWeb évalue chaque poignée de main TLS en fonction du bundle d’AC et de
 Suivez ces étapes pour déployer le mutual TLS sereinement :
 
 1. **Activer la fonctionnalité :** positionnez `USE_MTLS` à `yes` sur les sites qui nécessitent l’authentification par certificat.
-2. **Fournir le bundle d’AC :** stockez vos autorités de confiance dans un fichier PEM et renseignez `MTLS_CA_CERTIFICATE` avec son chemin absolu.
+2. **Fournir le bundle d’AC :** renseignez `MTLS_CA_CERTIFICATE` avec le chemin d’un fichier PEM lisible par le Scheduler, ou fournissez le bundle directement sous forme de données base64/PEM via `MTLS_CA_CERTIFICATE_DATA`. Le Scheduler valide, met en cache et distribue le bundle à chaque instance, sans montage nécessaire par instance.
 3. **Choisir le mode de vérification :** sélectionnez `on` pour rendre les certificats obligatoires, `optional` pour offrir un repli ou `optional_no_ca` pour un diagnostic temporaire.
 4. **Ajuster la profondeur de chaîne :** adaptez `MTLS_VERIFY_DEPTH` si votre organisation utilise plusieurs intermédiaires.
 5. **Transmettre le résultat (optionnel) :** laissez `MTLS_FORWARD_CLIENT_HEADERS` à `yes` si vos services amont doivent inspecter le certificat présenté.
-6. **Maintenir la révocation :** si vous publiez une CRL, renseignez `MTLS_CRL` pour que BunkerWeb refuse les certificats révoqués.
+6. **Maintenir la révocation :** si vous publiez une CRL, renseignez `MTLS_CRL` (ou `MTLS_CRL_DATA`) pour que BunkerWeb refuse les certificats révoqués.
 
 ### Paramètres de configuration
 
-| Paramètre                     | Valeur par défaut | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                                          |
-| ----------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`              | multisite | non      | **Activer le mutual TLS :** active l’authentification par certificat client pour le site courant.                                                                                                                                                                                                    |
-| `MTLS_CA_CERTIFICATE`         |                   | multisite | non      | **Bundle d’AC client :** chemin absolu vers le bundle d’AC clients (PEM). Requis lorsque `MTLS_VERIFY_CLIENT` vaut `on` ou `optional`; doit être lisible.                                                                                                                                            |
-| `MTLS_VERIFY_CLIENT`          | `on`              | multisite | non      | **Mode de vérification :** choisissez si les certificats sont requis (`on`), optionnels (`optional`) ou acceptés sans validation d’AC (`optional_no_ca`).                                                                                                                                            |
-| `MTLS_URL`                    |                   | multisite | oui      | **URL mTLS :** expression régulière comparée à l’URI de la requête pour exiger un certificat client valide uniquement sur les chemins correspondants (HTTP uniquement). Nécessite `MTLS_VERIFY_CLIENT` réglé sur `optional` ou `optional_no_ca`. Laissez vide pour appliquer le mTLS à tout le site. |
-| `MTLS_VERIFY_DEPTH`           | `2`               | multisite | non      | **Profondeur de vérification :** profondeur maximale de chaîne acceptée pour les certificats clients.                                                                                                                                                                                                |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`             | multisite | non      | **Transmettre les en-têtes client :** propage les résultats de vérification (`X-SSL-Client-*` avec statut, DN, émetteur, numéro de série, empreinte, validité).                                                                                                                                      |
-| `MTLS_CRL`                    |                   | multisite | non      | **Chemin de la CRL client :** chemin optionnel vers une liste de révocation de certificats encodée en PEM. Appliqué uniquement si le bundle d’AC est chargé avec succès.                                                                                                                             |
+| Paramètre                      | Valeur par défaut | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                                          |
+| ------------------------------ | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`              | multisite | non      | **Activer le mutual TLS :** active l’authentification par certificat client pour le site courant.                                                                                                                                                                                                    |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`            | multisite | non      | **Priorité du bundle d’AC client :** source du bundle d’AC client : `file` (chemin) ou `data` (base64/PEM).                                                                                                                                                                                          |
+| `MTLS_CA_CERTIFICATE`          |                   | multisite | non      | **Chemin du bundle d’AC client :** chemin vers le bundle d’AC clients (PEM), lisible par le Scheduler. Requis lorsque `MTLS_VERIFY_CLIENT` vaut `on` ou `optional`.                                                                                                                                  |
+| `MTLS_CA_CERTIFICATE_DATA`     |                   | multisite | non      | **Données du bundle d’AC client :** bundle d’AC client fourni directement en base64 ou PEM (p. ex. via l’interface web).                                                                                                                                                                             |
+| `MTLS_VERIFY_CLIENT`           | `on`              | multisite | non      | **Mode de vérification :** choisissez si les certificats sont requis (`on`), optionnels (`optional`) ou acceptés sans validation d’AC (`optional_no_ca`).                                                                                                                                            |
+| `MTLS_URL`                     |                   | multisite | oui      | **URL mTLS :** expression régulière comparée à l’URI de la requête pour exiger un certificat client valide uniquement sur les chemins correspondants (HTTP uniquement). Nécessite `MTLS_VERIFY_CLIENT` réglé sur `optional` ou `optional_no_ca`. Laissez vide pour appliquer le mTLS à tout le site. |
+| `MTLS_VERIFY_DEPTH`            | `2`               | multisite | non      | **Profondeur de vérification :** profondeur maximale de chaîne acceptée pour les certificats clients.                                                                                                                                                                                                |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`             | multisite | non      | **Transmettre les en-têtes client :** propage les résultats de vérification (`X-SSL-Client-*` avec statut, DN, émetteur, numéro de série, empreinte, validité).                                                                                                                                      |
+| `MTLS_CRL_PRIORITY`            | `file`            | multisite | non      | **Priorité de la CRL client :** source de la CRL : `file` (chemin) ou `data` (base64/PEM).                                                                                                                                                                                                           |
+| `MTLS_CRL`                     |                   | multisite | non      | **Chemin de la CRL client :** chemin optionnel vers une liste de révocation de certificats encodée en PEM, lisible par le Scheduler. Appliqué uniquement si le bundle d’AC est chargé avec succès. NGINX exige que le fichier de CRL contienne une CRL pour chaque AC de la chaîne de vérification.  |
+| `MTLS_CRL_DATA`                |                   | multisite | non      | **Données de la CRL client :** liste de révocation fournie directement en base64 ou PEM.                                                                                                                                                                                                             |
 
-!!! tip "Maintenez les certificats à jour"
-    Stockez bundles d’AC et listes de révocation dans un volume monté accessible par le Scheduler pour que chaque redémarrage récupère les ancrages de confiance récents.
+!!! tip "Configurez une fois, distribué partout"
+    Les bundles d’AC et les listes de révocation n’ont pas besoin d’être montés dans les conteneurs BunkerWeb. Fournissez-les uniquement au Scheduler, sous forme de chemin de fichier ou de données en ligne ; le Scheduler les valide, les met en cache et les distribue à chaque instance. Les mises à jour sont prises en compte et redistribuées automatiquement lors de la prochaine exécution du job.
 
 !!! warning "Bundle d’AC obligatoire en mode strict"
-    Lorsque `MTLS_VERIFY_CLIENT` vaut `on` ou `optional`, le fichier d’AC doit être présent à l’exécution. S’il manque, BunkerWeb ignore les directives mTLS pour éviter un démarrage sur un chemin invalide. Réservez `optional_no_ca` au diagnostic, car ce mode affaiblit l’authentification.
+    Lorsque `MTLS_VERIFY_CLIENT` vaut `on` ou `optional`, le Scheduler doit pouvoir valider et mettre en cache un bundle d’AC client. En l’absence de bundle valide, BunkerWeb ignore les directives mTLS sur chaque instance afin que le service ne tourne pas avec une référence de certificat invalide ou manquante. Réservez `optional_no_ca` au diagnostic, car ce mode affaiblit l’authentification. Après un redémarrage du Scheduler avec un `/var/cache/bunkerweb` non persistant, le mTLS reste désactivé jusqu’à ce que la première exécution du job se termine et redistribue le bundle d’AC ; utilisez donc un volume de cache persistant lorsqu’une politique d’application stricte est requise.
 
 !!! info "Certificat approuvé vs. vérification"
     BunkerWeb réutilise le même bundle d’AC pour vérifier les clients et bâtir la chaîne de confiance, garantissant une cohérence OCSP/CRL et durant le handshake.

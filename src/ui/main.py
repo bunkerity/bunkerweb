@@ -340,7 +340,7 @@ def refresh_app_context():
 
         active_plugin_paths.add(py_file.parent.parent.parent)
         # Namespace the module name with the plugin directory to avoid collisions
-        plugin_root = py_file.parents[2] if len(py_file.parents) >= 3 else py_file.parent
+        plugin_root = py_file.parents[1] if len(py_file.parents) >= 2 else py_file.parent
         module_name = f"bw_ui_hooks_{plugin_root.name}_{py_file.stem}"
         active_hook_modules.add(module_name)
         hook_dir = str(py_file.parent)
@@ -1213,7 +1213,7 @@ def before_request():
                 return redirect(url_for("login.login_page"))
 
             # Case not login page, keep on 2FA before any other access
-            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
+            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
                 if not request.path.endswith("/login"):
                     raw_next = request.values.get("next")
                     try:
@@ -1403,14 +1403,14 @@ def set_security_headers(response):
 
     # * Permissions-Policy header to prevent unwanted behavior
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()"
+        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
     )
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         try:
             resp = hook(response)
-            if resp:
-                return resp
+            if resp is not None:
+                response = resp
         except Exception:
             LOGGER.exception("Error in after_request hook")
 

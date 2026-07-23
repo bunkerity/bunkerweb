@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13-rc1
+        image: bunkerity/bunkerweb:1.6.14-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.13-rc1
+        image: bunkerity/bunkerweb-ui:1.6.14-rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -336,7 +336,6 @@ log {
     Use the code `freetrial` on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) for a one-month trial.
 
 
-<figure markdown>
 <figure markdown>
   ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
 </figure>

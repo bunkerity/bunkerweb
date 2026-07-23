@@ -445,7 +445,7 @@ vous pouvez forcer la mise à jour du « marqueur de changement » :
 
 Si vous avez oublié vos informations d'identification de l'interface utilisateur ou si vous rencontrez des problèmes de 2FA, vous pouvez vous connecter à la base de données pour retrouver l'accès.
 
-### Accéder à la base de données
+### Accéder à la base de données {#access-database}
 
 === "SQLite"
 

@@ -1669,10 +1669,11 @@ So funktioniert's:
 
 ### Parameter
 
-| Parameter           | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                 |
-| :------------------ | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen. |
-| `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
+| Parameter            | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                             |
+| :------------------- | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`  |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen.                                                                                                             |
+| `BLACKLIST_COUNTRY`  |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.                                                                                                                  |
+| `COUNTRY_IGNORE_URI` |          | Multisite | Nein     | Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den Pfad und die vollständige Anfrage-URI mit Query-String geprüft. |
 
 ### Unterstützte Ländergruppen
 
@@ -1844,7 +1845,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.13-rc1
+        image: bunkerity/bunkerweb:1.6.14-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1861,7 +1862,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -3324,19 +3325,22 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 - **Anzahl der Verbindungen pro IP-Adresse** (STREAM-Unterstützung :white_check_mark:)
 - **Anzahl der Anfragen pro IP-Adresse und URL innerhalb eines bestimmten Zeitraums** (STREAM-Unterstützung :x:)
+- **Aggregierte (globale) Anfragerate pro Dienst, über alle Clients und URLs hinweg** (STREAM-Unterstützung :x:)
 
 ### Wie es funktioniert
 
 1.  **Ratenbegrenzung:** Verfolgt die Anzahl der Anfragen von jeder Client-IP-Adresse an bestimmte URLs. Wenn ein Client die konfigurierte Ratenbegrenzung überschreitet, werden nachfolgende Anfragen vorübergehend abgelehnt.
-2.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
-3.  In beiden Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
+2.  **Globale Ratenbegrenzung:** Verfolgt die Gesamtzahl der Anfragen an einen Dienst unabhängig von Client-IP oder URL und schützt die Kapazität des Ursprungs-/Backend-Servers vor aggregierten Verkehrsspitzen. Dies ist unabhängig von der Begrenzung pro IP/URL und wird vor dieser ausgewertet.
+3.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
+4.  In allen Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
 
 ### Schritte zur Verwendung
 
 1.  **Anforderungsratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ`, um die Anforderungsratenbegrenzung zu aktivieren und URL-Muster zusammen mit ihren entsprechenden Ratenbegrenzungen zu definieren.
-2.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
-3.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
-4.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
+2.  **Globale Ratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ_GLOBAL`, um die gesamte aggregierte Anfragerate für einen Dienst zu begrenzen, unabhängig von Client-IP oder URL — nützlich, wenn der Schutz der Ursprungskapazität wichtiger ist als Fairness pro Client.
+3.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
+4.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
+5.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
 
 ### Konfigurationseinstellungen
 
@@ -3357,6 +3361,16 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
         - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
 
         Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
+
+=== "Globale Ratenbegrenzung"
+
+    | Einstellung             | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
+    | ----------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | nein     | **Globale Ratenbegrenzung aktivieren:** Auf `yes` setzen, um die gesamte aggregierte Anfragerate für den Dienst zu begrenzen (alle Clients, alle URLs). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | nein     | **Globale Ratenbegrenzung:** Maximale aggregierte Anfragerate im Format `Nr/t`, gleiche Syntax wie `LIMIT_REQ_RATE`.                                    |
+
+    !!! tip "Wann globale Ratenbegrenzung verwenden"
+        Die Begrenzung pro IP/URL schützt vor einem einzelnen missbräuchlichen Client. Die globale Ratenbegrenzung schützt den Ursprungsserver selbst: Sie begrenzt den gesamten Durchsatz zu einem Dienst, unabhängig davon, wer anfragt. Verwenden Sie sie, wenn Ihr Backend eine bekannte Kapazitätsgrenze hat (z. B. einen Datenbank-Verbindungspool oder eine langsame Drittanbieter-API), die vor jeder Verkehrsspitze geschützt werden muss, ob legitim oder nicht. Sie wird vor den Regeln pro IP/URL geprüft und ist somit die erste Verteidigungslinie unter Last.
 
 === "Verbindungsbegrenzung"
 
@@ -3753,18 +3767,18 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
 
     Die Beschränkung der HTTP-Methoden auf nur diejenigen, die von Ihrer Anwendung benötigt werden, ist eine grundlegende Sicherheitsmaßnahme, die dem Prinzip der geringsten Rechte folgt. Indem Sie explizit zulässige HTTP-Methoden definieren, können Sie das Risiko der Ausnutzung durch ungenutzte oder gefährliche Methoden minimieren.
 
-    Diese Funktion wird mit der Einstellung `ALLOWED_METHODS` konfiguriert, wobei die Methoden aufgelistet und durch ein `|` getrennt sind (Standard: `GET|POST|HEAD`). Wenn ein Client versucht, eine nicht aufgelistete Methode zu verwenden, antwortet der Server mit einem **405 - Method Not Allowed**-Status.
+    Diese Funktion wird mit der Einstellung `ALLOWED_METHODS` konfiguriert, wobei die Methoden aufgelistet und durch ein `|` getrennt sind (Standard: `GET|POST|HEAD|QUERY`). Wenn ein Client versucht, eine nicht aufgelistete Methode zu verwenden, antwortet der Server mit einem **405 - Method Not Allowed**-Status.
 
-    Für die meisten Websites ist der Standardwert `GET|POST|HEAD` ausreichend. Wenn Ihre Anwendung RESTful-APIs verwendet, müssen Sie möglicherweise Methoden wie `PUT` und `DELETE` hinzufügen. Benutzerdefinierte Großbuchstaben-Methoden dürfen zudem Unterstriche und Bindestriche enthalten, um mit nicht standardisierten Protokollen kompatibel zu sein (z. B. `CCM_POST`, `M-SEARCH`).
+    Für die meisten Websites ist der Standardwert `GET|POST|HEAD|QUERY` ausreichend. Wenn Ihre Anwendung RESTful-APIs verwendet, müssen Sie möglicherweise Methoden wie `PUT` und `DELETE` hinzufügen. Benutzerdefinierte Großbuchstaben-Methoden dürfen zudem Unterstriche und Bindestriche enthalten, um mit nicht standardisierten Protokollen kompatibel zu sein (z. B. `CCM_POST`, `M-SEARCH`).
 
     !!! success "Sicherheitsvorteile"
         - Verhindert die Ausnutzung von ungenutzten oder unnötigen HTTP-Methoden
         - Reduziert die Angriffsfläche durch Deaktivierung potenziell schädlicher Methoden
         - Blockiert von Angreifern verwendete Techniken zur Aufzählung von HTTP-Methoden
 
-    | Einstellung       | Standard          | Kontext   | Mehrfach | Beschreibung                                                                         |
-    | ----------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------ |
-    | `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | nein     | **HTTP-Methoden:** Liste der erlaubten HTTP-Methoden, getrennt durch Pipe-Zeichen (` | `). Benutzerdefinierte Großbuchstaben-Methoden dürfen Unterstriche und Bindestriche enthalten. |
+    | Einstellung       | Standard                 | Kontext   | Mehrfach | Beschreibung                                                                         |
+    | ----------------- | ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------ |
+    | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | nein     | **HTTP-Methoden:** Liste der erlaubten HTTP-Methoden, getrennt durch Pipe-Zeichen (` | `). Benutzerdefinierte Großbuchstaben-Methoden dürfen Unterstriche und Bindestriche enthalten. |
 
     !!! abstract "CORS und Preflight-Anfragen"
         Wenn Ihre Anwendung [Cross-Origin Resource Sharing (CORS)](#cors) unterstützt, sollten Sie die `OPTIONS`-Methode in der `ALLOWED_METHODS`-Einstellung aufnehmen, um Preflight-Anfragen zu bearbeiten. Dies gewährleistet die ordnungsgemäße Funktionalität für Browser, die Cross-Origin-Anfragen stellen.
@@ -4206,13 +4220,11 @@ STREAM-Unterstützung :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-| Einstellung                    | Standardwert | Kontext | Mehrfach | Beschreibung                                                                                                                                                     |
-| ------------------------------ | ------------ | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MONITORING`               | `yes`        | global  | nein     | Enable monitoring of BunkerWeb.                                                                                                                                  |
-| `MONITORING_METRICS_DICT_SIZE` | `10M`        | global  | nein     | Size of the dict to store monitoring metrics.                                                                                                                    |
-| `MONITORING_IGNORE_URLS`       |              | global  | nein     | List of URLs to ignore when monitoring separated with spaces (e.g. /health)                                                                                      |
-| `MONITORING_TOP_N_DECAY_HOURS` | `6`          | global  | nein     | How often (in hours) to halve attacker top-N counters and prune cold entries. Lower = top-N reflects more recent traffic; higher = old attackers persist longer. |
-| `MONITORING_TOP_N_TRACK_MAX`   | `5000`       | global  | nein     | Maximum tracked attacker IPs and URIs per prefix in the bounded top-N sketch. Caps memory under distributed attack via Space-Saving admission.                   |
+| Einstellung                    | Standardwert | Kontext | Mehrfach | Beschreibung                                                                |
+| ------------------------------ | ------------ | ------- | -------- | --------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`        | global  | nein     | Enable monitoring of BunkerWeb.                                             |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`        | global  | nein     | Size of the dict to store monitoring metrics.                               |
+| `MONITORING_IGNORE_URLS`       |              | global  | nein     | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
 
 ## Mutual TLS
 
@@ -4241,29 +4253,33 @@ BunkerWeb bewertet jeden TLS-Handshake anhand des von Ihnen bereitgestellten CA-
 Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 
 1. **Funktion aktivieren:** Setzen Sie `USE_MTLS` auf `yes` für die Site, die Zertifikatsauthentifizierung benötigt.
-2. **CA-Bundle bereitstellen:** Legen Sie Ihre vertrauenswürdigen Aussteller in einer PEM-Datei ab und verweisen Sie mit `MTLS_CA_CERTIFICATE` auf den absoluten Pfad.
+2. **CA-Bundle bereitstellen:** Verweisen Sie mit `MTLS_CA_CERTIFICATE` auf eine PEM-Datei, die für den Scheduler lesbar ist, oder übergeben Sie das Bundle direkt als base64/PEM-Daten mit `MTLS_CA_CERTIFICATE_DATA`. Der Scheduler validiert, cached und verteilt das Bundle an jede Instanz, sodass keine Einbindung pro Instanz nötig ist.
 3. **Verifizierungsmodus wählen:** Nutzen Sie `on` für verpflichtende Zertifikate, `optional` für fallback-fähige Szenarien oder `optional_no_ca` kurzfristig zur Diagnose.
 4. **Kettentiefe anpassen:** Erhöhen oder verringern Sie `MTLS_VERIFY_DEPTH`, falls Ihre PKI mehrere Zwischenstellen nutzt.
 5. **Ergebnisse weiterreichen (optional):** Belassen Sie `MTLS_FORWARD_CLIENT_HEADERS` auf `yes`, wenn nachgelagerte Anwendungen Zertifikatsinformationen benötigen.
-6. **Revokationslisten pflegen:** Verknüpfen Sie `MTLS_CRL`, sobald Sie eine CRL publizieren, damit BunkerWeb widerrufene Zertifikate ablehnt.
+6. **Revokationslisten pflegen:** Setzen Sie `MTLS_CRL` (oder `MTLS_CRL_DATA`), sobald Sie eine CRL publizieren, damit BunkerWeb widerrufene Zertifikate ablehnt.
 
 ### Konfigurationseinstellungen
 
-| Einstellung                   | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                  |
-| ----------------------------- | ------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`         | multisite | nein     | **Mutual TLS verwenden:** Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.                                                                                                                                                                            |
-| `MTLS_CA_CERTIFICATE`         |              | multisite | nein     | **Client-CA-Bundle:** Absoluter Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM). Erforderlich, wenn `MTLS_VERIFY_CLIENT` `on` oder `optional` ist; muss lesbar sein.                                                                                                       |
-| `MTLS_VERIFY_CLIENT`          | `on`         | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).                                                                                                            |
-| `MTLS_URL`                    |              | multisite | ja       | **mTLS-URL:** Regex, der gegen die Anfrage-URI geprüft wird, um nur auf passenden Pfaden ein gültiges Client-Zertifikat zu verlangen (nur HTTP). Erfordert `MTLS_VERIFY_CLIENT` auf `optional` oder `optional_no_ca`. Leer lassen, um mTLS für die gesamte Site zu erzwingen. |
-| `MTLS_VERIFY_DEPTH`           | `2`          | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                                                                                                                                  |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`        | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter.                                                                                                           |
-| `MTLS_CRL`                    |              | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde.                                                                                                                                    |
+| Einstellung                    | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                  |
+| ------------------------------ | ------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`         | multisite | nein     | **Mutual TLS verwenden:** Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.                                                                                                                                                                            |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`       | multisite | nein     | **Priorität des Client-CA-Bundles:** Quelle des Client-CA-Bundles: `file` (Pfad) oder `data` (base64/PEM).                                                                                                                                                                    |
+| `MTLS_CA_CERTIFICATE`          |              | multisite | nein     | **Client-CA-Bundle-Pfad:** Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM), lesbar für den Scheduler. Erforderlich, wenn `MTLS_VERIFY_CLIENT` `on` oder `optional` ist.                                                                                                    |
+| `MTLS_CA_CERTIFICATE_DATA`     |              | multisite | nein     | **Client-CA-Bundle-Daten:** Vertrauenswürdiges Client-CA-Bundle direkt als base64 oder PEM (z. B. über die Web-UI).                                                                                                                                                           |
+| `MTLS_VERIFY_CLIENT`           | `on`         | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).                                                                                                            |
+| `MTLS_URL`                     |              | multisite | ja       | **mTLS-URL:** Regex, der gegen die Anfrage-URI geprüft wird, um nur auf passenden Pfaden ein gültiges Client-Zertifikat zu verlangen (nur HTTP). Erfordert `MTLS_VERIFY_CLIENT` auf `optional` oder `optional_no_ca`. Leer lassen, um mTLS für die gesamte Site zu erzwingen. |
+| `MTLS_VERIFY_DEPTH`            | `2`          | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                                                                                                                                  |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`        | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter.                                                                                                           |
+| `MTLS_CRL_PRIORITY`            | `file`       | multisite | nein     | **Priorität der Client-CRL:** Quelle der CRL: `file` (Pfad) oder `data` (base64/PEM).                                                                                                                                                                                         |
+| `MTLS_CRL`                     |              | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste, lesbar für den Scheduler. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde. NGINX benötigt in der CRL-Datei eine Sperrliste für jede CA in der Verifizierungskette.                  |
+| `MTLS_CRL_DATA`                |              | multisite | nein     | **Client-CRL-Daten:** Sperrliste direkt als base64 oder PEM.                                                                                                                                                                                                                  |
 
-!!! tip "Zertifikate aktuell halten"
-    Speichern Sie CA-Bundles und Sperrlisten in einem eingehängten Volume, das der Scheduler lesen kann, damit Neustarts die neuesten Vertrauensanker übernehmen.
+!!! tip "Einmal konfigurieren, überall verteilt"
+    CA-Bundles und Sperrlisten müssen nicht in die BunkerWeb-Container eingehängt werden. Stellen Sie sie nur dem Scheduler bereit, als Dateipfad oder als Inline-Daten; der Scheduler validiert sie, cached sie und verteilt sie an jede Instanz. Aktualisierungen werden beim nächsten Job-Lauf automatisch übernommen und neu verteilt.
 
 !!! warning "CA-Bundle für strenge Modi obligatorisch"
-    Sobald `MTLS_VERIFY_CLIENT` auf `on` oder `optional` steht, muss die CA-Datei zur Laufzeit vorhanden sein. Fehlt sie, ignoriert BunkerWeb die mTLS-Direktiven, um keinen Dienst mit ungültigem Pfad zu starten. Verwenden Sie `optional_no_ca` nur zur Fehlersuche – dieser Modus schwächt die Client-Authentifizierung.
+    Sobald `MTLS_VERIFY_CLIENT` auf `on` oder `optional` steht, muss der Scheduler ein Client-CA-Bundle validieren und cachen können. Ist keines verfügbar, überspringt BunkerWeb die mTLS-Direktiven auf jeder Instanz, damit der Dienst nicht mit einer ungültigen oder fehlenden Zertifikatsreferenz läuft. Verwenden Sie `optional_no_ca` nur zur Fehlersuche – dieser Modus schwächt die Client-Authentifizierung. Nach einem Neustart des Schedulers mit einem nicht persistenten `/var/cache/bunkerweb` bleibt mTLS deaktiviert, bis der erste Job-Lauf abgeschlossen ist und das CA-Bundle neu verteilt hat; verwenden Sie deshalb ein persistentes Cache-Volume, wenn eine strikte Durchsetzung erforderlich ist.
 
 !!! info "Vertrauensquelle und Verifizierung"
     BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.

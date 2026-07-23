@@ -28,6 +28,7 @@ from letsencrypt_utils import (
     letsencrypt_cache_consistent,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
+    sanitize_and_persist,
     setup_route53_aws_config,
 )
 
@@ -56,6 +57,11 @@ try:
     prepare_logs_dir(LOGS_DIR, LOGGER)
 
     JOB = Job(LOGGER, __file__)
+
+    # Quarantine broken renewal confs before `certbot renew` reads them: one lineage whose name
+    # disagrees with its filename makes the whole run fail to parse. Persists the cleaned tree so
+    # the break can't be restored from the DB cache blob on the next tick.
+    sanitized_lineages = sanitize_and_persist(JOB, DATA_PATH, LOGGER)
 
     cmd_env = build_certbot_env(JOB, DEPS_PATH)
 
@@ -125,7 +131,9 @@ try:
     if not JOB.restore_ok:
         LOGGER.error("Skipping db cache update: initial cache restore failed, refusing to overwrite good DB state with current disk state.")
         status = 2
-    elif not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem")):
+    elif not sanitized_lineages and (not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem"))):
+        # Skip the "no live certs" persist only when nothing was sanitized; if a broken lineage was
+        # quarantined we must still write the cleaned tree back so it can't be restored again.
         LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
     else:
         # Refuse to re-cache when renewal/ references account IDs that are missing from accounts/.

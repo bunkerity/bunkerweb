@@ -249,10 +249,17 @@
     },
     {
       "id": "nginx",
+      "name": "Nginx v1.30.4",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "017cf98dcce217946572a896f0992370475e189f",
+      "post_install": "rm -r src/deps/src/nginx/docs"
+    },
+    {
+      "id": "nginx-1.30.3",
       "name": "Nginx v1.30.3",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "47c3628d23efaa1bfb1a32afbe9e3d013f860c2c",
-      "post_install": "rm -r src/deps/src/nginx/docs"
+      "post_install": "rm -r src/deps/src/nginx-1.30.3/docs"
     },
     {
       "id": "nginx-1.28.0",

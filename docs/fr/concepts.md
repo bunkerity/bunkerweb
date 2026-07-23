@@ -105,7 +105,7 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) du dépôt.
+    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) du dépôt.
 
 ## Configurations personnalisées {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestion des configurations personnalisées à partir de l'interface utilisate
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13-rc1/examples) du dépôt.
+    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc1/examples) du dépôt.
 
 ## Base de données
 
@@ -163,15 +163,15 @@ En spécifiant l'URI de base de données appropriée dans la configuration, vous
 
 ### Matrice de compatibilité des bases de données
 
-| Integration       | PostgreSQL                                    | MariaDB                   | MySQL                     | SQLite           |
-| :---------------- | :-------------------------------------------- | :------------------------ | :------------------------ | :--------------- |
-| **Docker**        | ✅ `v18` et antérieures (all-in-one : ✅ `v17`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
-| **Kubernetes**    | ✅ `v18` et antérieures                        | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
-| **Autoconf**      | ✅ `v18` et antérieures                        | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
-| **Paquets Linux** | Voir les notes ci-dessous                     | Voir les notes ci-dessous | Voir les notes ci-dessous | ✅ Pris en charge |
+| Integration       | PostgreSQL               | MariaDB                   | MySQL                     | SQLite           |
+| :---------------- | :----------------------- | :------------------------ | :------------------------ | :--------------- |
+| **Docker**        | ✅ `v18` et antérieures   | ✅ `v12` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Kubernetes**    | ✅ `v18` et antérieures   | ✅ `v12` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Autoconf**      | ✅ `v18` et antérieures   | ✅ `v12` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Paquets Linux** | Voir les notes ci-dessous | Voir les notes ci-dessous | Voir les notes ci-dessous | ✅ Pris en charge |
 
 !!! info "Remarques"
-    - **PostgreSQL** : les paquets basés sur Alpine incluent désormais le client `v18`, donc `v18` et les versions antérieures sont pris en charge par défaut ; l'image all-in-one embarque toujours le client `v17`, donc `v18` n'y est pas pris en charge.
+    - **PostgreSQL** : les images basées sur Alpine, y compris all-in-one, incluent désormais le client `v18` ; `v18` et les versions antérieures sont donc pris en charge par défaut.
     - **Linux** : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL).
     - **SQLite** : Est livré avec les paquets et est prêt à l'emploi.
 
@@ -228,6 +228,10 @@ BunkerWeb exploite la puissance des modèles pour simplifier le processus de con
     - **élevé**: modèle avancé qui met l'accent sur des mesures de sécurité robustes et une protection complète.
 
 - **Modèles personnalisés**: En plus des modèles prédéfinis, BunkerWeb permet aux utilisateurs de créer des modèles personnalisés adaptés à leurs besoins spécifiques. Les modèles personnalisés permettent d'affiner les paramètres et les configurations personnalisées, garantissant que BunkerWeb s'aligne parfaitement sur les besoins de l'utilisateur.
+
+!!! tip "Modèles communautaires prêts à l'emploi"
+
+    Consultez le [dépôt de modèles BunkerWeb](https://github.com/bunkerity/bunkerweb-templates#installing-templates) et suivez son guide d'installation. La méthode via l'interface Web est recommandée pour la plupart des utilisateurs ; une arborescence de plugin est également documentée pour les déploiements gérés. Après l'installation, sélectionnez le modèle en mode facile ou avec le paramètre `USE_TEMPLATE`.
 
 Avec l'interface utilisateur Web, les modèles sont disponibles en **mode facile** lorsque vous ajoutez ou modifiez un service:
 
