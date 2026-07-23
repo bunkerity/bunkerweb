@@ -3323,7 +3323,7 @@ The **BunkerWeb MCP server** enables AI assistants like **Claude Code** and **Cl
 
 ### Features
 
-- **37 tools** for managing instances, services, configs, bans, plugins, jobs, and cache
+- **43 tools** for managing instances, services, configs, bans, plugins, jobs, and cache
 - **MCP resources** for read-only access (`@config://global`, `@bans://active`, etc.)
 - **Multiple transports**: Stdio, HTTP, WebSocket
 
@@ -3345,7 +3345,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
+    image: bunkerity/bunkerweb-mcp:0.2.0
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -3394,7 +3394,7 @@ mcp:
 
   # Container image configuration
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
+  tag: 0.2.0
 
   # MCP server settings
   config:
@@ -3441,7 +3441,7 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
     - **Network policies** to restrict pod-to-pod communication
     - **Port-forward** instead of exposing externally (recommended for development)
 
-For full documentation, visit the [BunkerWeb MCP repository](https://github.com/bunkerity/mcp-bunkerweb).
+For full documentation, visit the [BunkerWeb MCP repository](https://github.com/bunkerity/bunkerweb-mcp).
 
 ## Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 

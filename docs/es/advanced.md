@@ -3322,7 +3322,7 @@ El **servidor MCP de BunkerWeb** permite que asistentes de IA como **Claude Code
 
 ### Características
 
-- **37 herramientas** para gestionar instancias, servicios, configuraciones, baneos, plugins, jobs y caché
+- **43 herramientas** para gestionar instancias, servicios, configuraciones, baneos, plugins, jobs y caché
 - **Recursos MCP** para acceso de solo lectura (`@config://global`, `@bans://active`, etc.)
 - **Múltiples transportes**: Stdio, HTTP, WebSocket
 
@@ -3344,7 +3344,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
+    image: bunkerity/bunkerweb-mcp:0.2.0
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -3372,17 +3372,6 @@ services:
     }
     ```
 
-=== "CLI"
-
-    ```bash
-    # Añadir el servidor MCP vía HTTP
-    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
-
-    # O vía stdio (instalación local)
-    pip install mcp-bunkerweb
-    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
-    ```
-
 Ejemplos de consultas:
 
 ```
@@ -3404,7 +3393,7 @@ mcp:
 
   # Configuración de la imagen del contenedor
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
+  tag: 0.2.0
 
   # Configuración del servidor MCP
   config:
@@ -3451,7 +3440,7 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
     - **Políticas de red** para restringir la comunicación entre pods
     - **Port-forward** en lugar de exponer externamente (recomendado para desarrollo)
 
-Para la documentación completa, visita el [repositorio BunkerWeb MCP](https://github.com/bunkerity/mcp-bunkerweb).
+Para la documentación completa, visita el [repositorio BunkerWeb MCP](https://github.com/bunkerity/bunkerweb-mcp).
 
 ## Migración <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 

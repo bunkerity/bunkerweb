@@ -3322,7 +3322,7 @@ Der **BunkerWeb MCP-Server** ermöglicht es KI-Assistenten wie **Claude Code** u
 
 ### Funktionen
 
-- **37 Tools** zur Verwaltung von Instanzen, Diensten, Konfigurationen, Sperren, Plugins, Jobs und Cache
+- **43 Tools** zur Verwaltung von Instanzen, Diensten, Konfigurationen, Sperren, Plugins, Jobs und Cache
 - **MCP-Ressourcen** für schreibgeschützten Zugriff (`@config://global`, `@bans://active`, usw.)
 - **Mehrere Transporte**: Stdio, HTTP, WebSocket
 
@@ -3344,7 +3344,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
+    image: bunkerity/bunkerweb-mcp:0.2.0
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -3372,17 +3372,6 @@ services:
     }
     ```
 
-=== "CLI"
-
-    ```bash
-    # MCP-Server über HTTP hinzufügen
-    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
-
-    # Oder über stdio (lokale Installation)
-    pip install mcp-bunkerweb
-    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
-    ```
-
 Beispielanfragen:
 
 ```
@@ -3404,7 +3393,7 @@ mcp:
 
   # Container-Image-Konfiguration
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
+  tag: 0.2.0
 
   # MCP-Server-Einstellungen
   config:
@@ -3451,7 +3440,7 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
     - **Netzwerkrichtlinien** zur Einschränkung der Pod-zu-Pod-Kommunikation
     - **Port-Forward** anstelle von externem Zugriff (empfohlen für Entwicklung)
 
-Die vollständige Dokumentation finden Sie im [BunkerWeb MCP Repository](https://github.com/bunkerity/mcp-bunkerweb).
+Die vollständige Dokumentation finden Sie im [BunkerWeb MCP Repository](https://github.com/bunkerity/bunkerweb-mcp).
 
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
