@@ -1,4 +1,4 @@
-FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061 AS builder
+FROM python:3.14-slim@sha256:cea0e6040540fb2b965b6e7fb5ffa00871e632eef63719f0ea54bca189ce14a6 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -40,7 +40,7 @@ COPY src/common/cli cli
 COPY src/common/db db
 COPY src/common/gen gen
 
-FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061
+FROM python:3.14-slim@sha256:cea0e6040540fb2b965b6e7fb5ffa00871e632eef63719f0ea54bca189ce14a6
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

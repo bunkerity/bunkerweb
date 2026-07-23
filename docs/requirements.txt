@@ -394,9 +394,9 @@ mkdocs-get-deps==0.2.2 \
     --hash=sha256:8ee8d5f316cdbbb2834bc1df6e69c08fe769a83e040060de26d3c19fad3599a1 \
     --hash=sha256:e7878cbeac04860b8b5e0ca31d3abad3df9411a75a32cde82f8e44b6c16ff650
     # via mkdocs
-mkdocs-material==9.7.6 \
-    --hash=sha256:00bdde50574f776d328b1862fe65daeaf581ec309bd150f7bff345a098c64a69 \
-    --hash=sha256:71b84353921b8ea1ba84fe11c50912cc512da8fe0881038fcc9a0761c0e635ba
+mkdocs-material==9.7.7 \
+    --hash=sha256:8ea9bb1737a5b524a5f9dcf2e1b4ebda8274ae3008aa7845720a97083bef708f \
+    --hash=sha256:c0649c065b1b0512d60aad8c10f947f8e455284475239b364b610f2deb4d0855
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -521,9 +521,9 @@ pillow==12.3.0 \
     # via
     #   cairosvg
     #   mkdocs-material
-platformdirs==4.10.0 \
-    --hash=sha256:31e761a6a0ca04faf7353ea759bdba55652be214725111e5aac52dfa29d4bef7 \
-    --hash=sha256:fb516cdb12eb0d857d0cd85a7c57cea4d060bee4578d6cf5a14dfdf8cbf8784a
+platformdirs==4.11.0 \
+    --hash=sha256:0555d18370482847566ffabcaa53ad7c6c1c29f195989ae1ed634a05f76ea1e0 \
+    --hash=sha256:360ccded2b7fce0af0ff80cc8f5942a1c5d99b0e856033acb030bfc634709e74
     # via mkdocs-get-deps
 pycparser==3.0 \
     --hash=sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29 \
@@ -644,14 +644,6 @@ pyyaml-env-tag==1.1 \
 requests==2.34.2 \
     --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0 \
     --hash=sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed
-    # via
-    #   cssselect2
-    #   tinycss2
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==83.0.0 \
-    --hash=sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef \
-    --hash=sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3
     # via mkdocs-material
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -721,4 +713,12 @@ watchdog==6.0.0 \
 webencodings==0.5.1 \
     --hash=sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78 \
     --hash=sha256:b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923
+    # via
+    #   cssselect2
+    #   tinycss2
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==83.0.0 \
+    --hash=sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef \
+    --hash=sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3
     # via pytablewriter
