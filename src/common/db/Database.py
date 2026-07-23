@@ -11,7 +11,7 @@ from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search, sub as re_sub
 from sys import argv, path as sys_path
 from threading import Lock
 from traceback import format_exc
@@ -228,6 +228,21 @@ class Database:
         sqlalchemy_string, main_match = validate_and_update_db_string(sqlalchemy_string)
         sqlalchemy_string_readonly, readonly_match = validate_and_update_db_string(sqlalchemy_string_readonly)
 
+        def _mask_db_uri(uri: str) -> str:
+            """Best-effort mask password in SQLAlchemy URI for logs."""
+            if not uri:
+                return uri
+            try:
+                from sqlalchemy.engine.url import make_url
+
+                u = make_url(uri)
+                if u.password:
+                    u = u.set(password="***")
+                return str(u)
+            except Exception:
+                # Fallback: mask :password@ in authority section
+                return re_sub(r"(//[^:/@]+:)[^@]*@", r"\1***@", uri)
+
         self.database_uri = "" if sqlalchemy_string == sqlalchemy_string_readonly else sqlalchemy_string
         self.database_uri_readonly = sqlalchemy_string_readonly
         error = False
@@ -332,6 +347,27 @@ class Database:
         current_time = datetime.now().astimezone()
         not_connected = True
         fallback = False
+        ssl_ca_hint_logged = False
+
+        def _ssl_expectations(uri: str) -> Tuple[bool, bool]:
+            """Return (ssl_enabled, has_explicit_root_ca) for a DB URI."""
+            if not uri:
+                return False, False
+            try:
+                from sqlalchemy.engine.url import make_url
+
+                u = make_url(uri)
+                q = {str(k).lower(): str(v) for k, v in dict(u.query or {}).items()}
+                ssl_flag = q.get("ssl", "").strip().lower()
+                sslmode = q.get("sslmode", "").strip().lower()
+                has_ca = bool((q.get("ssl_ca", "") or q.get("sslrootcert", "")).strip())
+                ssl_enabled = has_ca or ssl_flag in ("1", "true", "yes", "on") or (sslmode not in ("", "disable", "off", "no", "false", "0"))
+                return ssl_enabled, has_ca
+            except Exception:
+                _lower = uri.lower()
+                has_ca = ("ssl_ca=" in _lower) or ("sslrootcert=" in _lower)
+                ssl_enabled = has_ca or ("ssl=true" in _lower) or ("sslmode=" in _lower and "sslmode=disable" not in _lower)
+                return ssl_enabled, has_ca
 
         while not_connected:
             try:
@@ -346,6 +382,36 @@ class Database:
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
+                # Helpful TLS diagnostics: SSL enabled but no CA configured.
+                # Print once to avoid log spam during retries.
+                if not ssl_ca_hint_logged:
+                    _uri_for_check = self.database_uri or sqlalchemy_string
+                    ssl_enabled, has_root_ca = _ssl_expectations(_uri_for_check)
+                    err_l = str(e).lower()
+                    looks_like_tls_error = any(
+                        token in err_l
+                        for token in (
+                            "ssl",
+                            "tls",
+                            "certificate",
+                            "cert",
+                            "verify failed",
+                            "unknown ca",
+                            "self signed",
+                        )
+                    )
+                    if ssl_enabled and not has_root_ca and looks_like_tls_error:
+                        self.logger.error(
+                            "Database connection failed with SSL/TLS enabled but no root CA configured. "
+                            "Reason: %s",
+                            e,
+                        )
+                        self.logger.error(
+                            "Set a CA file in DATABASE_URI (ssl_ca=... for MySQL/MariaDB, sslrootcert=... for PostgreSQL), "
+                            "or disable SSL for testing only."
+                        )
+                        ssl_ca_hint_logged = True
+
                 if (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
                         self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
@@ -354,7 +420,12 @@ class Database:
                         self.readonly = True
                         fallback = True
                         continue
-                    self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    self.logger.error(
+                        "Can't connect to database after %s seconds: %s (DATABASE_URI=%s)",
+                        DATABASE_RETRY_TIMEOUT,
+                        e,
+                        _mask_db_uri(self.database_uri or self.database_uri_readonly),
+                    )
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
@@ -367,10 +438,18 @@ class Database:
                     not_connected = False
                     continue
                 elif log:
-                    self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
+                    self.logger.warning(
+                        "Can't connect to database (%s). Retrying in 5 seconds ... (DATABASE_URI=%s)",
+                        e,
+                        _mask_db_uri(self.database_uri or self.database_uri_readonly),
+                    )
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {e}")
+                self.logger.error(
+                    "Error when trying to connect to the database: %s (DATABASE_URI=%s)",
+                    e,
+                    _mask_db_uri(self.database_uri or self.database_uri_readonly),
+                )
                 exit(1)
 
         if log:
