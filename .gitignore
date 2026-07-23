@@ -30,3 +30,6 @@ src/ui/templates
 
 # Design-system handoff exports (large binaries, not source)
 *-handoff.zip
+
+# Internal AI working docs (kept locally, not published)
+docs/superpowers/
