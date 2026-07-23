@@ -278,7 +278,7 @@ class Job:
 
             if ret and isinstance(file_cache, Path) and delete_file and file_cache != cache_path:
                 file_cache.unlink(missing_ok=True)
-        except:
+        except Exception:
             return False, f"exception :\n{format_exc()}"
         return ret, err
 
@@ -314,7 +314,7 @@ class Job:
 
         try:
             self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
-        except:
+        except Exception:
             return False, f"exception :\n{format_exc()}"
         return ret, err
 
