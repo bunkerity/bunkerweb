@@ -29,6 +29,23 @@ services:
       SESSIONS_CHECK_IP: "no"
       GENERATE_SELF_SIGNED_SSL: "yes"
 
+      # Redis / Celery / API (bundled in the all-in-one image)
+      USE_REDIS: "yes"
+      REDIS_HOST: "127.0.0.1"
+      REDIS_PORT: "6379"
+      REDIS_DATABASE: "1"
+      CELERY_BROKER_URL: "redis://127.0.0.1:6379/0"
+      SERVICE_SCHEDULER: "yes"
+      SERVICE_WORKER: "yes"
+      SERVICE_API: "yes"
+      OVERRIDE_API_CREDS: "yes"
+      API_USERNAME: "admin"
+      API_PASSWORD: "P@ssw0rd"
+      API_TOKEN: "devsecrettoken"
+      API_URL: "http://127.0.0.1:8888"
+      API_RATE_LIMIT_ENABLED: "no"
+      API_WHITELIST_IPS: "127.0.0.0/8 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+
       # Autoconf
       AUTOCONF_MODE: "yes"
       DOCKER_HOST: "tcp://bw-docker:2375"

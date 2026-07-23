@@ -132,7 +132,7 @@ Dev credentials: UI `admin`/`P@ssw0rd`, API `admin`/`P@ssw0rd`, DB `bunkerweb`/`
 
 The dev compose (`docker-compose.ui.api.yml`) mounts `src/ui/app/` and `src/api/app/` as read-only (`:ro`) volumes, so UI and API code changes apply without rebuilding (restart the container to pick up changes).
 
-`docker-compose.ui.api.yml` brings up a Redis (Valkey) broker (`bw-jobs-broker`) and a `bw-worker` service alongside the scheduler — required since the Celery-based job executor landed. Other compose files in `misc/dev/` do not yet include the worker/broker, so jobs requiring the Celery path will not run under those stacks.
+Every dev compose stack now brings up a Redis (Valkey) broker (`bw-jobs-broker`), a `bw-worker` service, and `bw-api` alongside the scheduler — required since the Celery-based job executor landed (all-in-one variants bundle these inside the single container instead of as separate services). The two exceptions are `docker-compose.db-mount.yml`, an override fragment layered on top of `docker-compose.ui.api.yml`, and `docker-compose.test-db.yml`, a standalone test-DB helper that needs none of it.
 
 ### Database Migrations
 

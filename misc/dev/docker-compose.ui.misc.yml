@@ -6,6 +6,8 @@ x-env: &env
   LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
   USE_REDIS: "yes"
   REDIS_HOST: "redis"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "devsecrettoken"
 
 services:
   bunkerweb:
@@ -20,6 +22,8 @@ services:
       - 443:8443/udp
     environment:
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -35,11 +39,13 @@ services:
       dockerfile: ./src/scheduler/Dockerfile
     depends_on:
       - bunkerweb
+      - bw-jobs-broker
     volumes:
       - bw-storage:/data
       - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
     environment:
       <<: *env
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "www.example.com app1.example.com"
       MULTISITE: "yes"
@@ -96,6 +102,8 @@ services:
       DEBUG: "1"
       MAX_WORKERS: "1"
       MAX_THREADS: "4"
+      API_USERNAME: "admin"
+      API_PASSWORD: "P@ssw0rd"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -104,6 +112,86 @@ services:
       bw-db:
         aliases:
           - bw-ui
+
+  bw-api:
+    build:
+      context: ../..
+      dockerfile: ./src/api/Dockerfile
+    depends_on:
+      - bw-jobs-broker
+    ports:
+      - 8888:8888
+    volumes:
+      - ../../src/api/app:/usr/share/bunkerweb/api/app:ro
+      - ../../src/api/utils:/usr/share/bunkerweb/api/utils:ro
+    environment:
+      <<: *env
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      API_USERNAME: "admin"
+      API_PASSWORD: "P@ssw0rd"
+      OVERRIDE_API_CREDS: "yes"
+      API_RATE_LIMIT_ENABLED: "no"
+      FORWARDED_ALLOW_IPS: "*"
+      DEBUG: "1"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+
+  bw-worker:
+    build:
+      context: ../..
+      dockerfile: ./src/worker/Dockerfile
+    depends_on:
+      - bw-jobs-broker
+      - bw-db
+    volumes:
+      - bw-worker-storage:/data
+    environment:
+      <<: *env
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      WORKER_CONCURRENCY: "2"
+      WORKER_QUEUES: "default,heavy"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-worker
+      bw-db:
+        aliases:
+          - bw-worker
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "no",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-jobs-broker
 
   bw-db:
     image: mariadb:11
@@ -164,6 +252,7 @@ services:
 volumes:
   bw-data:
   bw-storage:
+  bw-worker-storage:
   bw-logs:
   redis-data:
 

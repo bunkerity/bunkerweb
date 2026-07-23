@@ -24,6 +24,15 @@ services:
       api.example.com_USE_REVERSE_PROXY: "yes"
       api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # Internal API endpoint
 
+      # Redis (doubles as the WAF datastore and the Celery broker for the bundled worker)
+      USE_REDIS: "yes"
+      REDIS_HOST: "127.0.0.1"
+      REDIS_PORT: "6379"
+      REDIS_DATABASE: "1"
+      CELERY_BROKER_URL: "redis://127.0.0.1:6379/0"
+      SERVICE_SCHEDULER: "yes"
+      SERVICE_WORKER: "yes"
+
       # API settings
       SERVICE_API: "yes"
       MAX_WORKERS: "1"
@@ -31,6 +40,11 @@ services:
       # Set a strong token and whitelist only trusted IPs/networks (more details below)
       API_USERNAME: "admin"
       API_PASSWORD: "StrongP@ssw0rd"
+      OVERRIDE_API_CREDS: "yes"
+      API_TOKEN: "devsecrettoken"
+      API_URL: "http://127.0.0.1:8888"
+      API_RATE_LIMIT_ENABLED: "no"
+      API_WHITELIST_IPS: "127.0.0.0/8 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
 
       # UI settings
       SERVICE_UI: "yes"
