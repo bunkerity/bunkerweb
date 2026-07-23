@@ -414,7 +414,9 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "wildcard": wildcard,
         "staging": staging,
         "profile": profile_val,
-        "disable_psl_check": env("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "no").lower() == "yes",
+        # LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES=yes (recommended default) blocks
+        # certificate requests for domains on the Public Suffix List.
+        "block_public_suffixes": env("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes").lower() == "yes",
         "retries": retries_int,
         "exists": False,
         "force_renew": False,
@@ -467,7 +469,7 @@ def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, st
         config.get("email"),
         config.get("dns_propagation"),
         config.get("wildcard"),
-        config.get("disable_psl_check"),
+        config.get("block_public_suffixes"),
         provider_hash,
     )
 
@@ -938,7 +940,7 @@ try:
         existing_cert = existing_certificates[server_name]
         existing_cert["active"] = True
 
-        if not config["disable_psl_check"]:
+        if config["block_public_suffixes"]:
             if psl_lines is None:
                 psl_lines = load_public_suffix_list(JOB)
             if psl_rules is None:
