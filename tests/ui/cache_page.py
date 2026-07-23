@@ -25,15 +25,21 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-cache-modal-submit='']")
 
-    log_info('The cache file content is correct, trying "misc/default-server-cert.pem" cache file ...')
+    # NOTE: previously opened misc/default-server-cert.pem to assert a TEXT cache
+    # file renders inline. That cert is now generated at the instance entrypoint into
+    # /var/lib/bunkerweb (never shipped to the job cache), so it is no longer a cache
+    # entry. This env (SEND_ANONYMOUS_REPORT=no, USE_BLACKLIST=no) has no reliable
+    # text cache file, so we re-open a second binary file instead; the inline-text
+    # render path is no longer covered here.
+    log_info('The cache file content is correct, trying "jobs/country.mmdb" cache file ...')
 
     assert_button_click(DRIVER, "//li[@data-cache-breadcrumb-item='' and @data-level='0']")
-    assert_button_click(DRIVER, "//div[@data-cache-element='misc']")
-    assert_button_click(DRIVER, "//div[@data-cache-element='default-server-cert.pem']")
+    assert_button_click(DRIVER, "//div[@data-cache-element='jobs']")
+    assert_button_click(DRIVER, "//div[@data-cache-element='country.mmdb']")
 
     file_content_elem = safe_get_element(DRIVER, By.XPATH, "//div[@id='editor']//div[@class='ace_content']")
     assert isinstance(file_content_elem, WebElement), "The file content element is not an instance of WebElement"
-    if file_content_elem.text.strip() == "Download file to view content":
+    if file_content_elem.text.strip() != "Download file to view content":
         log_exception("The cache file content is not correct, exiting ...")
         exit(1)
 

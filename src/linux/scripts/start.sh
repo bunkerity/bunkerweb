@@ -191,6 +191,9 @@ function start() {
 
     write_tmp_env_file "$tmp_env_path" "$tmp_env_content"
 
+    # Ensure the internal default-server certificate exists before rendering/starting
+    generate_default_server_cert || log "SYSTEMCTL" "⚠️" "Continuing without a freshly generated default-server certificate"
+
     if [[ "$regenerate_temp_config" == "true" ]] ; then
         if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
             --variables "$tmp_env_path"; then

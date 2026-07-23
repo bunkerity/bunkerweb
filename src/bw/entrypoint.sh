@@ -100,6 +100,9 @@ function set_loading_state() {
 	return 0
 }
 
+# ensure the internal default-server certificate exists before any render/start
+generate_default_server_cert || log "ENTRYPOINT" "⚠️" "Continuing without a freshly generated default-server certificate"
+
 # generate "temp" config
 tmp_env_path="/tmp/variables.env"
 tmp_env_content="$(generate_tmp_env_content)"
