@@ -83,13 +83,6 @@ class News {
     const newsRow = $("<div>", {
       class: "row g-6 justify-content-center",
     }).appendTo(newsContainer);
-    let homeNewsRow;
-
-    if (homeNewsContainer) {
-      homeNewsRow = $("<div>", {
-        class: "row g-2 justify-content-center",
-      }).appendTo(homeNewsContainer);
-    }
 
     orderedNews.forEach((news) => {
       const isLast = news === lastItem;
@@ -126,23 +119,134 @@ class News {
         false,
       );
       newsRow.append(cardElement);
-
-      if (homeNewsContainer) {
-        // Render for home page
-        const homeCardElement = this.template(
-          decodedTitle,
-          news.link,
-          featuredImg,
-          featuredAlt,
-          decodedExcerpt,
-          articleTags,
-          formattedDate,
-          isLast,
-          true,
-        );
-        homeNewsRow.append(homeCardElement);
-      }
     });
+
+    // Home dashboard renders the same posts as a sliding carousel (kit .news-*),
+    // not a stacked list, so build it separately from the shared card template.
+    if (homeNewsContainer.length) {
+      this.renderHomeCarousel(orderedNews);
+    }
+  }
+
+  // Build the home-page news carousel: one .news-slide per post (real blog
+  // thumbnail + title + excerpt + tag), then wire dots / prev-next / autoplay.
+  renderHomeCarousel(orderedNews) {
+    const track = $("#data-news-container-home");
+    if (!track.length) return;
+    track.empty();
+
+    orderedNews.forEach((news) => {
+      const filteredTitle = news.title.rendered
+        .trim()
+        .replace(/^<p>([\s\S]*?)<\/p>$/i, "$1");
+      const title = $("<textarea/>").html(filteredTitle).text();
+      const filteredExcerpt = news.excerpt.rendered
+        .trim()
+        .replace(/^<p>([\s\S]*?)<\/p>$/i, "$1");
+      const excerpt = $("<textarea/>").html(filteredExcerpt).text();
+      const href = `${news.link}?utm_campaign=self&utm_source=ui`;
+      const media = news._embedded?.["wp:featuredmedia"]?.[0] ?? null;
+      const img = media?.source_url ?? null;
+      const imgAlt =
+        media?.alt_text || media?.title?.rendered || this.t("news.image_alt");
+      const date = this.formatDate(news.date);
+      const tags = this.extractTerms(news).filter(
+        (tag) => tag?.slug && tag?.name,
+      );
+      const tagName = tags.length ? tags[0].name : "";
+
+      const thumb = $("<div>", { class: "news-thumb" });
+      if (img) {
+        thumb.append(
+          $("<img>", { src: img, alt: imgAlt || "", loading: "lazy" }),
+        );
+      }
+      const content = $("<div>", { class: "news-content" }).append(
+        $("<a>", {
+          class: "news-title",
+          href,
+          target: "_blank",
+          rel: "noopener",
+          text: title,
+        }),
+        $("<p>", { class: "news-body", text: excerpt }),
+      );
+      const foot = $("<div>", { class: "news-foot" });
+      if (date) foot.append($("<span>", { class: "news-date", text: date }));
+      if (tagName) {
+        foot.append(
+          $("<span>", { class: "news-tag news-tag-primary" }).append(
+            $("<i>", { class: "bx bx-purchase-tag", "aria-hidden": "true" }),
+            document.createTextNode(tagName),
+          ),
+        );
+      }
+      content.append(foot);
+      track.append($("<div>", { class: "news-slide" }).append(thumb, content));
+    });
+
+    this.initHomeCarousel();
+  }
+
+  initHomeCarousel() {
+    const track = document.getElementById("data-news-container-home");
+    const dotsWrap = document.getElementById("home-news-dots");
+    if (!track || !dotsWrap) return;
+    const slides = Array.from(track.querySelectorAll(".news-slide"));
+    if (!slides.length) return;
+
+    let idx = 0;
+    let timer = null;
+
+    const go = (n) => {
+      idx = (n + slides.length) % slides.length;
+      track.style.transform = `translateX(-${idx * 100}%)`;
+      dots.forEach((dot, i) => dot.classList.toggle("active", i === idx));
+    };
+    const start = () => {
+      if (slides.length > 1) timer = setInterval(() => go(idx + 1), 6000);
+    };
+    const restart = () => {
+      clearInterval(timer);
+      start();
+    };
+
+    dotsWrap.textContent = "";
+    const dots = slides.map((_, i) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "news-dot" + (i === 0 ? " active" : "");
+      dot.setAttribute(
+        "aria-label",
+        `${this.t("news.slide", "Slide")} ${i + 1}`,
+      );
+      dot.addEventListener("click", () => {
+        go(i);
+        restart();
+      });
+      dotsWrap.appendChild(dot);
+      return dot;
+    });
+
+    const prev = document.getElementById("home-news-prev");
+    const next = document.getElementById("home-news-next");
+    if (prev)
+      prev.addEventListener("click", () => {
+        go(idx - 1);
+        restart();
+      });
+    if (next)
+      next.addEventListener("click", () => {
+        go(idx + 1);
+        restart();
+      });
+
+    const root = track.closest(".news-carousel");
+    if (root) {
+      root.addEventListener("mouseenter", () => clearInterval(timer));
+      root.addEventListener("mouseleave", restart);
+    }
+    start();
   }
 
   // This markup is built client-side because the content comes from the news

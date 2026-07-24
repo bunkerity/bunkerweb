@@ -1,4 +1,4 @@
-$(function () {
+$(async function () {
   // Dynamic translation function that always uses the latest i18next state
   const t = (key, options = {}) => {
     if (typeof i18next !== "undefined" && i18next.isInitialized) {
@@ -16,6 +16,106 @@ $(function () {
     headingColor = config.colors.white;
     legendColor = config.colors.white;
   }
+
+  // ======================= Async dashboard metrics =======================
+  // The heavy world-map / blocked-IP donut / blocking-timeline series, the top-reasons
+  // table and the unique-IP count are fetched from /home/metrics AFTER first paint (an
+  // inline <script> in home.html kicks the request off into window.__homeMetricsPromise).
+  // We await it here, at the very top of the ready handler, and write the JSON into the
+  // hidden #*-data divs BEFORE the render code below reads them -- so every chart renders
+  // exactly once, with real data, and no downstream renderer needs to change.
+  function hideSpinner(wrapperId) {
+    const wrapper = document.getElementById(wrapperId);
+    if (wrapper) wrapper.classList.add("is-loaded");
+  }
+
+  const fmtCompact = (value) => {
+    const n = Number(value) || 0;
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+    return String(n);
+  };
+
+  const i18nReady = () =>
+    typeof i18next !== "undefined" && i18next.isInitialized;
+
+  function updateHomeAsyncValues(metrics) {
+    const uniqueIps = document.getElementById("home-unique-ips");
+    if (uniqueIps)
+      uniqueIps.textContent = fmtCompact(metrics.blocked_unique_ips || 0);
+
+    // Country count caption: update data-i18n-options too so a later language switch
+    // re-interpolates correctly via the global applyTranslations() pass.
+    const countriesEl = document.getElementById("home-unique-ips-countries");
+    if (countriesEl) {
+      const count = metrics.countries_count || 0;
+      countriesEl.setAttribute("data-i18n-options", JSON.stringify({ count }));
+      countriesEl.textContent = i18nReady()
+        ? i18next.t("dashboard.mini.across_countries", { count })
+        : `across ${count} countries`;
+    }
+
+    // Top-reasons table -- built from data (reason strings are untrusted, so DOM APIs
+    // only, never innerHTML).
+    const body = document.getElementById("home-top-reasons-body");
+    if (body) {
+      body.textContent = "";
+      const reasons = metrics.top_reasons || [];
+      if (reasons.length) {
+        reasons.forEach((row) => {
+          const tr = document.createElement("tr");
+          const nameTd = document.createElement("td");
+          const icon = document.createElement("i");
+          icon.className = "bx bx-shield-quarter me-1 text-danger";
+          icon.setAttribute("aria-hidden", "true");
+          nameTd.append(icon, document.createTextNode(row.reason));
+          const countTd = document.createElement("td");
+          countTd.className = "text-end font-monospace";
+          countTd.textContent = fmtCompact(row.count);
+          const pctTd = document.createElement("td");
+          pctTd.className = "text-end";
+          pctTd.style.width = "4.5rem";
+          const badge = document.createElement("span");
+          badge.className = "badge bg-label-secondary";
+          badge.textContent = `${row.pct}%`;
+          pctTd.appendChild(badge);
+          tr.append(nameTd, countTd, pctTd);
+          body.appendChild(tr);
+        });
+      } else {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 3;
+        td.className = "text-muted text-center py-3";
+        td.setAttribute("data-i18n", "status.no_data");
+        td.textContent = i18nReady()
+          ? i18next.t("status.no_data")
+          : "No data to show";
+        tr.appendChild(td);
+        body.appendChild(tr);
+      }
+      hideSpinner("requests-reasons-async");
+    }
+  }
+
+  let homeMetrics = null;
+  try {
+    homeMetrics = await (window.__homeMetricsPromise || Promise.resolve(null));
+  } catch (e) {
+    homeMetrics = null;
+  }
+  const homeMetricsOk = !!(homeMetrics && homeMetrics.status === "success");
+  if (homeMetricsOk) {
+    const setChartData = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = JSON.stringify(value || {});
+    };
+    setChartData("requests-map-data", homeMetrics.request_countries);
+    setChartData("requests-ips-data", homeMetrics.request_ips);
+    setChartData("requests-blocking-data", homeMetrics.time_buckets);
+  }
+  updateHomeAsyncValues(homeMetricsOk ? homeMetrics : {});
+  // =======================================================================
 
   // Requests countries map
 
@@ -463,6 +563,7 @@ $(function () {
       style: style,
       onEachFeature: onEachFeature,
     }).addTo(map);
+    hideSpinner("requests-map-async");
   }
 
   // Function to load GeoJSON as fallback
@@ -494,6 +595,7 @@ $(function () {
       style: style,
       onEachFeature: onEachFeature,
     }).addTo(map);
+    hideSpinner("requests-map-async");
   }
 
   // Initialize geo data loading
@@ -1232,6 +1334,8 @@ $(function () {
   }
 
   renderBlockingStatus();
+  hideSpinner("requests-ips-async");
+  hideSpinner("requests-blocking-async");
 
   // Handle theme changes and language changes for charts
   function updateChartsWithTranslations() {

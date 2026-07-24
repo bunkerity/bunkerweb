@@ -494,6 +494,9 @@
       "blocked_unique_ips": {
         "title": "Blocked Unique IPs"
       },
+      "certificates": {
+        "title": "Certificates"
+      },
       "instances": {
         "status": "{{up}} up / {{down}} down / {{loading}} loading",
         "title": "Instances"
@@ -525,6 +528,10 @@
       },
       "total_requests": {
         "title": "Total Requests"
+      },
+      "upstreams": {
+        "planned": "Coming soon",
+        "title": "Upstreams"
       }
     },
     "chart": {
@@ -556,6 +563,20 @@
       "hover_info": "Hover over a country",
       "legend": "Legend",
       "no_data": "No data"
+    },
+    "mini": {
+      "across_countries": "across {{count}} countries",
+      "enforced": "currently enforced",
+      "pct_blocked": "{{percent}}% blocked",
+      "scheduled": "scheduled"
+    },
+    "status": {
+      "blocked_of_total": "blocked of {{total}} total",
+      "free_plan": "Free plan",
+      "renews": "Renews",
+      "services_licensed": "{{count}} services licensed",
+      "trend_vs_prev": "vs prev.",
+      "vs_prev": "vs prev."
     },
     "tile": {
       "bans_active": "Bans active",
@@ -1069,7 +1090,8 @@
   },
   "news": {
     "image_alt": "News image",
-    "posted_on": "Posted on"
+    "posted_on": "Posted on",
+    "slide": "Slide"
   },
   "newsletter": {
     "legal_agreement": "I want to subscribe to the newsletter, and I've read and agree to the:",
@@ -1082,6 +1104,7 @@
       "pro": "Activate BunkerWeb PRO",
       "service": "Register your first service"
     },
+    "pro_tips": "PRO tips",
     "title": "Getting started"
   },
   "pagination": {
@@ -1444,7 +1467,9 @@
     "title": "Setup Wizard"
   },
   "status": {
+    "active": "Active",
     "admin_user_exists": "An admin user already exists. Please proceed to the next step.",
+    "all_valid": "All valid",
     "blog_connection_fail": "Could not connect to the blog for news updates.",
     "default_server": "Default Server",
     "done": "Completed",
@@ -1455,6 +1480,8 @@
     "error_loading_data": "Couldn't load data",
     "error_loading_template": "Unable to load template data.",
     "error_saving_template": "An error occurred while saving the template.",
+    "expired": "Expired",
+    "expiring": "Expiring",
     "failed": "Failed",
     "invalid_json_payload": "Invalid JSON payload.",
     "loading": "Loading...",

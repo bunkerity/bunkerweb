@@ -33,18 +33,33 @@
     // trend_pct is the % change of blocked count vs. the previous equal-length window
     // (get_metrics_timeseries) -- more blocked requests is bad news, so an increase is
     // colored danger and a decrease success (see reports-overview.js's identical tile).
-    const $value = $("#home-tile-trend .bw-kpi-value");
-    $value
-      .text(
-        typeof trendPct === "number"
-          ? `${trendPct > 0 ? "+" : ""}${trendPct}%`
-          : "—",
+    // Feeds the status band's "Blocked Requests" trend chip (#home-blocked-trend).
+    const $chip = $("#home-blocked-trend");
+    if (!$chip.length) return;
+    const hasVal = typeof trendPct === "number";
+    const up = hasVal && trendPct > 0;
+    const down = hasVal && trendPct < 0;
+    const suffix = t("dashboard.status.vs_prev", "vs prev.");
+    $chip
+      .removeClass("sb-chip-green sb-chip-danger sb-chip-muted")
+      .addClass(
+        up ? "sb-chip-danger" : down ? "sb-chip-green" : "sb-chip-muted",
       )
-      .toggleClass("text-danger", typeof trendPct === "number" && trendPct > 0)
-      .toggleClass(
-        "text-success",
-        typeof trendPct === "number" && trendPct < 0,
+      .removeAttr("data-i18n")
+      .empty();
+    if (up || down) {
+      $chip.append(
+        $("<i>", {
+          class: `bx ${up ? "bx-up-arrow-alt" : "bx-down-arrow-alt"}`,
+          "aria-hidden": "true",
+        }),
       );
+    }
+    $chip.append(
+      document.createTextNode(
+        `${hasVal ? `${trendPct > 0 ? "+" : ""}${trendPct}% ` : ""}${suffix}`,
+      ),
+    );
   }
 
   function renderChart(timeseries) {

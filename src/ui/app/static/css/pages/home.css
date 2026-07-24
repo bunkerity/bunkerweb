@@ -305,3 +305,562 @@
 .map-legend__range {
   font-variant-numeric: tabular-nums;
 }
+
+/* ============================================================================
+   Design-kit HOME patterns ported into the live UI.
+
+   Source: the admin UI-kit prototype (.claude/BunkerWeb Design System/ui_kits/
+   admin/pages/home.js + app.css). Kit tokens mapped to the live bridge that
+   overrides.css already ships:
+     kit --bw-theme      -> --bs-primary          kit --bw-theme-rgb -> --bs-primary-rgb
+     kit --shadow-sm     -> --bw-shadow-sm        kit --font-mono    -> --font-courier-prime
+     kit :root[data-theme="dark"] -> [data-bs-theme="dark"]  (the attr this app toggles)
+   The kit gates several looks behind a runtime customizer (data-tile-style /
+   data-card-title / data-card-subtitle); the live UI has no customizer, so the
+   SHIPPED defaults (minimal tiles + highlighted titles + colored stat trends /
+   rich captions) are baked in here unconditionally.
+   ============================================================================ */
+
+/* --- Status band: editorial Plan / RAM / Blocked-requests strip (kit app.css:845-926) --- */
+.status-band {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr 1px 1fr;
+  gap: 28px;
+  align-items: center;
+  padding: 20px 28px;
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 14px;
+  box-shadow: var(--bw-shadow-sm);
+}
+@media (max-width: 1100px) {
+  .status-band {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .status-band .sb-divider {
+    display: none;
+  }
+}
+.status-band .sb-divider {
+  width: 1px;
+  height: 52px;
+  background: var(--bw-border);
+}
+.status-band .sb-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.status-band .sb-eyebrow {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--bw-fg-3);
+}
+[data-bs-theme="dark"] .status-band .sb-eyebrow {
+  color: var(--bw-fg-2);
+}
+.status-band .sb-primary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.status-band .sb-plan-name {
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .status-band .sb-plan-name {
+  color: var(--bw-fg-1);
+}
+.status-band .sb-ram-val,
+.status-band .sb-uptime-val {
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .status-band .sb-ram-val,
+[data-bs-theme="dark"] .status-band .sb-uptime-val {
+  color: var(--bw-fg-1);
+}
+.status-band .sb-ram-unit {
+  font-size: 0.55em;
+  color: var(--bw-fg-3);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.status-band .sb-meta {
+  font-size: 12.5px;
+  color: var(--bw-fg-3);
+}
+.status-band .sb-meta strong {
+  color: var(--bw-fg-2);
+  font-weight: 600;
+}
+[data-bs-theme="dark"] .status-band .sb-meta strong {
+  color: var(--bw-fg-1);
+}
+.status-band .sb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.status-band .sb-chip .bx {
+  font-size: 14px;
+}
+.status-band .sb-chip-green {
+  background: rgba(46, 172, 104, 0.14);
+  color: #1f6e43;
+  border-color: rgba(46, 172, 104, 0.28);
+}
+[data-bs-theme="dark"] .status-band .sb-chip-green {
+  color: #8fe1b2;
+  background: rgba(46, 172, 104, 0.18);
+}
+.status-band .sb-chip-warn {
+  background: rgba(255, 171, 0, 0.14);
+  color: #8a5c00;
+  border-color: rgba(255, 171, 0, 0.3);
+  font-family: var(--font-courier-prime);
+}
+[data-bs-theme="dark"] .status-band .sb-chip-warn {
+  color: #ffcd6b;
+  background: rgba(255, 171, 0, 0.16);
+}
+.status-band .sb-chip-danger {
+  background: rgba(255, 62, 29, 0.12);
+  color: #b3301a;
+  border-color: rgba(255, 62, 29, 0.28);
+  font-family: var(--font-courier-prime);
+}
+[data-bs-theme="dark"] .status-band .sb-chip-danger {
+  color: #ffb1ba;
+  background: rgba(255, 62, 29, 0.18);
+  border-color: rgba(255, 62, 29, 0.36);
+}
+.status-band .sb-chip-muted {
+  background: rgba(var(--bs-primary-rgb), 0.06);
+  color: var(--bw-fg-2);
+  border-color: var(--bw-border);
+}
+.status-band .sb-ram-bar {
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(var(--bs-primary-rgb), 0.1);
+  max-width: 220px;
+}
+.status-band .sb-ram-bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--bs-bw-green) 0%,
+    var(--bs-warning) 100%
+  );
+}
+.status-band .sb-ram-bar.is-warn > i {
+  background: var(--bs-warning);
+}
+.status-band .sb-ram-bar.is-danger > i {
+  background: var(--bs-danger);
+}
+
+/* --- Category-tinted KPI tiles (kit cardTitle="highlight", app.css:106-129).
+   The live tile.html macro emits `.bw-kpi-tile-<color>`; its icon lives inside
+   `.bw-kpi-label`, so title + icon tint together. --- */
+.bw-kpi-tile-green .bw-kpi-label,
+.bw-kpi-tile-bw-green .bw-kpi-label {
+  color: var(--bs-bw-green);
+}
+.bw-kpi-tile-blue .bw-kpi-label,
+.bw-kpi-tile-navy .bw-kpi-label {
+  color: #2a7fa3;
+}
+.bw-kpi-tile-danger .bw-kpi-label {
+  color: var(--bs-danger);
+}
+[data-bs-theme="dark"] .bw-kpi-tile-green .bw-kpi-label,
+[data-bs-theme="dark"] .bw-kpi-tile-bw-green .bw-kpi-label {
+  color: #b8f7d2;
+}
+[data-bs-theme="dark"] .bw-kpi-tile-blue .bw-kpi-label,
+[data-bs-theme="dark"] .bw-kpi-tile-navy .bw-kpi-label {
+  color: #9bd5f0;
+}
+[data-bs-theme="dark"] .bw-kpi-tile-danger .bw-kpi-label {
+  color: #ffb1ba;
+}
+/* Rich caption inline highlights (kit .hl-*, app.css:280-313). */
+.bw-kpi-caption .hl-good {
+  color: var(--bs-bw-green);
+  font-weight: 600;
+}
+.bw-kpi-caption .hl-warn {
+  color: #b07b00;
+  font-weight: 600;
+}
+.bw-kpi-caption .hl-bad {
+  color: var(--bs-danger);
+  font-weight: 600;
+}
+.bw-kpi-caption .hl-info {
+  color: #2a7fa3;
+  font-weight: 600;
+}
+[data-bs-theme="dark"] .bw-kpi-caption .hl-good {
+  color: #b8f7d2;
+}
+[data-bs-theme="dark"] .bw-kpi-caption .hl-warn {
+  color: #ffd28a;
+}
+[data-bs-theme="dark"] .bw-kpi-caption .hl-bad {
+  color: #ffb1ba;
+}
+[data-bs-theme="dark"] .bw-kpi-caption .hl-info {
+  color: #9bd5f0;
+}
+/* Muted "planned / not configured" tile state (Upstreams stub). */
+.bw-kpi-tile.is-planned .bw-kpi-value {
+  color: var(--bw-fg-4);
+}
+[data-bs-theme="dark"] .bw-kpi-tile.is-planned .bw-kpi-value {
+  color: var(--bw-fg-4);
+}
+
+/* --- Secondary KPI mini-tiles (kit .mini-tile, app.css:259-322) --- */
+.mini-tile {
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: var(--bw-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+.mini-tile .lbl {
+  font-size: 12px;
+  color: var(--bw-fg-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mini-tile .lbl .bx {
+  font-size: 15px;
+}
+.mini-tile .val {
+  font-family: var(--font-don-jose);
+  font-size: 1.75rem;
+  color: var(--bs-primary);
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+}
+.mini-tile .val small {
+  font-family: var(--bs-font-sans-serif);
+  font-size: 0.75rem;
+  color: var(--bw-fg-3);
+  letter-spacing: 0;
+}
+.mini-tile .trend {
+  font-size: 12.5px;
+  color: var(--bw-fg-3);
+  font-family: var(--font-courier-prime);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mini-tile .trend.up {
+  color: var(--bs-bw-green);
+}
+.mini-tile .trend.down {
+  color: var(--bs-danger);
+}
+.mini-tile.good .lbl {
+  color: var(--bs-bw-green);
+}
+.mini-tile.bad .lbl {
+  color: var(--bs-danger);
+}
+.mini-tile.warn .lbl {
+  color: #b07b00;
+}
+.mini-tile.info .lbl {
+  color: #2a7fa3;
+}
+[data-bs-theme="dark"] .mini-tile .val {
+  color: var(--bw-fg-1);
+}
+[data-bs-theme="dark"] .mini-tile .lbl {
+  color: #b6c3cd;
+  font-weight: 600;
+}
+[data-bs-theme="dark"] .mini-tile.good .lbl {
+  color: #b8f7d2;
+}
+[data-bs-theme="dark"] .mini-tile.bad .lbl {
+  color: #ffb1ba;
+}
+[data-bs-theme="dark"] .mini-tile.warn .lbl {
+  color: #ffd28a;
+}
+[data-bs-theme="dark"] .mini-tile.info .lbl {
+  color: #9bd5f0;
+}
+[data-bs-theme="dark"] .mini-tile .trend.up {
+  color: #7bf0b3;
+}
+[data-bs-theme="dark"] .mini-tile .trend.down {
+  color: #ffb7a9;
+}
+
+/* --- PRO-tips / status chip (kit .tag-chip, admin.css:264-268) --- */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--bs-primary);
+  color: var(--bs-primary);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--bw-bg-card);
+}
+.tag-chip.green {
+  border-color: var(--bs-bw-green);
+  color: var(--bs-bw-green);
+}
+.tag-chip .bx {
+  font-size: 12px;
+}
+[data-bs-theme="dark"] .tag-chip {
+  background: transparent;
+  border-color: var(--bw-fg-3);
+  color: var(--bw-fg-2);
+}
+[data-bs-theme="dark"] .tag-chip.green {
+  border-color: var(--bs-bw-green);
+  color: var(--bs-bw-green);
+}
+
+/* --- News carousel: real blog thumbnails (kit .news-*, app.css:459-575) --- */
+.news-carousel .news-nav {
+  display: flex;
+  gap: 6px;
+}
+.news-carousel .news-nav .icon-btn {
+  width: 26px;
+  height: 26px;
+}
+.news-carousel .news-nav .icon-btn i {
+  font-size: 14px;
+}
+.news-see-more {
+  font-family: var(--font-courier-prime);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bs-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  letter-spacing: 0.02em;
+  margin-right: 10px;
+}
+.news-see-more:hover {
+  color: var(--bs-bw-green);
+}
+[data-bs-theme="dark"] .news-see-more {
+  color: #6fa8c4;
+}
+.news-viewport {
+  overflow: hidden;
+  position: relative;
+  padding-bottom: 28px;
+}
+.news-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+.news-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 22px;
+  align-items: stretch;
+  padding: 2px;
+}
+.news-thumb {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0b1d2b;
+  min-height: 160px;
+  align-self: stretch;
+  line-height: 0;
+}
+.news-thumb > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.news-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: 2px;
+}
+.news-slide .news-title {
+  display: block;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--bs-primary);
+  line-height: 1.3;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+[data-bs-theme="dark"] .news-slide .news-title {
+  color: var(--bw-fg-1);
+}
+.news-slide .news-title:hover {
+  text-decoration: underline;
+}
+.news-slide .news-body {
+  font-family: var(--font-courier-prime);
+  font-size: 13px;
+  margin: 0 0 14px;
+  color: var(--bw-fg-2);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.news-date {
+  font-family: var(--font-courier-prime);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bw-fg-2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.news-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: 1px solid currentColor;
+  background: transparent;
+  line-height: 1;
+}
+.news-tag i {
+  font-size: 13px;
+}
+.news-tag-primary {
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .news-tag-primary {
+  color: #6fa8c4;
+}
+.news-tag-green {
+  color: var(--bs-bw-green);
+}
+.news-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.news-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0;
+  background: rgba(var(--bs-primary-rgb), 0.25);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    width 0.2s;
+}
+.news-dot:hover {
+  background: rgba(var(--bs-primary-rgb), 0.5);
+}
+.news-dot.active {
+  background: var(--bs-primary);
+  width: 18px;
+}
+[data-bs-theme="dark"] .news-dot {
+  background: rgba(111, 168, 196, 0.3);
+}
+[data-bs-theme="dark"] .news-dot.active {
+  background: #6fa8c4;
+}
+.news-empty {
+  color: var(--bw-fg-3);
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+/* --- Async chart loading: the map / donut / timeline / top-reasons data is fetched from
+   /home/metrics after first paint (home.js), so each deferred card shows a centered
+   spinner overlay until its render completes and home.js adds .is-loaded. --- */
+.home-async-chart {
+  position: relative;
+}
+.home-chart-spinner {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bw-bg-card);
+  border-radius: 14px;
+}
+.home-async-chart.is-loaded .home-chart-spinner {
+  display: none;
+}
+@media (max-width: 640px) {
+  .news-slide {
+    grid-template-columns: 1fr;
+  }
+  .news-thumb {
+    min-height: 140px;
+  }
+}
