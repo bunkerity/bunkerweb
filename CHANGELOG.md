@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.6.14~rc1 - 2026/07/??
+## v1.6.14~rc2 - 2026/07/??
+
+- [PERF] `ui`: make the Reports, Logs, and Home pages fast when many blocked-request reports are stored in Redis: fetch a single report by id from the newest end instead of scanning the whole list, share the Home page aggregation across workers through Redis instead of recomputing it in every worker, cache the Logs line count until the file changes or is rotated, and pause the Reports auto-refresh while the browser tab is in the background. Also honor the `k`/`m` suffix on `METRICS_MAX_BLOCKED_REQUESTS_REDIS` when bounding report reads.
+- [PERF] `ui`: memoize the plugin catalog and rebuild it only when plugins change instead of on every request, cutting the fixed overhead paid on every page load.
+
+## v1.6.14~rc1 - 2026/07/23
 
 - [BUGFIX] `mtls`: the Scheduler now validates the client CA bundle and CRL, caches them, and distributes them to every instance instead of shipping the raw configured path straight into the NGINX configuration, so a Scheduler-only mount works as documented instead of causing "cannot load certificate" errors on instances that cannot read that path. Adds `MTLS_CA_CERTIFICATE_DATA` and `MTLS_CRL_DATA` to supply either file inline as base64 or plaintext PEM.
 - [BUGFIX] `backup`: support MySQL 9 and MariaDB 12 backup/restore with current authentication, TLS, and privilege defaults while preserving compatibility with older servers; refresh the documented database compatibility matrix, including PostgreSQL 18.
