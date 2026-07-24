@@ -6,12 +6,44 @@
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block page %}
-    <!-- Content -->
-    <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1030">
-        <div class="d-flex justify-content-end align-items-center">
-            <!-- Language Selector -->
-            <div class="me-3">{% include "language-selector.html" %}</div>
-            <!-- Theme Toggle -->
+    <div class="setup-screen">
+        <!-- Decorations (shared design-system auth deco, purely decorative) -->
+        <svg class="sw-deco sw-hatch" viewBox="0 0 150 22" aria-hidden="true">
+            <line x1="0" y1="22" x2="14" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="14" y1="22" x2="28" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="28" y1="22" x2="42" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="42" y1="22" x2="56" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="56" y1="22" x2="70" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="70" y1="22" x2="84" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="84" y1="22" x2="98" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="98" y1="22" x2="112" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="112" y1="22" x2="126" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="126" y1="22" x2="140" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="140" y1="22" x2="154" y2="0" stroke="currentColor" stroke-width="2" />
+        </svg>
+        <svg class="sw-deco sw-hatch-r" viewBox="0 0 22 150" aria-hidden="true">
+            <line x1="0" y1="14" x2="22" y2="0" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="28" x2="22" y2="14" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="42" x2="22" y2="28" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="56" x2="22" y2="42" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="70" x2="22" y2="56" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="84" x2="22" y2="70" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="98" x2="22" y2="84" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="112" x2="22" y2="98" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="126" x2="22" y2="112" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="140" x2="22" y2="126" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="154" x2="22" y2="140" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+        <div class="sw-deco sw-rule sw-rule-1"></div>
+        <div class="sw-deco sw-rule sw-rule-2"></div>
+        <div class="sw-deco sw-rule sw-rule-3"></div>
+        <div class="sw-deco sw-vertical-text" aria-hidden="true">Secure like a Bunker</div>
+        <svg class="sw-deco sw-poly" viewBox="0 0 580 105" fill="none" aria-hidden="true">
+            <path d="M1 1 H435 L580 104 H1 Z M1 88 H560" stroke="currentColor" stroke-width="1" />
+        </svg>
+        <!-- Topbar: language selector + theme toggle (markup/ids/wiring unchanged) -->
+        <header class="sw-topbar">
+            <div>{% include "language-selector.html" %}</div>
             <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
                 <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                        for="dark-mode-toggle"
@@ -28,100 +60,76 @@
                        for="dark-mode-toggle"
                        data-i18n="theme.dark">Dark</label>
             </div>
-        </div>
-    </div>
-    <div class="theme-bg-surface">
-        <div class="login-background">
-            <div class="container-xxl">
-                <div class="authentication-wrapper authentication-basic container-p-y">
-                    <div class="authentication-inner">
-                        <!-- Login -->
-                        <div class="card px-sm-6 px-0 shadow-sm rounded-3">
-                            <div class="card-body">
-                                <!-- Logo -->
-                                <div class="app-brand justify-content-center">
-                                    <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
-                                       target="_blank"
-                                       rel="noopener"
-                                       class="app-brand-link gap-2">
-                                        <span class="app-brand-logo login w-50">
-                                            <img class="img-fluid bw-logo-light"
-                                                 src="{{ url_for('static', filename='img/logo-menu.png') }}"
-                                                 alt="BunkerWeb logo">
-                                            <img class="img-fluid bw-logo-dark"
-                                                 src="{{ url_for('static', filename='img/logo-menu-white.png') }}"
-                                                 alt="BunkerWeb logo">
-                                        </span>
-                                    </a>
-                                </div>
-                                <!-- /Logo -->
-                                <p class="text-center text-muted mb-6" data-i18n="login.subtitle">Sign in to your BunkerWeb account</p>
-                                <form method="POST" id="login-form">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                    <input type="hidden"
-                                           name="next"
-                                           value="{{ request.values.get('next', '') }}" />
-                                    <input type="hidden" name="language" value="en" />
-                                    <input type="hidden" name="theme" value="" />
-                                    <div class="mb-6">
-                                        <label for="username" class="form-label" data-i18n="form.label.username">Username</label>
-                                        <input type="text"
-                                               class="form-control"
-                                               id="username"
-                                               name="username"
-                                               placeholder="Enter your username"
-                                               data-i18n="form.placeholder.enter_username"
-                                               autofocus
-                                               required />
-                                    </div>
-                                    <div class="mb-6 form-password-toggle">
-                                        <label class="form-label" for="password" data-i18n="form.label.password">Password</label>
-                                        <div class="input-group input-group-merge">
-                                            <input type="password"
-                                                   id="password"
-                                                   class="form-control"
-                                                   name="password"
-                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                   aria-describedby="password"
-                                                   required />
-                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="mb-8">
-                                        <div class="d-flex justify-content-between mt-8">
-                                            <div class="form-check mb-0 ms-2">
-                                                <input class="form-check-input"
-                                                       type="checkbox"
-                                                       id="remember-me"
-                                                       name="remember-me" />
-                                                <label class="form-check-label"
-                                                       for="remember-me"
-                                                       data-i18n="form.checkbox.remember_me">Remember Me</label>
-                                            </div>
-                                            <a href="{{ docs_url('/troubleshooting', '#__tabbed_6_2') }}"
-                                               target="_blank"
-                                               rel="noopener"
-                                               class="docs-link"
-                                               data-endpoint="/troubleshooting"
-                                               data-fragment="#__tabbed_6_2">
-                                                <span data-i18n="link.forgot_password">Forgot Password?</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="mb-6">
-                                        <button class="btn btn-primary d-grid w-100 don-jose"
-                                                type="submit"
-                                                data-i18n="button.login">Login</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        <!-- /Login -->
-                    </div>
+        </header>
+        <!-- Login card -->
+        <div class="sw-card login-card">
+            <div class="sw-brand">
+                <img class="bw-logo-light" src="{{ url_for('static', filename='img/logo-menu.png') }}" alt="BunkerWeb" />
+                <img class="bw-logo-dark" src="{{ url_for('static', filename='img/logo-menu-white.png') }}" alt="BunkerWeb" />
+            </div>
+            <div class="sw-card-head">
+                <div>
+                    <p class="sw-subtitle" data-i18n="login.subtitle">Sign in to your BunkerWeb account</p>
                 </div>
             </div>
+            <form method="POST" id="login-form" class="login-fields">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden"
+                       name="next"
+                       value="{{ request.values.get('next', '') }}" />
+                <input type="hidden" name="language" value="en" />
+                <input type="hidden" name="theme" value="" />
+                <div class="sw-field">
+                    <label for="username" data-i18n="form.label.username">Username</label>
+                    <div class="sw-input-wrap">
+                        <input type="text"
+                               class="sw-input"
+                               id="username"
+                               name="username"
+                               placeholder="Enter username"
+                               data-i18n="form.placeholder.enter_username"
+                               autocomplete="username"
+                               autofocus
+                               required />
+                    </div>
+                </div>
+                <div class="sw-field form-password-toggle">
+                    <label for="password" data-i18n="form.label.password">Password</label>
+                    <div class="sw-input-wrap">
+                        <input type="password"
+                               class="sw-input"
+                               id="password"
+                               name="password"
+                               placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                               aria-describedby="password"
+                               autocomplete="current-password"
+                               required />
+                        <span class="sw-eye cursor-pointer"><i class="bx bx-hide"></i></span>
+                    </div>
+                </div>
+                <div class="login-row">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="remember-me"
+                               name="remember-me" />
+                        <label class="form-check-label"
+                               for="remember-me"
+                               data-i18n="form.checkbox.remember_me">Remember Me</label>
+                    </div>
+                    <a href="{{ docs_url('/troubleshooting', '#__tabbed_6_2') }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="login-forgot docs-link"
+                       data-endpoint="/troubleshooting"
+                       data-fragment="#__tabbed_6_2">
+                        <span data-i18n="link.forgot_password">Forgot Password?</span>
+                    </a>
+                </div>
+                <button class="sw-btn sw-btn-next login-submit" type="submit">
+                    <span data-i18n="button.login">Login</span> <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                </button>
+            </form>
         </div>
     </div>
-</div>
-<!-- / Content -->
 {% endblock %}

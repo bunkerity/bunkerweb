@@ -848,7 +848,13 @@ def inject_variables():
 @login_manager.user_loader
 def load_user(username):
     try:
-        user_data = API_CLIENT.get_user(username)
+        # Use the auth variant: the plain /users/<name> endpoint strips password,
+        # totp_secret and recovery_codes, which would leave current_user.check_password()
+        # raising "Invalid salt" on every profile action AND the 2FA before_request gate
+        # (bool(current_user.totp_secret)) silently bypassed. Flask-Login rebuilds the user
+        # per request server-side (only the username is in the cookie), so carrying the hash
+        # here is the same exposure as the login request itself.
+        user_data = API_CLIENT.get_user_for_auth(username)
     except (ApiClientError, ApiUnavailableError):
         LOGGER.warning(f"Couldn't get the user {username} from the API.")
         return None
@@ -863,7 +869,7 @@ def load_user(username):
     ui_user = UiUsers(
         username=user_data["username"],
         email=user_data.get("email"),
-        password="",
+        password=user_data.get("password") or "",
         method=user_data.get("method", "manual"),
         admin=user_data.get("admin", False),
         theme=user_data.get("theme", "light"),

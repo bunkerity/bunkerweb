@@ -216,6 +216,7 @@
     "update_duration_all_filtered": "Update duration for all matching bans",
     "update_key": "Update Key",
     "upload_photo": "Upload New Photo",
+    "verify": "Verify",
     "view_details": "View Details",
     "view_raw_data": "View Raw Data",
     "wipe_other_sessions": "Wipe Other Sessions",
@@ -912,10 +913,13 @@
     "read_more": "Read More",
     "see_more": "See More",
     "upgrade": "Upgrade?",
+    "use_authenticator_code": "Use an authenticator code",
+    "use_recovery_code": "Use a recovery code",
     "get_support": "Get support"
   },
   "login": {
-    "subtitle": "Sign in to your BunkerWeb account"
+    "subtitle": "Sign in to your BunkerWeb account",
+    "title": "Sign In"
   },
   "logs": {
     "all_sources": "All sources (live)",
@@ -2085,7 +2089,11 @@
     "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request."
   },
   "totp": {
-    "prompt": "Please enter your TOTP code."
+    "cant_access": "Can't access your authenticator?",
+    "prompt": "Please enter your TOTP code.",
+    "signing_in": "Signing in to BunkerWeb",
+    "subtitle": "Enter the code from your authenticator app.",
+    "title": "Two-Factor"
   },
   "certificates": {
     "acme_help": "Select services whose existing settings already enable and configure Let's Encrypt. This action only schedules that configuration; certificate details and challenge credentials are not entered here.",

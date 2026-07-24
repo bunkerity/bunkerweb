@@ -5,12 +5,48 @@
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block page %}
-    <!-- Content -->
-    <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1030">
-        <div class="d-flex justify-content-end align-items-center">
-            <!-- Language Selector -->
-            <div class="me-3">{% include "language-selector.html" %}</div>
-            <!-- Theme Toggle -->
+    <div class="setup-screen">
+        <!-- Decorations (shared design-system auth deco, purely decorative) -->
+        <svg class="sw-deco sw-hatch" viewBox="0 0 150 22" aria-hidden="true">
+            <line x1="0" y1="22" x2="14" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="14" y1="22" x2="28" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="28" y1="22" x2="42" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="42" y1="22" x2="56" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="56" y1="22" x2="70" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="70" y1="22" x2="84" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="84" y1="22" x2="98" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="98" y1="22" x2="112" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="112" y1="22" x2="126" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="126" y1="22" x2="140" y2="0" stroke="currentColor" stroke-width="2" />
+            <line x1="140" y1="22" x2="154" y2="0" stroke="currentColor" stroke-width="2" />
+        </svg>
+        <svg class="sw-deco sw-hatch-r" viewBox="0 0 22 150" aria-hidden="true">
+            <line x1="0" y1="14" x2="22" y2="0" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="28" x2="22" y2="14" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="42" x2="22" y2="28" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="56" x2="22" y2="42" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="70" x2="22" y2="56" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="84" x2="22" y2="70" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="98" x2="22" y2="84" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="112" x2="22" y2="98" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="126" x2="22" y2="112" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="140" x2="22" y2="126" stroke="currentColor" stroke-width="1.5" />
+            <line x1="0" y1="154" x2="22" y2="140" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+        <div class="sw-deco sw-rule sw-rule-1"></div>
+        <div class="sw-deco sw-rule sw-rule-2"></div>
+        <div class="sw-deco sw-rule sw-rule-3"></div>
+        <div class="sw-deco sw-vertical-text" aria-hidden="true">Secure like a Bunker</div>
+        <svg class="sw-deco sw-poly" viewBox="0 0 580 105" fill="none" aria-hidden="true">
+            <path d="M1 1 H435 L580 104 H1 Z M1 88 H560" stroke="currentColor" stroke-width="1" />
+        </svg>
+        <!-- Topbar: back-to-login + language selector + theme toggle -->
+        <header class="sw-topbar">
+            <a class="sw-top-btn sw-back" href="{{ url_for('login') }}">
+                <i class="bx bx-arrow-back" aria-hidden="true"></i>
+                <span data-i18n="link.back_to_login">Back to Login</span>
+            </a>
+            <div>{% include "language-selector.html" %}</div>
             <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
                 <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                        for="dark-mode-toggle"
@@ -27,72 +63,67 @@
                        for="dark-mode-toggle"
                        data-i18n="theme.dark">Dark</label>
             </div>
-        </div>
-    </div>
-    <!-- /Theme + Language Toggle -->
-    <div class="theme-bg-surface">
-        <div class="login-background">
-            <div class="container-xxl">
-                <div class="authentication-wrapper authentication-basic container-p-y">
-                    <div class="authentication-inner">
-                        <!-- Register -->
-                        <div class="card px-sm-6 px-0">
-                            <a href="{{ url_for('login') }}">
-                                <i class="bx bx-arrow-back me-1" aria-hidden="true"></i>
-                                <span data-i18n="link.back_to_login">back to login</span></a>
-                            <div class="card-body">
-                                <!-- Logo -->
-                                <div class="app-brand justify-content-center">
-                                    <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
-                                       target="_blank"
-                                       rel="noopener"
-                                       class="app-brand-link gap-2">
-                                        <span class="app-brand-logo login w-75">
-                                            <img class="img-fluid bw-logo-light"
-                                                 src="{{ url_for('static', filename='img/logo-menu.png') }}"
-                                                 alt="BunkerWeb logo">
-                                            <img class="img-fluid bw-logo-dark"
-                                                 src="{{ url_for('static', filename='img/logo-menu-white.png') }}"
-                                                 alt="BunkerWeb logo">
-                                        </span>
-                                    </a>
-                                </div>
-                                <!-- /Logo -->
-                                <p class="mb-6" data-i18n="totp.prompt">Please enter your TOTP code</p>
-                                <form id="formAuthentication" class="mb-6" method="POST">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                    <input type="hidden"
-                                           name="next"
-                                           value="{{ request.values.get('next', '') }}" />
-                                    <div class="mb-6">
-                                        <label class="form-label"
-                                               for="totp_token"
-                                               data-i18n="form.label.2fa_code_or_recovery">2FA Code or Recovery Code</label>
-                                        <div class="input-group">
-                                            <input type="text"
-                                                   id="totp_token"
-                                                   class="form-control"
-                                                   name="totp_token"
-                                                   placeholder="Enter code"
-                                                   data-i18n="form.placeholder.2fa_or_recovery"
-                                                   autocomplete="one-time-code"
-                                                   autofocus
-                                                   required />
-                                        </div>
-                                    </div>
-                                    <div class="mb-6">
-                                        <button class="btn btn-primary d-grid w-100 don-jose"
-                                                type="submit"
-                                                data-i18n="button.submit">Submit</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        <!-- /Register -->
-                    </div>
+        </header>
+        <!-- TOTP card -->
+        <div class="sw-card totp-card">
+            <div class="sw-brand">
+                <img class="bw-logo-light" src="{{ url_for('static', filename='img/logo-menu.png') }}" alt="BunkerWeb" />
+                <img class="bw-logo-dark" src="{{ url_for('static', filename='img/logo-menu-white.png') }}" alt="BunkerWeb" />
+            </div>
+            <div class="sw-card-head">
+                <div>
+                    <p class="sw-subtitle" data-i18n="totp.subtitle">Enter the code from your authenticator app.</p>
                 </div>
             </div>
+            <form method="POST" id="totp-form" class="totp-body">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden"
+                       name="next"
+                       value="{{ request.values.get('next', '') }}" />
+                <div class="totp-user">
+                    <span class="totp-avatar"><i class="bx bx-user" aria-hidden="true"></i></span>
+                    <div>
+                        <div class="t">{{ current_user.username }}</div>
+                        <div class="d" data-i18n="totp.signing_in">Signing in to BunkerWeb</div>
+                    </div>
+                </div>
+                <!-- Single real input (name=totp_token) styled as 6 boxes via the
+                     .totp-code-boxes underlay — one field so 1Password / Bitwarden /
+                     SMS one-time-code autofill and clipboard paste all work. -->
+                <div class="totp-code-wrap" id="totpInputs">
+                    <div class="totp-code-boxes" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <input class="totp-code"
+                           type="text"
+                           name="totp_token"
+                           id="totp_token"
+                           inputmode="numeric"
+                           autocomplete="one-time-code"
+                           maxlength="6"
+                           pattern="\d{6}"
+                           aria-label="6-digit authentication code"
+                           spellcheck="false"
+                           autofocus
+                           required />
+                </div>
+                <div class="sw-key-status" id="totpStatus"></div>
+                <button type="button" class="sw-btn sw-btn-next totp-verify" id="totpVerify" disabled>
+                    <span data-i18n="button.verify">Verify</span> <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                </button>
+                <div class="totp-alt">
+                    <span data-i18n="totp.cant_access">Can't access your authenticator?</span>
+                    <button type="button"
+                            class="totp-link"
+                            id="totpRecovery"
+                            data-i18n="link.use_recovery_code">Use a recovery code</button>
+                </div>
+            </form>
         </div>
     </div>
-    <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/totp.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}
