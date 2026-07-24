@@ -146,7 +146,7 @@
         {% endfor %}
     </head>
     <body data-page-title="{{ page_title_fallback if page_title_fallback else 'BunkerWeb UI' }}"
-          data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}">
+          data-authenticated="{{ 'true' if current_user is defined and current_user.is_authenticated else 'false' }}">
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="is-admin" value="{{ user_admin }}" />

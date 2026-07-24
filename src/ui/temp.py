@@ -103,6 +103,24 @@ def not_found_handler(error):
     return render_template("starting.html", message=message, error=error)
 
 
+@app.errorhandler(500)
+def internal_error_handler(error):
+    # Last-resort boot placeholder: rendering starting.html failed, so serve dependency-free
+    # inline HTML (no template, no context vars) — the startup phase must never surface a bare
+    # Werkzeug 500. 503 + auto-refresh so clients keep retrying until main.py takes over 7000.
+    html = (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        '<meta http-equiv="refresh" content="3"><title>BunkerWeb UI is starting…</title>'
+        "<style>body{font-family:system-ui,-apple-system,sans-serif;display:flex;min-height:100vh;"
+        "margin:0;align-items:center;justify-content:center;background:#1c1e2c;color:#fff}"
+        "div{text-align:center}</style></head>"
+        "<body><div><h1>BunkerWeb UI is starting…</h1>"
+        "<p>Please wait, this page will refresh automatically.</p></div></body></html>"
+    )
+    return html, 503, {"Retry-After": "3"}
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def catch_all(path):
