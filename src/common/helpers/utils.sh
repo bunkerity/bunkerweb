@@ -120,14 +120,14 @@ function get_nginx_conf_dir() {
 	echo "/etc/nginx"
 }
 
-# Export key/value pairs from a simple env file (KEY=VALUE lines).
+# Export shell-compatible key/value pairs from a simple env file (KEY=VALUE lines).
 function export_env_file() {
 	local env_file=$1
 	[ -f "$env_file" ] || return 0
 	while IFS='=' read -r key value; do
 		[[ -z "$key" || "$key" =~ ^# ]] && continue
 		key=$(echo "$key" | xargs)
-		[[ -z "$key" ]] && continue
+		[[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
 		export "$key=$value"
 	done < "$env_file"
 }
