@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 from contextlib import suppress
 from datetime import datetime
+from os import getenv
 from typing import Any, Dict, List, Optional
 
 from model import Instances, Metadata  # type: ignore
 
+from certificate_utils import decrypt_private_key, encrypt_private_key  # type: ignore
 from common_utils import is_valid_host  # type: ignore
+
+from cryptography.exceptions import InvalidTag
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -27,6 +31,9 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
         name: Optional[str] = None,
         listen_https: bool = False,
         https_port: int = 5443,
+        credential: Optional[str] = None,
+        tls_mode: Optional[str] = None,
+        tls_fingerprint: Optional[str] = None,
     ) -> str:
         """Add instance."""
         if not is_valid_host(hostname):
@@ -41,6 +48,19 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
             if db_instance is not None:
                 return f"Instance {hostname} already exists, will not be added."
 
+            credential_columns: Dict[str, Any] = {}
+            if credential:
+                encrypted = self._encrypt_instance_credential(hostname, credential)
+                if encrypted is not None:
+                    ciphertext, nonce, key_id = encrypted
+                    credential_columns = {
+                        "credential_ciphertext": ciphertext,
+                        "credential_nonce": nonce,
+                        "credential_key_id": key_id,
+                        "credential_updated_at": datetime.now().astimezone(),
+                    }
+                # else: encryption unavailable (already logged); the instance falls back to the global token
+
             current_time = datetime.now().astimezone()
             session.add(
                 Instances(
@@ -53,6 +73,9 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                     method=method,
                     creation_date=current_time,
                     last_seen=current_time,
+                    tls_mode=tls_mode or "off",
+                    tls_fingerprint=tls_fingerprint or None,
+                    **credential_columns,
                 )
             )
 
@@ -148,6 +171,8 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
 
             session.execute(delete(Instances).where(Instances.method == method))
 
+            global_token = getenv("API_TOKEN")
+
             for instance in instances:
                 if instance.get("hostname") is None:
                     continue
@@ -165,6 +190,8 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                     db_instance.status = instance.get("status", "up" if instance.get("health", True) else "down")
                     db_instance.method = instance.get("method", method)
                     db_instance.last_seen = instance.get("last_seen", current_time)
+                    for column, value in self._reconcile_credential_columns(instance["hostname"], instance.get("env"), global_token).items():
+                        setattr(db_instance, column, value)
                     to_put.append(db_instance)
                     continue
 
@@ -181,6 +208,7 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                         method=instance.get("method", method),
                         creation_date=instance.get("creation_date", current_time),
                         last_seen=instance.get("last_seen", current_time),
+                        **self._reconcile_credential_columns(instance["hostname"], instance.get("env"), global_token),
                     )
                 )
 
@@ -232,9 +260,11 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
         https_port: Optional[int] = None,
         server_name: Optional[str] = None,
         method: Optional[str] = None,
+        tls_mode: Optional[str] = None,
+        tls_fingerprint: Optional[str] = None,
         changed: Optional[bool] = True,
     ) -> str:
-        """Update instance metadata fields (name, port, server_name, method)."""
+        """Update instance metadata fields (name, port, server_name, method, tls_mode, tls_fingerprint)."""
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -254,6 +284,10 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                 update_values["server_name"] = server_name
             if method is not None:
                 update_values["method"] = method
+            if tls_mode is not None:
+                update_values["tls_mode"] = tls_mode
+            if tls_fingerprint is not None:
+                update_values["tls_fingerprint"] = tls_fingerprint or None
 
             try:
                 if update_values:
@@ -275,8 +309,100 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
 
         return ""
 
-    def get_instances(self, *, method: Optional[str] = None, autoconf: bool = False) -> List[Dict[str, Any]]:
-        """Get instances."""
+    def _encrypt_instance_credential(self, hostname: str, token: str) -> Optional[tuple]:
+        """Encrypt a per-instance credential with the shared AES-256-GCM keyring.
+
+        Best-effort: returns None (and logs) when no keyring is configured so an
+        optional per-instance token never breaks instance persistence — the dial
+        simply falls back to the global API_TOKEN.
+        """
+        try:
+            return encrypt_private_key(token.encode("utf-8"), hostname)
+        except Exception as e:  # keyring absent/misconfigured must never break persistence
+            self.logger.warning(f"Could not encrypt the credential for instance {hostname}; it will fall back to the global API token: {e}")
+            return None
+
+    def _decrypt_instance_credential(self, instance: Instances) -> Optional[str]:
+        """Decrypt a stored per-instance credential; None when unset or unreadable."""
+        if not instance.credential_ciphertext or not instance.credential_nonce or not instance.credential_key_id:
+            return None
+        try:
+            return decrypt_private_key(instance.credential_ciphertext, instance.credential_nonce, instance.credential_key_id, instance.hostname).decode("utf-8")
+        except (InvalidTag, ValueError) as e:
+            self.logger.error(f"Could not decrypt the credential for instance {instance.hostname}: {e}")
+            return None
+
+    def _reconcile_credential_columns(self, hostname: str, env: Optional[Dict[str, Any]], global_token: Optional[str]) -> Dict[str, Any]:
+        """Credential columns for an autoconf reconcile insert/update.
+
+        Encrypt the instance's own API_TOKEN only when it is present and distinct
+        from the global one; otherwise leave it unset so the dial falls back to the
+        global token. Autoconf rows are env-sourced, so re-sourcing each reconcile
+        is correct and needs no side table.
+        """
+        cleared = {"credential_ciphertext": None, "credential_nonce": None, "credential_key_id": None, "credential_updated_at": None}
+        env_token = (env or {}).get("API_TOKEN")
+        if not env_token or env_token == global_token:
+            return cleared
+        encrypted = self._encrypt_instance_credential(hostname, env_token)
+        if encrypted is None:
+            return cleared
+        ciphertext, nonce, key_id = encrypted
+        return {
+            "credential_ciphertext": ciphertext,
+            "credential_nonce": nonce,
+            "credential_key_id": key_id,
+            "credential_updated_at": datetime.now().astimezone(),
+        }
+
+    def set_instance_credential(self, hostname: str, token: Optional[str], *, changed: Optional[bool] = True) -> str:
+        """Set (or clear, when token is falsy) the per-instance control-plane credential."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            if token:
+                encrypted = self._encrypt_instance_credential(hostname, token)
+                if encrypted is None:
+                    return "No certificate encryption keyring is configured; cannot store a per-instance credential"
+                ciphertext, nonce, key_id = encrypted
+                values: Dict[str, Any] = {
+                    "credential_ciphertext": ciphertext,
+                    "credential_nonce": nonce,
+                    "credential_key_id": key_id,
+                    "credential_updated_at": datetime.now().astimezone(),
+                }
+            else:
+                values = {"credential_ciphertext": None, "credential_nonce": None, "credential_key_id": None, "credential_updated_at": None}
+
+            try:
+                result = session.execute(update(Instances).filter_by(hostname=hostname).values(values), execution_options={"synchronize_session": False})
+                if result.rowcount == 0:
+                    return f"Instance {hostname} does not exist, will not be updated."
+
+                if changed:
+                    with suppress(ProgrammingError, OperationalError):
+                        session.execute(
+                            update(Metadata).filter_by(id=1).values({"instances_changed": True, "last_instances_change": datetime.now().astimezone()})
+                        )
+
+                session.commit()
+            except BaseException as e:
+                return f"An error occurred while updating the credential of instance {hostname}.\n{e}"
+
+        return ""
+
+    def get_instance_credential(self, hostname: str) -> Optional[str]:
+        """Return the decrypted per-instance credential, or None when unset/unreadable."""
+        with self._db_session() as session:
+            instance = session.scalars(select(Instances).filter_by(hostname=hostname).limit(1)).first()
+            if not instance:
+                return None
+            return self._decrypt_instance_credential(instance)
+
+    def get_instances(self, *, method: Optional[str] = None, autoconf: bool = False, with_credential: bool = False) -> List[Dict[str, Any]]:
+        """Get instances. Set with_credential=True (internal dial callers only) to
+        include the decrypted per-instance token; never expose it to API clients."""
         with self._db_session() as session:
             query = select(Instances)
             if method:
@@ -295,13 +421,19 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                     "method": instance.method,
                     "creation_date": instance.creation_date,
                     "last_seen": instance.last_seen,
+                    "tls_mode": instance.tls_mode,
+                    "tls_fingerprint": instance.tls_fingerprint,
+                    "credential_set": instance.credential_ciphertext is not None,
+                    "credential_updated_at": instance.credential_updated_at.astimezone().isoformat() if instance.credential_updated_at else None,
                 }
                 | ({"health": instance.status == "up", "env": {}} if autoconf else {})
+                | ({"credential": self._decrypt_instance_credential(instance)} if with_credential else {})
                 for instance in session.scalars(query)
             ]
 
-    def get_instance(self, hostname: str, *, method: Optional[str] = None) -> Dict[str, Any]:
-        """Get instance."""
+    def get_instance(self, hostname: str, *, method: Optional[str] = None, with_credential: bool = False) -> Dict[str, Any]:
+        """Get instance. Set with_credential=True (internal dial callers only) to
+        include the decrypted per-instance token; never expose it to API clients."""
         with self._db_session() as session:
             query = select(Instances).filter_by(hostname=hostname)
             if method:
@@ -324,4 +456,8 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                 "method": instance.method,
                 "creation_date": instance.creation_date,
                 "last_seen": instance.last_seen,
-            }
+                "tls_mode": instance.tls_mode,
+                "tls_fingerprint": instance.tls_fingerprint,
+                "credential_set": instance.credential_ciphertext is not None,
+                "credential_updated_at": instance.credential_updated_at.astimezone().isoformat() if instance.credential_updated_at else None,
+            } | ({"credential": self._decrypt_instance_credential(instance)} if with_credential else {})

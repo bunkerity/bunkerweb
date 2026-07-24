@@ -116,6 +116,26 @@ class UnbanRequest(BaseModel):
 
 
 # Instances
+def _normalize_tls_mode(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    value = value.strip().lower()
+    if value not in ("off", "pinned"):
+        raise ValueError('tls_mode must be "off" or "pinned"')
+    return value
+
+
+def _normalize_tls_fingerprint(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    normalized = value.strip().lower().replace(":", "")
+    if normalized == "":
+        return None
+    if len(normalized) != 64 or any(c not in "0123456789abcdef" for c in normalized):
+        raise ValueError("tls_fingerprint must be a SHA-256 hex digest (64 hex chars, optional colons)")
+    return normalized
+
+
 class InstanceCreateRequest(BaseModel):
     hostname: str
     name: Optional[str] = Field(None, description="Friendly name for the instance")
@@ -124,6 +144,9 @@ class InstanceCreateRequest(BaseModel):
     https_port: Optional[int] = Field(None, description="API HTTPS port; defaults from settings if omitted")
     server_name: Optional[str] = Field(None, description="API server_name/Host header; defaults if omitted")
     method: Optional[str] = Field("ui", description='Source method tag (defaults to "ui")')
+    credential: Optional[str] = Field(None, description="Per-instance control-plane API token (write-only; stored encrypted, never returned)")
+    tls_mode: Optional[str] = Field(None, description='Per-instance TLS trust for control-plane dials: "off" (default) or "pinned"')
+    tls_fingerprint: Optional[str] = Field(None, description="Peer certificate SHA-256 hex digest; required for tls_mode=pinned")
 
     @field_validator("hostname")
     @classmethod
@@ -131,6 +154,16 @@ class InstanceCreateRequest(BaseModel):
         if "@" in value:
             raise ValueError("hostname must not contain '@'")
         return value
+
+    @field_validator("tls_mode")
+    @classmethod
+    def validate_tls_mode(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_tls_mode(value)
+
+    @field_validator("tls_fingerprint")
+    @classmethod
+    def validate_tls_fingerprint(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_tls_fingerprint(value)
 
 
 class InstancesDeleteRequest(BaseModel):
@@ -144,6 +177,19 @@ class InstanceUpdateRequest(BaseModel):
     https_port: Optional[int] = Field(None, description="API HTTPS port")
     server_name: Optional[str] = Field(None, description="API server_name/Host header")
     method: Optional[str] = Field(None, description="Source method tag")
+    credential: Optional[str] = Field(None, description="Per-instance control-plane API token (write-only); empty string clears it")
+    tls_mode: Optional[str] = Field(None, description='Per-instance TLS trust: "off" or "pinned"')
+    tls_fingerprint: Optional[str] = Field(None, description="Peer certificate SHA-256 hex digest; required for tls_mode=pinned")
+
+    @field_validator("tls_mode")
+    @classmethod
+    def validate_tls_mode(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_tls_mode(value)
+
+    @field_validator("tls_fingerprint")
+    @classmethod
+    def validate_tls_fingerprint(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_tls_fingerprint(value)
 
 
 # Services

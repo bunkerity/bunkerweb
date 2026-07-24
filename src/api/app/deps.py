@@ -16,9 +16,9 @@ def get_instances_api_caller() -> ApiCaller:
     db = get_db(log=False)
     apis = []
     try:
-        for inst in db.get_instances():
+        for inst in db.get_instances(with_credential=True):
             try:
-                apis.append(API.from_instance(inst))
+                apis.append(API.from_instance(inst, token=inst.get("credential")))
             except Exception:
                 continue
     except Exception:
@@ -29,7 +29,7 @@ def get_instances_api_caller() -> ApiCaller:
 
 def get_api_for_hostname(hostname: str) -> API:
     """Dependency returning a single API client targeting the given hostname."""
-    inst = get_db(log=False).get_instance(hostname)
+    inst = get_db(log=False).get_instance(hostname, with_credential=True)
     if not inst:
         raise HTTPException(status_code=404, detail=f"Instance {hostname} not found")
-    return API.from_instance(inst)
+    return API.from_instance(inst, token=inst.get("credential"))

@@ -42,6 +42,7 @@ PLUGIN_TYPES_ENUM = Enum("core", "external", "ui", "pro", name="plugin_types_enu
 PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
 INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum")
 INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", "failover", name="instance_status_enum")
+INSTANCE_TLS_MODE_ENUM = Enum("off", "pinned", name="instance_tls_mode_enum")
 RESOURCE_KINDS_ENUM = Enum("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum")
 RESOURCE_TYPES_ENUM = Enum("certificate", name="resource_types_enum")
 CERTIFICATE_SOURCES_ENUM = Enum("letsencrypt", "customcert", "selfsigned", name="certificate_sources_enum")
@@ -313,6 +314,18 @@ class Instances(Base):
     method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False, default="manual")
     creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # Per-instance control-plane→instance credential (opaque API token), encrypted at
+    # rest with the shared AES-256-GCM keyring (certificate_utils); the hostname is the
+    # AAD. Nullable: rows without one fall back to the global API_TOKEN when dialing.
+    credential_ciphertext: Mapped[Optional[bytes]] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=True)
+    credential_nonce: Mapped[Optional[bytes]] = mapped_column(LargeBinary(12), nullable=True)
+    credential_key_id: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    credential_updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Per-instance TLS trust for control-plane dials: "off" keeps today's behavior
+    # (unverified + silent HTTP fallback); "pinned" requires the presented leaf's
+    # SHA-256 to equal tls_fingerprint and disables the HTTPS→HTTP downgrade.
+    tls_mode: Mapped[str] = mapped_column(INSTANCE_TLS_MODE_ENUM, nullable=False, default="off", server_default="off")
+    tls_fingerprint: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
 
 class Bw_cli_commands(Base):

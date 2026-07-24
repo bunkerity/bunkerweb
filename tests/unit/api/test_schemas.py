@@ -204,3 +204,28 @@ class TestCertificateRequests:
     def test_metadata_rejects_provider_owned_keys(self, key):
         with pytest.raises(ValidationError, match="provider-managed"):
             schemas.CertificateUpdateRequest(renewal_metadata={key: "caller-controlled"})
+
+
+class TestInstanceTlsValidators:
+    def test_tls_mode_normalized(self):
+        assert schemas.InstanceCreateRequest(hostname="bw-1", tls_mode="PINNED").tls_mode == "pinned"
+        assert schemas.InstanceUpdateRequest(tls_mode="off").tls_mode == "off"
+
+    def test_tls_mode_invalid(self):
+        with pytest.raises(ValidationError):
+            schemas.InstanceCreateRequest(hostname="bw-1", tls_mode="verify")
+
+    def test_tls_fingerprint_strips_colons_and_lowercases(self):
+        raw = ":".join(["AB"] * 32)  # 64 hex chars, colon-separated, uppercase
+        assert schemas.InstanceCreateRequest(hostname="bw-1", tls_fingerprint=raw).tls_fingerprint == "ab" * 32
+
+    def test_tls_fingerprint_invalid_length(self):
+        with pytest.raises(ValidationError):
+            schemas.InstanceCreateRequest(hostname="bw-1", tls_fingerprint="deadbeef")
+
+    def test_tls_fingerprint_non_hex(self):
+        with pytest.raises(ValidationError):
+            schemas.InstanceCreateRequest(hostname="bw-1", tls_fingerprint="z" * 64)
+
+    def test_credential_write_field_accepted(self):
+        assert schemas.InstanceCreateRequest(hostname="bw-1", credential="tok").credential == "tok"

@@ -242,7 +242,8 @@ def _build_api_caller(instances, *, hostnames=None) -> ApiCaller:
     for inst in instances:
         if hostnames is not None and inst.get("hostname") not in hostnames:
             continue
-        apis.append(API.from_instance(inst, token=token))
+        # Per-instance credential wins; fall back to the global API token when unset.
+        apis.append(API.from_instance(inst, token=inst.get("credential") or token))
     return ApiCaller(apis)
 
 
@@ -343,7 +344,7 @@ try:
 
     db = Database(LOGGER)
 
-    instances = [inst for inst in db.get_instances() if inst.get("status") != "down"]
+    instances = [inst for inst in db.get_instances(with_credential=True) if inst.get("status") != "down"]
     if not instances:
         LOGGER.warning("No live BunkerWeb instances registered; nothing to push")
         sys_exit(0)

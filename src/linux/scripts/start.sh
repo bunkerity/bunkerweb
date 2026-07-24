@@ -194,6 +194,9 @@ function start() {
     # Ensure the internal default-server certificate exists before rendering/starting
     generate_default_server_cert || log "SYSTEMCTL" "⚠️" "Continuing without a freshly generated default-server certificate"
 
+    # Ensure the internal API-server certificate exists (only when API_LISTEN_HTTPS=yes)
+    generate_api_server_cert || log "SYSTEMCTL" "⚠️" "Continuing without a freshly generated API-server certificate"
+
     if [[ "$regenerate_temp_config" == "true" ]] ; then
         if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
             --variables "$tmp_env_path"; then

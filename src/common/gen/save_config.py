@@ -162,26 +162,74 @@ if __name__ == "__main__":
 
         settings = config.get_config(db, first_run=args.first_run)
 
-        # Parse BunkerWeb instances from environment using centralized endpoint builder
-        apis = []
+        # Parse BunkerWeb instances: the flat BUNKERWEB_INSTANCES list (all inherit the global
+        # API config) plus grouped per-instance BUNKERWEB_INSTANCE_* settings (numeric suffix,
+        # no suffix = group 0) that can override listen_https / ports / server_name / api_token / tls.
+        instance_defs = []
         hostnames = set()
-        for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split():
+
+        def _register_instance(
+            raw_host, *, listen_https=None, port=None, https_port=None, server_name=None, credential=None, tls_mode=None, tls_fingerprint=None
+        ):
+            eff_listen_https = (settings.get("API_LISTEN_HTTPS", "no") or "no").lower() == "yes" if listen_https is None else listen_https
+            eff_port = port or settings.get("API_HTTP_PORT")
+            eff_https_port = https_port or settings.get("API_HTTPS_PORT")
             try:
-                endpoint = API.build_endpoint(
-                    bw_instance,
-                    port=settings.get("API_HTTP_PORT"),
-                    listen_https=(settings.get("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
-                    https_port=settings.get("API_HTTPS_PORT"),
-                )
+                endpoint = API.build_endpoint(raw_host, port=eff_port, listen_https=eff_listen_https, https_port=eff_https_port)
             except ValueError as e:
-                LOGGER.warning(f"Invalid BunkerWeb instance {bw_instance}: {e}, skipping it")
-                continue
-            hostname = urlsplit(endpoint).hostname
+                LOGGER.warning(f"Invalid BunkerWeb instance {raw_host}: {e}, skipping it")
+                return
+            parsed = urlsplit(endpoint)
+            hostname = parsed.hostname or "127.0.0.1"
             if hostname in hostnames:
                 LOGGER.warning(f"Duplicate BunkerWeb instance hostname {hostname}, skipping it")
-                continue
+                return
             hostnames.add(hostname)
-            apis.append(API(endpoint, host=settings.get("API_SERVER_NAME", "bwapi")))
+            is_https = parsed.scheme == "https"
+            http_port_default = settings.get("API_HTTP_PORT", getenv("API_HTTP_PORT", "5000"))
+            https_port_default = settings.get("API_HTTPS_PORT", getenv("API_HTTPS_PORT", "5443"))
+            if is_https:
+                http_port_val = int(eff_port or http_port_default)
+                https_port_val = int(parsed.port or eff_https_port or https_port_default)
+            else:
+                http_port_val = int(parsed.port or eff_port or http_port_default)
+                https_port_val = int(eff_https_port or https_port_default)
+            instance_defs.append(
+                {
+                    "hostname": hostname,
+                    "port": http_port_val,
+                    "https_port": https_port_val,
+                    "listen_https": is_https,
+                    "server_name": server_name or settings.get("API_SERVER_NAME", "bwapi"),
+                    "credential": credential or None,
+                    "tls_mode": (tls_mode or "").strip().lower() or None,
+                    "tls_fingerprint": (tls_fingerprint or "").strip() or None,
+                }
+            )
+
+        # Grouped per-instance declarations first (their richer config wins on hostname dedup).
+        _instance_host_rx = re_compile(r"^BUNKERWEB_INSTANCE_HOST(?:_(?P<idx>\d+))?$")
+        _group_suffixes = sorted({(m.group("idx") or "0") for key in environ for m in (_instance_host_rx.match(key),) if m}, key=int)
+        for _idx in _group_suffixes:
+            _suffix = "" if _idx == "0" else f"_{_idx}"
+            _raw_host = environ.get(f"BUNKERWEB_INSTANCE_HOST{_suffix}", "").strip()
+            if not _raw_host:
+                continue
+            _listen_https_env = environ.get(f"BUNKERWEB_INSTANCE_LISTEN_HTTPS{_suffix}")
+            _register_instance(
+                _raw_host,
+                listen_https=(_listen_https_env.strip().lower() == "yes") if _listen_https_env is not None else None,
+                port=environ.get(f"BUNKERWEB_INSTANCE_PORT{_suffix}"),
+                https_port=environ.get(f"BUNKERWEB_INSTANCE_HTTPS_PORT{_suffix}"),
+                server_name=environ.get(f"BUNKERWEB_INSTANCE_SERVER_NAME{_suffix}"),
+                credential=environ.get(f"BUNKERWEB_INSTANCE_API_TOKEN{_suffix}"),
+                tls_mode=environ.get(f"BUNKERWEB_INSTANCE_TLS_MODE{_suffix}"),
+                tls_fingerprint=environ.get(f"BUNKERWEB_INSTANCE_TLS_FINGERPRINT{_suffix}"),
+            )
+
+        # Flat BUNKERWEB_INSTANCES list (all inherit the global API config).
+        for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split():
+            _register_instance(bw_instance)
 
         changes = []
         changed_plugins = set()
@@ -208,34 +256,24 @@ if __name__ == "__main__":
 
         changes.append("instances")
 
-        for api in apis:
-            parsed = urlsplit(api.endpoint)
-            hostname = parsed.hostname or "127.0.0.1"
-            scheme = parsed.scheme
-            listen_https = scheme == "https"
-            http_port_default = settings.get("API_HTTP_PORT", getenv("API_HTTP_PORT", "5000"))
-            https_port_default = settings.get("API_HTTPS_PORT", getenv("API_HTTPS_PORT", "5443"))
-            if listen_https:
-                http_port_val = http_port_default
-                https_port_val = int(parsed.port or https_port_default)
-            else:
-                http_port_val = int(parsed.port or http_port_default)
-                https_port_val = https_port_default
-
+        for inst in instance_defs:
             err = db.add_instance(
-                hostname,
-                http_port_val,
-                api.host,
+                inst["hostname"],
+                inst["port"],
+                inst["server_name"],
                 method="manual",
                 changed=False,
-                listen_https=listen_https,
-                https_port=https_port_val,
+                listen_https=inst["listen_https"],
+                https_port=inst["https_port"],
+                credential=inst["credential"],
+                tls_mode=inst["tls_mode"],
+                tls_fingerprint=inst["tls_fingerprint"],
             )
 
             if err:
                 LOGGER.warning(err)
             else:
-                LOGGER.info(f"Instance {hostname} successfully saved to database")
+                LOGGER.info(f"Instance {inst['hostname']} successfully saved to database")
 
         if not args.no_check_changes:
             # update changes in db

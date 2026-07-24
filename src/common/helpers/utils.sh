@@ -291,43 +291,46 @@ function handle_docker_secrets() {
 	fi
 }
 
-# Load-or-generate the internal default-server self-signed certificate.
+# Load-or-generate an internal self-signed certificate (EC secp384r1 / SHA-512 /
+# 10 years, catch-all CN=www.example.org). Shared core for the internal
+# default-server and API-server certs. Args: <cert_file> <key_file> <log_tag>.
 #
-# This cert is config-free (no settings gate; catch-all CN=www.example.org), so
-# every BunkerWeb instance self-provisions it into the persistent, never-shipped
-# /var/lib/bunkerweb BEFORE nginx renders/starts. That guarantees the
-# default-server (and per-service bootstrap) HTTPS block always has a cert on
-# disk regardless of the scheduler/worker — killing the first-boot race and
-# fixing the no-worker integrations (Linux/k8s/Swarm/FreeBSD). It replaces the
-# retired `default-server-cert` job. Idempotent: regenerates only when the files
-# are missing or the cert expires within 30 days.
-function generate_default_server_cert() {
-	local cert_dir="/var/lib/bunkerweb"
-	local cert_file="${cert_dir}/default-server-cert.pem"
-	local key_file="${cert_dir}/default-server-cert.key"
+# The certs are self-provisioned into the persistent, never-shipped
+# /var/lib/bunkerweb BEFORE nginx renders/starts, so the HTTPS blocks always have
+# a cert on disk regardless of the scheduler/worker/broker — killing the
+# first-boot race and fixing the no-worker integrations (Linux/k8s/Swarm/FreeBSD).
+# Idempotent: regenerates only when the files are missing, the cert expires within
+# 30 days, or the key/cert pair is torn (mismatched pubkey from an interrupted run,
+# which would pass checkend but fail nginx load).
+function _generate_self_signed_cert() {
+	local cert_file="$1"
+	local key_file="$2"
+	local log_tag="$3"
+	local cert_dir
+	cert_dir=$(dirname "$cert_file")
 
 	local openssl_bin
 	openssl_bin=$(command -v openssl 2>/dev/null || echo /usr/bin/openssl)
 
-	# Reuse when both files exist, the cert is not expiring within 30 days, AND the
-	# key matches the cert. The pair check guards against a torn regeneration (crash
-	# between the two mv's below) that would otherwise leave a mismatched pem/key
-	# that passes checkend but fails nginx load.
 	if [ -f "$cert_file" ] && [ -f "$key_file" ] \
 		&& "$openssl_bin" x509 -checkend 2592000 -noout -in "$cert_file" >/dev/null 2>&1 \
 		&& [ "$("$openssl_bin" x509 -in "$cert_file" -noout -pubkey 2>/dev/null)" = "$("$openssl_bin" pkey -in "$key_file" -pubout 2>/dev/null)" ]; then
 		return 0
 	fi
 
-	log "DEFAULT-SERVER-CERT" "ℹ️" "Generating internal default-server self-signed certificate ..."
+	log "$log_tag" "ℹ️" "Generating internal self-signed certificate ..."
 	mkdir -p "$cert_dir"
+
+	local cert_name key_name
+	cert_name=$(basename "$cert_file")
+	key_name=$(basename "$key_file")
 	# Sweep any stale temp files left by a previous interrupted run.
-	rm -f "${cert_dir}"/.default-server-cert.pem.* "${cert_dir}"/.default-server-cert.key.* 2>/dev/null || true
+	rm -f "${cert_dir}/.${cert_name}."* "${cert_dir}/.${key_name}."* 2>/dev/null || true
 
 	local conf_file tmp_cert tmp_key
 	conf_file=$(mktemp) || return 1
-	tmp_cert=$(mktemp "${cert_dir}/.default-server-cert.pem.XXXXXX") || { rm -f "$conf_file"; return 1; }
-	tmp_key=$(mktemp "${cert_dir}/.default-server-cert.key.XXXXXX") || { rm -f "$conf_file" "$tmp_cert"; return 1; }
+	tmp_cert=$(mktemp "${cert_dir}/.${cert_name}.XXXXXX") || { rm -f "$conf_file"; return 1; }
+	tmp_key=$(mktemp "${cert_dir}/.${key_name}.XXXXXX") || { rm -f "$conf_file" "$tmp_cert"; return 1; }
 
 	cat > "$conf_file" <<'EOF'
 [req]
@@ -355,7 +358,7 @@ EOF
 	# block to apply to an -x509 cert (req_extensions alone only affects CSRs).
 	if ! "$openssl_bin" req -nodes -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 \
 		-keyout "$tmp_key" -out "$tmp_cert" -days 3650 -sha512 -config "$conf_file" -extensions v3_req >/dev/null 2>&1; then
-		log "DEFAULT-SERVER-CERT" "❌" "Failed to generate internal default-server certificate"
+		log "$log_tag" "❌" "Failed to generate internal self-signed certificate"
 		rm -f "$conf_file" "$tmp_cert" "$tmp_key"
 		return 1
 	fi
@@ -371,6 +374,23 @@ EOF
 	fi
 
 	return 0
+}
+
+# The internal default-server cert is config-free (catch-all CN=www.example.org),
+# the bootstrap/fallback leaf of every vhost — always generated. Replaces the
+# retired `default-server-cert` job.
+function generate_default_server_cert() {
+	_generate_self_signed_cert "/var/lib/bunkerweb/default-server-cert.pem" "/var/lib/bunkerweb/default-server-cert.key" "DEFAULT-SERVER-CERT"
+}
+
+# The internal API-server cert secures the instance's internal API listener
+# (api.conf, consumed only when API_LISTEN_HTTPS=yes). Self-provisioned here so
+# HTTPS is available from the first render with no scheduler/worker/broker,
+# keeping the private key on the instance (never in the DB, never pushed in
+# cleartext). Replaces the retired `api-server-cert` job. No-op unless HTTPS is on.
+function generate_api_server_cert() {
+	[ "${API_LISTEN_HTTPS:-no}" = "yes" ] || return 0
+	_generate_self_signed_cert "/var/lib/bunkerweb/api-server-cert.pem" "/var/lib/bunkerweb/api-server-cert.key" "API-SERVER-CERT"
 }
 
 # ============================================================================

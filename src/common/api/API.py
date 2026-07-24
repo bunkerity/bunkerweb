@@ -5,7 +5,8 @@ from copy import deepcopy
 from typing import Literal, Optional, Union
 from os import getenv
 from urllib.parse import urlsplit
-from requests import request
+from requests import Session, request
+from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError
 from urllib3 import disable_warnings  # new
 from urllib3.exceptions import InsecureRequestWarning  # new
@@ -19,6 +20,20 @@ if getenv("API_SUPPRESS_INSECURE_WARNING", "1").lower() in ("1", "true", "yes", 
         disable_warnings(InsecureRequestWarning)
 
 
+class _FingerprintAdapter(HTTPAdapter):
+    """requests adapter that pins the peer certificate by its SHA-256 fingerprint
+    (urllib3 assert_fingerprint), so a self-signed instance cert is trusted by
+    fingerprint rather than by CA chain."""
+
+    def __init__(self, fingerprint: Optional[str], **kwargs):
+        self._assert_fingerprint = fingerprint
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["assert_fingerprint"] = self._assert_fingerprint
+        super().init_poolmanager(*args, **kwargs)
+
+
 class API:
     """
     Thin HTTP client for BunkerWeb API with centralized endpoint building.
@@ -29,7 +44,15 @@ class API:
     - SSL verification and CA bundle controlled via env or constructor
     """
 
-    def __init__(self, endpoint: str, host: Optional[str] = None, token: Optional[str] = None):
+    def __init__(
+        self,
+        endpoint: str,
+        host: Optional[str] = None,
+        token: Optional[str] = None,
+        *,
+        tls_mode: str = "off",
+        tls_fingerprint: Optional[str] = None,
+    ):
         try:
             scheme, hostname, port = parse_host(endpoint)
         except ValueError as e:
@@ -42,6 +65,9 @@ class API:
         self.__host = host or getenv("API_SERVER_NAME", "bwapi")
         # Optional API token: if not provided, fallback to env var
         self.__token = token if token is not None else getenv("API_TOKEN")
+        # Per-instance TLS trust: "off" (unverified, legacy) or "pinned" (SHA-256)
+        self.__tls_mode = tls_mode or "off"
+        self.__tls_fingerprint = tls_fingerprint
         self.__logger = getLogger("API")
 
     @property
@@ -76,18 +102,28 @@ class API:
         if self.__token:
             headers["Authorization"] = f"Bearer {self.__token}"
 
+        pinned = self.__tls_mode == "pinned" and bool(self.__tls_fingerprint)
+        if self.__tls_mode == "pinned" and not self.__tls_fingerprint:
+            self.__logger.warning(f"Instance {self.__endpoint} is in TLS mode 'pinned' but has no fingerprint; the connection cannot be pinned")
+
+        full_url = f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}"
         try:
-            resp = request(
-                method,
-                f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}",
-                timeout=timeout,
-                headers=deepcopy(headers),
-                verify=False,  # TODO: see what to do about SSL verification
-                **deepcopy(kwargs),
-            )
+            if pinned:
+                # Trust the self-signed instance cert by SHA-256 fingerprint, not CA chain.
+                resp = self.__pinned_session().request(method, full_url, timeout=timeout, headers=deepcopy(headers), verify=False, **deepcopy(kwargs))
+            else:
+                resp = request(
+                    method,
+                    full_url,
+                    timeout=timeout,
+                    headers=deepcopy(headers),
+                    verify=False,  # TODO: per-instance CA verification (tls_mode "verify") is a Tier B follow-up
+                    **deepcopy(kwargs),
+                )
         except ConnectionError as e:
             scheme = urlsplit(self.__endpoint).scheme
-            if scheme == "https":
+            # Pinned instances must never be silently downgraded to plaintext HTTP.
+            if scheme == "https" and not pinned:
                 self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
                 resp = request(
                     method,
@@ -104,6 +140,12 @@ class API:
             return False, f"Request failed: {e}", None, None
 
         return True, "ok", resp.status_code, resp.json()
+
+    def __pinned_session(self) -> Session:
+        """A requests Session that pins the peer cert by SHA-256 for HTTPS dials."""
+        session = Session()
+        session.mount("https://", _FingerprintAdapter(self.__tls_fingerprint))
+        return session
 
     # ------------------ Builders ------------------
     @staticmethod
@@ -165,7 +207,7 @@ class API:
             https_port=instance.get("https_port"),
         )
         host = instance.get("server_name") or getenv("API_SERVER_NAME", "bwapi")
-        return cls(endpoint, host=host, token=token)
+        return cls(endpoint, host=host, token=token, tls_mode=instance.get("tls_mode", "off"), tls_fingerprint=instance.get("tls_fingerprint"))
 
     @classmethod
     def from_url_or_parts(
@@ -177,7 +219,9 @@ class API:
         listen_https: Optional[bool] = None,
         https_port: Optional[int] = None,
         token: Optional[str] = None,
+        tls_mode: str = "off",
+        tls_fingerprint: Optional[str] = None,
     ) -> "API":
         endpoint = cls.build_endpoint(hostname_or_url, port=port, listen_https=listen_https, https_port=https_port)
         host = server_name or getenv("API_SERVER_NAME", "bwapi")
-        return cls(endpoint, host=host, token=token)
+        return cls(endpoint, host=host, token=token, tls_mode=tls_mode, tls_fingerprint=tls_fingerprint)

@@ -4,6 +4,9 @@ Runs against every selected engine via the ``db`` fixture. ``db_init`` seeds the
 singleton Metadata row so the ``changed`` -> ``instances_changed`` paths are exercised.
 """
 
+import base64
+import json
+
 import pytest
 
 
@@ -11,6 +14,18 @@ import pytest
 def db_init(db):
     db.initialize_db("1.7.0", "Docker")
     return db
+
+
+_TEST_KEY_ID = "test-key-1"
+_TEST_KEYRING = json.dumps({_TEST_KEY_ID: base64.b64encode(b"\x00" * 32).decode()})
+
+
+@pytest.fixture
+def db_keyring(db_init, monkeypatch):
+    """A ``db_init`` with a valid AES-256-GCM keyring configured for credential tests."""
+    monkeypatch.setenv("CERTIFICATE_ENCRYPTION_KEYS", _TEST_KEYRING)
+    monkeypatch.setenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", _TEST_KEY_ID)
+    return db_init
 
 
 class TestAddInstance:
@@ -103,3 +118,70 @@ class TestUpdateInstance:
 
     def test_update_fields_missing(self, db_init):
         assert "does not exist" in db_init.update_instance_fields("ghost", name="x")
+
+
+class TestInstanceCredential:
+    def test_add_with_credential_encrypts_and_roundtrips(self, db_keyring):
+        assert db_keyring.add_instance("bw-c", 5000, "bwapi", "manual", credential="secret-token") == ""
+        inst = db_keyring.get_instance("bw-c")
+        # The raw token is never exposed in the normal projection ...
+        assert inst["credential_set"] is True
+        assert "credential" not in inst
+        assert inst["credential_updated_at"] is not None
+        # ... but is decryptable for the dial path.
+        assert db_keyring.get_instance_credential("bw-c") == "secret-token"
+        assert db_keyring.get_instance("bw-c", with_credential=True)["credential"] == "secret-token"
+
+    def test_set_and_clear_credential(self, db_keyring):
+        db_keyring.add_instance("bw-c", 5000, "bwapi", "manual")
+        assert db_keyring.get_instance("bw-c")["credential_set"] is False
+        assert db_keyring.set_instance_credential("bw-c", "tok") == ""
+        assert db_keyring.get_instance_credential("bw-c") == "tok"
+        # An empty token clears it.
+        assert db_keyring.set_instance_credential("bw-c", "") == ""
+        assert db_keyring.get_instance_credential("bw-c") is None
+        assert db_keyring.get_instance("bw-c")["credential_set"] is False
+
+    def test_credential_without_keyring_falls_back(self, db_init, monkeypatch):
+        monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
+        monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
+        # No keyring -> the credential is silently not stored (global-token fallback), not an error.
+        assert db_init.add_instance("bw-nokey", 5000, "bwapi", "manual", credential="tok") == ""
+        assert db_init.get_instance("bw-nokey")["credential_set"] is False
+        assert db_init.get_instance_credential("bw-nokey") is None
+
+
+class TestInstanceTls:
+    def test_tls_mode_and_fingerprint_roundtrip(self, db_init):
+        fp = "a" * 64
+        db_init.add_instance("bw-p", 5000, "bwapi", "manual", tls_mode="pinned", tls_fingerprint=fp)
+        inst = db_init.get_instance("bw-p")
+        assert inst["tls_mode"] == "pinned"
+        assert inst["tls_fingerprint"] == fp
+
+    def test_tls_defaults_off(self, db_init):
+        db_init.add_instance("bw-d", 5000, "bwapi", "manual")
+        inst = db_init.get_instance("bw-d")
+        assert inst["tls_mode"] == "off"
+        assert inst["tls_fingerprint"] is None
+
+    def test_update_tls_fields(self, db_init):
+        db_init.add_instance("bw-u", 5000, "bwapi", "manual")
+        assert db_init.update_instance_fields("bw-u", tls_mode="pinned", tls_fingerprint="b" * 64) == ""
+        inst = db_init.get_instance("bw-u")
+        assert inst["tls_mode"] == "pinned"
+        assert inst["tls_fingerprint"] == "b" * 64
+
+
+class TestReconcileCredential:
+    def test_env_token_distinct_from_global_is_stored(self, db_keyring, monkeypatch):
+        monkeypatch.setenv("API_TOKEN", "global-token")
+        specs = [{"hostname": "bw-e", "env": {"API_HTTP_PORT": 5000, "API_SERVER_NAME": "bwapi", "API_TOKEN": "per-instance-token"}}]
+        assert db_keyring.update_instances(specs, "autoconf") == ""
+        assert db_keyring.get_instance_credential("bw-e") == "per-instance-token"
+
+    def test_env_token_equal_global_not_stored(self, db_keyring, monkeypatch):
+        monkeypatch.setenv("API_TOKEN", "same-token")
+        specs = [{"hostname": "bw-s", "env": {"API_HTTP_PORT": 5000, "API_SERVER_NAME": "bwapi", "API_TOKEN": "same-token"}}]
+        assert db_keyring.update_instances(specs, "autoconf") == ""
+        assert db_keyring.get_instance("bw-s")["credential_set"] is False

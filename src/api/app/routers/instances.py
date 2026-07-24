@@ -200,6 +200,15 @@ def create_instance(req: InstanceCreateRequest) -> JSONResponse:
         code = 400 if "already exists" in err or "read-only" in err else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": err})
 
+    if req.credential:
+        cred_err = db.set_instance_credential(hostname, req.credential)
+        if cred_err:
+            LOGGER.warning(f"Instance {hostname} created but its credential could not be stored: {cred_err}")
+    if req.tls_mode is not None or req.tls_fingerprint is not None:
+        tls_err = db.update_instance_fields(hostname, tls_mode=req.tls_mode, tls_fingerprint=req.tls_fingerprint)
+        if tls_err:
+            LOGGER.warning(f"Instance {hostname} created but its TLS settings could not be applied: {tls_err}")
+
     return JSONResponse(
         status_code=201,
         content={
@@ -212,6 +221,8 @@ def create_instance(req: InstanceCreateRequest) -> JSONResponse:
                 "method": method,
                 "listen_https": listen_https,
                 "https_port": https_port,
+                "tls_mode": req.tls_mode or "off",
+                "credential_set": bool(req.credential),
             },
         },
     )
@@ -258,12 +269,24 @@ def update_instance(hostname: str, req: InstanceUpdateRequest) -> JSONResponse:
         method=req.method,
         listen_https=bool(req.listen_https) if req.listen_https is not None else None,
         https_port=int(req.https_port) if req.https_port is not None else None,
+        tls_mode=req.tls_mode,
+        tls_fingerprint=req.tls_fingerprint,
     )
     if err:
         code = 400 if ("does not exist" in err or "read-only" in err) else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": err})
 
+    # A credential of "" explicitly clears it; None means "leave unchanged".
+    if req.credential is not None:
+        cred_err = db.set_instance_credential(hostname, req.credential)
+        if cred_err:
+            code = 400 if ("does not exist" in cred_err or "read-only" in cred_err) else 500
+            return JSONResponse(status_code=code, content={"status": "error", "message": cred_err})
+
     instance = db.get_instance(hostname)
+    if instance:
+        instance["creation_date"] = instance["creation_date"].astimezone().isoformat() if instance.get("creation_date") else None
+        instance["last_seen"] = instance["last_seen"].astimezone().isoformat() if instance.get("last_seen") else None
     return JSONResponse(status_code=200, content={"status": "success", "instance": instance})
 
 
