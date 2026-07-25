@@ -51,6 +51,32 @@ DATABASE_URI=${DATABASE_URI:-sqlite:////var/lib/bunkerweb/db.sqlite3}
 export DATABASE_URI
 DATABASE=$(echo "$DATABASE_URI" | awk -F: '{print $1}' | awk -F+ '{print $1}')
 
+# Parse DB connection target first (needed for TLS validation)
+# shellcheck disable=SC1091
+source /usr/share/bunkerweb/helpers/db-tls-validate.sh
+if parse_output=$(parse_database_uri); then
+	eval "$parse_output"
+else
+	log "ENTRYPOINT" "⚠️" "Failed to parse DATABASE_URI (error), using defaults"
+	type="(unknown)"
+	database="(none)"
+	host="(local)"
+	user="(none)"
+	ssl_enabled="no"
+	pem_path="(none)"
+fi
+db_ssl_enabled="$ssl_enabled"
+db_pem_path="$pem_path"
+db_port="$port"
+
+# Skip TLS validation for SQLite (local file-based, no network)
+if [ "$type" != "sqlite" ]; then
+	# Validate TLS certificate before any database connection (with system CA fallback)
+	if ! validate_db_tls "ENTRYPOINT" "$db_ssl_enabled" "$db_pem_path" "$host" "$db_port" "$type" "no"; then
+		log "ENTRYPOINT" "⚠️" "TLS validation failed but continuing"
+	fi
+fi
+
 # Check current version and stamp
 log "ENTRYPOINT" "ℹ️" "Checking database version..."
 installed_version=$(cat /usr/share/bunkerweb/VERSION)
@@ -98,6 +124,9 @@ fi
 DATABASE_URI=$(cat /var/tmp/bunkerweb/database_uri)
 export DATABASE_URI
 rm -f /var/tmp/bunkerweb/database_uri
+
+# Log parsed database connection info
+log "ENTRYPOINT" "ℹ️" "Scheduler DB target: type=${type} database=${database} host=${host} port=${port} user=${user} ssl=${ssl_enabled} pem=${pem_path}"
 
 # Update configuration files
 if [ "$current_version" != "$installed_version" ]; then
