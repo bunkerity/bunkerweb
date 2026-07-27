@@ -27,7 +27,8 @@ from common_utils import (
     normalize_select_value,
     trim_scalar_value,
 )  # type: ignore
-from redirect_resolver import config_servers, inline_redirect_conflict  # type: ignore
+from location_claims import LOCATION_FAMILIES, inline_location_conflict  # type: ignore
+from redirect_resolver import config_servers, scan_prefixes  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
@@ -272,22 +273,25 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     self.logger.warning(error)
                     return error
 
-            # An inline REDIRECT_* rule must not claim a source path a redirect resource
-            # already serves on the same service: two rules on one path make the winner
-            # depend on NGINX location ordering. The mirror of the check attach_redirect
-            # runs when the resource side changes.
-            if any(isinstance(key, str) and "REDIRECT_TO" in key for key in config):
+            # reverseproxy, grpc and redirect all render a `location` into the same server, and
+            # NGINX refuses two locations with the same URI. An incoming inline rule of any of
+            # them must therefore not land on a path an attached resource already serves — the
+            # mirror of the check the redirects and upstreams mixins run on the resource side.
+            if any(isinstance(key, str) and any(trigger in key for trigger, _ in LOCATION_FAMILIES.values()) for key in config):
                 try:
                     service_redirects = self._service_redirects(session)
+                    service_upstreams = self._service_upstreams(session)
                 except (ProgrammingError, OperationalError) as exc:
                     session.rollback()
-                    self.logger.warning(f"Could not load redirect resources while validating config: {exc}")
-                    service_redirects = {}
+                    self.logger.warning(f"Could not load attached resources while validating config: {exc}")
+                    service_redirects, service_upstreams = {}, {}
 
                 multisite = str(config.get("MULTISITE", "no")) == "yes"
                 for server in config_servers(config):
                     paths = [rule["from_path"] for rule in service_redirects.get(server, [])]
-                    if error := inline_redirect_conflict(config, server, paths, multisite=multisite):
+                    # A stream pool has no location, so it cannot collide with one.
+                    paths += [pool["match_path"] or "/" for pool in service_upstreams.get(server, []) if pool.get("protocol") != "stream"]
+                    if error := inline_location_conflict(config, server, scan_prefixes(server, multisite), paths):
                         self.logger.warning(error)
                         return error
 

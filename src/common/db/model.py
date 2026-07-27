@@ -48,7 +48,14 @@ RESOURCE_KINDS_ENUM = Enum("ip", "country", "asn", "rdns", "user_agent", "uri", 
 # (redirects, then upstreams) would otherwise cost a schema migration on four engines just
 # to widen a constraint, and PostgreSQL enum values cannot be dropped on downgrade. Writes
 # validate against this tuple instead.
-CORE_RESOURCE_TYPES = ("certificate", "redirect")
+CORE_RESOURCE_TYPES = ("certificate", "redirect", "upstream")
+# Load-balancing methods an upstream pool can use. "round_robin" is NGINX's default and emits
+# no directive; the other two are plain http upstream directives, no third-party module needed.
+UPSTREAM_METHODS = ("round_robin", "least_conn", "ip_hash")
+# What consumes the pool. "http" and "grpc" both live in the http context and share a service's
+# location namespace (proxy_pass / grpc_pass); "stream" lives in the stream context and has no
+# path at all. Orthogonal to backend_ssl, so grpc-over-TLS stays expressible.
+UPSTREAM_PROTOCOLS = ("http", "grpc", "stream")
 
 
 class Base(DeclarativeBase):
@@ -455,6 +462,7 @@ class Resources(Base):
 
     certificate: Mapped[Optional["Certificates"]] = relationship("Certificates", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     redirect: Mapped[Optional["Redirects"]] = relationship("Redirects", back_populates="resource", cascade="all, delete-orphan", uselist=False)
+    upstream: Mapped[Optional["Upstreams"]] = relationship("Upstreams", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     attachments: Mapped[List["ResourceAttachments"]] = relationship("ResourceAttachments", back_populates="resource", cascade="all, delete-orphan")
 
 
@@ -503,14 +511,67 @@ class Redirects(Base):
     resource: Mapped["Resources"] = relationship("Resources", back_populates="redirect")
 
 
+class Upstreams(Base):
+    __tablename__ = "bw_upstreams"
+
+    resource_id: Mapped[str] = mapped_column(String(36), ForeignKey("bw_resources.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    # Not an enum, for the same reason as ``Certificates.source``: widening a DB enum costs a
+    # migration on four engines. Validated against UPSTREAM_METHODS on write.
+    method: Mapped[str] = mapped_column(String(32), nullable=False, default="round_robin")
+    # Which directive consumes the pool; validated against UPSTREAM_PROTOCOLS on write.
+    protocol: Mapped[str] = mapped_column(String(16), nullable=False, default="http", server_default="http")
+    # Talk TLS to the members: picks https:// over http:// and grpcs:// over grpc://. Kept
+    # orthogonal to protocol so gRPC over TLS does not need its own protocol value.
+    backend_ssl: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    # ``keepalive N`` in the rendered block; NULL means the directive is not emitted at all,
+    # which is not the same as 0 (NGINX rejects 0).
+    keepalive: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    resource: Mapped["Resources"] = relationship("Resources", back_populates="upstream")
+    servers: Mapped[List["UpstreamServers"]] = relationship(
+        "UpstreamServers", back_populates="upstream", cascade="all, delete-orphan", order_by="UpstreamServers.order"
+    )
+
+
+class UpstreamServers(Base):
+    __tablename__ = "bw_upstream_servers"
+    # Uniqueness of ``host`` inside a pool is enforced by the DB-layer validator, not here:
+    # a String(256) column in a key exceeds the index byte limit of older MySQL/MariaDB row
+    # formats, the same constraint ResourceGroupEntries works around.
+    __table_args__ = (UniqueConstraint("resource_id", "order"),)
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    resource_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("bw_upstreams.resource_id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True
+    )
+    host: Mapped[str] = mapped_column(String(256), nullable=False)
+    weight: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    max_fails: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    fail_timeout: Mapped[str] = mapped_column(String(16), nullable=False, default="10s")
+    backup: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    down: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    upstream: Mapped["Upstreams"] = relationship("Upstreams", back_populates="servers")
+
+
 class ResourceAttachments(Base):
     __tablename__ = "bw_resource_attachments"
-    __table_args__ = (UniqueConstraint("resource_id", "service_id"), Index("ix_bw_resource_attachments_service_primary", "service_id", "is_primary"))
+    __table_args__ = (
+        UniqueConstraint("resource_id", "service_id", "match_path"),
+        Index("ix_bw_resource_attachments_service_primary", "service_id", "is_primary"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     resource_id: Mapped[str] = mapped_column(String(36), ForeignKey("bw_resources.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     service_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    # Where the resource applies inside the service. Only upstreams use it (the reverse-proxy
+    # location path); certificates and redirects attach to the whole service and keep "".
+    # Empty string rather than NULL on purpose: it is part of the unique constraint, and on
+    # most engines NULL never equals NULL, which would silently allow duplicate certificate
+    # attachments on one service.
+    match_path: Mapped[str] = mapped_column(String(256), nullable=False, default="", server_default="")
     creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     resource: Mapped["Resources"] = relationship("Resources", back_populates="attachments")
@@ -762,6 +823,12 @@ API_PERMISSION_ENUM = Enum(
     "redirect_update",
     "redirect_delete",
     "redirect_assign",
+    # Upstream resource permissions
+    "upstream_read",
+    "upstream_create",
+    "upstream_update",
+    "upstream_delete",
+    "upstream_assign",
     name="api_permission_enum",
 )
 
@@ -778,6 +845,7 @@ API_RESOURCE_ENUM = Enum(
     "resource_groups",
     "certificates",
     "redirects",
+    "upstreams",
     name="api_resource_enum",
 )
 

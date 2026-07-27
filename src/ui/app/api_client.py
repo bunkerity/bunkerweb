@@ -335,6 +335,35 @@ class ApiClient(BaseApiClient):
     def detach_redirect(self, redirect_id, service_id):
         return self._delete(f"/redirects/{redirect_id}/attachments/{service_id}")
 
+    # Upstreams
+
+    def get_upstreams(self, search="", service_id="", offset=0, limit=500):
+        params = {"offset": offset, "limit": limit}
+        for key, value in (("search", search), ("service_id", service_id)):
+            if value:
+                params[key] = value
+        return self._get("/upstreams", params=params)
+
+    def get_upstream(self, upstream_id):
+        data = self._get(f"/upstreams/{upstream_id}")
+        return data.get("upstream", data)
+
+    def create_upstream(self, **kwargs):
+        return self._post("/upstreams", json=kwargs)
+
+    def update_upstream(self, upstream_id, **kwargs):
+        return self._patch(f"/upstreams/{upstream_id}", json=kwargs)
+
+    def delete_upstream(self, upstream_id):
+        return self._delete(f"/upstreams/{upstream_id}")
+
+    def attach_upstream(self, upstream_id, service_id, match_path="/"):
+        return self._post(f"/upstreams/{upstream_id}/attachments", json={"service_id": service_id, "match_path": match_path})
+
+    def detach_upstream(self, upstream_id, service_id, match_path=""):
+        params = {"match_path": match_path} if match_path else None
+        return self._delete(f"/upstreams/{upstream_id}/attachments/{service_id}", params=params)
+
     # ── Configs ─────────────────────────────────────────────────────────
 
     def get_configs(self, service=None, type=None, with_drafts=True, with_data=False):

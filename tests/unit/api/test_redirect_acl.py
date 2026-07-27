@@ -45,4 +45,5 @@ def test_permissions_are_declared_in_the_model_enum():
     model = (ROOT / "src" / "common" / "db" / "model.py").read_text(encoding="utf-8")
     for permission in ("redirect_read", "redirect_create", "redirect_update", "redirect_delete", "redirect_assign"):
         assert f'"{permission}"' in model
-    assert '"redirects",\n    name="api_resource_enum"' in model
+    resource_enum = model.split("API_RESOURCE_ENUM = Enum(", 1)[1].split(")", 1)[0]
+    assert '"redirects"' in resource_enum

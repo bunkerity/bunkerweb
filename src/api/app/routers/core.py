@@ -18,6 +18,7 @@ from .templates import router as templates_router
 from .resource_groups import router as resource_groups_router
 from .certificates import router as certificates_router
 from .redirects import router as redirects_router
+from .upstreams import router as upstreams_router
 from .metadata import router as metadata_router
 from .metrics import router as metrics_router
 
@@ -57,5 +58,6 @@ router.include_router(templates_router)
 router.include_router(resource_groups_router)
 router.include_router(certificates_router)
 router.include_router(redirects_router)
+router.include_router(upstreams_router)
 router.include_router(metadata_router)
 router.include_router(metrics_router)

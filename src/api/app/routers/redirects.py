@@ -26,7 +26,9 @@ def list_redirects(
     limit: int = Query(100, ge=1, le=500),
 ) -> JSONResponse:
     result = get_db().get_redirects(search=search, service_id=service_id, offset=offset, limit=limit)
-    return JSONResponse(status_code=200, content={"status": "success", "redirects": result["items"], **{key: result[key] for key in ("total", "offset", "limit")}})
+    return JSONResponse(
+        status_code=200, content={"status": "success", "redirects": result["items"], **{key: result[key] for key in ("total", "offset", "limit")}}
+    )
 
 
 @router.post("", dependencies=[Depends(guard)])

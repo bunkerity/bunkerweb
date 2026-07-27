@@ -1,0 +1,312 @@
+{% extends "dashboard.html" %}
+{% from "components/alert.html" import alert %}
+{% from "components/badge.html" import badge %}
+{% from "components/button.html" import button %}
+{% from "components/card.html" import card %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/modal.html" import modal %}
+{% from "components/search.html" import search %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row (same treatment as the redirects page). #}
+{% block page_head %}{% endblock %}
+{% block content %}
+    {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
+    {% set upstreams_url = url_for("upstreams.upstreams_page") %}
+
+    {% macro server_row() -%}
+        <div class="row g-2 align-items-end upstream-server-row mb-2">
+            <div class="col-md-4">
+                <label class="form-label small" data-i18n="upstreams.server_host">Server</label>
+                <input class="form-control form-control-sm" name="server_host" maxlength="256" placeholder="10.0.0.1:8080" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small" data-i18n="upstreams.server_weight">Weight</label>
+                <input class="form-control form-control-sm" type="number" name="server_weight" min="1" max="1000" value="1" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small" data-i18n="upstreams.server_max_fails">Max fails</label>
+                <input class="form-control form-control-sm" type="number" name="server_max_fails" min="0" max="1000" value="1" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small" data-i18n="upstreams.server_fail_timeout">Fail timeout</label>
+                <input class="form-control form-control-sm" name="server_fail_timeout" maxlength="16" value="10s" />
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small" data-i18n="upstreams.server_role">Role</label>
+                {# A select rather than checkboxes: every row must submit a value or the
+                   parallel form lists shift onto the wrong server. #}
+                <select class="form-select form-select-sm" name="server_role">
+                    <option value="primary" data-i18n="upstreams.role.primary">Primary</option>
+                    <option value="backup" data-i18n="upstreams.role.backup">Backup</option>
+                    <option value="down" data-i18n="upstreams.role.down">Down</option>
+                </select>
+            </div>
+            <div class="col-md-1 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm upstream-server-remove" aria-label="Remove this server">
+                    <i class="bx bx-trash" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    {%- endmacro %}
+
+    {% macro pool_fields(prefix) -%}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="{{ prefix }}-name" data-i18n="table.header.name">Name</label>
+                <input class="form-control"
+                       id="{{ prefix }}-name"
+                       name="name"
+                       maxlength="64"
+                       pattern="[A-Za-z0-9_-]+"
+                       required />
+                <div class="form-text" data-i18n="upstreams.name_help">Letters, digits, hyphens and underscores only. Dots are refused so a pool name can never shadow a real host.</div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="{{ prefix }}-protocol" data-i18n="upstreams.protocol">Protocol</label>
+                <select class="form-select" id="{{ prefix }}-protocol" name="protocol">
+                    {% for value in protocols %}
+                        <option value="{{ value }}" data-i18n="upstreams.protocols.{{ value }}">{{ value }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text" data-i18n="upstreams.protocol_help">HTTP and gRPC pools are attached to a path; a stream pool takes over the whole TCP/UDP service.</div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="{{ prefix }}-method" data-i18n="upstreams.method">Load balancing</label>
+                <select class="form-select" id="{{ prefix }}-method" name="method">
+                    {% for value in methods %}
+                        {# Options live under their own key: i18next cannot hold both a string
+                           and a nested object at "upstreams.method". #}
+                        <option value="{{ value }}" data-i18n="upstreams.balancing.{{ value }}">{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="{{ prefix }}-keepalive" data-i18n="upstreams.keepalive">Keepalive</label>
+                <input class="form-control" id="{{ prefix }}-keepalive" type="number" name="keepalive" min="1" max="10000" placeholder="off" />
+                <div class="form-text" data-i18n="upstreams.keepalive_help">Idle connections kept per worker. HTTP and gRPC only; leave empty to disable.</div>
+            </div>
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="{{ prefix }}-backend-ssl" name="backend_ssl" value="yes" />
+                    <label class="form-check-label" for="{{ prefix }}-backend-ssl" data-i18n="upstreams.backend_ssl">Talk TLS to the servers (https:// / grpcs://)</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="{{ prefix }}-description" data-i18n="table.header.description">Description</label>
+                <textarea class="form-control" id="{{ prefix }}-description" name="description" maxlength="4000" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label" data-i18n="upstreams.servers">Servers</label>
+                <div class="upstream-servers" id="{{ prefix }}-servers">{{ server_row() }}</div>
+                {{ button(label="Add server", i18n_key="upstreams.add_server", variant="outline-secondary", size="sm", icon="bx-plus", classes="upstream-server-add") }}
+            </div>
+        </div>
+    {%- endmacro %}
+
+    {% call page_head(title="Upstreams", title_i18n="navigation.upstreams",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Upstreams", "navigation.upstreams", none)]) %}
+        {{ button(label="New upstream", i18n_key="upstreams.new", size="sm", icon="bx-plus", modal_target="upstream-create-modal", disabled=readonly, classes="don-jose") }}
+    {% endcall %}
+
+    {% if readonly %}
+        {{ alert(message="The database is read-only. Upstreams can be inspected but not changed.", message_key="upstreams.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
+    {% endif %}
+    {% if truncated %}
+        {{ alert(message="Only the first 500 upstreams are displayed. Narrow the list through the API for the complete result.", message_key="upstreams.truncated", variant="warning", icon="bx-info-circle", classes="mb-4") }}
+    {% endif %}
+
+    {% call card(classes="p-4 min-vh-70") %}
+        <div class="d-flex flex-wrap gap-2 align-items-end mb-4">
+            <div class="flex-grow-1">
+                {{ search(id="upstreams-search", placeholder="Search name, description, or server...", i18n_key="upstreams.search", size="sm", clearable=true, clear_id="upstreams-search-clear") }}
+            </div>
+            <div>
+                <label class="form-label small" for="upstreams-service-filter" data-i18n="table.header.service">Service</label>
+                <select class="form-select form-select-sm" id="upstreams-service-filter">
+                    <option value="" data-i18n="upstreams.all">All</option>
+                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        {% if upstreams %}
+            <div class="table-responsive">
+                <table class="table align-middle upstreams-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="table.header.name">Name</th>
+                            <th data-i18n="upstreams.servers">Servers</th>
+                            <th data-i18n="upstreams.method">Load balancing</th>
+                            <th data-i18n="table.header.service">Services</th>
+                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pool in upstreams %}
+                            <tr class="upstream-row" data-upstream-id="{{ pool.id }}">
+                                <td>
+                                    <div class="fw-semibold">
+                                        {{ pool.name }}
+                                        {{ badge(text=pool.protocol, i18n_key="upstreams.protocols." ~ pool.protocol, variant="secondary", classes="ms-1") }}
+                                        {% if pool.backend_ssl %}{{ badge(text="TLS", variant="secondary", classes="ms-1") }}{% endif %}
+                                    </div>
+                                    {% if pool.description %}<div class="text-muted small text-truncate">{{ pool.description }}</div>{% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column gap-1">
+                                        {% for server in pool.servers %}
+                                            <span>
+                                                <code>{{ server.host }}</code>
+                                                {% if server.backup %}{{ badge(text="backup", i18n_key="upstreams.role.backup", variant="secondary", classes="ms-1") }}{% endif %}
+                                                {% if server.down %}{{ badge(text="down", i18n_key="upstreams.role.down", variant="danger", classes="ms-1") }}{% endif %}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <code>{{ pool.method }}</code>
+                                    {% if pool.keepalive %}
+                                        {{ badge(text="keepalive " ~ pool.keepalive, variant="secondary", classes="ms-1") }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if pool.services %}
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for attachment in pool.services %}
+                                                <span class="badge bg-label-primary d-inline-flex align-items-center gap-1">
+                                                    {{ attachment.service_id }}<code class="ms-1">{{ attachment.match_path }}</code>
+                                                    {% if not readonly %}
+                                                        <form method="post" action="{{ upstreams_url }}/detach" class="d-inline">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                                            <input type="hidden" name="upstream_id" value="{{ pool.id }}" />
+                                                            <input type="hidden" name="service_id" value="{{ attachment.service_id }}" />
+                                                            <input type="hidden" name="match_path" value="{{ attachment.match_path }}" />
+                                                            <button type="submit"
+                                                                    class="btn btn-link btn-sm p-0 lh-1 text-reset"
+                                                                    aria-label="Detach {{ pool.name }} from {{ attachment.service_id }}">
+                                                                <i class="bx bx-x" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {# An unattached pool is never rendered into NGINX: it is stored but no service proxies to it. #}
+                                        {{ badge(text="Not attached", i18n_key="upstreams.not_attached", variant="secondary") }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label="Attach " ~ pool.name ~ " to a service", classes="upstream-attach", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label="Edit " ~ pool.name, classes="upstream-edit", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete " ~ pool.name, classes="upstream-delete", disabled=readonly) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {{ empty_state(title="No upstreams yet", title_key="upstreams.empty_title", text="An upstream is a named pool of backends you attach to one or more services at a reverse proxy path. Inline REVERSE_PROXY_HOST settings keep working alongside it.", text_key="upstreams.empty_text", icon="bx-server") }}
+        {% endif %}
+    {% endcall %}
+
+    {# The page JS reads the pools from here instead of re-parsing the table, so an edit modal
+       is populated from the same values the API returned. #}
+    <input type="hidden" id="upstreams-data" value="{{ upstreams | tojson }}" />
+    <template id="upstream-server-template">{{ server_row() }}</template>
+
+    {% call modal(id="upstream-create-modal", title_key="upstreams.new", title="New upstream", size="lg") %}
+        <form method="post" action="{{ upstreams_url }}/create">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="modal-body">
+                {{ pool_fields("upstream-create") }}
+                <div class="mt-3 row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label" for="upstream-create-services" data-i18n="table.header.service">Services</label>
+                        {# Tagged with the service kind so the page can hide the ones the chosen
+                           protocol cannot serve, instead of letting the API refuse the attach. #}
+                        <select class="form-select" id="upstream-create-services" name="service_ids" multiple size="4">
+                            {% for service in services %}
+                                <option value="{{ service.id }}" data-server-type="{{ service.server_type | default('http') }}">{{ service.id }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text d-none" id="upstream-create-services-hidden"></div>
+                        <div class="form-text" data-i18n="upstreams.services_help">Use Ctrl or Command to select multiple services. An upstream can be attached later.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="upstream-create-path" data-i18n="upstreams.match_path">Reverse proxy path</label>
+                        <input class="form-control" id="upstream-create-path" name="match_path" maxlength="256" value="/" />
+                        <div class="form-text" data-i18n="upstreams.match_path_help">The location the selected services proxy to this pool. Ignored for a stream pool, which takes the whole service.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Create upstream", i18n_key="upstreams.create", icon="bx-plus", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="upstream-edit-modal", title_key="upstreams.edit", title="Edit upstream", size="lg") %}
+        <form method="post" action="{{ upstreams_url }}/update">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="upstream_id" id="upstream-edit-id" />
+            <div class="modal-body">
+                <div id="upstream-edit-shared" class="alert alert-info d-none" role="alert"></div>
+                {{ pool_fields("upstream-edit") }}
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Save upstream", i18n_key="upstreams.save", icon="bx-save", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="upstream-attach-modal", title_key="upstreams.attach", title="Attach upstream") %}
+        <form method="post" action="{{ upstreams_url }}/attach">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="upstream_id" id="upstream-attach-id" />
+            <div class="modal-body">
+                <p id="upstream-attach-copy" class="text-muted"></p>
+                <label class="form-label" for="upstream-attach-services" data-i18n="table.header.service">Services</label>
+                <select class="form-select" id="upstream-attach-services" name="service_ids" multiple size="6" required>
+                    {% for service in services %}
+                        <option value="{{ service.id }}" data-server-type="{{ service.server_type | default('http') }}">{{ service.id }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text d-none" id="upstream-attach-services-hidden"></div>
+                <div class="mt-3">
+                    <label class="form-label" for="upstream-attach-path" data-i18n="upstreams.match_path">Reverse proxy path</label>
+                    <input class="form-control" id="upstream-attach-path" name="match_path" maxlength="256" value="/" />
+                    <div class="form-text" data-i18n="upstreams.match_path_help">The location the selected services proxy to this pool.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Attach", i18n_key="upstreams.attach", icon="bx-link", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="upstream-delete-modal", title_key="upstreams.delete_confirm_title", title="Delete this upstream?") %}
+        <form method="post" action="{{ upstreams_url }}/delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="upstream_id" id="upstream-delete-id" />
+            <div class="modal-body">
+                <p id="upstream-delete-copy"></p>
+                <p class="text-muted small mb-0" data-i18n="upstreams.delete_help">An upstream still attached to a service cannot be deleted. Detach it first.</p>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Delete", i18n_key="button.delete", variant="danger", icon="bx-trash", type="submit") }}
+            </div>
+        </form>
+    {% endcall %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/upstreams.js') }}" nonce="{{ script_nonce }}" defer></script>
+{% endblock %}

@@ -18,6 +18,38 @@ Follow these steps to configure and use the Reverse Proxy feature:
 4. **Configure protocol-specific options:** For WebSockets or special HTTP requirements, adjust the corresponding settings.
 5. **Set up caching (optional):** Enable and configure proxy caching to improve performance for frequently accessed content.
 
+### Reusable Upstreams
+
+The settings below point a location at a single backend. When several backends serve the same application, or several services share the same backends, you can instead declare a **named, reusable pool** — an upstream — from the **Upstreams** page in the web UI or through the `/upstreams` API endpoints, and attach it to as many services as you like. Editing the pool updates every service it is attached to.
+
+- A pool carries a name, a **protocol**, a load-balancing method (`round_robin`, `least_conn` or `ip_hash`), an optional `keepalive` connection count, and one or more servers.
+- Each server carries its address (`host` or `host:port`, no scheme), a `weight`, and the passive health-check parameters `max_fails` and `fail_timeout`; it can also be marked as a `backup` (only used when the others fail) or `down` (temporarily taken out).
+- The **protocol** decides which consumer uses the pool and how it is attached:
+    - `http` — the reverse proxy (`proxy_pass`). Attached to a **service and a path**, so one service can proxy `/` to one pool and `/api` to another.
+    - `grpc` — the gRPC plugin (`grpc_pass`), attached the same way. HTTP and gRPC pools share one path namespace, since both render a `location` into the same server.
+    - `stream` — a TCP/UDP service. There is no path: the pool takes over the whole service and replaces the single implicit backend the stream configuration builds from `REVERSE_PROXY_HOST`. A service can carry only one, and `keepalive` does not apply.
+- The `backend_ssl` switch selects TLS towards the servers: `https://` instead of `http://`, `grpcs://` instead of `grpc://`.
+- The protocol has to match the service: an HTTP or gRPC pool goes on a service whose `SERVER_TYPE` is `http`, a stream pool on one whose `SERVER_TYPE` is `stream`. The web UI only offers the services that fit; the API refuses the rest with an explanation.
+- Inline `REVERSE_PROXY_HOST` and `GRPC_HOST` settings keep working exactly as before. Attached pools are rendered **after** them, taking the next free suffixes, so existing configurations are untouched and no migration is needed. A service with an attached pool has `USE_REVERSE_PROXY` (or `USE_GRPC`) enabled automatically.
+- **One path, one owner.** Reverse proxy, gRPC and **redirects** all render a `location` into the same server, and NGINX rejects two `location` blocks with the same URI. A path is therefore taken across all three at once — whether it is claimed by an attached pool, an attached redirect, or an inline setting — and the conflicting change is refused with a message naming what already holds it.
+- A pool attached to nothing renders nothing, and deleting a pool is refused while it is still attached to a service; detach it first. Changing the protocol of an attached pool is refused for the same reason.
+- Pool names accept letters, digits, hyphens and underscores only. Dots are refused on purpose: NGINX resolves a name against the declared upstreams before the DNS resolver, so a pool named like a real host would capture traffic meant for it.
+
+### Mutual TLS with the upstream
+
+The `REVERSE_PROXY_SSL_VERIFY` settings below check *the backend's* certificate. To also present a certificate **to** the backend — mutual TLS — set the client pair:
+
+- `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` for file paths readable by the scheduler, or `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` for base64 or plaintext PEM, selected by `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` or `data`).
+- The pair is validated with OpenSSL, cached and distributed to every instance by the same job that handles the trusted CA, and written there with owner/group-only permissions.
+- **Both halves are required.** A certificate without its key (or the reverse) is refused rather than half-applied, because NGINX needs both directives or neither.
+- The identity is **per service, and shared with gRPC and stream**: one service authenticates to its backends with one certificate, whichever plugin proxies the traffic. In the stream context this is also what enables TLS to the backend at all (`proxy_ssl on`), so a service without a client pair keeps its current plaintext behaviour.
+- Clearing the settings removes the files on the next run, which turns mutual TLS back off.
+
+This is independent of the `mtls` plugin, which authenticates *clients connecting to BunkerWeb* — the opposite direction.
+
+!!! warning "Unresolvable backends fail the reload"
+    NGINX resolves the addresses of upstream servers when it loads its configuration. If a server of an attached pool cannot be resolved, the whole configuration is refused and BunkerWeb keeps the last valid one. Use an address that resolves at reload time, or mark the server as `down` while it is unavailable.
+
 ### Configuration Guide
 
 === "Basic Configuration"

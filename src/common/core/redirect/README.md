@@ -25,7 +25,7 @@ Beyond the per-service settings below, a redirect can be stored once as a **name
 - A rule carries the same four values as the inline settings: source path, destination URL, status code and whether to append the request URI.
 - Inline `REDIRECT_*` settings keep working exactly as before. Attached rules are rendered **after** them, taking the next free suffixes, so existing configurations are untouched and no migration is needed.
 - A rule attached to nothing renders nothing.
-- Two rules cannot claim the same source path on one service — whether that is two attached rules, or an attached rule and an inline setting. The conflicting change is refused with an explicit message instead of letting NGINX `location` ordering decide.
+- **One path, one owner.** A redirect renders a `location` into the same server as the reverse proxy and gRPC plugins, and NGINX rejects two `location` blocks with the same URI. A source path is therefore taken across all three at once — another redirect, an attached upstream pool, or an inline `REVERSE_PROXY_*`/`GRPC_*` setting — and the conflicting change is refused with a message naming what already holds it.
 - Deleting a rule is refused while it is still attached to a service; detach it first.
 
 ### Configuration Settings

@@ -555,6 +555,89 @@ class RedirectAttachmentRequest(BaseModel):
         return value
 
 
+# Upstreams
+# Every field here ends up verbatim in an NGINX ``upstream {}`` block; the database layer
+# re-validates them, the constraints below only keep obviously malformed payloads out of it.
+class UpstreamServerRequest(BaseModel):
+    host: str = Field(..., min_length=1, max_length=256)
+    weight: int = Field(1, ge=1, le=1000)
+    max_fails: int = Field(1, ge=0, le=1000)
+    fail_timeout: str = Field("10s", min_length=1, max_length=16)
+    backup: bool = False
+    down: bool = False
+
+    @field_validator("host", "fail_timeout")
+    @classmethod
+    def _upstream_server_non_empty(cls, value: str) -> str:
+        value = value.strip()
+        if not value or "\x00" in value:
+            raise ValueError("must be a non-empty string without NUL bytes")
+        return value
+
+
+class UpstreamAttachmentRequest(BaseModel):
+    service_id: str = Field(..., min_length=1, max_length=256)
+    match_path: str = Field("/", min_length=1, max_length=256)
+
+    @field_validator("service_id")
+    @classmethod
+    def _upstream_service_id(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("service_id must be a non-empty string")
+        return value
+
+    @field_validator("match_path")
+    @classmethod
+    def _upstream_match_path(cls, value: str) -> str:
+        value = value.strip()
+        if not value.startswith("/"):
+            raise ValueError("match_path must start with /")
+        return value
+
+
+class UpstreamCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=64)
+    description: str = Field("", max_length=4096)
+    # http and grpc are proxied per location; stream takes over the whole connection and
+    # therefore ignores match_path. backend_ssl is orthogonal (https:// / grpcs://).
+    protocol: Literal["http", "grpc", "stream"] = "http"
+    backend_ssl: bool = False
+    method: Literal["round_robin", "least_conn", "ip_hash"] = "round_robin"
+    keepalive: Optional[int] = Field(None, ge=1, le=10000)
+    servers: List[UpstreamServerRequest] = Field(..., min_length=1, max_length=64)
+    services: List[UpstreamAttachmentRequest] = Field(default_factory=list, max_length=100)
+
+    @field_validator("name")
+    @classmethod
+    def _upstream_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value or "\x00" in value:
+            raise ValueError("must be a non-empty string without NUL bytes")
+        return value
+
+
+class UpstreamUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=64)
+    description: Optional[str] = Field(None, max_length=4096)
+    protocol: Optional[Literal["http", "grpc", "stream"]] = None
+    backend_ssl: Optional[bool] = None
+    method: Optional[Literal["round_robin", "least_conn", "ip_hash"]] = None
+    # Explicitly nullable: null clears the keepalive directive, omitting the field keeps it.
+    keepalive: Optional[int] = Field(None, ge=1, le=10000)
+    servers: Optional[List[UpstreamServerRequest]] = Field(None, min_length=1, max_length=64)
+
+    @field_validator("name")
+    @classmethod
+    def _upstream_optional_name(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value or "\x00" in value:
+            raise ValueError("must be a non-empty string without NUL bytes")
+        return value
+
+
 # Jobs
 class JobItem(BaseModel):
     plugin: str

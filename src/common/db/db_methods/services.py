@@ -20,10 +20,13 @@ class DatabaseServicesMixin(DatabaseMixinBase):
         """Get the services from the database"""
         services = []
         with self._db_session() as session:
-            # Fetch all services with their USE_TEMPLATE and SECURITY_MODE settings in a single optimized query
-            # This avoids N+1 query problem when loading many services
+            # Fetch all services with their USE_TEMPLATE, SECURITY_MODE and SERVER_TYPE settings
+            # in a single optimized query. This avoids N+1 query problem when loading many
+            # services. SERVER_TYPE tells HTTP services apart from stream ones, which callers
+            # need to know before offering anything that only applies to one of the two.
             template_alias = aliased(Services_settings)
             security_mode_alias = aliased(Services_settings)
+            server_type_alias = aliased(Services_settings)
 
             stmt = (
                 select(
@@ -34,10 +37,12 @@ class DatabaseServicesMixin(DatabaseMixinBase):
                     Services.last_update,
                     template_alias.value.label("template"),
                     security_mode_alias.value.label("security_mode"),
+                    server_type_alias.value.label("server_type"),
                 )
                 .select_from(Services)
                 .outerjoin(template_alias, (Services.id == template_alias.service_id) & (template_alias.setting_id == "USE_TEMPLATE"))
                 .outerjoin(security_mode_alias, (Services.id == security_mode_alias.service_id) & (security_mode_alias.setting_id == "SECURITY_MODE"))
+                .outerjoin(server_type_alias, (Services.id == server_type_alias.service_id) & (server_type_alias.setting_id == "SERVER_TYPE"))
             )
 
             if not with_drafts:
@@ -55,6 +60,7 @@ class DatabaseServicesMixin(DatabaseMixinBase):
                     "last_update": service.last_update,
                     "template": service.template or "",
                     "security_mode": service.security_mode or "block",
+                    "server_type": service.server_type or "http",
                 }
             )
 

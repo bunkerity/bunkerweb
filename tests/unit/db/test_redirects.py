@@ -158,7 +158,7 @@ def test_attach_refuses_a_path_another_resource_already_serves(db):
 
     assert db.attach_redirect(first, "app1.example.com") == ""
     error = db.attach_redirect(second, "app1.example.com")
-    assert "already has the redirect docs on path /docs" in error
+    assert "already serves /docs through the redirect “docs”" in error
     assert db.get_redirect_details(second)["services"] == []
 
 
@@ -169,7 +169,7 @@ def test_attach_refuses_a_path_an_inline_rule_already_serves(db):
     add_service_setting(db, service_id="app1.example.com", setting_id="REDIRECT_TO", value="https://inline.example.com")
 
     resource_id = _create(db)
-    assert "already has an inline redirect on path /docs" in db.attach_redirect(resource_id, "app1.example.com")
+    assert "already serves /docs through its own redirect settings" in db.attach_redirect(resource_id, "app1.example.com")
 
 
 def test_a_blank_inline_target_does_not_reserve_the_path(db):
@@ -190,7 +190,7 @@ def test_a_global_inline_rule_reserves_the_path_on_every_service(db):
     add_global_value(db, setting_id="REDIRECT_TO", value="https://global.example.com")
 
     resource_id = _create(db)
-    assert "already has an inline redirect on path /docs" in db.attach_redirect(resource_id, "app1.example.com")
+    assert "already serves /docs through its own redirect settings" in db.attach_redirect(resource_id, "app1.example.com")
 
 
 def test_update_changes_every_attached_service_and_refuses_a_conflict(db):
@@ -206,7 +206,7 @@ def test_update_changes_every_attached_service_and_refuses_a_conflict(db):
     assert (updated["to_url"], updated["status_code"], updated["append_request_uri"]) == ("https://new.example.com", "308", True)
 
     # Moving the source path onto one already served by the other rule is refused.
-    assert "already has the redirect blog on path /blog" in db.update_redirect(resource_id, from_path="/blog")
+    assert "already serves /blog through the redirect “blog”" in db.update_redirect(resource_id, from_path="/blog")
     assert db.get_redirect_details(resource_id)["from_path"] == "/docs"
 
     assert db.update_redirect("missing", name="x") == "Redirect not found"
@@ -255,7 +255,7 @@ def test_save_config_refuses_an_inline_rule_that_collides_with_a_resource(db):
         },
         "ui",
     )
-    assert isinstance(error, str) and "already has a redirect resource on path /docs" in error
+    assert isinstance(error, str) and "already serves /docs through an attached resource" in error
 
 
 def test_save_config_accepts_an_inline_rule_on_a_free_path(db):

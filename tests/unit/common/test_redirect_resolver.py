@@ -99,14 +99,26 @@ def test_non_multisite_uses_unprefixed_keys():
 
 def test_conflict_with_an_inline_rule_aborts_generation():
     config = multisite(**{"app1.example.com_REDIRECT_FROM": "/docs", "app1.example.com_REDIRECT_TO": "https://inline.example.com"})
-    with pytest.raises(RedirectConflictError, match="inline redirect"):
+    with pytest.raises(RedirectConflictError, match="its own inline redirect"):
         expand_service_redirects(config, FakeDB({"app1.example.com": [rule("docs", "/docs", "https://docs.example.com")]}))
 
 
 def test_conflict_between_two_resources_aborts_generation():
     rules = [rule("a", "/dup", "https://one.example.com"), rule("b", "/dup", "https://two.example.com")]
-    with pytest.raises(RedirectConflictError, match="another redirect resource"):
+    with pytest.raises(RedirectConflictError, match="another redirect"):
         expand_service_redirects(multisite(), FakeDB({"app1.example.com": rules}))
+
+
+def test_conflict_with_a_proxied_location_aborts_generation():
+    # reverseproxy and grpc render a `location` into the same server as redirect does, so a
+    # path they already serve is not available to a redirect either.
+    for host_setting, url_setting, label in (
+        ("app1.example.com_REVERSE_PROXY_HOST", "app1.example.com_REVERSE_PROXY_URL", "reverse proxy"),
+        ("app1.example.com_GRPC_HOST", "app1.example.com_GRPC_URL", "gRPC"),
+    ):
+        config = multisite(**{host_setting: "http://backend", url_setting: "/docs"})
+        with pytest.raises(RedirectConflictError, match=f"already served by its {label} configuration"):
+            expand_service_redirects(config, FakeDB({"app1.example.com": [rule("docs", "/docs", "https://docs.example.com")]}))
 
 
 def test_untouched_when_nothing_applies():
@@ -125,6 +137,6 @@ def test_a_database_failure_degrades_instead_of_aborting(quiet_logger):
 
 def test_inline_redirect_conflict_mirrors_the_resource_side_check():
     config = {"MULTISITE": "yes", "app1.example.com_REDIRECT_FROM": "/docs", "app1.example.com_REDIRECT_TO": "https://inline.example.com"}
-    assert "already has a redirect resource on path /docs" in inline_redirect_conflict(config, "app1.example.com", ["/docs"])
+    assert "already serves /docs through an attached resource" in inline_redirect_conflict(config, "app1.example.com", ["/docs"])
     assert inline_redirect_conflict(config, "app1.example.com", ["/other"]) == ""
     assert inline_redirect_conflict(config, "app1.example.com", []) == ""

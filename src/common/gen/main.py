@@ -19,6 +19,7 @@ from Configurator import Configurator
 from Templator import Templator
 from resource_group_resolver import expand_config_groups  # type: ignore
 from redirect_resolver import expand_service_redirects  # type: ignore
+from upstream_resolver import expand_service_upstreams  # type: ignore
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -139,6 +140,12 @@ if __name__ == "__main__":
         # after the group expansion because a resource carries literal values only.
         config = expand_service_redirects(config, db, LOGGER)
         full_config = expand_service_redirects(full_config, db, LOGGER)
+
+        # Same treatment for upstream pools: each attachment takes the next free reverse-proxy
+        # suffix, and every pool used by at least one service is declared globally for the
+        # http-context upstream {} blocks.
+        config = expand_service_upstreams(config, db, LOGGER)
+        full_config = expand_service_upstreams(full_config, db, LOGGER)
 
         # Remove old files
         LOGGER.info("Removing old files ...")

@@ -18,6 +18,8 @@ caller hands it a ``db`` object exposing ``get_service_redirects()``.
 
 from typing import Any, Dict, List
 
+from location_claims import LOCATION_FAMILIES, claimed_paths, family_occupancy, inline_location_conflict, suffix_key  # type: ignore
+
 REDIRECT_TO = "REDIRECT_TO"
 REDIRECT_FROM = "REDIRECT_FROM"
 REDIRECT_REQUEST_URI = "REDIRECT_TO_REQUEST_URI"
@@ -38,7 +40,7 @@ class RedirectConflictError(Exception):
 
 
 def _suffix_key(base: str, index: int) -> str:
-    return base if index == 0 else f"{base}_{index}"
+    return suffix_key(base, index)
 
 
 def config_servers(config: Dict[str, Any]) -> List[str]:
@@ -67,26 +69,11 @@ def scan_prefixes(server: str, multisite: bool) -> List[str]:
 def _occupied(config: Dict[str, Any], prefixes: List[str]) -> Dict[int, str]:
     """``{suffix: from_path}`` for the inline rules that actually render for one server.
 
-    A suffix counts as taken only when its ``REDIRECT_TO`` is non-empty, which is the exact
-    condition the redirect template renders on — so the empty default at suffix 0, and any
-    inline rule the operator blanked out, stay available for a resource. Later prefixes
-    override earlier ones on the same suffix, matching global-then-server-specific merging.
+    Suffix allocation only cares about this family — ``REDIRECT_TO_REQUEST_URI`` and
+    ``REDIRECT_TO_STATUS_CODE`` share the ``REDIRECT_TO`` prefix and are filtered out by the
+    numeric-suffix check in :func:`family_occupancy`.
     """
-    taken: Dict[int, str] = {}
-    for prefix in prefixes:
-        base = f"{prefix}{REDIRECT_TO}"
-        for key, value in config.items():
-            if not isinstance(key, str) or not key.startswith(base):
-                continue
-            suffix = key[len(base) :]  # noqa: E203
-            if suffix and not (suffix.startswith("_") and suffix[1:].isdigit()):
-                continue  # REDIRECT_TO_REQUEST_URI / REDIRECT_TO_STATUS_CODE and their suffixes
-            index = int(suffix[1:]) if suffix else 0
-            if not str(value or "").strip():
-                taken.pop(index, None)  # a server-specific blank disables the inherited rule
-                continue
-            taken[index] = str(config.get(_suffix_key(f"{prefix}{REDIRECT_FROM}", index), "") or config.get(_suffix_key(REDIRECT_FROM, index), "/") or "/")
-    return taken
+    return family_occupancy(config, prefixes, REDIRECT_TO, REDIRECT_FROM)
 
 
 def expand_service_redirects(config: Dict[str, Any], db: Any, logger: Any = None) -> Dict[str, Any]:
@@ -113,15 +100,28 @@ def expand_service_redirects(config: Dict[str, Any], db: Any, logger: Any = None
         if not rules:
             continue
         prefix = f"{server}_" if multisite else ""
-        taken = _occupied(out, scan_prefixes(server, multisite))
+        prefixes = scan_prefixes(server, multisite)
+        taken = _occupied(out, prefixes)
+        # A path is taken by *any* plugin that renders a location into this server, not just by
+        # another redirect: NGINX refuses two location blocks with the same URI whoever emitted
+        # them. Upstream pools are flattened into these same settings before this runs.
+        foreign = claimed_paths(out, prefixes, families={label: pair for label, pair in LOCATION_FAMILIES.items() if label != "redirect"})
         claimed = dict(taken)
         next_index = 0
         for rule in rules:
             from_path = rule["from_path"]
+            if from_path in foreign:
+                raise RedirectConflictError(
+                    f"Redirect {rule['name']} cannot serve {from_path} on {server}: that path is already served by its "
+                    f"{foreign[from_path]} configuration. Detach one of them, or move one to another path."
+                )
             for index, path in claimed.items():
                 if path == from_path:
-                    origin = "an inline redirect" if index in taken else "another redirect resource"
-                    raise RedirectConflictError(f"Service {server} has {origin} on path {from_path}, conflicting with redirect {rule['name']}")
+                    origin = "its own inline redirect" if index in taken else "another redirect"
+                    raise RedirectConflictError(
+                        f"Redirect {rule['name']} cannot serve {from_path} on {server}: that path is already served by "
+                        f"{origin}. Detach one of them, or move one to another path."
+                    )
 
             while next_index in claimed:
                 next_index += 1
@@ -142,11 +142,8 @@ def inline_redirect_conflict(config: Dict[str, Any], server: str, attached_paths
 
     Used by the settings save path, where the incoming value is an inline rule and the
     resources are what the service already carries — the mirror of the check the redirects
-    mixin runs when the resource side changes.
+    mixin runs when the resource side changes. Every family that renders a ``location`` is
+    considered, not just redirects: ``save_config`` passes the union of what the service has
+    attached.
     """
-    if not attached_paths:
-        return ""
-    for path in _occupied(config, scan_prefixes(server, multisite)).values():
-        if path in attached_paths:
-            return f"Service {server} already has a redirect resource on path {path}"
-    return ""
+    return inline_location_conflict(config, server, scan_prefixes(server, multisite), attached_paths)

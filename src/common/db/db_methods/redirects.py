@@ -3,13 +3,14 @@
 
 from datetime import datetime, timezone
 from re import compile as re_compile, error as re_error
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
 
-from model import Global_values, Plugins, Redirects, ResourceAttachments, Resources, Services, Services_settings, Settings  # type: ignore
+from model import Plugins, Redirects, ResourceAttachments, Resources, Services, Settings  # type: ignore
 from sqlalchemy import delete, or_, select, update
 
 from .common import DatabaseMixinBase
+from .locations import location_conflict
 
 # The redirect core plugin owns the schema for these values; a redirect resource is the same
 # rule stored as a first-class object instead of four suffixed settings, so it must accept
@@ -63,54 +64,15 @@ class DatabaseRedirectsMixin(DatabaseMixinBase):
             return "Redirect target is required"
         return ""
 
-    def _inline_redirect_paths(self, session, service_id: str) -> Set[str]:
-        """Source paths already claimed by the service's inline ``REDIRECT_*`` settings.
-
-        Only suffixes with a non-empty ``REDIRECT_TO`` count — that is exactly the condition
-        the redirect template renders on, so a disabled inline rule never blocks a resource.
-        Service values shadow global ones, matching the multisite inheritance the generator
-        applies.
-        """
-        by_suffix: Dict[int, Dict[str, str]] = {}
-        for scope in (
-            select(Global_values.setting_id, Global_values.value, Global_values.suffix).where(
-                Global_values.setting_id.in_(("REDIRECT_FROM", "REDIRECT_TO"))
-            ),
-            select(Services_settings.setting_id, Services_settings.value, Services_settings.suffix).where(
-                Services_settings.service_id == service_id, Services_settings.setting_id.in_(("REDIRECT_FROM", "REDIRECT_TO"))
-            ),
-        ):
-            for row in session.execute(scope):
-                by_suffix.setdefault(row.suffix or 0, {})[row.setting_id] = row.value or ""
-
-        paths: Set[str] = set()
-        for values in by_suffix.values():
-            if values.get("REDIRECT_TO"):
-                paths.add(values.get("REDIRECT_FROM") or "/")
-        return paths
-
-    def _redirect_conflict(self, session, resource_id: str, from_path: str, service_ids: List[str]) -> str:
+    def _redirect_conflict(self, session, resource_id: str, from_path: str, service_ids: List[str], name: str = "") -> str:
         """Return an actionable error when ``from_path`` is already served on a service.
 
-        Two rules on the same source path make the winner depend on NGINX ``location``
-        ordering, which the operator never chose. Refusing the mutation keeps that ambiguity
-        out of the database instead of resolving it silently at render time.
+        The whole location namespace is consulted — reverse proxy and gRPC locations, inline or
+        resource-backed, included — because NGINX refuses two ``location`` blocks with the same
+        URI whichever plugin emitted them. Refusing the mutation keeps a configuration NGINX
+        would reject out of the database instead of discovering it at render time.
         """
-        if not service_ids:
-            return ""
-        rows = session.execute(
-            select(ResourceAttachments.service_id, Resources.name, Redirects.from_path)
-            .join(Resources, Resources.id == ResourceAttachments.resource_id)
-            .join(Redirects, Redirects.resource_id == Resources.id)
-            .where(ResourceAttachments.service_id.in_(service_ids), ResourceAttachments.resource_id != resource_id)
-        ).all()
-        for row in rows:
-            if row.from_path == from_path:
-                return f"Service {row.service_id} already has the redirect {row.name} on path {from_path}"
-        for service_id in service_ids:
-            if from_path in self._inline_redirect_paths(session, service_id):
-                return f"Service {service_id} already has an inline redirect on path {from_path}"
-        return ""
+        return location_conflict(session, resource_id, from_path, service_ids, subject=f"redirect “{name}”" if name else "this redirect")
 
     @staticmethod
     def _attached_service_ids(session, resource_id: str) -> List[str]:
@@ -300,7 +262,7 @@ class DatabaseRedirectsMixin(DatabaseMixinBase):
             if "from_path" in values and values["from_path"] != redirect.from_path:
                 # The rule is shared: moving its source path must not collide on any service
                 # it is already attached to.
-                if error := self._redirect_conflict(session, resource_id, values["from_path"], attached):
+                if error := self._redirect_conflict(session, resource_id, values["from_path"], attached, resource.name):
                     return error
             for field, value in values.items():
                 setattr(redirect, field, value)
@@ -346,7 +308,8 @@ class DatabaseRedirectsMixin(DatabaseMixinBase):
                 select(ResourceAttachments.id).where(ResourceAttachments.resource_id == resource_id, ResourceAttachments.service_id == service_id).limit(1)
             ).first():
                 return ""  # already attached: idempotent, and nothing changed to signal
-            if error := self._redirect_conflict(session, resource_id, redirect.from_path, [service_id]):
+            name = session.execute(select(Resources.name).where(Resources.id == resource_id).limit(1)).scalar_one_or_none() or ""
+            if error := self._redirect_conflict(session, resource_id, redirect.from_path, [service_id], name):
                 return error
             # is_primary stays False: it disambiguates the single certificate NGINX serves per
             # SNI, whereas every attached redirect renders.

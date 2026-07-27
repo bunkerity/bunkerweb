@@ -230,6 +230,54 @@
       "type": "file",
       "accept": ".pem,.crt,.cer,.txt"
     },
+    "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY": {
+      "context": "multisite",
+      "default": "file",
+      "help": "Source of the client certificate and key used for mutual TLS with the upstream: file path or base64/PEM data (file or data).",
+      "id": "reverse-proxy-ssl-client-cert-priority",
+      "label": "Client certificate priority",
+      "regex": "^(file|data)$",
+      "type": "select",
+      "select": ["file", "data"]
+    },
+    "REVERSE_PROXY_SSL_CLIENT_CERT": {
+      "context": "multisite",
+      "default": "",
+      "help": "Path to the PEM client certificate BunkerWeb presents to the upstream (mutual TLS, priority 'file', readable by the scheduler, which caches and distributes it). Requires the matching key; also used for gRPC and stream upstreams.",
+      "id": "reverse-proxy-ssl-client-cert",
+      "label": "SSL client certificate path",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_SSL_CLIENT_CERT_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Client certificate as base64 or plaintext PEM (priority 'data').",
+      "id": "reverse-proxy-ssl-client-cert-data",
+      "label": "Client certificate data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crt,.cer,.txt"
+    },
+    "REVERSE_PROXY_SSL_CLIENT_KEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Path to the PEM private key matching the client certificate (priority 'file'). The key is cached and distributed to instances like any other job artifact, and written with owner/group-only permissions.",
+      "id": "reverse-proxy-ssl-client-key",
+      "label": "SSL client key path",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_SSL_CLIENT_KEY_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Client private key as base64 or plaintext PEM (priority 'data'). Prefer a file path when possible: a key set here is stored as a setting value.",
+      "id": "reverse-proxy-ssl-client-key-data",
+      "label": "Client key data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.key,.txt"
+    },
     "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
       "context": "multisite",
       "default": "1",
