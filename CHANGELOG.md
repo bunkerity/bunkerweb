@@ -7,6 +7,8 @@
 - [BUGFIX] `metrics`: when the metrics memory zone fills up, shed the oldest blocked-request reports instead of silently discarding a worker's whole history, and warn that `METRICS_MEMORY_SIZE` needs raising.
 - [BUGFIX] `metrics`: stop storing the literal string `nil` in Redis for a counter evicted from a worker's LRU mid-sync, which made the `misc`, `blacklist` and `greylist` plugin pages return a 500.
 - [BUGFIX] `ui`: an unreadable counter no longer breaks a whole plugin page, and no longer hides the workers that reported real counts.
+- [BUGFIX] `scheduler`: refresh the job environment in place instead of replacing it on every reload, so jobs stop reading a snapshot of the configuration taken at startup. A DNS-01 service created or edited in the web UI got no certificate until the container was restarted. (Fixes #3755)
+- [BUGFIX] `letsencrypt`: fail the `certbot-new` job when a service cannot get the certificate it asked for instead of reporting success, and write each job's output to `certbot-new.log` and `certbot-renew.log` so the Jobs and Logs pages show why.
 - [UI] Reports page: document the retention model, a rolling buffer capped per worker that is cleared on restart unless Redis is enabled.
 
 ## v1.6.14~rc1 - 2026/07/23
