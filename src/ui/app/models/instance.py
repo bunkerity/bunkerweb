@@ -1536,11 +1536,15 @@ class InstancesUtils:
 
                         # Aggregate values for the same metric name across workers
                         if metric_name in redis_metrics:
-                            if isinstance(redis_metrics[metric_name], (int, float)) and isinstance(decoded_value, (int, float)):
+                            current = redis_metrics[metric_name]
+                            if isinstance(current, (int, float)) and isinstance(decoded_value, (int, float)):
                                 redis_metrics[metric_name] += decoded_value
-                            elif isinstance(redis_metrics[metric_name], list) and isinstance(decoded_value, list):
-                                redis_metrics[metric_name].extend(decoded_value)
-                            # For other types, just use the latest value
+                            elif isinstance(current, list) and isinstance(decoded_value, list):
+                                current.extend(decoded_value)
+                            elif isinstance(decoded_value, (int, float)) and not isinstance(current, (int, float)):
+                                # A garbage per-worker key (SCAN order is arbitrary, so it can
+                                # land first) must not shadow the workers that hold real counts.
+                                redis_metrics[metric_name] = decoded_value
                         else:
                             redis_metrics[metric_name] = decoded_value
 
