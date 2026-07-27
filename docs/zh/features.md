@@ -2929,17 +2929,17 @@ STREAM 支持 :x:
         - **X-Frame-Options：** 通过控制 iframe 嵌入来阻止点击劫持尝试。
         - **Referrer Policy：** 通过 referrer 头限制敏感信息的泄露。
 
-    | 设置                                  | 默认值                                                                                              | 上下文    | 多个 | 描述                                                                              |
-    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | ---- | --------------------------------------------------------------------------------- |
-    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
-    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
-    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
-    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
+    | 设置                                  | 默认值                                                                                                | 上下文    | 多个 | 描述                                                                              |
+    | ------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------- | ---- | --------------------------------------------------------------------------------- |
+    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
+    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
+    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
+    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
     | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
 
     !!! tip "最佳实践"
         -   定期审查和更新您的安全标头，以与不断发展的安全标准保持一致。
@@ -3693,6 +3693,9 @@ STREAM 支持 :warning:
 
 !!! note "工作进程特定存储"
     每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。
+
+!!! warning "报告保留"
+    被拦截请求的报告是一个循环缓冲区，而非审计日志。达到上限后，最旧的报告会被丢弃以便存放新报告，因此 Web UI 中显示的总数会停滞不前：未启用 Redis 时，该上限为 `METRICS_MAX_BLOCKED_REQUESTS` 乘以每个实例的 NGINX 工作进程数；启用 Redis 时则为 `METRICS_MAX_BLOCKED_REQUESTS_REDIS`。报告保存在共享内存中，除非启用并持久化 Redis，否则每次重启 BunkerWeb（包括软件包升级）都会被清空。如需长期保留，请将 NGINX 日志发送到 syslog 服务器或 SIEM。
 
 ### 配置示例
 

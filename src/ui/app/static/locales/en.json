@@ -1049,6 +1049,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Reports are a rolling in-memory buffer: the oldest entries are dropped once the configured limit is reached. Unless Redis is enabled, they are also cleared when BunkerWeb restarts.",
     "security_incident": "Security Incident",
     "security_report_data": "Security Report Data"
   },

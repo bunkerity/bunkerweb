@@ -1042,6 +1042,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Raporlar bellekte tutulan dairesel bir arabellektir: yapılandırılan sınıra ulaşıldığında en eski kayıtlar silinir. Redis etkin değilse, BunkerWeb yeniden başlatıldığında da temizlenirler.",
     "security_incident": "Güvenlik Olayı",
     "security_report_data": "Güvenlik Raporu Verisi"
   },

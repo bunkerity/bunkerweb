@@ -1042,6 +1042,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Les rapports sont un tampon circulaire en mémoire : les entrées les plus anciennes sont supprimées une fois la limite configurée atteinte. Sauf si Redis est activé, ils sont également effacés au redémarrage de BunkerWeb.",
     "security_incident": "Incident de sécurité",
     "security_report_data": "Données du rapport de sécurité"
   },

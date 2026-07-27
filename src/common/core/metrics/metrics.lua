@@ -8,7 +8,6 @@ local utils = require "bunkerweb.utils"
 local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
-local INFO = ngx.INFO
 local WARN = ngx.WARN
 local null = ngx.null
 local unescape_uri = ngx.unescape_uri
@@ -556,10 +555,38 @@ function metrics:timer()
 		-- Push to dict (with LRU eviction if needed)
 		local ok
 		ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
+		-- Shed the oldest half rather than the whole history: set_with_retries already
+		-- force-evicted, so "no memory" means the dict is undersized, and dropping every
+		-- stored entry to make one write fit loses far more than needed. The halving is
+		-- kept in the LRU, so later cycles start from the reduced size.
+		while not ok and err == "no memory" do
+			local live = lru:get(key)
+			if type(live) ~= "table" or #live < 2 then
+				break
+			end
+			for _ = 1, math.floor(#live / 2) do
+				table_remove(live, 1)
+			end
+			lru:set(key, live)
+			self:log_throttled(
+				WARN,
+				"datastore_shed_" .. key,
+				"not enough memory in the metrics datastore, halved LRU key "
+					.. key
+					.. " to "
+					.. #live
+					.. " entries : raise METRICS_MEMORY_SIZE"
+			)
+			ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live))
+		end
 		if not ok then
-			-- If there isn't enough memory : we fallback to delete everything
+			-- Nothing left to shed : drop the key so the next cycle starts clean
 			if err == "no memory" then
-				self.logger:log(INFO, "not enough memory in the metrics datastore, purging LRU key " .. key)
+				self:log_throttled(
+					WARN,
+					"datastore_purge_" .. key,
+					"not enough memory in the metrics datastore, purging LRU key " .. key
+				)
 				lru:delete(key)
 			else
 				ret = false

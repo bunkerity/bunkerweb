@@ -108,6 +108,9 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
 !!! note "Worker-spezifischer Speicher"
     Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.
 
+!!! warning "Aufbewahrung der Berichte"
+    Berichte über blockierte Anfragen sind ein rollierender Puffer, kein Audit-Log. Sobald das Limit erreicht ist, werden die ältesten Berichte verworfen, um Platz für neue zu schaffen. Die in der Web-UI angezeigte Gesamtzahl bleibt deshalb konstant: ohne Redis liegt diese Obergrenze bei `METRICS_MAX_BLOCKED_REQUESTS` multipliziert mit der Anzahl der NGINX-Worker jeder Instanz, mit Redis bei `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Berichte liegen im Shared Memory und werden bei jedem Neustart von BunkerWeb gelöscht, auch bei Paket-Upgrades, sofern Redis nicht aktiviert und persistent ist. Leiten Sie die NGINX-Logs an einen Syslog-Server oder ein SIEM weiter, wenn Sie eine langfristige Aufbewahrung benötigen.
+
 ### Beispielkonfigurationen
 
 === "Grundlegende Konfiguration"

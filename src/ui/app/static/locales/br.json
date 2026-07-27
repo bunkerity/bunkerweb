@@ -1042,6 +1042,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Os relatórios são um buffer circular em memória: as entradas mais antigas são descartadas quando o limite configurado é atingido. A menos que o Redis esteja habilitado, eles também são apagados quando o BunkerWeb reinicia.",
     "security_incident": "Incidente de Segurança",
     "security_report_data": "Dados do Relatório de Segurança"
   },
