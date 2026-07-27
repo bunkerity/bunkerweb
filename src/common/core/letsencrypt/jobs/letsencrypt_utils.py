@@ -1,5 +1,7 @@
 from base64 import b64decode
 from json import loads as json_loads
+from logging import Formatter
+from logging.handlers import RotatingFileHandler
 from os import (
     O_CREAT,
     O_NOFOLLOW,
@@ -26,6 +28,7 @@ from typing import Dict, List, Mapping, Optional, Type, Union
 from pydantic import ValidationError
 
 from common_utils import bytes_hash  # type: ignore
+from logger import DATE_FORMAT, LOG_FORMAT  # type: ignore
 from letsencrypt_providers import (
     BunnyNetProvider,
     ClouDNSProvider,
@@ -69,6 +72,10 @@ LETSENCRYPT_CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
 LETSENCRYPT_DATA_PATH = LETSENCRYPT_CACHE_PATH.joinpath("etc")
 LETSENCRYPT_WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LETSENCRYPT_LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
+
+# Name tagged on the per-job log handler so re-running a job cannot stack duplicates.
+JOB_LOG_HANDLER_NAME = "bw-letsencrypt-job-log"
+JOB_LOG_MAX_BYTES = 1_000_000
 
 LETSENCRYPT_PRODUCTION_DIRECTORY = "https://acme-v02.api.letsencrypt.org/directory"
 LETSENCRYPT_STAGING_DIRECTORY = "https://acme-staging-v02.api.letsencrypt.org/directory"
@@ -354,6 +361,60 @@ def build_certbot_env(job, deps_path: str, base_env: Optional[Dict[str, str]] = 
     return cmd_env
 
 
+def ensure_logs_dir(logs_dir: Union[str, Path], logger) -> Optional[Path]:
+    """Create the Let's Encrypt logs directory and return it, or ``None`` if unusable.
+
+    Split out of :func:`prepare_logs_dir` so a caller can get the directory without also
+    taking that function's process-global ``umask`` side effect.
+    """
+    logs_path = Path(logs_dir)
+    try:
+        logs_path.mkdir(parents=True, exist_ok=True)
+    except BaseException as e:
+        logger.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
+        return None
+
+    try:
+        logs_path.chmod(0o2770)
+    except BaseException as e:
+        logger.debug(f"Failed to set permissions on {logs_path}: {e}")
+
+    return logs_path
+
+
+def attach_job_log_file(logger, file_name: str, logs_dir: Union[str, Path] = LETSENCRYPT_LOGS_DIR) -> None:
+    """Mirror ``logger``'s own records into ``<logs_dir>/<file_name>`` for the Web UI.
+
+    In Docker the scheduler logs only to stdout, so a refused or skipped issuance was
+    invisible outside ``docker logs``. The UI's Let's Encrypt log view globs
+    ``<logs_dir>/*.log*``, which until now only ever contained certbot's own log, and
+    certbot never runs on the skip paths. Child loggers (``<name>.CERTBOT``) propagate
+    here, so they are covered without attaching twice.
+
+    Idempotent: job modules are re-executed on every scheduler reload but ``getLogger``
+    returns the same object, so an unguarded call would stack a handler per reload.
+    """
+    if any(handler.get_name() == JOB_LOG_HANDLER_NAME for handler in logger.handlers):
+        return
+
+    logs_path = ensure_logs_dir(logs_dir, logger)
+    if logs_path is None:
+        return
+
+    try:
+        backup_count = max(0, int((environ.get("LETS_ENCRYPT_MAX_LOG_BACKUPS", "") or "50").strip()))
+    except ValueError:
+        backup_count = 50
+
+    try:
+        handler = RotatingFileHandler(logs_path.joinpath(file_name), maxBytes=JOB_LOG_MAX_BYTES, backupCount=backup_count)
+        handler.set_name(JOB_LOG_HANDLER_NAME)
+        handler.setFormatter(Formatter(LOG_FORMAT, DATE_FORMAT))
+        logger.addHandler(handler)
+    except BaseException as e:
+        logger.error(f"Failed to attach the Let's Encrypt job log file {logs_path.joinpath(file_name)}: {e}")
+
+
 def prepare_logs_dir(logs_dir: Union[str, Path], logger) -> None:
     """Ensure the Let's Encrypt logs directory is writable by the running user."""
     try:
@@ -361,17 +422,9 @@ def prepare_logs_dir(logs_dir: Union[str, Path], logger) -> None:
     except BaseException:
         logger.debug("Failed to set umask to 007 for letsencrypt logs")
 
-    logs_path = Path(logs_dir)
-    try:
-        logs_path.mkdir(parents=True, exist_ok=True)
-    except BaseException as e:
-        logger.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
+    logs_path = ensure_logs_dir(logs_dir, logger)
+    if logs_path is None:
         return
-
-    try:
-        logs_path.chmod(0o2770)
-    except BaseException as e:
-        logger.debug(f"Failed to set permissions on {logs_path}: {e}")
 
     for log_file in logs_path.glob("*.log*"):
         try:

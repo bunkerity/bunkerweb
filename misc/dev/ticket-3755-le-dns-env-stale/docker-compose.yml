@@ -1,0 +1,126 @@
+services:
+  bunkerweb-all-in-one:
+    build:
+      context: ../../..
+      dockerfile: ./src/all-in-one/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
+    container_name: bw-3755-aio
+    depends_on:
+      - bw-db
+      - bind9
+      - pebble
+    ports:
+      # Deliberately off the usual 80/443/7000 so this rig can run beside other dev stacks.
+      - 8355:8080/tcp
+      - 8443:8443/tcp
+      - 7355:7000/tcp
+    volumes:
+      - bw-storage:/data
+      - ./certs:/certs:ro
+      # Only difference from the built image: issuance points at Pebble. See setup.sh.
+      - ./generated/letsencrypt_utils.py:/usr/share/bunkerweb/core/letsencrypt/jobs/letsencrypt_utils.py:ro
+      - ./generated/certbot-new.py:/usr/share/bunkerweb/core/letsencrypt/jobs/certbot-new.py:ro
+    environment:
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
+      MULTISITE: "yes"
+      # Only app1 exists at container start, and it does NOT use Let's Encrypt.
+      # Every DNS-01 service is created afterwards through the Web UI: that is the bug.
+      SERVER_NAME: "app1.bwtest.lan"
+      app1.bwtest.lan_USE_REVERSE_PROXY: "yes"
+      app1.bwtest.lan_REVERSE_PROXY_URL: "/"
+      app1.bwtest.lan_REVERSE_PROXY_HOST: "http://app:8080"
+
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "no"
+      GENERATE_SELF_SIGNED_SSL: "yes"
+      LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
+
+      # Trust the local ACME CA (certbot / acme go through requests).
+      REQUESTS_CA_BUNDLE: "/certs/ca.crt"
+
+      # UI
+      ADMIN_USERNAME: "admin"
+      ADMIN_PASSWORD: "P@ssw0rd"
+      FLASK_SECRET: "secret"
+      CHECK_PRIVATE_IP: "no"
+      SESSIONS_CHECK_IP: "no"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
+    restart: "no"
+    networks:
+      bw-le:
+        ipv4_address: 10.30.55.10
+
+  bw-db:
+    image: mariadb:11
+    container_name: bw-3755-db
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "no"
+    networks:
+      - bw-le
+
+  # Authoritative DNS for bwtest.lan, accepting TSIG-signed RFC2136 updates.
+  bind9:
+    image: internetsystemsconsortium/bind9:9.20
+    container_name: bw-3755-bind9
+    volumes:
+      - ./bind/named.conf:/etc/bind/named.conf:ro
+      - ./bind/bwtest.lan.zone:/zones/bwtest.lan.zone:ro
+    # The zone must live somewhere writable: dynamic updates rewrite it and its journal.
+    # entrypoint, not command: the image's own entrypoint already execs named.
+    entrypoint:
+      - sh
+      - -c
+      - "mkdir -p /var/lib/bind && cp /zones/bwtest.lan.zone /var/lib/bind/ && chown -R bind:bind /var/lib/bind && exec named -g -c /etc/bind/named.conf -u bind"
+    restart: "no"
+    networks:
+      bw-le:
+        ipv4_address: 10.30.55.53
+
+  # Local ACME CA. -dnsserver makes its DNS-01 validation query our bind9.
+  pebble:
+    image: ghcr.io/letsencrypt/pebble:latest
+    container_name: bw-3755-pebble
+    depends_on:
+      - bind9
+    command: -config /test/config/pebble-config.json -dnsserver 10.30.55.53:53
+    environment:
+      PEBBLE_VA_NOSLEEP: "1"
+    volumes:
+      - ./pebble-config.json:/test/config/pebble-config.json:ro
+      - ./certs:/certs:ro
+    restart: "no"
+    networks:
+      bw-le:
+        ipv4_address: 10.30.55.14
+
+  app:
+    image: nginxdemos/nginx-hello
+    container_name: bw-3755-app
+    restart: "no"
+    networks:
+      - bw-le
+
+volumes:
+  bw-data:
+  bw-storage:
+
+networks:
+  bw-le:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.30.55.0/24
