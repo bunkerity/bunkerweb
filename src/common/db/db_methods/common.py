@@ -15,7 +15,7 @@ from logging import Logger
 from sqlite3 import Connection as SQLiteConnection
 from threading import Lock
 from time import sleep
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Tuple, TypeVar
 from warnings import filterwarnings
 
 from model import (  # type: ignore
@@ -202,6 +202,7 @@ class DatabaseMixinBase:
     _request_retry_attempts: int
     _request_retry_delay: float
     _ignore_regex_check: bool
+    _db_keyring: Optional[Dict[str, str]]
 
     # class constants defined on Database
     DB_STRING_RX: Any
@@ -245,6 +246,10 @@ class DatabaseMixinBase:
 
         def is_valid_setting(self, setting: str, **kwargs: Any) -> Tuple[bool, str]:
             """Implemented in a sibling mixin."""
+            ...
+
+        def _keyring_values(self) -> Mapping[str, str]:
+            """Implemented in a sibling mixin (metadata.py)."""
             ...
 
         def get_config(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:

@@ -56,6 +56,10 @@
     "api": {
       "module": "api/router.py",
       "prefix": "/selfsigned"
+    },
+    "certificate_source": {
+      "label": "Self-signed",
+      "renews": true
     }
   }
 }

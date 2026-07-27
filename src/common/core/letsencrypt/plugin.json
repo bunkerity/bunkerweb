@@ -460,6 +460,10 @@
     "api": {
       "module": "api/router.py",
       "prefix": "/letsencrypt"
+    },
+    "certificate_source": {
+      "label": "Let's Encrypt",
+      "renews": true
     }
   }
 }

@@ -33,16 +33,27 @@ def import_legacy_certificates() -> None:
 @router.get("", dependencies=[Depends(guard)])
 def list_certificates(
     search: str = "",
-    source: str = Query("", pattern="^(|letsencrypt|customcert|selfsigned)$"),
+    source: str = Query("", max_length=64),
     status: str = Query("", pattern="^(|valid|expiring_soon|expired|not_yet_valid|revoked)$"),
     service_id: str = "",
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
 ) -> JSONResponse:
-    result = get_db().get_certificates(search=search, source=source, status=status, service_id=service_id, offset=offset, limit=limit)
+    db = get_db()
+    # Validated against the live source registry rather than a fixed pattern, so filtering
+    # by a certificate source shipped by a pro/external plugin is not rejected.
+    if source and source not in db.certificate_sources():
+        return _error(f"Unknown certificate source: {source}", 422)
+    result = db.get_certificates(search=search, source=source, status=status, service_id=service_id, offset=offset, limit=limit)
     return JSONResponse(
         status_code=200, content={"status": "success", "certificates": result["items"], **{key: result[key] for key in ("total", "offset", "limit")}}
     )
+
+
+@router.get("/sources", dependencies=[Depends(guard)])
+def list_certificate_sources() -> JSONResponse:
+    """Accepted certificate sources — built-ins plus every plugin declaring one."""
+    return JSONResponse(status_code=200, content={"status": "success", "sources": get_db().certificate_sources()})
 
 
 @router.get("/{certificate_id}", dependencies=[Depends(guard)])

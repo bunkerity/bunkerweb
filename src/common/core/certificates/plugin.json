@@ -1,0 +1,17 @@
+{
+  "id": "certificates",
+  "name": "Certificates",
+  "description": "Serve the certificate attached to a service in the central inventory, whatever provider issued it.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {},
+  "jobs": [
+    {
+      "name": "deploy-certificates",
+      "file": "deploy-certificates.py",
+      "every": "hour",
+      "reload": true,
+      "async": true
+    }
+  ]
+}

@@ -8,7 +8,7 @@ from os.path import join as os_join
 from pathlib import Path
 from re import Match, compile as re_compile
 from sys import path as sys_path
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 from time import sleep
 from uuid import uuid4
 
@@ -110,6 +110,10 @@ class Database(
         self._ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
         self._request_retry_attempts = 2
         self._request_retry_delay = 0.25
+        # Cached database-stored certificate keyring (see DatabaseMetadataMixin._keyring_values).
+        # None means "not looked up yet"; an empty mapping means "none available", which makes
+        # encryption fail closed instead of silently retrying the lookup on every call.
+        self._db_keyring: Optional[Dict[str, str]] = None
 
         request_retry_attempts = getenv("DATABASE_REQUEST_RETRY_ATTEMPTS", "2")
         if request_retry_attempts.isdigit() and int(request_retry_attempts) > 0:

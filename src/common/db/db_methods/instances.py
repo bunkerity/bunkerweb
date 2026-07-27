@@ -312,12 +312,13 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
     def _encrypt_instance_credential(self, hostname: str, token: str) -> Optional[tuple]:
         """Encrypt a per-instance credential with the shared AES-256-GCM keyring.
 
-        Best-effort: returns None (and logs) when no keyring is configured so an
+        Best-effort: returns None (and logs) when no keyring is available so an
         optional per-instance token never breaks instance persistence — the dial
-        simply falls back to the global API_TOKEN.
+        simply falls back to the global API_TOKEN. With the metadata-backed keyring
+        this now only happens on a read-only database or before metadata exists.
         """
         try:
-            return encrypt_private_key(token.encode("utf-8"), hostname)
+            return encrypt_private_key(token.encode("utf-8"), hostname, self._keyring_values())
         except Exception as e:  # keyring absent/misconfigured must never break persistence
             self.logger.warning(f"Could not encrypt the credential for instance {hostname}; it will fall back to the global API token: {e}")
             return None
@@ -327,7 +328,13 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
         if not instance.credential_ciphertext or not instance.credential_nonce or not instance.credential_key_id:
             return None
         try:
-            return decrypt_private_key(instance.credential_ciphertext, instance.credential_nonce, instance.credential_key_id, instance.hostname).decode("utf-8")
+            return decrypt_private_key(
+                instance.credential_ciphertext,
+                instance.credential_nonce,
+                instance.credential_key_id,
+                instance.hostname,
+                self._keyring_values(),
+            ).decode("utf-8")
         except (InvalidTag, ValueError) as e:
             self.logger.error(f"Could not decrypt the credential for instance {instance.hostname}: {e}")
             return None

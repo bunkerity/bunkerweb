@@ -150,3 +150,38 @@ def test_download_returns_public_pem_only(monkeypatch):
     assert b"PRIVATE KEY" not in response.body
     assert response.headers["x-content-type-options"] == "nosniff"
     db.get_certificate_public_data.assert_called_once_with("cert-1", "chain")
+
+
+def test_sources_endpoint_exposes_the_registry(monkeypatch):
+    db = Mock()
+    db.certificate_sources.return_value = {"selfsigned": {"label": "Self-signed", "renews": True}}
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.list_certificate_sources()
+
+    assert response.status_code == 200
+    assert _json(response)["sources"] == {"selfsigned": {"label": "Self-signed", "renews": True}}
+
+
+def test_list_rejects_an_unregistered_source(monkeypatch):
+    db = Mock()
+    db.certificate_sources.return_value = {"selfsigned": {"label": "Self-signed", "renews": True}}
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.list_certificates(search="", source="vault", status="", service_id="", offset=0, limit=100)
+
+    assert response.status_code == 422
+    db.get_certificates.assert_not_called()
+
+
+def test_list_accepts_a_plugin_declared_source(monkeypatch):
+    """A pro/external provider must be filterable without a core change."""
+    db = Mock()
+    db.certificate_sources.return_value = {"acme": {"label": "ACME", "renews": True}}
+    db.get_certificates.return_value = {"items": [], "total": 0, "offset": 0, "limit": 100}
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.list_certificates(search="", source="acme", status="", service_id="", offset=0, limit=100)
+
+    assert response.status_code == 200
+    assert db.get_certificates.call_args.kwargs["source"] == "acme"

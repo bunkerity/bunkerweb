@@ -1,10 +1,12 @@
-from base64 import b64encode
+from base64 import b64decode, b64encode
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
+from json import loads
 from tarfile import REGTYPE, SYMTYPE, TarInfo, open as tar_open
 
 from certificate_utils import generate_self_signed  # type: ignore
 from fixtures.seed import add_service, seed_minimal, session
-from model import Certificates, Jobs  # type: ignore
+from model import Certificates, Jobs, Metadata  # type: ignore
 
 
 def _configure_keyring(monkeypatch):
@@ -329,3 +331,210 @@ def test_legacy_import_reads_new_issuance_cache(db, monkeypatch):
 
     assert summary == {"imported": 1, "unchanged": 0, "errors": []}
     assert db.get_certificates()["items"][0]["attachments"] == [{"service_id": "app1.example.com", "is_primary": True}]
+
+
+def _generated_keyring(db):
+    """The keyring row as persisted by the metadata-backed fallback."""
+    with session(db) as db_session:
+        row = db_session.get(Metadata, 1)
+        return row.certificate_keyring, row.certificate_keyring_active
+
+
+def test_keyring_environment_wins_over_database(db, monkeypatch):
+    """An operator-provided keyring must keep the key material out of the database."""
+    db.initialize_db("1.7.0", "Docker")
+    _configure_keyring(monkeypatch)
+
+    values = db._keyring_values()
+
+    assert values["CERTIFICATE_ENCRYPTION_ACTIVE_KEY"] == "v1"
+    assert _generated_keyring(db) == (None, None)
+
+
+def test_keyring_generated_on_demand_and_reused(db, monkeypatch):
+    """Without an environment keyring, one is generated once and then reused."""
+    db.initialize_db("1.7.0", "Docker")
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
+
+    values = db._keyring_values()
+    stored, active = _generated_keyring(db)
+
+    assert active == "db-v1"
+    assert len(b64decode(loads(stored)["db-v1"], validate=True)) == 32
+    # Cached, and a fresh Database over the same schema adopts the stored key rather
+    # than minting a second one.
+    assert db._keyring_values() is values
+    db._db_keyring = None
+    assert db._keyring_values() == values
+
+
+def test_certificate_roundtrips_on_generated_keyring(db, monkeypatch):
+    """A certificate written under the generated keyring stays decryptable."""
+    db.initialize_db("1.7.0", "Docker")
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
+
+    certificate, private_key = generate_self_signed("gen.example.com", [])
+    error, resource_id = db.create_certificate(name="gen", source="selfsigned", certificate_pem=certificate, private_key_pem=private_key)
+
+    assert error == ""
+    # renew decrypts the stored private key, so a successful renewal proves the round trip.
+    assert db.renew_self_signed_certificate(resource_id, valid_days=30) == ""
+
+
+def test_keyring_unavailable_fails_closed(db, monkeypatch):
+    """No environment keyring and no metadata row must refuse the write, not store plaintext."""
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
+
+    certificate, private_key = generate_self_signed("nokey.example.com", [])
+    error, resource_id = db.create_certificate(name="nokey", source="selfsigned", certificate_pem=certificate, private_key_pem=private_key)
+
+    assert resource_id is None
+    assert "must both be configured" in error
+
+
+def test_set_metadata_cannot_overwrite_the_keyring(db, monkeypatch):
+    """PATCH /metadata must not be able to destroy or plant the encryption key."""
+    db.initialize_db("1.7.0", "Docker")
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
+    db._keyring_values()
+    stored, active = _generated_keyring(db)
+
+    assert db.set_metadata({"certificate_keyring": '{"evil":"' + b64encode(b"e" * 32).decode() + '"}', "certificate_keyring_active": "evil"}) == ""
+
+    assert _generated_keyring(db) == (stored, active)
+
+
+def test_certificate_sources_registry(db, monkeypatch):
+    """Built-in sources are always accepted; unknown ones are refused."""
+    assert set(db.certificate_sources()) >= {"letsencrypt", "customcert", "selfsigned"}
+
+    certificate, private_key = generate_self_signed("nope.example.com", [])
+    _configure_keyring(monkeypatch)
+    error, resource_id = db.create_certificate(name="nope", source="vault", certificate_pem=certificate, private_key_pem=private_key)
+
+    assert resource_id is None
+    assert error == "Invalid certificate source: vault"
+
+
+def test_plugin_declared_source_accepted(db, monkeypatch):
+    """A plugin declaring extensions.certificate_source can own inventory rows."""
+    import db_methods.certificates as certificates_module
+
+    monkeypatch.setattr(certificates_module, "iter_certificate_sources", lambda: {"vault": {"label": "Vault", "renews": True}})
+    _configure_keyring(monkeypatch)
+    certificate, private_key = generate_self_signed("vault.example.com", [])
+
+    error, resource_id = db.create_certificate(name="vault", source="vault", certificate_pem=certificate, private_key_pem=private_key)
+
+    assert error == ""
+    assert db.get_certificate_details(resource_id)["source"] == "vault"
+
+
+def test_deployable_resolution_prefers_primary_and_skips_revoked(db, monkeypatch):
+    """Only the winning attachment of each service is deployed, and never a revoked one."""
+    seed_minimal(db)
+    first, _, _ = _create(db, monkeypatch, name="first", service_ids=["app1.example.com"])
+    second, _, _ = _create(db, monkeypatch, name="second")
+    assert db.attach_certificate(second, "app1.example.com", primary=True) == ""
+
+    deployable = db.get_deployable_certificates()
+
+    assert set(deployable) == {"app1.example.com"}
+    assert deployable["app1.example.com"]["resource_id"] == second
+    assert deployable["app1.example.com"]["private_key_pem"].startswith(b"-----BEGIN PRIVATE KEY-----")
+
+    # Revoking the primary falls back to the other attachment rather than serving it.
+    assert db.revoke_certificate(second) == ""
+    assert db.get_deployable_certificates()["app1.example.com"]["resource_id"] == first
+
+
+def test_deployable_skips_undecryptable_and_records_the_error(db, monkeypatch):
+    """One unreadable private key must not block the other services."""
+    seed_minimal(db)
+    add_service(db, "app2.example.com")
+    broken, _, _ = _create(db, monkeypatch, name="broken", service_ids=["app1.example.com"])
+    healthy, _, _ = _create(db, monkeypatch, name="healthy", service_ids=["app2.example.com"])
+    with session(db) as db_session:
+        db_session.get(Certificates, broken).private_key_ciphertext = b"tampered"
+
+    deployable = db.get_deployable_certificates()
+
+    assert set(deployable) == {"app2.example.com"}
+    assert deployable["app2.example.com"]["resource_id"] == healthy
+    assert db.get_certificate_details(broken)["last_error"] == "InvalidTag"
+
+
+def test_attachment_changes_flag_the_scheduler(db, monkeypatch):
+    """The scheduler only redeploys when it is told material changed."""
+    db.initialize_db("1.7.0", "Docker")
+    seed_minimal(db)
+    assert db.get_metadata()["certificates_changed"] is False
+
+    resource_id, _, _ = _create(db, monkeypatch, name="flagged")
+    assert db.checked_changes(["certificates"], value=False) == ""
+    assert db.get_metadata()["certificates_changed"] is False
+
+    assert db.attach_certificate(resource_id, "app1.example.com", primary=True) == ""
+    assert db.get_metadata()["certificates_changed"] is True
+
+    assert db.checked_changes(["certificates"], value=False) == ""
+    assert db.detach_certificate(resource_id, "app1.example.com") == ""
+    assert db.get_metadata()["certificates_changed"] is True
+
+
+def test_sync_managed_attachments_detaches_withdrawn_services(db, monkeypatch):
+    """A provider that stops covering a service must stop serving it."""
+    seed_minimal(db)
+    add_service(db, "app2.example.com")
+    managed = {"managed_by": "customcert"}
+    kept, _, _ = _create(db, monkeypatch, name="kept", source="customcert", service_ids=["app1.example.com"], renewal_metadata=managed)
+    dropped, _, _ = _create(db, monkeypatch, name="dropped", source="customcert", service_ids=["app2.example.com"], renewal_metadata=managed)
+    other, _, _ = _create(db, monkeypatch, name="other", source="selfsigned", service_ids=["app2.example.com"], renewal_metadata={"managed_by": "selfsigned"})
+
+    assert db.sync_managed_attachments("customcert", ["app1.example.com"]) == ""
+
+    assert db.get_certificate_details(kept)["attachments"] == [{"service_id": "app1.example.com", "is_primary": True}]
+    assert db.get_certificate_details(dropped)["attachments"] == []
+    # Another source's attachments are untouched.
+    assert db.get_certificate_details(other)["attachments"] == [{"service_id": "app2.example.com", "is_primary": True}]
+
+
+def test_self_signed_renewal_is_due_only_after_next_renewal(db, monkeypatch):
+    resource_id, _, _ = _create(db, monkeypatch, name="renewable")
+    assert db.get_self_signed_certificates_due_for_renewal() == []
+
+    with session(db) as db_session:
+        db_session.get(Certificates, resource_id).next_renewal = datetime.now(timezone.utc) - timedelta(days=1)
+
+    assert db.get_self_signed_certificates_due_for_renewal() == [resource_id]
+
+    # A different source is never renewed locally, even when overdue.
+    uploaded, _, _ = _create(db, monkeypatch, name="uploaded", source="customcert")
+    with session(db) as db_session:
+        db_session.get(Certificates, uploaded).next_renewal = datetime.now(timezone.utc) - timedelta(days=1)
+    assert db.get_self_signed_certificates_due_for_renewal() == [resource_id]
+
+
+def test_sync_leaves_manually_assigned_certificates_alone(db, monkeypatch):
+    """A provider run must not detach a certificate the operator uploaded and assigned itself.
+
+    A hand-uploaded certificate carries source="customcert" like the provider's own entries;
+    only the managed_by marker separates them, and matching on the source alone silently wiped
+    the operator's assignment on the next run of the custom-cert job.
+    """
+    seed_minimal(db)
+    add_service(db, "app2.example.com")
+    managed, _, _ = _create(
+        db, monkeypatch, name="provider", source="customcert", service_ids=["app2.example.com"], renewal_metadata={"managed_by": "customcert"}
+    )
+    manual, _, _ = _create(db, monkeypatch, name="uploaded", source="customcert", service_ids=["app1.example.com"])
+
+    # The provider no longer covers anything.
+    assert db.sync_managed_attachments("customcert", []) == ""
+
+    assert db.get_certificate_details(managed)["attachments"] == []
+    assert db.get_certificate_details(manual)["attachments"] == [{"service_id": "app1.example.com", "is_primary": True}]

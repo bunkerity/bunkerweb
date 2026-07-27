@@ -609,3 +609,88 @@ def test_certificate_template_renders_with_shared_component_contracts():
     assert 'action="/certificates/upload"' in rendered
     assert 'id="certificate-acme-services"' in rendered
     assert 'src="/static/js/components/file-upload.js"' in rendered
+
+
+def test_page_passes_declared_sources_to_the_template(route_app, monkeypatch):
+    """The source filter is built from the API registry, not a hardcoded list."""
+    module, client, app = route_app
+    client.get_certificates.return_value = {"certificates": [], "total": 0}
+    client.get_services.return_value = []
+    client.get_letsencrypt_orphans.return_value = []
+    client.get_certificate_sources.return_value = {"acme": {"label": "ACME", "renews": True}}
+    render = Mock(return_value="rendered")
+    monkeypatch.setattr(module, "render_template", render)
+
+    with app.test_request_context("/certificates"):
+        assert module.certificates_page.__wrapped__() == "rendered"
+
+    assert render.call_args.kwargs["sources"] == {"acme": {"label": "ACME", "renews": True}}
+
+
+def test_page_survives_an_unavailable_source_registry(route_app, monkeypatch):
+    """A registry lookup failure must not take the whole inventory page down."""
+    module, client, app = route_app
+    client.get_certificates.return_value = {"certificates": [], "total": 0}
+    client.get_services.return_value = []
+    client.get_letsencrypt_orphans.return_value = []
+    client.get_certificate_sources.side_effect = ApiUnavailableError("down")
+    render = Mock(return_value="rendered")
+    monkeypatch.setattr(module, "render_template", render)
+
+    with app.test_request_context("/certificates"):
+        assert module.certificates_page.__wrapped__() == "rendered"
+
+    assert render.call_args.kwargs["sources"] == {}
+
+
+def test_plugin_declared_source_renders_its_label_not_a_raw_i18n_key():
+    """A pro/external source has no locale key, so the template must not emit one."""
+    templates = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
+    environment = Environment(
+        loader=ChoiceLoader(
+            [
+                DictLoader({"dashboard.html": ("{% block head %}{% endblock %}" "{% block content %}{% endblock %}" "{% block scripts %}{% endblock %}")}),
+                FileSystemLoader(templates),
+            ]
+        ),
+        autoescape=select_autoescape(),
+    )
+    environment.globals.update(
+        csrf_token=lambda: "csrf",
+        url_for=lambda endpoint, **values: (
+            f"/static/{values['filename']}" if endpoint == "static" else "/certificates" if endpoint == "certificates" else "#"
+        ),
+    )
+    certificate = {
+        "id": "cert-1",
+        "name": "vault-issued",
+        "source": "acme",
+        "status": "valid",
+        "common_name": "app.example",
+        "sans": [],
+        "issuer": "ACME CA",
+        "valid_to": "2026-12-01T00:00:00Z",
+        "valid_from": "2026-01-01T00:00:00Z",
+        "attachments": [],
+        "renewal_metadata": {},
+    }
+
+    rendered = environment.get_template("certificates.html").render(
+        certificates=[certificate],
+        total=1,
+        truncated=False,
+        status_counts={},
+        issuer_counts=[],
+        upcoming=[],
+        certificate_context=[],
+        services=[{"id": "app.example"}],
+        sources={"acme": {"label": "ACME", "renews": True}, "selfsigned": {"label": "Self-signed", "renews": True}},
+        readonly=False,
+        style_nonce="style",
+        script_nonce="script",
+    )
+
+    assert '<option value="acme">ACME</option>' in rendered
+    assert 'data-i18n="certificates.source.acme"' not in rendered
+    # The built-in keeps its translation key.
+    assert 'data-i18n="certificates.source.selfsigned"' in rendered

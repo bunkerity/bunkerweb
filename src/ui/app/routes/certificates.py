@@ -72,6 +72,13 @@ def certificates_page():
     except (ApiClientError, ApiUnavailableError):
         orphan_states = {}
 
+    # Built by the API from the plugins that declare themselves a certificate source, so a
+    # certificate issued by a pro or external provider is filterable like any core one.
+    try:
+        sources = API_CLIENT.get_certificate_sources()
+    except (ApiClientError, ApiUnavailableError):
+        sources = {}
+
     for certificate in certificate_rows:
         cert_name = (certificate.get("renewal_metadata") or {}).get("cert_name")
         certificate["orphan_state"] = orphan_states.get(cert_name) if certificate.get("source") == "letsencrypt" else None
@@ -106,6 +113,7 @@ def certificates_page():
         upcoming=upcoming,
         certificate_context=certificate_context,
         services=services,
+        sources=sources,
     )
 
 

@@ -76,6 +76,10 @@
     "api": {
       "module": "api/router.py",
       "prefix": "/customcert"
+    },
+    "certificate_source": {
+      "label": "Custom",
+      "renews": false
     }
   }
 }

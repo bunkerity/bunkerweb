@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """First-class certificate resource persistence."""
 
+from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from json import JSONDecodeError, dumps, loads
 from tarfile import TarError
@@ -9,13 +10,17 @@ from uuid import uuid4
 
 from certificate_utils import certificate_status, decrypt_private_key, encrypt_private_key, parse_certificate, read_certbot_cache, renew_self_signed  # type: ignore
 from cryptography.exceptions import InvalidTag
-from model import Certificates, ResourceAttachments, Resources, Services  # type: ignore
+from model import Certificates, Metadata, ResourceAttachments, Resources, Services  # type: ignore
+from plugin_extensions import iter_certificate_sources  # type: ignore
 from sqlalchemy import delete, or_, select, update
 from sqlalchemy.exc import IntegrityError
 
 from .common import DatabaseMixinBase
 
-CERTIFICATE_SOURCES = frozenset(("letsencrypt", "customcert", "selfsigned"))
+# Sources shipped in the image. Any other plugin — core, pro or external — joins them by
+# declaring ``extensions.certificate_source`` in its plugin.json, so a PRO certificate
+# provider owns inventory rows without a core change or a schema migration.
+BUILTIN_CERTIFICATE_SOURCES = frozenset(("letsencrypt", "customcert", "selfsigned"))
 CERTIFICATE_PROVIDER_METADATA_KEYS = frozenset(("cache_checksum", "cert_name", "legacy", "managed_by", "service_ids"))
 
 
@@ -33,6 +38,31 @@ def _load_json(value: Optional[str], fallback):
 
 class DatabaseCertificatesMixin(DatabaseMixinBase):
     """Certificate CRUD, assignment and self-signed renewal."""
+
+    @staticmethod
+    def _flag_certificates_changed(session) -> None:
+        """Signal the scheduler that deployed certificate material is out of date.
+
+        Called inside the mutating method's own session so the flag and the change commit
+        together: a flag set without the change would trigger a pointless deployment, and a
+        change without the flag would sit in the inventory unserved until the next hourly
+        run of deploy-certificates.
+        """
+        session.execute(update(Metadata).where(Metadata.id == 1).values(certificates_changed=True, last_certificates_change=datetime.now().astimezone()))
+
+    def certificate_sources(self) -> Dict[str, dict]:
+        """Every accepted certificate source, keyed by id: built-ins plus declared plugins.
+
+        Deliberately uncached: the scan is a handful of small plugin.json reads and only
+        runs on certificate writes and listings, whereas a cache would reject a freshly
+        installed provider until every component restarted.
+        """
+        sources = {source: {"label": source, "renews": source == "letsencrypt"} for source in BUILTIN_CERTIFICATE_SOURCES}
+        try:
+            sources.update(iter_certificate_sources())
+        except Exception as exc:  # a malformed plugin tree must not block certificate writes
+            self.logger.debug(f"Could not scan plugins for certificate sources: {exc}")
+        return sources
 
     def _certificate_attachments(self, session, resource_ids: List[str]) -> Dict[str, List[dict]]:
         attachments: Dict[str, List[dict]] = {resource_id: [] for resource_id in resource_ids}
@@ -121,6 +151,90 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
             attachments = self._certificate_attachments(session, [resource_id])
             return self._certificate_dict(row[0], row[1], attachments[resource_id])
 
+    def get_deployable_certificates(self) -> Dict[str, Dict[str, Any]]:
+        """Certificate material to deploy, keyed by service id.
+
+        One certificate per service: the ``ssl_certificate`` phase serves a single chain per
+        SNI, so only the winning attachment is returned — primary first, then most recently
+        attached, which keeps a service usable when an attachment was made without ``primary``.
+        Revoked certificates are skipped so revoking one falls back to the settings-driven
+        providers instead of serving material the operator withdrew; expired ones are still
+        deployed, because the operator's explicit attachment outranks our opinion and the
+        inventory already reports the expiry. A certificate whose private key cannot be
+        decrypted is skipped with its ``last_error`` recorded, so one unreadable key never
+        blocks every other service's deployment.
+        """
+        deployable: Dict[str, Dict[str, Any]] = {}
+        undecryptable: List[tuple] = []
+        with self._db_session() as session:
+            rows = session.execute(
+                select(ResourceAttachments.service_id, Resources.id, Resources.name, Certificates)
+                .join(Resources, Resources.id == ResourceAttachments.resource_id)
+                .join(Certificates, Certificates.resource_id == Resources.id)
+                .where(Certificates.revoked.is_(False))
+                .order_by(ResourceAttachments.service_id, ResourceAttachments.is_primary.desc(), ResourceAttachments.creation_date.desc())
+            ).all()
+
+            for service_id, resource_id, name, certificate in rows:
+                if service_id in deployable:
+                    continue
+                try:
+                    private_key = decrypt_private_key(
+                        certificate.private_key_ciphertext,
+                        certificate.private_key_nonce,
+                        certificate.private_key_key_id,
+                        resource_id,
+                        self._keyring_values(),
+                    )
+                except (InvalidTag, TypeError, ValueError) as exc:
+                    message = str(exc) or exc.__class__.__name__
+                    self.logger.error(f"Could not decrypt the private key of certificate {name} attached to {service_id}: {message}")
+                    undecryptable.append((resource_id, message))
+                    continue
+                deployable[service_id] = {
+                    "resource_id": resource_id,
+                    "name": name,
+                    "source": certificate.source,
+                    "fingerprint": certificate.fingerprint,
+                    "certificate_pem": certificate.certificate_pem.encode(),
+                    "private_key_pem": private_key,
+                }
+
+            if undecryptable and not self.readonly:
+                for resource_id, message in undecryptable:
+                    session.execute(update(Certificates).where(Certificates.resource_id == resource_id).values(last_error=message))
+                with suppress(BaseException):
+                    session.commit()
+
+        return deployable
+
+    def get_self_signed_certificates_due_for_renewal(self) -> List[str]:
+        """Ids of self-signed certificates whose renewal date has passed.
+
+        Only self-signed material is listed: every other source renews through its own
+        provider job — certbot for Let's Encrypt, the provider's own job for a plugin
+        source — and an uploaded certificate has no renewal path at all.
+
+        The due check runs in Python rather than SQL because ``next_renewal`` comes back
+        naive on some engines, and comparing it to an aware ``now`` in the query would
+        behave differently across the four supported databases.
+        """
+        with self._db_session() as session:
+            rows = session.execute(
+                select(Certificates.resource_id, Certificates.next_renewal).where(Certificates.source == "selfsigned", Certificates.revoked.is_(False))
+            ).all()
+
+        now = datetime.now(timezone.utc)
+        due = []
+        for resource_id, next_renewal in rows:
+            if next_renewal is None:
+                continue
+            if next_renewal.tzinfo is None:
+                next_renewal = next_renewal.replace(tzinfo=timezone.utc)
+            if next_renewal <= now:
+                due.append(resource_id)
+        return due
+
     def create_certificate(
         self,
         *,
@@ -137,7 +251,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
         if self.readonly:
             return "The database is read-only, the changes will not be saved", None
         source = source.strip().lower()
-        if source not in CERTIFICATE_SOURCES:
+        if source not in self.certificate_sources():
             return f"Invalid certificate source: {source}", None
         name = name.strip()
         if not name:
@@ -150,7 +264,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
 
         resource_id = str(uuid4())
         try:
-            ciphertext, nonce, key_id = encrypt_private_key(private_key_pem, resource_id)
+            ciphertext, nonce, key_id = encrypt_private_key(private_key_pem, resource_id, self._keyring_values())
         except ValueError as exc:
             return str(exc), None
 
@@ -177,7 +291,9 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
             stored_metadata = dict(renewal_metadata or {})
             if service_ids:
                 stored_metadata["service_ids"] = service_ids
-            resource = Resources(id=resource_id, type="certificate", name=name, description=description or "", creation_date=now, last_update=now)
+            resource = Resources(
+                id=resource_id, type="certificate", name=name, description=self._empty_if_none(description), creation_date=now, last_update=now
+            )
             resource.certificate = Certificates(
                 source=source,
                 certificate_pem=parsed["certificate_pem"],
@@ -203,6 +319,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                     if primary:
                         session.execute(update(ResourceAttachments).where(ResourceAttachments.service_id == service_id).values(is_primary=False))
                     session.add(ResourceAttachments(resource_id=resource_id, service_id=service_id, is_primary=primary, creation_date=now))
+                self._flag_certificates_changed(session)
                 session.commit()
             except IntegrityError:
                 session.rollback()
@@ -227,6 +344,11 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
 
         name = str(kwargs.get("name", "")).strip()
         source = str(kwargs.get("source", "")).strip().lower()
+        # Validated here too, not only in create_certificate: the refresh path below reassigns
+        # ``certificate.source`` on an existing row, so an unregistered source must not be able
+        # to take ownership of a certificate that is already in the inventory.
+        if source not in self.certificate_sources():
+            return f"Invalid certificate source: {source}", None
         certificate_pem = kwargs.get("certificate_pem", b"")
         private_key_pem = kwargs.get("private_key_pem", b"")
         service_ids = list(dict.fromkeys(kwargs.get("service_ids") or []))
@@ -273,7 +395,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
         material_changed = certificate.fingerprint != parsed["fingerprint"]
         if material_changed:
             try:
-                ciphertext, nonce, key_id = encrypt_private_key(private_key_pem, resource.id)
+                ciphertext, nonce, key_id = encrypt_private_key(private_key_pem, resource.id, self._keyring_values())
             except ValueError as exc:
                 return str(exc), None
         with self._db_session() as session:
@@ -314,6 +436,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
             if material_changed or metadata_changed:
                 resource.last_update = now
             try:
+                self._flag_certificates_changed(session)
                 session.commit()
             except BaseException as exc:
                 return f"An error occurred while importing certificate: {exc}", None
@@ -333,6 +456,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
         cache_files.sort(key=lambda item: str(item.get("last_update") or ""))
         known_services = {service["id"] for service in self.get_services(with_drafts=True)}
         summary: Dict[str, Any] = {"imported": 0, "unchanged": 0, "errors": []}
+        managed_services: List[str] = []
         for cache_file in cache_files:
             if not cache_file["file_name"].startswith("folder:") or not cache_file["file_name"].endswith(".tgz"):
                 continue
@@ -367,10 +491,20 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 )
                 if error:
                     summary["errors"].append(f"{record['name']}: {error}")
-                elif parsed["fingerprint"] in previous_fingerprints:
+                    continue
+
+                managed_services.extend(service_ids)
+                if parsed["fingerprint"] in previous_fingerprints:
                     summary["unchanged"] += 1
                 else:
                     summary["imported"] += 1
+
+        # Only reconcile when the cache actually told us something. An empty read is just as
+        # likely to be a transient failure as a genuine withdrawal, and detaching every
+        # Let's Encrypt certificate on a bad read would stop serving them.
+        if cache_files:
+            if error := self.sync_managed_attachments("letsencrypt", managed_services):
+                summary["errors"].append(error)
         return summary
 
     def update_certificate(
@@ -465,6 +599,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                     )
                 )
             try:
+                self._flag_certificates_changed(session)
                 session.commit()
             except BaseException as exc:
                 return f"An error occurred while attaching certificate: {exc}"
@@ -481,9 +616,49 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
             if not result.rowcount:
                 return "Certificate attachment not found"
             try:
+                self._flag_certificates_changed(session)
                 session.commit()
             except BaseException as exc:
                 return f"An error occurred while detaching certificate: {exc}"
+        return ""
+
+    def sync_managed_attachments(self, source: str, service_ids: List[str]) -> str:
+        """Make the attachments ``source`` *manages* exactly ``service_ids``.
+
+        Provider jobs call this with the services they still cover. Without it, turning a
+        provider off for a service would leave its attachment behind and deploy-certificates
+        would keep serving material the operator has just disabled — the inventory would
+        outlive the setting that created it.
+
+        Only rows the provider itself created are considered, identified by the ``managed_by``
+        marker its import writes. Matching on the source alone would be destructive: a
+        certificate uploaded by hand carries ``source="customcert"`` too, so the custom
+        provider's own run would silently detach the operator's manual assignment.
+        """
+        if self.readonly:
+            return "The database is read-only, the changes will not be saved"
+
+        keep = {service_id.strip() for service_id in service_ids if service_id.strip()}
+        with self._db_session() as session:
+            rows = session.execute(
+                select(ResourceAttachments.id, ResourceAttachments.service_id, Certificates.renewal_metadata)
+                .join(Certificates, Certificates.resource_id == ResourceAttachments.resource_id)
+                .where(Certificates.source == source)
+            ).all()
+            stale = [
+                attachment_id
+                for attachment_id, service_id, renewal_metadata in rows
+                if service_id not in keep and _load_json(renewal_metadata, {}).get("managed_by") == source
+            ]
+            if not stale:
+                return ""
+
+            session.execute(delete(ResourceAttachments).where(ResourceAttachments.id.in_(stale)), execution_options={"synchronize_session": False})
+            try:
+                self._flag_certificates_changed(session)
+                session.commit()
+            except BaseException as exc:
+                return f"An error occurred while syncing {source} attachments: {exc}"
         return ""
 
     def get_certificate_public_data(self, resource_id: str, part: str) -> Optional[bytes]:
@@ -509,6 +684,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                     certificate.private_key_nonce,
                     certificate.private_key_key_id,
                     resource_id,
+                    self._keyring_values(),
                 )
                 renewed_pem = renew_self_signed(certificate.certificate_pem.encode(), private_key, valid_days=valid_days)
                 parsed = parse_certificate(renewed_pem, private_key)
@@ -529,6 +705,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
             certificate.revoked_at = None
             certificate.resource.last_update = now
             try:
+                self._flag_certificates_changed(session)
                 session.commit()
             except BaseException as exc:
                 return f"An error occurred while renewing certificate: {exc}"
@@ -548,6 +725,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
             certificate.revoked_at = now
             certificate.resource.last_update = now
             try:
+                self._flag_certificates_changed(session)
                 session.commit()
             except BaseException as exc:
                 return f"An error occurred while revoking certificate: {exc}"

@@ -159,6 +159,7 @@ try:
         sys_exit(0)
 
     skipped_servers = []
+    managed_servers = []
     if not multisite:
         all_domains = [all_domains[0]]
         if getenv("USE_CUSTOM_SSL", "no") == "no":
@@ -208,7 +209,23 @@ try:
                 skipped_servers.append(first_server)
                 status = 2
                 continue
-            elif need_reload:
+            # Mirror the material into the central inventory so the certificate is visible and
+            # manageable from the certificates page, which this provider has no UI of its own for.
+            managed_servers.append(first_server)
+            import_err, _ = JOB.db.import_certificate(
+                name=first_server,
+                description="Managed by the custom certificate provider",
+                source="customcert",
+                certificate_pem=cert_file,
+                private_key_pem=key_file,
+                service_ids=[first_server],
+                primary=True,
+                renewal_metadata={"managed_by": "customcert"},
+            )
+            if import_err:
+                LOGGER.error(f"Could not add {first_server}'s certificate to the inventory : {import_err}")
+
+            if need_reload:
                 LOGGER.info(f"Detected change in {first_server}'s certificate")
                 status = 1
                 continue
@@ -218,6 +235,11 @@ try:
     for first_server in skipped_servers:
         JOB.del_cache("cert.pem", service_id=first_server)
         JOB.del_cache("key.pem", service_id=first_server)
+
+    # Services this provider no longer covers must lose their attachment, otherwise the
+    # inventory would keep serving a certificate whose setting has just been turned off.
+    if sync_err := JOB.db.sync_managed_attachments("customcert", managed_servers):
+        LOGGER.error(f"Could not sync the custom certificate attachments : {sync_err}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:

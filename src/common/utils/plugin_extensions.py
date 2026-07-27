@@ -133,6 +133,42 @@ def iter_extension_plugins(paths=None, logger=None) -> List[PluginExtension]:
     return out
 
 
+def iter_certificate_sources(paths=None) -> Dict[str, dict]:
+    """Return every plugin declaring ``extensions.certificate_source``, keyed by plugin id::
+
+        "extensions": { "certificate_source": { "label": "Let's Encrypt", "renews": true } }
+
+    Purely declarative — unlike the api/db extensions above this loads no plugin code. It
+    only states that the plugin may own certificates in the inventory, which is why a new
+    PRO or external certificate provider needs no core change and no schema migration. The
+    trust boundary stays where the material actually enters: the guarded endpoints and jobs
+    a source writes through.
+    """
+    out: Dict[str, dict] = {}
+    for base, _ in _roots(paths):
+        if not base.is_dir():
+            continue
+        for plugin_json in sorted(base.glob("*/plugin.json")):
+            try:
+                manifest = loads(plugin_json.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            if not isinstance(manifest, dict):
+                continue
+            extensions = manifest.get("extensions")
+            if not isinstance(extensions, dict):
+                continue
+            declaration = extensions.get("certificate_source")
+            if not isinstance(declaration, dict):
+                continue
+            plugin_id = manifest.get("id") or plugin_json.parent.name
+            out[plugin_id] = {
+                "label": str(declaration.get("label") or manifest.get("name") or plugin_id),
+                "renews": bool(declaration.get("renews", False)),
+            }
+    return out
+
+
 def is_trusted(plugin_type: str) -> bool:
     """Tier gate (first line of defense).
 

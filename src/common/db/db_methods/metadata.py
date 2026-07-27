@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
+from base64 import b64encode
 from contextlib import suppress
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from json import dumps
+from os import environ, urandom
+from typing import Any, Dict, List, Literal, Mapping, Optional, Set, Tuple, Union
 
+from certificate_utils import ACTIVE_KEY_ENV, KEYS_ENV  # type: ignore
 from model import Metadata, Plugins  # type: ignore
 
-from sqlalchemy import select, text, update
+from sqlalchemy import or_, select, text, update
 
 from .common import DatabaseMixinBase, retry_on_transient_db_errors
+
+# Key id of the database-stored fallback keyring. The keyring is a mapping, so a future
+# rotation adds "db-v2" alongside it rather than replacing this entry.
+DB_KEYRING_KEY_ID = "db-v1"
+# Secrets that PATCH /metadata must never be able to overwrite: replacing the keyring makes
+# every stored private key and per-instance credential undecryptable, and planting a known
+# key would compromise everything encrypted afterwards.
+PROTECTED_METADATA_KEYS = frozenset(("certificate_keyring", "certificate_keyring_active"))
 
 
 class DatabaseMetadataMixin(DatabaseMixinBase):
@@ -45,6 +57,66 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
 
         return ""
 
+    def _keyring_values(self) -> Mapping[str, str]:
+        """Return the mapping the AES-256-GCM keyring is loaded from.
+
+        An operator-provided environment keyring always wins and keeps the key material
+        outside the database. Without one, fall back to a keyring persisted in the metadata
+        row so certificate and per-instance credential encryption work on a stock install
+        instead of failing every write.
+        """
+        if environ.get(KEYS_ENV, "").strip() and environ.get(ACTIVE_KEY_ENV, "").strip():
+            return environ
+        if self._db_keyring is None:
+            self._db_keyring = self._load_or_create_db_keyring()
+        return self._db_keyring
+
+    def _load_or_create_db_keyring(self) -> Dict[str, str]:
+        """Load the metadata-stored keyring, generating it once when absent.
+
+        The write is a compare-and-set on an unset keyring, so components racing at first
+        boot (API, scheduler, worker) all converge on whichever key landed first. Returns an
+        empty mapping when no key can be obtained — a read-only database, or metadata that
+        does not exist yet — which makes callers fail closed exactly as an unconfigured
+        environment keyring does.
+        """
+        with self._db_session() as session:
+            row = session.execute(select(Metadata.certificate_keyring, Metadata.certificate_keyring_active).filter_by(id=1).limit(1)).first()
+            if row is None:
+                return {}
+
+            if not row.certificate_keyring or not row.certificate_keyring_active:
+                if self.readonly:
+                    return {}
+                self.logger.warning(
+                    f"No certificate encryption keyring is configured; generating one and storing it in the database. "
+                    f"It only provides envelope encryption: a database dump contains both the key and the ciphertext it protects. "
+                    f"Set {KEYS_ENV} and {ACTIVE_KEY_ENV} in the environment to keep the key outside the database."
+                )
+                try:
+                    session.execute(
+                        update(Metadata)
+                        .where(
+                            Metadata.id == 1,
+                            or_(Metadata.certificate_keyring.is_(None), Metadata.certificate_keyring == ""),
+                        )
+                        .values(
+                            certificate_keyring=dumps({DB_KEYRING_KEY_ID: b64encode(urandom(32)).decode()}, separators=(",", ":")),
+                            certificate_keyring_active=DB_KEYRING_KEY_ID,
+                        )
+                    )
+                    session.commit()
+                except BaseException as e:
+                    session.rollback()
+                    self.logger.error(f"Could not store the generated certificate encryption keyring: {e}")
+                    return {}
+                # Re-read so a component that lost the race adopts the winner's key.
+                row = session.execute(select(Metadata.certificate_keyring, Metadata.certificate_keyring_active).filter_by(id=1).limit(1)).first()
+                if row is None or not row.certificate_keyring or not row.certificate_keyring_active:
+                    return {}
+
+        return {KEYS_ENV: row.certificate_keyring, ACTIVE_KEY_ENV: row.certificate_keyring_active}
+
     def get_version(self) -> str:
         """Get the database version"""
         with self._db_session() as session:
@@ -79,11 +151,13 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
             "external_plugins_changed": False,
             "pro_plugins_changed": False,
             "instances_changed": False,
+            "certificates_changed": False,
             "plugins_config_changed": {},
             "last_custom_configs_change": None,
             "last_external_plugins_change": None,
             "last_pro_plugins_change": None,
             "last_instances_change": None,
+            "last_certificates_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
             "version": "1.7.0~beta",
@@ -132,6 +206,10 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
                     return "The metadata are not set yet, try again"
 
                 for key, value in data.items():
+                    if key in PROTECTED_METADATA_KEYS:
+                        self.logger.warning(f"Metadata key {key} is protected and cannot be set through this method")
+                        continue
+
                     if not hasattr(metadata, key):
                         self.logger.warning(f"Metadata key {key} does not exist")
                         continue
@@ -150,7 +228,7 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
         value: Optional[bool] = False,
     ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
-        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances", "ui_plugins"]
+        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances", "certificates", "ui_plugins"]
         plugins_changes = plugins_changes or set()
         with self._db_session() as session:
             if self.readonly:
@@ -179,6 +257,9 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
                 if "instances" in changes:
                     metadata.instances_changed = value
                     metadata.last_instances_change = current_time
+                if "certificates" in changes:
+                    metadata.certificates_changed = value
+                    metadata.last_certificates_change = current_time
                 if "ui_plugins" in changes:
                     metadata.reload_ui_plugins = value
 

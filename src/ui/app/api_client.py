@@ -239,6 +239,9 @@ class ApiClient(BaseApiClient):
         data = self._get(f"/certificates/{certificate_id}")
         return data.get("certificate", data)
 
+    def get_certificate_sources(self):
+        return self._get("/certificates/sources").get("sources", {})
+
     def get_letsencrypt_orphans(self):
         return self._get("/letsencrypt/certificates/orphans").get("orphans", [])
 

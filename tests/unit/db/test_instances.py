@@ -142,10 +142,21 @@ class TestInstanceCredential:
         assert db_keyring.get_instance_credential("bw-c") is None
         assert db_keyring.get_instance("bw-c")["credential_set"] is False
 
-    def test_credential_without_keyring_falls_back(self, db_init, monkeypatch):
+    def test_credential_without_env_keyring_uses_database_keyring(self, db_init, monkeypatch):
         monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
         monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
-        # No keyring -> the credential is silently not stored (global-token fallback), not an error.
+        # Without an environment keyring the metadata-backed one is generated on demand, so
+        # the credential is stored and readable instead of degrading to the global API token.
+        assert db_init.add_instance("bw-nokey", 5000, "bwapi", "manual", credential="tok") == ""
+        assert db_init.get_instance("bw-nokey")["credential_set"] is True
+        assert db_init.get_instance_credential("bw-nokey") == "tok"
+
+    def test_credential_without_any_keyring_falls_back(self, db_init, monkeypatch):
+        monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
+        monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
+        # No keyring obtainable at all (read-only database) -> the credential is silently not
+        # stored and the dial falls back to the global API token, rather than erroring.
+        monkeypatch.setattr(db_init, "_load_or_create_db_keyring", lambda: {})
         assert db_init.add_instance("bw-nokey", 5000, "bwapi", "manual", credential="tok") == ""
         assert db_init.get_instance("bw-nokey")["credential_set"] is False
         assert db_init.get_instance_credential("bw-nokey") is None

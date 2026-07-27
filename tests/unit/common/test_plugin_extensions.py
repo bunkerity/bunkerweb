@@ -211,3 +211,26 @@ class TestPrefix:
         _make_plugin(tmp_path, "myplug", extensions={"api": {"module": "api/router.py", "prefix": "/evil"}})
         ext = pe.iter_extension_plugins(paths=[(tmp_path, "core")])[0]
         assert pe.effective_api_prefix(ext) == "/myplug"
+
+
+class TestIterCertificateSources:
+    def test_finds_only_declaring_plugins(self, tmp_path):
+        _make_plugin(tmp_path, "acme", extensions={"certificate_source": {"label": "ACME", "renews": True}})
+        _make_plugin(tmp_path, "plain", extensions={"api": {"module": "api/router.py", "prefix": "/plain"}})
+        _make_plugin(tmp_path, "bare")
+
+        found = pe.iter_certificate_sources(paths=[(tmp_path, "pro")])
+
+        assert found == {"acme": {"label": "ACME", "renews": True}}
+
+    def test_label_falls_back_to_plugin_name(self, tmp_path):
+        _make_plugin(tmp_path, "vault", extensions={"certificate_source": {}})
+
+        found = pe.iter_certificate_sources(paths=[(tmp_path, "pro")])
+
+        assert found == {"vault": {"label": "vault", "renews": False}}
+
+    def test_malformed_declaration_ignored(self, tmp_path):
+        _make_plugin(tmp_path, "broken", extensions={"certificate_source": "yes"})
+
+        assert pe.iter_certificate_sources(paths=[(tmp_path, "pro")]) == {}

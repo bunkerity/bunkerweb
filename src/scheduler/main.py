@@ -806,6 +806,7 @@ if __name__ == "__main__":
         FIRST_START = True
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
+        CERTIFICATES_NEED_DEPLOYMENT = False
         CHANGES = []
 
         changed_plugins = []
@@ -882,6 +883,7 @@ if __name__ == "__main__":
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
+            CERTIFICATES_NEED_DEPLOYMENT = False
             changed_plugins.clear()
 
             if scheduler_first_start:
@@ -942,6 +944,8 @@ if __name__ == "__main__":
                         "plugins_config_changed": db_metadata["plugins_config_changed"],
                         "instances_changed": db_metadata["instances_changed"],
                         "last_instances_change": db_metadata["last_instances_change"],
+                        "certificates_changed": db_metadata.get("certificates_changed", False),
+                        "last_certificates_change": db_metadata.get("last_certificates_change"),
                     }
 
                     if API_CLIENT.readonly and changes == old_changes:
@@ -1012,6 +1016,20 @@ if __name__ == "__main__":
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
 
+                    # check if the attached certificates have changed since last time. Nothing
+                    # needs regenerating here — the material comes from the inventory, not from
+                    # the templates — so only the deployment job runs; it pushes the cache and
+                    # requests the reload itself when it actually wrote something.
+                    if changes["certificates_changed"] and (
+                        not API_CLIENT.readonly
+                        or not changes["last_certificates_change"]
+                        or not old_changes
+                        or old_changes.get("last_certificates_change") != changes["last_certificates_change"]
+                    ):
+                        LOGGER.info("Attached certificates changed, deploying ...")
+                        CERTIFICATES_NEED_DEPLOYMENT = True
+                        NEED_RELOAD = True
+
                     old_changes = changes.copy()
                 except BaseException:
                     LOGGER.debug(format_exc())
@@ -1028,6 +1046,10 @@ if __name__ == "__main__":
 
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")
+
+                if CERTIFICATES_NEED_DEPLOYMENT:
+                    CHANGES.append("certificates")
+                    SCHEDULER.run_single("deploy-certificates")
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")

@@ -45,7 +45,6 @@ INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", "failover", name="instance_
 INSTANCE_TLS_MODE_ENUM = Enum("off", "pinned", name="instance_tls_mode_enum")
 RESOURCE_KINDS_ENUM = Enum("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum")
 RESOURCE_TYPES_ENUM = Enum("certificate", name="resource_types_enum")
-CERTIFICATE_SOURCES_ENUM = Enum("letsencrypt", "customcert", "selfsigned", name="certificate_sources_enum")
 
 
 class Base(DeclarativeBase):
@@ -457,7 +456,10 @@ class Certificates(Base):
     __tablename__ = "bw_certificates"
 
     resource_id: Mapped[str] = mapped_column(String(36), ForeignKey("bw_resources.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    source: Mapped[str] = mapped_column(CERTIFICATE_SOURCES_ENUM, nullable=False)
+    # Not an enum: any plugin declaring ``extensions.certificate_source`` in its plugin.json
+    # can own certificates, so a new PRO or external provider must not require a schema
+    # migration. Accepted values are validated against that registry on write.
+    source: Mapped[str] = mapped_column(String(64), nullable=False)
     certificate_pem: Mapped[str] = mapped_column(LargeText, nullable=False)
     private_key_ciphertext: Mapped[bytes] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=False)
     private_key_nonce: Mapped[bytes] = mapped_column(LargeBinary(12), nullable=False)
@@ -519,12 +521,21 @@ class Metadata(Base):
     last_pro_plugins_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     instances_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
     last_instances_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    certificates_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    last_certificates_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     reload_ui_plugins: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
     force_pro_update: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
     failover: Mapped[Optional[bool]] = mapped_column(Boolean, default=None, nullable=True)
     failover_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
     integration: Mapped[str] = mapped_column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
     version: Mapped[str] = mapped_column(String(32), default="1.7.0~beta", nullable=False)
+    # AES-256-GCM keyring protecting stored private keys (bw_certificates) and per-instance
+    # credentials (bw_instances). Only consulted when CERTIFICATE_ENCRYPTION_KEYS and
+    # CERTIFICATE_ENCRYPTION_ACTIVE_KEY are absent from the environment: an operator-provided
+    # keyring always wins and keeps the key outside the database. Never exposed by
+    # get_metadata() and rejected by set_metadata().
+    certificate_keyring: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default=None)
+    certificate_keyring_active: Mapped[Optional[str]] = mapped_column(String(128), nullable=True, default=None)
 
 
 ## UI Models

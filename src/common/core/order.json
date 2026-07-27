@@ -12,6 +12,7 @@
     "crowdsec",
     "dnsbl",
     "headers",
+    "certificates",
     "customcert",
     "letsencrypt",
     "selfsigned"
@@ -20,13 +21,19 @@
   "set": [
     "sessions",
     "whitelist",
+    "certificates",
     "letsencrypt",
     "customcert",
     "selfsigned",
     "ui"
   ],
   "ssl_client_hello_default": ["misc"],
-  "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],
+  "ssl_certificate": [
+    "certificates",
+    "customcert",
+    "letsencrypt",
+    "selfsigned"
+  ],
   "access": [
     "ssl",
     "whitelist",

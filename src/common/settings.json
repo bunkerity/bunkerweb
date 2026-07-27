@@ -488,7 +488,7 @@
   },
   "PLUGINS_ORDER_INIT": {
     "context": "global",
-    "default": "sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert letsencrypt selfsigned",
+    "default": "sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers certificates customcert letsencrypt selfsigned",
     "help": "Plugins that should run first during the init phase (engine bootstrap, runs once). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-init",
     "label": "Plugins order (init)",
@@ -506,7 +506,7 @@
   },
   "PLUGINS_ORDER_SET": {
     "context": "multisite",
-    "default": "sessions whitelist letsencrypt customcert selfsigned ui",
+    "default": "sessions whitelist certificates letsencrypt customcert selfsigned ui",
     "help": "Plugins that should run first during the set phase for this site (variable setup before rewrite/access). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-set",
     "label": "Plugins order (set)",
@@ -524,7 +524,7 @@
   },
   "PLUGINS_ORDER_SSL_CERTIFICATE": {
     "context": "multisite",
-    "default": "customcert letsencrypt selfsigned",
+    "default": "certificates customcert letsencrypt selfsigned",
     "help": "Plugins that should run first during the ssl_certificate phase for this site (TLS certificate selection/issuance). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-ssl-certificate",
     "label": "Plugins order (ssl_certificate)",

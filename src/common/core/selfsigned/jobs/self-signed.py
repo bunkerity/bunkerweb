@@ -190,6 +190,7 @@ try:
         sys_exit(0)
 
     skipped_servers = []
+    managed_servers = []
     if getenv("MULTISITE", "no") == "no":
         servers = [servers[0]]
         if getenv("GENERATE_SELF_SIGNED_SSL", "no") == "no":
@@ -212,11 +213,38 @@ try:
             )
             if not ret:
                 skipped_servers.append(first_server)
+            else:
+                # Mirror the material into the central inventory so the certificate is visible
+                # and manageable from the certificates page, which this provider has no UI of
+                # its own for.
+                managed_servers.append(first_server)
+                certificate = JOB.get_cache("cert.pem", service_id=first_server)
+                private_key = JOB.get_cache("key.pem", service_id=first_server)
+                if certificate and private_key:
+                    import_err, _ = JOB.db.import_certificate(
+                        name=first_server,
+                        description="Managed by the self-signed certificate provider",
+                        source="selfsigned",
+                        certificate_pem=certificate,
+                        private_key_pem=private_key,
+                        service_ids=[first_server],
+                        primary=True,
+                        renewal_metadata={"managed_by": "selfsigned"},
+                    )
+                    if import_err:
+                        LOGGER.error(f"Could not add {first_server}'s certificate to the inventory : {import_err}")
+                else:
+                    LOGGER.error(f"Could not read {first_server}'s generated certificate back from the cache, skipping its inventory entry")
             status = ret_status
 
     for first_server in skipped_servers:
         JOB.del_cache("cert.pem", service_id=first_server)
         JOB.del_cache("key.pem", service_id=first_server)
+
+    # Services this provider no longer covers must lose their attachment, otherwise the
+    # inventory would keep serving a certificate whose setting has just been turned off.
+    if sync_err := JOB.db.sync_managed_attachments("selfsigned", managed_servers):
+        LOGGER.error(f"Could not sync the self-signed certificate attachments : {sync_err}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:

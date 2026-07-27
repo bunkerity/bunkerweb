@@ -159,9 +159,16 @@
                 <label class="form-label small" for="certificates-source-filter" data-i18n="certificates.source_label">Source</label>
                 <select class="form-select form-select-sm" id="certificates-source-filter">
                     <option value="" data-i18n="certificates.all">All</option>
-                    <option value="letsencrypt" data-i18n="certificates.source.letsencrypt">Let's Encrypt</option>
-                    <option value="customcert" data-i18n="certificates.source.customcert">Custom</option>
-                    <option value="selfsigned" data-i18n="certificates.source.selfsigned">Self-signed</option>
+                    {# Sources come from the plugins that declare one, so a pro or external provider is
+                       listed too. Only the built-ins carry a locale key; anything else falls back to the
+                       label the plugin declared, because i18next renders the raw key when it is missing. #}
+                    {% for source_id, source in (sources or {}) | dictsort %}
+                        {% if source_id in ["letsencrypt", "customcert", "selfsigned"] %}
+                            <option value="{{ source_id }}" data-i18n="certificates.source.{{ source_id }}">{{ source.label or source_id }}</option>
+                        {% else %}
+                            <option value="{{ source_id }}">{{ source.label or source_id }}</option>
+                        {% endif %}
+                    {% endfor %}
                 </select>
             </div>
             <div>
@@ -210,7 +217,13 @@
                                 </td>
                                 <td>
                                     <div class="fw-semibold">{{ certificate.name }}</div>
-                                    {{ badge(text=certificate.source, i18n_key="certificates.source." ~ certificate.source, variant=source_variants.get(certificate.source, "secondary"), classes="mt-1") }}
+                                    {# Same reason as the source filter: only the built-ins have a locale key,
+                                       a plugin-declared source shows its own label instead of the raw key. #}
+                                    {% if certificate.source in ["letsencrypt", "customcert", "selfsigned"] %}
+                                        {{ badge(text=certificate.source, i18n_key="certificates.source." ~ certificate.source, variant=source_variants.get(certificate.source, "secondary"), classes="mt-1") }}
+                                    {% else %}
+                                        {{ badge(text=(sources.get(certificate.source, {}).get("label") or certificate.source), variant="secondary", classes="mt-1") }}
+                                    {% endif %}
                                     {% if certificate.is_orphan %}
                                         {{ badge(text="ACME account missing", i18n_key="certificates.orphan_badge", variant="warning", icon="bx-error-circle", classes="mt-1") }}
                                     {% endif %}
