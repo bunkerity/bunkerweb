@@ -1,0 +1,227 @@
+{% extends "dashboard.html" %}
+{% from "components/alert.html" import alert %}
+{% from "components/badge.html" import badge %}
+{% from "components/button.html" import button %}
+{% from "components/card.html" import card %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/modal.html" import modal %}
+{% from "components/search.html" import search %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row (same treatment as the certificates page). #}
+{% block page_head %}{% endblock %}
+{% block content %}
+    {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
+    {% set redirects_url = url_for("redirects.redirects_page") %}
+
+    {% macro rule_fields(prefix, rule) -%}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="{{ prefix }}-name" data-i18n="table.header.name">Name</label>
+                <input class="form-control" id="{{ prefix }}-name" name="name" maxlength="256" value="{{ rule.name if rule else '' }}" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="{{ prefix }}-status-code" data-i18n="redirects.status_code">Status code</label>
+                <select class="form-select" id="{{ prefix }}-status-code" name="status_code">
+                    {% for code in status_codes %}
+                        <option value="{{ code }}" data-i18n="redirects.code.{{ code }}">{{ code }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="{{ prefix }}-from-path" data-i18n="redirects.from_path">Redirect from</label>
+                <input class="form-control" id="{{ prefix }}-from-path" name="from_path" maxlength="256" value="/" required />
+                <div class="form-text" data-i18n="redirects.from_path_help">Source path on the attached services, for example /old.</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="{{ prefix }}-to-url" data-i18n="redirects.to_url">Redirect to</label>
+                <input class="form-control" id="{{ prefix }}-to-url" name="to_url" maxlength="512" placeholder="https://example.com" required />
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="{{ prefix }}-description" data-i18n="table.header.description">Description</label>
+                <textarea class="form-control" id="{{ prefix }}-description" name="description" maxlength="4000" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="{{ prefix }}-append-uri" name="append_request_uri" value="yes" />
+                    <label class="form-check-label" for="{{ prefix }}-append-uri" data-i18n="redirects.append_request_uri">Append the requested URI to the target</label>
+                </div>
+            </div>
+        </div>
+    {%- endmacro %}
+
+    {% call page_head(title="Redirects", title_i18n="navigation.redirects",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Redirects", "navigation.redirects", none)]) %}
+        {{ button(label="New redirect", i18n_key="redirects.new", size="sm", icon="bx-plus", modal_target="redirect-create-modal", disabled=readonly, classes="don-jose") }}
+    {% endcall %}
+
+    {% if readonly %}
+        {{ alert(message="The database is read-only. Redirects can be inspected but not changed.", message_key="redirects.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
+    {% endif %}
+    {% if truncated %}
+        {{ alert(message="Only the first 500 redirects are displayed. Narrow the list through the API for the complete result.", message_key="redirects.truncated", variant="warning", icon="bx-info-circle", classes="mb-4") }}
+    {% endif %}
+
+    {% call card(classes="p-4 min-vh-70") %}
+        <div class="d-flex flex-wrap gap-2 align-items-end mb-4">
+            <div class="flex-grow-1">
+                {{ search(id="redirects-search", placeholder="Search name, source path, or target...", i18n_key="redirects.search", size="sm", clearable=true, clear_id="redirects-search-clear") }}
+            </div>
+            <div>
+                <label class="form-label small" for="redirects-service-filter" data-i18n="table.header.service">Service</label>
+                <select class="form-select form-select-sm" id="redirects-service-filter">
+                    <option value="" data-i18n="redirects.all">All</option>
+                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        {% if redirects %}
+            <div class="table-responsive">
+                <table class="table align-middle redirects-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="table.header.name">Name</th>
+                            <th data-i18n="redirects.from_path">From</th>
+                            <th data-i18n="redirects.to_url">To</th>
+                            <th data-i18n="redirects.status_code">Code</th>
+                            <th data-i18n="table.header.service">Services</th>
+                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rule in redirects %}
+                            <tr class="redirect-row"
+                                data-redirect-id="{{ rule.id }}"
+                                data-services="{{ rule.services | join(' ') }}">
+                                <td>
+                                    <div class="fw-semibold">{{ rule.name }}</div>
+                                    {% if rule.description %}<div class="text-muted small text-truncate">{{ rule.description }}</div>{% endif %}
+                                </td>
+                                <td><code>{{ rule.from_path }}</code></td>
+                                <td>
+                                    <code class="text-truncate d-inline-block mw-100">{{ rule.to_url }}</code>
+                                    {% if rule.append_request_uri %}
+                                        {{ badge(text="+ URI", i18n_key="redirects.append_badge", variant="secondary", classes="ms-1") }}
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ rule.status_code }}</code></td>
+                                <td>
+                                    {% if rule.services %}
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for service_id in rule.services %}
+                                                <span class="badge bg-label-primary d-inline-flex align-items-center gap-1">
+                                                    {{ service_id }}
+                                                    {% if not readonly %}
+                                                        <form method="post" action="{{ redirects_url }}/detach" class="d-inline">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                                            <input type="hidden" name="redirect_id" value="{{ rule.id }}" />
+                                                            <input type="hidden" name="service_id" value="{{ service_id }}" />
+                                                            <button type="submit"
+                                                                    class="btn btn-link btn-sm p-0 lh-1 text-reset"
+                                                                    aria-label="Detach {{ rule.name }} from {{ service_id }}">
+                                                                <i class="bx bx-x" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {# An unattached rule renders nothing: it is stored but no service serves it. #}
+                                        {{ badge(text="Not attached", i18n_key="redirects.not_attached", variant="secondary") }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label="Attach " ~ rule.name ~ " to a service", classes="redirect-attach", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label="Edit " ~ rule.name, classes="redirect-edit", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete " ~ rule.name, classes="redirect-delete", disabled=readonly) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {{ empty_state(title="No redirects yet", title_key="redirects.empty_title", text="A redirect is a named rule you attach to one or more services. Inline REDIRECT_* settings keep working alongside it.", text_key="redirects.empty_text", icon="bx-git-branch") }}
+        {% endif %}
+    {% endcall %}
+
+    {# The page JS reads the rules from here instead of re-parsing the table, so an edit modal
+       is populated from the same values the API returned. #}
+    <input type="hidden" id="redirects-data" value="{{ redirects | tojson }}" />
+
+    {% call modal(id="redirect-create-modal", title_key="redirects.new", title="New redirect", size="lg") %}
+        <form method="post" action="{{ redirects_url }}/create">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="modal-body">
+                {{ rule_fields("redirect-create", none) }}
+                <div class="mt-3">
+                    <label class="form-label" for="redirect-create-services" data-i18n="table.header.service">Services</label>
+                    <select class="form-select" id="redirect-create-services" name="service_ids" multiple size="4">
+                        {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                    </select>
+                    <div class="form-text" data-i18n="redirects.services_help">Use Ctrl or Command to select multiple services. A redirect can be attached later.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Create redirect", i18n_key="redirects.create", icon="bx-plus", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="redirect-edit-modal", title_key="redirects.edit", title="Edit redirect", size="lg") %}
+        <form method="post" action="{{ redirects_url }}/update">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="redirect_id" id="redirect-edit-id" />
+            <div class="modal-body">
+                <div id="redirect-edit-shared" class="alert alert-info d-none" role="alert"></div>
+                {{ rule_fields("redirect-edit", none) }}
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Save redirect", i18n_key="redirects.save", icon="bx-save", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="redirect-attach-modal", title_key="redirects.attach", title="Attach redirect") %}
+        <form method="post" action="{{ redirects_url }}/attach">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="redirect_id" id="redirect-attach-id" />
+            <div class="modal-body">
+                <p id="redirect-attach-copy" class="text-muted"></p>
+                <label class="form-label" for="redirect-attach-services" data-i18n="table.header.service">Services</label>
+                <select class="form-select" id="redirect-attach-services" name="service_ids" multiple size="6" required>
+                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                </select>
+                <div class="form-text" data-i18n="redirects.services_help">Use Ctrl or Command to select multiple services. A redirect can be attached later.</div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Attach", i18n_key="redirects.attach", icon="bx-link", type="submit", classes="don-jose") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="redirect-delete-modal", title_key="redirects.delete_confirm_title", title="Delete this redirect?") %}
+        <form method="post" action="{{ redirects_url }}/delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="redirect_id" id="redirect-delete-id" />
+            <div class="modal-body">
+                <p id="redirect-delete-copy"></p>
+                <p class="text-muted small mb-0" data-i18n="redirects.delete_help">A redirect still attached to a service cannot be deleted. Detach it first.</p>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Delete", i18n_key="button.delete", variant="danger", icon="bx-trash", type="submit") }}
+            </div>
+        </form>
+    {% endcall %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/redirects.js') }}" nonce="{{ script_nonce }}" defer></script>
+{% endblock %}

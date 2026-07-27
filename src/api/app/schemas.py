@@ -495,6 +495,66 @@ class CertificateRevokeRequest(BaseModel):
     reason: Optional[str] = Field(None, max_length=512)
 
 
+# Redirects
+# The rule fields are re-validated against the redirect plugin's own regexes in the database
+# layer; the constraints here only keep obviously malformed payloads out of it.
+class RedirectCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=256)
+    description: str = Field("", max_length=4096)
+    from_path: str = Field("/", min_length=1, max_length=256)
+    to_url: str = Field(..., min_length=1, max_length=512)
+    status_code: Literal["301", "302", "303", "307", "308"] = "301"
+    append_request_uri: bool = False
+    service_ids: List[str] = Field(default_factory=list, max_length=100)
+
+    @field_validator("name", "from_path", "to_url")
+    @classmethod
+    def _redirect_non_empty(cls, value: str) -> str:
+        value = value.strip()
+        if not value or "\x00" in value:
+            raise ValueError("must be a non-empty string without NUL bytes")
+        return value
+
+    @field_validator("service_ids")
+    @classmethod
+    def _redirect_service_ids(cls, value: List[str]) -> List[str]:
+        cleaned = [item.strip() for item in value if item and item.strip()]
+        if len(set(cleaned)) != len(cleaned):
+            raise ValueError("service_ids must not contain duplicates")
+        return cleaned
+
+
+class RedirectUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=256)
+    description: Optional[str] = Field(None, max_length=4096)
+    from_path: Optional[str] = Field(None, min_length=1, max_length=256)
+    to_url: Optional[str] = Field(None, min_length=1, max_length=512)
+    status_code: Optional[Literal["301", "302", "303", "307", "308"]] = None
+    append_request_uri: Optional[bool] = None
+
+    @field_validator("name", "from_path", "to_url")
+    @classmethod
+    def _redirect_optional_non_empty(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value or "\x00" in value:
+            raise ValueError("must be a non-empty string without NUL bytes")
+        return value
+
+
+class RedirectAttachmentRequest(BaseModel):
+    service_id: str = Field(..., min_length=1, max_length=256)
+
+    @field_validator("service_id")
+    @classmethod
+    def _redirect_service_id(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("service_id must be a non-empty string")
+        return value
+
+
 # Jobs
 class JobItem(BaseModel):
     plugin: str

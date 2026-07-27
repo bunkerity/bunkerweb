@@ -45,6 +45,7 @@ from db_methods.instances import DatabaseInstancesMixin
 from db_methods.templates import DatabaseTemplatesMixin
 from db_methods.resource_groups import DatabaseResourceGroupsMixin
 from db_methods.certificates import DatabaseCertificatesMixin
+from db_methods.redirects import DatabaseRedirectsMixin
 from db_methods.ui_users import DatabaseUIUsersMixin
 from db_methods.metrics import DatabaseMetricsMixin
 
@@ -74,6 +75,7 @@ class Database(
     DatabaseTemplatesMixin,
     DatabaseResourceGroupsMixin,
     DatabaseCertificatesMixin,
+    DatabaseRedirectsMixin,
     DatabaseUIUsersMixin,
     DatabaseMetricsMixin,
 ):

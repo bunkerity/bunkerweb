@@ -18,6 +18,7 @@ from logger import getLogger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
 from resource_group_resolver import expand_config_groups  # type: ignore
+from redirect_resolver import expand_service_redirects  # type: ignore
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -132,6 +133,12 @@ if __name__ == "__main__":
         # so NGINX/Lua only ever see literal values (the @name tokens stay stored in the DB).
         config = expand_config_groups(config, db, LOGGER)
         full_config = expand_config_groups(full_config, db, LOGGER)
+
+        # Flatten redirect resources attached to a service into the next free REDIRECT_*
+        # suffixes, so the redirect template renders them exactly like inline rules. Runs
+        # after the group expansion because a resource carries literal values only.
+        config = expand_service_redirects(config, db, LOGGER)
+        full_config = expand_service_redirects(full_config, db, LOGGER)
 
         # Remove old files
         LOGGER.info("Removing old files ...")

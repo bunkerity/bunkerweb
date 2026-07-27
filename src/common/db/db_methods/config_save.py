@@ -27,6 +27,7 @@ from common_utils import (
     normalize_select_value,
     trim_scalar_value,
 )  # type: ignore
+from redirect_resolver import config_servers, inline_redirect_conflict  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
@@ -270,6 +271,25 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 if error := validate_resource_group_refs(config, group_index):
                     self.logger.warning(error)
                     return error
+
+            # An inline REDIRECT_* rule must not claim a source path a redirect resource
+            # already serves on the same service: two rules on one path make the winner
+            # depend on NGINX location ordering. The mirror of the check attach_redirect
+            # runs when the resource side changes.
+            if any(isinstance(key, str) and "REDIRECT_TO" in key for key in config):
+                try:
+                    service_redirects = self._service_redirects(session)
+                except (ProgrammingError, OperationalError) as exc:
+                    session.rollback()
+                    self.logger.warning(f"Could not load redirect resources while validating config: {exc}")
+                    service_redirects = {}
+
+                multisite = str(config.get("MULTISITE", "no")) == "yes"
+                for server in config_servers(config):
+                    paths = [rule["from_path"] for rule in service_redirects.get(server, [])]
+                    if error := inline_redirect_conflict(config, server, paths, multisite=multisite):
+                        self.logger.warning(error)
+                        return error
 
             drafted_service_ids = self._sc_compute_drafted_service_ids(session, ctx, skip_service_management, disable_cleanup)
 

@@ -78,6 +78,7 @@ from app.routes.logs import logs
 from app.routes.plugins import plugins
 from app.routes.pro import pro
 from app.routes.profile import profile
+from app.routes.redirects import redirects
 from app.routes.reports import reports
 from app.routes.resource_groups import resource_groups
 from app.routes.services import services
@@ -102,6 +103,7 @@ BLUEPRINTS = (
     pro,
     cache,
     certificates,
+    redirects,
     web_cache,
     logs,
     login,

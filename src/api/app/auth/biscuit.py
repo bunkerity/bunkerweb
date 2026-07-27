@@ -350,6 +350,24 @@ def _resolve_certificates(path_normalized: str, method_u: str) -> tuple[Optional
     return rtype, None
 
 
+def _resolve_redirects(path_normalized: str, method_u: str) -> tuple[Optional[str], Optional[str]]:
+    rtype = "redirects"
+    parts = [segment for segment in path_normalized.split("/") if segment]
+    if method_u in {"GET", "OPTIONS"}:
+        return rtype, "redirect_read"
+    # Attaching a shared rule to a service changes what that service serves without touching
+    # the rule, so it carries its own permission instead of redirect_update.
+    if "attachments" in parts:
+        return rtype, "redirect_assign"
+    if method_u == "POST":
+        return rtype, "redirect_create"
+    if method_u in {"PUT", "PATCH"}:
+        return rtype, "redirect_update"
+    if method_u == "DELETE":
+        return rtype, "redirect_delete"
+    return rtype, None
+
+
 def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], Optional[str]]:
     """Derive resource_type and required permission name from request path and method.
 
@@ -410,6 +428,8 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
         return _resolve_resource_groups(p, method_u)
     if first == "certificates":
         return _resolve_certificates(p, method_u)
+    if first == "redirects":
+        return _resolve_redirects(p, method_u)
     if first in {"selfsigned", "customcert", "letsencrypt"} and len(parts) >= 2 and parts[1] == "certificates":
         return _resolve_certificates("/" + "/".join(parts[1:]), method_u)
 

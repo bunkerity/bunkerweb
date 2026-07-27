@@ -307,6 +307,34 @@ class ApiClient(BaseApiClient):
     def download_certificate(self, certificate_id, part="chain"):
         return self._raw_request("GET", f"/certificates/{certificate_id}/download", params={"part": part})
 
+    # Redirects
+
+    def get_redirects(self, search="", service_id="", offset=0, limit=500):
+        params = {"offset": offset, "limit": limit}
+        for key, value in (("search", search), ("service_id", service_id)):
+            if value:
+                params[key] = value
+        return self._get("/redirects", params=params)
+
+    def get_redirect(self, redirect_id):
+        data = self._get(f"/redirects/{redirect_id}")
+        return data.get("redirect", data)
+
+    def create_redirect(self, **kwargs):
+        return self._post("/redirects", json=kwargs)
+
+    def update_redirect(self, redirect_id, **kwargs):
+        return self._patch(f"/redirects/{redirect_id}", json=kwargs)
+
+    def delete_redirect(self, redirect_id):
+        return self._delete(f"/redirects/{redirect_id}")
+
+    def attach_redirect(self, redirect_id, service_id):
+        return self._post(f"/redirects/{redirect_id}/attachments", json={"service_id": service_id})
+
+    def detach_redirect(self, redirect_id, service_id):
+        return self._delete(f"/redirects/{redirect_id}/attachments/{service_id}")
+
     # ── Configs ─────────────────────────────────────────────────────────
 
     def get_configs(self, service=None, type=None, with_drafts=True, with_data=False):

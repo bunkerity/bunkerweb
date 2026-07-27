@@ -44,7 +44,11 @@ INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum
 INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", "failover", name="instance_status_enum")
 INSTANCE_TLS_MODE_ENUM = Enum("off", "pinned", name="instance_tls_mode_enum")
 RESOURCE_KINDS_ENUM = Enum("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum")
-RESOURCE_TYPES_ENUM = Enum("certificate", name="resource_types_enum")
+# Attachable resource types shipped in the image. Not an enum: every new typed vertical
+# (redirects, then upstreams) would otherwise cost a schema migration on four engines just
+# to widen a constraint, and PostgreSQL enum values cannot be dropped on downgrade. Writes
+# validate against this tuple instead.
+CORE_RESOURCE_TYPES = ("certificate", "redirect")
 
 
 class Base(DeclarativeBase):
@@ -442,13 +446,15 @@ class Resources(Base):
     __table_args__ = (UniqueConstraint("type", "name"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    type: Mapped[str] = mapped_column(RESOURCE_TYPES_ENUM, nullable=False)
+    # Validated against CORE_RESOURCE_TYPES on write rather than by the database.
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(LargeText, nullable=True, default="")
     creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     last_update: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     certificate: Mapped[Optional["Certificates"]] = relationship("Certificates", back_populates="resource", cascade="all, delete-orphan", uselist=False)
+    redirect: Mapped[Optional["Redirects"]] = relationship("Redirects", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     attachments: Mapped[List["ResourceAttachments"]] = relationship("ResourceAttachments", back_populates="resource", cascade="all, delete-orphan")
 
 
@@ -480,6 +486,21 @@ class Certificates(Base):
     revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     resource: Mapped["Resources"] = relationship("Resources", back_populates="certificate")
+
+
+class Redirects(Base):
+    __tablename__ = "bw_redirects"
+
+    resource_id: Mapped[str] = mapped_column(String(36), ForeignKey("bw_resources.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    # Mirrors the REDIRECT_* settings of the redirect core plugin: values are validated
+    # against that plugin.json's regexes so an inline rule and a resource rule can never
+    # diverge on what they accept.
+    from_path: Mapped[str] = mapped_column(String(256), nullable=False, default="/")
+    to_url: Mapped[str] = mapped_column(String(512), nullable=False)
+    status_code: Mapped[str] = mapped_column(String(3), nullable=False, default="301")
+    append_request_uri: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+
+    resource: Mapped["Resources"] = relationship("Resources", back_populates="redirect")
 
 
 class ResourceAttachments(Base):
@@ -735,6 +756,12 @@ API_PERMISSION_ENUM = Enum(
     "certificate_renew",
     "certificate_revoke",
     "certificate_download",
+    # Redirect resource permissions
+    "redirect_read",
+    "redirect_create",
+    "redirect_update",
+    "redirect_delete",
+    "redirect_assign",
     name="api_permission_enum",
 )
 
@@ -750,6 +777,7 @@ API_RESOURCE_ENUM = Enum(
     "jobs",
     "resource_groups",
     "certificates",
+    "redirects",
     name="api_resource_enum",
 )
 

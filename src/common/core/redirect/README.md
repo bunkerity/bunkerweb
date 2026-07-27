@@ -18,6 +18,16 @@ Follow these steps to configure and use the Redirect feature:
 4. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
 5. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected based on your settings.
 
+### Reusable Redirects
+
+Beyond the per-service settings below, a redirect can be stored once as a **named, reusable rule** and attached to as many services as you like, from the **Redirects** page in the web UI or through the `/redirects` API endpoints. Editing the rule updates every service it is attached to.
+
+- A rule carries the same four values as the inline settings: source path, destination URL, status code and whether to append the request URI.
+- Inline `REDIRECT_*` settings keep working exactly as before. Attached rules are rendered **after** them, taking the next free suffixes, so existing configurations are untouched and no migration is needed.
+- A rule attached to nothing renders nothing.
+- Two rules cannot claim the same source path on one service — whether that is two attached rules, or an attached rule and an inline setting. The conflicting change is refused with an explicit message instead of letting NGINX `location` ordering decide.
+- Deleting a rule is refused while it is still attached to a service; detach it first.
+
 ### Configuration Settings
 
 | Setting                   | Default | Context   | Multiple | Description                                                                                                       |
