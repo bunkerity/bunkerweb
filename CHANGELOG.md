@@ -9,6 +9,9 @@
 - [BUGFIX] `ui`: an unreadable counter no longer breaks a whole plugin page, and no longer hides the workers that reported real counts.
 - [BUGFIX] `scheduler`: refresh the job environment in place instead of replacing it on every reload, so jobs stop reading a snapshot of the configuration taken at startup. A DNS-01 service created or edited in the web UI got no certificate until the container was restarted. (Fixes #3755)
 - [BUGFIX] `letsencrypt`: fail the `certbot-new` job when a service cannot get the certificate it asked for instead of reporting success, and write each job's output to `certbot-new.log` and `certbot-renew.log` so the Jobs and Logs pages show why.
+- [BUGFIX] `whitelist`: whitelisting a banned IP now lifts the block on HTTP and stream services, and manually configured `WHITELIST_*` values are honored by the default server and badbehavior checks instead of only the entries downloaded from `WHITELIST_*_URLS`. (Refs #3708)
+- [BUGFIX] `core`: a setting missing from a service's configuration falls back to its global value, and a setting declared by a plugin but absent from the configuration is logged once per minute at warning level instead of at error level on every request. (Refs #3746)
+- [BUGFIX] `autoconf`: a Kubernetes watch that exhausts its retries now backs off and marks the container unhealthy instead of silently restarting forever while reporting healthy. (Refs #3750)
 - [UI] Reports page: document the retention model, a rolling buffer capped per worker that is cleared on restart unless Redis is enabled.
 
 ## v1.6.14~rc1 - 2026/07/23
