@@ -78,7 +78,9 @@ utils.get_variable = function(variable, site_search, ctx)
 		else
 			server_name = var.server_name
 		end
-		if variables[server_name] then
+		-- Keep the global value when the service has no entry of its own, otherwise a
+		-- partially populated per-service table hides settings that do exist globally.
+		if variables[server_name] and variables[server_name][variable] ~= nil then
 			value = variables[server_name][variable]
 		end
 	end
