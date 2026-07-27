@@ -86,6 +86,8 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
 
     Remarque : pour des raisons d’amorçage, si vous activez `API_TOKEN`, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête `Authorization` quand `API_TOKEN` est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant `API_LISTEN_HTTPS=yes` (port : `API_HTTPS_PORT`, `5443` par défaut).
 
+    Avec `API_LISTEN_HTTPS=yes`, BunkerWeb crée un certificat auto-signé persistant propre à l’instance dans `/var/lib/bunkerweb` avant le premier rendu de configuration. Les clés privées des certificats internes restent sur l’instance et ne transitent jamais par un worker, la base de données ou l’API. Le démarrage s’interrompt sans revenir au texte en clair si le certificat requis ne peut pas être créé. Une paire valide est réutilisée après redémarrage ; une paire absente, corrompue ou expirant dans moins de 30 jours est remplacée, ce qui change son empreinte. Les clients qui épinglent le certificat doivent alors mettre à jour l’empreinte manuellement.
+
     Exemple de test avec curl (remplacez le jeton et l’hôte) :
 
     ```bash

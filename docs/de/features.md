@@ -86,6 +86,8 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
     Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie `API_TOKEN` aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den `Authorization`-Header automatisch hinzu, wenn `API_TOKEN` in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie `API_LISTEN_HTTPS=yes` setzen (Port: `API_HTTPS_PORT`, Standard `5443`).
 
+    Bei `API_LISTEN_HTTPS=yes` erstellt BunkerWeb vor dem ersten Rendern der Konfiguration ein dauerhaftes, instanzspezifisches selbstsigniertes Zertifikat unter `/var/lib/bunkerweb`. Die privaten Schlüssel interner Zertifikate verbleiben auf der Instanz und werden weder über einen Worker noch über die Datenbank oder API übertragen. Der Start wird ohne Rückfall auf Klartext abgebrochen, wenn das erforderliche Zertifikat nicht erstellt werden kann. Ein gültiges Paar wird bei Neustarts wiederverwendet; ein fehlendes, beschädigtes oder innerhalb von 30 Tagen ablaufendes Paar wird ersetzt, wodurch sich sein Fingerabdruck ändert. Clients mit Zertifikat-Pinning müssen den Pin anschließend manuell aktualisieren.
+
     Beispieltest mit curl (Token und Host ersetzen):
 
     ```bash

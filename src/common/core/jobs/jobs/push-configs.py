@@ -65,6 +65,21 @@ FAILOVER_KEEP = 3
 INSTANCE_PUSH_TIMEOUT = (5, 60)
 RELOAD_TIMEOUT = (5, 30)
 
+RETIRED_CACHE_ROWS = {
+    ("api-server-cert", "api-server-cert.key"),
+    ("api-server-cert", "api-server-cert.pem"),
+    ("default-server-cert", "default-server-cert.key"),
+    ("default-server-cert", "default-server-cert.pem"),
+}
+RETIRED_CACHE_PATHS = {
+    ("jobs", "api-server-cert.key"),
+    ("jobs", "api-server-cert.pem"),
+    ("misc", "api-server-cert.key"),
+    ("misc", "api-server-cert.pem"),
+    ("misc", "default-server-cert.key"),
+    ("misc", "default-server-cert.pem"),
+}
+
 
 def _redis_client():
     broker_url = getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
@@ -152,6 +167,24 @@ def _materialize_plugins(db: Database, target: Path, *, pro: bool) -> None:
             LOGGER.error(f"Failed to extract {label} plugin {plugin.get('id')!r}: {e}")
 
 
+def _purge_retired_caches(db: Database) -> None:
+    errors = []
+    for job_name, file_name in RETIRED_CACHE_ROWS:
+        error = db.delete_job_cache(file_name, job_name=job_name)
+        if error:
+            errors.append(f"{job_name}/{file_name}: {error}")
+
+    cache_roots = [CACHE_PATH]
+    if FAILOVER_PATH.is_dir():
+        cache_roots.extend(snapshot.joinpath("cache") for snapshot in FAILOVER_PATH.iterdir() if snapshot.is_dir())
+    for cache_root in cache_roots:
+        for plugin_id, file_name in RETIRED_CACHE_PATHS:
+            cache_root.joinpath(plugin_id, file_name).unlink(missing_ok=True)
+
+    if errors:
+        raise RuntimeError(f"Failed to purge retired caches from the database: {'; '.join(errors)}")
+
+
 def _materialize_caches(db: Database) -> None:
     LOGGER.info("Materializing job caches from DB ...")
     CACHE_PATH.mkdir(parents=True, exist_ok=True)
@@ -159,15 +192,15 @@ def _materialize_caches(db: Database) -> None:
     cache_files = db.get_jobs_cache_files()
     desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
 
-    expected = set()
     for cache in cache_files:
         plugin_id = cache.get("plugin_id")
         file_name = cache.get("file_name") or ""
         if not plugin_id or not file_name:
             continue
+        if (cache.get("job_name"), file_name) in RETIRED_CACHE_ROWS or (plugin_id, file_name) in RETIRED_CACHE_PATHS:
+            continue
         cache_dir = CACHE_PATH.joinpath(plugin_id, cache.get("service_id") or "")
         cache_path = cache_dir.joinpath(file_name)
-        expected.add(cache_path)
         try:
             cache_dir.mkdir(parents=True, exist_ok=True)
             if file_name.endswith(".tgz"):
@@ -343,6 +376,7 @@ try:
         sys_exit(0)
 
     db = Database(LOGGER)
+    _purge_retired_caches(db)
 
     instances = [inst for inst in db.get_instances(with_credential=True) if inst.get("status") != "down"]
     if not instances:

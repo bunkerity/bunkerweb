@@ -6,8 +6,10 @@ end-to-end on every engine: create -> idempotent re-run -> update -> prune. Mark
 """
 
 import pytest
+from sqlalchemy import select
 
-from fixtures.seed import make_core_plugin, session
+from fixtures.seed import FIXED_DT, make_core_plugin, session
+from model import Jobs_cache, Jobs_runs
 
 pytestmark = pytest.mark.slow
 
@@ -67,6 +69,20 @@ class TestInitTables:
     def test_jobs_created(self, db):
         db.init_tables([make_core_plugin("alpha", jobs=[{"name": "alphajob", "file": "alphajob.py", "every": "hour", "reload": False}])])
         assert "alphajob" in db.get_jobs()
+
+    def test_removed_job_prunes_cache_and_runs(self, db):
+        job = {"name": "alphajob", "file": "alphajob.py", "every": "hour", "reload": False}
+        db.init_tables([make_core_plugin("alpha", jobs=[job])])
+        with session(db) as s:
+            s.add(Jobs_cache(job_name="alphajob", file_name="legacy.key", data=b"secret"))
+            s.add(Jobs_runs(job_name="alphajob", success=True, start_date=FIXED_DT, end_date=FIXED_DT))
+
+        db.init_tables([make_core_plugin("alpha")])
+
+        assert "alphajob" not in db.get_jobs()
+        with session(db) as s:
+            assert s.scalar(select(Jobs_cache).filter_by(job_name="alphajob")) is None
+            assert s.scalar(select(Jobs_runs).filter_by(job_name="alphajob")) is None
 
     def test_case_insensitive_fetched_by_init_diff(self, db):
         # A3 regression: the bw_settings diff (_it_fetch_old_data) must fetch

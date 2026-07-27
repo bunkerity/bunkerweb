@@ -7,6 +7,10 @@ on:
     branches: [1.7]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-1.7
+  cancel-in-progress: false
+
 jobs:
   # Containers
   build-containers:
@@ -100,9 +104,16 @@ jobs:
       contents: read
       security-events: write
 
+  test-internalcert:
+    needs: [build-containers]
+    uses: ./.github/workflows/test-core.yml
+    with:
+      TEST: internalcert
+      RELEASE: 1.7
+
   # Push with 1.7-dev tag
   push-dev:
-    needs: [build-containers]
+    needs: [build-containers, test-internalcert]
     runs-on: ubuntu-latest
     permissions:
       contents: read

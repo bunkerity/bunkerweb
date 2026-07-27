@@ -86,6 +86,8 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
     Nota: por razones de arranque, si habilitas `API_TOKEN` debes establecerlo en el entorno de AMBAS, la instancia de BunkerWeb y el Programador. El Programador incluye automáticamente el encabezado `Authorization` cuando `API_TOKEN` está presente en su entorno. Si no se establece, no se envía ningún encabezado y BunkerWeb no aplicará la autenticación por token. Puedes exponer la API a través de HTTPS estableciendo `API_LISTEN_HTTPS=yes` (puerto: `API_HTTPS_PORT`, predeterminado `5443`).
 
+    Con `API_LISTEN_HTTPS=yes`, BunkerWeb crea un certificado autofirmado persistente y específico de la instancia en `/var/lib/bunkerweb` antes de renderizar la primera configuración. Las claves privadas de los certificados internos permanecen en la instancia y nunca pasan por un worker, la base de datos ni la API. El arranque se interrumpe sin volver a texto plano si no se puede crear el certificado requerido. Un par válido se reutiliza tras los reinicios; uno ausente, dañado o que caduca en menos de 30 días se sustituye, cambiando su huella digital. Los clientes que fijen el certificado deberán actualizar la huella manualmente.
+
     Prueba de ejemplo con curl (reemplaza el token y el host):
 
     ```bash

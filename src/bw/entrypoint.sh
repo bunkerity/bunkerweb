@@ -101,11 +101,17 @@ function set_loading_state() {
 }
 
 # ensure the internal default-server certificate exists before any render/start
-generate_default_server_cert || log "ENTRYPOINT" "⚠️" "Continuing without a freshly generated default-server certificate"
+if ! generate_default_server_cert; then
+	log "ENTRYPOINT" "❌" "Failed to provision the internal default-server certificate"
+	exit 1
+fi
 
 # ensure the internal API-server certificate exists (only when API_LISTEN_HTTPS=yes)
 # before the first render so api.conf serves HTTPS from boot without the worker
-generate_api_server_cert || log "ENTRYPOINT" "⚠️" "Continuing without a freshly generated API-server certificate"
+if ! generate_api_server_cert; then
+	log "ENTRYPOINT" "❌" "Failed to provision the internal API-server certificate"
+	exit 1
+fi
 
 # generate "temp" config
 tmp_env_path="/tmp/variables.env"

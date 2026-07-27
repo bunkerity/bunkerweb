@@ -865,6 +865,12 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                 to_update.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}, "data": new_j})
 
         for jk in old_job_keys - new_job_keys:
+            to_delete.extend(
+                (
+                    {"type": "job_cache", "filter": {"job_name": jk[1]}},
+                    {"type": "job_run", "filter": {"job_name": jk[1]}},
+                )
+            )
             to_delete.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}})
 
     def _it_diff_plugin_pages(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list) -> None:

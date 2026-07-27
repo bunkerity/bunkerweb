@@ -307,32 +307,45 @@ function _generate_self_signed_cert() {
 	local key_file="$2"
 	local log_tag="$3"
 	local cert_dir
-	cert_dir=$(dirname "$cert_file")
+	cert_dir=$(dirname "$cert_file") || return 1
 
 	local openssl_bin
-	openssl_bin=$(command -v openssl 2>/dev/null || echo /usr/bin/openssl)
+	if ! openssl_bin=$(command -v openssl 2>/dev/null); then
+		log "$log_tag" "❌" "OpenSSL is required to provision the internal certificate"
+		return 1
+	fi
 
 	if [ -f "$cert_file" ] && [ -f "$key_file" ] \
 		&& "$openssl_bin" x509 -checkend 2592000 -noout -in "$cert_file" >/dev/null 2>&1 \
 		&& [ "$("$openssl_bin" x509 -in "$cert_file" -noout -pubkey 2>/dev/null)" = "$("$openssl_bin" pkey -in "$key_file" -pubout 2>/dev/null)" ]; then
-		return 0
+		if ! chmod 600 "$key_file"; then
+			log "$log_tag" "❌" "Failed to secure the internal certificate private key"
+			return 1
+		fi
+		return
 	fi
 
 	log "$log_tag" "ℹ️" "Generating internal self-signed certificate ..."
-	mkdir -p "$cert_dir"
+	if ! mkdir -p "$cert_dir"; then
+		log "$log_tag" "❌" "Failed to create the internal certificate directory"
+		return 1
+	fi
 
 	local cert_name key_name
-	cert_name=$(basename "$cert_file")
-	key_name=$(basename "$key_file")
+	cert_name=$(basename "$cert_file") || return 1
+	key_name=$(basename "$key_file") || return 1
 	# Sweep any stale temp files left by a previous interrupted run.
-	rm -f "${cert_dir}/.${cert_name}."* "${cert_dir}/.${key_name}."* 2>/dev/null || true
+	if ! rm -f "${cert_dir}/.${cert_name}."* "${cert_dir}/.${key_name}."* 2>/dev/null; then
+		log "$log_tag" "❌" "Failed to clean stale internal certificate files"
+		return 1
+	fi
 
 	local conf_file tmp_cert tmp_key
 	conf_file=$(mktemp) || return 1
 	tmp_cert=$(mktemp "${cert_dir}/.${cert_name}.XXXXXX") || { rm -f "$conf_file"; return 1; }
 	tmp_key=$(mktemp "${cert_dir}/.${key_name}.XXXXXX") || { rm -f "$conf_file" "$tmp_cert"; return 1; }
 
-	cat > "$conf_file" <<'EOF'
+	if ! cat > "$conf_file" <<'EOF'
 [req]
 distinguished_name = req_distinguished_name
 req_extensions = v3_req
@@ -353,6 +366,10 @@ basicConstraints = critical, CA:false
 [alt_names]
 DNS.1 = www.example.org
 EOF
+	then
+		rm -f "$conf_file" "$tmp_cert" "$tmp_key"
+		return 1
+	fi
 
 	# -extensions v3_req is required for the [v3_req] SAN/keyUsage/EKU/basicConstraints
 	# block to apply to an -x509 cert (req_extensions alone only affects CSRs).
@@ -362,18 +379,26 @@ EOF
 		rm -f "$conf_file" "$tmp_cert" "$tmp_key"
 		return 1
 	fi
-	rm -f "$conf_file"
 
-	chmod 600 "$tmp_key"
-	mv -f "$tmp_cert" "$cert_file"
-	mv -f "$tmp_key" "$key_file"
-
-	# When invoked as root (Linux/FreeBSD service start), hand ownership to nginx.
-	if [ "$(id -u)" = "0" ] && id nginx >/dev/null 2>&1; then
-		chown nginx:nginx "$cert_file" "$key_file" 2>/dev/null || true
+	if ! "$openssl_bin" x509 -noout -in "$tmp_cert" >/dev/null 2>&1 \
+		|| [ "$("$openssl_bin" x509 -in "$tmp_cert" -noout -pubkey 2>/dev/null)" != "$("$openssl_bin" pkey -in "$tmp_key" -pubout 2>/dev/null)" ] \
+		|| ! chmod 600 "$tmp_key" \
+		|| ! mv -f "$tmp_cert" "$cert_file" \
+		|| ! mv -f "$tmp_key" "$key_file" \
+		|| ! chmod 600 "$key_file" \
+		|| ! "$openssl_bin" x509 -checkend 2592000 -noout -in "$cert_file" >/dev/null 2>&1 \
+		|| [ "$("$openssl_bin" x509 -in "$cert_file" -noout -pubkey 2>/dev/null)" != "$("$openssl_bin" pkey -in "$key_file" -pubout 2>/dev/null)" ]; then
+		log "$log_tag" "❌" "Failed to install a valid internal certificate"
+		rm -f "$conf_file" "$tmp_cert" "$tmp_key"
+		return 1
 	fi
 
-	return 0
+	if ! rm -f "$conf_file"; then
+		log "$log_tag" "❌" "Failed to clean the internal certificate configuration"
+		return 1
+	fi
+
+	return
 }
 
 # The internal default-server cert is config-free (catch-all CN=www.example.org),

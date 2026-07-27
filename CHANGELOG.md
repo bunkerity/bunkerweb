@@ -2,6 +2,7 @@
 
 ## v1.7.0-beta - 2026/07/??
 
+- [SECURITY] `nginx`/`api`: create persistent per-instance internal self-signed certificates under `/var/lib/bunkerweb` before the first configuration render (the API certificate when `API_LISTEN_HTTPS=yes`), keeping private keys out of workers, the database and API transit. Startup now fails closed instead of falling back to plaintext; valid pairs survive restarts, while missing, corrupt or pairs expiring within 30 days rotate and require pinned clients to update their fingerprint manually.
 - [FEATURE] `ui`: new Reports dashboard — a 4-tab view (Overview, Top offenders, Rules, Requests) over the persisted blocked-request metrics, with a shared range picker driving the timeseries, top-offenders, and top-rules queries.
 - [FEATURE] `metrics`: attribute each blocked-request report to its origin network — new `asn_number` and `asn_org` columns on `bw_metrics_requests` surface the offending ASN in the Reports dashboard.
 - [FEATURE] `ui`: the Templates page gained a card gallery — icon, real per-template usage count, plugin/config/feature badges, and View/Edit/Clone/Delete actions — replacing the flat DataTable; bulk delete is preserved via a card selection toggle feeding the existing confirmation flow.
