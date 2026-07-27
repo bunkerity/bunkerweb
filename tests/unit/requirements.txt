@@ -1,3 +1,13 @@
+# Unit-test dependencies for tests/unit/ (DB-layer milestone 1).
+#
+# Install into a dedicated venv — the repo's runtime deps are NOT installed
+# locally (src/deps/python/ is empty; they are baked into the containers):
+#   python3 -m venv .venv-unit
+#   .venv-unit/bin/pip install -r tests/unit/requirements.txt
+#
+# DB libraries under test — pinned to match src/common/db/requirements.in so the
+# tests run the exact library versions BunkerWeb ships.
+alembic==1.18.5
 
 # UI-layer import deps: importing UIDatabase pulls app.utils + app.models.models,
 # which require Flask/bcrypt/etc. Pinned to src/ui/requirements.txt.
@@ -20,14 +30,4 @@ pytest-randomly==3.16.0
 regex==2026.5.9
 requests==2.34.2
 schedule==1.2.2
-# Unit-test dependencies for tests/unit/ (DB-layer milestone 1).
-#
-# Install into a dedicated venv — the repo's runtime deps are NOT installed
-# locally (src/deps/python/ is empty; they are baked into the containers):
-#   python3 -m venv .venv-unit
-#   .venv-unit/bin/pip install -r tests/unit/requirements.txt
-#
-# DB libraries under test — pinned to match src/common/db/requirements.in so the
-# tests run the exact library versions BunkerWeb ships.
-alembic==1.18.5
 SQLAlchemy==2.0.50

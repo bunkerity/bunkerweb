@@ -28,20 +28,20 @@ certbot==5.7.0 \
     # via
     #   -r requirements.in
     #   certbot-dns-multi
-certbot-dns-multi==5.2.2 \
-    --hash=sha256:1a4f1bd6119140bcc74379ae383bed267cbb430e388273ff26d77d5c7bdf33bb \
-    --hash=sha256:20e9693365b89c0694c17cfe6d1b954e9a2a03fd5784e453952d5babec21fcdb \
-    --hash=sha256:22ab32a9ee22a12d4dafd0370b979d16c75bf5ae8f2608eba0cb70b49ac9d2f6 \
-    --hash=sha256:23a1a30985d040d96c628180e6768dd05119ad7d3a75ea85dec9385d0fab71e1 \
-    --hash=sha256:2d8b4944225971901d55f38278f0e6701ebf1020bdd79b06cf6567aa71c17afb \
-    --hash=sha256:5f45a8d8c5965ce2dc62b266d3204dd1f554cb9d8f144f6ee6948f6c49592c3f \
-    --hash=sha256:a10a24f41dd3224bbfd37f05018c5ecd089c6db58d2ba82ba129e45e1324006c \
-    --hash=sha256:e323743fc32d7b4d560b17c646cf6c6c3826086f594bbd985d31eeb74bfee3e4 \
-    --hash=sha256:fafc7804a33db50f8b88ef0c5d6c3076ea3ca6c2e89b4fde9a02134162056da0
+certbot-dns-multi==5.3.1 \
+    --hash=sha256:171650c996e883cd9aa8fd0575b4a3819f6ebf00ad4b9642abba0a0125134a18 \
+    --hash=sha256:430aa6df25882e5ab0a04e5135c38e3bd5fd8c490c30446656f380e7c32d16a2 \
+    --hash=sha256:4e4701b152ed17eb5ed6a398bfe537d61d04bafbecc32cd82469590de301fcab \
+    --hash=sha256:aa8dce715e958d28304a9c7e171508e2f3ee5b499cf7c12694ebbe1451247ec9 \
+    --hash=sha256:b358a55aeb2ffc2657aab0958d98f56c563abf78fe5ab138e9b19330a853da2f \
+    --hash=sha256:b8e9d6918a6cb532232f8afec75e0d6a7315ba507b743a00345704ad33e5f9aa \
+    --hash=sha256:cdeeda59652c043cf8cf9b9957d8ab52ac960d23f6143797946de089338cd2fe \
+    --hash=sha256:e36bd3d2ff27a6eaf62df9398f37e1e3437d370734735563c4b21e2313a36567 \
+    --hash=sha256:fed407c7573b44674ad2399267f092ca598189aaf94153a9f3f287993f16251d
     # via -r requirements.in
-certifi==2026.6.17 \
-    --hash=sha256:024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432 \
-    --hash=sha256:2227dcbaafe0d2f59279d1762ddddc37783ed4354594f194ffc31d20f41fc3db
+certifi==2026.7.22 \
+    --hash=sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775 \
+    --hash=sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55
     # via requests
 cffi==2.1.0 \
     --hash=sha256:02cb7ff33ded4f1532476731f89ede53e2e488a8e6205515a82144246ffa7dcc \
@@ -542,9 +542,9 @@ parsedatetime==2.6 \
     --hash=sha256:4cb368fbb18a0b7231f4d76119165451c8d2e35951455dfee97c62a87b04d455 \
     --hash=sha256:cb96edd7016872f58479e35879294258c71437195760746faffedb692aef000b
     # via certbot
-prompt-toolkit==3.0.52 \
-    --hash=sha256:28cde192929c8e7321de85de1ddbe736f1375148b02f2e17edd840042b1be855 \
-    --hash=sha256:9aac639a3bbd33284347de5ad8d68ecc044b91a762dc39b7c21095fcd6a19955
+prompt-toolkit==3.0.53 \
+    --hash=sha256:01c0891d7f9237d5e339f7d3e42cdae80b7534abb1c7c0e3352efba6231492f2 \
+    --hash=sha256:9ec8a0ad96d5c56148b3f914aa79c1564c3fde5d2e6b876e7bc327e353cf8fa6
     # via click-repl
 pycparser==3.0 \
     --hash=sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29 \
