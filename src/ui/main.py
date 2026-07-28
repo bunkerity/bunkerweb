@@ -893,6 +893,12 @@ def handle_csrf_error(_):
         return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
+    if request.method == "POST":
+        # A submitted form dies here rather than at the login check, because the CSRF
+        # token lives in the session that just went away. logout_page() clears the
+        # session and the response tells the browser to drop its cookies, so a flash
+        # would not survive: the reason has to travel in the URL.
+        response.headers["Location"] = url_for("login.login_page", reason="session_expired")
     return response
 
 
