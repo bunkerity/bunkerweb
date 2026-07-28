@@ -13,7 +13,6 @@ local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
 local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
-local get_asn = utils.get_asn
 local regex_match = utils.regex_match
 local get_variable = utils.get_variable
 local deduplicate_list = utils.deduplicate_list
@@ -262,9 +261,9 @@ function greylist:is_greylisted_ip()
 
 	-- Check if ASN is in greylist
 	if self.ctx.bw.ip_is_global then
-		local asn, _, err = get_asn(self.ctx.bw.remote_addr)
+		local asn = self.ctx.bw.asn_number
 		if not asn then
-			self.logger:log(ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
+			self.logger:log(ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr)
 		else
 			for _, bl_asn in ipairs(self.lists["ASN"]) do
 				if bl_asn == tostring(asn) then

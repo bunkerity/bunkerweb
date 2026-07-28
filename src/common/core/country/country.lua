@@ -5,7 +5,6 @@ local utils = require "bunkerweb.utils"
 
 local country = class("country", plugin)
 
-local get_country = utils.get_country
 local get_deny_status = utils.get_deny_status
 local regex_match = utils.regex_match
 local decode = cjson.decode
@@ -122,10 +121,11 @@ function country:access()
 		return self:ret(true, "client IP " .. self.ctx.bw.remote_addr .. " is not global, skipping check")
 	end
 
-	-- Get the country of client
-	local country_data, err = get_country(self.ctx.bw.remote_addr)
-	if not country_data then
-		return self:ret(false, "can't get country of client IP " .. self.ctx.bw.remote_addr .. " : " .. err)
+	-- Get the country of client (resolved once per request by fill_ctx())
+	local country_data = self.ctx.bw.country
+	local err
+	if not country_data or country_data == "unknown" then
+		return self:ret(false, "can't get country of client IP " .. self.ctx.bw.remote_addr)
 	end
 
 	-- Process whitelist first

@@ -16,7 +16,6 @@ local remove_ban = utils.remove_ban
 local is_whitelisted = utils.is_whitelisted
 local is_ip_whitelisted = utils.is_ip_whitelisted
 local is_banned = utils.is_banned
-local get_country = utils.get_country
 local get_security_mode = utils.get_security_mode
 local tostring = tostring
 local time = os.time
@@ -65,16 +64,8 @@ function badbehavior:log()
 	end
 	-- Get security mode
 	local security_mode = get_security_mode(self.ctx)
-	-- Get country
-	local country = "local"
-	local err
-	if self.ctx.bw.ip_is_global then
-		country, err = get_country(self.ctx.bw.remote_addr)
-		if not country then
-			country = "unknown"
-			self.logger:log(ERR, "can't get country code " .. err)
-		end
-	end
+	-- Get country (resolved once per request by fill_ctx())
+	local country = self.ctx.bw.country or "local"
 	-- Add incr operation so timer can manage it
 	local status = tostring(ngx.status)
 	local ban_scope = self.variables["BAD_BEHAVIOR_BAN_SCOPE"]

@@ -20,8 +20,15 @@ local ip_is_global = utils.ip_is_global
 local is_ipv4 = utils.is_ipv4
 local is_ipv6 = utils.is_ipv6
 local get_variable = utils.get_variable
+local get_country = utils.get_country
+local get_asn = utils.get_asn
+local lower = string.lower
 
 local helpers = {}
+
+-- Geo lookups are reported once per worker : a missing MMDB would otherwise log on every request
+local geo_country_warned = false
+local geo_asn_warned = false
 
 helpers.load_plugin = function(json)
 	-- Open file
@@ -320,6 +327,40 @@ helpers.fill_ctx = function(no_ref)
 			-- IP data : v4 / v6
 			data.ip_is_ipv4 = is_ipv4(data.remote_addr)
 			data.ip_is_ipv6 = is_ipv6(data.remote_addr)
+			if data.ip_is_ipv4 then
+				data.ip_version = 4
+			elseif data.ip_is_ipv6 then
+				data.ip_version = 6
+			end
+			-- Normalized protocol : http/https or tcp/udp
+			if data.kind == "http" then
+				data.protocol = data.scheme
+			elseif var.protocol then
+				data.protocol = lower(var.protocol)
+			end
+			-- Geo data : resolved once here, then shared by plugins, logs and workflows
+			if data.ip_is_global then
+				local country, country_err = get_country(data.remote_addr)
+				if country then
+					data.country = country
+				else
+					data.country = "unknown"
+					if not geo_country_warned then
+						geo_country_warned = true
+						table.insert(errors, "can't get country of IP : " .. tostring(country_err))
+					end
+				end
+				local asn_number, asn_org, asn_err = get_asn(data.remote_addr)
+				if asn_number then
+					data.asn_number = asn_number
+					data.asn_org = asn_org
+				elseif not geo_asn_warned then
+					geo_asn_warned = true
+					table.insert(errors, "can't get ASN of IP : " .. tostring(asn_err))
+				end
+			else
+				data.country = "local"
+			end
 		end
 		-- Fill ctx
 		ctx.bw = data
@@ -335,6 +376,23 @@ helpers.fill_ctx = function(no_ref)
 	ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
 	ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes", ctx)
 	return true, "ctx filled", errors, ctx
+end
+
+-- Copy the enriched ctx to the $bw_* NGINX variables (logs, custom configs).
+-- Only call it from a phase where writing ngx.var is allowed (set, preread) and from a server
+-- block declaring the variables : server-http/server.conf and server-stream/server-stream.conf.
+helpers.export_ctx_vars = function(ctx)
+	local data = ctx and ctx.bw
+	if not data then
+		return
+	end
+	var.bw_kind = data.kind or ""
+	var.bw_protocol = data.protocol or ""
+	var.bw_ip_is_global = data.ip_is_global and "yes" or "no"
+	var.bw_ip_version = data.ip_version and tostring(data.ip_version) or ""
+	var.bw_country = data.country or ""
+	var.bw_asn_number = data.asn_number and tostring(data.asn_number) or ""
+	var.bw_asn_org = data.asn_org or ""
 end
 
 helpers.save_ctx = function(ctx)

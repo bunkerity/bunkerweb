@@ -159,6 +159,27 @@ Switching to `detect` mode can help you identify and resolve potential false pos
         - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.
         - For debugging issues, temporarily set the log level to `debug` to get more detailed information.
 
+    !!! info "Enriched context variables"
+        On top of the native NGINX variables, `LOG_FORMAT` accepts the following variables. They are resolved **once per request** (or per stream session) and shared with the plugins, so adding them to your log format costs no extra lookup.
+
+        | Variable           | Value                                                                       |
+        | ------------------ | --------------------------------------------------------------------------- |
+        | `$bw_kind`         | `http` or `stream`                                                          |
+        | `$bw_protocol`     | `http`, `https`, `tcp` or `udp`                                             |
+        | `$bw_ip_is_global` | `yes` or `no`                                                               |
+        | `$bw_ip_version`   | `4` or `6`                                                                  |
+        | `$bw_country`      | ISO 3166-1 alpha-2 code, `local` (private IP) or `unknown` (no GeoIP match) |
+        | `$bw_asn_number`   | AS number, or empty                                                         |
+        | `$bw_asn_org`      | AS organization, or empty                                                   |
+
+        Example of a JSON access log using them:
+
+        ```
+        LOG_FORMAT={"request_id":"$request_id","ip":"$remote_addr","country":"$bw_country","asn":"$bw_asn_number","asn_org":"$bw_asn_org","method":"$request_method","uri":"$request_uri","status":$status}
+        ```
+
+        A request served by a server block that does not fill them (default server, internal API) logs `-`. GeoIP data requires the `country.mmdb` / `asn.mmdb` databases: when they are missing, `$bw_country` is `unknown` and traffic is served normally.
+
 === "Integration Settings"
 
     | Setting                  | Default | Context   | Multiple | Description                                                                                                     |

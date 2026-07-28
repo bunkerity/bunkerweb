@@ -66,6 +66,25 @@ All classes use `middleclass` (third-party OOP in `lua/middleclass.lua` — do n
 3. **Plugin execution**: For each plugin in `PLUGINS_ORDER_<PHASE>`, instantiate via `plugin:new(ctx)` and call the phase method (set/rewrite/access/content/header_filter/body_filter/log/preread).
 4. **Return convention**: All phase methods return a table with named keys (built by `self:ret(...)`): `{ ret = ..., msg = ..., status = ..., redirect = ..., data = ... }`.
 
+### Enriched request context (`ctx.bw`)
+
+`fill_ctx()` resolves the request/session metadata **once**, then every plugin reads it from `self.ctx.bw` — never re-resolve it. `self.variables` stays reserved for configuration settings.
+
+| Field                                      | Value                                                                                                                                                                                   |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`                                     | `http` or `stream`                                                                                                                                                                      |
+| `protocol`                                 | `http`, `https`, `tcp` or `udp`                                                                                                                                                         |
+| `remote_addr`, `server_name`, `time_local` | as seen by NGINX                                                                                                                                                                        |
+| `ip_is_global`, `ip_is_ipv4`, `ip_is_ipv6` | booleans                                                                                                                                                                                |
+| `ip_version`                               | `4` or `6`                                                                                                                                                                              |
+| `country`                                  | ISO 3166-1 alpha-2 code, `local` (non-global IP) or `unknown` (MMDB missing or lookup failed)                                                                                           |
+| `asn_number`, `asn_org`                    | number / string, or `nil`                                                                                                                                                               |
+| HTTP only                                  | `request_id`, `uri`, `request_uri`, `request_method`, `http_user_agent`, `http_host`, `http_content_type`, `http_content_length`, `http_origin`, `http_version`, `start_time`, `scheme` |
+
+Enrichment is fail-open: a GeoIP failure never blocks a request, and it is logged at most once per worker. `utils.get_country()` / `utils.get_asn()` remain for lookups on **another** IP (e.g. the bans API) — not for the current request.
+
+`helpers.export_ctx_vars(ctx)` mirrors the context into the `$bw_*` NGINX variables (`$bw_kind`, `$bw_protocol`, `$bw_ip_is_global`, `$bw_ip_version`, `$bw_country`, `$bw_asn_number`, `$bw_asn_org`) so they can be used in `LOG_FORMAT`. Call it only from a phase where writing `ngx.var` is allowed — `set-lua.conf` (HTTP) and `preread-stream-lua.conf` (Stream) — and from a server block that declares the variables (`server-http/server.conf`, `server-stream/server-stream.conf`).
+
 ### Subsystem Handling (HTTP vs Stream)
 
 Lua modules detect `ngx.config.subsystem` ("http" or "stream") and select the appropriate shared dicts (e.g., `datastore` vs `datastore_stream`, `cachestore` vs `cachestore_stream`). Stream uses `preread` and `log_stream` phases instead of HTTP access/content phases.

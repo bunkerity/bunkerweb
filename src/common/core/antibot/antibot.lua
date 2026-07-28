@@ -30,8 +30,6 @@ local decode = cjson.decode
 local encode = cjson.encode
 local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
-local get_asn = utils.get_asn
-local get_country = utils.get_country
 local regex_match = utils.regex_match
 local ipmatcher_new = ipmatcher.new
 local upper = string.upper
@@ -1144,9 +1142,9 @@ function antibot:is_ignored_country()
 		end
 		return false, "ko"
 	end
-	local country_code, err = get_country(self.ctx.bw.remote_addr)
-	if not country_code then
-		self.logger:log(ERR, "can't get country for IP " .. self.ctx.bw.remote_addr .. " : " .. err)
+	local country_code = self.ctx.bw.country
+	if not country_code or country_code == "unknown" then
+		self.logger:log(ERR, "can't get country for IP " .. self.ctx.bw.remote_addr)
 		return false, "ko"
 	end
 	country_code = upper(country_code)
@@ -1206,9 +1204,9 @@ function antibot:is_ignored_ip()
 
 	-- Check if ASN is in ignore list
 	if self.ctx.bw.ip_is_global then
-		local asn, _, err = get_asn(self.ctx.bw.remote_addr)
+		local asn = self.ctx.bw.asn_number
 		if not asn then
-			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr)
 		else
 			for _, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
 				if ignore_asn == tostring(asn) then
