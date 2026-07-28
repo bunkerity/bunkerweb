@@ -893,6 +893,12 @@ def handle_csrf_error(_):
         return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
+    if request.method == "POST":
+        # A submitted form dies here rather than at the login check, because the CSRF
+        # token lives in the session that just went away. logout_page() clears the
+        # session and the response tells the browser to drop its cookies, so a flash
+        # would not survive: the reason has to travel in the URL.
+        response.headers["Location"] = url_for("login.login_page", reason="session_expired")
     return response
 
 
@@ -1403,7 +1409,7 @@ def set_security_headers(response):
 
     # * Permissions-Policy header to prevent unwanted behavior
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
+        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version=(), ch-ua-full-version-list=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform=(), ch-ua-platform-version=(), ch-ua-wow64=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), focus-without-user-activation=(), join-ad-interest-group=(), keyboard-map=(), manual-text=(), media-playback-while-not-visible=(), private-aggregation=(), record-ad-auction-events=(), run-ad-auction=(), shared-storage=(), shared-storage-select-url=(), tools=(), unload=(), vertical-scroll=(), web-app-installation=(), webnn=()"
     )
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:

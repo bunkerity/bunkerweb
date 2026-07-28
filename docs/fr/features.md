@@ -1805,7 +1805,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.14-rc1
+        image: bunkerity/bunkerweb:1.6.14-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1822,7 +1822,7 @@ Les sections suivantes détaillent chacune de ces étapes.
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -2829,23 +2829,24 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
         - **X-Frame-Options :** Bloque les tentatives de clickjacking en contrôlant l'intégration des iframes.
         - **Referrer Policy :** Limite les fuites d'informations sensibles via les en-têtes referrer.
 
-    | Paramètre                             | Défaut                                                                                              | Contexte  | Multiple | Description                                                                                                                                               |
-    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | non      | **HSTS :** Force les connexions HTTPS sécurisées, réduisant les risques d'attaques de type "man-in-the-middle".                                           |
-    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | non      | **CSP :** Restreint le chargement des ressources aux sources de confiance, atténuant les attaques de type cross-site scripting et d'injection de données. |
-    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | non      | **Mode rapport CSP :** Signale les violations sans bloquer le contenu, aidant à tester les politiques de sécurité tout en capturant les journaux.         |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | non      | **X-Frame-Options :** Empêche le clickjacking en contrôlant si votre site peut être intégré dans une frame.                                               |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download".                       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité.                  |
-    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | non      | **Politique de Referrer :** Contrôle la quantité d'informations de référent envoyées, protégeant la vie privée de l'utilisateur.                          |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | non      | **Conserver les en-têtes :** Préserve les en-têtes en amont sélectionnés, facilitant l'intégration héritée tout en maintenant la sécurité.                |
+    | Paramètre                             | Défaut                                                                                                | Contexte  | Multiple | Description                                                                                                                                               |
+    | ------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | non      | **HSTS :** Force les connexions HTTPS sécurisées, réduisant les risques d'attaques de type "man-in-the-middle".                                           |
+    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | non      | **CSP :** Restreint le chargement des ressources aux sources de confiance, atténuant les attaques de type cross-site scripting et d'injection de données. |
+    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | non      | **Mode rapport CSP :** Signale les violations sans bloquer le contenu, aidant à tester les politiques de sécurité tout en capturant les journaux.         |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | non      | **X-Frame-Options :** Empêche le clickjacking en contrôlant si votre site peut être intégré dans une frame.                                               |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download".                       |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité.                  |
+    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | non      | **Politique de Referrer :** Contrôle la quantité d'informations de référent envoyées, protégeant la vie privée de l'utilisateur.                          |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | non      | **Conserver les en-têtes :** Préserve les en-têtes en amont sélectionnés, facilitant l'intégration héritée tout en maintenant la sécurité.                |
 
     !!! tip "Bonnes pratiques"
         - Révisez et mettez à jour régulièrement vos en-têtes de sécurité pour vous conformer aux normes de sécurité en constante évolution.
         - Utilisez des outils comme [Mozilla Observatory](https://observatory.mozilla.org/) pour valider la configuration de vos en-têtes.
         - Testez la CSP en mode `Report-Only` avant de l'appliquer pour éviter de casser des fonctionnalités.
         - En mode `Report-Only`, un en-tête `Content-Security-Policy` ou `Content-Security-Policy-Report-Only` fourni par l'amont est conservé par défaut (`KEEP_UPSTREAM_HEADERS`) ; retirez le nom de l'en-tête de ce paramètre pour que la politique de BunkerWeb prenne le dessus.
+        - La `PERMISSIONS_POLICY` par défaut bloque également les client hints (directives `ch-*`) ; si un service dépend d'`Accept-CH` (par exemple des images adaptatives basées sur les client hints ou la détection du mode sombre via `Sec-CH-Prefers-Color-Scheme`), personnalisez `PERMISSIONS_POLICY` pour réautoriser les fonctionnalités `ch-*` nécessaires (par exemple `ch-dpr=(self)`).
 
 === "Paramètres des cookies"
 
@@ -3582,6 +3583,9 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
 
 !!! note "Stockage spécifique aux workers"
     Chaque worker NGINX maintient ses propres métriques en mémoire. Lors de l'accès aux métriques via l'API, les données de tous les workers sont automatiquement agrégées pour fournir une vue complète.
+
+!!! warning "Rétention des rapports"
+    Les rapports de requêtes bloquées forment un tampon circulaire, pas un journal d'audit. Une fois la limite atteinte, les rapports les plus anciens sont supprimés pour laisser place aux nouveaux, ce qui fait plafonner le total affiché dans la Web UI : sans Redis, ce plafond vaut `METRICS_MAX_BLOCKED_REQUESTS` multiplié par le nombre de workers NGINX de chaque instance, et avec Redis il vaut `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Les rapports résident en mémoire partagée et sont effacés à chaque redémarrage de BunkerWeb, y compris lors des mises à jour de paquets, sauf si Redis est activé et persistant. Exportez les logs NGINX vers un serveur syslog ou un SIEM si vous avez besoin d'une rétention longue durée.
 
 ### Exemples de configuration
 

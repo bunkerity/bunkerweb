@@ -1042,6 +1042,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Berichte sind ein rollierender Puffer im Arbeitsspeicher: Die ältesten Einträge werden verworfen, sobald das konfigurierte Limit erreicht ist. Sofern Redis nicht aktiviert ist, werden sie zudem bei einem Neustart von BunkerWeb gelöscht.",
     "security_incident": "Sicherheitsvorfall",
     "security_report_data": "Daten des Sicherheitsberichts"
   },

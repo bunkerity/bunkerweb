@@ -8,7 +8,6 @@ local utils = require "bunkerweb.utils"
 local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
-local INFO = ngx.INFO
 local WARN = ngx.WARN
 local null = ngx.null
 local unescape_uri = ngx.unescape_uri
@@ -466,105 +465,140 @@ function metrics:timer()
 	for _, key in ipairs(lru:get_keys()) do
 		-- Get LRU data
 		local value = lru:get(key)
-		if self.redis_ok then
-			if key == "requests" then
-				for _, request in ipairs(value) do
-					if not request.synced then
-						local v = {}
-						for i, field in ipairs(REQUEST_FACET_FIELDS) do
-							v[i] = get_request_facet_value(request, field)
-						end
-						local ok
-						ok, err = self:redis_call(
-							"eval",
-							PUSH_SCRIPT,
-							1,
-							"requests",
-							encode(request),
-							v[1],
-							v[2],
-							v[3],
-							v[4],
-							v[5],
-							v[6],
-							v[7],
-							v[8]
-						)
-						if not ok then
-							self:log_throttled(
-								ERR,
-								"sync_request",
-								"Can't sync request to Redis: " .. (err or "unknown error")
+		-- get_keys() returns a snapshot and every redis_call below yields, so a
+		-- concurrent log() can evict this key from the (full) LRU in between. A miss
+		-- must never be written out: tostring(nil) stores the literal string "nil" in
+		-- Redis, and a nil datastore value deletes the entry. Skip it and let the next
+		-- cycle resync whatever is still live.
+		if value ~= nil then
+			if self.redis_ok then
+				if key == "requests" then
+					for _, request in ipairs(value) do
+						if not request.synced then
+							local v = {}
+							for i, field in ipairs(REQUEST_FACET_FIELDS) do
+								v[i] = get_request_facet_value(request, field)
+							end
+							local ok
+							ok, err = self:redis_call(
+								"eval",
+								PUSH_SCRIPT,
+								1,
+								"requests",
+								encode(request),
+								v[1],
+								v[2],
+								v[3],
+								v[4],
+								v[5],
+								v[6],
+								v[7],
+								v[8]
 							)
-							break
-						end
-						request.synced = true
-					end
-				end
-
-				-- Update LRU cache
-				lru:set("requests", value)
-			elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				-- Sync other metrics (counters and tables) to Redis with optimized data structures
-				local redis_key = "metrics:" .. key .. ":" .. wid
-				local ok
-				if type(value) == "table" then
-					-- Use Redis list for table values
-					ok, err = self:redis_call("del", redis_key)
-					if ok then
-						for _, item in ipairs(value) do
-							local item_value = type(item) == "table" and encode(item) or tostring(item)
-							ok, err = self:redis_call("rpush", redis_key, item_value)
 							if not ok then
 								self:log_throttled(
 									ERR,
-									"sync_table_item",
-									"Can't push metric table item " .. key .. " to Redis: " .. err
+									"sync_request",
+									"Can't sync request to Redis: " .. (err or "unknown error")
 								)
 								break
 							end
+							request.synced = true
+						end
+					end
+
+					-- Update LRU cache
+					lru:set("requests", value)
+				elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+					-- Sync other metrics (counters and tables) to Redis with optimized data structures
+					local redis_key = "metrics:" .. key .. ":" .. wid
+					local ok
+					if type(value) == "table" then
+						-- Use Redis list for table values
+						ok, err = self:redis_call("del", redis_key)
+						if ok then
+							for _, item in ipairs(value) do
+								local item_value = type(item) == "table" and encode(item) or tostring(item)
+								ok, err = self:redis_call("rpush", redis_key, item_value)
+								if not ok then
+									self:log_throttled(
+										ERR,
+										"sync_table_item",
+										"Can't push metric table item " .. key .. " to Redis: " .. err
+									)
+									break
+								end
+							end
+						else
+							self:log_throttled(
+								ERR,
+								"sync_table_clear",
+								"Can't clear metric table " .. key .. " in Redis: " .. err
+							)
+						end
+					elseif type(value) == "number" then
+						-- Use Redis string for numeric counters
+						ok, err = self:redis_call("set", redis_key, value)
+						if not ok then
+							self:log_throttled(
+								ERR,
+								"sync_counter",
+								"Can't sync metric counter " .. key .. " to Redis: " .. err
+							)
 						end
 					else
-						self:log_throttled(
-							ERR,
-							"sync_table_clear",
-							"Can't clear metric table " .. key .. " in Redis: " .. err
-						)
-					end
-				elseif type(value) == "number" then
-					-- Use Redis string for numeric counters
-					ok, err = self:redis_call("set", redis_key, value)
-					if not ok then
-						self:log_throttled(
-							ERR,
-							"sync_counter",
-							"Can't sync metric counter " .. key .. " to Redis: " .. err
-						)
-					end
-				else
-					-- Use Redis string for other types
-					ok, err = self:redis_call("set", redis_key, tostring(value))
-					if not ok then
-						self:log_throttled(ERR, "sync_other", "Can't sync metric " .. key .. " to Redis: " .. err)
+						-- Use Redis string for other types
+						ok, err = self:redis_call("set", redis_key, tostring(value))
+						if not ok then
+							self:log_throttled(ERR, "sync_other", "Can't sync metric " .. key .. " to Redis: " .. err)
+						end
 					end
 				end
 			end
-		end
-		if type(value) == "table" then
-			value = encode(value)
-		end
-		-- Push to dict (with LRU eviction if needed)
-		local ok
-		ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
-		if not ok then
-			-- If there isn't enough memory : we fallback to delete everything
-			if err == "no memory" then
-				self.logger:log(INFO, "not enough memory in the metrics datastore, purging LRU key " .. key)
-				lru:delete(key)
-			else
-				ret = false
-				ret_err = err
-				self:log_throttled(ERR, "datastore_set", "can't set " .. key .. "_" .. wid .. " : " .. err)
+			if type(value) == "table" then
+				value = encode(value)
+			end
+			-- Push to dict (with LRU eviction if needed)
+			local ok
+			ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
+			-- Shed the oldest half rather than the whole history: set_with_retries already
+			-- force-evicted, so "no memory" means the dict is undersized, and dropping every
+			-- stored entry to make one write fit loses far more than needed. The halving is
+			-- kept in the LRU, so later cycles start from the reduced size.
+			while not ok and err == "no memory" do
+				local live = lru:get(key)
+				if type(live) ~= "table" or #live < 2 then
+					break
+				end
+				for _ = 1, math.floor(#live / 2) do
+					table_remove(live, 1)
+				end
+				lru:set(key, live)
+				self:log_throttled(
+					WARN,
+					"datastore_shed_" .. key,
+					"not enough memory in the metrics datastore, halved LRU key "
+						.. key
+						.. " to "
+						.. #live
+						.. " entries : raise METRICS_MEMORY_SIZE"
+				)
+				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live))
+			end
+			if not ok then
+				-- Nothing left to shed : drop the key so the next cycle starts clean
+				if err == "no memory" then
+					self:log_throttled(
+						WARN,
+						"datastore_purge_" .. key,
+						"not enough memory in the metrics datastore, purging LRU key " .. key
+					)
+					lru:delete(key)
+				else
+					ret = false
+					ret_err = err
+					self:log_throttled(ERR, "datastore_set", "can't set " .. key .. "_" .. wid .. " : " .. err)
+				end
 			end
 		end
 	end

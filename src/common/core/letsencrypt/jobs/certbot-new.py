@@ -46,6 +46,7 @@ from letsencrypt_utils import (
     PROVIDERS,
     certbot_log_backup_flags,
     ZEROSSL_BOT_SCRIPT,
+    attach_job_log_file,
     build_certbot_env,
     extract_provider,
     get_expected_acme_directory,
@@ -60,6 +61,10 @@ from letsencrypt_utils import (
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
 LOGGER = getLogger("LETS-ENCRYPT.NEW")
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
+
+# Attach before any service is inspected: the "skipping generation" warnings that used to
+# be visible only in `docker logs` are emitted while building the per-service config.
+attach_job_log_file(LOGGER, "certbot-new.log", LOGS_DIR)
 
 ZEROSSL_API_KEY_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-zerossl-api-key-hashes.json")
 MERGE_LOCK = Lock()
@@ -262,6 +267,11 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
     staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
+    # Set when the service asked for a certificate but its configuration makes issuance
+    # impossible. Distinguishes "not using Let's Encrypt" (a green job) from "wants a
+    # certificate and cannot get one" (a red job the operator has to look at). Settings
+    # that merely fall back to a default are not misconfigurations.
+    misconfigured = False
 
     if acme_server not in ACME_SERVER_TYPES:
         if activated:
@@ -271,6 +281,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     # User-friendly checks
     if activated and not server_names_val:
         LOGGER.warning(f"[Service: {service}] SERVER_NAME is empty. Please set a valid server name, skipping generation.")
+        misconfigured = True
         activated = False
 
     if email_val:
@@ -283,6 +294,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
 
     if acme_server == "zerossl" and not email_val and not zerossl_api_key and activated:
         LOGGER.warning(f"[Service: {service}] ZeroSSL requires EMAIL_LETS_ENCRYPT or LETS_ENCRYPT_ZEROSSL_API_KEY. Skipping generation.")
+        misconfigured = True
         activated = False
 
     if acme_server == "zerossl" and staging:
@@ -339,6 +351,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
 
     if activated and challenge_val not in CHALLENGE_TYPES:
         LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_CHALLENGE '{challenge_val}' is invalid. Must be one of {CHALLENGE_TYPES!r}, skipping generation.")
+        misconfigured = True
         activated = False
 
     if custom_profile:
@@ -370,17 +383,20 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         if not authenticator:
             if activated:
                 LOGGER.warning(f"[Service: {service}] DNS challenge selected but no DNS provider is configured, skipping generation.")
+            misconfigured = misconfigured or activated
             activated = False
         elif authenticator not in PROVIDERS:
             if activated:
                 LOGGER.warning(
                     f"[Service: {service}] DNS provider '{authenticator}' is not supported. Must be one of {list(PROVIDERS.keys())!r}, skipping generation."
                 )
+            misconfigured = misconfigured or activated
             activated = False
         else:
             credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
             provider = extract_provider(service, credential_key, authenticator, decode_base64, LOGGER)
             if not provider:
+                misconfigured = misconfigured or activated
                 activated = False
     else:
         authenticator = "manual"
@@ -393,6 +409,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     return server_names, {
         "server_names": "",
         "activated": activated,
+        "misconfigured": misconfigured,
         "acme_server": acme_server,
         "acme_server_url": get_expected_acme_directory(acme_server, staging),
         "zerossl_api_key": zerossl_api_key,
@@ -414,6 +431,11 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "exists": False,
         "force_renew": False,
     }
+
+
+def list_misconfigured(services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]) -> List[str]:
+    """Names of services that asked for a certificate but cannot get one, sorted."""
+    return sorted(name for name, config in services.items() if config.get("misconfigured"))
 
 
 def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
@@ -823,9 +845,18 @@ try:
             services[cert_name] = config
 
     if not any(service["activated"] for service in services.values()):
+        misconfigured_services = list_misconfigured(services)
+        if misconfigured_services:
+            LOGGER.error(
+                "Let's Encrypt is enabled but no certificate can be requested, invalid configuration for "
+                f"{len(misconfigured_services)} service(s): {', '.join(misconfigured_services)}"
+            )
+            sys_exit(2)
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
         sys_exit(0)
 
+    # Still needed before certbot runs: sets the umask and sweeps unwritable log files.
+    # The job's own log file is attached earlier, at import, without that side effect.
     prepare_logs_dir(LOGS_DIR, LOGGER)
 
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
@@ -933,6 +964,7 @@ try:
                 psl_rules = parse_psl(psl_lines)
 
             if check_psl_blacklist(list(normalize_server_names(config["server_names"])), psl_rules, server_name):
+                config["misconfigured"] = True
                 config["activated"] = False
                 continue
 
@@ -1040,6 +1072,18 @@ try:
                         status = 2
         finally:
             stop_progress_monitor()
+
+    misconfigured_services = list_misconfigured(services)
+    if misconfigured_services:
+        LOGGER.error(
+            f"Skipped certificate generation for {len(misconfigured_services)} service(s) with an invalid "
+            f"Let's Encrypt configuration: {', '.join(misconfigured_services)}"
+        )
+        # Only escalate when nothing was generated. status 1 means certbot succeeded and the
+        # scheduler still owes those certificates an nginx reload, which a status >= 2 would
+        # suppress, leaving freshly issued certificates unserved.
+        if status == 0:
+            status = 2
 
     if CACHE_PATH.is_dir():
         # * Clean up unused credential files

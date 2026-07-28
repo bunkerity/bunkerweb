@@ -60,6 +60,8 @@ class JobScheduler(ApiCaller):
         self.db = db or Database(self.__logger)
         # Store only essential environment variables to reduce memory usage
         self.__base_env = os.environ.copy()
+        # The dict published as ``os.environ`` once the first config is set. See __set_env.
+        self.__job_env: Optional[Dict[str, Any]] = None
         self.__lock = lock
         self.__thread_lock = Lock()
         self.__job_success = True
@@ -133,8 +135,39 @@ class JobScheduler(ApiCaller):
 
     @env.setter
     def env(self, env: Dict[str, Any]):
-        os.environ = self.__base_env.copy()  # Reset to base environment
-        os.environ.update(env)  # Update with new environment
+        self.__set_env(env)
+
+    def __set_env(self, env: Dict[str, Any]) -> None:
+        """Publish ``base_env | env`` as ``os.environ`` without ever changing its identity.
+
+        Jobs run in-process and a job helper module that does ``from os import environ``
+        binds whatever object ``os.environ`` is at its first import. Those helpers stay in
+        ``sys.modules`` across reloads (``cleanup_modules`` only drops the ``bw_job_*``
+        entrypoints), so rebinding ``os.environ`` on every reload froze them on a
+        start-time snapshot: a service created after startup was invisible to them, and
+        only a restart brought it back. Mutate the same dict instead.
+
+        Never ``clear()`` first. The SIGHUP handler runs in this very thread between two
+        bytecodes and reads ``getenv("PATH")`` / ``getenv("DATABASE_URI")`` to build the
+        env of the config-saver subprocess, so ``os.environ`` must never be observable
+        half-empty. Update, then prune.
+
+        The prune loop is load-bearing, not tidying: a deleted service must lose its
+        ``{service}_*`` keys, which resetting from ``base_env`` used to do for free.
+
+        Callers must hold the main thread with no job batch in flight. This mutates a dict
+        other modules read directly, so a concurrent ``environ.items()`` would raise
+        ``RuntimeError``. ``run_once``/``run_pending`` join every job future before
+        returning, and ``reload()`` calls this before starting a batch.
+        """
+        new_env = self.__base_env | env
+        if self.__job_env is None:
+            self.__job_env = new_env
+            os.environ = self.__job_env  # single atomic rebind, already fully populated
+            return
+        self.__job_env.update(new_env)
+        for key in self.__job_env.keys() - new_env.keys():
+            del self.__job_env[key]
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
@@ -561,8 +594,7 @@ class JobScheduler(ApiCaller):
             # Clear module cache on reload to pick up changes
             self.cleanup_modules()
 
-            os.environ = self.__base_env.copy()
-            os.environ.update(env)  # Update with new environment
+            self.__set_env(env)
             super().__init__(apis or self.apis)
             self.clear()
             self.update_jobs()

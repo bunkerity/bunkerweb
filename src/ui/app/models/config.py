@@ -17,6 +17,42 @@ class Config:
         self.__db = db
         self.__data = data
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
+        # Per-process cache of the plugin catalog (get_plugins). Keyed by _type,
+        # invalidated by a plugin-change signal, so the ~6-query catalog build is
+        # paid once per plugin change instead of on every request. Bounded to one
+        # entry per _type. Only the with_data=False catalog is cached.
+        self.__plugins_cache: dict = {}
+
+    def _plugins_cache_version(self):
+        """A value that changes only when the plugin catalog itself changes
+        (plugins installed/removed/updated/reloaded), NOT when setting values are
+        edited. Returns None if it can't be determined, in which case get_plugins
+        skips the cache and always recomputes.
+
+        Note: this deliberately does not track ``init_tables`` core-plugin schema
+        writes. That is safe only because core plugins change solely on an image
+        upgrade (which restarts the UI, emptying this per-process cache) and core
+        settings are backstopped by ``settings.json`` in ``get_plugins_settings``.
+        A future "hot-reload core plugins without restart" feature would need a
+        signal added here.
+        """
+        try:
+            metadata = self.__db.get_metadata()
+        except Exception:
+            return None
+        # get_metadata swallows read errors and returns its default dict flagged
+        # with "default": don't cache against an unreliable version, recompute.
+        if metadata.get("default"):
+            return None
+        plugins_config_changed = metadata.get("plugins_config_changed")
+        return (
+            metadata.get("last_external_plugins_change"),
+            metadata.get("last_pro_plugins_change"),
+            bool(metadata.get("external_plugins_changed")),
+            bool(metadata.get("pro_plugins_changed")),
+            bool(metadata.get("reload_ui_plugins")),
+            tuple(sorted(plugins_config_changed.items())) if isinstance(plugins_config_changed, dict) else plugins_config_changed,
+        )
 
     def gen_conf(
         self,
@@ -77,12 +113,30 @@ class Config:
         }
 
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
-        db_plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
+        # with_data payloads are large and only requested on specific user actions
+        # (plugin/template pages), never on the per-request render path, so they are
+        # not cached. The hot path is get_plugins() (with_data=False) on every request.
+        version = None if with_data else self._plugins_cache_version()
 
+        db_plugins = None
+        if version is not None:
+            cached = self.__plugins_cache.get(_type)
+            if cached is not None and cached[0] == version:
+                db_plugins = cached[1]
+
+        if db_plugins is None:
+            db_plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
+            if version is not None:
+                self.__plugins_cache[_type] = (version, db_plugins)
+
+        # Reshape a FRESH catalog on every call (new outer + per-plugin dicts, "id"
+        # dropped) so callers get an unaliased object exactly like the original
+        # code did. A caller mutating the returned dict can never poison the cache,
+        # and db_plugins is never mutated (no ``.pop``), so the cached raw result
+        # stays intact for the next reshape.
         plugins = {"general": {}}
-
-        for plugin in db_plugins.copy():
-            plugins[plugin.pop("id")] = plugin
+        for plugin in db_plugins:
+            plugins[plugin["id"]] = {k: v for k, v in plugin.items() if k != "id"}
 
         return plugins
 

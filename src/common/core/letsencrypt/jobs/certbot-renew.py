@@ -21,6 +21,7 @@ from letsencrypt_utils import (
     LETSENCRYPT_LOGS_DIR as LOGS_DIR,
     LETSENCRYPT_WORK_DIR as WORK_DIR,
     ZEROSSL_BOT_SCRIPT,
+    attach_job_log_file,
     build_certbot_env,
     certbot_log_backup_flags,
     is_zerossl_used_in_env,
@@ -35,6 +36,10 @@ from letsencrypt_utils import (
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
+
+# Same rationale as certbot-new: in Docker these lines otherwise only reach `docker logs`.
+attach_job_log_file(LOGGER, "certbot-renew.log", LOGS_DIR)
+
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 status = 0
 

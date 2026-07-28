@@ -83,6 +83,7 @@ class Configurator:
                 "IGNORE_REGEX_CHECK",
                 "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
+                "DISABLE_ONLINE_API",
                 "HIDE_SERVICE_LOGS",
                 "LOG_TYPES",
                 "LOG_FILE_PATH",

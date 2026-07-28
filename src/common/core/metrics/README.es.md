@@ -108,6 +108,9 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 !!! note "Almacenamiento Específico del Trabajador"
     Cada trabajador de NGINX mantiene sus propias métricas en la memoria. Al acceder a las métricas a través de la API, los datos de todos los trabajadores se agregan automáticamente para proporcionar una vista completa.
 
+!!! warning "Retención de los Informes"
+    Los informes de peticiones bloqueadas son un búfer circular, no un registro de auditoría. Una vez alcanzado el límite, los informes más antiguos se descartan para dejar sitio a los nuevos, por lo que el total mostrado en la interfaz web se estanca: sin Redis ese techo es `METRICS_MAX_BLOCKED_REQUESTS` multiplicado por el número de trabajadores de NGINX de cada instancia, y con Redis es `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Los informes residen en memoria compartida y se borran cada vez que BunkerWeb se reinicia, incluidas las actualizaciones de paquetes, salvo que Redis esté habilitado y sea persistente. Envíe los registros de NGINX a un servidor syslog o a un SIEM si necesita una retención a largo plazo.
+
 ### Configuraciones de Ejemplo
 
 === "Configuración Básica"

@@ -2,7 +2,8 @@
 
 from contextlib import suppress
 from logging import DEBUG
-from os import getenv
+from os import getenv, sep
+from pathlib import Path
 from re import compile as re_compile, split as re_split
 from threading import Lock, Thread
 from time import sleep, time
@@ -14,6 +15,9 @@ from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 
 from controllers.Controller import Controller
+
+# Written by main.py once the controller starts and checked by healthcheck-autoconf.sh.
+HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
 
 
 class KubernetesController(Controller):
@@ -554,6 +558,22 @@ class KubernetesController(Controller):
             self._logger.info(f"Detected Kubernetes changes: {summary}")
         self._event_summary.clear()
 
+    def _mark_unhealthy(self, why: str) -> None:
+        """Drop the health marker so the orchestrator can restart a controller whose
+        watches are no longer streaming. Rebuilding the process is what recovers a
+        credential the API server has started rejecting."""
+        self._logger.error(f"Marking autoconf unhealthy: {why}")
+        with suppress(OSError):
+            HEALTHY_PATH.unlink(missing_ok=True)
+
+    def _mark_healthy(self) -> None:
+        if HEALTHY_PATH.is_file():
+            return
+        with suppress(OSError):
+            HEALTHY_PATH.parent.mkdir(parents=True, exist_ok=True)
+            HEALTHY_PATH.write_text("ok")
+            self._logger.info("Kubernetes watch is streaming again, autoconf marked healthy")
+
     def _get_stream_with_retries(self, watch_type, what, retries=5):
         attempt = 0
         ignored = False
@@ -570,14 +590,24 @@ class KubernetesController(Controller):
                     attempt += 1
                     continue
                 self._logger.debug(format_exc())
-                self._logger.error(f"Unexpected ApiException while watching {watch_type}:\n{e}")
+                if e.status in (401, 403):
+                    self._logger.error(
+                        f"Kubernetes rejected our credentials while watching {watch_type} ({e.status} {e.reason}), "
+                        f"check the ServiceAccount token and its permissions:\n{e}"
+                    )
+                else:
+                    self._logger.error(f"Unexpected ApiException while watching {watch_type}:\n{e}")
             except Exception as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
             attempt += 1
             self._logger.warning(f"Retrying {watch_type} in 5 seconds...")
             sleep(5)
-        self._logger.error(f"Failed to watch {watch_type} after {retries} retries.")
+        # Returning here would end the caller's for loop without an exception, which reads
+        # as a clean stream close: the watch would restart instantly, forever, while the
+        # controller reconciled nothing and still looked healthy.
+        self._mark_unhealthy(f"watch for {watch_type} failed {retries} times in a row")
+        raise RuntimeError(f"Failed to watch {watch_type} after {retries} retries")
 
     def _get_watchers(self) -> Dict[str, Any]:
         raise NotImplementedError
@@ -589,6 +619,7 @@ class KubernetesController(Controller):
             applied = False
             try:
                 for event in self._get_stream_with_retries(watch_type, what):
+                    self._mark_healthy()
                     applied = False
                     self._internal_lock.acquire()
                     locked = True

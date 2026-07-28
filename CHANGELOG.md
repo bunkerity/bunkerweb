@@ -1,14 +1,34 @@
 # Changelog
 
-## v1.6.14~rc1 - 2026/07/??
+## v1.6.14~rc2 - 2026/07/??
+
+- [PERF] `ui`: make the Reports, Logs, and Home pages fast when many blocked-request reports are stored in Redis: fetch a single report by id from the newest end instead of scanning the whole list, share the Home page aggregation across workers through Redis instead of recomputing it in every worker, cache the Logs line count until the file changes or is rotated, and pause the Reports auto-refresh while the browser tab is in the background. Also honor the `k`/`m` suffix on `METRICS_MAX_BLOCKED_REQUESTS_REDIS` when bounding report reads.
+- [PERF] `ui`: memoize the plugin catalog and rebuild it only when plugins change instead of on every request, cutting the fixed overhead paid on every page load.
+- [BUGFIX] `metrics`: when the metrics memory zone fills up, shed the oldest blocked-request reports instead of silently discarding a worker's whole history, and warn that `METRICS_MEMORY_SIZE` needs raising.
+- [BUGFIX] `metrics`: stop storing the literal string `nil` in Redis for a counter evicted from a worker's LRU mid-sync, which made the `misc`, `blacklist` and `greylist` plugin pages return a 500.
+- [BUGFIX] `ui`: an unreadable counter no longer breaks a whole plugin page, and no longer hides the workers that reported real counts.
+- [BUGFIX] `scheduler`: refresh the job environment in place instead of replacing it on every reload, so jobs stop reading a snapshot of the configuration taken at startup. A DNS-01 service created or edited in the web UI got no certificate until the container was restarted. (Fixes #3755)
+- [BUGFIX] `letsencrypt`: fail the `certbot-new` job when a service cannot get the certificate it asked for instead of reporting success, and write each job's output to `certbot-new.log` and `certbot-renew.log` so the Jobs and Logs pages show why.
+- [BUGFIX] `whitelist`: whitelisting a banned IP now lifts the block on HTTP and stream services, and manually configured `WHITELIST_*` values are honored by the default server and badbehavior checks instead of only the entries downloaded from `WHITELIST_*_URLS`. (Refs #3708)
+- [BUGFIX] `core`: a setting missing from a service's configuration falls back to its global value, and a setting declared by a plugin but absent from the configuration is logged once per minute at warning level instead of at error level on every request. (Refs #3746)
+- [BUGFIX] `autoconf`: a Kubernetes watch that exhausts its retries now backs off and marks the container unhealthy instead of silently restarting forever while reporting healthy, and the Kubernetes manifests give the controller a liveness probe so it gets restarted. (Refs #3750)
+- [BUGFIX] `crowdsec`: enabling CrowdSec on individual services while it stays off globally now works. The bouncer was never initialized in that configuration, so every request logged `attempt to index field 'conf' (a nil value)` and was let through unchecked.
+- [FEATURE] `all-in-one`: add `DISABLE_ONLINE_API`, same name as the official CrowdSec images, to run CrowdSec without registering to the Central API. (Refs #3754)
+- [DOCS] `all-in-one`: document what CrowdSec Central API registration transmits, and correct the parser opt-out variable to `CROWDSEC_DISABLE_PARSERS`.
+- [BUGFIX] `ui`: a form submitted after the session ended now reports that the change was not saved, instead of redirecting to the login page and redrawing the old values as if nothing had happened. (Refs #3751, #3752)
+- [UI] Reports page: document the retention model, a rolling buffer capped per worker that is cleared on restart unless Redis is enabled.
+
+## v1.6.14~rc1 - 2026/07/23
 
 - [BUGFIX] `mtls`: the Scheduler now validates the client CA bundle and CRL, caches them, and distributes them to every instance instead of shipping the raw configured path straight into the NGINX configuration, so a Scheduler-only mount works as documented instead of causing "cannot load certificate" errors on instances that cannot read that path. Adds `MTLS_CA_CERTIFICATE_DATA` and `MTLS_CRL_DATA` to supply either file inline as base64 or plaintext PEM.
+- [BUGFIX] `backup`: support MySQL 9 and MariaDB 12 backup/restore with current authentication, TLS, and privilege defaults while preserving compatibility with older servers; refresh the documented database compatibility matrix, including PostgreSQL 18.
 - [BUGFIX] `ui`: fix plugin hook loading and chaining, and purge unavailable PRO plugin pages after license loss.
 - [BUGFIX] `letsencrypt`: quarantine broken renewal lineages and persist the cleaned cache before Certbot runs. (Fixes #3733)
-- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683, #3685)
 - [FEATURE] `metrics`: buffer reports during Redis OOM events, make list and facet updates atomic, and add the `METRICS_REDIS_TTL` setting.
 - [FEATURE] `headers`: deny Chrome built-in AI APIs in the default `PERMISSIONS_POLICY`.
 - [FEATURE] `misc`: allow the `QUERY` HTTP method by default in `ALLOWED_METHODS` and bundled service templates.
+- [LINUX] Updated the NGINX version to v1.30.4 for Fedora 43 and 44 now that it is available in their repositories.
+- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683, #3685)
 
 ## v1.6.13 - 2026/07/16
 
