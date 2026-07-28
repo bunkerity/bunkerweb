@@ -20,6 +20,7 @@ from Templator import Templator
 from resource_group_resolver import expand_config_groups  # type: ignore
 from redirect_resolver import expand_service_redirects  # type: ignore
 from upstream_resolver import expand_service_upstreams  # type: ignore
+from plugin_extensions import run_config_extensions  # type: ignore
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -146,6 +147,12 @@ if __name__ == "__main__":
         # http-context upstream {} blocks.
         config = expand_service_upstreams(config, db, LOGGER)
         full_config = expand_service_upstreams(full_config, db, LOGGER)
+
+        # Let plugins compile their own stored documents into derived settings and a cache
+        # artefact. Runs last, so a compiler sees groups, redirects and upstreams already
+        # expanded, and before the render, so its variables reach the templates. A failure
+        # raises: nothing is written and the previous push stays live on every instance.
+        config, full_config = run_config_extensions(db, config, full_config, LOGGER)
 
         # Remove old files
         LOGGER.info("Removing old files ...")

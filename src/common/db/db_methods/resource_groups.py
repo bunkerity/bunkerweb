@@ -17,6 +17,7 @@ from model import (
     Global_values,
     Plugins,
     ResourceGroup_entries,
+    ResourceGroupUsages,
     ResourceGroups,
     Services_settings,
     Settings,
@@ -35,7 +36,7 @@ from resource_validation import (  # type: ignore
     validate_resource_value,
 )
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 
 from .common import DatabaseMixinBase
 
@@ -47,11 +48,17 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
     """Reusable resource group management."""
 
     @staticmethod
-    def _get_resource_group_index(session) -> Dict[str, Dict[str, List[str]]]:
-        """Build the live alias/kind index inside the caller's transaction."""
+    def _get_resource_group_index(session, *, by: str = "name") -> Dict[str, Dict[str, List[str]]]:
+        """Build the live group/kind index inside the caller's transaction.
+
+        Keyed by alias for the ``@name`` token expansion in list settings, or by id for
+        consumers that reference a group structurally — a workflow rule stores the id so a
+        rename cannot silently repoint a security rule at another group.
+        """
         index: Dict[str, Dict[str, List[str]]] = {}
         for row in session.execute(
             select(
+                ResourceGroups.id,
                 ResourceGroups.name,
                 ResourceGroup_entries.kind,
                 ResourceGroup_entries.value,
@@ -62,7 +69,7 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
             )
             .order_by(ResourceGroups.name, ResourceGroup_entries.order)
         ):
-            group = index.setdefault(row.name, {})
+            group = index.setdefault(row.id if by == "id" else row.name, {})
             if row.kind is not None:
                 group.setdefault(row.kind, []).append(row.value)
         return index
@@ -271,6 +278,46 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
             groups = {group.id: group.name for group in session.execute(query)}
             return self._get_resource_group_references(session, groups)
 
+    @staticmethod
+    def _get_resource_group_usages(session, group_ids: List[str]) -> Dict[str, List[Dict[str, str]]]:
+        """Structural references declared by plugins, keyed by group id.
+
+        The complement of ``_get_resource_group_references``: that one scans ``@name``
+        tokens in setting values, this one reads what a plugin registered when it stored a
+        document holding the group's id (a workflow rule tree). Neither sees the other's
+        references, so both are consulted before a group may be deleted.
+        """
+        usages: Dict[str, List[Dict[str, str]]] = {group_id: [] for group_id in group_ids}
+        if not group_ids:
+            return usages
+        for row in session.execute(
+            select(ResourceGroupUsages.group_id, ResourceGroupUsages.plugin_id, ResourceGroupUsages.consumer_type, ResourceGroupUsages.consumer_id)
+            .where(ResourceGroupUsages.group_id.in_(group_ids))
+            .order_by(ResourceGroupUsages.plugin_id, ResourceGroupUsages.consumer_type, ResourceGroupUsages.consumer_id)
+        ):
+            usages[row.group_id].append({"plugin_id": row.plugin_id, "consumer_type": row.consumer_type, "consumer_id": row.consumer_id})
+        return usages
+
+    def get_resource_group_usages(self, group_id: Optional[str] = None) -> Dict[str, List[Dict[str, str]]]:
+        """Return plugin usages for one group, or for every group when no id is supplied."""
+        with self._db_session() as session:
+            query = select(ResourceGroups.id)
+            if group_id is not None:
+                query = query.filter_by(id=group_id)
+            return self._get_resource_group_usages(session, list(session.scalars(query).all()))
+
+    @staticmethod
+    def _flag_group_consumers_config_changed(session, group_id: str) -> None:
+        """Mark every plugin holding a document that references this group for recompilation.
+
+        A group edit changes what those plugins render even though none of their own rows
+        moved, so without this the new entries would sit in the database until some
+        unrelated change happened to trigger a generation.
+        """
+        plugin_ids = list(session.scalars(select(ResourceGroupUsages.plugin_id).where(ResourceGroupUsages.group_id == group_id).distinct()).all())
+        if plugin_ids:
+            session.execute(update(Plugins).where(Plugins.id.in_(plugin_ids)).values(config_changed=True, last_config_change=datetime.now().astimezone()))
+
     def _prepare_group_entries(self, entries: Optional[List[Dict[str, Any]]]) -> Tuple[Optional[str], List[Dict[str, Any]]]:
         """Validate/normalize the incoming entries, dedupe on (kind, value), assign order."""
         if entries is None:
@@ -442,6 +489,7 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
                 session.execute(delete(ResourceGroup_entries).filter_by(group_id=group_id).execution_options(synchronize_session=False))
                 for entry in entry_entities:
                     session.add(ResourceGroup_entries(group_id=group_id, **entry))
+                self._flag_group_consumers_config_changed(session, group_id)
 
             try:
                 session.commit()
@@ -464,6 +512,12 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
 
             if self._get_resource_group_references(session, {group.id: group.name})[group.id]:
                 return f"Resource group {group.name} is currently referenced by a setting"
+
+            if usages := self._get_resource_group_usages(session, [group.id])[group.id]:
+                # Name the consumers: "referenced somewhere" is not actionable when the
+                # reference lives inside a plugin document the operator cannot grep for.
+                consumers = ", ".join(sorted({f"{usage['plugin_id']}/{usage['consumer_type']}" for usage in usages}))
+                return f"Resource group {group.name} is used by {len(usages)} object(s) ({consumers})"
 
             session.delete(group)
 

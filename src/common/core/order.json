@@ -51,6 +51,7 @@
     "cors",
     "securitytxt",
     "robotstxt",
+    "workflows",
     "antibot"
   ],
   "headers": ["headers", "cors", "antibot", "misc"],

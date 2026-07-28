@@ -263,3 +263,8 @@ class DatabaseMixinBase:
         def get_template_details(self, template_id: str) -> Dict[str, Any]:
             """Implemented in a sibling mixin."""
             ...
+
+        @staticmethod
+        def _get_resource_group_index(session: Any, *, by: str = "name") -> Dict[str, Dict[str, List[str]]]:
+            """Implemented in a sibling mixin (resource_groups.py)."""
+            ...

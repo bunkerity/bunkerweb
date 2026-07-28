@@ -1,6 +1,7 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local ratelimit = require "bunkerweb.ratelimit"
 local utils = require "bunkerweb.utils"
 
 local limit = class("limit", plugin)
@@ -14,6 +15,7 @@ local get_multiple_variables = utils.get_multiple_variables
 local is_whitelisted = utils.is_whitelisted
 local regex_match = utils.regex_match
 local get_security_mode = utils.get_security_mode
+local ratelimit_incr = ratelimit.incr
 local time = os.time
 local date = os.date
 local encode = cjson.encode
@@ -427,84 +429,19 @@ end
 -- log used above. The log is O(n) per request (n = rate_max) which is fine at the
 -- existing low per-IP defaults but too costly at the hundreds/thousands of req/s a
 -- global cap runs at. A fixed-window counter is O(1) per request.
--- ponytail: fixed window allows ~2x rate right at a window boundary; upgrade to a
--- sliding-window counter if precise smoothing is ever needed.
+-- The counter itself lives in bunkerweb.ratelimit so the workflow rate gates share it;
+-- the key, the window arithmetic and the Redis-then-local fallback are unchanged, and the
+-- limited/not-limited decision deliberately stays here where the settings are.
 function limit:limit_req_global(rate_max, rate_time)
-	local count = nil
-	if self.use_redis then
-		local redis_count, err = self:limit_req_global_redis(rate_time)
-		if redis_count == nil then
-			self.logger:log(ERR, "limit_req_global_redis failed, falling back to local : " .. err)
-		else
-			count = redis_count
-		end
-	end
+	local count, err =
+		ratelimit_incr(self, "plugin_limit_global_" .. self.ctx.bw.server_name, limit_global_delay(rate_time))
 	if count == nil then
-		local local_count, err = self:limit_req_global_local(rate_time)
-		if local_count == nil then
-			return nil, "limit_req_global_local failed : " .. err
-		end
-		count = local_count
+		return nil, "limit_req_global_local failed : " .. err
 	end
 	if count > rate_max then
 		return true, "success - limited", count
 	end
 	return false, "success - not limited", count
-end
-
-function limit:limit_req_global_local(rate_time)
-	local delay = limit_global_delay(rate_time)
-	local window = math.floor(time(date("!*t")) / delay)
-	local key = "plugin_limit_global_" .. self.ctx.bw.server_name .. "_" .. tostring(window)
-	local value, err = self.datastore:get(key)
-	if not value and err ~= "not found" then
-		return nil, err
-	end
-	local count = 1
-	if value then
-		count = tonumber(value) + 1
-	end
-	-- luacheck: ignore 421
-	local ok, err = self.datastore:set_with_retries(key, tostring(count), delay)
-	if not ok then
-		return nil, err
-	end
-	return count, "success"
-end
-
-function limit:limit_req_global_redis(rate_time)
-	local redis_script = [[
-		local delay = tonumber(ARGV[1])
-		local count = redis.pcall("INCR", KEYS[1])
-		if type(count) == "table" and count["err"] ~= nil then
-			redis.log(redis.LOG_WARNING, "limit global INCR error : " .. count["err"])
-			return count
-		end
-		if count == 1 then
-			local ret_expire = redis.pcall("EXPIRE", KEYS[1], delay)
-			if type(ret_expire) == "table" and ret_expire["err"] ~= nil then
-				redis.log(redis.LOG_WARNING, "limit global EXPIRE error : " .. ret_expire["err"])
-				return ret_expire
-			end
-		end
-		return count
-	]]
-	-- Connect
-	local ok, err = self.clusterstore:connect()
-	if not ok then
-		return nil, err
-	end
-	local delay = limit_global_delay(rate_time)
-	local window = math.floor(time(date("!*t")) / delay)
-	local key = "plugin_limit_global_" .. self.ctx.bw.server_name .. "_" .. tostring(window)
-	-- Execute script
-	local count, err = self.clusterstore:call("eval", redis_script, 1, key, delay)
-	if not count then
-		self.clusterstore:close()
-		return nil, err
-	end
-	self.clusterstore:close()
-	return count, "success"
 end
 
 return limit

@@ -196,10 +196,9 @@ function antibot:initialize(ctx)
 end
 
 function antibot:header()
-	-- Check if access is needed
-	if self.variables["USE_ANTIBOT"] == "no" then
-		return self:ret(true, "antibot not activated")
-	end
+	-- No USE_ANTIBOT gate here : a workflow rule can request a challenge on a service whose
+	-- setting is "no", and every branch below already depends on state that only a live
+	-- access() produces (the session data, the nonces, the display flag).
 	-- Check if antibot uri
 	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
 		return self:ret(true, "not antibot uri")
@@ -208,7 +207,9 @@ function antibot:header()
 	-- Get session data
 	self.session_data = self.ctx.bw.antibot_session_data
 	if not self.session_data then
-		return self:ret(false, "can't get session data", HTTP_INTERNAL_SERVER_ERROR)
+		-- Reaching the challenge path without access() having run is not an error, just
+		-- nothing to do : answering 500 would turn a stray request into an incident.
+		return self:ret(true, "no antibot session data")
 	end
 
 	-- Don't go further if client resolved the challenge. The header_filter phase
@@ -323,60 +324,69 @@ function antibot:header()
 end
 
 function antibot:access()
-	-- Check if access is needed
-	if self.variables["USE_ANTIBOT"] == "no" then
+	-- Effective provider : an explicit workflow rule wins over the service setting, so a
+	-- service with USE_ANTIBOT=no still challenges when a policy says so.
+	self.provider = self.ctx.bw.workflow_antibot_provider or self.variables["USE_ANTIBOT"]
+	-- Still nothing to do, unless this is the challenge path itself — which must be answered
+	-- rather than silently served (see the guard after the session is loaded).
+	if self.provider == "no" and self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
 		return self:ret(true, "antibot not activated")
 	end
 
-	-- Check the caches and ignore lists
-	local checks = {
-		["IP"] = "ip" .. self.ctx.bw.remote_addr,
-	}
-	if self.country_filter_enabled then
-		checks["COUNTRY"] = "country" .. self.ctx.bw.remote_addr
-	end
-	if self.ctx.bw.http_user_agent then
-		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
-	end
-	if self.ctx.bw.uri then
-		checks["URI"] = self:kind_to_ele("URI")
-	end
-	local already_cached = {
-		["IP"] = false,
-		["URI"] = false,
-		["UA"] = false,
-	}
-	if self.country_filter_enabled then
-		already_cached["COUNTRY"] = false
-	end
-	for k, v in pairs(checks) do
-		local ok, cached = self:is_in_cache(v)
-		if not ok then
-			self.logger:log(ERR, "error while checking cache : " .. cached)
-		elseif cached and cached ~= "ko" then
-			return self:ret(true, k .. " is in cached antibot ignored (info : " .. cached .. ")")
+	-- The ignore lists are the service's own policy about the *global* antibot. A workflow
+	-- rule that explicitly asks for a challenge overrides them: the exclusions it wants are
+	-- expressed in its own condition tree.
+	if not self.ctx.bw.workflow_antibot_provider then
+		-- Check the caches and ignore lists
+		local checks = {
+			["IP"] = "ip" .. self.ctx.bw.remote_addr,
+		}
+		if self.country_filter_enabled then
+			checks["COUNTRY"] = "country" .. self.ctx.bw.remote_addr
 		end
-		if ok and cached then
-			already_cached[k] = true
+		if self.ctx.bw.http_user_agent then
+			checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
 		end
-	end
+		if self.ctx.bw.uri then
+			checks["URI"] = self:kind_to_ele("URI")
+		end
+		local already_cached = {
+			["IP"] = false,
+			["URI"] = false,
+			["UA"] = false,
+		}
+		if self.country_filter_enabled then
+			already_cached["COUNTRY"] = false
+		end
+		for k, v in pairs(checks) do
+			local ok, cached = self:is_in_cache(v)
+			if not ok then
+				self.logger:log(ERR, "error while checking cache : " .. cached)
+			elseif cached and cached ~= "ko" then
+				return self:ret(true, k .. " is in cached antibot ignored (info : " .. cached .. ")")
+			end
+			if ok and cached then
+				already_cached[k] = true
+			end
+		end
 
-	if self.lists then
-		-- Perform checks
-		for k, _ in pairs(checks) do
-			-- Skip URI ignore checks if current path is the challenge URI
-			if not already_cached[k] and not (k == "URI" and self.ctx.bw.uri == self.variables["ANTIBOT_URI"]) then
-				local ok, ignored = self:is_ignored(k)
-				if ok == nil then
-					self.logger:log(ERR, "error while checking if " .. k .. " is ignored : " .. ignored)
-				else
-					-- luacheck: ignore 421
-					local ok, err = self:add_to_cache(self:kind_to_ele(k), ignored)
-					if not ok then
-						self.logger:log(ERR, "error while adding element to cache : " .. err)
-					end
-					if ignored ~= "ko" then
-						return self:ret(true, k .. " is ignored (info : " .. ignored .. ")")
+		if self.lists then
+			-- Perform checks
+			for k, _ in pairs(checks) do
+				-- Skip URI ignore checks if current path is the challenge URI
+				if not already_cached[k] and not (k == "URI" and self.ctx.bw.uri == self.variables["ANTIBOT_URI"]) then
+					local ok, ignored = self:is_ignored(k)
+					if ok == nil then
+						self.logger:log(ERR, "error while checking if " .. k .. " is ignored : " .. ignored)
+					else
+						-- luacheck: ignore 421
+						local ok, err = self:add_to_cache(self:kind_to_ele(k), ignored)
+						if not ok then
+							self.logger:log(ERR, "error while adding element to cache : " .. err)
+						end
+						if ignored ~= "ko" then
+							return self:ret(true, k .. " is ignored (info : " .. ignored .. ")")
+						end
 					end
 				end
 			end
@@ -391,6 +401,23 @@ function antibot:access()
 	self.session = session
 	self.session_data = session:get("antibot") or {}
 	self.ctx.bw.antibot_session_data = self.session_data
+
+	if self.provider == "no" then
+		-- The challenge path, on a service with no global antibot and no workflow challenge
+		-- pending. Nothing legitimate arrives here, and serving the page would let anyone
+		-- probe the challenge machinery.
+		if not self.session_data.prepared then
+			return self:ret(
+				true,
+				"no antibot challenge is pending",
+				get_deny_status(),
+				nil,
+				{ id = "antibot-no-challenge" }
+			)
+		end
+		-- A workflow challenge started earlier in this session : keep serving it.
+		self.provider = self.session_data.type
+	end
 
 	-- Check if session is valid
 	local msg = self:check_session()
@@ -413,6 +440,22 @@ function antibot:access()
 
 	-- Prepare challenge if needed
 	self:prepare_challenge()
+
+	-- A redirect loses the method and the body, so a workflow-driven challenge answers a
+	-- POST, an API call or a preflight with the deny status instead of bouncing it to a
+	-- page it could never complete. Scoped to the workflow override on purpose: the global
+	-- antibot keeps its historical redirect-everything behaviour.
+	if
+		self.ctx.bw.workflow_antibot_provider
+		and not self.session_data.resolved
+		and self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"]
+		and not self:is_navigation_request()
+	then
+		return self:ret(true, "non-navigation request cannot be challenged", get_deny_status(), nil, {
+			id = "antibot-nonavigation",
+			method = self.ctx.bw.request_method,
+		})
+	end
 
 	-- Redirect to challenge page
 	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
@@ -471,11 +514,9 @@ function antibot:access()
 end
 
 function antibot:content()
-	-- Check if content is needed
-	if self.variables["USE_ANTIBOT"] == "no" then
-		return self:ret(true, "antibot not activated")
-	end
-
+	-- No USE_ANTIBOT gate here either : antibot_display_content and session_data.prepared
+	-- below are both set only by a live access(), so a service with the setting off and no
+	-- workflow challenge still falls straight through.
 	-- Check if display content is needed
 	if not self.ctx.bw.antibot_display_content then
 		return self:ret(true, "display content not needed", nil, "/")
@@ -513,6 +554,14 @@ function antibot:check_session()
 		self:set_session_data()
 		return "not prepared"
 	end
+	-- A session only stays valid while it matches the provider now in effect : a solved
+	-- captcha must not satisfy a rule that asks for turnstile. Immunity is keyed on the
+	-- provider, so rules requesting the same one deliberately share it in v1.
+	if self.provider and self.session_data.type and self.session_data.type ~= self.provider then
+		self.session_data = {}
+		self:set_session_data()
+		return "provider changed"
+	end
 	-- Check if still valid
 	local time = now()
 	local resolved = self.session_data.resolved
@@ -545,7 +594,7 @@ function antibot:prepare_challenge()
 		-- type are exempt.
 		if
 			self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"]
-			and self.variables["USE_ANTIBOT"] ~= "cookie"
+			and (self.provider or self.variables["USE_ANTIBOT"]) ~= "cookie"
 			and not self:is_navigation_request()
 		then
 			-- uri is decoded (may hold CR/LF); strip control bytes to avoid log injection.
@@ -559,7 +608,9 @@ function antibot:prepare_challenge()
 		local session_update = {
 			prepared = true,
 			time_resolve = now_time,
-			type = self.variables["USE_ANTIBOT"],
+			-- The session records the provider actually served, which is what every later
+			-- phase (CSP, template, verification) dispatches on — never the setting.
+			type = self.provider or self.variables["USE_ANTIBOT"],
 			resolved = false,
 			original_uri = original_uri,
 		}

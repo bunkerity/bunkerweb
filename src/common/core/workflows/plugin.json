@@ -1,0 +1,27 @@
+{
+  "id": "workflows",
+  "name": "Security workflows",
+  "description": "Compose reusable security policies: ordered rules pairing a condition tree over IP, country, ASN, URI and method with an optional rate threshold and one terminal action (challenge, block or redirect).",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "WORKFLOWS_REGEX_BUDGET": {
+      "context": "global",
+      "default": "512",
+      "help": "Maximum number of distinct regular expressions compiled across all workflow rules. NGINX shares one regex cache between every plugin, so rules beyond this budget are disabled instead of silently degrading the whole instance.",
+      "id": "workflows-regex-budget",
+      "label": "Workflow regex budget",
+      "regex": "^[0-9]+$",
+      "type": "number"
+    }
+  },
+  "extensions": {
+    "api": {
+      "module": "api/router.py",
+      "prefix": "/workflows"
+    },
+    "config": {
+      "module": "config/compiler.py"
+    }
+  }
+}

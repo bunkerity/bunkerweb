@@ -31,7 +31,7 @@ is set, and even then are checksum-verified against the DB plugin record.
 """
 
 from importlib import import_module
-from json import loads
+from json import dumps, loads
 from logging import Logger
 from os import getenv, sep
 from os.path import join
@@ -66,6 +66,7 @@ class PluginExtension(NamedTuple):
     api: Optional[dict]
     db: Optional[dict]
     table_prefix: str
+    config: Optional[dict] = None
 
 
 def _roots(paths=None):
@@ -107,11 +108,12 @@ def iter_extension_plugins(paths=None, logger=None) -> List[PluginExtension]:
                 continue
             api = extensions.get("api") if isinstance(extensions.get("api"), dict) else None
             db = extensions.get("db") if isinstance(extensions.get("db"), dict) else None
-            if not api and not db:
+            config = extensions.get("config") if isinstance(extensions.get("config"), dict) else None
+            if not api and not db and not config:
                 continue
             plugin_id = manifest.get("id") or plugin_json.parent.name
             table_prefix = (db or {}).get("table_prefix") or enforced_table_prefix(plugin_id)
-            out.append(PluginExtension(plugin_id, ptype, plugin_json.parent, manifest, api, db, table_prefix))
+            out.append(PluginExtension(plugin_id, ptype, plugin_json.parent, manifest, api, db, table_prefix, config))
 
     # Refuse namespace collisions (distinct ids that collapse to one bw_<id>_ prefix).
     namespaces: Dict[str, set] = {}
@@ -344,6 +346,115 @@ def _import_with_namespace_guard(plugin_id: str, plugin_dir: Path, rel_module: s
                 Base.metadata.remove(table)
         raise ValueError(f"registered table(s) outside enforced '{prefix}' namespace: {bad}")
     return module, sorted(new_tables)
+
+
+class ConfigExtensionError(Exception):
+    """A plugin's ``compile_config`` failed or returned something unacceptable.
+
+    Deliberately fatal: config generation is the only place a plugin can turn its stored
+    documents into what NGINX and Lua actually read, and shipping a half-compiled state is
+    worse than shipping the previous one. Raising aborts the whole push and every instance
+    keeps serving its last good configuration.
+    """
+
+
+def enforced_variable_namespace(plugin_id: str) -> str:
+    """The setting namespace a config extension is HARD-bound to, derived from its id.
+
+    Same reasoning as :func:`enforced_table_prefix`: computed, never read from the
+    manifest, so an edited ``plugin.json`` cannot claim ``USE_ANTIBOT`` or any other
+    plugin's settings by declaring a broader namespace.
+    """
+    return plugin_id.replace("-", "_").replace(".", "_").upper()
+
+
+def _strip_server_prefix(name: str, servers: List[str]) -> str:
+    """Drop the ``<server>_`` prefix a multisite setting carries, if there is one."""
+    for server in servers:
+        if name.startswith(f"{server}_"):
+            return name[len(server) + 1 :]  # noqa: E203
+    return name
+
+
+def run_config_extensions(db, config: dict, full_config: dict, logger: Logger, *, paths=None, cache_root: Optional[Path] = None) -> Tuple[dict, dict]:
+    """Run every trusted plugin's ``compile_config`` and merge what they derived.
+
+    A plugin declaring ``"extensions": {"config": {"module": "config/compiler.py"}}`` gets
+    to turn its own stored documents into two things, once per generation::
+
+        compile_config(db, config, logger) -> {"variables": {...}, "data": {...}}
+
+    ``variables`` are merged into the rendering config (so ordinary Jinja templates can
+    branch on them) and are restricted to the plugin's own namespace; ``data`` is encoded
+    by the core as canonical JSON and written to the single fixed path
+    ``/var/cache/bunkerweb/<plugin_id>/config.json``, which the existing cache-push
+    pipeline already ships to every instance. The plugin never chooses a path.
+
+    Two-phase on purpose: every compiler runs before anything is written, so one failing
+    plugin cannot leave a newer artefact on disk for an unrelated later push to ship.
+    Returns the updated ``(config, full_config)``; raises :class:`ConfigExtensionError`.
+    """
+    if db is None:
+        # The bootstrap render (``--variables``) has no database, so no plugin has any
+        # stored document to compile yet. The real artefact arrives with the first push.
+        return config, full_config
+
+    servers = [server for server in str(full_config.get("SERVER_NAME", "") or "").split() if server]
+    compiled: List[Tuple[str, Dict[str, str], object]] = []
+
+    for ext in iter_extension_plugins(paths=paths, logger=logger):
+        if not ext.config or not ext.config.get("module"):
+            continue
+        if not extension_allowed(ext, db, logger):
+            continue
+
+        namespace = enforced_variable_namespace(ext.plugin_id)
+        try:
+            module = import_plugin_submodule(ext.plugin_id, ext.directory, ext.config["module"])
+            compile_config = getattr(module, "compile_config", None)
+            if compile_config is None:
+                raise ValueError("config module exposes no `compile_config(db, config, logger)`")
+            result = compile_config(db, full_config, logger)
+        except Exception as e:
+            raise ConfigExtensionError(f"Config extension of plugin {ext.plugin_id} failed: {e}") from e
+
+        if not isinstance(result, dict):
+            raise ConfigExtensionError(f"Config extension of plugin {ext.plugin_id} returned {type(result).__name__}, expected a mapping")
+        variables = result.get("variables") or {}
+        if not isinstance(variables, dict):
+            raise ConfigExtensionError(f"Config extension of plugin {ext.plugin_id} returned non-mapping variables")
+
+        own_settings = set((ext.manifest.get("settings") or {}).keys())
+        for name, value in variables.items():
+            if not isinstance(name, str) or not isinstance(value, str):
+                raise ConfigExtensionError(f"Config extension of plugin {ext.plugin_id} returned a non-string variable ({name!r})")
+            base = _strip_server_prefix(name, servers)
+            if not base.startswith(f"{namespace}_"):
+                raise ConfigExtensionError(f"Config extension of plugin {ext.plugin_id} returned {name!r}, outside its {namespace}_ namespace")
+            if base not in own_settings and base in full_config:
+                # The namespace alone is not enough: a plugin whose id happens to prefix a
+                # foreign setting (id "use" -> namespace "USE" -> "USE_ANTIBOT") would
+                # otherwise be able to rewrite it. A plugin may only derive settings it
+                # declares in its own plugin.json.
+                raise ConfigExtensionError(f"Config extension of plugin {ext.plugin_id} would overwrite {base}, a setting it does not declare")
+
+        compiled.append((ext.plugin_id, variables, result.get("data")))
+
+    root = Path(cache_root) if cache_root is not None else Path(sep, "var", "cache", "bunkerweb")
+    for plugin_id, variables, data in compiled:
+        config.update(variables)
+        full_config.update(variables)
+        if data is None:
+            continue
+        try:
+            from jobs import _write_atomic  # type: ignore  # local import: utils/jobs pulls in optional deps
+
+            _write_atomic(root.joinpath(plugin_id, "config.json"), dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8"))
+        except Exception as e:
+            raise ConfigExtensionError(f"Could not write the config artefact of plugin {plugin_id}: {e}") from e
+        logger.info(f"Compiled the configuration artefact of plugin {plugin_id}")
+
+    return config, full_config
 
 
 def register_plugin_models(logger: Logger, db=None, paths=None) -> Dict[str, List[str]]:

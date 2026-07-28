@@ -335,6 +335,49 @@ class ApiClient(BaseApiClient):
     def detach_redirect(self, redirect_id, service_id):
         return self._delete(f"/redirects/{redirect_id}/attachments/{service_id}")
 
+    # Security workflows
+
+    def get_workflows(self, search="", service_id="", offset=0, limit=500):
+        params = {"offset": offset, "limit": limit}
+        for key, value in (("search", search), ("service_id", service_id)):
+            if value:
+                params[key] = value
+        return self._get("/workflows", params=params)
+
+    def get_workflow(self, workflow_id):
+        data = self._get(f"/workflows/{workflow_id}")
+        return data.get("workflow", data)
+
+    def get_workflow_definition(self, workflow_id):
+        return self._get(f"/workflows/{workflow_id}/definition")
+
+    def save_workflow_definition(self, workflow_id, definition):
+        return self._put(f"/workflows/{workflow_id}/definition", json={"definition": definition})
+
+    def validate_workflow(self, definition, workflow_id="", service_ids=None):
+        payload = {"definition": definition, "workflow_id": workflow_id}
+        if service_ids is not None:
+            payload["service_ids"] = service_ids
+        return self._post("/workflows/validate", json=payload)
+
+    def create_workflow(self, **kwargs):
+        return self._post("/workflows", json=kwargs)
+
+    def update_workflow(self, workflow_id, **kwargs):
+        return self._patch(f"/workflows/{workflow_id}", json=kwargs)
+
+    def clone_workflow(self, workflow_id, name):
+        return self._post(f"/workflows/{workflow_id}/clone", json={"name": name})
+
+    def delete_workflow(self, workflow_id):
+        return self._delete(f"/workflows/{workflow_id}")
+
+    def attach_workflow(self, workflow_id, service_id):
+        return self._post(f"/workflows/{workflow_id}/attachments", json={"service_id": service_id})
+
+    def detach_workflow(self, workflow_id, service_id):
+        return self._delete(f"/workflows/{workflow_id}/attachments/{service_id}")
+
     # Upstreams
 
     def get_upstreams(self, search="", service_id="", offset=0, limit=500):

@@ -7,7 +7,7 @@
         {% endfor %}
     {% else %}
         {% for server_name in SERVER_NAME.split() %}
-            {% if all[server_name + "_USE_ANTIBOT"] != "no" %}
+            {% if all[server_name + "_USE_ANTIBOT"] != "no" or all[server_name + "_WORKFLOWS_HAS_CHALLENGE"] == "yes" %}
                 {% for host in all[server_name + "_SERVER_NAME"].split() %}
                     {% set _ = hosts.append(re.escape(host.lower())) %}
                 {% endfor %}

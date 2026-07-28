@@ -48,7 +48,7 @@ RESOURCE_KINDS_ENUM = Enum("ip", "country", "asn", "rdns", "user_agent", "uri", 
 # (redirects, then upstreams) would otherwise cost a schema migration on four engines just
 # to widen a constraint, and PostgreSQL enum values cannot be dropped on downgrade. Writes
 # validate against this tuple instead.
-CORE_RESOURCE_TYPES = ("certificate", "redirect", "upstream")
+CORE_RESOURCE_TYPES = ("certificate", "redirect", "upstream", "workflow")
 # Load-balancing methods an upstream pool can use. "round_robin" is NGINX's default and emits
 # no directive; the other two are plain http upstream directives, no third-party module needed.
 UPSTREAM_METHODS = ("round_robin", "least_conn", "ip_hash")
@@ -448,6 +448,29 @@ class ResourceGroup_entries(Base):
     group: Mapped["ResourceGroups"] = relationship("ResourceGroups", back_populates="entries")
 
 
+class ResourceGroupUsages(Base):
+    """Which plugin-owned object references a resource group, structurally.
+
+    The ``@name`` tokens in list settings are found by scanning setting values
+    (``_get_resource_group_references``); that scan cannot see a group referenced from
+    inside a plugin's own payload — a workflow rule tree, for instance. This table is that
+    missing half: it makes "who uses this group" answerable without parsing every plugin's
+    documents, so deleting a used group can be refused with the consumer named, and editing
+    one can flag exactly the plugins whose generated configuration must be recompiled.
+    """
+
+    __tablename__ = "bw_resource_group_usages"
+    __table_args__ = (UniqueConstraint("group_id", "plugin_id", "consumer_type", "consumer_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    group_id: Mapped[str] = mapped_column(String(256), ForeignKey("bw_resource_groups.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    plugin_id: Mapped[str] = mapped_column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    # Free-form, owned by the declaring plugin (e.g. "workflow"): the core never interprets
+    # it, it only reports it, so a new consumer needs no schema change.
+    consumer_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    consumer_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+
+
 class Resources(Base):
     __tablename__ = "bw_resources"
     __table_args__ = (UniqueConstraint("type", "name"),)
@@ -463,6 +486,7 @@ class Resources(Base):
     certificate: Mapped[Optional["Certificates"]] = relationship("Certificates", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     redirect: Mapped[Optional["Redirects"]] = relationship("Redirects", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     upstream: Mapped[Optional["Upstreams"]] = relationship("Upstreams", back_populates="resource", cascade="all, delete-orphan", uselist=False)
+    workflow: Mapped[Optional["Workflows"]] = relationship("Workflows", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     attachments: Mapped[List["ResourceAttachments"]] = relationship("ResourceAttachments", back_populates="resource", cascade="all, delete-orphan")
 
 
@@ -509,6 +533,22 @@ class Redirects(Base):
     append_request_uri: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
 
     resource: Mapped["Resources"] = relationship("Resources", back_populates="redirect")
+
+
+class Workflows(Base):
+    __tablename__ = "bw_workflows"
+
+    resource_id: Mapped[str] = mapped_column(String(36), ForeignKey("bw_resources.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    # Format of ``definition``. Bumping it is a breaking change: the compiler refuses a
+    # version it does not know rather than guessing, so the bump must ship its own migrator.
+    schema_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    # Canonical JSON (sorted keys, no whitespace): ordered rules, each with a typed condition
+    # tree, an optional rate threshold and exactly one terminal action. Validated by
+    # utils/workflow_schema.py on every write — the column is deliberately opaque to SQL,
+    # since a rule tree is nested and only ever read as a whole.
+    definition: Mapped[str] = mapped_column(LargeText, nullable=False, default='{"rules":[],"schema_version":1}')
+
+    resource: Mapped["Resources"] = relationship("Resources", back_populates="workflow")
 
 
 class Upstreams(Base):
@@ -829,6 +869,12 @@ API_PERMISSION_ENUM = Enum(
     "upstream_update",
     "upstream_delete",
     "upstream_assign",
+    # Security workflow resource permissions
+    "workflow_read",
+    "workflow_create",
+    "workflow_update",
+    "workflow_delete",
+    "workflow_assign",
     name="api_permission_enum",
 )
 
@@ -846,6 +892,7 @@ API_RESOURCE_ENUM = Enum(
     "certificates",
     "redirects",
     "upstreams",
+    "workflows",
     name="api_resource_enum",
 )
 

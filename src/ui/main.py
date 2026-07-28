@@ -87,6 +87,7 @@ from app.routes.totp import totp
 from app.routes.support import support
 from app.routes.templates import templates as templates_bp
 from app.routes.upstreams import upstreams
+from app.routes.workflows import workflows
 
 BLUEPRINTS = (
     about,
@@ -106,6 +107,7 @@ BLUEPRINTS = (
     certificates,
     redirects,
     upstreams,
+    workflows,
     web_cache,
     logs,
     login,

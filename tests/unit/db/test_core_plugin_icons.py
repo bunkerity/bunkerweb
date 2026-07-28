@@ -58,6 +58,6 @@ def test_all_core_plugins_ship_icon_svg():
 
 
 def test_core_plugin_count_is_covered():
-    # There are 44 core plugins today; every one is checked above. This asserts the glob
+    # There are 45 core plugins today; every one is checked above. This asserts the glob
     # is actually finding them (a broken path would make the integrity test vacuous).
-    assert len(CORE_PLUGIN_JSONS) == 44
+    assert len(CORE_PLUGIN_JSONS) == 45

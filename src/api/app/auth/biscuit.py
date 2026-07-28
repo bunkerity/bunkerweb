@@ -386,6 +386,28 @@ def _resolve_upstreams(path_normalized: str, method_u: str) -> tuple[Optional[st
     return rtype, None
 
 
+def _resolve_workflows(path_normalized: str, method_u: str) -> tuple[Optional[str], Optional[str]]:
+    rtype = "workflows"
+    parts = [segment for segment in path_normalized.split("/") if segment]
+    if method_u in {"GET", "OPTIONS"}:
+        return rtype, "workflow_read"
+    # Attaching a shared policy to a service changes what that service enforces without
+    # touching the policy, so it carries its own permission instead of workflow_update.
+    if "attachments" in parts:
+        return rtype, "workflow_assign"
+    # Validating a draft writes nothing — it is the editor asking whether a definition
+    # would be accepted, so reading is enough.
+    if "validate" in parts:
+        return rtype, "workflow_read"
+    if method_u == "POST":
+        return rtype, "workflow_create"
+    if method_u in {"PUT", "PATCH"}:
+        return rtype, "workflow_update"
+    if method_u == "DELETE":
+        return rtype, "workflow_delete"
+    return rtype, None
+
+
 def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], Optional[str]]:
     """Derive resource_type and required permission name from request path and method.
 
@@ -450,6 +472,8 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
         return _resolve_redirects(p, method_u)
     if first == "upstreams":
         return _resolve_upstreams(p, method_u)
+    if first == "workflows":
+        return _resolve_workflows(p, method_u)
     if first in {"selfsigned", "customcert", "letsencrypt"} and len(parts) >= 2 and parts[1] == "certificates":
         return _resolve_certificates("/" + "/".join(parts[1:]), method_u)
 

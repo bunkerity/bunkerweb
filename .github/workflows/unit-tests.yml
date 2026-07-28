@@ -48,6 +48,10 @@ jobs:
           cache-dependency-path: tests/unit/requirements.txt
       - name: Install unit-test dependencies
         run: pip install -r tests/unit/requirements.txt
+      # The Lua-layer tests shell out to the interpreter and skip without it, so install it
+      # rather than let them silently pass by not running.
+      - name: Install the Lua interpreter
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
       - name: Run unit tests (SQLite, full suite incl. slow tier)
         if: github.ref_name != '1.7' && github.base_ref != '1.7'
         run: pytest tests/unit
@@ -106,6 +110,10 @@ jobs:
           cache-dependency-path: tests/unit/requirements.txt
       - name: Install unit-test dependencies
         run: pip install -r tests/unit/requirements.txt
+      # The Lua-layer tests shell out to the interpreter and skip without it, so install it
+      # rather than let them silently pass by not running.
+      - name: Install the Lua interpreter
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
       - name: Run unit tests (all engines)
         env:
           BW_TEST_PG_URI: postgresql://bw:bw@127.0.0.1:5433/bw_test

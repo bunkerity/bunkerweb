@@ -1,0 +1,193 @@
+{% extends "dashboard.html" %}
+{% from "components/alert.html" import alert %}
+{% from "components/badge.html" import badge %}
+{% from "components/button.html" import button %}
+{% from "components/card.html" import card %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/modal.html" import modal %}
+{% from "components/search.html" import search %}
+{% from "components/page-head.html" import page_head %}
+{# The page-head band owns the breadcrumb + title, so suppress the dashboard shell's
+   legacy breadcrumb/mode row (same treatment as the redirects page). #}
+{% block page_head %}{% endblock %}
+{% block content %}
+    {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
+    {% set workflows_url = url_for("workflows.workflows_page") %}
+
+    {% call page_head(title="Workflows", title_i18n="navigation.workflows",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Workflows", "navigation.workflows", none)]) %}
+        {{ button(label="New workflow", i18n_key="workflows.new", size="sm", icon="bx-plus", modal_target="workflow-create-modal", disabled=readonly, classes="don-jose") }}
+    {% endcall %}
+
+    {% if readonly %}
+        {{ alert(message="The database is read-only. Workflows can be inspected but not changed.", message_key="workflows.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
+    {% endif %}
+    {% if truncated %}
+        {{ alert(message="Only the first 500 workflows are displayed. Narrow the list through the API for the complete result.", message_key="workflows.truncated", variant="warning", icon="bx-info-circle", classes="mb-4") }}
+    {% endif %}
+
+    {% call card(classes="p-4 min-vh-70") %}
+        <div class="d-flex flex-wrap gap-2 align-items-end mb-4">
+            <div class="flex-grow-1">
+                {{ search(id="workflows-search", placeholder="Search name or description...", i18n_key="workflows.search", size="sm", clearable=true, clear_id="workflows-search-clear") }}
+            </div>
+            <div>
+                <label class="form-label small" for="workflows-service-filter" data-i18n="table.header.service">Service</label>
+                <select class="form-select form-select-sm" id="workflows-service-filter">
+                    <option value="" data-i18n="workflows.all">All</option>
+                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        {% if workflows %}
+            <div class="table-responsive">
+                <table class="table align-middle workflows-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="table.header.name">Name</th>
+                            <th data-i18n="workflows.rules">Rules</th>
+                            <th data-i18n="table.header.service">Services</th>
+                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for flow in workflows %}
+                            <tr class="workflow-row"
+                                data-workflow-id="{{ flow.id }}"
+                                data-services="{{ flow.services | join(' ') }}">
+                                <td>
+                                    <a class="fw-semibold" href="{{ workflows_url }}/{{ flow.id }}">{{ flow.name }}</a>
+                                    {% if flow.description %}<div class="text-muted small text-truncate">{{ flow.description }}</div>{% endif %}
+                                </td>
+                                <td>
+                                    {{ flow.enabled_rules_count }}
+                                    {% if flow.rules_count != flow.enabled_rules_count %}
+                                        {# Disabled rules are stored but never compiled into the artefact. #}
+                                        <span class="text-muted small">/ {{ flow.rules_count }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if flow.services %}
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for service_id in flow.services %}
+                                                <span class="badge bg-label-primary d-inline-flex align-items-center gap-1">
+                                                    {{ service_id }}
+                                                    {% if not readonly %}
+                                                        <form method="post" action="{{ workflows_url }}/detach" class="d-inline">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                                            <input type="hidden" name="workflow_id" value="{{ flow.id }}" />
+                                                            <input type="hidden" name="service_id" value="{{ service_id }}" />
+                                                            <button type="submit"
+                                                                    class="btn btn-link btn-sm p-0 lh-1 text-reset"
+                                                                    aria-label="Detach {{ flow.name }} from {{ service_id }}">
+                                                                <i class="bx bx-x" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {# An unattached workflow renders nothing: no service enforces it. #}
+                                        {{ badge(text="Not attached", i18n_key="workflows.not_attached", variant="secondary") }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label="Edit the rules of " ~ flow.name, classes="workflow-rules", tag="a", href=workflows_url ~ "/" ~ flow.id) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label="Attach " ~ flow.name ~ " to a service", classes="workflow-attach", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label="Clone " ~ flow.name, classes="workflow-clone", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete " ~ flow.name, classes="workflow-delete", disabled=readonly) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {{ empty_state(title="No workflows yet", title_key="workflows.empty_title", text="A workflow is an ordered list of rules you attach to services: a condition tree, an optional rate threshold, and one action — challenge, block or redirect.", text_key="workflows.empty_text", icon="bx-sitemap") }}
+        {% endif %}
+    {% endcall %}
+
+    {# The page JS reads the rows from here instead of re-parsing the table. #}
+    <input type="hidden" id="workflows-data" value="{{ workflows | tojson }}" />
+
+    {% call modal(id="workflow-create-modal", title_key="workflows.new", title="New workflow", size="lg") %}
+        <form method="post" action="{{ workflows_url }}/create">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="workflow-create-name" data-i18n="table.header.name">Name</label>
+                    <input class="form-control" id="workflow-create-name" name="name" maxlength="256" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="workflow-create-description" data-i18n="table.header.description">Description</label>
+                    <textarea class="form-control" id="workflow-create-description" name="description" maxlength="4000" rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="form-label" for="workflow-create-services" data-i18n="table.header.service">Services</label>
+                    <select class="form-select" id="workflow-create-services" name="service_ids" multiple size="5">
+                        {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                    </select>
+                    <div class="form-text" data-i18n="workflows.attach_help">Rules are only enforced on the services a workflow is attached to.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Create", i18n_key="button.create", type="submit") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="workflow-attach-modal", title_key="workflows.attach", title="Attach to services") %}
+        <form method="post" action="{{ workflows_url }}/attach">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="workflow_id" id="workflow-attach-id" />
+            <div class="modal-body">
+                <label class="form-label" for="workflow-attach-services" data-i18n="table.header.service">Services</label>
+                <select class="form-select" id="workflow-attach-services" name="service_ids" multiple size="8">
+                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Attach", i18n_key="button.attach", type="submit") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="workflow-clone-modal", title_key="workflows.clone", title="Clone workflow") %}
+        <form method="post" action="{{ workflows_url }}/clone">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="workflow_id" id="workflow-clone-id" />
+            <div class="modal-body">
+                <label class="form-label" for="workflow-clone-name" data-i18n="workflows.clone_name">Name of the copy</label>
+                <input class="form-control" id="workflow-clone-name" name="name" maxlength="256" required />
+                <div class="form-text" data-i18n="workflows.clone_help">The rules are copied; the service attachments are not.</div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Clone", i18n_key="button.clone", type="submit") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="workflow-delete-modal", title_key="workflows.delete", title="Delete workflow") %}
+        <form method="post" action="{{ workflows_url }}/delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="workflow_id" id="workflow-delete-id" />
+            <div class="modal-body">
+                <p data-i18n="workflows.delete_confirm">This workflow and all of its rules will be permanently deleted.</p>
+                <p class="fw-semibold" id="workflow-delete-name"></p>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Delete", i18n_key="button.delete", variant="danger", icon="bx-trash", type="submit") }}
+            </div>
+        </form>
+    {% endcall %}
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/workflows.js') }}" nonce="{{ script_nonce }}" defer></script>
+{% endblock %}

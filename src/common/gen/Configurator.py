@@ -575,8 +575,9 @@ class Configurator:
 
         api_ext = extensions.get("api")
         db_ext = extensions.get("db")
-        if api_ext is None and db_ext is None:
-            return (False, f"Invalid extensions for plugin {plugin_id} (Must declare 'api' and/or 'db')")
+        config_ext = extensions.get("config")
+        if api_ext is db_ext is config_ext is None:
+            return (False, f"Invalid extensions for plugin {plugin_id} (Must declare 'api', 'db' and/or 'config')")
 
         if api_ext is not None:
             if not isinstance(api_ext, dict):
@@ -604,6 +605,16 @@ class Configurator:
                 sanitized = plugin_id.replace("-", "_").replace(".", "_")
                 if table_prefix != f"bw_{sanitized}_":
                     return (False, f"Invalid extensions.db.table_prefix for plugin {plugin_id} (Must equal bw_{sanitized}_)")
+
+        if config_ext is not None:
+            # The compiler runs inside config generation and can abort the whole push, so
+            # it is held to the same module-path rules as the api/db code. It declares no
+            # output path: the core writes its artefact to one fixed location per plugin.
+            if not isinstance(config_ext, dict):
+                return (False, f"Invalid extensions.config for plugin {plugin_id} (Must be an object)")
+            module = config_ext.get("module")
+            if not isinstance(module, str) or ".." in module or not self.__ext_module_rx.match(module):
+                return (False, f"Invalid extensions.config.module for plugin {plugin_id} (Must be a .py file path inside the plugin, no traversal)")
 
         return (True, "ok")
 
