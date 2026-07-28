@@ -12,6 +12,8 @@
 - [BUGFIX] `whitelist`: whitelisting a banned IP now lifts the block on HTTP and stream services, and manually configured `WHITELIST_*` values are honored by the default server and badbehavior checks instead of only the entries downloaded from `WHITELIST_*_URLS`. (Refs #3708)
 - [BUGFIX] `core`: a setting missing from a service's configuration falls back to its global value, and a setting declared by a plugin but absent from the configuration is logged once per minute at warning level instead of at error level on every request. (Refs #3746)
 - [BUGFIX] `autoconf`: a Kubernetes watch that exhausts its retries now backs off and marks the container unhealthy instead of silently restarting forever while reporting healthy, and the Kubernetes manifests give the controller a liveness probe so it gets restarted. (Refs #3750)
+- [FEATURE] `all-in-one`: add `DISABLE_ONLINE_API`, same name as the official CrowdSec images, to run CrowdSec without registering to the Central API. (Refs #3754)
+- [DOCS] `all-in-one`: document what CrowdSec Central API registration transmits, and correct the parser opt-out variable to `CROWDSEC_DISABLE_PARSERS`.
 - [UI] Reports page: document the retention model, a rolling buffer capped per worker that is cleared on restart unless Redis is enabled.
 
 ## v1.6.14~rc1 - 2026/07/23

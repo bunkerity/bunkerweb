@@ -1455,6 +1455,10 @@ docker run -d \
     2.  **安装或升级**默认的集合和解析器。
     3.  **配置** `crowdsec-bunkerweb-bouncer/v1.6` 拦截器。
 
+!!! warning "注册会将您的实例接入 CrowdSec 中央 API"
+
+    第 1 步会将代理注册到 CrowdSec 的中央 API（CAPI），这是一个双向交换。您的实例会**接收**社区封禁列表，同时会为每一条由未修改的 Hub 场景触发的告警**发送**信号：场景名称、哈希与版本、决策时间戳、机器标识，以及攻击者 IP 地址和可用时的地理位置数据。自定义场景、被修改的场景和手动决策不会被发送。如需纯本地部署，请参阅[禁用中央 API](#禁用中央-api)。
+
 ---
 
 #### 默认集合和解析器
@@ -1512,14 +1516,14 @@ docker run -d \
 
 #### 禁用特定解析器
 
-如果您想保留默认设置但明确禁用一个或多个解析器，请通过 `CROWDSEC_DISABLED_PARSERS` 提供一个以空格分隔的列表：
+如果您想保留默认设置但明确禁用一个或多个解析器，请通过 `CROWDSEC_DISABLE_PARSERS` 提供一个以空格分隔的列表：
 
 ```bash
 docker run -d \
   --name bunkerweb-aio \
   -v bw-storage:/data \
   -e USE_CROWDSEC=yes \
-  -e CROWDSEC_DISABLED_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
+  -e CROWDSEC_DISABLE_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
@@ -1529,6 +1533,31 @@ docker run -d \
 注意：
 - 该列表在安装/更新所需项目后应用；只有您列出的解析器会被移除。
 - 使用 `cscli parsers list` 显示的 hub slug（例如，`crowdsecurity/geoip-enrich`）。
+
+---
+
+#### 禁用中央 API
+
+若要让 CrowdSec 完全在本地运行，不进行注册、也不与 CrowdSec 服务器通信，请将 `DISABLE_ONLINE_API` 设为 `true`：
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e DISABLE_ONLINE_API=true \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.14-rc1
+```
+
+这与 CrowdSec 官方镜像使用的变量名相同，现有配置可以直接沿用。
+
+注意事项：
+- 您的实例将停止**发送**攻击信号，也不再**接收**社区封禁列表。本地检测与处置不受影响：已安装的场景照常运行并继续封禁。
+- 该设置在每次启动时读取，因此之后可以重新启用。如果实例此前已注册，禁用时会删除已存储的凭据，重新启用时会再次注册。
+- 仅在 CrowdSec 于容器内运行时生效。若 `CROWDSEC_API` 指向远程实例，则以该实例的中央 API 设置为准。
 
 ---
 

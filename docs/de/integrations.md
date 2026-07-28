@@ -1454,6 +1454,10 @@ docker run -d \
     2. Standard-Sammlungen und -Parser **installieren oder aktualisieren**.
     3. Den Bouncer `crowdsec-bunkerweb-bouncer/v1.6` **konfigurieren**.
 
+!!! warning "Die Registrierung meldet Ihre Instanz bei der CrowdSec Central API an"
+
+    Schritt 1 registriert den Agenten bei der Central API (CAPI) von CrowdSec, und das ist ein Austausch in beide Richtungen. Ihre Instanz **erhält** die Community-Blocklist und **sendet** ein Signal für jede Alarmmeldung, die von einem unveränderten Hub-Szenario ausgelöst wird: Name, Hash und Version des Szenarios, Zeitstempel der Entscheidung, eine Maschinenkennung sowie die auffällige IP-Adresse samt Geolokalisierungsdaten, sofern verfügbar. Eigene Szenarien, geänderte Szenarien und manuelle Entscheidungen werden nicht übertragen. Siehe [Central API deaktivieren](#central-api-deaktivieren) für einen rein lokalen Betrieb.
+
 ---
 
 #### Standard-Sammlungen & Parser
@@ -1511,14 +1515,14 @@ docker run -d \
 
 #### Deaktivieren bestimmter Parser
 
-Wenn Sie die Standardeinrichtung beibehalten, aber einen oder mehrere Parser explizit deaktivieren möchten, geben Sie eine durch Leerzeichen getrennte Liste über `CROWDSEC_DISABLED_PARSERS` an:
+Wenn Sie die Standardeinrichtung beibehalten, aber einen oder mehrere Parser explizit deaktivieren möchten, geben Sie eine durch Leerzeichen getrennte Liste über `CROWDSEC_DISABLE_PARSERS` an:
 
 ```bash
 docker run -d \
   --name bunkerweb-aio \
   -v bw-storage:/data \
   -e USE_CROWDSEC=yes \
-  -e CROWDSEC_DISABLED_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
+  -e CROWDSEC_DISABLE_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
@@ -1528,6 +1532,31 @@ docker run -d \
 Hinweise:
 - Die Liste wird angewendet, nachdem die erforderlichen Elemente installiert/aktualisiert wurden; nur die von Ihnen aufgelisteten Parser werden entfernt.
 - Verwenden Sie Hub-Slugs, wie sie von `cscli parsers list` angezeigt werden (z. B. `crowdsecurity/geoip-enrich`).
+
+---
+
+#### Central API deaktivieren
+
+Um CrowdSec vollständig lokal zu betreiben, ohne Registrierung und ohne Datenverkehr zu den Servern von CrowdSec, setzen Sie `DISABLE_ONLINE_API` auf `true`:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e DISABLE_ONLINE_API=true \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.14-rc1
+```
+
+Es ist derselbe Variablenname wie in den offiziellen CrowdSec-Images, eine bestehende Konfiguration lässt sich also übernehmen.
+
+Hinweise:
+- Ihre Instanz **sendet** keine Angriffssignale mehr und **erhält** keine Community-Blocklist mehr. Lokale Erkennung und Abwehr bleiben unverändert: Die installierten Szenarien laufen weiter und sperren weiterhin.
+- Die Einstellung wird bei jedem Start gelesen, Sie können sie also später wieder aktivieren. War die Instanz bereits registriert, werden die gespeicherten Zugangsdaten beim Deaktivieren entfernt, und beim erneuten Aktivieren wird neu registriert.
+- Gilt nur, wenn CrowdSec im Container läuft. Zeigt `CROWDSEC_API` auf eine entfernte Instanz, zählt deren Central-API-Einstellung.
 
 ---
 
