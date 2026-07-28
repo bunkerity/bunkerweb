@@ -150,6 +150,28 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
         - 对于生产环境，请使用 `notice`、`warn` 或 `error` 日志级别以最小化日志量。
         - 为了调试问题，请暂时将日志级别设置为 `debug` 以获取更详细的信息。
 
+    !!! info "增强上下文变量"
+        除 NGINX 原生变量外，`LOG_FORMAT` 还支持以下变量。它们**每个请求（或每个流会话）只解析一次**并与各插件共享，因此把它们加入日志格式不会带来额外查询开销。
+
+        | 变量               | 取值                                                            |
+        | ------------------ | --------------------------------------------------------------- |
+        | `$bw_kind`         | `http` 或 `stream`                                              |
+        | `$bw_protocol`     | `http`、`https`、`tcp` 或 `udp`                                 |
+        | `$bw_ip_is_global` | `yes` 或 `no`                                                   |
+        | `$bw_ip_version`   | `4` 或 `6`                                                      |
+        | `$bw_country`      | ISO 3166-1 alpha-2 代码、`local`（私有 IP）或 `unknown`（未匹配） |
+        | `$bw_city`         | 城市名称，或为空（需要 `GEOIP_CITY=yes`）                        |
+        | `$bw_asn_number`   | AS 号，或为空                                                    |
+        | `$bw_asn_org`      | AS 组织名，或为空                                                |
+
+        使用这些变量的 JSON 访问日志示例：
+
+        ```
+        LOG_FORMAT={"request_id":"$request_id","ip":"$remote_addr","country":"$bw_country","asn":"$bw_asn_number","asn_org":"$bw_asn_org","method":"$request_method","uri":"$request_uri","status":$status}
+        ```
+
+        若某个 server 块未填充这些变量（默认服务器、内部 API），日志中记录 `-`。GeoIP 数据来自 [GeoIP](#geoip) 插件所管理的数据库：缺少其中任意一个时，`$bw_country` 为 `unknown`，`$bw_city` 为空，流量仍正常放行。
+
 === "集成设置"
 
     | 设置                     | 默认值 | 上下文    | 多个 | 描述                                                                     |

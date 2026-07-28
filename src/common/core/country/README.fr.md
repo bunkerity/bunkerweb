@@ -50,7 +50,7 @@ Vous pouvez utiliser des tokens de groupe préfixés par `@`. Ils sont étendus 
     Si une liste blanche et une liste noire sont définies, la liste blanche a priorité : si le pays n’y figure pas, l’accès est refusé.
 
 !!! info "Détection du pays"
-    BunkerWeb utilise la base mmdb [db‑ip lite](https://db-ip.com/db/download/ip-to-country-lite).
+    Le pays d'origine provient de la base gérée par le plugin [GeoIP](#geoip). Par défaut il s'agit de la base gratuite [DB-IP Lite](https://db-ip.com/db/download/ip-to-country-lite), rafraîchie quotidiennement ; vous pouvez la remplacer par MaxMind ou par votre propre base sans toucher à ce plugin.
 
 ### Exemples
 

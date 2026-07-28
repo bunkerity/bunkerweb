@@ -52,7 +52,7 @@
     如果同时配置了白名单和黑名单，则白名单优先。这意味着系统首先检查一个国家/地区是否在白名单中；如果不在，无论黑名单配置如何，访问都将被拒绝。
 
 !!! info "国家/地区检测"
-    BunkerWeb 使用 [lite db-ip mmdb 数据库](https://db-ip.com/db/download/ip-to-country-lite)根据 IP 地址确定来源国家/地区。
+    来源国家/地区来自 [GeoIP](#geoip) 插件所管理的数据库。默认使用每日更新的免费 [DB-IP Lite](https://db-ip.com/db/download/ip-to-country-lite) 数据库；你可以改用 MaxMind 或自己的数据库，无需改动本插件。
 
 ### 示例配置
 

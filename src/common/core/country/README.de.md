@@ -50,7 +50,7 @@ Sie können Gruppentokens mit `@` verwenden. Diese werden serverseitig in Mitgli
     Wenn eine Whitelist und eine Blacklist definiert sind, hat die Whitelist Vorrang: Wenn das Land nicht auf der Whitelist steht, wird der Zugriff verweigert.
 
 !!! info "Ländererkennung"
-    BunkerWeb verwendet die mmdb-Datenbank [db-ip lite](https://db-ip.com/db/download/ip-to-country-lite).
+    Das Herkunftsland stammt aus der Datenbank, die das [GeoIP](#geoip)-Plugin verwaltet. Standardmäßig ist das die kostenlose, täglich aktualisierte Datenbank [DB-IP Lite](https://db-ip.com/db/download/ip-to-country-lite); Sie können stattdessen MaxMind oder eine eigene Datenbank verwenden, ohne dieses Plugin anzupassen.
 
 ### Beispiele
 

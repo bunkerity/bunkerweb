@@ -63,7 +63,7 @@ settings.json + plugin.json schemas
 
 ### Plugin System (`core/`)
 
-42 core plugins, each following the same structure:
+43 core plugins, each following the same structure:
 
 - `plugin.json` — settings schema with `context`, `type`, `regex`, `default`, `multiple`, `select` fields
 - `<name>.lua` — Lua request-time processing (uses `require "bunkerweb.plugin"` and `require "bunkerweb.utils"`)

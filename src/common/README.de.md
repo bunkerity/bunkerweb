@@ -149,6 +149,28 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     - Verwenden Sie für Produktionsumgebungen die Protokollstufen `notice`, `warn` oder `error`, um das Protokollvolumen zu minimieren.
     - Setzen Sie zur Fehlersuche vorübergehend die Protokollstufe auf `debug`, um detailliertere Informationen zu erhalten.
 
+    !!! info "Variablen des angereicherten Kontexts"
+        Zusätzlich zu den nativen NGINX-Variablen akzeptiert `LOG_FORMAT` die folgenden Variablen. Sie werden **einmal pro Anfrage** (bzw. pro Stream-Sitzung) aufgelöst und mit den Plugins geteilt — sie in das Log-Format aufzunehmen kostet also keine zusätzliche Abfrage.
+
+        | Variable           | Wert                                                                              |
+        | ------------------ | --------------------------------------------------------------------------------- |
+        | `$bw_kind`         | `http` oder `stream`                                                              |
+        | `$bw_protocol`     | `http`, `https`, `tcp` oder `udp`                                                 |
+        | `$bw_ip_is_global` | `yes` oder `no`                                                                   |
+        | `$bw_ip_version`   | `4` oder `6`                                                                      |
+        | `$bw_country`      | ISO-3166-1-Alpha-2-Code, `local` (private IP) oder `unknown` (kein GeoIP-Treffer) |
+        | `$bw_city`         | Name der Stadt, oder leer (erfordert `GEOIP_CITY=yes`)                            |
+        | `$bw_asn_number`   | AS-Nummer, oder leer                                                              |
+        | `$bw_asn_org`      | AS-Organisation, oder leer                                                        |
+
+        Beispiel eines JSON-Zugriffsprotokolls, das sie verwendet:
+
+        ```
+        LOG_FORMAT={"request_id":"$request_id","ip":"$remote_addr","country":"$bw_country","asn":"$bw_asn_number","asn_org":"$bw_asn_org","method":"$request_method","uri":"$request_uri","status":$status}
+        ```
+
+        Eine Anfrage, die von einem Serverblock bedient wird, der sie nicht füllt (Standardserver, interne API), protokolliert `-`. Die GeoIP-Daten stammen aus den Datenbanken, die das [GeoIP](#geoip)-Plugin verwaltet: fehlt eine davon, ist `$bw_country` gleich `unknown`, `$bw_city` bleibt leer, und der Verkehr wird normal bedient.
+
 === "Integrationseinstellungen"
 
     | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                          |

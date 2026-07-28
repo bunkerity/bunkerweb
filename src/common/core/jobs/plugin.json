@@ -7,20 +7,6 @@
   "settings": {},
   "jobs": [
     {
-      "name": "mmdb-country",
-      "file": "mmdb-country.py",
-      "every": "day",
-      "reload": true,
-      "async": true
-    },
-    {
-      "name": "mmdb-asn",
-      "file": "mmdb-asn.py",
-      "every": "day",
-      "reload": true,
-      "async": true
-    },
-    {
       "name": "update-check",
       "file": "update-check.py",
       "every": "day",

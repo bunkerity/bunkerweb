@@ -736,6 +736,23 @@ utils.get_country = function(ip)
 	return result.country.iso_code, "success"
 end
 
+utils.get_city = function(ip)
+	-- Optional database : GEOIP_CITY is off by default and nothing is bundled
+	if not mmdb.city_db then
+		return false, "mmdb city not loaded"
+	end
+	-- Read the single field we expose instead of decoding the whole record : a city
+	-- entry carries every language and subdivision, which is wasteful per request
+	local ok, result, err = pcall(mmdb.city_db.lookup_value, mmdb.city_db, ip, "city", "names", "en")
+	if not ok then
+		return nil, result
+	end
+	if not result then
+		return nil, err
+	end
+	return result, "success"
+end
+
 utils.get_asn = function(ip)
 	-- Check if mmdp is loaded
 	if not mmdb.asn_db then
@@ -796,9 +813,17 @@ utils.get_deny_status = function()
 end
 
 utils.get_security_mode = function(ctx)
+	-- Resolved once per request : set_reason() already shares this key, and several plugins
+	-- (limit, badbehavior, misc, workflows) ask for the mode on the same request
+	if ctx and ctx.bw and ctx.bw.security_mode then
+		return ctx.bw.security_mode
+	end
 	local security_mode, _ = utils.get_variable("SECURITY_MODE", true, ctx)
 	if not security_mode then
-		return "block"
+		security_mode = "block"
+	end
+	if ctx and ctx.bw then
+		ctx.bw.security_mode = security_mode
 	end
 	return security_mode
 end

@@ -86,6 +86,9 @@ def test_retired_certificate_caches_are_deleted_and_never_materialized(tmp_path)
         ("api-server-cert", "api-server-cert.pem"),
         ("default-server-cert", "default-server-cert.key"),
         ("default-server-cert", "default-server-cert.pem"),
+        # Retired when the GeoIP databases moved to the `geoip` core plugin
+        ("mmdb-country", "country.mmdb"),
+        ("mmdb-asn", "asn.mmdb"),
     }
     assert not any((cache_root / plugin_id / file_name).exists() for cache_root in (cache_path, snapshot_cache) for plugin_id, file_name in retired_paths)
     source = SOURCE.read_text()

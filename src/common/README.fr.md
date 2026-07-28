@@ -148,6 +148,28 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
         - En production, utilisez les niveaux `notice`, `warn` ou `error` pour limiter le volume de logs.
         - Pour le dépannage, passez temporairement le niveau à `debug` pour obtenir plus de détails.
 
+    !!! info "Variables de contexte enrichi"
+        En plus des variables natives de NGINX, `LOG_FORMAT` accepte les variables suivantes. Elles sont résolues **une seule fois par requête** (ou par session stream) et partagées avec les plugins : les ajouter à votre format de log ne coûte aucune recherche supplémentaire.
+
+        | Variable           | Valeur                                                                            |
+        | ------------------ | --------------------------------------------------------------------------------- |
+        | `$bw_kind`         | `http` ou `stream`                                                                |
+        | `$bw_protocol`     | `http`, `https`, `tcp` ou `udp`                                                   |
+        | `$bw_ip_is_global` | `yes` ou `no`                                                                     |
+        | `$bw_ip_version`   | `4` ou `6`                                                                        |
+        | `$bw_country`      | Code ISO 3166-1 alpha-2, `local` (IP privée) ou `unknown` (aucune correspondance) |
+        | `$bw_city`         | Nom de la ville, ou vide (nécessite `GEOIP_CITY=yes`)                             |
+        | `$bw_asn_number`   | Numéro d'AS, ou vide                                                              |
+        | `$bw_asn_org`      | Organisation de l'AS, ou vide                                                     |
+
+        Exemple de log d'accès JSON les utilisant :
+
+        ```
+        LOG_FORMAT={"request_id":"$request_id","ip":"$remote_addr","country":"$bw_country","asn":"$bw_asn_number","asn_org":"$bw_asn_org","method":"$request_method","uri":"$request_uri","status":$status}
+        ```
+
+        Une requête servie par un bloc serveur qui ne les remplit pas (serveur par défaut, API interne) journalise `-`. Les données GeoIP proviennent des bases gérées par le plugin [GeoIP](#geoip) : si l'une manque, `$bw_country` vaut `unknown`, `$bw_city` est vide, et le trafic est servi normalement.
+
 === "Paramètres d’intégration"
 
     | Paramètre                | Valeur par défaut | Contexte  | Multiple | Description                                                                                                                                                         |

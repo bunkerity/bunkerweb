@@ -52,7 +52,7 @@ Puede usar tokens de grupo con prefijo `@`. Se expanden del lado del servidor a 
     Si se configuran tanto la lista blanca como la lista negra, la lista blanca tiene prioridad. Esto significa que el sistema primero comprueba si un país está en la lista blanca; si no, se deniega el acceso independientemente de la configuración de la lista negra.
 
 !!! info "Detección de País"
-    BunkerWeb utiliza la [base de datos mmdb lite de db-ip](https://db-ip.com/db/download/ip-to-country-lite) para determinar el país de origen basándose en las direcciones IP.
+    El país de origen procede de la base de datos que gestiona el plugin [GeoIP](#geoip). De forma predeterminada es la base de datos gratuita [DB-IP Lite](https://db-ip.com/db/download/ip-to-country-lite), actualizada a diario; puedes cambiarla por MaxMind o por tu propia base de datos sin tocar este plugin.
 
 ### Configuraciones de Ejemplo
 

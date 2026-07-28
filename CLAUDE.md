@@ -58,7 +58,7 @@ The Lua runtime (`src/bw/lua/bunkerweb/`) processes requests through plugin hook
 - `clusterstore.lua`: Cluster-aware storage (Redis)
 - `helpers.lua`, `utils.lua`: Shared utilities
 - `api.lua`: Internal API handling
-- `mmdb.lua`: MaxMind GeoIP database reader
+- `mmdb.lua`: MaxMind-format GeoIP database reader (country/ASN/city, refreshed by the `geoip` core plugin)
 
 `src/bw/lua/middleclass.lua` provides OOP support (third-party library, excluded from linting).
 

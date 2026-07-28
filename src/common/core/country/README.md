@@ -52,7 +52,7 @@ You can use group tokens prefixed with `@`. They are expanded server-side into t
     If both whitelist and blacklist are configured, the whitelist takes precedence. This means the system first checks if a country is whitelisted; if not, access is denied regardless of the blacklist configuration.
 
 !!! info "Country Detection"
-    BunkerWeb uses the [lite db-ip mmdb database](https://db-ip.com/db/download/ip-to-country-lite) to determine the country of origin based on IP addresses.
+    The country of origin comes from the database managed by the [GeoIP](#geoip) plugin. By default that is the free [DB-IP Lite](https://db-ip.com/db/download/ip-to-country-lite) database, refreshed daily; you can switch it to MaxMind or to your own database without touching this plugin.
 
 ### Example Configurations
 

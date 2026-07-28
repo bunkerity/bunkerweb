@@ -22,6 +22,7 @@ local is_ipv6 = utils.is_ipv6
 local get_variable = utils.get_variable
 local get_country = utils.get_country
 local get_asn = utils.get_asn
+local get_city = utils.get_city
 local lower = string.lower
 
 local helpers = {}
@@ -29,6 +30,8 @@ local helpers = {}
 -- Geo lookups are reported once per worker : a missing MMDB would otherwise log on every request
 local geo_country_warned = false
 local geo_asn_warned = false
+local export_vars_warned = false
+local geo_city_warned = false
 
 helpers.load_plugin = function(json)
 	-- Open file
@@ -313,6 +316,8 @@ helpers.fill_ctx = function(no_ref)
 				data.http_content_type = var.http_content_type
 				data.http_content_length = var.http_content_length
 				data.http_origin = var.http_origin
+				data.http_accept = var.http_accept
+				data.http_referer = var.http_referer
 				data.http_version = req.http_version()
 				data.start_time = req.start_time()
 				data.scheme = var.scheme
@@ -343,8 +348,10 @@ helpers.fill_ctx = function(no_ref)
 				local country, country_err = get_country(data.remote_addr)
 				if country then
 					data.country = country
+					data.country_ok = true
 				else
 					data.country = "unknown"
+					data.country_ok = false
 					if not geo_country_warned then
 						geo_country_warned = true
 						table.insert(errors, "can't get country of IP : " .. tostring(country_err))
@@ -354,12 +361,31 @@ helpers.fill_ctx = function(no_ref)
 				if asn_number then
 					data.asn_number = asn_number
 					data.asn_org = asn_org
-				elseif not geo_asn_warned then
-					geo_asn_warned = true
-					table.insert(errors, "can't get ASN of IP : " .. tostring(asn_err))
+					data.asn_ok = true
+				else
+					data.asn_ok = false
+					if not geo_asn_warned then
+						geo_asn_warned = true
+						table.insert(errors, "can't get ASN of IP : " .. tostring(asn_err))
+					end
 				end
+				local city, city_err = get_city(data.remote_addr)
+				if city then
+					data.city = city
+				elseif city == nil and not geo_city_warned then
+					-- false means the optional city database is simply absent, which is the
+					-- default : only a real lookup failure is worth reporting
+					geo_city_warned = true
+					table.insert(errors, "can't get city of IP : " .. tostring(city_err))
+				end
+				-- false means the database is absent, a known state unlike a nil failure
+				data.city_ok = city ~= nil
 			else
+				-- Non-global IP : "local", "no ASN" and "no city" are facts, not resolution failures
 				data.country = "local"
+				data.country_ok = true
+				data.asn_ok = true
+				data.city_ok = true
 			end
 		end
 		-- Fill ctx
@@ -386,13 +412,24 @@ helpers.export_ctx_vars = function(ctx)
 	if not data then
 		return
 	end
-	var.bw_kind = data.kind or ""
-	var.bw_protocol = data.protocol or ""
-	var.bw_ip_is_global = data.ip_is_global and "yes" or "no"
-	var.bw_ip_version = data.ip_version and tostring(data.ip_version) or ""
-	var.bw_country = data.country or ""
-	var.bw_asn_number = data.asn_number and tostring(data.asn_number) or ""
-	var.bw_asn_org = data.asn_org or ""
+	-- Writing an undeclared variable raises, and this runs on every request : a BunkerWeb instance
+	-- upgraded before it receives the matching configuration would answer 500 to all traffic.
+	-- Logging is left to the caller so a version skew degrades the logs, never the request.
+	local ok, err = pcall(function()
+		var.bw_kind = data.kind or ""
+		var.bw_protocol = data.protocol or ""
+		var.bw_ip_is_global = data.ip_is_global and "yes" or "no"
+		var.bw_ip_version = data.ip_version and tostring(data.ip_version) or ""
+		var.bw_country = data.country or ""
+		var.bw_city = data.city or ""
+		var.bw_asn_number = data.asn_number and tostring(data.asn_number) or ""
+		var.bw_asn_org = data.asn_org or ""
+	end)
+	if not ok and not export_vars_warned then
+		export_vars_warned = true
+		return false, "can't export the context to the $bw_* variables : " .. tostring(err)
+	end
+	return ok
 end
 
 helpers.save_ctx = function(ctx)

@@ -57,7 +57,7 @@ All classes use `middleclass` (third-party OOP in `lua/middleclass.lua` — do n
 | `api.lua`          | Internal NGINX API (`/ping`, `/reload`, `/ban`, `/unban`, `/bans`, `/health`, config upload endpoints). Token + IP whitelist auth. |
 | `ctx.lua`          | FFI-based context stashing for subrequest preservation.                                                                            |
 | `logger.lua`       | Thin wrapper around `ngx.log` with prefix formatting.                                                                              |
-| `mmdb.lua`         | Module-level singletons loading MaxMind country/ASN databases.                                                                     |
+| `mmdb.lua`         | Module-level singletons loading the country/ASN/city databases from `/var/cache/bunkerweb/geoip/` (city may be nil).               |
 
 ### Request Processing Flow
 
@@ -70,20 +70,28 @@ All classes use `middleclass` (third-party OOP in `lua/middleclass.lua` — do n
 
 `fill_ctx()` resolves the request/session metadata **once**, then every plugin reads it from `self.ctx.bw` — never re-resolve it. `self.variables` stays reserved for configuration settings.
 
-| Field                                      | Value                                                                                                                                                                                   |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind`                                     | `http` or `stream`                                                                                                                                                                      |
-| `protocol`                                 | `http`, `https`, `tcp` or `udp`                                                                                                                                                         |
-| `remote_addr`, `server_name`, `time_local` | as seen by NGINX                                                                                                                                                                        |
-| `ip_is_global`, `ip_is_ipv4`, `ip_is_ipv6` | booleans                                                                                                                                                                                |
-| `ip_version`                               | `4` or `6`                                                                                                                                                                              |
-| `country`                                  | ISO 3166-1 alpha-2 code, `local` (non-global IP) or `unknown` (MMDB missing or lookup failed)                                                                                           |
-| `asn_number`, `asn_org`                    | number / string, or `nil`                                                                                                                                                               |
-| HTTP only                                  | `request_id`, `uri`, `request_uri`, `request_method`, `http_user_agent`, `http_host`, `http_content_type`, `http_content_length`, `http_origin`, `http_version`, `start_time`, `scheme` |
+| Field                                      | Value                                                                                                                                                                                                                  |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`                                     | `http` or `stream`                                                                                                                                                                                                     |
+| `protocol`                                 | `http`, `https`, `tcp` or `udp`                                                                                                                                                                                        |
+| `remote_addr`, `server_name`, `time_local` | as seen by NGINX                                                                                                                                                                                                       |
+| `ip_is_global`, `ip_is_ipv4`, `ip_is_ipv6` | booleans                                                                                                                                                                                                               |
+| `ip_version`                               | `4` or `6`                                                                                                                                                                                                             |
+| `country`                                  | ISO 3166-1 alpha-2 code, `local` (non-global IP) or `unknown` (MMDB missing or lookup failed)                                                                                                                          |
+| `city`                                     | city name, or `nil` — the city database is opt-in (`GEOIP_CITY`) and absent by default                                                                                                                                 |
+| `asn_number`, `asn_org`                    | number / string, or `nil`                                                                                                                                                                                              |
+| `country_ok`, `asn_ok`, `city_ok`          | booleans — `true` when the value is authoritative (including "no ASN because the IP is not global"), `false` only when the lookup itself failed                                                                        |
+| HTTP only                                  | `request_id`, `uri`, `request_uri`, `request_method`, `http_user_agent`, `http_host`, `http_content_type`, `http_content_length`, `http_origin`, `http_accept`, `http_referer`, `http_version`, `start_time`, `scheme` |
 
-Enrichment is fail-open: a GeoIP failure never blocks a request, and it is logged at most once per worker. `utils.get_country()` / `utils.get_asn()` remain for lookups on **another** IP (e.g. the bans API) — not for the current request.
+Enrichment is fail-open: a GeoIP failure never blocks a request, and it is logged at most once per worker. `utils.get_country()` / `utils.get_asn()` / `utils.get_city()` remain for lookups on **another** IP (e.g. the bans API) — not for the current request. A missing _optional_ database returns `false` rather than `nil`, which is how `fill_ctx` tells "city is not enabled" (silent) from "the lookup failed" (warn once).
 
-`helpers.export_ctx_vars(ctx)` mirrors the context into the `$bw_*` NGINX variables (`$bw_kind`, `$bw_protocol`, `$bw_ip_is_global`, `$bw_ip_version`, `$bw_country`, `$bw_asn_number`, `$bw_asn_org`) so they can be used in `LOG_FORMAT`. Call it only from a phase where writing `ngx.var` is allowed — `set-lua.conf` (HTTP) and `preread-stream-lua.conf` (Stream) — and from a server block that declares the variables (`server-http/server.conf`, `server-stream/server-stream.conf`).
+The `*_ok` flags exist so a policy engine can tell a **fact** from an **unknown**: a private IP has no ASN (`asn_number = nil`, `asn_ok = true` → a predicate is `FALSE`), whereas a broken MMDB also has no ASN but `asn_ok = false` → the predicate must degrade to `UNKNOWN` instead of silently reading as "no match".
+
+Predicate semantics of the fields policies match on: `uri` is the NGINX-normalized, percent-decoded path **without** the query string (`/login%2Fx` matches a `/login/` prefix), `request_method` is upper-case, `remote_addr` is the effective client IP **after** Real-IP, and `server_name` is the service's first server name — the service identity used by per-service keys.
+
+Plugins may store their own request state in `ctx.bw`, prefixed with their plugin id (`antibot_session_data`, `sessions_checks`, …). Keep that convention: it is what stops core plugins, external plugins and PRO extensions from colliding in a shared table.
+
+`helpers.export_ctx_vars(ctx)` mirrors the context into the `$bw_*` NGINX variables (`$bw_kind`, `$bw_protocol`, `$bw_ip_is_global`, `$bw_ip_version`, `$bw_country`, `$bw_city`, `$bw_asn_number`, `$bw_asn_org`) so they can be used in `LOG_FORMAT`. Call it only from a phase where writing `ngx.var` is allowed — `set-lua.conf` (HTTP) and `preread-stream-lua.conf` (Stream) — and from a server block that declares the variables (`server-http/server.conf`, `server-stream/server-stream.conf`).
 
 ### Subsystem Handling (HTTP vs Stream)
 
@@ -122,7 +130,7 @@ value = self.variables["SETTING_NAME"]
 - `lua/bunkerweb/` — Lua runtime modules (the core of this component)
 - `lua/middleclass.lua` — Third-party OOP library (do not modify)
 - `loading/index.html` — Static loading page shown while BunkerWeb initializes
-- `misc/` — Static assets: `asn.mmdb`, `country.mmdb` (GeoIP), `root-ca.pem`
+- `misc/` — Static assets: `asn.mmdb`, `country.mmdb` (GeoIP bootstrap fallbacks; there is deliberately no `city.mmdb` — it is 125 MB and downloaded on demand), `root-ca.pem`
 - `entrypoint.sh` — Container startup: detects integration mode, generates temp config, starts NGINX
 - `Dockerfile` — Multi-stage build producing the runtime image
 

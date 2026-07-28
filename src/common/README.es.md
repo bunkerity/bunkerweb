@@ -148,6 +148,28 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
         - Para entornos de producción, usa los niveles de registro `notice`, `warn`, o `error` para minimizar el volumen de registros.
         - Para depurar problemas, establece temporalmente el nivel de registro en `debug` para obtener información más detallada.
 
+    !!! info "Variables de contexto enriquecido"
+        Además de las variables nativas de NGINX, `LOG_FORMAT` acepta las siguientes variables. Se resuelven **una sola vez por petición** (o por sesión de stream) y se comparten con los plugins, así que añadirlas a tu formato de registro no supone ninguna búsqueda adicional.
+
+        | Variable           | Valor                                                                             |
+        | ------------------ | --------------------------------------------------------------------------------- |
+        | `$bw_kind`         | `http` o `stream`                                                                 |
+        | `$bw_protocol`     | `http`, `https`, `tcp` o `udp`                                                    |
+        | `$bw_ip_is_global` | `yes` o `no`                                                                      |
+        | `$bw_ip_version`   | `4` o `6`                                                                         |
+        | `$bw_country`      | Código ISO 3166-1 alfa-2, `local` (IP privada) o `unknown` (sin coincidencia)     |
+        | `$bw_city`         | Nombre de la ciudad, o vacío (requiere `GEOIP_CITY=yes`)                          |
+        | `$bw_asn_number`   | Número de AS, o vacío                                                             |
+        | `$bw_asn_org`      | Organización del AS, o vacío                                                      |
+
+        Ejemplo de registro de acceso JSON que las usa:
+
+        ```
+        LOG_FORMAT={"request_id":"$request_id","ip":"$remote_addr","country":"$bw_country","asn":"$bw_asn_number","asn_org":"$bw_asn_org","method":"$request_method","uri":"$request_uri","status":$status}
+        ```
+
+        Una petición servida por un bloque de servidor que no las rellena (servidor por defecto, API interna) registra `-`. Los datos de GeoIP proceden de las bases de datos que gestiona el plugin [GeoIP](#geoip): si falta alguna, `$bw_country` es `unknown`, `$bw_city` queda vacío y el tráfico se sirve con normalidad.
+
 === "Ajustes de Integración"
 
     | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                           |

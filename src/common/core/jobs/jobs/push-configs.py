@@ -70,6 +70,9 @@ RETIRED_CACHE_ROWS = {
     ("api-server-cert", "api-server-cert.pem"),
     ("default-server-cert", "default-server-cert.key"),
     ("default-server-cert", "default-server-cert.pem"),
+    # The GeoIP databases moved from this plugin to the `geoip` core plugin
+    ("mmdb-country", "country.mmdb"),
+    ("mmdb-asn", "asn.mmdb"),
 }
 RETIRED_CACHE_PATHS = {
     ("jobs", "api-server-cert.key"),
@@ -78,6 +81,9 @@ RETIRED_CACHE_PATHS = {
     ("misc", "api-server-cert.pem"),
     ("misc", "default-server-cert.key"),
     ("misc", "default-server-cert.pem"),
+    # Superseded by /var/cache/bunkerweb/geoip/*.mmdb
+    ("jobs", "country.mmdb"),
+    ("jobs", "asn.mmdb"),
 }
 
 

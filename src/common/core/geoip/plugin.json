@@ -1,0 +1,86 @@
+{
+  "id": "geoip",
+  "name": "GeoIP",
+  "description": "GeoIP databases used to resolve the country, ASN and city of a client IP.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "MAXMIND_LICENSE_KEY": {
+      "context": "global",
+      "default": "",
+      "help": "MaxMind license key. When set, the country, ASN and city databases are downloaded from MaxMind instead of DB-IP.",
+      "id": "maxmind-license-key",
+      "label": "MaxMind license key",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "MAXMIND_ACCOUNT_ID": {
+      "context": "global",
+      "default": "",
+      "help": "MaxMind account ID. Optional but recommended: without it the deprecated key-only endpoint is used, which carries the license key in the URL instead of an auth header.",
+      "id": "maxmind-account-id",
+      "label": "MaxMind account ID",
+      "regex": "^[0-9]*$",
+      "type": "text"
+    },
+    "GEOIP_CITY": {
+      "context": "global",
+      "default": "no",
+      "help": "Download the city database. It is far bigger than the others (DB-IP City Lite unpacks to 125 MB) and is not bundled in the images.",
+      "id": "geoip-city",
+      "label": "City database",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "GEOIP_COUNTRY_MMDB": {
+      "context": "global",
+      "default": "",
+      "help": "Custom country database: absolute path readable by the worker, or http(s) URL. Takes priority over MaxMind and DB-IP.",
+      "id": "geoip-country-mmdb",
+      "label": "Custom country database",
+      "regex": "^$|^(/[\\w. \\-]+)+$|^https?://[^\\s]+$",
+      "type": "text"
+    },
+    "GEOIP_ASN_MMDB": {
+      "context": "global",
+      "default": "",
+      "help": "Custom ASN database: absolute path readable by the worker, or http(s) URL. Takes priority over MaxMind and DB-IP.",
+      "id": "geoip-asn-mmdb",
+      "label": "Custom ASN database",
+      "regex": "^$|^(/[\\w. \\-]+)+$|^https?://[^\\s]+$",
+      "type": "text"
+    },
+    "GEOIP_CITY_MMDB": {
+      "context": "global",
+      "default": "",
+      "help": "Custom city database: absolute path readable by the worker, or http(s) URL. Takes priority over MaxMind and DB-IP.",
+      "id": "geoip-city-mmdb",
+      "label": "Custom city database",
+      "regex": "^$|^(/[\\w. \\-]+)+$|^https?://[^\\s]+$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "geoip-country",
+      "file": "geoip-country.py",
+      "every": "day",
+      "reload": true,
+      "async": true
+    },
+    {
+      "name": "geoip-asn",
+      "file": "geoip-asn.py",
+      "every": "day",
+      "reload": true,
+      "async": true
+    },
+    {
+      "name": "geoip-city",
+      "file": "geoip-city.py",
+      "every": "day",
+      "reload": true,
+      "async": true
+    }
+  ]
+}
