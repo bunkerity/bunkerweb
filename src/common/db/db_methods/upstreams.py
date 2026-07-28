@@ -105,9 +105,7 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
             return "An upstream needs at least one non-backup server"
         return ""
 
-    def _upstream_conflict(  # noqa: C901
-        self, session, resource_id: str, protocol: str, match_path: str, service_ids: List[str], name: str = ""
-    ) -> str:
+    def _upstream_conflict(self, session, resource_id: str, protocol: str, match_path: str, service_ids: List[str], name: str = "") -> str:  # noqa: C901
         """Return an actionable error when the target is already taken on a service.
 
         For an http or gRPC pool the whole location namespace is consulted — redirects
@@ -272,7 +270,9 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
 
         servers: Dict[str, List[Dict[str, Any]]] = {}
         for server in session.scalars(
-            select(UpstreamServers).where(UpstreamServers.resource_id.in_({row.id for row in rows})).order_by(UpstreamServers.resource_id, UpstreamServers.order)
+            select(UpstreamServers)
+            .where(UpstreamServers.resource_id.in_({row.id for row in rows}))
+            .order_by(UpstreamServers.resource_id, UpstreamServers.order)
         ):
             servers.setdefault(server.resource_id, []).append(DatabaseUpstreamsMixin._server_dict(server))
 
@@ -495,9 +495,7 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
             # is_primary stays False: it disambiguates the single certificate NGINX serves per
             # SNI, whereas every attached pool renders its own location.
             session.add(
-                ResourceAttachments(
-                    resource_id=resource_id, service_id=service_id, is_primary=False, match_path=path, creation_date=datetime.now(timezone.utc)
-                )
+                ResourceAttachments(resource_id=resource_id, service_id=service_id, is_primary=False, match_path=path, creation_date=datetime.now(timezone.utc))
             )
             try:
                 self._flag_upstream_config_changed(session)

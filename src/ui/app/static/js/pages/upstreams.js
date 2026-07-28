@@ -68,7 +68,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // A stream server has no location, so the path field would be a lie.
     const pathField = document.getElementById(pathFieldId);
     if (pathField) {
-      pathField.closest(".col-md-4, .mt-3")?.classList.toggle("d-none", protocol === "stream");
+      pathField
+        .closest(".col-md-4, .mt-3")
+        ?.classList.toggle("d-none", protocol === "stream");
     }
   }
 

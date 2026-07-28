@@ -48,9 +48,7 @@ def family_occupancy(config: Dict[str, Any], prefixes: List[str], trigger: str, 
             if not str(value or "").strip():
                 taken.pop(index, None)  # a server-specific blank disables the inherited location
                 continue
-            taken[index] = str(
-                config.get(suffix_key(f"{prefix}{path_setting}", index), "") or config.get(suffix_key(path_setting, index), "/") or "/"
-            )
+            taken[index] = str(config.get(suffix_key(f"{prefix}{path_setting}", index), "") or config.get(suffix_key(path_setting, index), "/") or "/")
     return taken
 
 

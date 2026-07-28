@@ -103,12 +103,8 @@ def test_a_pool_shared_by_two_services_is_declared_once():
 
 
 def test_pool_declarations_are_ordered_by_name_for_a_stable_config_hash():
-    first = expand_service_upstreams(
-        multisite(), FakeDB({"app1.example.com": [pool("zeta", "/z"), pool("alpha", "/a")]})
-    )
-    second = expand_service_upstreams(
-        multisite(), FakeDB({"app1.example.com": [pool("zeta", "/z"), pool("alpha", "/a")]})
-    )
+    first = expand_service_upstreams(multisite(), FakeDB({"app1.example.com": [pool("zeta", "/z"), pool("alpha", "/a")]}))
+    second = expand_service_upstreams(multisite(), FakeDB({"app1.example.com": [pool("zeta", "/z"), pool("alpha", "/a")]}))
     assert first == second
     assert (first["UPSTREAM_NAME_0"], first["UPSTREAM_NAME_1"]) == ("alpha", "zeta")
 
@@ -143,9 +139,7 @@ def test_a_grpc_pool_drives_the_grpc_settings():
 def test_http_and_grpc_pools_use_separate_suffixes_but_one_path_namespace():
     # Both plugins emit a `location` into the same server, so NGINX would refuse two blocks
     # with the same URI outright — the paths must not collide even though the settings do not.
-    out = expand_service_upstreams(
-        multisite(), FakeDB({"app1.example.com": [pool("web_pool", "/"), pool("api_pool", "/rpc", protocol="grpc")]})
-    )
+    out = expand_service_upstreams(multisite(), FakeDB({"app1.example.com": [pool("web_pool", "/"), pool("api_pool", "/rpc", protocol="grpc")]}))
     assert out["app1.example.com_REVERSE_PROXY_HOST"] == "http://web_pool"
     assert out["app1.example.com_GRPC_HOST"] == "grpc://api_pool"
     assert out["app1.example.com_GRPC_URL"] == "/rpc"
@@ -184,9 +178,7 @@ def test_a_stream_pool_replaces_the_implicit_per_service_upstream():
 
 def test_a_service_cannot_have_two_stream_pools():
     with pytest.raises(UpstreamConflictError, match="two stream upstreams"):
-        expand_service_upstreams(
-            multisite(), FakeDB({"app1.example.com": [pool("tcp_pool", protocol="stream"), pool("other_pool", protocol="stream")]})
-        )
+        expand_service_upstreams(multisite(), FakeDB({"app1.example.com": [pool("tcp_pool", protocol="stream"), pool("other_pool", protocol="stream")]}))
 
 
 def test_a_stream_pool_coexists_with_http_pools_on_other_services():
