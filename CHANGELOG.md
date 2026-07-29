@@ -17,6 +17,19 @@
 - [DOCS] `all-in-one`: document what CrowdSec Central API registration transmits, and correct the parser opt-out variable to `CROWDSEC_DISABLE_PARSERS`.
 - [BUGFIX] `ui`: a form submitted after the session ended now reports that the change was not saved, instead of redirecting to the login page and redrawing the old values as if nothing had happened. (Refs #3751, #3752)
 - [UI] Reports page: document the retention model, a rolling buffer capped per worker that is cleared on restart unless Redis is enabled.
+- [SECURITY] `modsecurity`: update the OWASP Core Rule Set to v4.28.0 and v3.3.10, fixing GHSA-6jp8-c2w2-x7wr, where XML attribute values were not inspected by the attack-detection rules and could be used to bypass them, and GHSA-f5qm-3h4p-8qhg, catastrophic backtracking in the unix-shell-evasion prefix. v4.28.0 also removes excessive backtracking from rules 933160, 933161, 933180, 941140 and 942522.
+- [SECURITY] `modsecurity`: update Mbed TLS to v4.2.0, which fixes a use-after-free in `mbedtls_pkcs7_free()`, X.509 CA-bit forgery via an invalid `basicConstraints` extension, acceptance of weak hash algorithms in PKCS7 signature verification, and unenforced signature-algorithm restrictions on certificate chains. BunkerWeb builds Mbed TLS as ModSecurity's crypto backend only, so the TLS-handshake advisories in that release do not apply.
+- [MODSECURITY] CRS v4.28.0 enables `crs_validate_utf8_encoding` by default. Requests carrying non-UTF8 data that previously passed may now be flagged; raise the anomaly threshold or disable rule 920250 if this causes false positives.
+- [DEPS] Updated Coreruleset version to v4.28.0 (v4) and v3.3.10 (v3)
+- [DEPS] Updated Mbed TLS version to v4.2.0
+- [DEPS] Updated lua-nginx-module version to v0.10.29R2, lua-resty-core to v0.1.32R1 and stream-lua-nginx-module to v0.0.17R4 (these three share a compile-time version handshake and are bumped together)
+- [DEPS] Updated lua-resty-http version to v0.18.0
+- [DEPS] Updated lua-cjson version to v2.1.0.19
+- [DEPS] Updated LuaJIT version to v2.1-20260724
+- [DEPS] Updated postcss version to 8.5.24
+- [DEPS] Updated the web UI vendored libraries: DOMPurify to 3.4.12, ApexCharts to 6.6.1, i18next to 26.3.6 and i18next-http-backend to 4.0.1
+- [DEPS] Removed the unused nginx 1.28.0 source tree, which nothing built since the FreeBSD packaging was dropped, and the obsolete stream-lua-nginx-module patch, which upstream applied in v0.0.17R4
+- [UI] Removed vendored front-end assets that were never loaded: 28 unused ACE extensions, keybindings and themes, the ACE stylesheet directory, the 45 ApexCharts locale files, and the unminified topojson-client build.
 
 ## v1.6.14~rc1 - 2026/07/23
 
