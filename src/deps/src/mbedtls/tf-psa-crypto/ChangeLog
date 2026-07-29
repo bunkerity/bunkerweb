@@ -1,3 +1,44 @@
+= TF-PSA-Crypto 1.2.0 branch released 2026-07-07
+
+Security
+   * Fix a side channel in RSA PKCS#1 v1.5 decryption: error handling in the
+     library would reveal through timing the difference between success,
+     invalid padding, or output too large for buffer, giving rise to a
+     Bleichenbacher attack. Note that while the library now handles sensitive
+     errors in constant-time, RSA PKCS#1 v1.5 decryption remains inherently
+     dangerous, should be avoided when possible, and otherwise requires great
+     care in application code. Found by zhengg. CVE-2026-50587
+   * Added advice about compiler options in SECURITY.md.
+   * Reject ChaCha20 operations that would make the 32-bit block counter wrap
+     around, which could otherwise reuse keystream and compromise
+     confidentiality. Reported by jiliang. CVE-2026-50584
+   * Fix a side channel in ECC computations that allows a powerful local
+     attacker (typically, untrusted OS attacking a secure enclave) to fully
+     recover long-term secret keys. Found and reported by Alejandro Cabrera
+     Aldaya from Tampere University. CVE-2026-54435
+   * In configurations with MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED (non-default),
+     when doing ECDH key agreement with x25519, it was possible for the peer to
+     force the shared secret to all-zero by sending a low-order point. This is
+     only a problem for protocols that expect contributory behaviour, that is,
+     where neither party should be able to force the shared secret.
+     CVE-2026-54434
+   * Fix timing side channel in RSA key generation, prime generation and
+     primality testing, on platforms where division is not constant-time. At
+     this point this side channel is not known to be exploitable. Reported by
+     Bhargava Shastry, Ethereum Foundation.
+   * Fix a 1-byte buffer overread when parsing a malformed ECC public key
+     in the PK module. CVE-2026-50583
+
+Bugfix
+   * Fix a problem in library/alignment.h where the Zephyr Project use
+     a pre-defined macro '__packed' which collides with the IAR keyword
+     '__packed', causing the typedefs of unaligned types to remain aligned.
+     Fixes mbedtls issue #10334
+   * Doxygen documentation `apidoc` is now built into CMake's binary folder,
+     not in-tree. Fixes #381.
+   * Fixed a bug which prevented the inclusion of standard C library header
+     files from the user provided configuration file. Fixes #784.
+
 = TF-PSA-Crypto 1.1.0 branch released 2026-03-31
 
 Removals

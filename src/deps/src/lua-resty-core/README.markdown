@@ -451,7 +451,7 @@ Copyright and License
 
 This module is licensed under the BSD license.
 
-Copyright (C) 2013-2019, by Yichun "agentzh" Zhang, OpenResty Inc.
+Copyright (C) 2013-2025, by Yichun "agentzh" Zhang, OpenResty Inc.
 
 All rights reserved.
 

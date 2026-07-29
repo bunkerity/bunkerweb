@@ -14,6 +14,8 @@
 
 #include <wrap_mldsa_native.h>
 
+#include <test/drivers/test_driver.h>
+
 /* END_HEADER */
 
 /* BEGIN_DEPENDENCIES
@@ -187,5 +189,75 @@ void verify_pure_87(data_t *public_key, data_t *message, data_t *signature)
 
 exit:
     mbedtls_free(candidate);
+}
+/* END_CASE */
+
+/* BEGIN_CASE depends_on:PSA_CRYPTO_DRIVER_TEST */
+void shake_driver_calls(int expected)
+{
+    uint8_t seed[32];
+    memset(seed, 's', sizeof(seed));
+    uint8_t *secret_key = NULL;
+    const size_t secret_key_length = MLDSA_SECRETKEYBYTES(87);
+    uint8_t *public_key = NULL;
+    const size_t public_key_length = MLDSA_PUBLICKEYBYTES(87);
+    const uint8_t prefix[2] = { 0, 0 }; // pure ML-DSA with empty context
+    const size_t prefix_length = sizeof(prefix);
+    const uint8_t rnd[MLDSA_RNDBYTES] = { 0 };
+    uint8_t *signature = NULL;
+    const size_t signature_size = MLDSA_BYTES(87);
+    size_t signature_length = SIZE_MAX;
+    uint8_t message[14] MBEDTLS_ATTRIBUTE_UNTERMINATED_STRING = "This is a test";
+    const size_t message_length = sizeof(message);
+
+    PSA_INIT();
+
+    TEST_CALLOC(secret_key, secret_key_length);
+    TEST_CALLOC(public_key, public_key_length);
+    TEST_CALLOC(signature, signature_size);
+
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+
+    /* Calculate the expanded key pair from the seed */
+    mbedtls_test_driver_xof_hooks.hits = 0;
+    TEST_EQUAL(tf_psa_crypto_pqcp_mldsa87_keypair_internal(
+                   public_key, secret_key, seed), 0);
+    if (expected) {
+        TEST_ASSERT(mbedtls_test_driver_xof_hooks.hits != 0);
+    } else {
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+    }
+
+    /* Calculate a deterministic signature */
+    mbedtls_test_driver_xof_hooks.hits = 0;
+    TEST_EQUAL(tf_psa_crypto_pqcp_mldsa87_signature_internal(
+                   signature, &signature_length,
+                   message, message_length,
+                   prefix, prefix_length, rnd, secret_key, 0), 0);
+    TEST_EQUAL(signature_length, MLDSA_BYTES(87));
+    if (expected) {
+        TEST_ASSERT(mbedtls_test_driver_xof_hooks.hits != 0);
+    } else {
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+    }
+
+    /* Verify the signature */
+    mbedtls_test_driver_xof_hooks.hits = 0;
+    TEST_EQUAL(tf_psa_crypto_pqcp_mldsa87_verify(
+                   signature, signature_length,
+                   message, message_length,
+                   NULL, 0, public_key), 0);
+    if (expected) {
+        TEST_ASSERT(mbedtls_test_driver_xof_hooks.hits != 0);
+    } else {
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+    }
+
+exit:
+    PSA_DONE();
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+    mbedtls_free(secret_key);
+    mbedtls_free(public_key);
+    mbedtls_free(signature);
 }
 /* END_CASE */

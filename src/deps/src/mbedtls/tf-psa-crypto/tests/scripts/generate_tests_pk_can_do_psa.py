@@ -7,6 +7,9 @@ Generated test file is saved in 'tests/suites/test_suite_pk.pk_can_do_psa.data'
 for the time being.
 """
 
+## Copyright The Mbed TLS Contributors
+## SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
+
 import os
 import re
 

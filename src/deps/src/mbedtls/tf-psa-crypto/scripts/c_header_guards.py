@@ -20,6 +20,9 @@ where:
 - 'rel_path' is the path used in C files to include such header file.
 """
 
+## Copyright The Mbed TLS Contributors
+## SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
+
 import sys
 import os
 import re
