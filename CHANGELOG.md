@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.14~rc3 - 2026/07/??
+
+- [SECURITY] `ui`: a TOTP code can no longer be used more than once. The replay guard never persisted the last accepted time step, leaving a captured code valid for the rest of its 30 second window.
+
 ## v1.6.14~rc2 - 2026/07/??
 
 - [PERF] `ui`: make the Reports, Logs, and Home pages fast when many blocked-request reports are stored in Redis: fetch a single report by id from the newest end instead of scanning the whole list, share the Home page aggregation across workers through Redis instead of recomputing it in every worker, cache the Logs line count until the file changes or is rotated, and pause the Reports auto-refresh while the browser tab is in the background. Also honor the `k`/`m` suffix on `METRICS_MAX_BLOCKED_REQUESTS_REDIS` when bounding report reads.
