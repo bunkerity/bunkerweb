@@ -5,6 +5,35 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.28.0 - 2026-07-01
+
+## What's Changed
+
+### 🔒 Security
+* fix: inspect XML attribute values across attack-detection rules — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-6jp8-c2w2-x7wr
+* fix: remove catastrophic backtracking in unix-shell-evasion prefix — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-f5qm-3h4p-8qhg
+### 🆕 New features and detections 🎉
+* feat: enable crs_validate_utf8_encoding by default by @fzipi in https://github.com/coreruleset/coreruleset/pull/4647
+* feat: added detection for quote evasion by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3813
+* feat(934): detect ORM lookup operator injection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4659
+* fix(932): detect uninitialized variable spacer in RCE evasion prefix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4652
+### 🧰 Other Changes
+* refactor: create 941170 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4493
+* fix: Update restricted-files.data to include NPM subdirectories without causing FPs by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4653
+* fix: remove exponential backtracking in 933160/933161 comment suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4666
+* fix(941140): remove exponential backtracking in CSS url(javascript) detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4670
+* fix(933180): remove exponential backtracking in variable-function noise suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4669
+* fix(942390): move to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4011
+* feat(crs-setup): add default actions for phases 3-5 by @Prateeksaini12 in https://github.com/coreruleset/coreruleset/pull/4675
+* fix(942522): avoid excessive backtracking by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4676
+* fix: 4RI-250413 by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4672
+* fix: FPs related to RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4684
+
+## New Contributors
+* @Prateeksaini12 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4661
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.27.0...v4.28.0
+
 ## Version 4.27.0 - 2026-06-01
 
 ## What's Changed

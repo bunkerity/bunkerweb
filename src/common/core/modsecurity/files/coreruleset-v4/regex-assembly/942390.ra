@@ -3,15 +3,36 @@
 
 ##!+ i
 
-\bor\b\s?\d{1,10}\s?[=<>]+
-\bor\b\s?[\'\"][^=]{1,10}[\'\"]\s?[=<>]+
-'\s+or\s+.{1,20}[+\-!<>=]
-'\s+xor\s+.{1,20}[+\-!<>=]
-\bor\b\s+\d{1,10}
-\bor\b\s+'[^=]{1,10}'
-\bxor\b\s+\d{1,10}
-\bxor\b\s+'[^=]{1,10}'
-\bor\b\s+\d{1,10}\s*?[=<>]
-\bxor\b\s+\d{1,10}\s*?[=<>]
-\bor\b\s+'[^=]{1,10}'\s*?[=<>]
-\bxor\b\s+'[^=]{1,10}'\s*?[=<>]
+##! These expressions try to detect attacks that use the or and xor logic operators.
+##!
+##! Examples:
+##!
+##! or 1 <
+##! or 1 >
+##! or 1 =
+##! xor 2 <
+##! xor 2 >
+##! xor 2 =
+##! or 'a' <
+##! or 'a' >
+##! or 'a' =
+##! xor 'b' <
+##! xor 'b' >
+##! xor 'b' =
+##! '   or    chars_less_than_20+
+
+##!> define x_or \bx?or\b
+##!> define quotes ['"]
+##!> define spaces \s+
+##!> define optional_spaces \s*
+##!> define comparison_operators [><=]
+##!> define unary_operators [+\-!<>=]
+##!> define digits \d{1,10}
+##!> define not_equal [^=]{1,10}
+##!> define different_than_unary_operators [^+\-!<=>]{1,20}
+
+##! The pattern below that matches 'or/xor' followed by digits without requiring a comparison operator is very prone to false positives.
+{{x_or}}{{spaces}}{{digits}}
+{{x_or}}{{spaces}}{{digits}}{{optional_spaces}}{{comparison_operators}}
+{{x_or}}{{optional_spaces}}{{quotes}}{{not_equal}}{{quotes}}
+{{quotes}}{{spaces}}{{x_or}}{{spaces}}{{different_than_unary_operators}}{{unary_operators}}

@@ -5,7 +5,7 @@
 
 ##! Helpers
 
-##!> define nonword_number ^[\W\d]+\s*?
+##!> define nonword_number ^(?:json\.)?[\W\d]+\s*?
 
 ##!> define cmd_alter alter
 ##!> define cmd_create create

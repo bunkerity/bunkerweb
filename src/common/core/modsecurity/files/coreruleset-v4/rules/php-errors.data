@@ -1722,9 +1722,9 @@ Enum case type
 Enumerator value "
 Erroneous data format for unserializing '
 Error in packet at
-Error in packet at '
 Error while receiving public key. PID=
-Error while sending
+Error while sending QUERY packet. PID=
+Error while sending INIT_DB packet. PID=
 Error while sending public key request packet. PID=
 Error: OID not increasing:
 FFI Parser:
