@@ -22,6 +22,30 @@ OPERATION_BY_METHOD = {
     "DELETE": "write",
 }
 
+# biscuit-rust authorizes under a wall-clock budget defaulting to 1 ms, and reports blowing it as
+# the same AuthorizationError a policy denial raises. An honest token authorizes in ~0.01 ms, but a
+# CPU-starved host still overran 1 ms often enough to turn valid tokens into 401s. Raise the clock
+# only: max_facts and max_iterations are the dimensions a token's own content drives, so they keep
+# their defaults and keep denying fast.
+AUTHORIZE_MAX_TIME = timedelta(milliseconds=100)
+
+# Whole-message marker for a run-limit abort, used only to log the cause. With the clock at 100 ms
+# a residual abort means the token's own Datalog exploded the fact/iteration limits, which any
+# holder of any valid token can arrange offline by appending a block (biscuit attenuation needs no
+# private key). It is a hostile credential, not a busy host, so the status is the phase's normal
+# denial and this marker is not a security boundary. Match the whole message anyway: a denial
+# quotes back check text that token content can influence, so a substring test would misreport a
+# plain denial as a run-limit abort.
+RUN_LIMIT_ERROR = "Reached Datalog execution limits"
+
+
+def _raise_time_budget(az: AuthorizerBuilder) -> None:
+    # limits() hands back a copy, so set_limits() is what actually applies the change.
+    limits = az.limits()
+    limits.max_time = AUTHORIZE_MAX_TIME
+    az.set_limits(limits)
+
+
 # Default fine-grained permission verb mapping by method
 PERM_VERB_BY_METHOD = {
     "GET": "read",
@@ -436,6 +460,18 @@ class BiscuitGuard:
             self._logger.debug(f"Biscuit token parsing failed with unexpected error:\n{format_exc()}")
             raise HTTPException(status_code=401, detail="Unauthorized")
 
+        # Every token this product issues is a single authority block: both mints (routers/auth.py
+        # here, models/biscuit.py in the UI) add every fact to one builder and never append. Nothing
+        # in the product or its docs attenuates, so an extra block only ever comes from an attacker,
+        # and it is the entire attenuation DoS: the Datalog run limits are checked only *between*
+        # iterations, so one crafted join inside an appended block runs to completion however small
+        # max_time is. Rejecting on the block count costs the parse we already did instead of ~17 s
+        # of blocked event loop. Revisit only if attenuation ever becomes a supported feature, and
+        # bound block size rather than reallowing this.
+        if token.block_count() != 1:
+            self._logger.warning(f"Biscuit token carries {token.block_count()} blocks, expected 1 (attenuated token), rejecting")
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
         # Phase 1: freshness and IP binding
         try:
             az = AuthorizerBuilder()
@@ -459,11 +495,16 @@ class BiscuitGuard:
                 self._logger.debug(f"Biscuit phase1: skip client_ip check for private IP {client_ip}")
 
             az.add_policy(Policy("allow if true"))
+            _raise_time_budget(az)
             self._logger.debug("Biscuit phase1: authorizing freshness/IP checks")
             az.build(token).authorize()
             self._logger.debug("Biscuit phase1: authorization success")
-        except AuthorizationError:
+        except AuthorizationError as e:
             self._logger.debug(f"Biscuit phase1: authorization failed (AuthorizationError):\n{format_exc()}")
+            if str(e) == RUN_LIMIT_ERROR:
+                # Say so explicitly: this is a hostile token, not the ACL misconfiguration the
+                # generic "auth failed" line sends operators hunting.
+                self._logger.warning("Biscuit phase1: token exhausted the Datalog fact/iteration limits, rejecting")
             raise HTTPException(status_code=401, detail="Unauthorized")
         except Exception:
             self._logger.debug(f"Biscuit phase1: authorization failed (unexpected error):\n{format_exc()}")
@@ -501,11 +542,16 @@ class BiscuitGuard:
                 az.add_policy(Policy("allow if role($role, $perms), operation($op), $perms.contains($op)"))
                 self._logger.debug("Biscuit phase2: fallback to coarse role-based authorization")
 
+            _raise_time_budget(az)
             self._logger.debug("Biscuit phase2: authorizing route access")
             az.build(token).authorize()
             self._logger.debug("Biscuit phase2: authorization success")
-        except AuthorizationError:
+        except AuthorizationError as e:
             self._logger.debug(f"Biscuit phase2: authorization failed (AuthorizationError):\n{format_exc()}")
+            if str(e) == RUN_LIMIT_ERROR:
+                # Say so explicitly: this is a hostile token, not the ACL misconfiguration the
+                # generic "auth failed" line sends operators hunting.
+                self._logger.warning("Biscuit phase2: token exhausted the Datalog fact/iteration limits, rejecting")
             raise HTTPException(status_code=403, detail="Forbidden")
         except Exception:
             self._logger.debug(f"Biscuit phase2: authorization failed (unexpected error):\n{format_exc()}")
