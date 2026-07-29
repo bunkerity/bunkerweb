@@ -6,6 +6,7 @@
 - [SECURITY] `ui`: removed the year-long "remember me" token, which survived logout, password changes and *Wipe other sessions* and bypassed IP/User-Agent pinning and the absolute session cap. "Remember me" now marks the session cookie permanent, so it still survives a browser restart but is a normal revocable session; raise both `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS` to stay logged in longer. Existing tokens are rejected and deleted on the next request.
 - [SECURITY] `ui`: revoked sessions are recorded in the session store (Redis when enabled) instead of a file outside the persistent volume, where recreating the container forgot every revocation and revocations never reached other replicas.
 - [SECURITY] `ui`: *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
+- [SECURITY] `core`: client-supplied `X-SSL-*` request headers are stripped before reaching an upstream. With mTLS header forwarding off, or on any PHP-FPM service, a client could spoof `X-SSL-Client-Verify: SUCCESS`. See the mTLS documentation to re-publish them when another proxy terminates mTLS.
 
 ## v1.6.14~rc2 - 2026/07/??
 
