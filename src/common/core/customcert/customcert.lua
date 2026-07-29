@@ -56,7 +56,7 @@ local function get_certificate_dns_names(cert)
 	return names
 end
 
-local function get_wildcard_bases(cert_pem, key_pem, server_names)
+local function get_wildcard_bases(cert_pem, key_pem)
 	local cert, err = x509.new(cert_pem)
 	if not cert then
 		return nil, "can't parse certificate metadata : " .. err
@@ -99,9 +99,9 @@ local function get_wildcard_bases(cert_pem, key_pem, server_names)
 	end
 
 	local bases = {}
-	for server_name in server_names:gmatch("%S+") do
-		local base = normalize_hostname(server_name)
-		if dns_names["*." .. base] then
+	for dns_name in pairs(dns_names) do
+		local base = dns_name:match("^%*%.([^*]+)$")
+		if base then
 			bases[base] = true
 		end
 	end
@@ -246,7 +246,8 @@ function customcert:ssl_certificate()
 	if wildcard_bases then
 		local base = resolve_wildcard_base(normalized_server_name, wildcard_bases)
 		if base then
-			local wildcard_certificates, wildcard_err = self.internalstore:get("plugin_customcert_wildcard_certificates", true)
+			local wildcard_certificates, wildcard_err =
+				self.internalstore:get("plugin_customcert_wildcard_certificates", true)
 			if not wildcard_certificates then
 				if wildcard_err ~= "not found" then
 					return self:ret(false, "can't get custom wildcard certificates : " .. wildcard_err)
@@ -281,7 +282,7 @@ function customcert:load_data(data, server_name, wildcard_certificates)
 	end
 
 	if wildcard_certificates then
-		local wildcard_bases, wildcard_err = get_wildcard_bases(data[1], data[2], server_name)
+		local wildcard_bases, wildcard_err = get_wildcard_bases(data[1], data[2])
 		if not wildcard_bases then
 			self.logger:log(WARN, "custom certificate is not eligible for wildcard SNI fallback : " .. wildcard_err)
 		else

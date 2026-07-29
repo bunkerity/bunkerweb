@@ -32,6 +32,7 @@
 - [DEPS] Updated the web UI vendored libraries: DOMPurify to 3.4.12, ApexCharts to 6.6.1, i18next to 26.3.6 and i18next-http-backend to 4.0.1
 - [DEPS] Removed the unused nginx 1.28.0 source tree, which nothing built since the FreeBSD packaging was dropped, and the obsolete stream-lua-nginx-module patch, which upstream applied in v0.0.17R4
 - [UI] Removed vendored front-end assets that were never loaded: 28 unused ACE extensions, keybindings and themes, the ACE stylesheet directory, the 45 ApexCharts locale files, and the unminified topojson-client build.
+- [CONTRIBUTION] Thank you [xabru](https://github.com/xabru) for your contribution regarding wildcard SNI fallback for custom certificates. (#3745)
 
 ## v1.6.14~rc1 - 2026/07/23
 
