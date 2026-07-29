@@ -3,6 +3,9 @@
 ## v1.6.14~rc3 - 2026/07/??
 
 - [SECURITY] `ui`: a TOTP code can no longer be used more than once. The replay guard never persisted the last accepted time step, leaving a captured code valid for the rest of its 30 second window.
+- [SECURITY] `ui`: removed the year-long "remember me" token, which survived logout, password changes and *Wipe other sessions* and bypassed IP/User-Agent pinning and the absolute session cap. "Remember me" now marks the session cookie permanent, so it still survives a browser restart but is a normal revocable session; raise both `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS` to stay logged in longer. Existing tokens are rejected and deleted on the next request.
+- [SECURITY] `ui`: revoked sessions are recorded in the session store (Redis when enabled) instead of a file outside the persistent volume, where recreating the container forgot every revocation and revocations never reached other replicas.
+- [SECURITY] `ui`: *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
 
 ## v1.6.14~rc2 - 2026/07/??
 

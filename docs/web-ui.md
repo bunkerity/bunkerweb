@@ -11,7 +11,7 @@ The Web UI is the visual control plane for BunkerWeb. It drives services, global
     - Default listener: `0.0.0.0:7000` in containers, `127.0.0.1:7000` in packages (change with `UI_LISTEN_ADDR`/`UI_LISTEN_PORT`)
     - Reverse-proxy aware: honors `X-Forwarded-*` via `UI_FORWARDED_ALLOW_IPS`; set `PROXY_NUMBERS` when multiple proxies add headers
     - Auth: local admin account (password policy enforced), optional roles, TOTP 2FA backed by `TOTP_ENCRYPTION_KEYS`
-    - Sessions: signed with `FLASK_SECRET`, default lifetime 12h, pinned to IP and User-Agent; `ALWAYS_REMEMBER` controls persistent cookies
+    - Sessions: server-side, default idle lifetime 12h with a 7-day hard cap, pinned to IP and User-Agent; `ALWAYS_REMEMBER` keeps the session cookie across browser restarts without extending those limits
     - Logs: `/var/log/bunkerweb/ui.log` (+ access log when captured), UID/GID 101 inside the container
     - Health: optional `GET /healthcheck` when `ENABLE_HEALTHCHECK=yes`
     - Dependencies: shares the BunkerWeb database and talks to the API to reload, ban, or query instances
@@ -23,7 +23,7 @@ The Web UI is the visual control plane for BunkerWeb. It drives services, global
 - Provide `TOTP_ENCRYPTION_KEYS` and enable TOTP on admin accounts; keep recovery codes safe.
 - Use TLS (terminate at BunkerWeb or set `UI_SSL_ENABLED=yes` with cert/key paths); set `UI_FORWARDED_ALLOW_IPS` to trusted proxies.
 - Persist secrets: mount `/var/lib/bunkerweb` so `FLASK_SECRET`, Biscuit keys, and TOTP material survive restarts.
-- Keep `CHECK_PRIVATE_IP=yes` (default) to bind sessions to the client IP and `ALWAYS_REMEMBER=no` unless you explicitly want long-lived cookies.
+- Keep `CHECK_PRIVATE_IP=yes` (default) to bind sessions to the client IP. `ALWAYS_REMEMBER=yes` only makes the session cookie survive a browser restart; it never extends `SESSION_LIFETIME_HOURS` or `SESSION_ABSOLUTE_HOURS`.
 - Ensure `/var/log/bunkerweb` is writable by UID/GID 101 (or the mapped ID when running rootless) so the UI can read logs.
 
 ## Run it
@@ -187,7 +187,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
     ```
 
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
-- Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
+- Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or *Wipe other sessions*. To stay logged in longer, raise **both** `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS`: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
 !!! tip "Pre-hashed admin password"
@@ -242,7 +242,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 | `SESSION_LIFETIME_HOURS`                    | Idling session lifetime (sliding TTL, refreshed on every request)                                        | Number (hours)           | `12`                      |
 | `SESSION_ABSOLUTE_HOURS`                    | Absolute session cap regardless of activity (logout after this many hours since login)                   | Number (hours)           | `168`                     |
 | `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                                                     | Number (hours)           | `0`                       |
-| `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                                                      | `yes` or `no`            | `no`                      |
+| `ALWAYS_REMEMBER`                           | Always keep the session cookie across browser restarts (does not extend session lifetimes)               | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
 

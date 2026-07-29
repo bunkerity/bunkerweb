@@ -54,6 +54,7 @@ from app.utils import (
     human_readable_number,
     is_editable_method,
     is_plugin_active,
+    is_session_revoked,
     is_ui_api_method,
     stop,
     restart_workers,
@@ -611,12 +612,18 @@ with app.app_context():
     # Secure by default — auto-detection in before_request may downgrade if no proxy detected
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_SECURE"] = True
-    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-    app.config["REMEMBER_COOKIE_SECURE"] = True
 
-    app.config["REMEMBER_COOKIE_PATH"] = "/"
-    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
-    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+    # The Flask-Login remember cookie is disabled. It carried only the username, HMAC'd with a
+    # static secret, for 365 days, touched no server-side state, and so outlived logout, password
+    # change and session revocation. "Remember me" is now session.permanent (login.py), bounded by
+    # SESSION_LIFETIME_HOURS / SESSION_ABSOLUTE_HOURS and revocable like any other session.
+    # Pointing REMEMBER_COOKIE_NAME at a name no browser will ever send keeps has_cookie in
+    # flask_login's _load_user permanently False, so a legacy token already sitting in a browser is
+    # dead on the first request after upgrade rather than getting one free authenticated request.
+    # The name deliberately has no __Host- prefix: strong session protection can still emit a
+    # deletion header for it, which is inert unprefixed but would be rejected outright by the UA
+    # if prefixed.
+    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_disabled"
 
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
     default_max_content_length = 50 * 1024 * 1024  # 50 MB
@@ -1155,15 +1162,10 @@ def before_request():
                 if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
                     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
                     app.config["SESSION_COOKIE_SECURE"] = True
-                    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-                    app.config["REMEMBER_COOKIE_SECURE"] = True
                 else:
                     app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
                     app.config["SESSION_COOKIE_SECURE"] = False
                     app.config["SESSION_COOKIE_DOMAIN"] = None
-                    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
-                    app.config["REMEMBER_COOKIE_SECURE"] = False
-                    app.config["REMEMBER_COOKIE_DOMAIN"] = None
                 _cookie_config_detected = True
 
     if not request.path.startswith(STATIC_PATH_PREFIXES):
@@ -1235,7 +1237,7 @@ def before_request():
             elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
-            elif "session_id" in session and session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
+            elif "session_id" in session and is_session_revoked(session["session_id"]):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
                 passed = False
 
@@ -1419,6 +1421,18 @@ def set_security_headers(response):
                 response = resp
         except Exception:
             LOGGER.exception("Error in after_request hook")
+
+    # Evict a pre-upgrade Flask-Login remember token still sitting in a browser. It is already
+    # inert (REMEMBER_COOKIE_NAME points at a sentinel), so this is hygiene, not the fix itself.
+    # Done directly rather than through flask_login's _clear_cookie, which now targets the
+    # sentinel name and so cannot reach these two, and which omits secure= -- werkzeug's
+    # delete_cookie defaults it to False and a __Host- deletion without Secure is rejected by
+    # the UA. Skipped on static paths so no Set-Cookie lands on a cacheable response.
+    # ponytail: hard-coded name list; drop this block once no issued token can still be live.
+    if not request.path.startswith(STATIC_PATH_PREFIXES):
+        for legacy_cookie in ("__Host-bw_ui_remember_token", "bw_ui_remember_token"):
+            if legacy_cookie in request.cookies:
+                response.delete_cookie(legacy_cookie, path="/", secure=legacy_cookie.startswith("__Host-"))
 
     return response
 
