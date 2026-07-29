@@ -176,6 +176,15 @@ typedef struct {
 #define MBEDTLS_VERIFY_SIGN_HASH_INTERRUPTIBLE_OPERATION_INIT { 0 }
 #endif
 
+/* There are currently no built-in functions for multipart
+ * sign/verify-message. However, we have some boilerplate code that references
+ * such hypothetical functions in the driver dispatch code, to serve as
+ * a demonstration of what kind of code is expected there. Have a macro
+ * definition in the code to reassure check_names.py that the macro name
+ * is not a mistake. */
+#if 0
+#define MBEDTLS_PSA_BUILTIN_SIGNATURE_MULTIPART
+#endif
 
 /* EC-JPAKE operation definitions */
 

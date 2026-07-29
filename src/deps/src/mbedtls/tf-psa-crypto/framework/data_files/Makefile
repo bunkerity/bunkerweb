@@ -469,6 +469,22 @@ server5-selfsigned.crt: server5.key
         -out $@
 all_final += server5-selfsigned.crt
 
+server5-selfsigned.crt.der: server5-selfsigned.crt
+	$(OPENSSL) x509 -inform PEM -in $< -outform DER -out $@
+all_final += server5-selfsigned.crt.der
+
+server5-ca.der: server5.key
+	openssl req -x509 -key server5.key \
+        -sha256 -days 3650 -nodes \
+        -addext basicConstraints=critical,CA:TRUE \
+        -addext keyUsage=critical,digitalSignature \
+        -addext subjectKeyIdentifier=hash   \
+        -addext authorityKeyIdentifier=none \
+        -set_serial 0x53a2cb4b124ead837da894b2 \
+        -subj "/CN=selfsigned/OU=testing/O=PolarSSL/C=NL" \
+        -outform DER -out $@
+all_final += server5-ca.der
+
 # Create a certificate which is almost identical to "server3.crt", i.e.
 # it contains a public EC key and it is signed with RSA. The main difference
 # compared to "server3.crt" is that in this case we use a secp256r1 key ("server5.key")
@@ -2294,6 +2310,40 @@ parse_input/server4.crt server4.crt: server4.key
 		md=SHA256 version=3 output_file=$@
 all_final += server4.crt
 
+# Negative tests
+
+# Replace a well-formed basicConstraints extension containing CA:TRUE with
+# a malformed extension that is empty with trailing junk. The trailing
+# junk is a boolean with the value true, thus it would be interpreted as
+# CA:TRUE if it was properly inside the basicConstraints extension.
+parse_input/server5.basic-constraints-sequence-overflow.badsign.crt: server5-ca.der
+	perl -0777 -pe '$$n = s/\x04\x05\x30\x03\x01\x01\xff/\x04\x05\x30\x00\x01\x01\xff/g; die "More substitutions than expected" if $$n > 1; die "Substitution not found" if $$n < 1' <$< >$@.tmp
+	mv $@.tmp $@
+all_final += parse_input/server5.basic-constraints-sequence-overflow.badsign.crt
+
+parse_input/server5.basic-constraints-sequence-overflow.selfsigned.crt: parse_input/server5.basic-constraints-sequence-overflow.badsign.crt server5.key
+	$(OPENSSL) x509 -subj '/CN=Eve/' \
+		-key server5.key \
+		-days 3653 \
+		-inform DER -in $< -outform DER -out $@
+all_final += parse_input/server5.basic-constraints-sequence-overflow.selfsigned.crt
+
+# Replace a well-formed basicConstraints extension containing CA:TRUE with
+# a malformed extension that is empty with trailing junk. The trailing
+# junk is a boolean with the value true, thus it would be interpreted as
+# CA:TRUE if it was properly inside the basicConstraints extension.
+parse_input/server5.basic-constraints-integer-first.badsign.crt: server5-ca.der
+	perl -0777 -pe '$$n = s/\x04\x05\x30\x03\x01\x01\xff/\x04\x05\x30\x03\x02\x01\x01/g; die "More substitutions than expected" if $$n > 1; die "Substitution not found" if $$n < 1' <$< >$@.tmp
+	mv $@.tmp $@
+all_final += parse_input/server5.basic-constraints-integer-first.badsign.crt
+
+parse_input/server5.basic-constraints-integer-first.selfsigned.crt: parse_input/server5.basic-constraints-integer-first.badsign.crt server5.key
+	$(OPENSSL) x509 -subj '/CN=Eve/' \
+		-key server5.key \
+		-days 3653 \
+		-inform DER -in $< -outform DER -out $@
+all_final += parse_input/server5.basic-constraints-integer-first.selfsigned.crt
+
 # MD5 test certificate
 
 cert_md_test_key = $(cli_crt_key_file_rsa)
@@ -2388,7 +2438,7 @@ all_final += pkcs7-rsa-expired.crt
 
 # File with an otherwise valid signature signed with an expired cert
 pkcs7_data_rsa_expired.der: pkcs7-rsa-expired.key pkcs7-rsa-expired.crt pkcs7_data.bin
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha256 -inkey pkcs7-rsa-expired.key -signer pkcs7-rsa-expired.crt -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha256 -inkey pkcs7-rsa-expired.key -signer pkcs7-rsa-expired.crt -noattr -outform DER -out $@
 all_final += pkcs7_data_rsa_expired.der
 
 # Convert signing certs to DER for testing PEM-free builds
@@ -2411,42 +2461,50 @@ all_final += pkcs7_zerolendata_detached.der
 
 # pkcs7 signature file with CERT
 pkcs7_data_cert_signed_sha256.der: $(pkcs7_test_file) $(pkcs7_test_cert_1)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha256 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
 all_final += pkcs7_data_cert_signed_sha256.der
 
 # pkcs7 signature file with CERT and sha1
 pkcs7_data_cert_signed_sha1.der: $(pkcs7_test_file) $(pkcs7_test_cert_1)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha1 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha1 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
 all_final += pkcs7_data_cert_signed_sha1.der
+
+pkcs7_data_cert_signed_md5.der: $(pkcs7_test_file) $(pkcs7_test_cert_1)
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md md5 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+all_final += pkcs7_data_cert_signed_md5.der
+
+pkcs7_data_cert_signed_ripemd160.der: $(pkcs7_test_file) $(pkcs7_test_cert_1)
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md ripemd160 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+all_final += pkcs7_data_cert_signed_ripemd160.der
 
 # pkcs7 signature file with CERT and sha512
 pkcs7_data_cert_signed_sha512.der: $(pkcs7_test_file) $(pkcs7_test_cert_1)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha512 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha512 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
 all_final += pkcs7_data_cert_signed_sha512.der
 
 # pkcs7 signature file without CERT
 pkcs7_data_without_cert_signed.der: $(pkcs7_test_file) $(pkcs7_test_cert_1)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -nocerts -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha256 -signer pkcs7-rsa-sha256-1.pem -nocerts -noattr -outform DER -out $@
 all_final += pkcs7_data_without_cert_signed.der
 
 # pkcs7 signature file with signature
 pkcs7_data_with_signature.der: $(pkcs7_test_file) $(pkcs7_test_cert_1)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -nocerts -noattr -nodetach -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha256 -signer pkcs7-rsa-sha256-1.pem -nocerts -noattr -nodetach -outform DER -out $@
 all_final += pkcs7_data_with_signature.der
 
 # pkcs7 signature file with two signers
 pkcs7_data_multiple_signed.der: $(pkcs7_test_file) $(pkcs7_test_cert_1) $(pkcs7_test_cert_2)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -nocerts -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -nocerts -noattr -outform DER -out $@
 all_final += pkcs7_data_multiple_signed.der
 
 # pkcs7 signature file with three signers
 pkcs7_data_3_signed.der: $(pkcs7_test_file) $(pkcs7_test_cert_1) $(pkcs7_test_cert_2) $(pkcs7_test_cert_3)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -signer pkcs7-rsa-sha256-3.pem -nocerts -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -signer pkcs7-rsa-sha256-3.pem -nocerts -noattr -outform DER -out $@
 all_final += pkcs7_data_3_signed.der
 
 # pkcs7 signature file with multiple certificates
 pkcs7_data_multiple_certs_signed.der: $(pkcs7_test_file) $(pkcs7_test_cert_1) $(pkcs7_test_cert_2)
-	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -noattr -outform DER -out $@
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.bin -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -noattr -outform DER -out $@
 all_final += pkcs7_data_multiple_certs_signed.der
 
 # pkcs7 signature file with corrupted CERT

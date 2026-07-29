@@ -1878,7 +1878,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.14-rc1
+        image: bunkerity/bunkerweb:1.6.14-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1895,7 +1895,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2929,23 +2929,24 @@ STREAM 支持 :x:
         - **X-Frame-Options：** 通过控制 iframe 嵌入来阻止点击劫持尝试。
         - **Referrer Policy：** 通过 referrer 头限制敏感信息的泄露。
 
-    | 设置                                  | 默认值                                                                                              | 上下文    | 多个 | 描述                                                                              |
-    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | ---- | --------------------------------------------------------------------------------- |
-    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
-    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
-    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
-    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
+    | 设置                                  | 默认值                                                                                                | 上下文    | 多个 | 描述                                                                              |
+    | ------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------- | ---- | --------------------------------------------------------------------------------- |
+    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
+    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
+    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
+    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
 
     !!! tip "最佳实践"
         -   定期审查和更新您的安全标头，以与不断发展的安全标准保持一致。
         -   使用像 [Mozilla Observatory](https://observatory.mozilla.org/) 这样的工具来验证您的标头配置。
         -   在强制执行 CSP 之前，在 `Report-Only` 模式下进行测试，以避免破坏功能。
         -   在 `Report-Only` 模式下，上游发送的 `Content-Security-Policy` 或 `Content-Security-Policy-Report-Only` 标头默认会被保留（`KEEP_UPSTREAM_HEADERS`）；从该设置中移除相应的标头名称，BunkerWeb 自身的策略才会生效。
+        -   默认的 `PERMISSIONS_POLICY` 也会阻止客户端提示（`ch-*` 指令）；如果某个服务依赖 `Accept-CH`（例如基于客户端提示的响应式图片或通过 `Sec-CH-Prefers-Color-Scheme` 进行的深色模式检测），请覆盖 `PERMISSIONS_POLICY` 以重新允许所需的 `ch-*` 功能（例如 `ch-dpr=(self)`）。
 
 === "Cookie 设置"
 
@@ -3693,6 +3694,9 @@ STREAM 支持 :warning:
 !!! note "工作进程特定存储"
     每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。
 
+!!! warning "报告保留"
+    被拦截请求的报告是一个循环缓冲区，而非审计日志。达到上限后，最旧的报告会被丢弃以便存放新报告，因此 Web UI 中显示的总数会停滞不前：未启用 Redis 时，该上限为 `METRICS_MAX_BLOCKED_REQUESTS` 乘以每个实例的 NGINX 工作进程数；启用 Redis 时则为 `METRICS_MAX_BLOCKED_REQUESTS_REDIS`。报告保存在共享内存中，除非启用并持久化 Redis，否则每次重启 BunkerWeb（包括软件包升级）都会被清空。如需长期保留，请将 NGINX 日志发送到 syslog 服务器或 SIEM。
+
 ### 配置示例
 
 === "基本配置"
@@ -4112,8 +4116,8 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
 选择一个 CRS 版本以最符合您的安全需求：
 
-- **`3`**：稳定版 [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9)。
-- **`4`**：稳定版 [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**默认**)。
+- **`3`**：稳定版 [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10)。
+- **`4`**：稳定版 [v4.28.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.28.0) (**默认**)。
 
 !!! warning "每日构建版已弃用"
     `MODSECURITY_CRS_VERSION` 的 `nightly` 选项已弃用，因为 OWASP 核心规则集项目已停止每日构建发布。如果您的配置仍使用 `nightly`，将改为使用 CRS v4。请将您的配置更新为 `MODSECURITY_CRS_VERSION=4`。

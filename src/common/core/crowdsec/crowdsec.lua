@@ -9,6 +9,7 @@ local ngx = ngx
 local ERR = ngx.ERR
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
+local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
 local cs_init = cs.init
 local cs_allow = cs.Allow
@@ -18,9 +19,26 @@ function crowdsec:initialize(ctx)
 	plugin.initialize(self, "crowdsec", ctx)
 end
 
+function crowdsec:is_needed()
+	-- Loading case
+	if self.is_loading then
+		return false
+	end
+	-- Request phases (no default)
+	if self.is_request and (self.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_CROWDSEC"] == "yes"
+	end
+	-- Other cases : at least one service uses it
+	local is_needed, err = has_variable("USE_CROWDSEC", "yes")
+	if is_needed == nil then
+		self.logger:log(ERR, "can't check USE_CROWDSEC variable : " .. err)
+	end
+	return is_needed
+end
+
 function crowdsec:init()
 	-- Check if init is needed
-	if self.variables["USE_CROWDSEC"] ~= "yes" or self.is_loading then
+	if not self:is_needed() then
 		return self:ret(true, "init not needed")
 	end
 	-- Init CS
@@ -34,7 +52,7 @@ end
 
 function crowdsec:access()
 	-- Check if CS is activated
-	if self.variables["USE_CROWDSEC"] ~= "yes" then
+	if not self:is_needed() then
 		return self:ret(true, "CrowdSec plugin not enabled")
 	end
 	-- Do the check
@@ -52,7 +70,7 @@ end
 function crowdsec:api()
 	if self.ctx.bw.uri == "/crowdsec/ping" and self.ctx.bw.request_method == "POST" then
 		-- Check crowdsec connection
-		if self.variables["USE_CROWDSEC"] ~= "yes" then
+		if not self:is_needed() then
 			return self:ret(true, "CrowdSec plugin is not enabled", HTTP_OK)
 		end
 

@@ -373,7 +373,16 @@ def flash(message: str, category: str = "success", i18n_key: Optional[str] = Non
 
 
 def human_readable_number(value: Union[str, int]) -> str:
-    value = int(value)
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        try:
+            value = int(float(value))
+        except (TypeError, ValueError, OverflowError):
+            # A counter can reach the template non-numeric (metric lost to a worker
+            # restart or an LRU eviction, stale value left in Redis). One unreadable
+            # card must not take the whole plugin page down with a 500.
+            return "N/A"
     if value >= 1_000_000:
         return f"{value/1_000_000:.1f}M"  # noqa: E226
     elif value >= 1_000:

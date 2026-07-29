@@ -2,9 +2,10 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
 from heapq import heappush, heapreplace
-from json import loads
+from json import dumps as json_dumps, loads
 from operator import itemgetter
 from os import getenv
+from re import fullmatch
 from threading import Lock
 from time import monotonic
 from traceback import format_exc
@@ -20,7 +21,10 @@ from app.utils import LOGGER, RESERVED_SERVICE_NAMES
 # Short-lived process-local cache for home page aggregates. /home recomputes a
 # full 7-day Redis aggregation on every load; caching it for a few seconds makes
 # repeated/concurrent loads near-instant. Per-process (each gunicorn worker has
-# its own); data can be up to _HOME_AGG_CACHE_TTL seconds stale.
+# its own), backed by a shared Redis snapshot (see _get/_set_shared_home_aggregates)
+# so workers reuse one computation. Worst-case staleness is ~2x _HOME_AGG_CACHE_TTL:
+# a worker can adopt another's snapshot near its TTL edge and hold it locally for a
+# further TTL. Fine for a coarse 7-day dashboard.
 _HOME_AGG_CACHE: dict[tuple, tuple[float, dict]] = {}
 _HOME_AGG_CACHE_TTL = 30.0
 # Serializes cache misses so concurrent /home loads compute the aggregation once
@@ -48,6 +52,28 @@ def _copy_home_aggregates(agg: dict) -> dict:
 # Sentinel distinguishing "no redis_client argument passed" (fetch one) from an
 # explicit ``None`` (Redis disabled/unreachable — use the fallback, don't refetch).
 _REDIS_UNSET = object()
+
+
+def _parse_count(value: Any, default: int = 0) -> int:
+    """Parse a plain integer or ``k``/``m`` shorthand (``10k``, ``1m``).
+
+    Mirrors the Lua metrics ``parse_count`` (regex ``^%d+[kKmM]?$``) so the UI scan
+    cap honours the same ``METRICS_MAX_BLOCKED_REQUESTS_REDIS`` value the Redis list
+    is trimmed to, instead of ``int("10k")`` throwing and silently falling back.
+    Only digits plus an optional ``k``/``m`` suffix are accepted; anything else
+    (``1.5k``, negatives, exponents) returns ``default``, matching the Lua parser
+    and the config-schema regex rather than diverging from them.
+    """
+    if isinstance(value, (int, float)):
+        return int(value)
+    try:
+        s = str(value).strip().lower()
+    except Exception:
+        return default
+    match = fullmatch(r"(\d+)([km]?)", s)
+    if not match:
+        return default
+    return int(match.group(1)) * {"": 1, "k": 1000, "m": 1000000}[match.group(2)]
 
 
 class Instance:
@@ -246,7 +272,7 @@ class InstancesUtils:
         default_max = 100000
         try:
             config = self.__db.get_config(global_only=True, methods=False)
-            value = int(config.get("METRICS_MAX_BLOCKED_REQUESTS_REDIS", default_max))
+            value = _parse_count(config.get("METRICS_MAX_BLOCKED_REQUESTS_REDIS", default_max), default_max)
             return max(0, value)
         except Exception:
             return default_max
@@ -574,17 +600,12 @@ class InstancesUtils:
                 if max_redis_requests == 0:
                     return {}
                 scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
-                matched_report = None
-                matched_date = float("-inf")
-                for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx):
-                    if str(report.get("id", "")) != report_id:
-                        continue
-                    report_date = float(report.get("date", 0) or 0)
-                    if report_date >= matched_date:
-                        matched_date = report_date
-                        matched_report = report
-                if matched_report is not None:
-                    return matched_report.get("data", {})
+                # Iterate newest-first and stop at the first match: the tail-most
+                # occurrence of an id is its most recent one, so this avoids the
+                # full O(N) scan the forward loop needed to pick the max-date match.
+                for report in self._iter_redis_requests_reverse(redis_client, chunk_size=2000, start_index=scan_start_idx):
+                    if str(report.get("id", "")) == report_id:
+                        return report.get("data", {})
             except Exception as e:
                 LOGGER.warning(f"Failed to fetch report data from Redis: {e}")
 
@@ -969,6 +990,41 @@ class InstancesUtils:
                 break
             start = s
 
+    def _iter_redis_requests_reverse(self, redis_client, chunk_size: int = 2000, start_index: int = 0):
+        """Lazily yield decoded reports newest-first (tail -> head).
+
+        RPUSH appends the newest report at the tail, and the list is written in
+        chronological order, so the first match a caller finds here is the most
+        recent occurrence of an id. Lets single-id lookups break early instead of
+        scanning the whole capped window (which is what the forward iterator
+        forces when it must pick the max-date match).
+        """
+        try:
+            total = int(redis_client.llen("requests") or 0)
+        except Exception:
+            # Redis flaky: yield nothing so single-id callers fall through to the
+            # instance-API fallback (unlike the forward iterator's chunk-based
+            # termination — reverse callers early-break, so there is nothing to salvage).
+            return
+        low = max(0, start_index)
+        hi = total - 1
+        while hi >= low:
+            lo = max(low, hi - chunk_size + 1)
+            try:
+                chunk = redis_client.lrange("requests", lo, hi)
+            except Exception:
+                return
+            if not chunk:
+                return
+            for report_raw in reversed(chunk):
+                try:
+                    report = loads(report_raw)
+                except Exception:
+                    continue
+                if isinstance(report, dict):
+                    yield report
+            hi = lo - 1
+
     def _iter_instance_api_requests(self):
         """Fetch requests from BunkerWeb instance API (fallback when Redis is unavailable).
 
@@ -1060,10 +1116,57 @@ class InstancesUtils:
             if hit is not None:
                 return _copy_home_aggregates(hit)
 
+            # Cross-worker shared cache: another gunicorn worker may have computed
+            # this within the TTL. Read it from Redis before paying the full O(N)
+            # scan, so N workers don't each rescan the whole requests list.
+            shared = self._get_shared_home_aggregates(redis_client, cache_key)
+            if shared is not None:
+                _HOME_AGG_CACHE[cache_key] = (monotonic(), shared)
+                return _copy_home_aggregates(shared)
+
             result = self._compute_home_aggregates(hours, top_ips_limit, redis_client)
             _HOME_AGG_CACHE[cache_key] = (monotonic(), result)
+            # ponytail: no distributed lock — on a cold miss up to N workers may
+            # each compute once before the first write lands (same as the old
+            # per-worker behaviour); afterwards all workers read the shared key.
+            self._set_shared_home_aggregates(redis_client, cache_key, result)
             # Hand the caller a copy; the cached object stays private.
             return _copy_home_aggregates(result)
+
+    @staticmethod
+    def _home_agg_redis_key(cache_key: tuple) -> str:
+        hours, top_ips_limit = cache_key
+        return f"metrics:home_agg:{hours}:{top_ips_limit}"
+
+    def _get_shared_home_aggregates(self, redis_client, cache_key: tuple) -> Optional[dict]:
+        """Read a home-aggregates snapshot another worker stored in Redis.
+
+        Returns None on miss/error. ``request_statuses`` keys are ints in-process
+        but JSON stringifies them, so they are converted back.
+        """
+        if not redis_client:
+            return None
+        try:
+            raw = redis_client.get(self._home_agg_redis_key(cache_key))
+        except Exception:
+            return None
+        if not raw:
+            return None
+        try:
+            data = loads(raw)
+            statuses = data.get("request_statuses") or {}
+            data["request_statuses"] = {int(k): v for k, v in statuses.items()}
+            return data
+        except Exception:
+            return None
+
+    def _set_shared_home_aggregates(self, redis_client, cache_key: tuple, result: dict) -> None:
+        """Publish a home-aggregates snapshot to Redis with the same TTL as the
+        per-worker cache (volatile so it stays evictable under volatile-lru)."""
+        if not redis_client:
+            return
+        with suppress(Exception):
+            redis_client.set(self._home_agg_redis_key(cache_key), json_dumps(result), px=int(_HOME_AGG_CACHE_TTL * 1000))
 
     def _compute_home_aggregates(self, hours: int, top_ips_limit: int, redis_client: Any) -> dict[str, Any]:
         """Compute home aggregates from Redis (or the instance-API fallback).
@@ -1433,11 +1536,15 @@ class InstancesUtils:
 
                         # Aggregate values for the same metric name across workers
                         if metric_name in redis_metrics:
-                            if isinstance(redis_metrics[metric_name], (int, float)) and isinstance(decoded_value, (int, float)):
+                            current = redis_metrics[metric_name]
+                            if isinstance(current, (int, float)) and isinstance(decoded_value, (int, float)):
                                 redis_metrics[metric_name] += decoded_value
-                            elif isinstance(redis_metrics[metric_name], list) and isinstance(decoded_value, list):
-                                redis_metrics[metric_name].extend(decoded_value)
-                            # For other types, just use the latest value
+                            elif isinstance(current, list) and isinstance(decoded_value, list):
+                                current.extend(decoded_value)
+                            elif isinstance(decoded_value, (int, float)) and not isinstance(current, (int, float)):
+                                # A garbage per-worker key (SCAN order is arbitrary, so it can
+                                # land first) must not shadow the workers that hold real counts.
+                                redis_metrics[metric_name] = decoded_value
                         else:
                             redis_metrics[metric_name] = decoded_value
 

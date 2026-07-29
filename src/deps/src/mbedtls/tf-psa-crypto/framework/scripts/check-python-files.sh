@@ -55,6 +55,10 @@ elif [ "$1" = "--can-mypy" ]; then
 fi
 
 echo 'Running pylint ...'
+# Exclude `maintainer` subdirectories, because they can contain code
+# that does not work with the versions of pylint and mypy we use on the CI.
+# https://github.com/Mbed-TLS/mbedtls-framework/issues/293
+#
 # When we move Python code between repositories, there is a transition
 # period during which code is duplicated between the old repository and
 # the new repository.
@@ -64,7 +68,9 @@ echo 'Running pylint ...'
 # runs of pylint: one for the A files, and one for the others.
 # Remove exceptions below once the A file (or the moved code in the A file)
 # has been removed from all consuming branches.
-find framework/scripts scripts tests/scripts -name '*.py' \( \
+find framework/scripts scripts tests/scripts \
+     -name maintainer -prune -o \
+     -name '*.py' \( \
      ! -path scripts/abi_check.py \
      ! -path scripts/code_size_compare.py \
      ! -path scripts/ecp_comb_table.py \
@@ -87,7 +93,10 @@ $PYTHON -m mypy framework/scripts || {
     ret=1
 }
 
-$PYTHON -m mypy scripts tests/scripts || {
+# Exclude `maintainer` subdirectories, because they can contain code
+# that does not work with the versions of pylint and mypy we use on the CI.
+# https://github.com/Mbed-TLS/mbedtls-framework/issues/293
+$PYTHON -m mypy --exclude maintainer scripts tests/scripts || {
     echo >&2 "mypy reported errors in the parent repository"
     ret=1
 }

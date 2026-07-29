@@ -17,6 +17,10 @@
 
 #include "psa_crypto_core.h"
 
+/* For constant-time testing of PKCS#1 v1.5 decryption errors */
+#include "rsa_invasive.h"
+
+#include "test/constant_flow.h"
 #include "test/asn1_helpers.h"
 #include "test/psa_crypto_helpers.h"
 #include "test/psa_exercise_key.h"
@@ -26,6 +30,11 @@
 #else
 #define TEST_DRIVER_LOCATION 0x7fffff
 #endif
+
+/* While ML-DSA is only supported in the lower layers but not in the API,
+ * we test that it isn't supported. We do need to know the encoding of
+ * key types and algorithms, which is not yet defined in public headers. */
+#include "psa_crypto_mldsa.h"
 
 #if defined(MBEDTLS_THREADING_PTHREAD)
 #include "mbedtls/threading.h"
@@ -1497,6 +1506,16 @@ exit:
 }
 #endif /* MBEDTLS_THREADING_PTHREAD */
 
+#if defined(MBEDTLS_TEST_HOOKS) && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT)
+static void test_cf_secret(const void *ptr, size_t size)
+{
+    /* In case TEST_CF_SECRET() expands to nothing */
+    (void) ptr;
+    (void) size;
+
+    TEST_CF_SECRET(ptr, size);
+}
+#endif /* MBEDTLS_TEST_HOOKS && MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT */
 /* END_HEADER */
 
 /* BEGIN_DEPENDENCIES
@@ -2451,7 +2470,7 @@ void aead_key_policy(int policy_usage_arg,
     }
 
 exit:
-    PSA_ASSERT(psa_aead_abort(&operation));
+    psa_aead_abort(&operation);
     psa_destroy_key(key);
     PSA_DONE();
 }
@@ -3070,7 +3089,7 @@ void hash_compute_fail(int alg_arg, data_t *input,
     }
 
 exit:
-    PSA_ASSERT(psa_hash_abort(&operation));
+    psa_hash_abort(&operation);
     mbedtls_free(output);
     PSA_DONE();
 }
@@ -3109,7 +3128,7 @@ void hash_compare_fail(int alg_arg, data_t *input,
     }
 
 exit:
-    PSA_ASSERT(psa_hash_abort(&operation));
+    psa_hash_abort(&operation);
     PSA_DONE();
 }
 /* END_CASE */
@@ -3213,7 +3232,7 @@ void hash_compute_compare(int alg_arg, data_t *input,
     }
 
 exit:
-    PSA_ASSERT(psa_hash_abort(&operation));
+    psa_hash_abort(&operation);
     PSA_DONE();
 }
 /* END_CASE */
@@ -4385,7 +4404,7 @@ void cipher_alg_without_iv(int alg_arg, int key_type_arg, data_t *key_data,
                         output, output_length);
 
 exit:
-    PSA_ASSERT(psa_cipher_abort(&operation));
+    psa_cipher_abort(&operation);
     mbedtls_free(output);
     psa_cipher_abort(&operation);
     psa_destroy_key(key);
@@ -6403,13 +6422,20 @@ void aead_multipart_state_test(int key_type_arg, data_t *key_data,
 
     psa_aead_abort(&operation);
 
-    /* Test for setting nonce after calling set lengths with plaintext length of SIZE_MAX */
+    /* Test for setting nonce after calling set lengths with plaintext length above the
+     * algorithm limit. */
 #if SIZE_MAX > UINT32_MAX
     PSA_ASSERT(psa_aead_encrypt_setup(&operation, key, alg));
 
     if (operation.alg == PSA_ALG_GCM) {
         TEST_EQUAL(psa_aead_set_lengths(&operation, additional_data->len,
-                                        SIZE_MAX),
+                                        (size_t) 0xfffffffe * 16 + 1),
+                   PSA_ERROR_INVALID_ARGUMENT);
+        TEST_EQUAL(psa_aead_set_nonce(&operation, nonce->x, nonce->len),
+                   PSA_ERROR_BAD_STATE);
+    } else if (operation.alg == PSA_ALG_CHACHA20_POLY1305) {
+        TEST_EQUAL(psa_aead_set_lengths(&operation, additional_data->len,
+                                        (size_t) UINT32_MAX * 64 + 1),
                    PSA_ERROR_INVALID_ARGUMENT);
         TEST_EQUAL(psa_aead_set_nonce(&operation, nonce->x, nonce->len),
                    PSA_ERROR_BAD_STATE);
@@ -6422,7 +6448,8 @@ void aead_multipart_state_test(int key_type_arg, data_t *key_data,
     psa_aead_abort(&operation);
 #endif
 
-    /* Test for calling set lengths with a plaintext length of SIZE_MAX, after setting nonce */
+    /* Test for calling set lengths with a plaintext length above the algorithm limit,
+     * after setting nonce. */
 #if SIZE_MAX > UINT32_MAX
     PSA_ASSERT(psa_aead_encrypt_setup(&operation, key, alg));
 
@@ -6430,7 +6457,11 @@ void aead_multipart_state_test(int key_type_arg, data_t *key_data,
 
     if (operation.alg == PSA_ALG_GCM) {
         TEST_EQUAL(psa_aead_set_lengths(&operation, additional_data->len,
-                                        SIZE_MAX),
+                                        (size_t) 0xfffffffe * 16 + 1),
+                   PSA_ERROR_INVALID_ARGUMENT);
+    } else if (operation.alg == PSA_ALG_CHACHA20_POLY1305) {
+        TEST_EQUAL(psa_aead_set_lengths(&operation, additional_data->len,
+                                        (size_t) UINT32_MAX * 64 + 1),
                    PSA_ERROR_INVALID_ARGUMENT);
     } else if (operation.alg != PSA_ALG_CCM) {
         PSA_ASSERT(psa_aead_set_lengths(&operation, additional_data->len,
@@ -8784,6 +8815,14 @@ void asymmetric_encrypt_decrypt(int key_type_arg,
     TEST_LE_U(output_size, PSA_ASYMMETRIC_ENCRYPT_OUTPUT_MAX_SIZE);
     TEST_CALLOC(output, output_size);
 
+    /* We want the function to work with an output buffer that's just the size
+     * of the actual plaintext. The PSA spec requires portable callers to pass
+     * a buffer that's the maximum possible plaintext size, given by
+     * PSA_ASYMMETRIC_DECRYPT_OUTPUT_SIZE(). When the buffer is smaller than
+     * that but large enough for the actual plaintext, implementations may either
+     * return PSA_ERROR_BUFFER_TOO_SMALL or success. Historically we've done the
+     * latter. Even though we never promised it, people might depend on this
+     * (our TLS code did), so let's test this behaviour. */
     output2_size = input_data->len;
     TEST_LE_U(output2_size,
               PSA_ASYMMETRIC_DECRYPT_OUTPUT_SIZE(key_type, key_bits, alg));
@@ -8809,6 +8848,16 @@ void asymmetric_encrypt_decrypt(int key_type_arg,
                                       &output2_length));
     TEST_MEMORY_COMPARE(input_data->x, input_data->len,
                         output2, output2_length);
+
+    /* Try again with an output buffer that's one byte too small */
+    if (output2_size != 0) {
+        TEST_EQUAL(PSA_ERROR_BUFFER_TOO_SMALL,
+                   psa_asymmetric_decrypt(key, alg,
+                                          output, output_length,
+                                          label->x, label->len,
+                                          output2, output2_size - 1,
+                                          &output2_length));
+    }
 
 exit:
     /*
@@ -8853,10 +8902,23 @@ void asymmetric_decrypt(int key_type_arg,
     PSA_ASSERT(psa_get_key_attributes(key, &attributes));
     key_bits = psa_get_key_bits(&attributes);
 
-    /* Determine the maximum ciphertext length */
-    output_size = PSA_ASYMMETRIC_DECRYPT_OUTPUT_SIZE(key_type, key_bits, alg);
+    /* We want the function to work with an output buffer that's just the size
+     * of the actual plaintext. The PSA spec requires portable callers to pass
+     * a buffer that's the maximum possible plaintext size, given by
+     * PSA_ASYMMETRIC_DECRYPT_OUTPUT_SIZE(). When the buffer is smaller than
+     * that but large enough for the actual plaintext, implementations may either
+     * return PSA_ERROR_BUFFER_TOO_SMALL or success. Historically we've done the
+     * latter. Even though we never promised it, people might depend on this
+     * (our TLS code did), so let's test this behaviour. */
+    output_size = expected_data->len;
+    TEST_LE_U(output_size,
+              PSA_ASYMMETRIC_DECRYPT_OUTPUT_SIZE(key_type, key_bits, alg));
     TEST_LE_U(output_size, PSA_ASYMMETRIC_DECRYPT_OUTPUT_MAX_SIZE);
     TEST_CALLOC(output, output_size);
+
+#if defined(MBEDTLS_TEST_HOOKS) && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT)
+    mbedtls_rsa_cf_secret = test_cf_secret;
+#endif /* MBEDTLS_TEST_HOOKS && MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT */
 
     PSA_ASSERT(psa_asymmetric_decrypt(key, alg,
                                       input_data->x, input_data->len,
@@ -8864,6 +8926,7 @@ void asymmetric_decrypt(int key_type_arg,
                                       output,
                                       output_size,
                                       &output_length));
+    TEST_CF_PUBLIC(output, output_size);
     TEST_MEMORY_COMPARE(expected_data->x, expected_data->len,
                         output, output_length);
 
@@ -8880,11 +8943,26 @@ void asymmetric_decrypt(int key_type_arg,
                                           output,
                                           output_size,
                                           &output_length));
+        TEST_CF_PUBLIC(output, output_size);
         TEST_MEMORY_COMPARE(expected_data->x, expected_data->len,
                             output, output_length);
     }
 
+    /* Try again with an output buffer that's one byte too small */
+    if (output_size != 0) {
+        TEST_EQUAL(PSA_ERROR_BUFFER_TOO_SMALL,
+                   psa_asymmetric_decrypt(key, alg,
+                                          input_data->x, input_data->len,
+                                          label->x, label->len,
+                                          output,
+                                          output_size - 1,
+                                          &output_length));
+    }
+
 exit:
+#if defined(MBEDTLS_TEST_HOOKS) && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT)
+    mbedtls_rsa_cf_secret = NULL;
+#endif /* MBEDTLS_TEST_HOOKS && MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT */
     psa_reset_key_attributes(&attributes);
     psa_destroy_key(key);
     mbedtls_free(output);
@@ -8922,6 +9000,10 @@ void asymmetric_decrypt_fail(int key_type_arg,
     PSA_ASSERT(psa_import_key(&attributes, key_data->x, key_data->len,
                               &key));
 
+#if defined(MBEDTLS_TEST_HOOKS) && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT)
+    mbedtls_rsa_cf_secret = test_cf_secret;
+#endif /* MBEDTLS_TEST_HOOKS && MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT */
+
     actual_status = psa_asymmetric_decrypt(key, alg,
                                            input_data->x, input_data->len,
                                            label->x, label->len,
@@ -8947,6 +9029,9 @@ void asymmetric_decrypt_fail(int key_type_arg,
     }
 
 exit:
+#if defined(MBEDTLS_TEST_HOOKS) && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT)
+    mbedtls_rsa_cf_secret = NULL;
+#endif /* MBEDTLS_TEST_HOOKS && MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT */
     psa_reset_key_attributes(&attributes);
     psa_destroy_key(key);
     mbedtls_free(output);
@@ -11420,8 +11505,8 @@ void ecjpake_setup(int alg_arg, int key_type_pw_arg, int key_usage_pw_arg,
     }
 
 exit:
-    PSA_ASSERT(psa_destroy_key(key));
-    PSA_ASSERT(psa_pake_abort(&operation));
+    psa_destroy_key(key);
+    psa_pake_abort(&operation);
     mbedtls_free(output_buffer);
     PSA_DONE();
 }

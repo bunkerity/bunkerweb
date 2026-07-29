@@ -15,9 +15,9 @@
 ##! original="$(grep -vE '^[#$]' regex-assembly/exclude/unix-shell-fps-pl1.ra)"
 ##! upto3="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-upto3.ra)"
 ##! rest="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-4andup.ra)"
-##! english_upto3="$(util/fp-finder/spell.sh -m -e regex-assembly/include/unix-shell-upto3.ra)"
-##! # strip suffixes from words so that spell.sh works
-##! english_rest="$(util/fp-finder/spell.sh -m -e -s '[@~]' regex-assembly/include/unix-shell-4andup.ra)"
+##! english_upto3="$(crs-toolchain util fp-finder -m -e regex-assembly/include/unix-shell-upto3.ra)"
+##! strip suffixes from words for fp-finder
+##! english_rest="$(crs-toolchain util fp-finder -m -e -s '[@~]' regex-assembly/include/unix-shell-4andup.ra)"
 ##! result=""
 ##! function update_existing {
 ##!   if [ -z "${1}" ]; then

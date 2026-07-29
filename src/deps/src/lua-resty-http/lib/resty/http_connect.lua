@@ -38,6 +38,7 @@ client:connect {
     host = "myhost.com",    -- target machine, or a unix domain socket
     port = nil,             -- port on target machine, will default to 80/443 based on scheme
     pool = nil,             -- connection pool name, leave blank! this function knows best!
+    pool_debug = nil,       -- set to 'true' to log the connection pool name at DEBUG level
     pool_size = nil,        -- options as per: https://github.com/openresty/lua-nginx-module#tcpsockconnect
     backlog = nil,
 
@@ -250,7 +251,9 @@ local function connect(self, options)
         -- with a plain http request the authorization is part of the actual request.
     end
 
-    ngx_log(ngx_DEBUG, "poolname: ", poolname)
+    if options.pool_debug == true then
+        ngx_log(ngx_DEBUG, "poolname: ", poolname)
+    end
 
     -- do TCP level connection
     local tcp_opts = { pool = poolname, pool_size = pool_size, backlog = backlog }

@@ -1042,6 +1042,7 @@
     }
   },
   "reports": {
+    "retention_notice": "보고서는 메모리에 저장되는 순환 버퍼입니다. 설정된 한도에 도달하면 가장 오래된 항목부터 삭제됩니다. Redis를 사용하지 않는 경우 BunkerWeb을 다시 시작할 때도 모두 삭제됩니다.",
     "security_incident": "보안 사고",
     "security_report_data": "보안 보고서 데이터"
   },

@@ -1604,7 +1604,8 @@ static void asm_bitshift(ASMState *as, IRIns *ir, A64Ins ai, A64Shift sh)
   int32_t shmask = irt_is64(ir->t) ? 63 : 31;
   if (irref_isk(ir->op2)) {  /* Constant shifts. */
     Reg left, dest = ra_dest(as, ir, RSET_GPR);
-    int32_t shift = (IR(ir->op2)->i & shmask);
+    IRIns *irr = IR(ir->op2);
+    int32_t shift = ((irr->o == IR_KINT ? irr->i : (int32_t)ir_kint64(irr)->u64) & shmask);
     IRIns *irl = IR(ir->op1);
     if (shmask == 63) ai += A64I_UBFMx - A64I_UBFMw;
 

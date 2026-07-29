@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
 #
 
-from typing import Dict, List
+from typing import List
 
 from . import test_data_generation
 from . import bignum_common

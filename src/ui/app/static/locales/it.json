@@ -1042,6 +1042,7 @@
     }
   },
   "reports": {
+    "retention_notice": "I report sono un buffer circolare in memoria: le voci più vecchie vengono eliminate al raggiungimento del limite configurato. A meno che Redis non sia abilitato, vengono inoltre cancellati al riavvio di BunkerWeb.",
     "security_incident": "Incidente di Sicurezza",
     "security_report_data": "Dati del Report di Sicurezza"
   },

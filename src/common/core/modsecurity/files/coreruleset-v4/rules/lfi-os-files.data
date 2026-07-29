@@ -1062,7 +1062,8 @@ build.zig.zon
 # Red Hat Subscription Manager config
 .redhat/
 # NPM node modules
-node_modules/
+node_modules/.bin
+node_modules/.cache
 # Bun Dir
 .bun/
 # Bun global config

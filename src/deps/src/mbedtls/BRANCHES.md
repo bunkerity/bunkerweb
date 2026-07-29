@@ -88,9 +88,9 @@ The following branches are currently maintained:
 - [`development`](https://github.com/Mbed-TLS/mbedtls/)
 - [`mbedtls-3.6`](https://github.com/Mbed-TLS/mbedtls/tree/mbedtls-3.6)
  maintained until March 2027, see
-  <https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.6.6>.
+  <https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.6.7>.
 - [`mbedtls-4.1`](https://github.com/Mbed-TLS/mbedtls/tree/mbedtls-4.1)
  maintained until March 2029, see
-  <https://github.com/Mbed-TLS/mbedtls/releases/tag/v4.1.0>.
+  <https://github.com/Mbed-TLS/mbedtls/releases/tag/v4.1.1>.
 
 Users are urged to always use the latest version of a maintained branch.

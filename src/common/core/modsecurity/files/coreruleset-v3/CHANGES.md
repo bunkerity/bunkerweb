@@ -6,6 +6,18 @@
   or the CRS Google Group at
 * <https://groups.google.com/a/owasp.org/forum/#!forum/modsecurity-core-rule-set-project>
 
+## Version 3.3.10 - 2026-07-01
+
+### ⚠️ Breaking Change
+
+* Requires libmodsecurity v3.0.16 or later when running on nginx/libmodsecurity v3. The XML attribute injection fix (`ctl:ruleRemoveTargetByTag=...;XML://@*` in rule 901181) depends on [owasp-modsecurity/ModSecurity#3589](https://github.com/owasp-modsecurity/ModSecurity/pull/3589), which fixes the lexer's rejection of `@` in `ctl:ruleRemoveTarget*` actions. On libmodsecurity v3 versions older than v3.0.16, this `ctl` action fails to parse, breaking config load.
+* Fully opting out of XML attribute inspection (`tx.crs_xml_attr_inspect`) requires ModSecurity v2 >= v2.9.14, once <https://github.com/owasp-modsecurity/ModSecurity/issues/3591> is fixed upstream. Until then, `ctl:ruleRemoveTargetByTag` cannot remove the `XML://@*` target on ModSecurity v2, so rule 901181 cannot disable attribute inspection on that engine.
+
+### ⭐ Important changes
+
+* fix: R7U-260618 v3 by @fzipi in https://github.com/coreruleset/coreruleset/commit/4665b6d7a79a81aa8a802ef3c901d69491c009a4 (GHSA: <https://github.com/coreruleset/coreruleset/security/advisories/GHSA-f5qm-3h4p-8qhg>)
+* fix: N7Y-260316 v3 by @fzipi in https://github.com/coreruleset/coreruleset/commit/635cecf8f81908f02a687db4b5b13a55c3e3b9ed (GHSA: <https://github.com/coreruleset/coreruleset/security/advisories/GHSA-6jp8-c2w2-x7wr>)
+
 ## Version 3.3.9 - 2026-03-28
 
 ### ⭐ Important changes

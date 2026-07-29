@@ -20,6 +20,7 @@ Production ready.
 * Trailers
 * HTTP proxy connections
 * mTLS (requires `ngx_lua_http_module` >= v0.10.23)
+* W3C trace context propagation via `traceparent` header (>= v0.18.0)
 
 
 ## API
@@ -170,6 +171,7 @@ The options table has the following fields:
 * `host`: target host, or path to a unix domain socket
 * `port`: port on target host, will default to `80` or `443` based on the scheme
 * `pool`: custom connection pool name. Option as per [OpenResty docs](https://github.com/openresty/lua-nginx-module#tcpsockconnect), except that the default will become a pool name constructed using the SSL / proxy properties, which is important for safe connection reuse. When in doubt, leave it blank!
+* `pool_debug`: set to `true` to log the connection pool name at `DEBUG` level, off by default
 * `pool_size`: option as per [OpenResty docs](https://github.com/openresty/lua-nginx-module#tcpsockconnect)
 * `backlog`: option as per [OpenResty docs](https://github.com/openresty/lua-nginx-module#tcpsockconnect)
 * `proxy_opts`: sub-table, defaults to the global proxy options set, see [set\_proxy\_options](#set_proxy_options).

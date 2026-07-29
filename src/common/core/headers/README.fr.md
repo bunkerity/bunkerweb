@@ -43,7 +43,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
     | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download".                       |
     | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité.                  |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | non      | **Politique de Referrer :** Contrôle la quantité d'informations de référent envoyées, protégeant la vie privée de l'utilisateur.                          |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
     | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | non      | **Conserver les en-têtes :** Préserve les en-têtes en amont sélectionnés, facilitant l'intégration héritée tout en maintenant la sécurité.                |
 
     !!! tip "Bonnes pratiques"
@@ -51,6 +51,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
         - Utilisez des outils comme [Mozilla Observatory](https://observatory.mozilla.org/) pour valider la configuration de vos en-têtes.
         - Testez la CSP en mode `Report-Only` avant de l'appliquer pour éviter de casser des fonctionnalités.
         - En mode `Report-Only`, un en-tête `Content-Security-Policy` ou `Content-Security-Policy-Report-Only` fourni par l'amont est conservé par défaut (`KEEP_UPSTREAM_HEADERS`) ; retirez le nom de l'en-tête de ce paramètre pour que la politique de BunkerWeb prenne le dessus.
+        - La `PERMISSIONS_POLICY` par défaut bloque également les client hints (directives `ch-*`) ; si un service dépend d'`Accept-CH` (par exemple des images adaptatives basées sur les client hints ou la détection du mode sombre via `Sec-CH-Prefers-Color-Scheme`), personnalisez `PERMISSIONS_POLICY` pour réautoriser les fonctionnalités `ch-*` nécessaires (par exemple `ch-dpr=(self)`).
 
 === "Paramètres des cookies"
 

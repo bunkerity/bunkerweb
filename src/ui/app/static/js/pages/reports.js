@@ -438,6 +438,10 @@ $(document).ready(function () {
         .addClass("btn-primary");
       autoRefreshInterval = setInterval(() => {
         if (!autoRefresh) return;
+        // Skip the poll while the tab is backgrounded so a hidden tab with
+        // auto-refresh on stops hitting /reports/fetch + /reports/filters every
+        // 10s. A visibilitychange listener refreshes once when it returns.
+        if (document.hidden) return;
         $("#reports").DataTable().ajax.reload(null, false);
       }, 10000); // 10 seconds
     } else {
@@ -456,6 +460,14 @@ $(document).ready(function () {
       toggleAutoRefresh();
     },
   };
+
+  // When the tab comes back to the foreground with auto-refresh on, reload once
+  // immediately instead of waiting up to 10s (polls are skipped while hidden).
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && autoRefresh) {
+      $("#reports").DataTable().ajax.reload(null, false);
+    }
+  });
 
   // Initialize DataTable
   const reports_config = {

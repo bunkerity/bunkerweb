@@ -12,6 +12,17 @@
 #if (NGX_STREAM_SSL)
 #ifdef HAVE_PROXY_SSL_PATCH
 
+#if defined(LIBRESSL_VERSION_NUMBER)
+#define  HAVE_LUA_PROXY_SSL_VERIFY 0
+#elif defined(OPENSSL_IS_BORINGSSL)
+#define  HAVE_LUA_PROXY_SSL_VERIFY 0
+#elif defined(SSL_ERROR_WANT_RETRY_VERIFY) &&                                \
+    OPENSSL_VERSION_NUMBER >= 0x30000020uL
+#define  HAVE_LUA_PROXY_SSL_VERIFY 1
+#else
+#define  HAVE_LUA_PROXY_SSL_VERIFY 0
+#endif
+
 /* do not introduce ngx_stream_proxy_module
  * to pollute ngx_stream_lua_module.c
  */
