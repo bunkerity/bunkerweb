@@ -20,6 +20,8 @@
 
 #if (NGX_STREAM_SSL)
 
+#include "ngx_stream_lua_ssl.h"
+
 
 int ngx_stream_lua_ssl_ctx_index = -1;
 int ngx_stream_lua_ssl_key_log_index = -1;
@@ -55,6 +57,35 @@ ngx_stream_lua_ssl_init(ngx_log_t *log)
     }
 
     return NGX_OK;
+}
+
+
+ngx_ssl_conn_t *
+ngx_stream_lua_ffi_get_upstream_ssl_pointer(ngx_stream_lua_request_t *r,
+    const char **err)
+{
+    ngx_connection_t  *c;
+
+    if (r == NULL || r->connection == NULL || r->session == NULL) {
+        *err = "bad request";
+        return NULL;
+    }
+
+    if (r->session->upstream == NULL
+        || r->session->upstream->peer.connection == NULL)
+    {
+        *err = "not upstream";
+        return NULL;
+    }
+
+    c = r->session->upstream->peer.connection;
+
+    if (c->ssl == NULL || c->ssl->connection == NULL) {
+        *err = "not ssl connection";
+        return NULL;
+    }
+
+    return c->ssl->connection;
 }
 
 

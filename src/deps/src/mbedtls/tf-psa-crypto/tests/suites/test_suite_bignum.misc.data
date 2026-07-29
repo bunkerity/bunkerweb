@@ -1719,35 +1719,40 @@ mpi_gcd_modinv_odd_only_modinv:"28c":"26f0":"":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #1
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"0":MBEDTLS_ERR_MPI_NOT_ACCEPTABLE
+mpi_is_prime:"0":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #2
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"1":MBEDTLS_ERR_MPI_NOT_ACCEPTABLE
+mpi_is_prime:"1":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #3
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"2":0
+mpi_is_prime:"2":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #4
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"3":0
+mpi_is_prime:"3":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #5
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"4":MBEDTLS_ERR_MPI_NOT_ACCEPTABLE
+mpi_is_prime:"4":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #6
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"5":0
+mpi_is_prime:"5":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #7
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"1b":MBEDTLS_ERR_MPI_NOT_ACCEPTABLE
+mpi_is_prime:"1b":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Base test mbedtls_mpi_is_prime #8
 depends_on:MBEDTLS_GENPRIME
-mpi_is_prime:"2f":0
+mpi_is_prime:"2f":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
+
+# see small_primes_limit in bignum.c
+Base test mbedtls_mpi_is_prime #2 (997)
+depends_on:MBEDTLS_GENPRIME
+mpi_is_prime:"03e5":MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
 Test mbedtls_mpi_is_prime #1a
 depends_on:MBEDTLS_GENPRIME
@@ -1853,9 +1858,13 @@ Test mbedtls_mpi_gen_prime (Too small)
 depends_on:MBEDTLS_GENPRIME
 mpi_gen_prime:2:0:MBEDTLS_ERR_MPI_BAD_INPUT_DATA
 
+Test mbedtls_mpi_gen_prime (Too small by 1)
+depends_on:MBEDTLS_GENPRIME
+mpi_gen_prime:11:0:MBEDTLS_ERR_MPI_BAD_INPUT_DATA
+
 Test mbedtls_mpi_gen_prime (OK, minimum size)
 depends_on:MBEDTLS_GENPRIME
-mpi_gen_prime:3:0:0
+mpi_gen_prime:12:0:0
 
 Test mbedtls_mpi_gen_prime (corner case limb size -1 bits)
 depends_on:MBEDTLS_GENPRIME

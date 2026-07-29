@@ -10,7 +10,7 @@ At any point in time, we have a number of maintained branches, currently consist
   development for future versions.
 - [`tf-psa-crypto-1.1`](https://github.com/Mbed-TLS/TF-PSA-Crypto/tree/tf-psa-crypto-1.1)
  maintained until March 2029, see
-  <https://github.com/Mbed-TLS/TF-PSA-Crypto/releases/tag/v1.1.0>.
+  <https://github.com/Mbed-TLS/TF-PSA-Crypto/releases/tag/v1.1.1>.
 
 We use [Semantic Versioning](https://semver.org/). In particular, we maintain
 API compatibility in the `main` branch across minor version changes (e.g.
@@ -106,4 +106,4 @@ The following branches are currently maintained:
 - [`development`](https://github.com/Mbed-TLS/TF-PSA-Crypto/)
 - [`tf-psa-crypto-1.1`](https://github.com/Mbed-TLS/TF-PSA-Crypto/tree/tf-psa-crypto-1.1)
  maintained until March 2029, see
-  <https://github.com/Mbed-TLS/TF-PSA-Crypto/releases/tag/v1.1.0>.
+  <https://github.com/Mbed-TLS/TF-PSA-Crypto/releases/tag/v1.1.1>.

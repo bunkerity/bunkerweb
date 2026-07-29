@@ -44,9 +44,9 @@
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.18",
+      "name": "lua-cjson v2.1.0.19",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "fa418dcac3de13c9fe2ddc997bd53e92d793f0bc"
+      "commit": "5ce46a80b10ef9d380a45c9e6cff9ecffbe71ebb"
     },
     {
       "id": "lua-ffi-zlib",
@@ -63,16 +63,16 @@
     },
     {
       "id": "lua-nginx-module",
-      "name": "lua-nginx-module v0.10.29",
+      "name": "lua-nginx-module v0.10.29R2",
       "url": "https://github.com/openresty/lua-nginx-module.git",
-      "commit": "a1ec138e98801400832fee6030120777bf9bb435",
+      "commit": "16612cb0a2eb71273fc5b50a4d98e3c05559178a",
       "post_install": "rm -r src/deps/src/lua-nginx-module/t"
     },
     {
       "id": "lua-resty-core",
-      "name": "lua-resty-core v0.1.32",
+      "name": "lua-resty-core v0.1.32R1",
       "url": "https://github.com/openresty/lua-resty-core.git",
-      "commit": "768ce9631dd91f864ba454af9615a81847c3230c",
+      "commit": "3ad8ab4b01758c0a03b534026c31cbfa9fc203a5",
       "post_install": "rm -r src/deps/src/lua-resty-core/t"
     },
     {
@@ -90,9 +90,9 @@
     },
     {
       "id": "lua-resty-http",
-      "name": "lua-resty-http v0.17.2",
+      "name": "lua-resty-http v0.18.0",
       "url": "https://github.com/ledgetech/lua-resty-http.git",
-      "commit": "183310324026120ab7eaf5dd82b9be90ae63aadf",
+      "commit": "03995ff9a08194d48d446ed2fa099cd6de38fbef",
       "post_install": "rm -r src/deps/src/lua-resty-http/t"
     },
     {
@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260701",
+      "name": "LuaJIT v2.1-20260724",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "2802aafe24b7c3b2892e616c2bee97a61e9c026e",
+      "commit": "982cd8323eafd8604a9e5f2a916aa50b9f67d9ed",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -227,9 +227,9 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v4.1.0",
+      "name": "Mbed TLS v4.2.0",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "0fe989b6b514192783c469039edd325fd0989806",
+      "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
       "submodules": true,
       "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
     },
@@ -255,13 +255,6 @@
       "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {
-      "id": "nginx-1.28.0",
-      "name": "Nginx v1.28.0",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
-      "post_install": "rm -r src/deps/src/nginx-1.28.0/docs"
-    },
-    {
       "id": "nginx_cookie_flag_module",
       "name": "Nginx cookie flag module v1.1.0",
       "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
@@ -283,10 +276,10 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.17",
+      "name": "stream-lua-nginx-module v0.0.17R4",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "86cf76e3b62a5dea50813b3a00ff87b628c41aa4",
-      "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t && patch --forward src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c src/deps/misc/stream-lua-nginx-module.patch || rm src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.orig src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.rej"
+      "commit": "ba83956f27b38bc90f9aa843f8ca856ab6212151",
+      "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t"
     },
     {
       "id": "zlib",

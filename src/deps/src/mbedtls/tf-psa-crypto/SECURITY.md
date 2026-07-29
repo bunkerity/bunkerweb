@@ -7,8 +7,8 @@ please send an email to the security team at
 ## Security Incident Handling Process
 
 Our security process is detailed in our
-[security
-center](https://developer.trustedfirmware.org/w/mbed-tls/security-center/).
+[online
+documentation](https://mbed-tls.readthedocs.io/en/latest/project/vulnerabilities/).
 
 Its primary goal is to ensure fixes are ready to be deployed when the issue
 goes public.
@@ -103,6 +103,12 @@ physical attacks are present in a use case or a user application's threat
 model, they need to be mitigated by physical countermeasures.
 
 ### Caveats
+
+#### Compiler-induced side channels
+
+Mbed TLS is mostly written in C. We use standard C except with known compilers, so we do not expect compilers to introduce direct vulnerabilities. However, compilers can introduce [timing side channels](#timing-attacks) in code that was intended to be constant-time. Mbed TLS includes countermeasures to try to prevent this. But given the diversity of compilers, compiler options and target platforms, this prevention may not be complete.
+
+We recommend compiling Mbed TLS with commonly used levels of optimizations, such as `-O2` or `-Os`. We will generally treat exploitable timing side channels as a vulnerability if they appear with a common compiler at a common level of optimization. Higher levels of optimization such as `-O3` or `-Oz` are still likely to be safe but are less scrutinized. We do not recommend using individual options that might introduce data-dependent timing, and we will not try to work around such optimizations if they are not part of a commonly used level.
 
 #### Out-of-scope countermeasures
 

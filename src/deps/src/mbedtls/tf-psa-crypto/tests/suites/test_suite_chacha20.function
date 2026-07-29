@@ -67,6 +67,53 @@ void chacha20_crypt(data_t *key_str,
 }
 /* END_CASE */
 
+/* BEGIN_CASE */
+void chacha20_input_len_too_long(void)
+{
+    mbedtls_chacha20_context ctx;
+    unsigned char key[32] = { 0 };
+    unsigned char nonce[12] = { 0 };
+    unsigned char input[65] = { 0 };
+    unsigned char output[65] = { 0 };
+    size_t i;
+
+    mbedtls_chacha20_init(&ctx);
+
+    TEST_ASSERT(mbedtls_chacha20_setkey(&ctx, key) == 0);
+    TEST_ASSERT(mbedtls_chacha20_starts(&ctx, nonce, UINT32_MAX) == 0);
+
+    /*
+     * An overlong call must fail before consuming buffered keystream bytes,
+     * writing partial output, or advancing the context.
+     */
+    TEST_EQUAL(mbedtls_chacha20_update(&ctx, 1, input, output), 0);
+    memset(output, 0x2a, sizeof(output));
+    TEST_EQUAL(mbedtls_chacha20_update(&ctx, 64, input, output),
+               MBEDTLS_ERR_CHACHA20_BAD_INPUT_DATA);
+    for (i = 0; i < sizeof(output); i++) {
+        TEST_EQUAL(output[i], 0x2a);
+    }
+
+    /* Consume the rest of the final counter block, then reject more input. */
+    TEST_EQUAL(mbedtls_chacha20_update(&ctx, 63, input, output), 0);
+    TEST_EQUAL(mbedtls_chacha20_update(&ctx, 0, NULL, NULL), 0);
+/*Test that zero length update does not break an exhausted context */
+    TEST_EQUAL(mbedtls_chacha20_update(&ctx, 0, NULL, NULL), 0);
+    TEST_EQUAL(mbedtls_chacha20_update(&ctx, 1, input, output),
+               MBEDTLS_ERR_CHACHA20_BAD_INPUT_DATA);
+
+    /* The final counter block is valid, but generating another block is not. */
+    TEST_EQUAL(mbedtls_chacha20_crypt(key, nonce, UINT32_MAX,
+                                      MBEDTLS_CHACHA20_BLOCK_SIZE_BYTES,
+                                      input, output), 0);
+    TEST_EQUAL(mbedtls_chacha20_crypt(key, nonce, UINT32_MAX,
+                                      sizeof(input), input, output),
+               MBEDTLS_ERR_CHACHA20_BAD_INPUT_DATA);
+
+    mbedtls_chacha20_free(&ctx);
+}
+/* END_CASE */
+
 /* BEGIN_CASE depends_on:MBEDTLS_SELF_TEST */
 void chacha20_self_test()
 {

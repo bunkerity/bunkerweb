@@ -1,5 +1,105 @@
 Mbed TLS ChangeLog (Sorted per branch, date)
 
+= Mbed TLS 4.2.0 branch released 2026-07-07
+
+Features
+   * Restore DESTDIR support for CMake installs of compatibility
+     libmbedcrypto symlinks. Fixes #10627.
+   * SHA3-256, SHA3-384 and SHA3-512 are now accepted in the default X.509
+     certificate profile.
+
+Security
+   * Added advice about compiler options in SECURITY.md.
+   * Fix a bug where transcript-hash computation errors during TLS 1.2
+     extended master secret calculation could be ignored instead of causing the
+     handshake to fail. This could allow a handshake to continue with a master
+     secret that was not correctly bound to the handshake transcript,
+     undermining the security guarantees of the extended master secret
+     extension. Report by Mathew Gretton-Dann. CVE-2026-50581
+   * Fix a TLS 1.3 server-side error-handling bug affecting session ticket
+     generation. Under rare conditions, such as memory allocation failures
+     while computing the resumption master secret, the server could issue
+     invalid session tickets instead of failing the handshake. Clients
+     presented with such tickets would fail session resumption and fall back to
+     a full handshake. In deployments relying on session resumption, repeated
+     occurrences could increase the frequency of full handshakes and amplify
+     resource consumption during periods of resource exhaustion or other
+     transient failures. Reported by jjfz123.
+     CVE-2026-50640
+   * Fixed a TLS 1.3 record-boundary validation issue that could allow
+     unauthenticated plaintext data to be processed across a key change. In
+     servers with MBEDTLS_SSL_EARLY_DATA enabled, this could be exploited by a
+     man-in-the-middle attacker to cause loss of 0-RTT early data.
+     Reported by Ben Smyth.
+   * Fix a remote buffer overflow in (D)TLS with ECDHE-PSK cipher suites when
+     CBC is disabled. Reported by Karnakar Reddy. CVE-2026-50580
+   * Fix a potential information disclosure in TLS 1.2 servers using session
+     tickets. If the session ticket write callback failed without setting the
+     lifetime output parameter, Mbed TLS could send 4 bytes of uninitialized
+     stack memory to the peer in the NewSessionTicket message. Fixes #1570.
+     Reported by James Love. CVE-2026-50586.
+   * Fix an out-of-bounds read when parsing TLS 1.2 ECJPAKE ServerKeyExchange
+     messages. Reported-by Biniam Demissie.
+     CVE-2026-50588
+   * Fix a use-after-free/double-free risk in mbedtls_pkcs7_free() when reusing
+     an mbedtls_pkcs7 context across parse -> free -> parse -> free cycles. The
+     function now resets the context after freeing it, ensuring stale
+     signed_data.signers.next pointers cannot be walked by a later free
+     operation. CVE-2026-50579
+   * PKCS7 now rejects weak hash algorithms (RIPEMD160, MD5, SHA-1, SHA-224,
+     SHA3-224) on signature verification.
+   * Improved documentation of mbedtls_ssl_conf_sig_algs() to emphasize that
+     this function only sets signature algorithms that are enforced during
+     TLS key exchange and not on certificate verification. Reported by
+     Xiangdong Li, Beijing University of Posts and Telecommunications (BUPT).
+     CVE-2026-54441
+   * Ensure 'badmac_seen' and 'dtls_srtp_info' fields from 'mbedtls_ssl_context'
+     are properly zeroized when mbedtls_ssl_session_reset() is called. This
+     could cause premature DTLS connection failure or incorrect DTLS-SRTP
+     parameter inheritance for applications reusing an SSL context.
+     Reported by jjfz123. CVE-2026-50585.
+   * Fix a bug where mbedtls_ssl_read() and mbedtls_ssl_write() could return
+     1 instead of an error code if the random generator failed when a server
+     called these functions before the end of a TLS 1.3 handshake.
+     Reported by Mohammad Seet (mhdsait101).
+   * Fix TLS 1.3 clients to reject a HelloRetryRequest whose selected group was
+     not advertised in the original ClientHello. Reported independently by
+     Din Asotić / Xiangdong Li, Beijing University of Posts and
+     Telecommunications (BUPT), and NVIDIA Project Vanessa.
+     CVE-2026-25832.
+   * Fix two bugs in the X.509 certificate parser that caused some inputs
+     with a malformed basicConstraints extension to be accepted. This
+     could have dangerous results, in particular causing some certificates
+     to be parsed as CA certificates when other X.509 implementations would
+     parse them as end-entity certificates. Reported by Mohammad Seet
+     (mhdsait101), Pablo Ruiz García and NVIDIA Project Vanessa. CVE-2026-49300
+
+Bugfix
+   * Fix a TLS 1.2 regression that caused clients to reject valid
+     ServerKeyExchange signatures using RSA-PSS signature algorithms.
+     Fixes #10668.
+   * Fix a build error using the LLVM based MinGW toolchain.
+     Bug reported and fix contributed by valord577.
+   * Fixed a bug which prevented the inclusion of standard C library header
+     files from the user provided configuration file. Fixes #10740.
+   * Reject malformed TLS 1.3 serialized sessions instead of accepting
+     unterminated strings or extra trailing data.
+   * Reject serialized SSL contexts whose DTLS Connection ID length exceeds
+     the maximum supported size, instead of overflowing the internal buffer.
+   * Fixed documentation of mbedtls_ssl_set_cid(): the set CID configuration
+     is applied to all subsequent handshakes, not just to the next one.
+   * Reject malformed X.509 CSRs where the extensionRequest attribute
+     wrappers do not exactly contain the requested extensions.
+
+Changes
+   * Upgraded TF-PSA-Crypto from 1.1.0 to 1.2.0. See tf-psa-crypto/ChangeLog.
+   * X.509 certificates with a basicConstraints extension starting with an
+     INTEGER field are no longer accepted. According to RFC 5280, such
+     certificates are syntactically valid and the first field is the
+     pathLenConstraint value, but certificate authorities must not emit such
+     certificates. Mbed TLS interpreted it as a cA value, which was nonstandard
+     and dangerous.
+
 = Mbed TLS 4.1.0 branch released 2026-03-31
 
 API changes
@@ -143,7 +243,7 @@ Removals
      in favour of mbedtls_ssl_conf_groups() since Mbed TLS 3.1.
    * Remove support for the DHE-PSK key exchange in TLS 1.2.
    * Remove support for the DHE-RSA key exchange in TLS 1.2.
-   * Following the removal of DHM module (#9972 and TF-PSA-Crypto#175) the
+   * Following the removal of DHM module (#9972 and Mbed-TLS/TF-PSA-Crypto#175) the
      following SSL functions are removed:
      - mbedtls_ssl_conf_dh_param_bin
      - mbedtls_ssl_conf_dh_param_ctx

@@ -18,7 +18,7 @@
 #define HAVE_mbedtls_pk_parse_key_pkcs8_encrypted_der
 #endif
 
-#if defined(MBEDTLS_PSA_CRYPTO_C) && defined(MBEDTLS_FS_IO)
+#if defined(MBEDTLS_PSA_CRYPTO_C)
 static int test_psa_bridge(const mbedtls_pk_context *ctx,
                            psa_key_usage_t usage_flag)
 {
@@ -99,7 +99,7 @@ static int pk_can_ecdsa(const mbedtls_pk_context *ctx)
     return ctx->ec_family != PSA_ECC_FAMILY_MONTGOMERY;
 }
 #endif /* PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY */
-#endif /* MBEDTLS_PSA_CRYPTO_C &&  && MBEDTLS_FS_IO */
+#endif /* MBEDTLS_PSA_CRYPTO_C */
 
 /* END_HEADER */
 
@@ -179,6 +179,40 @@ void pk_parse_public_keyfile_rsa(char *key_file, int result)
 exit:
     mbedtls_pk_free(&ctx);
     PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE depends_on:PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY */
+void pk_parse_public_key_ec(data_t *key_data, int result)
+{
+    mbedtls_pk_context ctx;
+    mbedtls_pk_init(&ctx);
+    int res;
+    unsigned char *key_copy = NULL;
+
+    PSA_INIT();
+    TEST_CALLOC(key_copy, key_data->len);
+    memcpy(key_copy, key_data->x, key_data->len);
+
+    res = mbedtls_pk_parse_public_key(&ctx, key_copy, key_data->len);
+
+    TEST_EQUAL(res, result);
+
+    if (res == 0) {
+        TEST_ASSERT(PSA_KEY_TYPE_IS_ECC(mbedtls_pk_get_key_type(&ctx)));
+
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+        if (pk_can_ecdsa(&ctx)) {
+            TEST_ASSERT(test_psa_bridge(&ctx, PSA_KEY_USAGE_VERIFY_HASH));
+            TEST_ASSERT(test_psa_bridge(&ctx, PSA_KEY_USAGE_VERIFY_MESSAGE));
+        }
+#endif
+    }
+
+exit:
+    mbedtls_pk_free(&ctx);
+    PSA_DONE();
+    mbedtls_free(key_copy);
 }
 /* END_CASE */
 

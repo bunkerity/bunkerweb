@@ -1,0 +1,459 @@
+/* BEGIN_HEADER */
+
+/* Test the dispatch layer, a.k.a. driver wrappers, with transparent keys
+ * and keyless algorithms.
+ *
+ * Coverage is extremely sparse for now. See
+ * https://github.com/Mbed-TLS/TF-PSA-Crypto/issues/699
+ */
+
+#include <psa/crypto.h>
+#include <psa_crypto_driver_wrappers.h>
+#include <psa_crypto_driver_wrappers_no_static.h>
+
+/* While ML-DSA is only supported in the lower layers but not in the API,
+ * include the internal header with the encoding of key types and algorithms.
+ * This header is not yet included unconditionally by the driver wrapper
+ * headers, but we need all constants that appear in test data to be
+ * defined unconditionally. */
+#include "psa_crypto_mldsa.h"
+
+/* END_HEADER */
+
+/* BEGIN_DEPENDENCIES
+ * depends_on:MBEDTLS_PSA_CRYPTO_C
+ * END_DEPENDENCIES */
+
+/* BEGIN_CASE */
+void export_public_key(int type_arg, int bits_arg,
+                       data_t *key_buffer,
+                       data_t *expected_public_key,
+                       psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    uint8_t *public_key = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    /* Export into an exact-size buffer */
+    /* Note that the API does not guarantee that an exact-size output buffer
+     * works. The core could reject buffers that are smaller than
+     * PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(type, bits), and then drivers
+     * could have undefined behavior with such smaller buffers. If this happens,
+     * this test will need to be adapted. */
+    size_t public_key_size = expected_public_key->len;
+    TEST_CALLOC(public_key, public_key_size);
+    size_t public_key_length = SIZE_MAX;
+    TEST_EQUAL(psa_driver_wrapper_export_public_key(&attributes,
+                                                    key_buffer->x, key_buffer->len,
+                                                    public_key, public_key_size,
+                                                    &public_key_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(public_key, public_key_length,
+                            expected_public_key->x, expected_public_key->len);
+    }
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+    /* Export into a larger buffer */
+    public_key_size = expected_public_key->len + 1;
+    TEST_CALLOC(public_key, public_key_size);
+    public_key_length = SIZE_MAX;
+    TEST_EQUAL(psa_driver_wrapper_export_public_key(&attributes,
+                                                    key_buffer->x, key_buffer->len,
+                                                    public_key, public_key_size,
+                                                    &public_key_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(public_key, public_key_length,
+                            expected_public_key->x, expected_public_key->len);
+    }
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+exit:
+    mbedtls_free(public_key);
+    psa_reset_key_attributes(&attributes);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_message_deterministic(int type_arg, int bits_arg, int alg_arg,
+                                data_t *key_buffer,
+                                data_t *message,
+                                data_t *expected_signature,
+                                psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    uint8_t *signature = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    /* Sign into an exact-size buffer */
+    /* Note that the API does not guarantee that an exact-size output buffer
+     * works. The core could reject buffers that are smaller than
+     * PSA_SIGN_OUTPUT_SIZE(type, bits, alg), and then drivers
+     * could have undefined behavior with such smaller buffers. If this happens,
+     * this test will need to be adapted. */
+    size_t signature_size = expected_signature->len;
+    TEST_CALLOC(signature, signature_size);
+    size_t signature_length = SIZE_MAX;
+    TEST_EQUAL(psa_driver_wrapper_sign_message(&attributes,
+                                               key_buffer->x, key_buffer->len,
+                                               alg_arg,
+                                               message->x, message->len,
+                                               signature, signature_size,
+                                               &signature_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(signature, signature_length,
+                            expected_signature->x, expected_signature->len);
+    }
+    mbedtls_free(signature);
+    signature = NULL;
+
+    /* Sign into a larger buffer */
+    signature_size = expected_signature->len + 1;
+    TEST_CALLOC(signature, signature_size);
+    signature_length = SIZE_MAX;
+    TEST_EQUAL(psa_driver_wrapper_sign_message(&attributes,
+                                               key_buffer->x, key_buffer->len,
+                                               alg_arg,
+                                               message->x, message->len,
+                                               signature, signature_size,
+                                               &signature_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(signature, signature_length,
+                            expected_signature->x, expected_signature->len);
+    }
+    mbedtls_free(signature);
+    signature = NULL;
+
+exit:
+    mbedtls_free(signature);
+    psa_reset_key_attributes(&attributes);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_message(int type_arg, int bits_arg, int alg_arg,
+                    data_t *public_key,
+                    data_t *message,
+                    data_t *signature,
+                    psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    uint8_t *buf = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    TEST_EQUAL(psa_driver_wrapper_verify_message(&attributes,
+                                                 public_key->x, public_key->len,
+                                                 alg_arg,
+                                                 message->x, message->len,
+                                                 signature->x, signature->len),
+               expected_status);
+
+    if (expected_status == PSA_SUCCESS) {
+        /* Try verifying a signature whose last byte is wrong */
+        TEST_CALLOC(buf, signature->len);
+        memcpy(buf, signature->x, signature->len);
+        buf[signature->len - 1] ^= 1;
+        TEST_EQUAL(psa_driver_wrapper_verify_message(
+                       &attributes,
+                       public_key->x, public_key->len,
+                       alg_arg,
+                       message->x, message->len,
+                       buf, signature->len),
+                   PSA_ERROR_INVALID_SIGNATURE);
+        mbedtls_free(buf);
+        buf  = NULL;
+
+        /* Try verifying a signature that's too short */
+        TEST_CALLOC(buf, signature->len - 1);
+        memcpy(buf, signature->x, signature->len - 1);
+        TEST_EQUAL(psa_driver_wrapper_verify_message(
+                       &attributes,
+                       public_key->x, public_key->len,
+                       alg_arg,
+                       message->x, message->len,
+                       buf, signature->len - 1),
+                   PSA_ERROR_INVALID_SIGNATURE);
+        mbedtls_free(buf);
+        buf  = NULL;
+
+        /* Try verifying a signature that's too long */
+        TEST_CALLOC(buf, signature->len + 1);
+        memcpy(buf, signature->x, signature->len);
+        TEST_EQUAL(psa_driver_wrapper_verify_message(
+                       &attributes,
+                       public_key->x, public_key->len,
+                       alg_arg,
+                       message->x, message->len,
+                       buf, signature->len + 1),
+                   PSA_ERROR_INVALID_SIGNATURE);
+        mbedtls_free(buf);
+        buf = NULL;
+    }
+
+exit:
+    PSA_DONE();
+    mbedtls_free(buf);
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_setup(int type_arg, int bits_arg, int alg_arg,
+                data_t *key_buffer,
+                psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_sign_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    TEST_EQUAL(psa_driver_wrapper_sign_setup(&operation,
+                                             &attributes,
+                                             key_buffer->x, key_buffer->len,
+                                             alg_arg),
+               expected_status);
+
+    PSA_ASSERT(psa_driver_wrapper_sign_abort(&operation));
+
+exit:
+    psa_driver_wrapper_sign_abort(&operation);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_deterministic_multipart(
+    int type, int bits, int alg, data_t *key_buffer,
+    int n_chunks, data_t *chunk1, data_t *chunk2, data_t *chunk3,
+    data_t *expected_signature, int expected_finish_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_sign_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+    const size_t signature_size = expected_signature->len;
+    size_t signature_length = SIZE_MAX;
+    uint8_t *signature = NULL;
+
+    PSA_INIT();
+    TEST_CALLOC(signature, signature_size);
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    PSA_ASSERT(psa_driver_wrapper_sign_setup(&operation,
+                                             &attributes,
+                                             key_buffer->x, key_buffer->len,
+                                             alg));
+    if (n_chunks >= 1) {
+        PSA_ASSERT(psa_driver_wrapper_sign_update(&operation,
+                                                  chunk1->x, chunk1->len));
+    }
+    if (n_chunks >= 2) {
+        PSA_ASSERT(psa_driver_wrapper_sign_update(&operation,
+                                                  chunk2->x, chunk2->len));
+    }
+    if (n_chunks >= 3) {
+        PSA_ASSERT(psa_driver_wrapper_sign_update(&operation,
+                                                  chunk3->x, chunk3->len));
+    }
+    TEST_EQUAL(psa_driver_wrapper_sign_finish(&operation,
+                                              key_buffer->x, key_buffer->len,
+                                              signature, signature_size,
+                                              &signature_length),
+               expected_finish_status);
+    if (expected_finish_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(expected_signature->x, expected_signature->len,
+                            signature, signature_length);
+    }
+
+exit:
+    psa_driver_wrapper_sign_abort(&operation);
+    PSA_DONE();
+    mbedtls_free(signature);
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_deterministic_multipart_finish(
+    int type, int bits, int alg, data_t *key_buffer,
+    data_t *message,
+    data_t *expected_signature, int signature_size_delta,
+    int expected_finish_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_sign_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+    const size_t signature_size = PSA_MLDSA_SIGNATURE_SIZE(bits) + signature_size_delta;
+    size_t signature_length = SIZE_MAX;
+    uint8_t *signature = NULL;
+
+    PSA_INIT();
+    TEST_CALLOC(signature, signature_size);
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    PSA_ASSERT(psa_driver_wrapper_sign_setup(&operation,
+                                             &attributes,
+                                             key_buffer->x, key_buffer->len,
+                                             alg));
+    PSA_ASSERT(psa_driver_wrapper_sign_update(&operation,
+                                              message->x, message->len));
+    TEST_EQUAL(psa_driver_wrapper_sign_finish(&operation,
+                                              key_buffer->x, key_buffer->len,
+                                              signature, signature_size,
+                                              &signature_length),
+               expected_finish_status);
+    if (expected_finish_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(expected_signature->x, expected_signature->len,
+                            signature, signature_length);
+    }
+
+exit:
+    psa_driver_wrapper_sign_abort(&operation);
+    PSA_DONE();
+    mbedtls_free(signature);
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_setup(int type_arg, int bits_arg, int alg_arg,
+                  data_t *public_key,
+                  psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_verify_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    TEST_EQUAL(psa_driver_wrapper_verify_setup(&operation,
+                                               &attributes,
+                                               public_key->x, public_key->len,
+                                               alg_arg),
+               expected_status);
+
+    PSA_ASSERT(psa_driver_wrapper_verify_abort(&operation));
+
+exit:
+    psa_driver_wrapper_verify_abort(&operation);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_multipart(
+    int type, int bits, int alg, data_t *public_key,
+    int n_chunks, data_t *chunk1, data_t *chunk2, data_t *chunk3,
+    data_t *signature, int expected_verify_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_verify_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    PSA_ASSERT(psa_driver_wrapper_verify_setup(&operation,
+                                               &attributes,
+                                               public_key->x, public_key->len,
+                                               alg));
+    if (n_chunks >= 1) {
+        PSA_ASSERT(psa_driver_wrapper_verify_update(&operation,
+                                                    chunk1->x, chunk1->len));
+    }
+    if (n_chunks >= 2) {
+        PSA_ASSERT(psa_driver_wrapper_verify_update(&operation,
+                                                    chunk2->x, chunk2->len));
+    }
+    if (n_chunks >= 3) {
+        PSA_ASSERT(psa_driver_wrapper_verify_update(&operation,
+                                                    chunk3->x, chunk3->len));
+    }
+    TEST_EQUAL(psa_driver_wrapper_verify_finish(&operation,
+                                                public_key->x, public_key->len,
+                                                signature->x, signature->len),
+               expected_verify_status);
+
+exit:
+    psa_driver_wrapper_verify_abort(&operation);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_multipart_finish(
+    int type, int bits, int alg,
+    data_t *setup_public_key, data_t *finish_public_key,
+    data_t *message,
+    data_t *signature, int expected_verify_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_verify_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+    /* Temporary copy of the public key which is freed as soon as the
+     * library function returns. This lets us validate that the
+     * library doesn't rely on the key pointer remaining valid
+     * throughout the operation. */
+    uint8_t *public_key = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    TEST_CALLOC(public_key, setup_public_key->len);
+    memcpy(public_key, setup_public_key->x, setup_public_key->len);
+    PSA_ASSERT(psa_driver_wrapper_verify_setup(&operation,
+                                               &attributes,
+                                               public_key, setup_public_key->len,
+                                               alg));
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+    PSA_ASSERT(psa_driver_wrapper_verify_update(&operation, message->x, message->len));
+
+    TEST_CALLOC(public_key, finish_public_key->len);
+    if (finish_public_key->len != 0) {
+        memcpy(public_key, finish_public_key->x, finish_public_key->len);
+    }
+    TEST_EQUAL(psa_driver_wrapper_verify_finish(&operation,
+                                                public_key, finish_public_key->len,
+                                                signature->x, signature->len),
+               expected_verify_status);
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+exit:
+    psa_driver_wrapper_verify_abort(&operation);
+    PSA_DONE();
+    mbedtls_free(public_key);
+}
+/* END_CASE */
