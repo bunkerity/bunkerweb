@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -229,7 +229,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("..",location),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -1367,22 +1367,22 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v18</code> and earlier (all-in-one: ✅ <code>v17</code>)</td>
-<td style="text-align: left;">✅ <code>v11</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v18</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v9</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v11</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v9</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v11</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v9</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
@@ -1398,7 +1398,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">Notes</p>
 <ul>
-<li><strong>PostgreSQL</strong>: Alpine packages now ship with the <code>v18</code> client, so <code>v18</code> and earlier are supported out of the box; the all-in-one image still embeds <code>v17</code>, so <code>v18</code> is unsupported there.</li>
+<li><strong>PostgreSQL</strong>: Alpine-based images, including all-in-one, now ship with the <code>v18</code> client, so <code>v18</code> and earlier are supported out of the box.</li>
 <li><strong>Linux</strong>: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).</li>
 <li><strong>SQLite</strong>: Ships with the packages and is ready to use.</li>
 </ul>
@@ -1458,6 +1458,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>Custom templates</strong>: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.</p>
 </li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Ready-to-use community templates</p>
+<p>Browse the <a href="https://github.com/bunkerity/bunkerweb-templates#installing-templates">BunkerWeb templates repository</a> and follow its installation guide. The web UI method is recommended for most users; a plugin layout is also documented for managed deployments. Once installed, select the template through easy mode or with the <code>USE_TEMPLATE</code> setting.</p>
+</div>
 <p>With the web User Interface, templates are available through <strong>easy mode</strong> when you add or edit a service:</p>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/templates-ui.png" width="800" />
@@ -1661,7 +1665,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../assets/extra.js"></script>
       

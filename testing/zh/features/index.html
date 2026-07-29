@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -229,7 +229,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../..",location),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -8635,7 +8635,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>PERMISSIONS_POLICY</code></td>
-<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...</code></td>
+<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...</code></td>
 <td>multisite</td>
 <td>否</td>
 <td><strong>Permissions Policy：</strong> 限制浏览器功能访问，减少潜在的攻击向量。</td>
@@ -8656,6 +8656,7 @@ TrustedMonitor/\d+\.\d+
 <li>使用像 <a href="https://observatory.mozilla.org/">Mozilla Observatory</a> 这样的工具来验证您的标头配置。</li>
 <li>在强制执行 CSP 之前，在 <code>Report-Only</code> 模式下进行测试，以避免破坏功能。</li>
 <li>在 <code>Report-Only</code> 模式下，上游发送的 <code>Content-Security-Policy</code> 或 <code>Content-Security-Policy-Report-Only</code> 标头默认会被保留（<code>KEEP_UPSTREAM_HEADERS</code>）；从该设置中移除相应的标头名称，BunkerWeb 自身的策略才会生效。</li>
+<li>默认的 <code>PERMISSIONS_POLICY</code> 也会阻止客户端提示（<code>ch-*</code> 指令）；如果某个服务依赖 <code>Accept-CH</code>（例如基于客户端提示的响应式图片或通过 <code>Sec-CH-Prefers-Color-Scheme</code> 进行的深色模式检测），请覆盖 <code>PERMISSIONS_POLICY</code> 以重新允许所需的 <code>ch-*</code> 功能（例如 <code>ch-dpr=(self)</code>）。</li>
 </ul>
 </div>
 </div>
@@ -10274,6 +10275,10 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">工作进程特定存储</p>
 <p>每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">报告保留</p>
+<p>被拦截请求的报告是一个循环缓冲区，而非审计日志。达到上限后，最旧的报告会被丢弃以便存放新报告，因此 Web UI 中显示的总数会停滞不前：未启用 Redis 时，该上限为 <code>METRICS_MAX_BLOCKED_REQUESTS</code> 乘以每个实例的 NGINX 工作进程数；启用 Redis 时则为 <code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code>。报告保存在共享内存中，除非启用并持久化 Redis，否则每次重启 BunkerWeb（包括软件包升级）都会被清空。如需长期保留，请将 NGINX 日志发送到 syslog 服务器或 SIEM。</p>
+</div>
 <h3 id="_83">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">基本配置</label><label for="__tabbed_30_2">低资源环境</label><label for="__tabbed_30_3">高流量环境</label><label for="__tabbed_30_4">禁用指标</label></div>
 <div class="tabbed-content">
@@ -10463,8 +10468,8 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p><strong>HTTP 方法控制</strong></p>
 <p>将 HTTP 方法限制为应用程序所需的那些方法，是遵循最小权限原则的一项基本安全措施。通过明确定义可接受的 HTTP 方法，您可以最大限度地降低通过未使用或危险的方法被利用的风险。</p>
-<p>此功能使用 <code>ALLOWED_METHODS</code> 设置进行配置，其中方法用 <code>|</code> 分隔（默认值：<code>GET|POST|HEAD</code>）。如果客户端尝试使用未列出的方法，服务器将以 <strong>405 - Method Not Allowed</strong> 状态响应。</p>
-<p>对于大多数网站，默认的 <code>GET|POST|HEAD</code> 就足够了。如果您的应用程序使用 RESTful API，您可能需要包含 <code>PUT</code> 和 <code>DELETE</code> 等方法。自定义的大写方法还可以包含下划线和连字符，以兼容非标准协议（例如 <code>CCM_POST</code>、<code>M-SEARCH</code>）。</p>
+<p>此功能使用 <code>ALLOWED_METHODS</code> 设置进行配置，其中方法用 <code>|</code> 分隔（默认值：<code>GET|POST|HEAD|QUERY</code>）。如果客户端尝试使用未列出的方法，服务器将以 <strong>405 - Method Not Allowed</strong> 状态响应。</p>
+<p>对于大多数网站，默认的 <code>GET|POST|HEAD|QUERY</code> 就足够了。如果您的应用程序使用 RESTful API，您可能需要包含 <code>PUT</code> 和 <code>DELETE</code> 等方法。自定义的大写方法还可以包含下划线和连字符，以兼容非标准协议（例如 <code>CCM_POST</code>、<code>M-SEARCH</code>）。</p>
 <div class="admonition success">
 <p class="admonition-title">安全优势</p>
 <ul>
@@ -10486,7 +10491,7 @@ TrustedMonitor/\d+\.\d+
 <tbody>
 <tr>
 <td><code>ALLOWED_METHODS</code></td>
-<td><code>GET\|POST\|HEAD</code></td>
+<td><code>GET\|POST\|HEAD\|QUERY</code></td>
 <td>multisite</td>
 <td>no</td>
 <td><strong>HTTP 方法：</strong> 允许的 HTTP 方法列表，用竖线字符分隔。自定义大写方法可以包含下划线和连字符。</td>
@@ -10956,8 +10961,8 @@ TrustedMonitor/\d+\.\d+
 <h3 id="crs">可用的 CRS 版本</h3>
 <p>选择一个 CRS 版本以最符合您的安全需求：</p>
 <ul>
-<li><strong><code>3</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9">v3.3.9</a>。</li>
-<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0">v4.27.0</a> (<strong>默认</strong>)。</li>
+<li><strong><code>3</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>。</li>
+<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.28.0">v4.28.0</a> (<strong>默认</strong>)。</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">每日构建版已弃用</p>
@@ -11163,11 +11168,11 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>遵循以下步骤安全部署 Mutual TLS：</p>
 <ol>
 <li><strong>启用功能：</strong> 在目标站点将 <code>USE_MTLS</code> 设置为 <code>yes</code>。</li>
-<li><strong>提供 CA 证书包：</strong> 使用 PEM 文件存放可信颁发者，并在 <code>MTLS_CA_CERTIFICATE</code> 中配置其绝对路径。</li>
+<li><strong>提供 CA 证书包：</strong> 将 <code>MTLS_CA_CERTIFICATE</code> 指向 Scheduler 可读取的 PEM 文件，或通过 <code>MTLS_CA_CERTIFICATE_DATA</code> 直接提供 base64/PEM 内联数据。Scheduler 会验证、缓存并将证书包分发到每个实例，无需逐实例挂载。</li>
 <li><strong>选择验证模式：</strong> <code>on</code> 强制要求证书，<code>optional</code> 允许回退，<code>optional_no_ca</code> 仅用于短期诊断。</li>
 <li><strong>调节链路深度：</strong> 若组织存在多级中间证书，可调整 <code>MTLS_VERIFY_DEPTH</code>。</li>
 <li><strong>转发验证结果（可选）：</strong> 若后端需要检查证书信息，请保持 <code>MTLS_FORWARD_CLIENT_HEADERS</code> 为 <code>yes</code>。</li>
-<li><strong>维护吊销数据：</strong> 若发布 CRL，请填写 <code>MTLS_CRL</code>，使 BunkerWeb 能拒绝已吊销的证书。</li>
+<li><strong>维护吊销数据：</strong> 若发布 CRL，请配置 <code>MTLS_CRL</code>（或 <code>MTLS_CRL_DATA</code>），使 BunkerWeb 能拒绝已吊销的证书。</li>
 </ol>
 <h3 id="_91">配置设置</h3>
 <table>
@@ -11189,11 +11194,25 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>启用 mutual TLS：</strong> 为当前站点启用客户端证书认证。</td>
 </tr>
 <tr>
+<td><code>MTLS_CA_CERTIFICATE_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>客户端 CA 证书包优先级：</strong> 客户端 CA 证书包的来源：<code>file</code>（路径）或 <code>data</code>（base64/PEM）。</td>
+</tr>
+<tr>
 <td><code>MTLS_CA_CERTIFICATE</code></td>
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>客户端 CA 证书包：</strong> 指向受信任客户端 CA 证书包（PEM）的绝对路径。当 <code>MTLS_VERIFY_CLIENT</code> 为 <code>on</code> 或 <code>optional</code> 时必填；路径必须可读。</td>
+<td><strong>客户端 CA 证书包路径：</strong> 受信任客户端 CA 证书包（PEM）的路径，需 Scheduler 可读。当 <code>MTLS_VERIFY_CLIENT</code> 为 <code>on</code> 或 <code>optional</code> 时必填。</td>
+</tr>
+<tr>
+<td><code>MTLS_CA_CERTIFICATE_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>客户端 CA 证书包数据：</strong> 直接以 base64 或 PEM 提供的受信任客户端 CA 证书包（例如通过 Web UI）。</td>
 </tr>
 <tr>
 <td><code>MTLS_VERIFY_CLIENT</code></td>
@@ -11224,21 +11243,35 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>转发客户端请求头：</strong> 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 <code>X-SSL-Client-*</code> 请求头）。</td>
 </tr>
 <tr>
+<td><code>MTLS_CRL_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>客户端 CRL 优先级：</strong> CRL 的来源：<code>file</code>（路径）或 <code>data</code>（base64/PEM）。</td>
+</tr>
+<tr>
 <td><code>MTLS_CRL</code></td>
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>客户端 CRL 路径：</strong> 指向 PEM 编码证书吊销列表的可选路径。仅在成功加载 CA 证书包时生效。</td>
+<td><strong>客户端 CRL 路径：</strong> 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求 CRL 文件包含验证链中每个 CA 的吊销列表。</td>
+</tr>
+<tr>
+<td><code>MTLS_CRL_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>客户端 CRL 数据：</strong> 直接以 base64 或 PEM 提供的吊销列表。</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition tip">
-<p class="admonition-title">保持证书最新</p>
-<p>将 CA 证书包和吊销列表存放在 Scheduler 可读取的挂载卷中，以便重启时自动加载最新的信任锚。</p>
+<p class="admonition-title">配置一次，处处分发</p>
+<p>CA 证书包和吊销列表无需挂载到 BunkerWeb 容器中。只需将文件路径或内联数据提供给 Scheduler；Scheduler 会验证、缓存并将其分发到每个实例。更新会在下一次任务运行时自动获取并重新分发。</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">严格模式需提供 CA 证书包</p>
-<p>当 <code>MTLS_VERIFY_CLIENT</code> 为 <code>on</code> 或 <code>optional</code> 时，运行时必须存在 CA 文件。如果缺失，BunkerWeb 会跳过生成 mTLS 指令，避免服务因路径无效而启动失败。<code>optional_no_ca</code> 仅建议用于排查问题，因为它会降低认证强度。</p>
+<p>当 <code>MTLS_VERIFY_CLIENT</code> 为 <code>on</code> 或 <code>optional</code> 时，Scheduler 必须能够验证并缓存客户端 CA 证书包。如果没有可用的证书包，BunkerWeb 会在每个实例上跳过 mTLS 指令，避免服务在证书引用无效或缺失的情况下运行。<code>optional_no_ca</code> 仅建议用于排查问题，因为它会降低认证强度。若 Scheduler 在 <code>/var/cache/bunkerweb</code> 非持久化的情况下重启，mTLS 将保持禁用，直到首次任务运行完成并重新分发 CA 证书包；因此在需要严格执行策略的场景下，请使用持久化的缓存卷。</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">受信证书与验证</p>
@@ -14884,7 +14917,7 @@ TrustedMonitor/\d+\.\d+
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

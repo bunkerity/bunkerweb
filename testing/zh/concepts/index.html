@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -229,7 +229,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../..",location),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -1367,22 +1367,22 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v18</code> 及更早版本（all-in-one：✅ <code>v17</code>）</td>
-<td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
+<td style="text-align: left;">✅ <code>v18</code> 及更早版本</td>
+<td style="text-align: left;">✅ <code>v12</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
 <td style="text-align: left;">✅ 支持</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> 及更早版本</td>
-<td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
+<td style="text-align: left;">✅ <code>v12</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
 <td style="text-align: left;">✅ 支持</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> 及更早版本</td>
-<td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
+<td style="text-align: left;">✅ <code>v12</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
 <td style="text-align: left;">✅ 支持</td>
 </tr>
@@ -1398,7 +1398,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">说明</p>
 <ul>
-<li><strong>PostgreSQL</strong>: 基于 Alpine 的软件包现在包含 <code>v18</code> 客户端，因此默认支持 <code>v18</code> 及更早版本；all-in-one 镜像仍然使用 <code>v17</code> 客户端，因此 <code>v18</code> 在该镜像中尚不受支持。</li>
+<li><strong>PostgreSQL</strong>: 基于 Alpine 的镜像（包括 all-in-one）现已包含 <code>v18</code> 客户端，因此默认支持 <code>v18</code> 及更早版本。</li>
 <li><strong>Linux</strong>: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。</li>
 <li><strong>SQLite</strong>: 随软件包一起提供，可立即使用。</li>
 </ul>
@@ -1458,6 +1458,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>自定义模板</strong>：除了预定义模板外，BunkerWeb 还允许用户创建根据其特定要求量身定制的自定义模板。自定义模板可以对设置和自定义配置进行微调，确保 BunkerWeb 与用户的需求完美契合。</p>
 </li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">即用型社区模板</p>
+<p>浏览 <a href="https://github.com/bunkerity/bunkerweb-templates#installing-templates">BunkerWeb 模板仓库</a>并按照其安装指南操作。建议大多数用户使用 Web UI 方式；对于托管部署，文档中还介绍了插件目录结构。安装后，请通过简单模式或使用 <code>USE_TEMPLATE</code> 设置选择模板。</p>
+</div>
 <p>使用 Web 用户界面时，当您添加或编辑服务时，可以通过<strong>简单模式</strong>使用模板：</p>
 <figure>
 <p><img align="center," alt="概述" src="../../assets/img/templates-ui.png" width="800" />
@@ -1661,7 +1665,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

@@ -139,15 +139,15 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 ### Database compatibility matrix
 
-| Integration        | PostgreSQL                                | MariaDB             | MySQL              | SQLite      |
-| :----------------- | :---------------------------------------- | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Linux packages** | See notes below                           | See notes below     | See notes below    | ✅ Supported |
+| Integration        | PostgreSQL          | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :------------------ | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below     | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
-    - **PostgreSQL**: Alpine packages now ship with the `v18` client, so `v18` and earlier are supported out of the box; the all-in-one image still embeds `v17`, so `v18` is unsupported there.
+    - **PostgreSQL**: Alpine-based images, including all-in-one, now ship with the `v18` client, so `v18` and earlier are supported out of the box.
     - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
     - **SQLite**: Ships with the packages and is ready to use.
 
@@ -194,6 +194,10 @@ BunkerWeb leverages the power of templates to simplify the configuration process
     - **high**: An advanced template that focuses on robust security measures and comprehensive protection.
 
 - **Custom templates**: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.
+
+!!! tip "Ready-to-use community templates"
+
+    Browse the [BunkerWeb templates repository](https://github.com/bunkerity/bunkerweb-templates#installing-templates) and follow its installation guide. The web UI method is recommended for most users; a plugin layout is also documented for managed deployments. Once installed, select the template through easy mode or with the `USE_TEMPLATE` setting.
 
 With the web User Interface, templates are available through **easy mode** when you add or edit a service:
 

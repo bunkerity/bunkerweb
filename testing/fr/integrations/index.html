@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -229,7 +229,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../..",location),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -3132,6 +3132,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </ol>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">L'enregistrement inscrit votre instance auprès de l'API centrale de CrowdSec</p>
+<p>L'étape 1 enregistre l'agent auprès de l'API centrale (CAPI) de CrowdSec, et il s'agit d'un échange bidirectionnel. Votre instance <strong>reçoit</strong> la liste de blocage communautaire, et elle <strong>envoie</strong> un signal pour chaque alerte déclenchée par un scénario du hub non modifié : le nom du scénario, son hash et sa version, l'horodatage de la décision, un identifiant de machine, ainsi que l'adresse IP fautive avec ses données de géolocalisation lorsqu'elles sont disponibles. Les scénarios personnalisés, les scénarios modifiés et les décisions manuelles ne sont pas transmis. Voir <a href="#desactiver-lapi-centrale">Désactiver l'API centrale</a> pour une installation purement locale.</p>
+</div>
 <hr />
 <h4 id="collections-et-analyseurs-par-defaut">Collections et analyseurs par défaut</h4>
 <p>Au premier démarrage (ou après la mise à niveau), les ressources suivantes sont automatiquement installées et maintenues à jour :</p>
@@ -3203,12 +3207,12 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </div>
 <hr />
 <h4 id="desactiver-des-analyseurs-specifiques">Désactiver des analyseurs spécifiques</h4>
-<p>Si vous souhaitez conserver la configuration par défaut tout en désactivant explicitement un ou plusieurs analyseurs, fournissez une liste séparée par des espaces via <code>CROWDSEC_DISABLED_PARSERS</code> :</p>
+<p>Si vous souhaitez conserver la configuration par défaut tout en désactivant explicitement un ou plusieurs analyseurs, fournissez une liste séparée par des espaces via <code>CROWDSEC_DISABLE_PARSERS</code> :</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">USE_CROWDSEC</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-e<span class="w"> </span><span class="nv">CROWDSEC_DISABLED_PARSERS</span><span class="o">=</span><span class="s2">&quot;crowdsecurity/geoip-enrich foo/bar-parser&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">CROWDSEC_DISABLE_PARSERS</span><span class="o">=</span><span class="s2">&quot;crowdsecurity/geoip-enrich foo/bar-parser&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
@@ -3217,6 +3221,24 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p>Notes :
 - La liste est appliquée après l'installation/mise à jour des éléments requis ; seuls les analyseurs indiqués sont supprimés.
 - Utilisez les slugs du hub tels qu'affichés par <code>cscli parsers list</code> (ex. : <code>crowdsecurity/geoip-enrich</code>).</p>
+<hr />
+<h4 id="desactiver-lapi-centrale">Désactiver l'API centrale</h4>
+<p>Pour faire fonctionner CrowdSec entièrement en local, sans enregistrement ni trafic vers les serveurs de CrowdSec, définissez <code>DISABLE_ONLINE_API</code> à <code>true</code> :</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">USE_CROWDSEC</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">DISABLE_ONLINE_API</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Il s'agit du même nom de variable que celui utilisé par les images officielles CrowdSec, une configuration existante reste donc valable.</p>
+<p>Notes :
+- Votre instance cesse d'<strong>envoyer</strong> des signaux d'attaque et de <strong>recevoir</strong> la liste de blocage communautaire. La détection et la remédiation locales ne changent pas : les scénarios installés continuent de tourner et de bannir.
+- Le réglage est lu à chaque démarrage, vous pouvez donc le réactiver plus tard. Si l'instance était déjà enregistrée, les identifiants stockés sont supprimés lors de la désactivation, et un nouvel enregistrement est effectué si vous la réactivez.
+- Ne s'applique que si CrowdSec tourne dans le conteneur. Si <code>CROWDSEC_API</code> pointe vers une instance distante, c'est le réglage de cette instance qui compte.</p>
 <hr />
 <h4 id="basculement-appsec">Basculement AppSec</h4>
 <p>Les  fonctionnalités <a href="https://docs.crowdsec.net/docs/appsec/intro/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">CrowdSec AppSec</a>, optimisées par les  collections <code>appsec-virtual-patching</code> et <code>appsec-generic-rules</code> , sont <strong>activées par défaut</strong>.</p>
@@ -4190,8 +4212,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora fournit déjà NGINX 1.30.3, que nous prenons en charge</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.3
+<p>Fedora fournit déjà NGINX 1.30.4, que nous prenons en charge</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.4
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Désactiver l'assistant d'installation</p>
@@ -6835,7 +6857,7 @@ Pour déployer une machine virtuelle, vous avez besoin des autorisations Microso
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

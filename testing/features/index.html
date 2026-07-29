@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -229,7 +229,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("..",location),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -8633,7 +8633,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>PERMISSIONS_POLICY</code></td>
-<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...</code></td>
+<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...</code></td>
 <td>multisite</td>
 <td>no</td>
 <td><strong>Permissions Policy:</strong> Restricts browser feature access, reducing potential attack vectors.</td>
@@ -8654,6 +8654,7 @@ TrustedMonitor/\d+\.\d+
 <li>Use tools like <a href="https://observatory.mozilla.org/">Mozilla Observatory</a> to validate your header configuration.</li>
 <li>Test CSP in <code>Report-Only</code> mode before enforcing it to avoid breaking functionality.</li>
 <li>In <code>Report-Only</code> mode, an upstream <code>Content-Security-Policy</code> or <code>Content-Security-Policy-Report-Only</code> header is preserved by default (<code>KEEP_UPSTREAM_HEADERS</code>); remove the header name from that setting for BunkerWeb's own policy to take precedence.</li>
+<li>The default <code>PERMISSIONS_POLICY</code> also blocks client hints (<code>ch-*</code> directives); if a service relies on <code>Accept-CH</code> (for example client-hint responsive images or <code>Sec-CH-Prefers-Color-Scheme</code> dark-mode detection), override <code>PERMISSIONS_POLICY</code> to re-allow the needed <code>ch-*</code> features (for example <code>ch-dpr=(self)</code>).</li>
 </ul>
 </div>
 </div>
@@ -10241,6 +10242,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Max Redis Blocked Requests:</strong> Maximum number of blocked requests to store in Redis. Accepts <code>k</code>/<code>m</code> shorthand.</td>
 </tr>
 <tr>
+<td><code>METRICS_REDIS_TTL</code></td>
+<td><code>2592000</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Metrics Redis TTL:</strong> Seconds before Redis metrics keys expire (<code>0</code> = permanent); refreshed each sync so active data never expires, letting abandoned data become evictable under <code>volatile-lru</code> so Redis recovers from maxmemory. Accepts <code>k</code>/<code>m</code> shorthand.</td>
+</tr>
+<tr>
 <td><code>MAX_LRU_HISTORY</code></td>
 <td><code>1k</code></td>
 <td>global</td>
@@ -10262,7 +10270,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition info">
 <p class="admonition-title">Redis Integration</p>
-<p>When BunkerWeb is configured to use <a href="#redis">Redis</a>, the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances.</p>
+<p>When BunkerWeb is configured to use <a href="#redis">Redis</a>, the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances. Under Redis <code>maxmemory</code> pressure, new reports are buffered per-worker and synced once memory frees, so blocked-request reports are not lost while Redis is full.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Performance Considerations</p>
@@ -10271,6 +10279,10 @@ TrustedMonitor/\d+\.\d+
 <div class="admonition note">
 <p class="admonition-title">Worker-Specific Storage</p>
 <p>Each NGINX worker maintains its own metrics in memory. When accessing metrics through the API, data from all workers is automatically aggregated to provide a complete view.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Report Retention</p>
+<p>Blocked-request reports are a rolling buffer, not an audit log. Once the limit is reached, the oldest reports are dropped to make room for new ones, so the total shown in the web UI plateaus: without Redis that ceiling is <code>METRICS_MAX_BLOCKED_REQUESTS</code> multiplied by the number of NGINX workers on each instance, and with Redis it is <code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code>. Reports live in shared memory and are cleared whenever BunkerWeb restarts, including package upgrades, unless Redis is enabled and persisted. Ship the NGINX logs to a syslog server or a SIEM if you need long-term retention.</p>
 </div>
 <h3 id="example-configurations_22">Example Configurations</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Basic Configuration</label><label for="__tabbed_30_2">Low-Resource Environment</label><label for="__tabbed_30_3">High-Traffic Environment</label><label for="__tabbed_30_4">Metrics Disabled</label></div>
@@ -10461,8 +10473,8 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p><strong>HTTP Method Control</strong></p>
 <p>Restricting HTTP methods to only those required by your application is a fundamental security measure that adheres to the principle of least privilege. By explicitly defining acceptable HTTP methods, you can minimize the risk of exploitation through unused or dangerous methods.</p>
-<p>This feature is configured using the <code>ALLOWED_METHODS</code> setting, where methods are listed and separated by a <code>|</code> (default: <code>GET|POST|HEAD</code>). If a client attempts to use a method not listed, the server will respond with a <strong>405 - Method Not Allowed</strong> status.</p>
-<p>For most websites, the default <code>GET|POST|HEAD</code> is sufficient. If your application uses RESTful APIs, you may need to include methods like <code>PUT</code> and <code>DELETE</code>. Custom uppercase methods may also contain underscores and dashes for compatibility with non-standard protocols (e.g. <code>CCM_POST</code>, <code>M-SEARCH</code>).</p>
+<p>This feature is configured using the <code>ALLOWED_METHODS</code> setting, where methods are listed and separated by a <code>|</code> (default: <code>GET|POST|HEAD|QUERY</code>). If a client attempts to use a method not listed, the server will respond with a <strong>405 - Method Not Allowed</strong> status.</p>
+<p>For most websites, the default <code>GET|POST|HEAD|QUERY</code> is sufficient. If your application uses RESTful APIs, you may need to include methods like <code>PUT</code> and <code>DELETE</code>. Custom uppercase methods may also contain underscores and dashes for compatibility with non-standard protocols (e.g. <code>CCM_POST</code>, <code>M-SEARCH</code>).</p>
 <div class="admonition success">
 <p class="admonition-title">Security Benefits</p>
 <ul>
@@ -10484,7 +10496,7 @@ TrustedMonitor/\d+\.\d+
 <tbody>
 <tr>
 <td><code>ALLOWED_METHODS</code></td>
-<td><code>GET\|POST\|HEAD</code></td>
+<td><code>GET\|POST\|HEAD\|QUERY</code></td>
 <td>multisite</td>
 <td>no</td>
 <td><strong>HTTP Methods:</strong> List of HTTP methods that are allowed, separated by pipe characters. Custom uppercase methods may contain underscores and dashes.</td>
@@ -10954,8 +10966,8 @@ TrustedMonitor/\d+\.\d+
 <h3 id="available-crs-versions">Available CRS Versions</h3>
 <p>Select a CRS version to best match your security needs:</p>
 <ul>
-<li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9">v3.3.9</a>.</li>
-<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0">v4.27.0</a> (<strong>default</strong>).</li>
+<li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>.</li>
+<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.28.0">v4.28.0</a> (<strong>default</strong>).</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Nightly Build Deprecated</p>
@@ -11161,11 +11173,11 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Follow these steps to deploy mutual TLS with confidence:</p>
 <ol>
 <li><strong>Enable the feature:</strong> Set <code>USE_MTLS</code> to <code>yes</code> on the sites that require certificate authentication.</li>
-<li><strong>Provide the CA bundle:</strong> Store the trusted issuers in a PEM file and point <code>MTLS_CA_CERTIFICATE</code> to its absolute path.</li>
+<li><strong>Provide the CA bundle:</strong> Point <code>MTLS_CA_CERTIFICATE</code> at a PEM file readable by the Scheduler, or supply the bundle inline as base64/PEM data with <code>MTLS_CA_CERTIFICATE_DATA</code>. The Scheduler validates, caches, and distributes the bundle to every instance, so no per-instance mounting is needed.</li>
 <li><strong>Select the verification mode:</strong> Pick <code>on</code> for mandatory certificates, <code>optional</code> to allow fallbacks, or <code>optional_no_ca</code> for temporary diagnostics.</li>
 <li><strong>Tune chain depth:</strong> Adjust <code>MTLS_VERIFY_DEPTH</code> if your organization issues intermediate certificates beyond the default depth.</li>
 <li><strong>Forward results (optional):</strong> Keep <code>MTLS_FORWARD_CLIENT_HEADERS</code> at <code>yes</code> when upstream services should inspect the presented certificate.</li>
-<li><strong>Maintain revocation data:</strong> If you publish a CRL, set <code>MTLS_CRL</code> so BunkerWeb can deny revoked certificates.</li>
+<li><strong>Maintain revocation data:</strong> If you publish a CRL, set <code>MTLS_CRL</code> (or <code>MTLS_CRL_DATA</code>) so BunkerWeb can deny revoked certificates.</li>
 </ol>
 <h3 id="configuration-settings_22">Configuration Settings</h3>
 <table>
@@ -11187,11 +11199,25 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>Use mutual TLS:</strong> Enable client certificate authentication for the current site.</td>
 </tr>
 <tr>
+<td><code>MTLS_CA_CERTIFICATE_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Client CA bundle priority:</strong> Source of the client CA bundle: <code>file</code> (path) or <code>data</code> (base64/PEM).</td>
+</tr>
+<tr>
 <td><code>MTLS_CA_CERTIFICATE</code></td>
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Client CA bundle:</strong> Absolute path to the trusted client CA bundle (PEM). Required when <code>MTLS_VERIFY_CLIENT</code> is <code>on</code> or <code>optional</code>; must be readable.</td>
+<td><strong>Client CA bundle path:</strong> Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when <code>MTLS_VERIFY_CLIENT</code> is <code>on</code> or <code>optional</code>.</td>
+</tr>
+<tr>
+<td><code>MTLS_CA_CERTIFICATE_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Client CA bundle data:</strong> Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).</td>
 </tr>
 <tr>
 <td><code>MTLS_VERIFY_CLIENT</code></td>
@@ -11222,21 +11248,35 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>Forward client headers:</strong> Propagate verification results (<code>X-SSL-Client-*</code> headers with status, DN, issuer, serial, fingerprint, validity window).</td>
 </tr>
 <tr>
+<td><code>MTLS_CRL_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Client CRL priority:</strong> Source of the CRL: <code>file</code> (path) or <code>data</code> (base64/PEM).</td>
+</tr>
+<tr>
 <td><code>MTLS_CRL</code></td>
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Client CRL path:</strong> Optional path to a PEM-encoded certificate revocation list. Applied only when the CA bundle is successfully loaded.</td>
+<td><strong>Client CRL path:</strong> Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain.</td>
+</tr>
+<tr>
+<td><code>MTLS_CRL_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Client CRL data:</strong> Certificate revocation list supplied directly as base64 or plaintext PEM.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition tip">
-<p class="admonition-title">Keep certificates up to date</p>
-<p>Store CA bundles and revocation lists in a mounted volume that the Scheduler can read so that restarts pick up the latest trust anchors.</p>
+<p class="admonition-title">Configure once, distributed everywhere</p>
+<p>CA bundles and revocation lists do not need to be mounted into the BunkerWeb containers. Supply them to the Scheduler only, as a file path or inline data; the Scheduler validates them, caches them, and distributes them to every instance. Updates are picked up and redistributed automatically on the next job run.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Provide the CA bundle for strict modes</p>
-<p>When <code>MTLS_VERIFY_CLIENT</code> is <code>on</code> or <code>optional</code>, the CA file must exist at runtime. If it is missing, BunkerWeb skips the mTLS directives so the service does not boot with an invalid path. Use <code>optional_no_ca</code> only for diagnostics because it weakens client authentication.</p>
+<p>When <code>MTLS_VERIFY_CLIENT</code> is <code>on</code> or <code>optional</code>, the Scheduler must be able to validate and cache a client CA bundle. If none is available, BunkerWeb skips the mTLS directives on every instance so the service does not run with an invalid or missing certificate reference. Use <code>optional_no_ca</code> only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent <code>/var/cache/bunkerweb</code>, mTLS stays disabled until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Trusted certificate vs. verification</p>
@@ -14884,7 +14924,7 @@ TrustedMonitor/\d+\.\d+
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../assets/extra.js"></script>
       

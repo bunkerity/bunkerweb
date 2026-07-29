@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -229,7 +229,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../..",location),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -1367,22 +1367,22 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v18</code> und früher (all-in-one: ✅ <code>v17</code>)</td>
-<td style="text-align: left;">✅ <code>v11</code> und früher</td>
+<td style="text-align: left;">✅ <code>v18</code> und früher</td>
+<td style="text-align: left;">✅ <code>v12</code> und früher</td>
 <td style="text-align: left;">✅ <code>v9</code> und früher</td>
 <td style="text-align: left;">✅ Unterstützt</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> und früher</td>
-<td style="text-align: left;">✅ <code>v11</code> und früher</td>
+<td style="text-align: left;">✅ <code>v12</code> und früher</td>
 <td style="text-align: left;">✅ <code>v9</code> und früher</td>
 <td style="text-align: left;">✅ Unterstützt</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> und früher</td>
-<td style="text-align: left;">✅ <code>v11</code> und früher</td>
+<td style="text-align: left;">✅ <code>v12</code> und früher</td>
 <td style="text-align: left;">✅ <code>v9</code> und früher</td>
 <td style="text-align: left;">✅ Unterstützt</td>
 </tr>
@@ -1398,7 +1398,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">Hinweise</p>
 <ul>
-<li><strong>PostgreSQL</strong>: Alpine-basierte Pakete enthalten jetzt den <code>v18</code>-Client, daher werden <code>v18</code> und frühere Versionen standardmäßig unterstützt; das all-in-one-Image enthält weiterhin den <code>v17</code>-Client, daher wird <code>v18</code> dort nicht unterstützt.</li>
+<li><strong>PostgreSQL</strong>: Alpine-basierte Images, einschließlich des all-in-one-Images, enthalten jetzt den <code>v18</code>-Client; daher werden <code>v18</code> und frühere Versionen standardmäßig unterstützt.</li>
 <li><strong>Linux</strong>: Die Unterstützung hängt von den Paketen Ihrer Distribution ab. Bei Bedarf können Sie Datenbank-Clients manuell aus den Hersteller-Repositorys installieren (dies ist bei RHEL normalerweise erforderlich).</li>
 <li><strong>SQLite</strong>: Wird mit den Paketen ausgeliefert und ist sofort einsatzbereit.</li>
 </ul>
@@ -1458,6 +1458,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>Benutzerdefinierte Vorlagen</strong>: Zusätzlich zu den vordefinierten Vorlagen ermöglicht BunkerWeb den Benutzern, benutzerdefinierte Vorlagen zu erstellen, die auf ihre spezifischen Anforderungen zugeschnitten sind. Benutzerdefinierte Vorlagen ermöglichen die Feinabstimmung von Einstellungen und benutzerdefinierten Konfigurationen und stellen sicher, dass BunkerWeb perfekt auf die Bedürfnisse des Benutzers abgestimmt ist.</p>
 </li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Sofort einsatzbereite Community-Vorlagen</p>
+<p>Durchsuchen Sie das <a href="https://github.com/bunkerity/bunkerweb-templates#installing-templates">BunkerWeb-Vorlagen-Repository</a> und folgen Sie der Installationsanleitung. Die Web-UI-Methode wird für die meisten Benutzer empfohlen; für verwaltete Bereitstellungen ist außerdem eine Plugin-Struktur dokumentiert. Wählen Sie die Vorlage nach der Installation im Einfachmodus oder über die Einstellung <code>USE_TEMPLATE</code> aus.</p>
+</div>
 <p>Mit der Web-Benutzeroberfläche sind Vorlagen über den <strong>Einfachmodus</strong> verfügbar, wenn Sie einen Dienst hinzufügen oder bearbeiten:</p>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/templates-ui.png" width="800" />
@@ -1661,7 +1665,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

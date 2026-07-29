@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -229,7 +229,7 @@
     </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../..",location),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -8582,7 +8582,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>PERMISSIONS_POLICY</code></td>
-<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...</code></td>
+<td><code>accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...</code></td>
 <td>multisite</td>
 <td>non</td>
 <td><strong>Politique de permissions :</strong> Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.</td>
@@ -8603,6 +8603,7 @@ TrustedMonitor/\d+\.\d+
 <li>Utilisez des outils comme <a href="https://observatory.mozilla.org/">Mozilla Observatory</a> pour valider la configuration de vos en-têtes.</li>
 <li>Testez la CSP en mode <code>Report-Only</code> avant de l'appliquer pour éviter de casser des fonctionnalités.</li>
 <li>En mode <code>Report-Only</code>, un en-tête <code>Content-Security-Policy</code> ou <code>Content-Security-Policy-Report-Only</code> fourni par l'amont est conservé par défaut (<code>KEEP_UPSTREAM_HEADERS</code>) ; retirez le nom de l'en-tête de ce paramètre pour que la politique de BunkerWeb prenne le dessus.</li>
+<li>La <code>PERMISSIONS_POLICY</code> par défaut bloque également les client hints (directives <code>ch-*</code>) ; si un service dépend d'<code>Accept-CH</code> (par exemple des images adaptatives basées sur les client hints ou la détection du mode sombre via <code>Sec-CH-Prefers-Color-Scheme</code>), personnalisez <code>PERMISSIONS_POLICY</code> pour réautoriser les fonctionnalités <code>ch-*</code> nécessaires (par exemple <code>ch-dpr=(self)</code>).</li>
 </ul>
 </div>
 </div>
@@ -10216,6 +10217,10 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Stockage spécifique aux workers</p>
 <p>Chaque worker NGINX maintient ses propres métriques en mémoire. Lors de l'accès aux métriques via l'API, les données de tous les workers sont automatiquement agrégées pour fournir une vue complète.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Rétention des rapports</p>
+<p>Les rapports de requêtes bloquées forment un tampon circulaire, pas un journal d'audit. Une fois la limite atteinte, les rapports les plus anciens sont supprimés pour laisser place aux nouveaux, ce qui fait plafonner le total affiché dans la Web UI : sans Redis, ce plafond vaut <code>METRICS_MAX_BLOCKED_REQUESTS</code> multiplié par le nombre de workers NGINX de chaque instance, et avec Redis il vaut <code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code>. Les rapports résident en mémoire partagée et sont effacés à chaque redémarrage de BunkerWeb, y compris lors des mises à jour de paquets, sauf si Redis est activé et persistant. Exportez les logs NGINX vers un serveur syslog ou un SIEM si vous avez besoin d'une rétention longue durée.</p>
+</div>
 <h3 id="exemples-de-configuration_11">Exemples de configuration</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Configuration de base</label><label for="__tabbed_30_2">Environnement à faibles ressources</label><label for="__tabbed_30_3">Environnement à fort trafic</label><label for="__tabbed_30_4">Métriques désactivées</label></div>
 <div class="tabbed-content">
@@ -10405,8 +10410,8 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p><strong>Contrôle des méthodes HTTP</strong></p>
 <p>Restreindre les méthodes HTTP à celles requises par votre application est une mesure de sécurité fondamentale qui respecte le principe du moindre privilège. En définissant explicitement les méthodes acceptables, vous minimisez le risque d'exploitation via des méthodes inutilisées ou dangereuses.</p>
-<p>Cette fonctionnalité est configurée avec <code>ALLOWED_METHODS</code>, où les méthodes sont listées et séparées par un <code>|</code> (défaut : <code>GET|POST|HEAD</code>). Si un client tente une méthode non listée, le serveur répondra avec un statut <strong>405 - Method Not Allowed</strong>.</p>
-<p>Pour la plupart des sites web, le défaut <code>GET|POST|HEAD</code> est suffisant. Si votre application utilise des API RESTful, vous devrez peut-être inclure <code>PUT</code> et <code>DELETE</code>. Les méthodes personnalisées en majuscules peuvent également contenir des underscores et des tirets pour la compatibilité avec des protocoles non standards (ex. <code>CCM_POST</code>, <code>M-SEARCH</code>).</p>
+<p>Cette fonctionnalité est configurée avec <code>ALLOWED_METHODS</code>, où les méthodes sont listées et séparées par un <code>|</code> (défaut : <code>GET|POST|HEAD|QUERY</code>). Si un client tente une méthode non listée, le serveur répondra avec un statut <strong>405 - Method Not Allowed</strong>.</p>
+<p>Pour la plupart des sites web, le défaut <code>GET|POST|HEAD|QUERY</code> est suffisant. Si votre application utilise des API RESTful, vous devrez peut-être inclure <code>PUT</code> et <code>DELETE</code>. Les méthodes personnalisées en majuscules peuvent également contenir des underscores et des tirets pour la compatibilité avec des protocoles non standards (ex. <code>CCM_POST</code>, <code>M-SEARCH</code>).</p>
 <div class="admonition success">
 <p class="admonition-title">Avantages en matière de sécurité</p>
 <ul>
@@ -10428,7 +10433,7 @@ TrustedMonitor/\d+\.\d+
 <tbody>
 <tr>
 <td><code>ALLOWED_METHODS</code></td>
-<td><code>GET\|POST\|HEAD</code></td>
+<td><code>GET\|POST\|HEAD\|QUERY</code></td>
 <td>multisite</td>
 <td>no</td>
 <td><strong>Méthodes HTTP :</strong> Liste des méthodes HTTP autorisées, séparées par des barres verticales (<code>|</code>). Les méthodes personnalisées en majuscules peuvent contenir des underscores et des tirets.</td>
@@ -10898,8 +10903,8 @@ TrustedMonitor/\d+\.\d+
 <h3 id="versions-du-crs-disponibles">Versions du CRS disponibles</h3>
 <p>Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :</p>
 <ul>
-<li><strong><code>3</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9">v3.3.9</a>.</li>
-<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0">v4.27.0</a> (<strong>par défaut</strong>).</li>
+<li><strong><code>3</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>.</li>
+<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.28.0">v4.28.0</a> (<strong>par défaut</strong>).</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Version de nuit obsolète</p>
@@ -11103,11 +11108,11 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Suivez ces étapes pour déployer le mutual TLS sereinement :</p>
 <ol>
 <li><strong>Activer la fonctionnalité :</strong> positionnez <code>USE_MTLS</code> à <code>yes</code> sur les sites qui nécessitent l’authentification par certificat.</li>
-<li><strong>Fournir le bundle d’AC :</strong> stockez vos autorités de confiance dans un fichier PEM et renseignez <code>MTLS_CA_CERTIFICATE</code> avec son chemin absolu.</li>
+<li><strong>Fournir le bundle d’AC :</strong> renseignez <code>MTLS_CA_CERTIFICATE</code> avec le chemin d’un fichier PEM lisible par le Scheduler, ou fournissez le bundle directement sous forme de données base64/PEM via <code>MTLS_CA_CERTIFICATE_DATA</code>. Le Scheduler valide, met en cache et distribue le bundle à chaque instance, sans montage nécessaire par instance.</li>
 <li><strong>Choisir le mode de vérification :</strong> sélectionnez <code>on</code> pour rendre les certificats obligatoires, <code>optional</code> pour offrir un repli ou <code>optional_no_ca</code> pour un diagnostic temporaire.</li>
 <li><strong>Ajuster la profondeur de chaîne :</strong> adaptez <code>MTLS_VERIFY_DEPTH</code> si votre organisation utilise plusieurs intermédiaires.</li>
 <li><strong>Transmettre le résultat (optionnel) :</strong> laissez <code>MTLS_FORWARD_CLIENT_HEADERS</code> à <code>yes</code> si vos services amont doivent inspecter le certificat présenté.</li>
-<li><strong>Maintenir la révocation :</strong> si vous publiez une CRL, renseignez <code>MTLS_CRL</code> pour que BunkerWeb refuse les certificats révoqués.</li>
+<li><strong>Maintenir la révocation :</strong> si vous publiez une CRL, renseignez <code>MTLS_CRL</code> (ou <code>MTLS_CRL_DATA</code>) pour que BunkerWeb refuse les certificats révoqués.</li>
 </ol>
 <h3 id="parametres-de-configuration_10">Paramètres de configuration</h3>
 <table>
@@ -11126,21 +11131,35 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>no</code></td>
 <td>multisite</td>
 <td>non</td>
-<td><strong>Activer le mutual TLS :</strong> active l’authentification par certificat client pour le site courant.</td>
+<td><strong>Activer le mutual TLS :</strong> active l’authentification par certificat client pour le site courant.</td>
+</tr>
+<tr>
+<td><code>MTLS_CA_CERTIFICATE_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Priorité du bundle d’AC client :</strong> source du bundle d’AC client : <code>file</code> (chemin) ou <code>data</code> (base64/PEM).</td>
 </tr>
 <tr>
 <td><code>MTLS_CA_CERTIFICATE</code></td>
 <td></td>
 <td>multisite</td>
 <td>non</td>
-<td><strong>Bundle d’AC client :</strong> chemin absolu vers le bundle d’AC clients (PEM). Requis lorsque <code>MTLS_VERIFY_CLIENT</code> vaut <code>on</code> ou <code>optional</code>; doit être lisible.</td>
+<td><strong>Chemin du bundle d’AC client :</strong> chemin vers le bundle d’AC clients (PEM), lisible par le Scheduler. Requis lorsque <code>MTLS_VERIFY_CLIENT</code> vaut <code>on</code> ou <code>optional</code>.</td>
+</tr>
+<tr>
+<td><code>MTLS_CA_CERTIFICATE_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Données du bundle d’AC client :</strong> bundle d’AC client fourni directement en base64 ou PEM (p. ex. via l’interface web).</td>
 </tr>
 <tr>
 <td><code>MTLS_VERIFY_CLIENT</code></td>
 <td><code>on</code></td>
 <td>multisite</td>
 <td>non</td>
-<td><strong>Mode de vérification :</strong> choisissez si les certificats sont requis (<code>on</code>), optionnels (<code>optional</code>) ou acceptés sans validation d’AC (<code>optional_no_ca</code>).</td>
+<td><strong>Mode de vérification :</strong> choisissez si les certificats sont requis (<code>on</code>), optionnels (<code>optional</code>) ou acceptés sans validation d’AC (<code>optional_no_ca</code>).</td>
 </tr>
 <tr>
 <td><code>MTLS_URL</code></td>
@@ -11154,31 +11173,45 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>2</code></td>
 <td>multisite</td>
 <td>non</td>
-<td><strong>Profondeur de vérification :</strong> profondeur maximale de chaîne acceptée pour les certificats clients.</td>
+<td><strong>Profondeur de vérification :</strong> profondeur maximale de chaîne acceptée pour les certificats clients.</td>
 </tr>
 <tr>
 <td><code>MTLS_FORWARD_CLIENT_HEADERS</code></td>
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>non</td>
-<td><strong>Transmettre les en-têtes client :</strong> propage les résultats de vérification (<code>X-SSL-Client-*</code> avec statut, DN, émetteur, numéro de série, empreinte, validité).</td>
+<td><strong>Transmettre les en-têtes client :</strong> propage les résultats de vérification (<code>X-SSL-Client-*</code> avec statut, DN, émetteur, numéro de série, empreinte, validité).</td>
+</tr>
+<tr>
+<td><code>MTLS_CRL_PRIORITY</code></td>
+<td><code>file</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Priorité de la CRL client :</strong> source de la CRL : <code>file</code> (chemin) ou <code>data</code> (base64/PEM).</td>
 </tr>
 <tr>
 <td><code>MTLS_CRL</code></td>
 <td></td>
 <td>multisite</td>
 <td>non</td>
-<td><strong>Chemin de la CRL client :</strong> chemin optionnel vers une liste de révocation de certificats encodée en PEM. Appliqué uniquement si le bundle d’AC est chargé avec succès.</td>
+<td><strong>Chemin de la CRL client :</strong> chemin optionnel vers une liste de révocation de certificats encodée en PEM, lisible par le Scheduler. Appliqué uniquement si le bundle d’AC est chargé avec succès. NGINX exige que le fichier de CRL contienne une CRL pour chaque AC de la chaîne de vérification.</td>
+</tr>
+<tr>
+<td><code>MTLS_CRL_DATA</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Données de la CRL client :</strong> liste de révocation fournie directement en base64 ou PEM.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition tip">
-<p class="admonition-title">Maintenez les certificats à jour</p>
-<p>Stockez bundles d’AC et listes de révocation dans un volume monté accessible par le Scheduler pour que chaque redémarrage récupère les ancrages de confiance récents.</p>
+<p class="admonition-title">Configurez une fois, distribué partout</p>
+<p>Les bundles d’AC et les listes de révocation n’ont pas besoin d’être montés dans les conteneurs BunkerWeb. Fournissez-les uniquement au Scheduler, sous forme de chemin de fichier ou de données en ligne ; le Scheduler les valide, les met en cache et les distribue à chaque instance. Les mises à jour sont prises en compte et redistribuées automatiquement lors de la prochaine exécution du job.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Bundle d’AC obligatoire en mode strict</p>
-<p>Lorsque <code>MTLS_VERIFY_CLIENT</code> vaut <code>on</code> ou <code>optional</code>, le fichier d’AC doit être présent à l’exécution. S’il manque, BunkerWeb ignore les directives mTLS pour éviter un démarrage sur un chemin invalide. Réservez <code>optional_no_ca</code> au diagnostic, car ce mode affaiblit l’authentification.</p>
+<p>Lorsque <code>MTLS_VERIFY_CLIENT</code> vaut <code>on</code> ou <code>optional</code>, le Scheduler doit pouvoir valider et mettre en cache un bundle d’AC client. En l’absence de bundle valide, BunkerWeb ignore les directives mTLS sur chaque instance afin que le service ne tourne pas avec une référence de certificat invalide ou manquante. Réservez <code>optional_no_ca</code> au diagnostic, car ce mode affaiblit l’authentification. Après un redémarrage du Scheduler avec un <code>/var/cache/bunkerweb</code> non persistant, le mTLS reste désactivé jusqu’à ce que la première exécution du job se termine et redistribue le bundle d’AC ; utilisez donc un volume de cache persistant lorsqu’une politique d’application stricte est requise.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Certificat approuvé vs. vérification</p>
@@ -14786,7 +14819,7 @@ TrustedMonitor/\d+\.\d+
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

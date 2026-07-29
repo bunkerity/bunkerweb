@@ -97,6 +97,24 @@ def _get_page_title(content):
     return None
 
 
+def _write_page_sitemaps(site_dir):
+    """Copy the root sitemap beside each page for Material's language selector."""
+    sitemap = site_dir / "sitemap.xml"
+    if not sitemap.is_file():
+        log.warning("llmstxt: Root sitemap not found; page-local copies were not generated")
+        return 0
+
+    content = sitemap.read_bytes()
+    count = 0
+    for index_path in site_dir.rglob("index.html"):
+        target = index_path.parent / "sitemap.xml"
+        if target == sitemap:
+            continue
+        target.write_bytes(content)
+        count += 1
+    return count
+
+
 def on_post_build(config, **kwargs):
     """Generate llms.txt and llms-full.txt after the build completes."""
     site_dir = Path(config["site_dir"])
@@ -167,3 +185,6 @@ def on_post_build(config, **kwargs):
     llms_full = site_dir / "llms-full.txt"
     llms_full.write_text("\n".join(full_parts), encoding="utf-8")
     log.info("llmstxt: Generated %s (%dKB)", llms_full, llms_full.stat().st_size // 1024)
+
+    sitemap_count = _write_page_sitemaps(site_dir)
+    log.info("llmstxt: Generated %d page-local sitemap copies", sitemap_count)
