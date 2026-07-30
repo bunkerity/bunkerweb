@@ -576,8 +576,14 @@ class Configurator:
         api_ext = extensions.get("api")
         db_ext = extensions.get("db")
         config_ext = extensions.get("config")
-        if api_ext is db_ext is config_ext is None:
-            return (False, f"Invalid extensions for plugin {plugin_id} (Must declare 'api', 'db' and/or 'config')")
+        # 'activation' and 'certificate_source' are purely declarative — no plugin code is
+        # loaded for them — so a manifest may carry either on its own. Requiring api/db/config
+        # here rejected the whole plugin: ssl, misc, errors, headers, sessions, antibot,
+        # country, inject, limit, php, pro and redirect all declare activation alone, so all
+        # twelve were dropped and NGINX rendered an empty `ssl_protocols ;`.
+        declarative_ext = extensions.get("activation") is not None or extensions.get("certificate_source") is not None
+        if api_ext is db_ext is config_ext is None and not declarative_ext:
+            return (False, f"Invalid extensions for plugin {plugin_id} (Must declare 'api', 'db', 'config', 'activation' and/or 'certificate_source')")
 
         if api_ext is not None:
             if not isinstance(api_ext, dict):

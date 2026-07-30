@@ -60,6 +60,35 @@ class TestValidExtensions:
         ok, _ = c._Configurator__validate_plugin(dict(BASE))
         assert ok
 
+    def test_activation_always_alone_is_valid(self, tmp_path):
+        """Declarative-only blocks must not sink the plugin.
+
+        Requiring api/db/config here dropped twelve core plugins that declare nothing
+        but activation — ssl among them — so NGINX rendered an empty `ssl_protocols ;`
+        and refused to start.
+        """
+        assert _validate(tmp_path, {"activation": "always"})[0]
+
+    def test_activation_map_alone_is_valid(self, tmp_path):
+        assert _validate(tmp_path, {"activation": {"USE_LIMIT_REQ": "no"}})[0]
+
+    def test_certificate_source_alone_is_valid(self, tmp_path):
+        assert _validate(tmp_path, {"certificate_source": {"label": "Custom", "renews": False}})[0]
+
+    def test_every_shipped_core_manifest_validates(self, tmp_path):
+        """The regression this class exists for is only caught end to end."""
+        from json import loads
+        from pathlib import Path
+
+        c = _configurator(tmp_path)
+        core = Path(__file__).resolve().parents[3] / "src" / "common" / "core"
+        rejected = []
+        for manifest in sorted(core.glob("*/plugin.json")):
+            ok, msg = c._Configurator__validate_plugin(loads(manifest.read_text(encoding="utf-8")))
+            if not ok:
+                rejected.append(f"{manifest.parent.name}: {msg}")
+        assert not rejected, "shipped core plugins rejected by their own validator: " + "; ".join(rejected)
+
 
 def _validate_setting(tmp_path, setting):
     c = _configurator(tmp_path)
