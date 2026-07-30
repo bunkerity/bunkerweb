@@ -174,6 +174,78 @@ spec:
               value: "yes"
             - name: REDIS_HOST
               value: "svc-bunkerweb-redis.default.svc.cluster.local"
+            - name: API_URL
+              value: "http://svc-bunkerweb-api.default.svc.cluster.local:8888"
+            - name: API_TOKEN
+              value: "changeme"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-api
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-api
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-api
+    spec:
+      serviceAccountName: sa-bunkerweb
+      containers:
+        - name: bunkerweb-api
+          image: bunkerity/bunkerweb-api:1.7.0-beta
+          imagePullPolicy: Always
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            - name: DATABASE_URI
+              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+            - name: API_TOKEN
+              value: "changeme"
+            - name: CELERY_BROKER_URL
+              value: "redis://svc-bunkerweb-redis.default.svc.cluster.local:6379/1"
+            - name: API_USERNAME
+              value: "changeme"
+            - name: API_PASSWORD
+              value: "changeme"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-worker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-worker
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-worker
+    spec:
+      serviceAccountName: sa-bunkerweb
+      containers:
+        - name: bunkerweb-worker
+          image: bunkerity/bunkerweb-worker:1.7.0-beta
+          imagePullPolicy: Always
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"
+            - name: DATABASE_URI
+              value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+            - name: API_URL
+              value: "http://svc-bunkerweb-api.default.svc.cluster.local:8888"
+            - name: API_TOKEN
+              value: "changeme"
+            - name: CELERY_BROKER_URL
+              value: "redis://svc-bunkerweb-redis.default.svc.cluster.local:6379/1"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -257,6 +329,20 @@ spec:
       protocol: TCP
       port: 3306
       targetPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-api
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
 ---
 apiVersion: v1
 kind: Service

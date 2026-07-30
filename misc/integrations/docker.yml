@@ -1,5 +1,7 @@
 x-env: &env
   API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
 
 services:
   bunkerweb:
@@ -25,6 +27,21 @@ services:
       <<: *env
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "www.example.com"
+    networks:
+      - bw-universe
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    volumes:
+      # Shares the scheduler's SQLite file (both run as uid 101). No bw-worker here for the
+      # same reason: it runs as uid 102 and could not read this volume, so this stack runs no
+      # background jobs (no certbot renewal, no blocklist downloads). Use one of the
+      # docker.<engine>.yml stacks, where every component reaches the database over the network.
+      - bw-storage:/data
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "changeme"
     networks:
       - bw-universe
 

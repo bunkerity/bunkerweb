@@ -1,5 +1,8 @@
 x-env: &env
   DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
@@ -40,6 +43,32 @@ services:
       - bw-universe
       - bw-db
 
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "changeme"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    depends_on:
+      - bw-api
+      - bw-jobs-broker
+    volumes:
+      # Its own volume on purpose: the worker runs as uid 102 and the scheduler/API as 101,
+      # so a shared /data would be unreadable to one of them.
+      - bw-worker-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+    networks:
+      - bw-universe
+      - bw-db
+
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.7.0-beta
     environment:
@@ -49,6 +78,32 @@ services:
     networks:
       - bw-universe
       - bw-db
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # noeviction on purpose: a broker that evicts under memory pressure drops queued
+    # jobs on the floor, and nothing upstream would notice.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "no",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
 
   bw-db:
     image: mariadb:11
@@ -64,6 +119,7 @@ services:
       - bw-db
 
 volumes:
+  bw-worker-storage:
   bw-data:
   bw-storage:
 

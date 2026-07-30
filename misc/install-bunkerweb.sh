@@ -242,6 +242,7 @@ DOCKER_HTTPS_PORT="443"            # bunkerweb HTTPS+QUIC (container 8443 tcp+ud
 DOCKER_API_PORT="5000"             # worker internal API (container 5000)
 DOCKER_UI_PORT="7000"              # manager/ui Web UI   (container 7000)
 DOCKER_FASTAPI_PORT="8888"         # api FastAPI service (container 8888)
+DOCKER_API_URL="http://127.0.0.1:8888"  # external API base URL for the split ui docker type
 
 # ---------------------------------------------------------------------------
 # Save-state / resume — checkpoints the fresh-install flow so a crash or Ctrl+C
@@ -1437,11 +1438,14 @@ render_docker_env() {
                 ;;
             ui)
                 printf 'DATABASE_URI=%s\n' "$DOCKER_DATABASE_URI"
+                printf 'API_URL=%s\n' "$DOCKER_API_URL"
+                printf 'API_TOKEN=%s\n' "$DOCKER_API_TOKEN_GENERATED"
                 printf 'UI_PORT=%s\n' "$DOCKER_UI_PORT"
                 _docker_env_admin_block
                 ;;
             api)
                 printf 'DATABASE_URI=%s\n' "$DOCKER_DATABASE_URI"
+                printf 'API_TOKEN=%s\n' "$DOCKER_API_TOKEN_GENERATED"
                 printf 'API_USERNAME=%s\n' "$API_USERNAME_INPUT"
                 printf 'API_PASSWORD=%s\n' "$API_PASSWORD_INPUT"
                 printf 'FASTAPI_PORT=%s\n' "$DOCKER_FASTAPI_PORT"
@@ -1465,6 +1469,8 @@ x-bw-env: &bw-env
   API_WHITELIST_IP: "${API_WHITELIST_IP}"
   API_TOKEN: "${API_TOKEN}"
   DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
+  API_URL: "http://bw-api:8888"
+  CELERY_BROKER_URL: "redis://redis:6379/1"
 
 services:
   bunkerweb:
@@ -1492,6 +1498,34 @@ services:
       REDIS_HOST: "redis"
     volumes:
       - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:${BW_TAG}
+    environment:
+      <<: *bw-env
+      API_TOKEN: "${API_TOKEN}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:${BW_TAG}
+    depends_on:
+      - bw-api
+      - redis
+    environment:
+      <<: *bw-env
+      API_TOKEN: "${API_TOKEN}"
+      BUNKERWEB_INSTANCES: "bunkerweb"
+    volumes:
+      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
+      # so a shared /data would be unreadable to one of them.
+      - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1540,6 +1574,7 @@ services:
       - bw-universe
 
 volumes:
+  bw-worker-storage:
   bw-data:
   bw-storage:
   redis-data:
@@ -1564,6 +1599,8 @@ render_docker_compose_autoconf() {
 x-ui-env: &bw-ui-env
   AUTOCONF_MODE: "yes"
   DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
+  API_URL: "http://bw-api:8888"
+  CELERY_BROKER_URL: "redis://redis:6379/1"
 
 services:
   bunkerweb:
@@ -1597,6 +1634,34 @@ services:
       REDIS_HOST: "redis"
     volumes:
       - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:${BW_TAG}
+    environment:
+      <<: *bw-ui-env
+      API_TOKEN: "${API_TOKEN}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:${BW_TAG}
+    depends_on:
+      - bw-api
+      - redis
+    environment:
+      <<: *bw-ui-env
+      API_TOKEN: "${API_TOKEN}"
+      BUNKERWEB_INSTANCES: ""
+    volumes:
+      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
+      # so a shared /data would be unreadable to one of them.
+      - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1668,6 +1733,7 @@ services:
       - bw-universe
 
 volumes:
+  bw-worker-storage:
   bw-data:
   bw-storage:
   redis-data:
@@ -1694,6 +1760,8 @@ x-bw-env: &bw-env
   API_WHITELIST_IP: "${API_WHITELIST_IP}"
   API_TOKEN: "${API_TOKEN}"
   DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
+  API_URL: "http://bw-api:8888"
+  CELERY_BROKER_URL: "redis://redis:6379/1"
 
 services:
   bw-scheduler:
@@ -1708,6 +1776,34 @@ services:
       REDIS_HOST: "redis"
     volumes:
       - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:${BW_TAG}
+    environment:
+      <<: *bw-env
+      API_TOKEN: "${API_TOKEN}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:${BW_TAG}
+    depends_on:
+      - bw-api
+      - redis
+    environment:
+      <<: *bw-env
+      API_TOKEN: "${API_TOKEN}"
+      BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
+    volumes:
+      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
+      # so a shared /data would be unreadable to one of them.
+      - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1758,6 +1854,7 @@ services:
       - bw-universe
 
 volumes:
+  bw-worker-storage:
   bw-data:
   bw-storage:
   redis-data:
@@ -1816,12 +1913,40 @@ services:
       BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
       API_WHITELIST_IP: "${API_WHITELIST_IP}"
       API_TOKEN: "${API_TOKEN}"
+      API_URL: "http://bw-api:8888"
+  CELERY_BROKER_URL: "redis://redis:6379/1"
       SERVER_NAME: ""
       MULTISITE: "yes"
       USE_REDIS: "yes"
       REDIS_HOST: "redis"
     volumes:
       - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:${BW_TAG}
+    environment:
+      DATABASE_URI: "${DATABASE_URI}"
+      API_TOKEN: "${API_TOKEN}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:${BW_TAG}
+    depends_on:
+      - bw-api
+      - redis
+    environment:
+      DATABASE_URI: "${DATABASE_URI}"
+      API_TOKEN: "${API_TOKEN}"
+      BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
+    volumes:
+      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
+      # so a shared /data would be unreadable to one of them.
+      - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1842,6 +1967,7 @@ services:
 
 volumes:
   bw-storage:
+  bw-worker-storage:
   redis-data:
 
 # Network is project-scoped (Compose prefixes it with COMPOSE_PROJECT_NAME) and
@@ -1863,6 +1989,9 @@ services:
       - "${UI_PORT}:7000/tcp"
     environment:
       DATABASE_URI: "${DATABASE_URI}"
+      # Point this at the host running the api stack, then set the same API_TOKEN there.
+      API_URL: "${API_URL}"
+      API_TOKEN: "${API_TOKEN}"
       ADMIN_USERNAME: "${ADMIN_USERNAME}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
       OVERRIDE_ADMIN_CREDS: "${OVERRIDE_ADMIN_CREDS}"
@@ -1892,6 +2021,7 @@ services:
       - "${FASTAPI_PORT}:8888/tcp"
     environment:
       DATABASE_URI: "${DATABASE_URI}"
+      API_TOKEN: "${API_TOKEN}"
       API_USERNAME: "${API_USERNAME}"
       API_PASSWORD: "${API_PASSWORD}"
     restart: "unless-stopped"
@@ -6506,6 +6636,7 @@ usage() {
     echo "  --api-port N             Host worker-API port (default: 5000; worker)"
     echo "  --ui-port N              Host Web UI port    (default: 7000; manager/ui)"
     echo "  --fastapi-port N         Host FastAPI port   (default: 8888; api)"
+    echo "  --api-url URL            API base URL        (default: http://127.0.0.1:8888; ui)"
     echo "                           (remap these to run several stacks on one host)"
     echo "  --api-token TOKEN        Shared API token (required for non-interactive"
     echo "                           --docker manager/worker/scheduler — same on every host)"
@@ -6751,6 +6882,12 @@ while [[ $# -gt 0 ]]; do
             # External DATABASE_URI for docker scheduler/ui/api types.
             require_value "$1" "$2" "URI"
             DOCKER_DATABASE_URI="$2"
+            shift 2
+            ;;
+        --api-url)
+            # Base URL of the API the split "ui" stack talks to.
+            require_value "$1" "$2" "URL"
+            DOCKER_API_URL="$2"
             shift 2
             ;;
         --http-port|--https-port|--api-port|--ui-port|--fastapi-port)

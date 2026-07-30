@@ -59,6 +59,25 @@ else
   echo "Scheduler service check skipped (disabled by SERVICE_SCHEDULER setting)"
 fi
 
+# Check the worker only when it is supposed to run. Mirror the entrypoint gate: it
+# defaults to on whenever the scheduler is on. Without this a wedged worker left the
+# container healthy while every job silently stopped running.
+if [ "${SERVICE_WORKER:-${SERVICE_SCHEDULER:-yes}}" = "yes" ]; then
+  status=$(supervisorctl status "worker" 2>/dev/null)
+  if ! echo "$status" | grep -q "RUNNING"; then
+    echo "Service worker is not running: $status"
+    exit 1
+  fi
+
+  # Not executable in the image (COPY src/worker keeps 0644), so run it through bash.
+  if ! bash /usr/share/bunkerweb/worker/healthcheck-worker.sh; then
+    echo "Worker health check failed"
+    exit 1
+  fi
+else
+  echo "Worker service check skipped (disabled by SERVICE_WORKER setting)"
+fi
+
 # Check autoconf service status only if enabled
 if [ "${AUTOCONF_MODE:-no}" = "yes" ]; then
   status=$(supervisorctl status "autoconf" 2>/dev/null)
