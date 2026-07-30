@@ -3,6 +3,9 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+
+from job_queues import queue_for  # type: ignore
+
 from ..celery_app import get_celery_app
 from ..schemas import DispatchJobsRequest, RunJobsRequest
 
@@ -56,23 +59,7 @@ def dispatch_jobs(payload: DispatchJobsRequest) -> JSONResponse:
             "run_id": run_id,
             "dispatch_time": datetime.now(timezone.utc).isoformat(),
         }
-        # HEAVY_JOBS mirrors src/worker/app.py — keeps queue routing in sync
-        # without importing worker package on the API side.
-        HEAVY_JOBS = {
-            "backup-data",
-            "bunkernet-data",
-            "bunkernet-register",
-            "certbot-auth",
-            "certbot-cleanup",
-            "certbot-new",
-            "certbot-renew",
-            "coreruleset-nightly",
-            "download-crs-plugins",
-            "download-plugins",
-            "download-pro-plugins",
-            "push-configs",
-        }
-        queue = "heavy" if job.name in HEAVY_JOBS else "default"
+        queue = queue_for(job.name)
         try:
             celery.send_task("worker.execute_job", args=[job_payload], task_id=run_id, queue=queue)
         except Exception as exc:

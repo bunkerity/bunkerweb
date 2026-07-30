@@ -49,6 +49,10 @@ def set_sqlite_pragma(dbapi_connection, _):
     if isinstance(dbapi_connection, SQLiteConnection):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA journal_mode=WAL")
+        # WAL lets readers and one writer coexist, but a second writer still gets an
+        # immediate "database is locked" because sqlite's default busy timeout is 0.
+        # The scheduler, the API and the worker all write to the same file.
+        cursor.execute("PRAGMA busy_timeout=5000")
         cursor.close()
 
 

@@ -5,6 +5,8 @@ from celery import Celery
 from celery.signals import worker_process_init, worker_process_shutdown
 from kombu import Queue
 
+from job_queues import HEAVY_JOBS, queue_for  # type: ignore # noqa: F401 (HEAVY_JOBS re-exported for callers importing it from here)
+
 app = Celery("bunkerweb", include=["worker.tasks"])
 
 app.conf.update(
@@ -42,27 +44,12 @@ app.conf.update(
     enable_utc=True,
 )
 
-HEAVY_JOBS = {
-    "backup-data",
-    "bunkernet-data",
-    "bunkernet-register",
-    "certbot-auth",
-    "certbot-cleanup",
-    "certbot-new",
-    "certbot-renew",
-    "coreruleset-nightly",
-    "download-crs-plugins",
-    "download-plugins",
-    "download-pro-plugins",
-    "push-configs",
-}
-
 
 def route_job(name: str, args: tuple[Any, ...], kwargs: dict[str, Any], options: dict[str, Any], task=None, **kw) -> dict[str, str]:
     job_data = args[0] if args else kwargs.get("job_data", {})
-    if isinstance(job_data, dict) and job_data.get("name", "") in HEAVY_JOBS:
-        return {"queue": "heavy"}
-    return {"queue": "default"}
+    if not isinstance(job_data, dict):
+        return {"queue": "default"}
+    return {"queue": queue_for(job_data.get("name", ""))}
 
 
 app.conf.task_routes = {"worker.execute_job": route_job}
