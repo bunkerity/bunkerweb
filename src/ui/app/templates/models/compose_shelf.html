@@ -1,0 +1,312 @@
+{# The compose shelf: one row per composable plugin, driven by the settings-driven loop
+   (`get_filtered_settings`), NEVER by a hardcoded plugin list. A plugin that gains a
+   multisite setting appears here with no code change; `workflows` and the other eight
+   plugins with zero multisite settings simply never enter the loop.
+
+   ============================ THE SAVE CONTRACT ============================
+   A row renders enabled, postable inputs IFF `shelf_plugin_scope(...)` returns a non-empty
+   set, and it then posts EVERY key in that set on EVERY save. `Database.save_config`
+   deletes any in-scope key the form did not post (db_methods/config_save.py:592), so
+   over-claiming destroys data while under-claiming merely preserves it. That biconditional
+   is pinned over the REAL shipped manifests by
+   tests/unit/ui/test_compose_shelf.py::test_row_posts_exactly_the_declared_scope.
+
+   Consequences that look like details and are not:
+
+   * Every postable element carries `data-shelf-post`. The keys a row posts are exactly
+     `shelf_plugin_scope(...)` -- not the activation map, which also declares keys this
+     surface deliberately cannot post (`multiple` / `multiselect`).
+   * A switch is a NAMED checkbox and an unchecked checkbox posts NOTHING, so each one is
+     immediately followed by a hidden input of the SAME name carrying the inactive value.
+     `request.form.to_dict()` keeps the FIRST value for a repeated name, so checked wins and
+     unchecked falls through. The fallback must stay adjacent to its own box: moving it to
+     the end of the form would put it AFTER the control-key inputs below, and a switched-off
+     `USE_UI` would then lose to the stale control value.
+   * The checkbox's own `value` is the CURRENT value while the plugin is already active, so a
+     save that touches nothing writes nothing new. Only a genuinely inactive plugin gets the
+     canonical active value (the complement of the declared inactive one, or the single
+     remaining legal `select` option).
+   * Multi-key plugins (`limit` = USE_LIMIT_REQ + USE_LIMIT_CONN) render ONE switch: the first
+     declared key is the checkbox, the siblings are hidden inputs at their current value that
+     js/components/compose-shelf.js rewrites to the inactive value when the switch goes off.
+     With JS disabled the siblings still post their current value -- an incomplete OFF, never
+     a deleted row.
+   * `multiple` / `multiselect` activation keys (redirect, country) get a count and a chevron
+     and post NOTHING, which is why they are out of scope: `_in_scope` base-matches, so
+     claiming REDIRECT_TO would drag every stored REDIRECT_TO_<n> into scope for a row that
+     posts none of them.
+   * Free-text activation keys (inject, php) get an OPENER, not a switch: `type`/`regex` admit
+     every string, so no active value is derivable and the shelf must not invent one. They are
+     OUT of scope (`shelf_plugin_scope` drops `text`), so the row posts nothing and owns nothing.
+     Round-tripping their stored value to keep them in scope is worse than the deletion it
+     avoids: CRLF + trim normalisation makes config_save materialise a real `ui` row and decouple
+     the service from the global. Activating or clearing them happens on the plugin page.
+   * Folded rows hide with `display:none` ONLY (see the JS). Detaching or rebuilding them would
+     stop their hidden inputs posting while their keys stay in scope, which deletes rows.
+
+   ======================== REQUIRED CONTEXT ========================
+   Beyond the page's usual `plugins` / `config` / `is_pro_version` / `is_readonly` and the
+   `get_filtered_settings` / `is_plugin_active*` / `plugin_types` Jinja globals, the including
+   page MUST provide:
+
+     shelf_plugin_scope  app/routes/services.py's function itself -- the single source for
+                         "does this row post, and what". Never re-derive it here.
+     activation_map      `iter_plugin_activations()`'s map: {plugin_id: {key: inactive} | "always"}.
+     control_keys        app/models/save_scope.py's function; the two pages need DIFFERENT
+                         lists and this is the only place that knows which.
+     blacklisted_settings, global_page, service_id
+
+   They are deliberately NOT defaulted: a silently missing scope function would render a shelf
+   that posts the wrong set, which is the one failure mode this partial exists to prevent.
+
+   `global_page` is a separate flag on purpose -- do NOT derive it from `service_id`, which is
+   also "" on /services/new (routes/services.py passes `service_id="" if service == "new"`).
+   That page additionally needs a real, typeable SERVER_NAME: this partial's control-key
+   fallback would post an empty one and update_service aborts with "the server name was not
+   provided".
+
+   ============ BLOCKER FOR WHOEVER ASSEMBLES THE PAGE (T7), NOT A NOTE ============
+   The compose pane MUST be wrapped in a REAL `<form method="POST">`, and its payload MUST
+   NOT be harvested by `getFormFromSettings` (static/js/plugins-settings.js:1075). Today
+   `/services/<svc>` has no form at all -- the monolith builds a synthetic one, and it:
+
+     * DROPS every `type="hidden"` input that is not `.plugin-setting-file-text` (:1118-1123),
+       which is every OFF fallback, every multi-key sibling and every opener key here;
+     * rewrites a checkbox to a flat "yes"/"no" (:1132-1134), discarding the `value` this
+       partial computes so an untouched save stops being a no-op;
+     * has branches for `easy` / `advanced` / `raw` only (:1203-1325), so `mode=compose`
+       matches NOTHING and the POST carries neither the shelf nor the control keys -- while
+       routes/services.py:1110-1126 still hands that POST the full shelf scope. Every
+       in-scope key is then unposted, and unposted means DELETED.
+
+   Pinned by test_compose_shelf.py::test_the_host_page_must_wrap_the_shelf_in_a_real_form,
+   which bites the moment a page includes this partial.
+
+   Include INSIDE that form and LAST, after any page-level control (the draft toggle, the
+   template picker): first-value-wins means a rendered enabled control beats the trailing
+   hidden fallbacks emitted at the bottom of this file. #}
+{% set shelf_attachments = attachments | default({}) %}
+{% set is_stream = (not global_page) and (config.get("SERVER_TYPE") or {}).get("value", "http") == "stream" %}
+{% set counts = namespace(total=0, on=0, locked=0, folded=0) %}
+{% set shelf_body %}
+    {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], global_page) %}
+        {% set settings = plugin_data["settings"] or {} %}
+        {% set declaration = activation_map.get(plugin) %}
+        {% set scope = shelf_plugin_scope(plugin, plugin_data, config, global_page=global_page, is_pro_version=is_pro_version, blacklisted=blacklisted_settings, is_stream=is_stream, activation_map=activation_map) %}
+        {# The keys the manifest DECLARES, in manifest order (a set has none, and "the first key"
+           has to be stable). Same USE_<ID>-then-USE_<NAME> tier-3 order as
+           `shelf_plugin_scope` and `is_plugin_active`: 6 core plugins -- reverseproxy among
+           them -- resolve only through the name half. #}
+        {% set id_key = "USE_" + (plugin | upper) %}
+        {% set name_key = "USE_" + (plugin_data.get("name", "") | string | replace(" ", "_") | upper) %}
+        {% set declared_keys = (declaration | list) if declaration is mapping else ([id_key] if id_key in settings else ([name_key] if name_key in settings else [])) %}
+        {# The keys this row POSTS. Empty scope => empty list => no named input at all. #}
+        {% set keys = declared_keys if (scope and not is_readonly) else [] %}
+        {% set first_key = keys[0] if keys else none %}
+        {% set first_data = (settings.get(first_key) or {}) if first_key else {} %}
+        {% set first_type = first_data.get("type") %}
+        {% set inactive = declaration[first_key] if (declaration is mapping and first_key) else "no" %}
+        {% set active_options = (first_data.get("select") or []) | reject("equalto", inactive) | list %}
+        {% set active_value = ("no" if inactive == "yes" else "yes") if first_type == "check" else (active_options[0] if active_options | length == 1 else "") %}
+        {% set declared_first = declared_keys[0] if declared_keys else none %}
+        {% set declared_first_data = (settings.get(declared_first) or {}) if declared_first else {} %}
+        {% set delegated = declared_first_data.get("multiple") or declared_first_data.get("type") in ("multiselect", "multivalue") %}
+        {% set pro_locked = plugin_data.get("type") == "pro" and not is_pro_version %}
+        {% set stream_excluded = (not global_page) and is_stream and plugin_data.get("stream") == "no" %}
+        {% if stream_excluded %}
+            {% set kind = "locked" %}
+        {% elif declaration == "always" or plugin == "general" %}
+            {# `general` reaches always-on through _SYNTHESIZED_ALWAYS_ON (app/utils.py) --
+               it has no plugin.json, so it cannot declare a manifest. #}
+            {% set kind = "always" %}
+        {% elif not keys %}
+            {# `text` is out of scope BY DESIGN (see shelf_plugin_scope): there is no switch that
+               can author an HTML block or a PHP socket path, so the row opens the plugin page and
+               posts nothing at all. Claiming these keys deletes them; round-tripping their stored
+               value through a hidden input corrupts them (CRLF + trim normalisation makes
+               config_save materialise a real `ui` row and decouple the service from the global).
+               Both wrong; posting nothing is right, and it is what D2 said from the start. #}
+            {% set kind = "delegated" if delegated else ("opener" if declared_first_data.get("type") == "text" else "locked") %}
+        {% elif first_type == "check" or (first_type == "select" and active_options | length == 1) %}
+            {% set kind = "switch" %}
+        {% elif first_type == "select" %}
+            {% set kind = "picker" %}
+        {% else %}
+            {% set kind = "opener" %}
+        {% endif %}
+        {% set row_on = (not pro_locked) and is_plugin_active_for_service(plugin, plugin_data["name"], config, shelf_attachments) %}
+        {% set row = namespace(changed=false, count=0, active=false) %}
+        {% for key in declared_keys if (config.get(key) or {}).get("method", "default") != "default" %}
+            {% set row.changed = true %}
+        {% endfor %}
+        {# Derived from THIS row's own `declaration`, never from `is_plugin_active` -- that
+           helper re-reads `get_activation_map()` internally (app/utils.py), which returns {}
+           on a scan failure and drops every plugin to the USE_<ID> tier-3 convention. With the
+           context map intact and the internal one empty, `limit` would render UNCHECKED while
+           its keys still rendered, and the adjacent fallback would post USE_LIMIT_REQ=no: an
+           untouched save silently disabling the request limiter. One source per row, so the
+           two cannot disagree. Same comparison as is_plugin_active's tiers 1 and 3 -- ACTIVE
+           is "any declared key differs from its declared inactive value". #}
+        {% for key in declared_keys if (config.get(key) or {}).get("value", (settings.get(key) or {}).get("default", "")) != (declaration[key] if declaration is mapping else "no") %}
+            {% set row.active = true %}
+        {% endfor %}
+        {% set switch_on = row.active %}
+        {% if kind == "delegated" %}
+            {# "3 redirects" / "2 countries": how many values are actually set behind the chevron.
+               A `multiple` key is stored suffixed (REDIRECT_TO, REDIRECT_TO_1, ...) so count the
+               stored rows; a multiselect holds a separated list in one value. #}
+            {% for key in declared_keys %}
+                {% if declared_first_data.get("multiple") %}
+                    {% for stored, entry in config.items() if (stored == key or stored.startswith(key + "_")) and entry.get("value") %}
+                        {% set row.count = row.count + 1 %}
+                    {% endfor %}
+                {% else %}
+                    {% set row.count = row.count + ((config.get(key) or {}).get("value", "") | string).split() | length %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% set counts.total = counts.total + 1 %}
+        {% if row_on %}{% set counts.on = counts.on + 1 %}{% endif %}
+        {% if kind == "locked" %}{% set counts.locked = counts.locked + 1 %}{% endif %}
+        {% if not row_on %}{% set counts.folded = counts.folded + 1 %}{% endif %}
+        {% set glyph = (plugin_types.get(plugin_data["type"]) or {}).get("icon") or "<i class='bx bx-diamond bx-xs'></i>" %}
+        {% set plugin_page = url_for("global_settings.global_settings_plugin_page", plugin=plugin) if global_page else url_for("services.services_plugin_page", service=service_id, plugin=plugin) %}
+        <div class="list-group-item shelf-row d-flex align-items-center flex-wrap gap-2 py-2"
+             data-shelf-row
+             data-plugin="{{ plugin }}"
+             data-shelf-kind="{{ kind }}"
+             data-shelf-on="{{ 'true' if row_on else 'false' }}"
+             data-shelf-changed="{{ 'true' if row.changed else 'false' }}"
+             {% if not row_on %}data-shelf-folded style="display: none"{% endif %}>
+            <span class="shelf-glyph d-inline-flex align-items-center">{{ glyph | safe }}</span>
+            <span class="shelf-name fw-semibold text-truncate flex-grow-1">
+                <i class="bx bx-xs align-middle me-1 {{ 'bxs-circle text-success' if row_on else 'bx-circle text-muted' }}"
+                   data-shelf-dot
+                   aria-hidden="true"></i>
+                {{ plugin_data["name"] }}
+            </span>
+            {% if stream_excluded %}
+                <span class="badge rounded-pill bg-danger-subtle text-dark"
+                      title="Does not support STREAM mode."
+                      data-i18n="tooltip.stream_support.no">Does not support STREAM mode.</span>
+            {% endif %}
+            <span class="shelf-control d-inline-flex align-items-center gap-2">
+                {% if kind == "always" %}
+                    <span class="text-muted small" data-i18n="compose.always_on">Always on</span>
+                {% elif kind == "switch" %}
+                    <span class="form-check form-switch mb-0">
+                        {# value = the current one while the plugin is already on, so an untouched
+                           save is a no-op; the canonical active value only when turning it on. #}
+                        <input class="form-check-input shelf-switch"
+                               type="checkbox"
+                               role="switch"
+                               id="shelf-switch-{{ plugin }}"
+                               name="{{ first_key }}"
+                               value="{{ (config.get(first_key) or {}).get('value', first_data.get('default', active_value)) if switch_on else active_value }}"
+                               data-shelf-post
+                               {% if switch_on %}checked{% endif %}>
+                        {# IMMEDIATELY after its own box -- see the header note. #}
+                        <input type="hidden"
+                               name="{{ first_key }}"
+                               value="{{ inactive }}"
+                               data-shelf-post
+                               data-shelf-fallback>
+                        <label class="form-check-label visually-hidden" for="shelf-switch-{{ plugin }}">{{ plugin_data["name"] }}</label>
+                    </span>
+                {% elif kind == "picker" %}
+                    {# A real <select> always posts, so it IS the postable input; no fallback needed. #}
+                    <select class="form-select form-select-sm shelf-picker"
+                            id="shelf-picker-{{ plugin }}"
+                            name="{{ first_key }}"
+                            data-shelf-post
+                            aria-label="{{ plugin_data['name'] }}">
+                        {% set current = (config.get(first_key) or {}).get("value", first_data.get("default", inactive)) %}
+                        {% for option in first_data.get("select") or [] %}
+                            <option value="{{ option }}" {% if option == current %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                        {% if current not in (first_data.get("select") or []) %}
+                            {# A stored value outside the declared options (env/scheduler-set, or a
+                               manifest that dropped an option) would otherwise leave NOTHING
+                               selected, and a select with no selection posts its FIRST option --
+                               an untouched save silently rewriting the value. Carry it. #}
+                            <option value="{{ current }}" selected>{{ current }}</option>
+                        {% endif %}
+                    </select>
+                {% elif kind == "delegated" %}
+                    <a href="{{ plugin_page }}" class="btn btn-sm btn-outline-secondary shelf-open">
+                        <span data-i18n="compose.entries"
+                              data-i18n-options='{{ {"count": row.count} | tojson }}'>{{ row.count }} configured</span>
+                        <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                    </a>
+                {% elif kind == "opener" %}
+                    <a href="{{ plugin_page }}" class="btn btn-sm btn-outline-secondary shelf-open"
+                       data-i18n="compose.set_value">Set a value…</a>
+                {% else %}
+                    <span class="text-muted small" data-i18n="compose.locked">No control here</span>
+                {% endif %}
+                {# Every remaining in-scope key, at its CURRENT value: the siblings a multi-key
+                   switch rewrites on OFF. An opener reaches here with `keys` empty and emits
+                   nothing -- its keys are out of scope, so there is nothing to preserve. #}
+                {% set posted_by_control = first_key if kind in ("switch", "picker") else none %}
+                {% for key in keys if key != posted_by_control %}
+                    <input type="hidden"
+                           name="{{ key }}"
+                           value="{{ (config.get(key) or {}).get('value', (settings.get(key) or {}).get('default', '')) }}"
+                           data-shelf-post
+                           {% if kind == "switch" %}data-shelf-sibling data-shelf-inactive="{{ declaration[key] if declaration is mapping else 'no' }}"{% endif %}>
+                {% endfor %}
+            </span>
+            {# T4 fills the provenance ladder here (from <tpl> / from global / edited here /
+               managed via api / from attachment / cloned / default). Left empty on purpose --
+               a chip derived from a shared `get_config` entry must copy before mutating. #}
+            <span class="shelf-provenance" data-plugin="{{ plugin }}"></span>
+            <a href="{{ plugin_page }}"
+               class="shelf-chevron btn btn-sm btn-link p-0"
+               aria-label="{{ plugin_data['name'] }}">
+                <i class="bx bx-chevron-right" aria-hidden="true"></i>
+            </a>
+        </div>
+    {% endfor %}
+{% endset %}
+<div id="compose-shelf" class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <span class="text-muted small"
+                  id="compose-shelf-counts"
+                  data-i18n="compose.count"
+                  data-i18n-options='{{ {"on": counts.on, "total": counts.total, "locked": counts.locked} | tojson }}'>
+                {{ counts.on }} on · {{ counts.total }} available · {{ counts.locked }} locked
+            </span>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Filter plugins">
+                {% for value, label, i18n_key in [("on", "On", "compose.filter.on"), ("all", "All", "compose.filter.all"), ("changed", "Changed", "compose.filter.changed")] %}
+                    <button type="button"
+                            class="btn btn-outline-primary shelf-filter{% if value == 'all' %} active{% endif %}"
+                            data-shelf-filter="{{ value }}"
+                            data-i18n="{{ i18n_key }}">{{ label }}</button>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="list-group list-group-flush" id="compose-shelf-rows">{{ shelf_body }}</div>
+        {% if counts.folded %}
+            <button type="button"
+                    class="btn btn-sm btn-link mt-2"
+                    id="compose-shelf-show-more"
+                    data-i18n="compose.show_more"
+                    data-i18n-options='{{ {"count": counts.folded} | tojson }}'>Show {{ counts.folded }} more</button>
+        {% endif %}
+    </div>
+</div>
+{# The control keys, LAST and unconditional -- `restore_unowned_settings` never restores a
+   `restore_skip` key, so whatever this form omits is destroyed: omitting IS_DRAFT publishes a
+   draft service, omitting SERVER_NAME *and* OLD_SERVER_NAME makes edit_service raise
+   IndexError inside the executor thread. `control_keys(True)` is empty -- at global scope
+   SERVER_NAME is the service LIST and posting it would rewrite it. Emitted after the shelf
+   body so a rendered enabled control (the `ui` plugin's switch IS USE_UI) wins on
+   first-value-wins, and emitted even when readonly, because a hidden input is not disabled by
+   a readonly page. #}
+{% set control_defaults = {"SERVER_NAME": service_id, "OLD_SERVER_NAME": service_id, "IS_DRAFT": "no", "USE_TEMPLATE": "", "USE_UI": "no"} %}
+{% for control_key in control_keys(global_page) %}
+    <input type="hidden"
+           name="{{ control_key }}"
+           value="{{ (config.get('SERVER_NAME' if control_key == 'OLD_SERVER_NAME' else control_key) or {}).get('value', control_defaults.get(control_key, '')) }}">
+{% endfor %}

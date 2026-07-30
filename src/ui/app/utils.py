@@ -14,6 +14,7 @@ from urllib.parse import unquote
 
 from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import current_app, flash as flask_flash, session
+from flask_login import current_user
 from regex import compile as re_compile, match
 from requests import get
 
@@ -247,6 +248,30 @@ def can_delete_service(service: Dict[str, Any]) -> bool:
     if is_ui_api_method(method):
         return True
     return method == "autoconf" and bool(service.get("is_draft"))
+
+
+def is_readonly_request(api_readonly: bool) -> bool:
+    """Would the page that rendered this form have disabled every field?
+
+    Mirrors main.py:1283's `is_readonly` context processor (its `request.path` exemption is for
+    /profile, which no settings-save route serves). `current_user.list_permissions` is set to an
+    empty set when the permission load fails mid-request, so a transient API error must be read
+    the same way here as it was on the page the user submitted.
+
+    Every settings POST handler needs it, because a read-only page posts nothing but still posts
+    a valid csrf_token -- and "in scope but not posted" means DELETE
+    (db_methods/config_save.py:592). What that costs is NOT symmetric and this helper must not be
+    read as if it were: at global scope it wipes a plugin's whole configuration, one plugin per
+    POST (see the note at routes/global_settings.py:207-212); on a service page the same POST is
+    a harmless no-op, because the service's own rows are re-materialised from the DB. Both
+    callers still have to pass it -- the scope functions are where the asymmetry lives.
+
+    Takes the API's readonly flag rather than importing it: `app.dependencies` builds real
+    singletons at module scope (`Config()` reads the image-only /usr/share/bunkerweb/settings.json),
+    so importing it here would make `app.utils` -- which every unit test imports bare -- fail to
+    import in a checkout.
+    """
+    return api_readonly or "write" not in getattr(current_user, "list_permissions", [])
 
 
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:

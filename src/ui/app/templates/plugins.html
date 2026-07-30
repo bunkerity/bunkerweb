@@ -68,8 +68,13 @@
             {% set is_always = activation == 'always' or plugin == 'general' %}
             {% set use_key = 'USE_' ~ plugin|upper %}
             {% if use_key not in config %}{% set use_key = 'USE_' ~ pname|replace(' ', '_')|upper %}{% endif %}
-            {% set core_specific = activation is mapping %}
-            {% set core_toggleable = is_core and not is_always and not core_specific and use_key in config %}
+            {# The key this card's switch posts, or none for "no switch, render the state badge".
+               A map-declared plugin is switchable exactly when the shared activation writer can
+               derive BOTH directions for it -- routes/plugins.py:activation_toggle_setting names
+               the key, and country / redirect / inject / php come back absent and keep the badge.
+               Everything else keeps the tier-3 USE_<ID>-in-config convention. #}
+            {% set toggle_key = (activation_toggles|default({})).get(plugin) if activation is mapping else (use_key if use_key in config else none) %}
+            {% set core_toggleable = is_core and not is_always and toggle_key %}
             {% if is_core %}
                 {% set state_on = true if is_always else is_plugin_active(plugin, pname, config) %}
             {% else %}
@@ -137,7 +142,7 @@
                                       class="plugin-toggle-form mb-0">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden" name="plugin" value="{{ plugin }}" />
-                                    {% if core_toggleable %}<input type="hidden" name="setting" value="{{ use_key }}" />{% endif %}
+                                    {% if core_toggleable %}<input type="hidden" name="setting" value="{{ toggle_key }}" />{% endif %}
                                     <input type="hidden" name="enabled" value="{{ 'yes' if state_on else 'no' }}" class="plugin-enabled-field" />
                                     <label class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
                                         <input class="form-check-input plugin-switch mt-0"

@@ -11,7 +11,7 @@ from shutil import move, rmtree
 from sys import path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from time import time
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Mapping, Optional, Union
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
@@ -69,10 +69,21 @@ def plugins_page():
     tmp_ui_path.mkdir(parents=True, exist_ok=True)
     # `plugins`/`config` come from the global before_request context; pass the manifest-driven
     # activation map the marketplace grid needs to decide how each core card's switch behaves
-    # (locked "always on" chip vs. a USE_*-bound toggle vs. a non-toggleable state badge).
+    # (locked "always on" chip vs. a toggle vs. a non-toggleable state badge).
+    #
+    # `activation_toggles` names, per map-declared plugin, the key its switch posts -- it exists
+    # only for the plugins the shared activation writer can flip BOTH ways, so "map-declared" is
+    # no longer a blanket reason to render the read-only badge. Definitions come off `g._env`
+    # (main.py:1314), which already holds this request's `BW_CONFIG.get_plugins()` payload -- no
+    # extra round-trip, and no new failure mode. An `_env` without plugins yields no toggles at
+    # all, i.e. every map-declared card degrades to the read-only badge.
+    definitions = env_setting_definitions()
+    activation_toggles = {plugin_id: key for plugin_id in get_activation_map() if (key := activation_toggle_setting(plugin_id, definitions))}
+
     return render_template(
         "plugins.html",
         plugin_activations=get_activation_map(),
+        activation_toggles=activation_toggles,
         custom_icons=CUSTOM_PLUGIN_ICONS,
         static_icons=STATIC_PLUGIN_ICONS,
     )
@@ -169,16 +180,16 @@ def delete_plugin():
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
 
 
-def _active_value_for(setting_id: str, inactive: str) -> str:
+def _active_value_for(setting_id: str, inactive: str, definitions: Dict[str, dict]) -> str:
     """Derive a schema-legal active value for ``setting_id`` given its inactive value.
 
-    Reads the setting's definition via ``BW_CONFIG.get_plugins_settings()`` -- the same
-    payload ``plugins_settings.html``/``models/select_setting.html`` already render from
-    (a select-typed entry carries ``"type": "select"`` and ``"select": [option, ...]``).
-    Raises ``ValueError`` when no schema-legal active value can be derived (free-text
-    settings such as ``REDIRECT_TO``/``INJECT_BODY`` have no such value).
+    ``definitions`` is a ``{setting_id: definition}`` map in the shape
+    ``plugins_settings.html``/``models/select_setting.html`` already render from (a select-typed
+    entry carries ``"type": "select"`` and ``"select": [option, ...]``). Always passed in, never
+    fetched here. Raises ``ValueError`` when no schema-legal active value can be derived (free-text
+    settings such as ``INJECT_BODY``/``REMOTE_PHP`` have no such value).
     """
-    definition = BW_CONFIG.get_plugins_settings().get(setting_id) or {}
+    definition = definitions.get(setting_id) or {}
     setting_type = definition.get("type")
 
     if setting_type == "select":
@@ -193,22 +204,70 @@ def _active_value_for(setting_id: str, inactive: str) -> str:
     raise ValueError(f"{setting_id!r} (type={setting_type!r}) has no derivable active value; not safe to enable from a switch")
 
 
-def resolve_activation_write(plugin_id: str, setting: Optional[str], *, enabled: bool) -> Dict[str, str]:
+def _is_list_shaped(definition: dict) -> bool:
+    """Whether an activation key holds a LIST, and so can never be driven by one switch.
+
+    Two shapes, refused for two different reasons, in BOTH directions:
+
+    * ``multiple`` -- the real values live under ``<KEY>_<n>`` (redirect's ``REDIRECT_TO``), so
+      writing the bare base name claims "off" while every suffixed redirect keeps serving
+      (``core/redirect/confs/server-http/redirect.conf`` iterates them all).
+    * ``multiselect`` / ``multivalue`` -- a list has no single schema-legal "active" value to
+      derive, and country's BLACKLIST_COUNTRY/WHITELIST_COUNTRY are the live case.
+
+    Locked with the PO: those rows get a count + chevron, never a switch. Deliberately the same
+    test and the same set as ``shelf_plugin_scope``'s (``routes/services.py``) -- the shelf leaves
+    them out of its declared scope, so a write here would post a key the page does not own.
+    """
+    return bool(definition.get("multiple")) or definition.get("type") in ("multiselect", "multivalue")
+
+
+def resolve_activation_write(
+    plugin_id: str,
+    setting: Optional[str],
+    *,
+    enabled: bool,
+    settings: Dict[str, dict],
+    current_values: Optional[Mapping[str, str]] = None,
+) -> Dict[str, str]:
     """Values to write to flip ``plugin_id`` on or off, derived from its declared activation.
 
-    Disabling writes EVERY declared key to its inactive value -- a plugin with a second
-    switch (limit's ``USE_LIMIT_CONN`` gates its nginx conf independently of
-    ``USE_LIMIT_REQ``) would otherwise keep enforcing after the UI claims it is off.
+    ONE writer for two surfaces: the ``/plugins`` marketplace grid (``POST /plugins/enable``) and
+    the compose shelf. Both need EVERY declared key in the returned dict on every activation
+    change, because the shelf's declared scope owns every key ``shelf_plugin_scope``
+    (``routes/services.py``) returns, and an in-scope key the form does not post has its row
+    DELETED (``db_methods/config_save.py:592``).
 
-    Enabling is only well-defined for a single-key activation whose active value is
-    unambiguous; the caller must not offer a toggle for anything else (raises
-    ``ValueError`` for a multi-key declaration or a setting the plugin does not declare).
+    * **OFF** writes every declared key at its declared inactive value. ``limit``'s
+      ``USE_LIMIT_CONN`` gates ``limitconn.conf`` independently of ``USE_LIMIT_REQ``, so a partial
+      OFF keeps enforcing after the UI claims the plugin is off.
+    * **ON** writes the toggled key at a schema-legal active value and every SIBLING at its
+      current resolved value from ``current_values`` -- a no-op write whose only job is to keep
+      the row alive. Dropping a sibling deletes it and falls it back to its default, which for
+      ``USE_LIMIT_CONN`` is ``"yes"``: enabling the plugin would silently switch the connection
+      limiter on too. A sibling MISSING from ``current_values`` therefore **raises** rather than
+      guessing -- falling back to the schema default is the very clobber this rule exists to
+      prevent, and ``Database.py:463`` lets an ``api`` write overwrite a ``ui`` one, so the guess
+      would land. Fail closed: an aborted toggle flashes an error, a wrong one silently re-arms a
+      limiter the operator turned off.
+    * ON is NOT the exact inverse of OFF for a multi-key plugin: OFF drives every key to its
+      inactive value, so a following ON restores only the toggled key and leaves the siblings off.
+      That is inherent to one switch owning several keys -- the per-plugin page is where the
+      siblings come back.
+    * A ``multiple`` / multiselect / multivalue activation key is refused in both directions, and
+      refused for the WHOLE plugin (see ``_is_list_shaped``): the row carries one control, so
+      there is no half state to drift into.
+    * Undeclared plugins (no manifest entry) keep the legacy convention: a plain ``USE_<ID>``
+      boolean, still guarded by ``USE_SETTING_RX``.
+    * A plugin declared ``"always"`` (no switch, ever -- mirrors ``plugins.html``'s ``is_always``)
+      is refused outright: it must never be flippable through this endpoint, even by a crafted
+      ``setting`` that happens to match the ``USE_<ID>`` convention.
 
-    Undeclared plugins (no manifest entry) keep the legacy convention: a plain
-    ``USE_<ID>`` boolean, still guarded by ``USE_SETTING_RX``. A plugin declared
-    ``"always"`` (no switch, ever -- mirrors ``plugins.html``'s ``is_always``) is
-    refused outright: it must never be flippable through this endpoint, even by a
-    crafted ``setting`` that happens to match the ``USE_<ID>`` convention.
+    ``settings`` is REQUIRED, and is this request's ``{setting_id: definition}`` map -- use
+    ``env_setting_definitions()``. It has no default on purpose: the one it used to have
+    (``BW_CONFIG.get_plugins_settings()``) had zero production callers left once both surfaces
+    sourced from ``g._env``, and leaving it would let a caller silently re-add a per-call API
+    round-trip that no test would catch.
     """
     declaration = get_activation_map().get(plugin_id)
     if declaration == "always":
@@ -218,16 +277,118 @@ def resolve_activation_write(plugin_id: str, setting: Optional[str], *, enabled:
             raise ValueError(f"No activation declaration and no conventional setting for {plugin_id!r}")
         return {setting: "yes" if enabled else "no"}
 
+    if setting is not None and setting not in declaration:
+        raise ValueError(f"{setting!r} is not an activation setting of {plugin_id!r}")
+
+    for key in declaration:
+        # A MISSING schema is not a scalar one. `_is_list_shaped({})` is False, so reading an
+        # absent definition as "not list-shaped" makes this refusal fail OPEN on exactly the input
+        # the sibling rule below fails CLOSED on -- and `main.py:1262-1265` parks `{}` whenever the
+        # per-request get_plugins() failed, so it is reachable: measured, `redirect` OFF then wrote
+        # REDIRECT_TO="" while every REDIRECT_TO_<n> kept serving, and `country` OFF wiped both
+        # lists. Same missing-input condition, same failure mode: refuse.
+        definition = settings.get(key)
+        if definition is None:
+            raise ValueError(f"no schema for {key!r}; refusing to flip {plugin_id!r} on an unknown setting shape")
+        if _is_list_shaped(definition):
+            raise ValueError(f"{plugin_id!r} activates through {key!r}, a list-shaped setting that no single switch can flip")
+
     if not enabled:
         return dict(declaration)
 
-    if setting is not None and setting not in declaration:
-        raise ValueError(f"{setting!r} is not an activation setting of {plugin_id!r}")
-    if len(declaration) != 1:
-        raise ValueError(f"{plugin_id!r} has a multi-key activation and cannot be enabled from a single switch")
+    # Insertion order is manifest order, so "the first declared key" is well-defined and stable
+    # for a caller that has no particular key in mind (the shelf's one-switch row).
+    toggled = setting or next(iter(declaration))
+    values: Dict[str, str] = {}
+    for key, inactive in declaration.items():
+        if key == toggled:
+            values[key] = _active_value_for(key, inactive, settings)
+            continue
+        if current_values is None or key not in current_values:
+            raise ValueError(f"no current value for {key!r}; refusing to guess a sibling of {plugin_id!r}'s activation")
+        values[key] = current_values[key]
+    return values
 
-    only_key, inactive = next(iter(declaration.items()))
-    return {only_key: _active_value_for(only_key, inactive)}
+
+def is_activation_setting(plugin_id: str, setting: str) -> bool:
+    """Whether ``setting`` is a legal activation key to flip ``plugin_id`` through.
+
+    A map-declared plugin's legal set is exactly the keys it declares -- tighter than
+    ``USE_SETTING_RX`` for a given plugin, and the only way ``AUTO_LETS_ENCRYPT`` /
+    ``GENERATE_SELF_SIGNED_SSL`` can reach the writer at all, since neither matches the
+    ``USE_<...>`` convention. Everything else keeps the regex.
+
+    **Bound, stated honestly:** this delegates the guard to the MANIFEST, and
+    ``iter_plugin_activations`` does not check that a declared key belongs to the plugin declaring
+    it (``src/common/utils/plugin_extensions.py:214-216`` type-checks only, and is deliberately not
+    gated by ``is_trusted``). So an installed plugin declaring ``{"SERVER_NAME": ""}`` is accepted
+    here and its OFF path writes that key -- measured. It is NOT a privilege boundary: reaching it
+    already requires having installed a plugin that runs Python jobs. Zero shipped core manifests
+    declare a foreign key. The root fix is an ownership filter in ``iter_plugin_activations``,
+    where ``is_plugin_active`` and ``shelf_plugin_scope`` inherit the same trust; do not re-derive
+    it here.
+    """
+    declaration = get_activation_map().get(plugin_id)
+    if isinstance(declaration, dict):
+        return setting in declaration
+    return bool(USE_SETTING_RX.match(setting))
+
+
+def activation_toggle_setting(plugin_id: str, settings: Dict[str, dict]) -> Optional[str]:
+    """The activation key a single on/off switch may flip for ``plugin_id``, or None if none fits.
+
+    Asks the writer rather than re-deriving its rules, so the control a surface renders and the
+    values that surface writes can never disagree: ``country`` (multiselect), ``redirect``
+    (multiple), ``inject`` and ``php`` (free text, no derivable active value) come back None and
+    keep the marketplace's read-only Active/Inactive badge; ``antibot``, ``customcert``,
+    ``letsencrypt``, ``selfsigned`` and ``limit`` come back with the key their switch posts.
+
+    **A returned key does NOT mean "render a binary switch."** It means "one control may own this
+    plugin"; the CONTROL SHAPE is the key's own `type`. ``USE_ANTIBOT`` is a 9-value select, and
+    plan D2 gives that a MODE PICKER, not a switch -- a switch there silently selects "cookie", the
+    first non-inactive option in manifest order (pinned by
+    ``test_enabling_antibot_from_a_switch_picks_cookie``). The `/plugins` marketplace is binary by
+    design and accepts that; any surface that is not must read ``settings[key]["type"]`` itself.
+
+    None for an undeclared plugin too: those keep the template's own ``USE_<ID> in config``
+    convention, which needs no schema.
+    """
+    declaration = get_activation_map().get(plugin_id)
+    if not isinstance(declaration, dict):
+        return None
+    try:
+        # The declaration itself is a legal, COMPLETE set of current values (every key at its
+        # inactive value), so the probe never trips the writer's fail-closed sibling rule while
+        # still exercising every other rule it enforces.
+        resolve_activation_write(plugin_id, None, enabled=True, current_values=dict(declaration), settings=settings)
+        resolve_activation_write(plugin_id, None, enabled=False, settings=settings)
+    except ValueError:
+        return None
+    return next(iter(declaration))
+
+
+def env_setting_definitions() -> Dict[str, dict]:
+    """This request's flattened `{setting_id: definition}`, off `g._env` -- no API round-trip.
+
+    `main.py:1263` already fetches `BW_CONFIG.get_plugins()` per request and parks it on `g._env`
+    (`:1314`); each plugin entry carries its own `settings` with the `type` / `select` / `multiple`
+    fields the activation writer reads (`db_methods/plugins.py:204-231`). Every activation key
+    belongs to the plugin declaring it (pinned by
+    `tests/unit/common/test_plugin_activations.py::test_declared_settings_exist_in_their_own_plugin`),
+    so flattening the plugin payloads is complete for this purpose and `settings.json`'s globals
+    are not needed. An absent `_env` yields `{}`, which makes every derivation fail closed.
+    """
+    return {key: data for entry in (getattr(g, "_env", {}).get("plugins") or {}).values() for key, data in (entry.get("settings") or {}).items()}
+
+
+def env_current_values() -> Dict[str, str]:
+    """This request's resolved global config flattened to `{setting_id: value}`, off `g._env`.
+
+    `main.py:1297` fetches it with `methods=True`, so entries are `{"value", "method", ...}` dicts;
+    every multisite setting is present, seeded from its default (`config_read.py:309-316`). Read in
+    the REQUEST thread and handed to the executor, because `g` is gone by the time the task runs.
+    """
+    return {key: entry["value"] for key, entry in (getattr(g, "_env", {}).get("config") or {}).items() if isinstance(entry, dict) and "value" in entry}
 
 
 @plugins.route("/plugins/enable", methods=["POST"])
@@ -250,11 +411,19 @@ def enable_plugin():
     plugin = request.form["plugin"]
     enabled = request.form["enabled"].strip().lower() in ("1", "true", "yes", "on")
     # Core plugins can't be DB-toggled (structurally required); the grid instead binds their
-    # switch to a master USE_* setting and passes its name here. Anything else is rejected so
-    # this endpoint can never write an arbitrary global setting.
+    # switch to one of the plugin's activation settings and passes its name here. Anything the
+    # plugin does not declare (or, undeclared, anything failing USE_SETTING_RX) is rejected -- see
+    # is_activation_setting for the one bound that guard does NOT give you: it trusts the manifest
+    # to declare only its own keys, which nothing currently enforces.
     setting = request.form.get("setting", "").strip()
-    if setting and not USE_SETTING_RX.match(setting):
+    if setting and not is_activation_setting(plugin, setting):
         return handle_error("Invalid setting parameter on /plugins/enable.", "plugins", True)
+
+    # Read in the REQUEST thread: `g` is gone inside the executor. Both come off `g._env`, which
+    # this request already paid for, so the toggle adds no round-trip -- and an empty `_env` makes
+    # the writer raise instead of guessing a sibling's value.
+    definitions = env_setting_definitions()
+    current_values = env_current_values()
 
     def toggle_plugin(plugin: str, enabled: bool, setting: str):
         wait_applying()
@@ -264,7 +433,12 @@ def enable_plugin():
                 # Core plugin: write every value the manifest's activation declares (or, absent
                 # one, the conventional USE_* boolean) instead of blindly writing "yes"/"no" --
                 # a select-typed master setting (e.g. USE_ANTIBOT) has no legal "yes" value.
-                API_CLIENT.update_global_settings(resolve_activation_write(plugin, setting, enabled=enabled))
+                # Enabling a MULTI-key activation also rewrites its siblings at their CURRENT
+                # value; letting them fall back to their schema defaults would switch limit's
+                # connection limiter back on behind an operator who had deliberately turned it off.
+                API_CLIENT.update_global_settings(
+                    resolve_activation_write(plugin, setting, enabled=enabled, current_values=current_values, settings=definitions)
+                )
             else:
                 # External/ui/pro plugin: flip the DB `enabled` flag.
                 API_CLIENT.set_plugin_enabled(plugin, enabled)

@@ -21,9 +21,45 @@ own, so callers can adopt this function before they can compute a scope.
 """
 
 from re import search as re_search
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Optional, Set, Tuple
 
 from app.utils import is_editable_method
+
+# The keys a surface must post itself because this module deliberately never restores them
+# (they are in the caller's `restore_skip`, so omitting one destroys it). Rendered as hidden
+# inputs AFTER the settings body: `request.form.to_dict()` keeps the FIRST value for a repeated
+# name, so an enabled field in the body wins and a disabled/blacklisted/absent one falls through
+# to the trailing fallback -- the rule plugin_settings_page.html:2-19 already writes out.
+#
+# The two pages need DIFFERENT lists, which is why this is one function keyed on the page rather
+# than one shared constant:
+#
+#   * SERVER_NAME / OLD_SERVER_NAME -- the rename pair. Omitting BOTH makes update_service fall
+#     back to `variables["SERVER_NAME"] = old_server_name` == "" (routes/services.py:750-755) and
+#     `Config.edit_service` then raises IndexError on `server_name_splitted[0]`
+#     (models/config.py:375) inside CONFIG_TASKS_EXECUTOR -- DATA["RELOADING"] is never cleared,
+#     so the save is lost and the loading page spins forever. At GLOBAL scope SERVER_NAME is the
+#     service *list*: it is blacklisted there (app/utils.py:272) and posting it would rewrite
+#     that list, so the global page must NOT emit it.
+#   * IS_DRAFT -- blacklisted, hence never restored, and routes/services.py:931 does
+#     `variables.pop("IS_DRAFT", "no")`, so omitting it PUBLISHES a draft service. Global
+#     settings have no draft state and update_global_config never reads it.
+#   * USE_TEMPLATE -- in the service `restore_skip`; omitting it deletes the row, the service
+#     loses its template, and `template_unchanged` goes False so the outgoing template's values
+#     are dropped rather than materialised. Blacklisted at global scope.
+#   * USE_UI -- in the service `restore_skip` only (`get_blacklisted_settings(True)` does not add
+#     it, and global_settings.py:55 passes exactly that). It is also the `ui` plugin's tier-3
+#     activation key, so it is a control key and a shelf switch at once; the ordering rule above
+#     resolves that collision.
+#
+# `OVERRIDE_NON_GLOBAL_SERVICES` is deliberately absent: it is a form control, not a setting, and
+# it is popped before any of this runs (global_settings.py:148).
+_SERVICE_CONTROL_KEYS: Tuple[str, ...] = ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_TEMPLATE", "USE_UI")
+
+
+def control_keys(global_page: bool = False) -> Tuple[str, ...]:
+    """The keys this page must post itself, in render order. Empty at global scope -- see above."""
+    return () if global_page else _SERVICE_CONTROL_KEYS
 
 
 def _in_scope(setting: str, scope: Set[str]) -> bool:
@@ -47,6 +83,7 @@ def restore_unowned_settings(
     scope: Optional[Set[str]] = None,
     restore_skip: Optional[Set[str]] = None,
     template_unchanged: bool = True,
+    preserve_suffixed: bool = False,
 ) -> Dict[str, str]:
     """Return ``payload`` plus every stored setting that must not be deleted.
 
@@ -64,6 +101,13 @@ def restore_unowned_settings(
         they flow through their own rename/template paths instead.
     template_unchanged:
         False when this save switches ``USE_TEMPLATE``.
+    preserve_suffixed:
+        True for a surface that renders no multi-value cloner, so it can never post a stored
+        ``_<digits>`` row. ``_in_scope`` base-matches, so declaring the base name would drag
+        every suffix into scope and delete it. Tie this to the surface, never default it on: a
+        surface that CAN edit multiples (the per-plugin page) needs it False or a legitimate
+        clear becomes impossible, and ``scope=None`` + True would make every ``multiple`` row
+        unclearable everywhere.
     """
     restore_skip = restore_skip or set()
     variables = dict(payload)
@@ -81,6 +125,20 @@ def restore_unowned_settings(
         # Behaviour-preserving for scope=None -- "default" is non-editable under
         # allow_default=False, so this guard was already reached on exactly these keys.
         if setting_method == "default" and entry.get("template") and not template_unchanged:
+            continue
+
+        # A stored multi-value row on a surface with no cloner. Must sit ABOVE the scope branch:
+        # an out-of-scope suffix would be restored there anyway, but an IN-scope one would fall
+        # through to the method branch and be deleted whenever its method is ui/api/wizard.
+        # Below the template guard on purpose -- an outgoing template's default must still be
+        # dropped rather than frozen into the service as a real row.
+        # Reaching this line at all means `setting` is not in `restore_skip`: verified over
+        # src/common/settings.json + every src/common/core/*/plugin.json that no blacklisted or
+        # control key is `multiple`, so no `<restore_skip name>_<n>` row can exist. That is a
+        # property of the shipped manifests, not of the code -- pinned by
+        # test_save_scope.py::test_no_restore_skip_name_is_a_multiple_setting.
+        if preserve_suffixed and re_search(r"_\d+$", setting):
+            variables[setting] = entry["value"]
             continue
 
         # Outside the declared scope: this form has no authority to remove it.

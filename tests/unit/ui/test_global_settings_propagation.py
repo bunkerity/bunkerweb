@@ -22,8 +22,11 @@ import importlib.util
 import sys
 from copy import deepcopy
 from pathlib import Path
-from types import ModuleType
+from json import loads as json_loads
+from types import ModuleType, SimpleNamespace
 from unittest.mock import Mock, patch
+
+import pytest
 
 from app.models.config import Config  # type: ignore  (src/ui on path via the ui conftest)
 
@@ -164,3 +167,105 @@ def test_identical_repost_takes_the_no_change_short_circuit():
 
     assert payload is None, "nothing changed, so nothing should have been sent to save"
     assert flashed == ["The global settings were not edited because no values were changed."]
+
+
+# ------------------------------------------------------- the global page's own save scope
+# The global page posted every key and declared no scope, which was safe only while one form
+# owned the whole configuration. The compose shelf owns activation keys and nothing else, so it
+# has to declare them -- and the two pages' control-key lists differ, so nothing here may be
+# copied from the service page.
+
+
+def _post_global_page(monkeypatch, *, query="", form=None, permissions=("read", "write")):
+    """POST the real route and return the (args, kwargs) handed to the executor."""
+    from flask import Flask
+
+    api = Mock()
+    api.readonly = False
+    api.get_global_settings.return_value = {"SSL_PROTOCOLS": {"value": "TLSv1.2", "method": "ui", "global": True}}
+    api.get_metadata.return_value = {"is_pro": False}
+    bw_config = Mock()
+    bw_config.get_plugins.return_value = _REAL_PLUGINS
+    executor = Mock()
+    monkeypatch.setattr(_MODULE, "API_CLIENT", api)
+    monkeypatch.setattr(_MODULE, "BW_CONFIG", bw_config)
+    monkeypatch.setattr(_MODULE, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(_MODULE, "DATA", _FakeData(TO_FLASH=[]))
+
+    app = Flask(__name__)
+    app.secret_key = "test"
+    app.register_blueprint(_MODULE.global_settings)
+    app.add_url_rule("/loading", "loading", lambda: "")
+    data = {"csrf_token": "x"} | (form or {})
+    with app.test_request_context(f"/global-settings{query}", method="POST", data=data), patch(
+        "app.utils.current_user", SimpleNamespace(list_permissions=list(permissions))
+    ):
+        _MODULE.global_settings_page.__wrapped__()
+    assert executor.submit.called, "the route returned before submitting -- this test proves nothing"
+    return executor.submit.call_args
+
+
+def _real_plugins():
+    plugins = {}
+    for manifest_path in sorted((REPO_ROOT / "src" / "common" / "core").glob("*/plugin.json")):
+        manifest = json_loads(manifest_path.read_text(encoding="utf-8"))
+        plugins[manifest.get("id") or manifest_path.parent.name] = manifest | {"type": "core"}
+    return plugins
+
+
+_REAL_PLUGINS = _real_plugins()
+
+
+def test_the_global_compose_shelf_declares_a_scope(monkeypatch):
+    call = _post_global_page(monkeypatch, query="?mode=compose")
+    scope = call.kwargs["scope"]
+
+    assert scope is not None
+    assert "USE_BACKUP" in scope, "a `global` context activation key belongs to the GLOBAL shelf"
+    assert "USE_ANTIBOT" in scope
+    assert "BLACKLIST_COUNTRY" not in scope and "REDIRECT_TO" not in scope, "multiselect/multiple rows post nothing"
+
+
+@pytest.mark.parametrize("query", ["", "?mode=advanced", "?mode=wat"])
+def test_the_global_advanced_pane_still_claims_everything(monkeypatch, query):
+    """This page's default pane is `advanced` (global_settings.py:192) and it posts every rendered
+    key, so `scope=None` is correct for it -- and an unrecognised mode renders that same pane, so
+    it must save the same way. A declared scope here would let a pane that posts multi-value rows
+    have a DELETED clone restored behind the user's back."""
+    assert _post_global_page(monkeypatch, query=query).kwargs["scope"] is None
+
+
+def test_the_global_raw_pane_still_claims_everything(monkeypatch):
+    assert _post_global_page(monkeypatch, query="?mode=raw").kwargs["scope"] is None
+
+
+def test_a_readonly_global_user_gets_an_empty_scope(monkeypatch):
+    """At global scope this is the sharp one: "in scope but not posted" means DELETE, so a
+    read-only POST with a claimed scope wipes a plugin's whole global configuration."""
+    assert _post_global_page(monkeypatch, query="?mode=compose", permissions=("read",)).kwargs["scope"] == set()
+
+
+def test_the_global_restore_skip_does_not_pick_up_the_service_control_keys():
+    """The two pages' skip sets differ and copying one onto the other loses a global.
+
+    `USE_UI` is in the SERVICE page's `restore_skip` (it flows through that page's own control
+    inputs) and is NOT in `get_blacklisted_settings(True)`. Emitting the service list here would
+    put it in the global skip set, where nothing posts it back -- so a global `USE_UI` the form
+    did not carry stops being restored and its row is deleted.
+    """
+    config = {
+        "SERVER_NAME": {"value": "svc1", "method": "scheduler", "global": True},
+        "USE_UI": {"value": "yes", "method": "scheduler", "global": True},
+        "SSL_PROTOCOLS": {"value": "TLSv1.2", "method": "ui", "global": True},
+    }
+    bw_config = Mock()
+    bw_config.get_config.return_value = config
+    bw_config.check_variables.side_effect = lambda variables, *args, **kwargs: variables
+    bw_config.edit_global_conf.return_value = ("saved", None)
+    with patch.object(_MODULE, "BW_CONFIG", bw_config), patch.object(_MODULE, "DATA", _FakeData(TO_FLASH=[])), patch.object(
+        _MODULE, "wait_applying", lambda: None
+    ):
+        _MODULE.update_global_config({"SSL_PROTOCOLS": "TLSv1.3"}, False, {}, scope={"SSL_PROTOCOLS"})
+
+    payload = bw_config.edit_global_conf.call_args[0][0]
+    assert payload["USE_UI"] == "yes", "a global outside the scope must be preserved, not skipped"

@@ -99,6 +99,10 @@
     }
   },
   "extensions": {
-    "activation": { "USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no" }
+    "activation": {
+      "USE_LIMIT_REQ": "no",
+      "USE_LIMIT_REQ_GLOBAL": "no",
+      "USE_LIMIT_CONN": "no"
+    }
   }
 }

@@ -213,6 +213,28 @@ def iter_plugin_activations(paths=None) -> Dict[str, Any]:
             # Values are compared against stored setting values, which are always strings.
             if not all(isinstance(key, str) and isinstance(value, str) for key, value in declaration.items()):
                 continue
+            # A plugin may only declare its OWN settings as activation keys. Without this the
+            # manifest alone decides what an activation toggle writes: a plugin declaring
+            # {"SERVER_NAME": ""} gets SERVER_NAME written by the activation writer
+            # (ui/app/routes/plugins.py) and pulled into the compose shelf's declared save scope
+            # (ui/app/routes/services.py:shelf_plugin_scope), where "in scope but not posted"
+            # means the row is DELETED (db_methods/config_save.py:592). This loop is deliberately
+            # not behind `is_trusted` (see above), so an external plugin.json -- inert-looking
+            # declarative data -- reaches both. Bounded by "a hostile plugin is already installed",
+            # which buys plugin code execution anyway, so this is a blast-radius limit rather than
+            # a privilege boundary: it keeps a *malformed* or copy-pasted manifest from writing
+            # another plugin's settings. No-op against every shipped manifest -- all 14 core
+            # activation keys belong to their own plugin.
+            #
+            # ALL-or-nothing, like every other malformed case above, rather than filtering the
+            # foreign keys out. Keeping the rest would leave the plugin map-declared with a
+            # SILENTLY TRUNCATED declaration -- wrong activation set, wrong `is_plugin_active`,
+            # wrong shelf scope, no signal anywhere. Dropping it hands the plugin to the tier-3
+            # naming heuristic the docstring already promises, which can only ever resolve the
+            # plugin's own USE_<ID>.
+            own_settings = manifest.get("settings")
+            if not all(key in (own_settings if isinstance(own_settings, dict) else {}) for key in declaration):
+                continue
             out[plugin_id] = dict(declaration)
     return out
 

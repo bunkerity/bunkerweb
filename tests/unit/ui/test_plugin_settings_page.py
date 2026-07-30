@@ -342,7 +342,7 @@ def _post_plugin_page(module, app, monkeypatch, *, db_config=None, form=None, pl
     monkeypatch.setattr(module, "BW_CONFIG", bw_config)
     monkeypatch.setattr(module, "CONFIG_TASKS_EXECUTOR", executor)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
-    monkeypatch.setattr(module, "current_user", SimpleNamespace(list_permissions=["read", "write"]))
+    monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=["read", "write"]))
 
     data = {"csrf_token": "x"} | (form or {})
     with app.test_request_context(f"/services/app.example.com/plugins/{plugin}", method="POST", data=data):

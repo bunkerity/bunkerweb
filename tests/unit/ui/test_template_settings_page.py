@@ -578,7 +578,7 @@ def _post_template_page(module, app, monkeypatch, *, db_config, form=None, permi
     monkeypatch.setattr(module, "API_CLIENT", api)
     monkeypatch.setattr(module, "CONFIG_TASKS_EXECUTOR", executor)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
-    monkeypatch.setattr(module, "current_user", SimpleNamespace(list_permissions=list(permissions)))
+    monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=list(permissions)))
 
     data = {"csrf_token": "x"} | (form or {})
     with app.test_request_context(f"/services/app.example.com/templates/{template}", method="POST", data=data):
@@ -711,7 +711,7 @@ def test_get_hands_the_page_the_context_it_cannot_derive_itself(route_app, monke
     api.get_configs.return_value = [{"service": "app.example.com", "type": "modsec", "name": "anomaly_score", "data": "# stored"}]
     monkeypatch.setattr(module, "API_CLIENT", api)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
-    monkeypatch.setattr(module, "current_user", SimpleNamespace(list_permissions=["read", "write"]))
+    monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=["read", "write"]))
     captured = {}
     monkeypatch.setattr(module, "render_template", lambda name, **context: captured.update(context, _name=name) or "")
 

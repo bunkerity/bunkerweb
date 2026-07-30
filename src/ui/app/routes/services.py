@@ -7,17 +7,27 @@ from json import dumps
 from time import time
 from typing import Any, Dict, List, Optional, Set, Tuple
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
-from flask_login import current_user, login_required
+from flask_login import login_required
 from regex import search, sub
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.models.save_scope import restore_unowned_settings
+from app.models.save_scope import control_keys, restore_unowned_settings
 from app.models.service_attachments import attached_ids, failed_families, get_service_attachments
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
 from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
-from app.utils import LOGGER, flash, can_delete_service, get_blacklisted_settings, is_editable_method, is_ui_api_method
+from app.utils import (
+    LOGGER,
+    _SYNTHESIZED_ALWAYS_ON,
+    flash,
+    can_delete_service,
+    get_activation_map,
+    get_blacklisted_settings,
+    is_editable_method,
+    is_readonly_request,
+    is_ui_api_method,
+)
 
 services = Blueprint("services", __name__)
 
@@ -423,6 +433,183 @@ def _base_setting_name(key: str) -> str:
     return key.rsplit("_", 1)[0] if search(r"_\d+$", key) else key
 
 
+SAVE_MODES: Tuple[str, ...] = ("easy", "advanced", "raw", "compose")
+
+
+def resolve_save_mode(mode: Optional[str], default: str) -> str:
+    """Normalise the client-supplied `mode` down to what the SAVE path understands.
+
+    `mode` is an ordinary query argument, not a route segment -- the pills are client-side tabs
+    and `handleModeChange` (static/js/plugins-settings.js:565-595) syncs the URL with
+    `history.pushState`. A bookmark, a stale tab or a Back navigation can therefore hand this
+    route any string at all, so an unrecognised value must land on the pane the page actually
+    RENDERS for it, which is the page's own GET default -- `easy` for a service
+    (:1130), `advanced` for global settings (global_settings.py:192). Anything else pairs a
+    rendered pane with a different pane's save contract, and the mismatch is measured in deleted
+    rows: `Database.save_config` deletes any in-scope key the form did not post
+    (db_methods/config_save.py:592).
+
+    In particular an absent mode must keep resolving to `easy` on the service page while the easy
+    pane still exists and is still the default: its save deliberately strips `?mode=`
+    (static/js/plugins-settings.js:577-580) so a bare POST and an easy-pane POST are
+    indistinguishable, and the stepper posts only USE_TEMPLATE plus the step-named keys. Handing
+    that payload the compose scope deletes every in-scope activation key no step names. The easy
+    branch's indiscriminate re-injection (:816-818) is strictly more preserving than any declared
+    scope, so falling through to it destroys nothing. T7/T8 revisit this when the compose pane
+    replaces easy as the default.
+
+    routes/templates.py's own VIEW_MODES is a different feature that happens to share the
+    chrome; it is not routed through here.
+    """
+    return mode if mode in SAVE_MODES else default
+
+
+def shelf_plugin_scope(
+    plugin_id: str,
+    plugin_data: dict,
+    db_config: Dict[str, Dict[str, Any]],
+    *,
+    global_page: bool,
+    is_pro_version: bool,
+    blacklisted: Set[str],
+    is_stream: bool = False,
+    activation_map: Optional[Dict[str, Any]] = None,
+) -> Set[str]:
+    """The activation keys ONE compose-shelf row renders as an enabled, postable control.
+
+    THIS IS THE CONTRACT THE SHELF MARKUP HAS TO HONOUR, and it is deliberately expressed as
+    "what does the row post", never as "what does the activation map declare". A disabled input
+    posts nothing, an unchecked checkbox posts nothing, and an in-scope key that is not posted
+    has its row DELETED (db_methods/config_save.py:592) -- so over-claiming destroys data while
+    under-claiming merely preserves it.
+
+    All-or-nothing per plugin, because a shelf row carries ONE control for the whole plugin:
+    either it renders enabled and posts every key returned here (ON with the new value, OFF with
+    the declared inactive value, siblings with their currently resolved value -- see the
+    USE_LIMIT_REQ/USE_LIMIT_CONN case below), or it renders no postable control and this returns
+    an empty set. There is no half state to drift into.
+
+    Empty -- no control, nothing owned -- when any of these holds:
+
+    * ``extensions.activation: "always"``, or the synthesized always-on ``general``: the row says
+      "Always on" and has no switch.
+    * A declared activation key of `global` context on a service page. That also covers "the
+      settings-driven loop renders no row for this plugin at all" (models/plugins_settings.html:137):
+      a plugin with zero multisite settings cannot have a multisite activation key, so the per-key
+      filter below is the same test as a `get_filtered_settings` emptiness check -- mutation-checked
+      as equivalent, and `.get("context")` here does not raise on the malformed manifest that
+      `get_filtered_settings`' `data["context"]` would. `backup` and `redis` are the live cases, and
+      `models/config.py:61` would silently drop such a key from a service payload anyway.
+    * A PRO plugin without an active licence, or a `stream: no` plugin on a stream service
+      (`plugin_data["stream"]` has THREE values: yes / no / partial -- only the literal "no" is
+      excluded).
+    * A declared activation key that is blacklisted, or absent from the plugin's own settings, or
+      whose stored method is not UI-editable and is not a global the service may override (the
+      same formula as `postable_scope._passes`).
+    * A declared activation key that is `multiple` or `multiselect`. Locked with the PO: those
+      rows get a count and a chevron, never a switch, so they post nothing. Two live cases, both
+      of which would be silent data loss if claimed: `country`'s BLACKLIST_COUNTRY /
+      WHITELIST_COUNTRY are `multiselect`, and `redirect`'s REDIRECT_TO is `"multiple":
+      "redirect"` -- and `_in_scope` base-matches (save_scope.py:39-40), so claiming REDIRECT_TO
+      would drag every stored REDIRECT_TO_<n> into scope for a row that posts none of them.
+      Excluding the key at source is why the compose save needs no `preserve_suffixed`.
+    * A declared activation key of type `text`. The shelf gives these an OPENER, not a control --
+      there is no switch that can author an HTML block or a PHP socket path -- so the row posts
+      nothing and must own nothing. `inject`'s INJECT_BODY / INJECT_HEAD and `php`'s REMOTE_PHP /
+      LOCAL_PHP are the four live cases. Round-tripping their stored value through a hidden input
+      to keep them in scope is NOT a safe alternative: `Config.check_variables` normalises CRLF
+      and `edit_service` runs `trim_scalar_value` (common_utils.py:163; `text` is not in
+      `NO_TRIM_TYPES`), so a multi-line or trailing-newline global -- the normal shape for an HTML
+      block -- comes back changed, `_is_default_value` no longer matches the global, and
+      config_save materialises a real `ui` row that permanently decouples the service from it.
+      Claiming them deletes; round-tripping them corrupts; excluding them does neither.
+
+    Multi-key: `limit` declares {USE_LIMIT_REQ: "no", USE_LIMIT_CONN: "no"}, both `check`,
+    both defaulting to "yes". "ON writes the first key" is only safe when the siblings are OUT of
+    scope, and OFF needs them IN -- so both are returned, and the row must post BOTH on every
+    save. Posting USE_LIMIT_REQ alone would leave USE_LIMIT_CONN in scope and unposted, delete its
+    row, fall back to its "yes" default and silently turn the connection limiter ON.
+    """
+    declaration = (get_activation_map() if activation_map is None else activation_map).get(plugin_id)
+
+    # No switch at all -- nothing rendered, nothing posted, nothing owned.
+    if plugin_id in _SYNTHESIZED_ALWAYS_ON or declaration == "always":
+        return set()
+
+    settings = plugin_data.get("settings") or {}
+    if plugin_data.get("type") == "pro" and not is_pro_version:
+        return set()
+    if not global_page and is_stream and plugin_data.get("stream") == "no":
+        return set()
+
+    if isinstance(declaration, dict):
+        keys = set(declaration)
+    else:
+        # Tier 3, the naming convention every plugin that declares no manifest relies on. Same
+        # USE_<ID>-then-USE_<NAME> order as is_plugin_active (app/utils.py:372), but resolved
+        # against the plugin's DECLARED settings rather than the stored config: the shelf needs a
+        # setting to render a control from, and a key with no declaration has no type, no legal
+        # values and no inactive value.
+        plugin_name_formatted = str(plugin_data.get("name", "")).replace(" ", "_").upper()
+        candidate = next((key for key in (f"USE_{plugin_id.upper()}", f"USE_{plugin_name_formatted}") if key in settings), None)
+        if candidate is None:
+            return set()
+        keys = {candidate}
+
+    for key in keys:
+        setting_data = settings.get(key)
+        if setting_data is None or key in blacklisted:
+            return set()
+        if not global_page and setting_data.get("context") != "multisite":
+            return set()
+        if setting_data.get("multiple") or setting_data.get("type") in ("multiselect", "multivalue", "text"):
+            return set()
+        entry = db_config.get(key) or {}
+        if not is_editable_method(entry.get("method", "default"), allow_default=True) and (global_page or not entry.get("global")):
+            return set()
+
+    return keys
+
+
+def postable_shelf_scope(
+    plugins_data: Dict[str, dict],
+    db_config: Dict[str, Dict[str, Any]],
+    *,
+    global_page: bool,
+    is_pro_version: bool,
+    blacklisted: Set[str],
+    is_readonly: bool = False,
+    activation_map: Optional[Dict[str, Any]] = None,
+) -> Set[str]:
+    """Every key the compose shelf posts on this page: the union of `shelf_plugin_scope`.
+
+    `is_readonly` disables every control at once, so the whole page posts nothing and owns
+    nothing -- checked here rather than per plugin, exactly as `postable_scope` does.
+    """
+    if is_readonly:
+        return set()
+
+    # models/config.py:61 keys a service's server type off SERVER_TYPE; a stream service renders
+    # no usable control for an http-only plugin. Global scope has no single server type.
+    is_stream = not global_page and (db_config.get("SERVER_TYPE") or {}).get("value", "http") == "stream"
+    if activation_map is None:
+        activation_map = get_activation_map()
+
+    scope: Set[str] = set()
+    for plugin_id, plugin_data in plugins_data.items():
+        scope |= shelf_plugin_scope(
+            plugin_id,
+            plugin_data,
+            db_config,
+            global_page=global_page,
+            is_pro_version=is_pro_version,
+            blacklisted=blacklisted,
+            is_stream=is_stream,
+            activation_map=activation_map,
+        )
+    return scope
+
+
 def postable_scope(
     plugin_data: dict,
     db_config: Dict[str, Dict[str, Any]],
@@ -651,26 +838,6 @@ def update_service(
                 if setting not in variables:
                     variables[setting] = value["value"]
 
-        # The stepper has no multiples UI -- one input per step-named key -- so a stored
-        # REVERSE_PROXY_HOST_1 is never posted, while save_scope.py:39-40 base-matches it into
-        # the scope declared for REVERSE_PROXY_HOST and would therefore DELETE it. Carry every
-        # suffixed row through unchanged: this page cannot edit or clear one, so it must not be
-        # able to destroy one. Narrow by design -- it restores only `_<digits>` keys, never the
-        # base, so a legitimate clear of a step-named setting still goes through.
-        if mode == "template" and service != "new":
-            # This runs BEFORE restore_unowned_settings, so it must re-apply that function's
-            # own template guard (save_scope.py:83-84) or it silently defeats it: carrying an
-            # outgoing template's default across a USE_TEMPLATE switch makes config_save
-            # materialise it as a real ui-method row, permanently detaching it from the
-            # template it came from.
-            switching_template = db_config.get("USE_TEMPLATE", {}).get("value", "") != variables.get("USE_TEMPLATE", "")
-            for setting, value in db_config.items():
-                if setting in variables or _base_setting_name(setting) == setting:
-                    continue
-                if switching_template and value.get("method") == "default" and value.get("template"):
-                    continue
-                variables[setting] = value["value"]
-
         for db_custom_config, data in db_custom_configs.copy().items():
             if data["method"] == "default" and data["template"]:
                 LOGGER.debug(f"Removing default custom config {db_custom_config} because it is not used anymore.")
@@ -703,7 +870,10 @@ def update_service(
     # Which stored settings must survive this save -- see app/models/save_scope.py.
     # `scope=None` keeps the historical method-based behaviour; the per-plugin and
     # per-template pages (S3.2, S3.3) pass the key set they own instead.
-    restore_skip = get_blacklisted_settings() | {"SERVER_NAME", "OLD_SERVER_NAME", "USE_TEMPLATE", "USE_UI"}
+    # `restore_skip` is the blacklist plus exactly the keys this page must post itself -- one
+    # definition, so a control key added to the shelf cannot be left out of the skip set (or
+    # vice versa) and quietly start being restored instead of posted.
+    restore_skip = get_blacklisted_settings() | set(control_keys())
     if service != "new" and mode != "easy":
         old_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
         new_template = variables.get("USE_TEMPLATE", "")
@@ -713,6 +883,13 @@ def update_service(
             scope=scope,
             restore_skip=restore_skip,
             template_unchanged=old_template == new_template,
+            # The stepper has no multiples cloner -- one input per step-named key
+            # (models/template_steps_body.html:115 vs models/plugin_settings_body.html:122) -- so
+            # a stored REVERSE_PROXY_HOST_1 is never posted, while save_scope.py:39-40
+            # base-matches it into the scope declared for REVERSE_PROXY_HOST and would DELETE it.
+            # The compose shelf needs no such flag: shelf_plugin_scope drops `multiple`
+            # activation keys at source, so no suffix is ever base-matched into its scope.
+            preserve_suffixed=mode == "template",
         )
 
     variables_to_check = variables.copy()
@@ -916,7 +1093,9 @@ def services_service_page(service: str):
         del variables["csrf_token"]
         file_setting_names = extract_file_setting_names(variables)
 
-        mode = request.args.get("mode", "easy")
+        # Resolved centrally against this page's own GET default, so an unrecognised `mode` saves
+        # the way the pane it renders posts. See resolve_save_mode.
+        mode = resolve_save_mode(request.args.get("mode"), "easy")
         clone = request.args.get("clone", "")
 
         if mode == "raw":
@@ -930,8 +1109,34 @@ def services_service_page(service: str):
 
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
+        # Only the compose shelf declares a scope, because only it renders a form that posts a
+        # KNOWN subset. `easy`, `advanced` and `raw` keep the historical `scope=None` -- the
+        # method-based restore for the first two, "this payload is the complete desired state"
+        # for raw. Declaring a scope for a pane that does not render the shelf pairs a partial
+        # payload with authority to delete what it never posted. A new service has no stored rows
+        # to protect either (update_service skips the restore for it entirely, and db_config
+        # would be the GLOBAL config there).
+        scope = None
+        if mode == "compose" and service != "new":
+            try:
+                scope_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
+            except (ApiClientError, ApiUnavailableError):
+                return handle_error("Could not fetch service from the API.", "services")
+            try:
+                metadata = API_CLIENT.get_metadata()
+            except (ApiClientError, ApiUnavailableError):
+                metadata = {}
+            scope = postable_shelf_scope(
+                BW_CONFIG.get_plugins(),
+                scope_config,
+                global_page=False,
+                is_pro_version=metadata.get("is_pro", False),
+                blacklisted=get_blacklisted_settings(),
+                is_readonly=is_readonly_request(API_CLIENT.readonly),
+            )
+
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names)
+        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope)
 
         new_service = False
         if service == "new":
@@ -941,8 +1146,13 @@ def services_service_page(service: str):
             service = variables["SERVER_NAME"].split(" ")[0]
 
         arguments = {}
-        if mode != "easy":
-            arguments["mode"] = mode
+        # Which PANE to come back to, which is not the same question as which save path ran:
+        # `resolve_save_mode` collapses easy/advanced/compose into one save contract, while the
+        # user is still looking at whichever tab they submitted from. Keyed off the raw argument
+        # so this stays a display decision. The pills own it from S3.4's chrome slice on.
+        requested_mode = request.args.get("mode", "easy")
+        if requested_mode != "easy":
+            arguments["mode"] = requested_mode
         if request.args.get("type", "all") != "all":
             arguments["type"] = request.args["type"]
 
@@ -1100,13 +1310,10 @@ def services_plugin_page(service: str, plugin: str):
         except (ApiClientError, ApiUnavailableError):
             metadata = {}
 
-        # Mirrors main.py's `is_readonly` context-processor formula (its `request.path`
-        # exemption is for /profile, never true on this route): the API's own readonly state
-        # is already ruled out by the early return above, so in practice this is the
-        # transient-user-permission-load-error case -- current_user.list_permissions is set to
-        # an empty set on a failed API call while loading the user, which must be treated the
-        # same way here as it is on the page that rendered the form the user just submitted.
-        is_readonly = API_CLIENT.readonly or "write" not in getattr(current_user, "list_permissions", [])
+        # One helper, four call sites -- see app/utils.py:is_readonly_request. The API's own
+        # readonly state is already ruled out by the early return above, so in practice this is
+        # the transient-user-permission-load-error case.
+        is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
         CONFIG_TASKS_EXECUTOR.submit(
@@ -1198,13 +1405,10 @@ def services_template_page(service: str, template: str):
         file_setting_names = extract_file_setting_names(variables)
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
-        # Mirrors main.py's `is_readonly` context-processor formula (its `request.path`
-        # exemption is for /profile, never true on this route): the API's own readonly state
-        # is already ruled out by the early return above, so in practice this is the
-        # transient-user-permission-load-error case -- current_user.list_permissions is set to
-        # an empty set on a failed API call while loading the user, which must be treated the
-        # same way here as it is on the page that rendered the form the user just submitted.
-        is_readonly = API_CLIENT.readonly or "write" not in getattr(current_user, "list_permissions", [])
+        # One helper, four call sites -- see app/utils.py:is_readonly_request. The API's own
+        # readonly state is already ruled out by the early return above, so in practice this is
+        # the transient-user-permission-load-error case.
+        is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
         CONFIG_TASKS_EXECUTOR.submit(

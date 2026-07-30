@@ -3,13 +3,13 @@ from time import time
 from typing import Dict, Optional, Set
 
 from flask import Blueprint, redirect, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask_login import login_required
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.models.save_scope import restore_unowned_settings
-from app.routes.services import postable_scope, resolve_plugin
-from app.utils import LOGGER, flash, get_blacklisted_settings
+from app.models.save_scope import control_keys, restore_unowned_settings
+from app.routes.services import postable_scope, postable_shelf_scope, resolve_plugin, resolve_save_mode
+from app.utils import LOGGER, flash, get_blacklisted_settings, is_readonly_request
 
 from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
 
@@ -52,7 +52,11 @@ def update_global_config(
         variables,
         global_config_entries,
         scope=scope,
-        restore_skip=get_blacklisted_settings(True),
+        # Same one-definition rule as the service page, and the two lists are NOT the same: the
+        # global blacklist adds SERVER_NAME/USE_TEMPLATE, and `control_keys(True)` is empty
+        # because this page must not post SERVER_NAME (it is the service list) and has no draft
+        # state. A shared control-key list would be wrong on both pages.
+        restore_skip=get_blacklisted_settings(True) | set(control_keys(True)),
         template_unchanged=True,
     )
 
@@ -147,8 +151,27 @@ def global_settings_page():
         file_setting_names = extract_file_setting_names(variables)
         override_non_global_services = variables.pop("OVERRIDE_NON_GLOBAL_SERVICES", variables.pop("OVERRIDE_TEMPLATE_SERVICES", "no")) == "yes"
 
+        # Same contract as the service page: only the compose shelf posts a known subset and may
+        # therefore declare a scope. `advanced` (this page's default, and where an unrecognised
+        # mode from a bookmarked URL lands) and `raw` both post every rendered key, so they keep
+        # the historical `scope=None`. See resolve_save_mode.
+        scope = None
+        if resolve_save_mode(request.args.get("mode"), "advanced") == "compose":
+            try:
+                metadata = API_CLIENT.get_metadata()
+            except (ApiClientError, ApiUnavailableError):
+                metadata = {}
+            scope = postable_shelf_scope(
+                BW_CONFIG.get_plugins(),
+                global_config,
+                global_page=True,
+                is_pro_version=metadata.get("is_pro", False),
+                blacklisted=get_blacklisted_settings(True),
+                is_readonly=is_readonly_request(API_CLIENT.readonly),
+            )
+
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services, file_setting_names, scope=None)
+        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services, file_setting_names, scope=scope)
 
         arguments = {}
         if request.args.get("mode", "advanced") != "advanced":
@@ -204,13 +227,13 @@ def global_settings_plugin_page(plugin: str):
         except (ApiClientError, ApiUnavailableError):
             metadata = {}
 
-        # Same formula as services_plugin_page, and it matters more here. When the page rendered
+        # Same helper as the service pages, and it matters more here. When the page rendered
         # read-only every control is disabled, so the form posts nothing -- but csrf_token still
         # renders, so the POST is valid. Without this the scope would still claim the plugin's whole
         # global key set, and "in scope but not posted" means DELETE (db_methods/config_save.py:592):
         # a read-only user would wipe a plugin's entire global configuration, one plugin per POST.
         # On a service page the same POST is a harmless no-op; at global scope it is not.
-        is_readonly = API_CLIENT.readonly or "write" not in getattr(current_user, "list_permissions", [])
+        is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
         CONFIG_TASKS_EXECUTOR.submit(

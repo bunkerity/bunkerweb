@@ -29,6 +29,22 @@ LOCALES = TEMPLATES.parent / "static" / "locales"
 # card shape -- a switch -- the real manifest can no longer produce).
 CORE_PLUGINS_PATH = Path(__file__).resolve().parents[3] / "src" / "common" / "core"
 _REAL_PLUGIN_ACTIVATIONS = plugin_extensions.iter_plugin_activations(paths=[(CORE_PLUGINS_PATH, "core")])
+# The real setting definitions BW_CONFIG.get_plugins_settings() serves, flattened the same way
+# models/config.py:81-85 flattens them. The activation writer reads `type`/`select`/`multiple`
+# from here to decide what a switch may write, so seeding the Mock with the SHIPPED schemas is
+# what keeps "antibot is switchable, country is not" a statement about the manifests rather than
+# about a hand-written fixture.
+_REAL_CORE_PLUGIN_ENV = {}
+_REAL_CORE_SETTINGS = {}
+for _manifest in sorted(CORE_PLUGINS_PATH.glob("*/plugin.json")):
+    _parsed = json.loads(_manifest.read_text(encoding="utf-8"))
+    _REAL_CORE_PLUGIN_ENV[_parsed.get("id", _manifest.parent.name)] = {"settings": _parsed.get("settings", {})}
+    _REAL_CORE_SETTINGS.update(_parsed.get("settings", {}))
+# What `g._env` holds on a real request: main.py:1263 parks BW_CONFIG.get_plugins() there and
+# main.py:1297 the global config (methods=True, so `{"value": ...}` entries, every multisite
+# setting seeded from its default). The route reads BOTH from `_env`, never from the API, so the
+# fixtures below have to supply it or nothing derives.
+_REAL_CORE_CONFIG = {key: {"value": data.get("default", "")} for key, data in _REAL_CORE_SETTINGS.items()}
 
 
 # ======================================================================================
@@ -106,8 +122,8 @@ def _card_slice(html, plugin_id):
 
 ALL_PLUGINS = {
     "general": _plugin(name="General"),  # core, always-on
-    "antibot": _plugin(name="Antibot"),  # core, manifest activation map ({"USE_ANTIBOT": "no"}) -> state badge
-    "country": _plugin(name="Country"),  # core, manifest activation map -> state badge
+    "antibot": _plugin(name="Antibot"),  # core, manifest activation map ({"USE_ANTIBOT": "no"}) -> switch (T2)
+    "country": _plugin(name="Country"),  # core, multiselect activation map -> state badge, no switch
     "myext": _plugin(type="external", name="My Ext", method="manual", enabled=True),
     "myui": _plugin(type="ui", name="My UI", method="ui", page=True, enabled=False),
     "mypro": _plugin(type="pro", name="My Pro", method="scheduler", enabled=True),
@@ -147,23 +163,42 @@ class TestGridRender:
         assert 'name="setting" value="USE_GZIP"' in card
         assert "checked" in card  # USE_GZIP=yes -> on
 
-    def test_core_specific_declared_activation_shows_badge_no_switch(self):
-        # The slice's one user-visible change (S0 review, Important #2): antibot declares
-        # {"USE_ANTIBOT": "no"} in its real manifest, so `core_specific` is true and the card
-        # renders an Active/Inactive badge -- never the switch that used to POST the illegal
-        # "yes" through a select-typed USE_ANTIBOT.
-        html = _render(plugins={"antibot": ALL_PLUGINS["antibot"]}, config=CONFIG)
+    def test_map_declared_plugin_gets_a_switch_bound_to_its_declared_key(self):
+        # S3.4 T2: the read-only badge for map-declared core plugins is gone now that the shared
+        # writer can flip them. antibot declares {"USE_ANTIBOT": "no"} -- a 9-value select, so the
+        # switch must post the DECLARED key and let the writer pick a legal value, never "yes".
+        html = _render(plugins={"antibot": ALL_PLUGINS["antibot"]}, config=CONFIG, activation_toggles={"antibot": "USE_ANTIBOT"})
         card = _card_slice(html, "antibot")
+        assert "plugin-switch" in card
+        assert 'name="setting" value="USE_ANTIBOT"' in card
+        assert "plugins.marketplace.active" not in card  # the badge it replaces
+
+    def test_map_declared_plugin_the_writer_refuses_keeps_the_state_badge(self):
+        # country's BLACKLIST_COUNTRY/WHITELIST_COUNTRY are multiselect: no derivable active
+        # value, and locked with the PO as count + chevron. The route leaves it out of
+        # activation_toggles, so the card must fall back to the read-only badge.
+        html = _render(plugins={"country": ALL_PLUGINS["country"]}, config=CONFIG, activation_toggles={"antibot": "USE_ANTIBOT"})
+        card = _card_slice(html, "country")
         assert "plugin-switch" not in card
         assert 'name="setting"' not in card
-        assert "plugins.marketplace.active" in card  # USE_ANTIBOT=yes -> active badge
+        assert "plugins.marketplace.inactive" in card  # USE_COUNTRY=no -> inactive state badge
 
-    def test_core_specific_shows_state_badge_no_switch(self):
-        html = _render(plugins={"country": ALL_PLUGINS["country"]}, config=CONFIG)
-        card = _card_slice(html, "country")
-        assert "plugin-switch" not in card  # COUNTRY is multi-key/ambiguous -> no live toggle
-        # USE_COUNTRY=no -> inactive state badge
-        assert "plugins.marketplace.inactive" in card
+    def test_absent_activation_toggles_degrades_every_map_plugin_to_the_badge(self):
+        # plugins_page swallows a get_plugins_settings() failure and passes nothing; a card must
+        # then render the read-only badge rather than a switch it cannot honour.
+        html = _render(plugins={"antibot": ALL_PLUGINS["antibot"], "country": ALL_PLUGINS["country"]}, config=CONFIG)
+        for plugin_id in ("antibot", "country"):
+            card = _card_slice(html, plugin_id)
+            assert "plugin-switch" not in card, plugin_id
+            assert 'name="setting"' not in card, plugin_id
+
+    def test_map_declared_switch_never_borrows_the_use_id_convention(self):
+        # limit's tier-3 name would be USE_LIMIT, which is not a setting at all. The switch must
+        # post the key activation_toggles names, not the convention-derived one.
+        html = _render(plugins={"limit": _plugin(name="Limit")}, config=CONFIG, activation_toggles={"limit": "USE_LIMIT_REQ"})
+        card = _card_slice(html, "limit")
+        assert 'name="setting" value="USE_LIMIT_REQ"' in card
+        assert 'value="USE_LIMIT"' not in card
 
     def test_external_has_switch_without_setting(self):
         html = _render(plugins={"myext": ALL_PLUGINS["myext"]}, config={})
@@ -354,6 +389,16 @@ def route_app(plugins_route):
     return plugins_route, app
 
 
+@pytest.fixture(autouse=True)
+def _no_stale_settings_mock(route_app):
+    """Nothing production-side reads ``BW_CONFIG.get_plugins_settings()`` any more -- schemas come
+    from ``g._env``. Reset the module-scoped Mock between tests anyway (pytest-randomly shuffles
+    order) so a `side_effect` armed by one test cannot leak into the next, and so the two
+    ``assert_not_called`` guards below measure this test's calls, not the module's."""
+    module, _ = route_app
+    module.BW_CONFIG.get_plugins_settings.reset_mock(return_value=True, side_effect=True)
+
+
 @pytest.fixture
 def plugins_page_context(route_app, monkeypatch, tmp_path):
     """Calls the real `plugins_page()` route (bypassing @login_required, same pattern as
@@ -367,7 +412,7 @@ def plugins_page_context(route_app, monkeypatch, tmp_path):
     """
     module, app = route_app
 
-    def _build():
+    def _build(env=None):
         monkeypatch.setattr(module, "TMP_DIR", tmp_path)
         captured = {}
 
@@ -377,6 +422,9 @@ def plugins_page_context(route_app, monkeypatch, tmp_path):
 
         monkeypatch.setattr(module, "render_template", _fake_render_template)
         with app.test_request_context("/plugins"):
+            # `main.py`'s before_request parks this request's plugins + config on g._env; the
+            # route reads its setting definitions from there rather than re-querying the API.
+            module.g._env = {"plugins": _REAL_CORE_PLUGIN_ENV, "config": _REAL_CORE_CONFIG} if env is None else env
             module.plugins_page.__wrapped__()
         return captured
 
@@ -394,16 +442,64 @@ def test_marketplace_toggle_not_offered_for_manifest_declared_plugins(plugins_pa
 def test_activation_map_reaches_the_template(plugins_page_context):
     activations = plugins_page_context()["plugin_activations"]
     assert activations.get("errors") == "always"
-    assert activations.get("limit") == {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"}
+    # USE_LIMIT_REQ_GLOBAL is declared too (S3.4 T2): limit.lua:99/:107/:150 runs the request
+    # limiter on it alone, so a map without it makes a conformant OFF leave the global rate
+    # limiter enforcing, and a service using only it read inactive.
+    assert activations.get("limit") == {"USE_LIMIT_REQ": "no", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
 
 
-def _call_enable(module, app, monkeypatch, form, client):
+def test_marketplace_offers_a_switch_exactly_for_the_activations_the_writer_can_flip(plugins_page_context, route_app):
+    """The read-only badge for map-declared core plugins is dropped, but only where the shared
+    writer can actually derive both directions -- otherwise the card would offer a switch that
+    flashes an error. Asserted against the REAL manifests, so a new/changed activation
+    declaration shows up here rather than as a dead switch in production."""
+    module, _ = route_app
+    toggles = plugins_page_context()["activation_toggles"]
+    # switchable: single-key check/select activations, and limit's all-`check` multi-key one
+    assert toggles["antibot"] == "USE_ANTIBOT"
+    assert toggles["customcert"] == "USE_CUSTOM_SSL"
+    assert toggles["letsencrypt"] == "AUTO_LETS_ENCRYPT"  # matches no USE_<ID> convention
+    assert toggles["selfsigned"] == "GENERATE_SELF_SIGNED_SSL"  # ditto
+    assert toggles["limit"] == "USE_LIMIT_REQ"
+    # refused: list-shaped (country multiselect, redirect multiple) and free text (inject, php)
+    for refused in ("country", "redirect", "inject", "php"):
+        assert refused not in toggles, refused
+    # "always" declarations are never flippable
+    for always in ("errors", "headers", "misc", "pro", "sessions", "ssl"):
+        assert always not in toggles, always
+
+
+def test_an_env_without_plugin_schemas_degrades_to_no_toggles(plugins_page_context, route_app):
+    """`main.py:1262-1265` swallows a get_plugins() failure and parks `{}`. With no schemas the
+    route can derive nothing, and every map-declared card must fall back to the read-only badge
+    rather than offering a switch it cannot honour."""
+    module, _ = route_app
+    module.BW_CONFIG.get_plugins_settings.side_effect = RuntimeError("must not be called")
+    try:
+        assert plugins_page_context(env={"plugins": {}, "config": {}})["activation_toggles"] == {}
+    finally:
+        module.BW_CONFIG.get_plugins_settings.side_effect = None
+
+
+def test_the_marketplace_page_adds_no_api_round_trip(plugins_page_context, route_app):
+    """Definitions come off g._env, which this request already paid for. A fetch here would be a
+    second get_plugins() per page load."""
+    module, _ = route_app
+    module.BW_CONFIG.get_plugins_settings.reset_mock()
+    plugins_page_context()
+    module.BW_CONFIG.get_plugins_settings.assert_not_called()
+
+
+def _call_enable(module, app, monkeypatch, form, client, env=None):
     monkeypatch.setattr(module, "current_user", SimpleNamespace(admin=True))
     monkeypatch.setattr(module, "wait_applying", lambda: None)
     client.readonly = False
     module.DATA.clear()
     module.DATA["TO_FLASH"] = []
     with app.test_request_context("/plugins/enable", method="POST", data=form):
+        # Same g._env main.py's before_request builds: the route snapshots the definitions and
+        # the resolved config from it IN THE REQUEST THREAD, since `g` is gone in the executor.
+        module.g._env = {"plugins": _REAL_CORE_PLUGIN_ENV, "config": _REAL_CORE_CONFIG} if env is None else env
         return module.enable_plugin.__wrapped__()
 
 
@@ -499,68 +595,163 @@ def test_rejected_toggle_flashes_error_and_clears_reloading(route_app, monkeypat
 # tests/unit/ui/conftest.py's autouse fixture points its manifest scan at this repo's
 # real src/common/core plugin.json files, so the plugin ids below reflect their actual
 # shipped declarations:
-#   antibot  -> {"USE_ANTIBOT": "no"}                            (single-key, select)
-#   limit    -> {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"}   (multi-key)
-#   redirect -> {"REDIRECT_TO": ""}                               (single-key, free-text)
+#   antibot  -> {"USE_ANTIBOT": "no"}                       (single-key, select)
+#   limit    -> {USE_LIMIT_REQ, USE_LIMIT_REQ_GLOBAL, USE_LIMIT_CONN} all "no"  (multi-key)
+#   redirect -> {"REDIRECT_TO": ""}                         (single-key, `multiple` -> refused)
+#   country  -> {BLACKLIST_COUNTRY, WHITELIST_COUNTRY} ""   (multi-key, multiselect -> refused)
 #   gzip     -> not declared -> legacy USE_GZIP convention
-# BW_CONFIG.get_plugins_settings() is mocked (BW_CONFIG itself is a bare Mock in the
-# fixture) so each test configures the setting definition shape select_setting.html
-# actually consumes: {"type": ..., "select": [...], "default": ...}.
+# `settings` is a REQUIRED kwarg -- the writer never fetches schemas itself. `_write` supplies the
+# real shipped ones so each test states only what it is actually about; the constants below survive
+# as ORACLES (what a legal answer looks like), not as inputs.
 # ======================================================================================
-_ANTIBOT_USE_SETTING = {
-    "type": "select",
-    "select": ["no", "cookie", "javascript", "captcha", "recaptcha", "hcaptcha", "turnstile", "mcaptcha", "capjs"],
-    "default": "no",
-}
-_LETSENCRYPT_USE_SETTING = {"type": "check", "default": "no"}
-_REDIRECT_USE_SETTING = {"type": "text", "default": ""}
+
+
+def _write(module, plugin_id, setting, *, settings=None, **kwargs):
+    return module.resolve_activation_write(plugin_id, setting, settings=_REAL_CORE_SETTINGS if settings is None else settings, **kwargs)
+
+
+def test_settings_is_a_required_kwarg(route_app):
+    """MED-6: the writer must never source schemas itself. A default here had zero production
+    callers once both surfaces read from `g._env`, and would let a caller silently re-add a
+    per-call API round-trip that no test would catch."""
+    module, _ = route_app
+    with pytest.raises(TypeError):
+        module.resolve_activation_write("gzip", "USE_GZIP", enabled=True)
 
 
 def test_disable_writes_every_declared_key(route_app):
     module, _ = route_app
-    assert module.resolve_activation_write("limit", None, enabled=False) == {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"}
+    assert _write(module, "limit", None, enabled=False) == {"USE_LIMIT_REQ": "no", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
+
+
+def test_enable_a_multi_key_activation_writes_every_declared_key(route_app):
+    """The T1 shelf contract: a row owns every key `shelf_plugin_scope` returns, and an in-scope
+    key the form does not post is DELETED (db_methods/config_save.py:592). Posting USE_LIMIT_REQ
+    alone would delete USE_LIMIT_CONN's row, fall it back to its "yes" default, and silently turn
+    the connection limiter ON from an operator enabling the request limiter."""
+    module, _ = route_app
+    declared = module.get_activation_map()["limit"]
+    written = _write(
+        module,
+        "limit",
+        "USE_LIMIT_REQ",
+        enabled=True,
+        current_values={"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no", "USE_LIMIT_REQ_GLOBAL": "no"},
+    )
+    assert set(written) == set(declared), "every declared key must be written, not just the toggled one"
+    assert written["USE_LIMIT_REQ"] == "yes"
+
+
+def test_enable_a_multi_key_activation_keeps_siblings_at_their_current_value(route_app):
+    """Siblings are re-posted at what they CURRENTLY resolve to, never at their schema default:
+    USE_LIMIT_CONN defaults to "yes", so writing the default would switch the connection limiter
+    back on behind an operator who had turned it off."""
+    module, _ = route_app
+    written = _write(
+        module,
+        "limit",
+        "USE_LIMIT_REQ",
+        enabled=True,
+        current_values={"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no", "USE_LIMIT_REQ_GLOBAL": "yes"},
+    )
+    assert written["USE_LIMIT_CONN"] == "no", "sibling clobbered with its default instead of its current value"
+    assert written["USE_LIMIT_REQ_GLOBAL"] == "yes"
+
+
+def test_enable_refuses_to_guess_a_sibling_whose_current_value_is_unknown(route_app):
+    """The sibling rule is fail-CLOSED. Falling back to the schema default is the exact clobber it
+    exists to prevent: USE_LIMIT_CONN defaults to "yes", and Database.py:463 lets the resulting
+    `api` write overwrite an operator's `ui` "no"."""
+    module, _ = route_app
+    with pytest.raises(ValueError):
+        _write(module, "limit", "USE_LIMIT_REQ", enabled=True)
+    with pytest.raises(ValueError):
+        _write(module, "limit", "USE_LIMIT_REQ", enabled=True, current_values={"USE_LIMIT_CONN": "no"})  # REQ_GLOBAL missing
+
+
+def test_a_multiple_activation_key_is_refused_in_both_directions(route_app):
+    """redirect's REDIRECT_TO is `"multiple": "redirect"`: the live values live under
+    REDIRECT_TO_<n>, which redirect.conf iterates, so writing the bare base name claims "off"
+    while every suffixed redirect keeps serving. Refuse rather than lie -- and refuse ON too,
+    since a free-text key has no derivable active value anyway."""
+    module, _ = route_app
+    assert module.get_activation_map()["redirect"] == {"REDIRECT_TO": ""}, "fixture premise"
+    with pytest.raises(ValueError):
+        _write(module, "redirect", "REDIRECT_TO", enabled=False)
+    with pytest.raises(ValueError):
+        _write(module, "redirect", "REDIRECT_TO", enabled=True)
+
+
+def test_a_multiselect_activation_key_is_refused_in_both_directions(route_app):
+    """country's BLACKLIST_COUNTRY/WHITELIST_COUNTRY are `type: multiselect` -- locked with the
+    PO as a count + chevron, never a switch, and excluded from the shelf's scope, so a write here
+    would post keys the page does not own."""
+    module, _ = route_app
+    for enabled in (True, False):
+        with pytest.raises(ValueError):
+            _write(module, "country", "BLACKLIST_COUNTRY", enabled=enabled)
+
+
+def test_a_declared_activation_key_outside_the_use_convention_is_accepted(route_app):
+    """AUTO_LETS_ENCRYPT / GENERATE_SELF_SIGNED_SSL match no USE_<...> pattern; the endpoint's
+    pre-thread guard has to consult the manifest or those two plugins can never be toggled."""
+    module, _ = route_app
+    assert module.is_activation_setting("letsencrypt", "AUTO_LETS_ENCRYPT") is True
+    assert module.is_activation_setting("selfsigned", "GENERATE_SELF_SIGNED_SSL") is True
+    # ...and the manifest is a TIGHTER gate than the regex, not a looser one
+    assert module.is_activation_setting("letsencrypt", "USE_SOMETHING_ELSE") is False
+    assert module.is_activation_setting("gzip", "USE_GZIP") is True  # undeclared: regex convention
+    assert module.is_activation_setting("gzip", "DROP TABLE") is False
 
 
 def test_enable_writes_a_schema_legal_value_for_a_select_activation(route_app):
     module, _ = route_app
-    module.BW_CONFIG.get_plugins_settings.return_value = {"USE_ANTIBOT": _ANTIBOT_USE_SETTING}
-    assert module.resolve_activation_write("antibot", "USE_ANTIBOT", enabled=False) == {"USE_ANTIBOT": "no"}
-    written = module.resolve_activation_write("antibot", "USE_ANTIBOT", enabled=True)
+    assert _write(module, "antibot", "USE_ANTIBOT", enabled=False) == {"USE_ANTIBOT": "no"}
+    written = _write(module, "antibot", "USE_ANTIBOT", enabled=True)
     assert written["USE_ANTIBOT"] != "yes"  # "yes" is not a legal USE_ANTIBOT value
     assert written["USE_ANTIBOT"] != "no"  # must actually flip it on
-    assert written["USE_ANTIBOT"] in _ANTIBOT_USE_SETTING["select"]
+    assert written["USE_ANTIBOT"] in _REAL_CORE_SETTINGS["USE_ANTIBOT"]["select"]
 
 
 def test_enable_writes_a_schema_legal_value_for_a_check_activation(route_app):
     module, _ = route_app
-    module.BW_CONFIG.get_plugins_settings.return_value = {"AUTO_LETS_ENCRYPT": _LETSENCRYPT_USE_SETTING}
-    assert module.resolve_activation_write("letsencrypt", "AUTO_LETS_ENCRYPT", enabled=True) == {"AUTO_LETS_ENCRYPT": "yes"}
-    assert module.resolve_activation_write("letsencrypt", "AUTO_LETS_ENCRYPT", enabled=False) == {"AUTO_LETS_ENCRYPT": "no"}
+    assert _write(module, "letsencrypt", "AUTO_LETS_ENCRYPT", enabled=True) == {"AUTO_LETS_ENCRYPT": "yes"}
+    assert _write(module, "letsencrypt", "AUTO_LETS_ENCRYPT", enabled=False) == {"AUTO_LETS_ENCRYPT": "no"}
 
 
 def test_enable_rejects_a_setting_the_plugin_does_not_declare(route_app):
-    """The endpoint must not flip an arbitrary USE_* just because it matches a name pattern."""
+    """The endpoint must not flip an arbitrary USE_* just because it matches a name pattern.
+
+    `current_values` covers every DECLARED key, so the sibling rule cannot fire and the only rule
+    left that can raise is the one under test. Without that, this passed with the check deleted --
+    the undeclared name became the "toggled" key, antibot's real key became a value-less sibling,
+    and the sibling rule raised instead. Caught by mutating the check away."""
     module, _ = route_app
     with pytest.raises(ValueError):
-        module.resolve_activation_write("antibot", "USE_SOMETHING_ELSE", enabled=True)
+        _write(module, "antibot", "USE_SOMETHING_ELSE", enabled=True, current_values={"USE_ANTIBOT": "no"})
 
 
-def test_enable_rejects_multi_key_declaration(route_app):
-    """limit declares two keys -- enabling from a single switch is ambiguous, must raise."""
+def test_enable_a_multi_key_activation_defaults_to_the_first_declared_key(route_app):
+    """A shelf row carries one switch and names no key; dict order is manifest order, so "first
+    declared" is well-defined and stable."""
     module, _ = route_app
-    with pytest.raises(ValueError):
-        module.resolve_activation_write("limit", "USE_LIMIT_REQ", enabled=True)
-    with pytest.raises(ValueError):
-        module.resolve_activation_write("limit", None, enabled=True)
+    written = _write(module, "limit", None, enabled=True, current_values={"USE_LIMIT_CONN": "no", "USE_LIMIT_REQ_GLOBAL": "no"})
+    assert written["USE_LIMIT_REQ"] == "yes"
+    assert written["USE_LIMIT_CONN"] == "no"
 
 
 def test_enable_rejects_free_text_activation(route_app):
-    """REDIRECT_TO has no derivable active value -- a free-text activation must never be
-    offered as a simple switch."""
+    """A free-text activation has no derivable active value -- it must never be offered as a
+    simple switch. inject/php are the only live cases: REDIRECT_TO is free text too, but it is
+    `multiple` and so refused one step earlier, which
+    test_a_multiple_activation_key_is_refused_in_both_directions owns."""
     module, _ = route_app
-    module.BW_CONFIG.get_plugins_settings.return_value = {"REDIRECT_TO": _REDIRECT_USE_SETTING}
-    with pytest.raises(ValueError):
-        module.resolve_activation_write("redirect", "REDIRECT_TO", enabled=True)
+    for plugin_id, key in (("inject", "INJECT_BODY"), ("php", "REMOTE_PHP")):
+        # Supply EVERY declared key's current value. With `current_values={}` the sibling rule
+        # raises first, so this test passed even with the free-text guard removed -- it was
+        # asserting the wrong rule. Caught by mutating `_active_value_for` to stop raising.
+        with pytest.raises(ValueError):
+            _write(module, plugin_id, key, enabled=True, current_values=dict(module.get_activation_map()[plugin_id]))
 
 
 def test_always_active_plugin_cannot_be_toggled(route_app):
@@ -568,23 +759,23 @@ def test_always_active_plugin_cannot_be_toggled(route_app):
     crafted setting name that happens to match the USE_<ID> convention."""
     module, _ = route_app
     with pytest.raises(ValueError):
-        module.resolve_activation_write("headers", "USE_HEADERS", enabled=True)
+        _write(module, "headers", "USE_HEADERS", enabled=True)
     with pytest.raises(ValueError):
-        module.resolve_activation_write("headers", None, enabled=False)
+        _write(module, "headers", None, enabled=False)
 
 
 def test_undeclared_plugin_keeps_conventional_use_boolean(route_app):
     module, _ = route_app
-    assert module.resolve_activation_write("gzip", "USE_GZIP", enabled=True) == {"USE_GZIP": "yes"}
-    assert module.resolve_activation_write("gzip", "USE_GZIP", enabled=False) == {"USE_GZIP": "no"}
+    assert _write(module, "gzip", "USE_GZIP", enabled=True) == {"USE_GZIP": "yes"}
+    assert _write(module, "gzip", "USE_GZIP", enabled=False) == {"USE_GZIP": "no"}
 
 
 def test_undeclared_plugin_still_rejects_non_conventional_setting(route_app):
     module, _ = route_app
     with pytest.raises(ValueError):
-        module.resolve_activation_write("gzip", "DROP TABLE", enabled=True)
+        _write(module, "gzip", "DROP TABLE", enabled=True)
     with pytest.raises(ValueError):
-        module.resolve_activation_write("gzip", None, enabled=True)
+        _write(module, "gzip", None, enabled=True)
 
 
 def test_toggle_plugin_route_writes_schema_legal_value_end_to_end(route_app, monkeypatch):
@@ -593,13 +784,122 @@ def test_toggle_plugin_route_writes_schema_legal_value_end_to_end(route_app, mon
     module, app = route_app
     client = module.API_CLIENT
     client.reset_mock()
-    module.BW_CONFIG.get_plugins_settings.return_value = {"USE_ANTIBOT": _ANTIBOT_USE_SETTING}
     _call_enable(module, app, monkeypatch, {"plugin": "antibot", "enabled": "yes", "setting": "USE_ANTIBOT"}, client)
     client.update_global_settings.assert_called_once()
     args, _kwargs = client.update_global_settings.call_args
     written = args[0]
     assert written["USE_ANTIBOT"] != "yes"
-    assert written["USE_ANTIBOT"] in _ANTIBOT_USE_SETTING["select"]
+    assert written["USE_ANTIBOT"] in _REAL_CORE_SETTINGS["USE_ANTIBOT"]["select"]
+
+
+def test_enabling_a_multi_key_plugin_end_to_end_uses_the_resolved_sibling_values(route_app, monkeypatch):
+    """The route hands the writer this request's RESOLVED config. A sibling explicitly turned off
+    must come back written as "no" -- USE_LIMIT_CONN's schema default is "yes", so any path that
+    guesses re-arms the connection limiter behind the operator (and Database.py:463 lets an `api`
+    write overwrite a `ui` one, so the guess would land)."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    env = {
+        "plugins": _REAL_CORE_PLUGIN_ENV,
+        "config": {**_REAL_CORE_CONFIG, "USE_LIMIT_CONN": {"value": "no"}, "USE_LIMIT_REQ": {"value": "no"}},
+    }
+    _call_enable(module, app, monkeypatch, {"plugin": "limit", "enabled": "yes", "setting": "USE_LIMIT_REQ"}, client, env=env)
+    written = client.update_global_settings.call_args.args[0]
+    assert written == {"USE_LIMIT_REQ": "yes", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
+
+
+@pytest.mark.parametrize("plugin_id,key", [("country", "BLACKLIST_COUNTRY"), ("redirect", "REDIRECT_TO")])
+def test_a_list_shaped_plugin_writes_nothing_when_the_schemas_are_missing(route_app, monkeypatch, plugin_id, key):
+    """FAIL CLOSED on a MISSING schema, not just a missing value. `_is_list_shaped({})` is False,
+    so reading an absent definition as "scalar" made this refusal fail OPEN -- and `main.py:
+    1262-1265` parks `{}` whenever the per-request get_plugins() failed, so it was reachable from
+    a stale tab or a resubmit. Measured before the fix: `redirect` OFF wrote REDIRECT_TO="" while
+    every REDIRECT_TO_<n> kept serving, and `country` OFF wiped both lists."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    _call_enable(module, app, monkeypatch, {"plugin": plugin_id, "enabled": "no", "setting": key}, client, env={"plugins": {}, "config": {}})
+    client.update_global_settings.assert_not_called()
+    assert module.DATA["RELOADING"] is False
+    assert module.DATA["TO_FLASH"][-1]["type"] == "error"
+
+
+def test_enabling_with_no_resolved_config_aborts_instead_of_guessing(route_app, monkeypatch, caplog):
+    """FAIL CLOSED. `main.py:1296-1299` swallows a get_config() failure and parks `{}`; with no
+    current value for a sibling the writer must refuse rather than fall back to its schema default.
+    An aborted toggle flashes an error; a guessed one silently re-arms a limiter."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    with caplog.at_level("ERROR", logger="UI"):
+        _call_enable(
+            module, app, monkeypatch, {"plugin": "limit", "enabled": "yes", "setting": "USE_LIMIT_REQ"}, client, env={"plugins": _REAL_CORE_PLUGIN_ENV}
+        )
+    client.update_global_settings.assert_not_called()
+    assert module.DATA["RELOADING"] is False
+    assert module.DATA["TO_FLASH"][-1]["type"] == "error"
+
+
+def test_disabling_a_multi_key_plugin_end_to_end_needs_no_api_read(route_app, monkeypatch):
+    """OFF is a pure function of the manifest plus this request's already-fetched schemas, so the
+    route must reach the API only to write -- and must still write every declared key."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    module.BW_CONFIG.reset_mock()
+    _call_enable(module, app, monkeypatch, {"plugin": "limit", "enabled": "no", "setting": "USE_LIMIT_CONN"}, client)
+    written = client.update_global_settings.call_args.args[0]
+    assert written == {"USE_LIMIT_REQ": "no", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
+    module.BW_CONFIG.get_config.assert_not_called()
+    module.BW_CONFIG.get_plugins_settings.assert_not_called()
+
+
+def test_enabling_antibot_from_a_switch_picks_cookie(route_app, monkeypatch):
+    """PINNED ON PURPOSE. USE_ANTIBOT is a 9-value select and `_active_value_for` takes the first
+    option that is not the inactive one, i.e. the manifest's array order -- so a bare on/off switch
+    silently selects "cookie", the lightest of the nine modes. That is a decision, not an accident:
+    reordering core/antibot/plugin.json's `select` changes what a marketplace toggle turns on.
+    D2 gives the compose shelf a MODE PICKER for this shape rather than a switch."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    _call_enable(module, app, monkeypatch, {"plugin": "antibot", "enabled": "yes", "setting": "USE_ANTIBOT"}, client)
+    assert client.update_global_settings.call_args.args[0] == {"USE_ANTIBOT": "cookie"}
+
+
+def test_off_then_on_does_not_restore_a_multi_key_plugins_siblings(route_app):
+    """DOCUMENTED ASYMMETRY, not a bug to silently fix: OFF drives every declared key to its
+    inactive value, so a following ON restores only the toggled key. One switch owning three keys
+    cannot remember what they were; the per-plugin page is where the siblings come back."""
+    module, _ = route_app
+    off = _write(module, "limit", "USE_LIMIT_REQ", enabled=False)
+    back_on = _write(module, "limit", "USE_LIMIT_REQ", enabled=True, current_values=off)
+    assert back_on == {"USE_LIMIT_REQ": "yes", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
+
+
+def test_a_declared_non_use_setting_survives_the_pre_thread_guard(route_app, monkeypatch):
+    """AUTO_LETS_ENCRYPT fails USE_SETTING_RX; before T2 the guard rejected it outright, so
+    letsencrypt could not be toggled from the marketplace at all."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    monkeypatch.setattr(module, "handle_error", lambda *a, **k: "REJECTED")
+    result = _call_enable(module, app, monkeypatch, {"plugin": "letsencrypt", "enabled": "yes", "setting": "AUTO_LETS_ENCRYPT"}, client)
+    assert result != "REJECTED"
+    client.update_global_settings.assert_called_once_with({"AUTO_LETS_ENCRYPT": "yes"})
+
+
+def test_a_setting_the_plugin_does_not_declare_is_still_rejected_before_the_thread(route_app, monkeypatch):
+    """The manifest gate is TIGHTER than the regex it replaces: a well-formed USE_* that the
+    plugin does not declare must never reach update_global_settings."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    monkeypatch.setattr(module, "handle_error", lambda *a, **k: "REJECTED")
+    result = _call_enable(module, app, monkeypatch, {"plugin": "letsencrypt", "enabled": "yes", "setting": "USE_MODSECURITY"}, client)
+    assert result == "REJECTED"
+    client.update_global_settings.assert_not_called()
 
 
 # ======================================================================================
