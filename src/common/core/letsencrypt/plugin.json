@@ -464,6 +464,7 @@
     "certificate_source": {
       "label": "Let's Encrypt",
       "renews": true
-    }
+    },
+    "activation": { "AUTO_LETS_ENCRYPT": "no" }
   }
 }

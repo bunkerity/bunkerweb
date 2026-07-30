@@ -403,17 +403,13 @@ function antibot:access()
 	self.ctx.bw.antibot_session_data = self.session_data
 
 	if self.provider == "no" then
-		-- The challenge path, on a service with no global antibot and no workflow challenge
-		-- pending. Nothing legitimate arrives here, and serving the page would let anyone
-		-- probe the challenge machinery.
 		if not self.session_data.prepared then
-			return self:ret(
-				true,
-				"no antibot challenge is pending",
-				get_deny_status(),
-				nil,
-				{ id = "antibot-no-challenge" }
-			)
+			-- The challenge path on a service with antibot off and nothing pending. Denying
+			-- here protects nothing : the location is only rendered when the service has
+			-- antibot or a challenge rule, and content() refuses without a prepared session
+			-- anyway. It would, however, break an application legitimately serving this path
+			-- and file a security report against a plugin that is disabled.
+			return self:ret(true, "antibot not activated")
 		end
 		-- A workflow challenge started earlier in this session : keep serving it.
 		self.provider = self.session_data.type

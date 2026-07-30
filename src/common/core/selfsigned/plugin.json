@@ -60,6 +60,7 @@
     "certificate_source": {
       "label": "Self-signed",
       "renews": true
-    }
+    },
+    "activation": { "GENERATE_SELF_SIGNED_SSL": "no" }
   }
 }

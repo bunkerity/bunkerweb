@@ -80,6 +80,7 @@
     "certificate_source": {
       "label": "Custom",
       "renews": false
-    }
+    },
+    "activation": { "USE_CUSTOM_SSL": "no" }
   }
 }

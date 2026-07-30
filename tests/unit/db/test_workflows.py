@@ -2,8 +2,8 @@
 
 from json import loads
 
-from fixtures.seed import add_service, seed_minimal, session
-from model import Plugins, ResourceAttachments, ResourceGroupUsages, Resources, Workflows  # type: ignore
+from fixtures.seed import add_global_value, add_service, add_service_setting, seed_minimal, session
+from model import Plugins, ResourceAttachments, ResourceGroupUsages, Resources, Settings, Workflows  # type: ignore
 from workflow_schema import MAX_ACTIVE_RULES_PER_SERVICE, MAX_RULES_PER_WORKFLOW, canonical_json  # type: ignore
 
 
@@ -235,6 +235,107 @@ def test_service_workflows_are_ordered_by_attachment(db):
     # this ordering decides which rule wins.
     assert [entry["id"] for entry in per_service["app1.example.com"]] == [first, second]
     assert [entry["id"] for entry in per_service["app2.example.com"]] == [second]
+
+
+def _challenge_rule(provider="hcaptcha", rule_id="c1"):
+    return {
+        "id": rule_id,
+        "name": "challenge",
+        "enabled": True,
+        "condition": {"op": "uri", "match": "prefix", "value": "/login"},
+        "action": {"type": "challenge", "provider": provider},
+        "threshold": None,
+    }
+
+
+def _seed_antibot_settings(db, *, service_id=None, sitekey="site", secret="secret"):
+    """Give a service (or the global scope) the hCaptcha credentials."""
+    with session(db) as s:
+        s.add(Plugins(id="antibot", name="Antibot", description="Antibot.", version="1.0"))
+        s.flush()
+        for setting_id in ("ANTIBOT_HCAPTCHA_SITEKEY", "ANTIBOT_HCAPTCHA_SECRET"):
+            s.add(
+                Settings(
+                    id=setting_id,
+                    name=setting_id,
+                    plugin_id="antibot",
+                    context="multisite",
+                    default="",
+                    help="h",
+                    label=setting_id,
+                    regex="^.*$",
+                    type="password",
+                )
+            )
+    for setting_id, value in (("ANTIBOT_HCAPTCHA_SITEKEY", sitekey), ("ANTIBOT_HCAPTCHA_SECRET", secret)):
+        if service_id:
+            add_service_setting(db, service_id=service_id, setting_id=setting_id, value=value)
+        else:
+            add_global_value(db, setting_id=setting_id, value=value)
+
+
+def test_attaching_a_challenge_workflow_without_credentials_is_refused(db):
+    """Otherwise the fail-closed compiler aborts the push for the WHOLE deployment."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    _seed_antibot_settings(db, sitekey="", secret="")
+    resource_id = _create(db)
+    assert db.save_workflow_definition(resource_id, _definition(_challenge_rule()))[0] == ""
+
+    error = db.attach_workflow(resource_id, "app1.example.com")
+    assert "cannot serve a hcaptcha challenge" in error and "ANTIBOT_HCAPTCHA_SITEKEY" in error
+    assert db.get_workflow_details(resource_id)["services"] == []
+
+
+def test_a_challenge_workflow_attaches_when_the_service_has_the_credentials(db):
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    _seed_antibot_settings(db, service_id="app1.example.com")
+    resource_id = _create(db)
+    assert db.save_workflow_definition(resource_id, _definition(_challenge_rule()))[0] == ""
+
+    assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+
+def test_clearing_the_credentials_is_caught_when_the_definition_is_saved(db):
+    """The save path checks too — attaching first and adding the rule later must not slip through."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    _seed_antibot_settings(db, sitekey="", secret="")
+    resource_id = _create(db)
+    assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+    error, _ = db.save_workflow_definition(resource_id, _definition(_challenge_rule()))
+    assert "cannot serve a hcaptcha challenge" in error
+    assert db.get_workflow_details(resource_id)["definition"]["rules"] == []
+
+
+def test_a_disabled_challenge_rule_does_not_require_credentials(db):
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    _seed_antibot_settings(db, sitekey="", secret="")
+    resource_id = _create(db)
+    rule = _challenge_rule()
+    rule["enabled"] = False
+    assert db.save_workflow_definition(resource_id, _definition(rule))[0] == ""
+    # A disabled rule is never compiled, so it cannot make the compiler raise.
+    assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+
+def test_draft_services_are_excluded_from_what_the_compiler_sees(db):
+    """A draft renders nothing and its settings are absent from the generated config."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    add_service(db, "draft.example.com", is_draft=True)
+    resource_id = _create(db)
+    assert db.save_workflow_definition(resource_id, _definition(_rule()))[0] == ""
+    assert db.attach_workflow(resource_id, "draft.example.com") == ""
+
+    # The attachment exists and is visible to the operator...
+    assert db.get_workflow_details(resource_id)["services"] == ["draft.example.com"]
+    # ...but the compiler never sees it, so it cannot abort the push over a service that
+    # was never going to be served.
+    assert "draft.example.com" not in db.get_service_workflows()
 
 
 def _group_rule(group_id, rule_id="r1"):

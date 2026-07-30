@@ -97,5 +97,8 @@
       "regex": "^\\d+$",
       "type": "number"
     }
+  },
+  "extensions": {
+    "activation": { "USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no" }
   }
 }

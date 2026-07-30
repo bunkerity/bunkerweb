@@ -64,10 +64,11 @@
             {% set pmethod = plugin_data.get('method', 'manual') %}
             {% set has_page = plugin_data.get('page') %}
             {% set is_core = (ptype == 'core') %}
-            {% set is_always = plugin in always_used_plugins %}
+            {% set activation = plugin_activations.get(plugin) %}
+            {% set is_always = activation == 'always' or plugin == 'general' %}
             {% set use_key = 'USE_' ~ plugin|upper %}
             {% if use_key not in config %}{% set use_key = 'USE_' ~ pname|replace(' ', '_')|upper %}{% endif %}
-            {% set core_specific = plugin|upper in plugins_specifics %}
+            {% set core_specific = activation is mapping %}
             {% set core_toggleable = is_core and not is_always and not core_specific and use_key in config %}
             {% if is_core %}
                 {% set state_on = true if is_always else is_plugin_active(plugin, pname, config) %}

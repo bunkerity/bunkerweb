@@ -5,13 +5,15 @@ from io import BytesIO
 from itertools import chain
 from json import dumps
 from time import time
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
-from flask_login import login_required
-from regex import sub
+from flask_login import current_user, login_required
+from regex import search, sub
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.models.save_scope import restore_unowned_settings
+from app.models.service_attachments import attached_ids, failed_families, get_service_attachments
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
 from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
@@ -286,6 +288,610 @@ def services_delete():
     )
 
 
+def build_service_attachments(service: str) -> dict:
+    """Resources attached to ``service``, or empty entries for the "new" page.
+
+    Kept as a named function rather than inlined so the route stays testable without
+    a Flask request context.
+    """
+    return get_service_attachments(API_CLIENT, "" if service == "new" else service)
+
+
+_DETACH_METHODS = {
+    "upstream": "detach_upstream",
+    "certificate": "detach_certificate",
+    "redirect": "detach_redirect",
+    "workflow": "detach_workflow",
+}
+
+
+def detach_service_resource(service: str, family: str, resource_id: str, match_path: str = ""):
+    """Detach one resource from one service.
+
+    ``family`` is validated against the known map rather than interpolated into a
+    method name, so a crafted form field cannot reach an arbitrary client method.
+    """
+    if family not in _DETACH_METHODS:
+        raise ValueError(f"Unknown resource family {family!r}")
+    if API_CLIENT.readonly:
+        raise PermissionError("The API is in read-only mode")
+
+    method = getattr(API_CLIENT, _DETACH_METHODS[family])
+    if family == "upstream":
+        return method(resource_id, service, match_path=match_path)
+    return method(resource_id, service)
+
+
+@services.route("/services/<string:service>/resources/detach", methods=["POST"])
+@login_required
+def services_resource_detach(service: str):
+    family = request.form.get("family", "")
+    resource_id = request.form.get("resource_id", "")
+    match_path = request.form.get("match_path", "")
+
+    try:
+        detach_service_resource(service, family, resource_id, match_path)
+        flash(f"Detached the {family} from {service}.", "success")
+    except PermissionError:
+        flash("The API is in read-only mode, cannot detach.", "error")
+    except ValueError:
+        flash("Unknown resource type.", "error")
+    except (ApiClientError, ApiUnavailableError) as exc:
+        flash(f"Could not detach: {exc.message}", "error")
+
+    return redirect(url_for("services.services_service_page", service=service))
+
+
+_ATTACH_METHODS = {
+    "upstream": "attach_upstream",
+    "certificate": "attach_certificate",
+    "redirect": "attach_redirect",
+    "workflow": "attach_workflow",
+}
+
+
+def attach_service_resource(service: str, family: str, resource_id: str, *, match_path: str = "/", primary: bool = False):
+    """Attach one resource to one service.
+
+    The API owns the conflict rules -- overlapping upstream match_path, colliding
+    redirect paths, and demoting a previous primary certificate -- so this helper does
+    not duplicate them; it surfaces the API's error instead.
+    """
+    if family not in _ATTACH_METHODS:
+        raise ValueError(f"Unknown resource family {family!r}")
+    if API_CLIENT.readonly:
+        raise PermissionError("The API is in read-only mode")
+
+    method = getattr(API_CLIENT, _ATTACH_METHODS[family])
+    if family == "upstream":
+        return method(resource_id, service, match_path=match_path or "/")
+    if family == "certificate":
+        return method(resource_id, service, primary=primary)
+    return method(resource_id, service)
+
+
+@services.route("/services/<string:service>/resources/attach", methods=["POST"])
+@login_required
+def services_resource_attach(service: str):
+    family = request.form.get("family", "")
+    resource_id = request.form.get("resource_id", "")
+    match_path = request.form.get("match_path", "/")
+    primary = request.form.get("primary", "no") == "yes"
+
+    try:
+        attach_service_resource(service, family, resource_id, match_path=match_path, primary=primary)
+        flash(f"Attached the {family} to {service}.", "success")
+    except PermissionError:
+        flash("The API is in read-only mode, cannot attach.", "error")
+    except ValueError:
+        flash("Unknown resource type.", "error")
+    except (ApiClientError, ApiUnavailableError) as exc:
+        flash(f"Could not attach: {exc.message}", "error")
+
+    return redirect(url_for("services.services_service_page", service=service))
+
+
+def resolve_plugin(plugin: str, plugins_data: Dict[str, dict]) -> Optional[dict]:
+    """Look up a plugin id by membership in the real, installed plugin set.
+
+    Strictly tighter than any regex: PLUGIN_NAME_RX's 4-64 character range rejected the real
+    core plugin ids "db", "ui", "php", "pro" and "ssl" outright. A dict lookup accepts exactly
+    the ids that exist and nothing else -- no traversal payload or malformed id is ever a
+    member of `plugins_data`, and there is no length limit to get wrong.
+    """
+    return plugins_data.get(plugin)
+
+
+def resolve_template(template: str, templates_data: Dict[str, dict]) -> Optional[dict]:
+    """Look up a template id by membership in the real, installed template set.
+
+    Same rule and the same reason as resolve_plugin: `template` is a raw URL path segment, and
+    flash.html/sidebar-notifications.html render flashes with |safe, so it must never be
+    regex-validated and then interpolated into one. A dict lookup accepts exactly the ids that
+    exist; the caller logs the raw value and flashes a constant instead.
+    """
+    return templates_data.get(template)
+
+
+def _base_setting_name(key: str) -> str:
+    """Strip a trailing numeric multiple-suffix: "PROXY_HOST_2" -> "PROXY_HOST".
+
+    Same rule as app/models/save_scope.py's `_in_scope`, which needs it to match a `multiple`
+    setting's suffixed db_config key back to its plugin.json base name -- kept in sync by hand
+    since the two live in different modules.
+    """
+    return key.rsplit("_", 1)[0] if search(r"_\d+$", key) else key
+
+
+def postable_scope(
+    plugin_data: dict,
+    db_config: Dict[str, Dict[str, Any]],
+    *,
+    global_page: bool,
+    is_pro_version: bool,
+    blacklisted: Set[str],
+    is_readonly: bool = False,
+) -> Set[str]:
+    """The keys this page's form can actually submit, and is therefore authoritative for.
+
+    Mirrors the `disabled` computation in models/plugin_settings_body.html. A disabled input posts
+    nothing, and an in-scope key that is not posted has its row deleted
+    (db_methods/config_save.py:592) -- so claiming authority over a key the form cannot send is a
+    silent data-destroying bug, not a harmless over-claim.
+
+    `is_readonly` mirrors the template's own top-of-body `is_readonly` branch, which disables
+    every field regardless of method or PRO status -- so it is checked first, right beside the
+    PRO short-circuit. A `multiple` setting is evaluated on each suffixed row's own stored entry
+    (method/global), never the base/suffix-0 row, because that is what the template does in its
+    multiples loop -- a plugin.json only names the base, but "PROXY_HOST_2" can be disabled while
+    "PROXY_HOST" (suffix 0) is not, or vice versa.
+
+    Deliberately conservative: when in doubt a key is left OUT of scope, which preserves it.
+    """
+    if is_readonly:
+        return set()
+    if plugin_data.get("type") == "pro" and not is_pro_version:
+        return set()
+
+    settings = plugin_data.get("settings") or {}
+
+    def _passes(base_key: str, data: dict, entry: Dict[str, Any]) -> bool:
+        if base_key in blacklisted:
+            return False
+        if not global_page and data.get("context") != "multisite":
+            return False
+        method = entry.get("method", "default")
+        disabled = not is_editable_method(method, allow_default=True) and (global_page or not entry.get("global"))
+        return not disabled
+
+    scope: Set[str] = set()
+    seen_bases: Set[str] = set()
+    for key, entry in db_config.items():
+        base = _base_setting_name(key)
+        data = settings.get(base)
+        if data is None:
+            continue
+        seen_bases.add(base)
+        if _passes(base, data, entry):
+            scope.add(key)
+
+    # A declared setting with no stored row at all (suffixed or not) has no method to be
+    # disabled by -- default it to "default" (editable) and keep it, same conservative-when-in-
+    # doubt contract as before: a key that was never written cannot be deleted.
+    for key, data in settings.items():
+        if key in seen_bases:
+            continue
+        if _passes(key, data, {}):
+            scope.add(key)
+
+    return scope
+
+
+def postable_template_scope(
+    template_data: dict,
+    db_config: Dict[str, Dict[str, Any]],
+    *,
+    blacklisted: Set[str],
+    is_readonly: bool = False,
+    template_editable: bool = True,
+) -> Set[str]:
+    """The keys this page's form can actually submit, and is therefore authoritative for.
+
+    Mirrors the `disabled` computation in the stepper markup (models/plugins_settings_easy.html,
+    extracted into models/template_steps_body.html). A disabled input posts nothing, and an
+    in-scope key that is not posted has its row deleted (db_methods/config_save.py:592) -- so
+    claiming authority over a key the form cannot send is silent data destruction, not a
+    harmless over-claim. Deliberately conservative: when in doubt a key is left OUT, which
+    preserves it.
+
+    `is_readonly` and `template_editable` mirror the two branches that suppress every field at
+    once: the template's own `{% if is_readonly %}{% set disabled = true %}`, and the
+    "template in use" notice that renders *instead of* the stepper when the service already
+    uses another template it may not edit.
+
+    Candidates are exactly the keys named by a step -- not `template_data["settings"]`, not a
+    plugin manifest, and NOT a stored key merely sharing a base name with one. The stepper is a
+    flat `{% for setting in step["settings"] %}` emitting one `name="{{ setting }}"` input per
+    step-named key (models/template_steps_body.html:115); unlike the per-plugin body
+    (models/plugin_settings_body.html:122) it has no `get_multiples` loop, so a stored
+    REVERSE_PROXY_HOST_1 is never rendered and never posted even when a step names the base.
+    Claiming it here would delete it. A step's list may name a suffixed key directly
+    (db_methods/templates.py:82 builds those) -- then and only then is that row in scope, and it
+    is judged on its own stored entry.
+
+    That is not sufficient on its own: save_scope.py:39-40 base-matches, so declaring the base
+    pulls every stored suffix back into scope whatever this function returns. update_service
+    re-injects those rows for `mode == "template"`; the two must stay together.
+
+    There is deliberately no `multisite` context filter and no PRO check -- the stepper has
+    neither, and adding one would drop a key the form does post.
+
+    CUSTOM_CONF_* keys are never in scope: update_service strips them from `variables` before
+    restore_unowned_settings runs, and they have no db_config rows.
+    """
+    if is_readonly or not template_editable:
+        return set()
+
+    scope: Set[str] = set()
+    for step in template_data.get("steps") or []:
+        for setting in step.get("settings") or []:
+            if setting in blacklisted:
+                continue
+            # A step-named key with no stored row at all has no method to be disabled by --
+            # "default" is editable under allow_default, and a key that was never written
+            # cannot be deleted anyway.
+            entry = db_config.get(setting) or {}
+            method = entry.get("method", "default")
+            if is_editable_method(method, allow_default=True) or entry.get("global"):
+                scope.add(setting)
+
+    return scope
+
+
+def update_service(
+    service: str,
+    variables: Dict[str, str],
+    is_draft: bool,
+    mode: str,
+    clone: str,
+    file_setting_names: Dict[str, str],
+    *,
+    scope: Optional[Set[str]] = None,
+):
+    wait_applying()
+
+    if clone and service == "new":
+        cloned_service_config = {k: v for k, v in API_CLIENT.get_service(clone, full=True, methods=False, with_drafts=True).items()}
+        clone_prefix = f"{clone}_"
+
+        for key, value in cloned_service_config.items():
+            # Strip the clone service prefix from keys so they are recognized as valid setting names
+            stripped_key = key.removeprefix(clone_prefix)
+            if stripped_key in variables or stripped_key in ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_UI"):
+                continue
+
+            variables[stripped_key] = value
+
+    # Edit check fields and remove already existing ones
+    if service != "new":
+        db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
+    else:
+        db_config = API_CLIENT.get_global_settings(full=True, methods=True)
+
+    service_method = db_config.get("SERVER_NAME", {}).get("method", "ui") if service != "new" else "ui"
+    override_method = service_method if is_editable_method(service_method) else "ui"
+
+    was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
+
+    old_server_name = variables.pop("OLD_SERVER_NAME", "")
+    db_custom_configs = {}
+    all_custom_configs = _configs_list_to_dict(API_CLIENT.get_configs(with_drafts=True, with_data=True))
+    removed_custom_configs: set[str] = set()
+    new_configs = set()
+    configs_changed = False
+
+    if mode in ("easy", "template"):
+        db_templates = API_CLIENT.get_templates()
+        db_custom_configs = all_custom_configs.copy()
+
+        for variable, value in variables.copy().items():
+            conf_match = CUSTOM_CONF_RX.match(variable)
+            if conf_match:
+                del variables[variable]
+                key = f"{conf_match['type'].lower()}_{conf_match['name']}"
+                if value == db_templates.get(f"{key}.conf"):
+                    if db_custom_configs.pop(f"{service}_{key}", None):
+                        configs_changed = True
+                    continue
+                value = value.replace("\r\n", "\n").strip().encode("utf-8")
+
+                new_configs.add(key)
+                db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method, "is_draft": False})
+
+                if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": (
+                                f"The template Custom config {key} cannot be edited because it has been created via the {db_custom_config['method']} method."
+                            ),
+                            "type": "error",
+                        }
+                    )
+                    continue
+                # `data` is None on the default dict above, which is reached whenever the lookup
+                # misses. Two ways for it to miss, both live:
+                #  * the config belongs to a template the service does not use -- the overlay is
+                #    materialised only for the service's own USE_TEMPLATE
+                #    (db_methods/custom_configs.py:218-221), and the per-template page can be
+                #    opened for any template, so this is the common one;
+                #  * the type carries an underscore -- custom_configs.py:222 keys the overlay
+                #    hyphenated ({svc}_modsec-crs_api) while the key built above is underscored,
+                #    and the shipped `api` template ships modsec-crs/api.conf.
+                # Either way this line raises AttributeError today, inside a worker thread where
+                # it would strand DATA["RELOADING"]. The key-format mismatch is out of scope here.
+                elif value == (db_custom_config["data"] or b"").strip():
+                    continue
+
+                configs_changed = True
+                db_custom_configs[f"{service}_{key}"] = {
+                    "service_id": variables.get("SERVER_NAME", old_server_name).split(" ")[0],
+                    "type": conf_match["type"].lower(),
+                    "name": conf_match["name"],
+                    "data": value,
+                    "method": override_method,
+                    "is_draft": db_custom_config.get("is_draft", False),
+                }
+
+        # Easy mode's second restore layer, deliberately NOT extended to the template page:
+        # restore_unowned_settings (below) covers it with a declared scope instead. Do not
+        # unify the two -- this one re-injects indiscriminately, which also stops a legitimate
+        # clear of a ui-method setting from going through.
+        if mode == "easy" and service != "new":
+            for setting, value in db_config.items():
+                if setting not in variables:
+                    variables[setting] = value["value"]
+
+        # The stepper has no multiples UI -- one input per step-named key -- so a stored
+        # REVERSE_PROXY_HOST_1 is never posted, while save_scope.py:39-40 base-matches it into
+        # the scope declared for REVERSE_PROXY_HOST and would therefore DELETE it. Carry every
+        # suffixed row through unchanged: this page cannot edit or clear one, so it must not be
+        # able to destroy one. Narrow by design -- it restores only `_<digits>` keys, never the
+        # base, so a legitimate clear of a step-named setting still goes through.
+        if mode == "template" and service != "new":
+            # This runs BEFORE restore_unowned_settings, so it must re-apply that function's
+            # own template guard (save_scope.py:83-84) or it silently defeats it: carrying an
+            # outgoing template's default across a USE_TEMPLATE switch makes config_save
+            # materialise it as a real ui-method row, permanently detaching it from the
+            # template it came from.
+            switching_template = db_config.get("USE_TEMPLATE", {}).get("value", "") != variables.get("USE_TEMPLATE", "")
+            for setting, value in db_config.items():
+                if setting in variables or _base_setting_name(setting) == setting:
+                    continue
+                if switching_template and value.get("method") == "default" and value.get("template"):
+                    continue
+                variables[setting] = value["value"]
+
+        for db_custom_config, data in db_custom_configs.copy().items():
+            if data["method"] == "default" and data["template"]:
+                LOGGER.debug(f"Removing default custom config {db_custom_config} because it is not used anymore.")
+                removed_custom_configs.add(db_custom_config)
+                del db_custom_configs[db_custom_config]
+                continue
+
+            if db_custom_config.startswith(f"{service}_") and db_custom_config.replace(f"{service}_", "", 1) not in new_configs and data["template"]:
+                LOGGER.debug(f"Removing custom config {db_custom_config} because it is not used anymore.")
+                configs_changed = True
+                removed_custom_configs.add(db_custom_config)
+                del db_custom_configs[db_custom_config]
+                continue
+
+            db_custom_configs[db_custom_config] = {
+                "service_id": data["service_id"],
+                "type": data["type"],
+                "name": data["name"],
+                "data": data["data"],
+                "method": data["method"],
+                "is_draft": data.get("is_draft", False),
+            }
+            if "checksum" in data:
+                db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
+
+    for db_custom_config, data in all_custom_configs.items():
+        if data.get("method") == "default" and data.get("template"):
+            removed_custom_configs.add(db_custom_config)
+
+    # Which stored settings must survive this save -- see app/models/save_scope.py.
+    # `scope=None` keeps the historical method-based behaviour; the per-plugin and
+    # per-template pages (S3.2, S3.3) pass the key set they own instead.
+    restore_skip = get_blacklisted_settings() | {"SERVER_NAME", "OLD_SERVER_NAME", "USE_TEMPLATE", "USE_UI"}
+    if service != "new" and mode != "easy":
+        old_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
+        new_template = variables.get("USE_TEMPLATE", "")
+        variables = restore_unowned_settings(
+            variables,
+            db_config,
+            scope=scope,
+            restore_skip=restore_skip,
+            template_unchanged=old_template == new_template,
+        )
+
+    variables_to_check = variables.copy()
+    has_file_name_changes = False
+
+    for variable, value in variables.items():
+        if value == db_config.get(variable, {"value": None})["value"]:
+            del variables_to_check[variable]
+
+    for setting_name, file_name in file_setting_names.items():
+        current_file_name = str(db_config.get(setting_name, {}).get("file_name", "") or "").strip()
+        if file_name != current_file_name:
+            has_file_name_changes = True
+            break
+
+    variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True)
+
+    no_removed_settings = True
+    blacklist = get_blacklisted_settings()
+    for setting in db_config:
+        if setting not in blacklist and setting not in variables:
+            no_removed_settings = False
+            break
+
+    if no_removed_settings and service != "new" and was_draft == is_draft and not variables_to_check and not configs_changed and not has_file_name_changes:
+        DATA["TO_FLASH"].append(
+            {
+                "content": f"The service {service} was not edited because no values{' or custom configs' if mode in ('easy', 'template') else ''} were changed.",
+                "type": "warning",
+            }
+        )
+        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+        return
+
+    if "SERVER_NAME" not in variables:
+        if service == "new":
+            DATA["TO_FLASH"].append({"content": "The service was not created because the server name was not provided.", "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
+        variables["SERVER_NAME"] = old_server_name
+
+    operation = None
+    error = None
+
+    # Build the final custom config map taking into account removals and additions
+    new_server_name = variables.get("SERVER_NAME", "").split(" ")[0]
+    old_server_name_splitted = old_server_name.split()
+    old_server_id = old_server_name_splitted[0] if old_server_name_splitted and old_server_name_splitted[0] else service
+    renamed_service = service != "new" and new_server_name and new_server_name != old_server_id
+
+    final_custom_configs: dict[str, dict] = {}
+    for key, data in all_custom_configs.items():
+        if key in removed_custom_configs:
+            continue
+
+        # If this config belongs to the service being renamed, rewrite it
+        if renamed_service and key.startswith(f"{old_server_id}_"):
+            new_key = key.replace(f"{old_server_id}_", f"{new_server_name}_", 1)
+            final_custom_configs[new_key] = data | {"service_id": new_server_name}
+            configs_changed = True
+            continue
+
+        final_custom_configs[key] = data
+
+    # Apply changes from the current edit session (db_custom_configs overrides base)
+    for key, data in db_custom_configs.items():
+        target_key = key
+        target_data = data
+        if renamed_service and key.startswith(f"{service}_"):
+            target_key = key.replace(f"{service}_", f"{new_server_name}_", 1)
+            target_data = data | {"service_id": new_server_name}
+            configs_changed = True
+        final_custom_configs[target_key] = target_data
+
+    if service == "new":
+        old_server_name = variables["SERVER_NAME"]
+        operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method, file_name_map=file_setting_names)
+    else:
+        operation, error = BW_CONFIG.edit_service(
+            old_server_name,
+            variables,
+            check_changes=(was_draft != is_draft or not is_draft),
+            is_draft=is_draft,
+            override_method=override_method,
+            file_name_map=file_setting_names,
+        )
+
+    # Save custom configs after the service edit so the new service id exists
+    if new_configs or configs_changed:
+        if renamed_service:
+            # Use per-config create/update to avoid bulk delete when renaming services
+            for custom_config in final_custom_configs.values():
+                conf_data = custom_config.get("data")
+                if isinstance(conf_data, bytes):
+                    conf_data = conf_data.decode("utf-8", errors="replace")
+                try:
+                    API_CLIENT.create_config(
+                        service=custom_config.get("service_id"),
+                        type=custom_config.get("type"),
+                        name=custom_config.get("name"),
+                        data=conf_data or "",
+                        is_draft=custom_config.get("is_draft", False),
+                    )
+                except Exception as create_err:
+                    if "already exists" in str(create_err):
+                        try:
+                            API_CLIENT.update_config(
+                                custom_config.get("service_id"),
+                                custom_config.get("type"),
+                                custom_config.get("name"),
+                                data=conf_data or "",
+                                is_draft=custom_config.get("is_draft", False),
+                            )
+                        except Exception as update_err:
+                            DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {update_err}", "type": "error"})
+                            break
+                    else:
+                        DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {create_err}", "type": "error"})
+                        break
+        else:
+            serializable_configs = []
+            for cfg in final_custom_configs.values():
+                cfg_copy = cfg.copy()
+                if isinstance(cfg_copy.get("data"), bytes):
+                    cfg_copy["data"] = cfg_copy["data"].decode("utf-8", errors="replace")
+                serializable_configs.append(cfg_copy)
+            try:
+                API_CLIENT.bulk_save_configs(
+                    serializable_configs,
+                    override_method,
+                    changed=service != "new" and (was_draft != is_draft or not is_draft),
+                )
+            except Exception as e:
+                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
+
+    if operation.endswith("already exists."):
+        DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
+        operation = None
+    elif not error:
+        operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
+
+    if operation:
+        if operation.startswith(("Can't", "The database is read-only")):
+            DATA["TO_FLASH"].append({"content": operation, "type": "error"})
+        else:
+            DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+            DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
+
+    DATA["RELOADING"] = False
+
+
+def inject_template_dom_ids(templates_data: Dict[str, dict]) -> Dict[str, dict]:
+    """Give every template a DOM-safe, unique `dom_id` -- the API payload carries none.
+
+    Mutates in place and returns the same dict. Shared by the service page and the per-template
+    page: the stepper's ids (`navs-steps-<dom_id>-<n>`) and the JS that keys off them come from
+    here, so a route that skips this renders a stepper whose navigation silently no-ops. Run it
+    over the *whole* templates map before narrowing to one entry, or the dedupe suffix can
+    differ between the two pages.
+    """
+    used_dom_ids = set()
+
+    for template_id, template_data in templates_data.items():
+        dom_id = sub(r"[^0-9A-Za-z_-]+", "-", template_id).strip("-")
+        if not dom_id:
+            dom_id = "template"
+
+        base_dom_id = dom_id
+        suffix = 2
+        while dom_id in used_dom_ids:
+            dom_id = f"{base_dom_id}-{suffix}"
+            suffix += 1
+
+        used_dom_ids.add(dom_id)
+        template_data["dom_id"] = dom_id
+
+    return templates_data
+
+
 @services.route("/services/<string:service>", methods=["GET", "POST"])
 @login_required
 def services_service_page(service: str):
@@ -323,291 +929,6 @@ def services_service_page(service: str):
                     variables[variable.replace(f"{server_name}_", "", 1)] = variables.pop(variable)
 
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
-
-        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str, clone: str, file_setting_names: Dict[str, str]):
-            wait_applying()
-
-            if clone and service == "new":
-                cloned_service_config = {k: v for k, v in API_CLIENT.get_service(clone, full=True, methods=False, with_drafts=True).items()}
-                clone_prefix = f"{clone}_"
-
-                for key, value in cloned_service_config.items():
-                    # Strip the clone service prefix from keys so they are recognized as valid setting names
-                    stripped_key = key.removeprefix(clone_prefix)
-                    if stripped_key in variables or stripped_key in ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_UI"):
-                        continue
-
-                    variables[stripped_key] = value
-
-            # Edit check fields and remove already existing ones
-            if service != "new":
-                db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
-            else:
-                db_config = API_CLIENT.get_global_settings(full=True, methods=True)
-
-            service_method = db_config.get("SERVER_NAME", {}).get("method", "ui") if service != "new" else "ui"
-            override_method = service_method if is_editable_method(service_method) else "ui"
-
-            was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
-
-            old_server_name = variables.pop("OLD_SERVER_NAME", "")
-            db_custom_configs = {}
-            all_custom_configs = _configs_list_to_dict(API_CLIENT.get_configs(with_drafts=True, with_data=True))
-            removed_custom_configs: set[str] = set()
-            new_configs = set()
-            configs_changed = False
-
-            if mode == "easy":
-                db_templates = API_CLIENT.get_templates()
-                db_custom_configs = all_custom_configs.copy()
-
-                for variable, value in variables.copy().items():
-                    conf_match = CUSTOM_CONF_RX.match(variable)
-                    if conf_match:
-                        del variables[variable]
-                        key = f"{conf_match['type'].lower()}_{conf_match['name']}"
-                        if value == db_templates.get(f"{key}.conf"):
-                            if db_custom_configs.pop(f"{service}_{key}", None):
-                                configs_changed = True
-                            continue
-                        value = value.replace("\r\n", "\n").strip().encode("utf-8")
-
-                        new_configs.add(key)
-                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method, "is_draft": False})
-
-                        if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
-                            DATA["TO_FLASH"].append(
-                                {
-                                    "content": (
-                                        f"The template Custom config {key} cannot be edited because it has been created via the {db_custom_config['method']} method."
-                                    ),
-                                    "type": "error",
-                                }
-                            )
-                            continue
-                        elif value == db_custom_config["data"].strip():
-                            continue
-
-                        configs_changed = True
-                        db_custom_configs[f"{service}_{key}"] = {
-                            "service_id": variables.get("SERVER_NAME", old_server_name).split(" ")[0],
-                            "type": conf_match["type"].lower(),
-                            "name": conf_match["name"],
-                            "data": value,
-                            "method": override_method,
-                            "is_draft": db_custom_config.get("is_draft", False),
-                        }
-
-                if service != "new":
-                    for setting, value in db_config.items():
-                        if setting not in variables:
-                            variables[setting] = value["value"]
-
-                for db_custom_config, data in db_custom_configs.copy().items():
-                    if data["method"] == "default" and data["template"]:
-                        LOGGER.debug(f"Removing default custom config {db_custom_config} because it is not used anymore.")
-                        removed_custom_configs.add(db_custom_config)
-                        del db_custom_configs[db_custom_config]
-                        continue
-
-                    if db_custom_config.startswith(f"{service}_") and db_custom_config.replace(f"{service}_", "", 1) not in new_configs and data["template"]:
-                        LOGGER.debug(f"Removing custom config {db_custom_config} because it is not used anymore.")
-                        configs_changed = True
-                        removed_custom_configs.add(db_custom_config)
-                        del db_custom_configs[db_custom_config]
-                        continue
-
-                    db_custom_configs[db_custom_config] = {
-                        "service_id": data["service_id"],
-                        "type": data["type"],
-                        "name": data["name"],
-                        "data": data["data"],
-                        "method": data["method"],
-                        "is_draft": data.get("is_draft", False),
-                    }
-                    if "checksum" in data:
-                        db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
-
-            for db_custom_config, data in all_custom_configs.items():
-                if data.get("method") == "default" and data.get("template"):
-                    removed_custom_configs.add(db_custom_config)
-
-            # Defense-in-depth: in advanced/raw modes the form may omit keys (multi-value
-            # rebuild dropping a suffix, conditional Jinja branch, plugin tab not in DOM,
-            # JS race). Without this restoration the cleanup pass in Database.save_config
-            # would delete the corresponding DB rows. Only restore values whose method is
-            # NOT editable from the UI — legitimate user clears of a ui-method setting
-            # still go through (the form rebuild posts an empty value, not absence).
-            # Skip transient/form-managed keys plus the existing blacklist.
-            restore_skip = get_blacklisted_settings() | {"SERVER_NAME", "OLD_SERVER_NAME", "USE_TEMPLATE", "USE_UI"}
-            if service != "new" and mode != "easy":
-                old_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
-                new_template = variables.get("USE_TEMPLATE", "")
-                template_unchanged = old_template == new_template
-                for setting, value in db_config.items():
-                    if setting in variables or setting in restore_skip:
-                        continue
-                    setting_method = value.get("method")
-                    if not is_editable_method(setting_method, allow_default=False):
-                        # Don't carry old-template defaults forward when switching templates.
-                        if setting_method == "default" and value.get("template") and not template_unchanged:
-                            continue
-                        variables[setting] = value["value"]
-
-            variables_to_check = variables.copy()
-            has_file_name_changes = False
-
-            for variable, value in variables.items():
-                if value == db_config.get(variable, {"value": None})["value"]:
-                    del variables_to_check[variable]
-
-            for setting_name, file_name in file_setting_names.items():
-                current_file_name = str(db_config.get(setting_name, {}).get("file_name", "") or "").strip()
-                if file_name != current_file_name:
-                    has_file_name_changes = True
-                    break
-
-            variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True)
-
-            no_removed_settings = True
-            blacklist = get_blacklisted_settings()
-            for setting in db_config:
-                if setting not in blacklist and setting not in variables:
-                    no_removed_settings = False
-                    break
-
-            if (
-                no_removed_settings
-                and service != "new"
-                and was_draft == is_draft
-                and not variables_to_check
-                and not configs_changed
-                and not has_file_name_changes
-            ):
-                DATA["TO_FLASH"].append(
-                    {
-                        "content": f"The service {service} was not edited because no values{' or custom configs' if mode == 'easy' else ''} were changed.",
-                        "type": "warning",
-                    }
-                )
-                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-                return
-
-            if "SERVER_NAME" not in variables:
-                if service == "new":
-                    DATA["TO_FLASH"].append({"content": "The service was not created because the server name was not provided.", "type": "error"})
-                    DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-                    return
-                variables["SERVER_NAME"] = old_server_name
-
-            operation = None
-            error = None
-
-            # Build the final custom config map taking into account removals and additions
-            new_server_name = variables.get("SERVER_NAME", "").split(" ")[0]
-            old_server_name_splitted = old_server_name.split()
-            old_server_id = old_server_name_splitted[0] if old_server_name_splitted and old_server_name_splitted[0] else service
-            renamed_service = service != "new" and new_server_name and new_server_name != old_server_id
-
-            final_custom_configs: dict[str, dict] = {}
-            for key, data in all_custom_configs.items():
-                if key in removed_custom_configs:
-                    continue
-
-                # If this config belongs to the service being renamed, rewrite it
-                if renamed_service and key.startswith(f"{old_server_id}_"):
-                    new_key = key.replace(f"{old_server_id}_", f"{new_server_name}_", 1)
-                    final_custom_configs[new_key] = data | {"service_id": new_server_name}
-                    configs_changed = True
-                    continue
-
-                final_custom_configs[key] = data
-
-            # Apply changes from the current edit session (db_custom_configs overrides base)
-            for key, data in db_custom_configs.items():
-                target_key = key
-                target_data = data
-                if renamed_service and key.startswith(f"{service}_"):
-                    target_key = key.replace(f"{service}_", f"{new_server_name}_", 1)
-                    target_data = data | {"service_id": new_server_name}
-                    configs_changed = True
-                final_custom_configs[target_key] = target_data
-
-            if service == "new":
-                old_server_name = variables["SERVER_NAME"]
-                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method, file_name_map=file_setting_names)
-            else:
-                operation, error = BW_CONFIG.edit_service(
-                    old_server_name,
-                    variables,
-                    check_changes=(was_draft != is_draft or not is_draft),
-                    is_draft=is_draft,
-                    override_method=override_method,
-                    file_name_map=file_setting_names,
-                )
-
-            # Save custom configs after the service edit so the new service id exists
-            if new_configs or configs_changed:
-                if renamed_service:
-                    # Use per-config create/update to avoid bulk delete when renaming services
-                    for custom_config in final_custom_configs.values():
-                        conf_data = custom_config.get("data")
-                        if isinstance(conf_data, bytes):
-                            conf_data = conf_data.decode("utf-8", errors="replace")
-                        try:
-                            API_CLIENT.create_config(
-                                service=custom_config.get("service_id"),
-                                type=custom_config.get("type"),
-                                name=custom_config.get("name"),
-                                data=conf_data or "",
-                                is_draft=custom_config.get("is_draft", False),
-                            )
-                        except Exception as create_err:
-                            if "already exists" in str(create_err):
-                                try:
-                                    API_CLIENT.update_config(
-                                        custom_config.get("service_id"),
-                                        custom_config.get("type"),
-                                        custom_config.get("name"),
-                                        data=conf_data or "",
-                                        is_draft=custom_config.get("is_draft", False),
-                                    )
-                                except Exception as update_err:
-                                    DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {update_err}", "type": "error"})
-                                    break
-                            else:
-                                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {create_err}", "type": "error"})
-                                break
-                else:
-                    serializable_configs = []
-                    for cfg in final_custom_configs.values():
-                        cfg_copy = cfg.copy()
-                        if isinstance(cfg_copy.get("data"), bytes):
-                            cfg_copy["data"] = cfg_copy["data"].decode("utf-8", errors="replace")
-                        serializable_configs.append(cfg_copy)
-                    try:
-                        API_CLIENT.bulk_save_configs(
-                            serializable_configs,
-                            override_method,
-                            changed=service != "new" and (was_draft != is_draft or not is_draft),
-                        )
-                    except Exception as e:
-                        DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
-
-            if operation.endswith("already exists."):
-                DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
-                operation = None
-            elif not error:
-                operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
-
-            if operation:
-                if operation.startswith(("Can't", "The database is read-only")):
-                    DATA["TO_FLASH"].append({"content": operation, "type": "error"})
-                else:
-                    DATA["TO_FLASH"].append({"content": operation, "type": "success"})
-                    DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
-
-            DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
         CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names)
@@ -651,21 +972,7 @@ def services_service_page(service: str):
         flash("Could not fetch templates from the API.", "error")
         db_templates = {}
 
-    used_dom_ids = set()
-
-    for template_id, template_data in db_templates.items():
-        dom_id = sub(r"[^0-9A-Za-z_-]+", "-", template_id).strip("-")
-        if not dom_id:
-            dom_id = "template"
-
-        base_dom_id = dom_id
-        suffix = 2
-        while dom_id in used_dom_ids:
-            dom_id = f"{base_dom_id}-{suffix}"
-            suffix += 1
-
-        used_dom_ids.add(dom_id)
-        template_data["dom_id"] = dom_id
+    inject_template_dom_ids(db_templates)
 
     try:
         db_custom_configs = _configs_list_to_dict(API_CLIENT.get_configs(with_drafts=True, with_data=True))
@@ -706,6 +1013,36 @@ def services_service_page(service: str):
             flash(f"Could not fetch service {service} from the API.", "error")
             db_config = {}
 
+    attachments = build_service_attachments(service)
+
+    # The band only knows what is already attached; the attach picker needs the
+    # unattached candidates too, per family, so it fans out to the same four getters.
+    attach_candidates: dict = {}
+    if service != "new":
+        for family, (getter, rows_key) in (
+            ("upstream", ("get_upstreams", "upstreams")),
+            ("certificate", ("get_certificates", "certificates")),
+            ("redirect", ("get_redirects", "redirects")),
+            ("workflow", ("get_workflows", "workflows")),
+        ):
+            try:
+                payload = getattr(API_CLIENT, getter)(limit=500)
+            except (ApiClientError, ApiUnavailableError):
+                attach_candidates[family] = []
+                continue
+            rows = payload.get(rows_key, [])
+            if family == "upstream":
+                # An upstream pool can be attached to the same service at more than one
+                # path, so an already-attached pool must stay a candidate -- unlike the
+                # other families, which only ever attach once.
+                attach_candidates[family] = rows
+            else:
+                already = attached_ids(attachments, family)
+                attach_candidates[family] = [row for row in rows if row.get("id") not in already]
+
+    for family in failed_families(attachments):
+        flash(f"Could not fetch attached {family}s for this service.", "error")
+
     return render_template(
         "service_settings.html",
         config=db_config,
@@ -715,6 +1052,214 @@ def services_service_page(service: str):
         mode=mode,
         type=search_type,
         current_template=template,
+        attachments=attachments,
+        attach_candidates=attach_candidates,
+        service_id="" if service == "new" else service,
+    )
+
+
+@services.route("/services/<string:service>/plugins/<string:plugin>", methods=["GET", "POST"])
+@login_required
+def services_plugin_page(service: str, plugin: str):
+    """One plugin's settings for one service.
+
+    Renders the plugin's own declared settings only -- it loads no plugin code, which is what
+    keeps this out of the threat model that governs plugin-supplied pages (S4).
+    """
+    # `plugin` is a raw URL path segment -- resolve it by membership in the real plugin set
+    # before doing anything else, and never interpolate it into a flash message:
+    # flash.html/sidebar-notifications.html render flashes with |safe, so an unvalidated value
+    # here is a reflected injection on the trusted UI origin. Membership is strictly tighter
+    # than a regex (see resolve_plugin) and the warning below carries the raw value instead.
+    plugin_data = resolve_plugin(plugin, BW_CONFIG.get_plugins())
+    if not plugin_data:
+        LOGGER.warning(f"Plugin not found on the service plugin page: {plugin!r}")
+        return handle_error("Plugin not found", "services")
+
+    try:
+        db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
+    except (ApiClientError, ApiUnavailableError):
+        LOGGER.warning(f"Could not fetch service from the API on the service plugin page: {service!r}")
+        return handle_error("Could not fetch service from the API.", "services")
+    if not db_config:
+        LOGGER.warning(f"Service not found on the service plugin page: {service!r}")
+        return handle_error("Service not found", "services")
+
+    if request.method == "POST":
+        if API_CLIENT.readonly:
+            return handle_error("Database is in read-only mode", "services")
+
+        DATA.load_from_file()
+        variables = request.form.to_dict().copy()
+        del variables["csrf_token"]
+        file_setting_names = extract_file_setting_names(variables)
+        is_draft = variables.pop("IS_DRAFT", "no") == "yes"
+
+        try:
+            metadata = API_CLIENT.get_metadata()
+        except (ApiClientError, ApiUnavailableError):
+            metadata = {}
+
+        # Mirrors main.py's `is_readonly` context-processor formula (its `request.path`
+        # exemption is for /profile, never true on this route): the API's own readonly state
+        # is already ruled out by the early return above, so in practice this is the
+        # transient-user-permission-load-error case -- current_user.list_permissions is set to
+        # an empty set on a failed API call while loading the user, which must be treated the
+        # same way here as it is on the page that rendered the form the user just submitted.
+        is_readonly = API_CLIENT.readonly or "write" not in getattr(current_user, "list_permissions", [])
+
+        DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+        CONFIG_TASKS_EXECUTOR.submit(
+            update_service,
+            service,
+            variables.copy(),
+            is_draft,
+            "compose",
+            "",
+            file_setting_names,
+            scope=postable_scope(
+                plugin_data,
+                db_config,
+                global_page=False,
+                is_pro_version=metadata.get("is_pro", False),
+                blacklisted=get_blacklisted_settings(),
+                is_readonly=is_readonly,
+            ),
+        )
+
+        return redirect(
+            url_for(
+                "loading",
+                # A rename makes this page's own URL dead (the path param still names the
+                # pre-rename service, so the GET would flash "Service not found" next to the
+                # success message). Same post-rename destination as the legacy page, :952-960.
+                next=(
+                    url_for("services.services_plugin_page", service=service, plugin=plugin)
+                    if variables.get("SERVER_NAME", service).split(" ")[0] == service
+                    else url_for("services.services_page")
+                ),
+                message=f"Saving {plugin_data['name']} settings for service {service}",
+            )
+        )
+
+    return render_template(
+        "plugin_settings_page.html",
+        plugin=plugin,
+        plugin_data=plugin_data | {"id": plugin},
+        config=db_config,
+        service_id=service,
+        clone=None,
+    )
+
+
+@services.route("/services/<string:service>/templates/<string:template>", methods=["GET", "POST"])
+@login_required
+def services_template_page(service: str, template: str):
+    """One template's guided steps for one service.
+
+    Renders the template's own declared steps only, and declares the key set they can post
+    (postable_template_scope) so a save cannot reach a setting this page never showed.
+    """
+    try:
+        db_templates = API_CLIENT.get_templates()
+    except (ApiClientError, ApiUnavailableError):
+        LOGGER.warning("Could not fetch templates from the API on the service template page.")
+        return handle_error("Could not fetch templates from the API.", "services")
+
+    # `template` is a raw URL path segment -- resolve it by membership before anything else and
+    # never interpolate it into a flash message (flashes render with |safe). See resolve_template.
+    template_data = resolve_template(template, db_templates)
+    if not template_data:
+        LOGGER.warning(f"Template not found on the service template page: {template!r}")
+        return handle_error("Template not found", "services")
+
+    try:
+        db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
+    except (ApiClientError, ApiUnavailableError):
+        LOGGER.warning(f"Could not fetch service from the API on the service template page: {service!r}")
+        return handle_error("Could not fetch service from the API.", "services")
+    if not db_config:
+        LOGGER.warning(f"Service not found on the service template page: {service!r}")
+        return handle_error("Service not found", "services")
+
+    template_method = db_config.get("USE_TEMPLATE", {}).get("method", "ui")
+    selected_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
+    # models/template_steps_body.html:48 -- a service locked to another template renders the
+    # "template in use" notice instead of any field, so the form posts nothing at all.
+    template_editable = is_editable_method(template_method) or not selected_template or template == selected_template
+
+    if request.method == "POST":
+        if API_CLIENT.readonly:
+            return handle_error("Database is in read-only mode", "services")
+
+        DATA.load_from_file()
+        variables = request.form.to_dict().copy()
+        del variables["csrf_token"]
+        file_setting_names = extract_file_setting_names(variables)
+        is_draft = variables.pop("IS_DRAFT", "no") == "yes"
+
+        # Mirrors main.py's `is_readonly` context-processor formula (its `request.path`
+        # exemption is for /profile, never true on this route): the API's own readonly state
+        # is already ruled out by the early return above, so in practice this is the
+        # transient-user-permission-load-error case -- current_user.list_permissions is set to
+        # an empty set on a failed API call while loading the user, which must be treated the
+        # same way here as it is on the page that rendered the form the user just submitted.
+        is_readonly = API_CLIENT.readonly or "write" not in getattr(current_user, "list_permissions", [])
+
+        DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+        CONFIG_TASKS_EXECUTOR.submit(
+            update_service,
+            service,
+            variables.copy(),
+            is_draft,
+            "template",
+            "",
+            file_setting_names,
+            scope=postable_template_scope(
+                template_data,
+                db_config,
+                blacklisted=get_blacklisted_settings(),
+                is_readonly=is_readonly,
+                template_editable=template_editable,
+            ),
+        )
+
+        return redirect(
+            url_for(
+                "loading",
+                # `low` step 1 renders SERVER_NAME as an editable, required field, so a rename
+                # is a supported save here and it makes this page's own URL dead. Same
+                # post-rename destination as the legacy page, :952-960.
+                next=(
+                    url_for("services.services_template_page", service=service, template=template)
+                    if variables.get("SERVER_NAME", service).split(" ")[0] == service
+                    else url_for("services.services_page")
+                ),
+                message=f"Saving template settings for service {service}",
+            )
+        )
+
+    # dom_ids are derived across the whole map, then the page keeps the single pane it renders.
+    inject_template_dom_ids(db_templates)
+
+    try:
+        db_custom_configs = _configs_list_to_dict(API_CLIENT.get_configs(with_drafts=True, with_data=True))
+    except (ApiClientError, ApiUnavailableError):
+        flash("Could not fetch custom configs from the API.", "error")
+        db_custom_configs = {}
+
+    # service_settings.html:5-8 sets these four with {% set %}; this page does not go through it.
+    return render_template(
+        "template_settings_page.html",
+        config=db_config,
+        templates={template: template_data},
+        configs=db_custom_configs,
+        service_id=service,
+        clone=None,
+        is_draft=db_config.get("IS_DRAFT", {}).get("value", "no"),
+        service_method=db_config.get("SERVER_NAME", {}).get("method", "ui"),
+        template_method=template_method,
+        selected_template=selected_template,
     )
 
 

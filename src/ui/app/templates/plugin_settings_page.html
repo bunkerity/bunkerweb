@@ -1,0 +1,90 @@
+{% extends "dashboard.html" %}
+{# One plugin's settings for one service (or globally). The page posts ONLY this plugin's
+   keys plus the control keys below; the route derives the scope and `restore_unowned_settings`
+   preserves everything outside it.
+
+   The control inputs are not optional, and they always render -- even when the plugin also
+   declares one of these keys as its own setting, and even when that declared setting renders
+   disabled (PRO-locked, a non-UI-editable method) or is not rendered at all (blacklisted, like
+   IS_DRAFT). `restore_skip` keys are deliberately never restored (app/models/save_scope.py), so
+   whatever this form omits is destroyed: omitting IS_DRAFT publishes a draft service, omitting
+   SERVER_NAME loses the service identity, and omitting USE_UI deletes the service's USE_UI row
+   (restore_skip always includes USE_UI).
+
+   They render AFTER the settings body on purpose: request.form.to_dict() keeps the FIRST value
+   for a repeated field name, so an editable field the body renders wins (a rename typed here is
+   kept) while a setting the body renders disabled or skips entirely falls through to this
+   hidden fallback (its stored value survives instead of being deleted). One ordering rule
+   covers every case correctly -- no per-key guard needed, and no per-key guard can be trusted
+   to cover every way a setting can end up unable to post (blacklisted, disabled, PRO-locked). #}
+{% block page_head %}{% endblock %}
+{% block content %}
+    {% set blacklisted_settings = get_blacklisted_settings(not service_id) %}
+    {% set filtered_settings = get_filtered_settings(plugin_data["settings"], not service_id) %}
+    {# `current_endpoint` is the last URL path segment (main.py), so here it is the plugin id,
+       never "global-settings"/"global-config". The shared body partial keys its disabled/badge
+       logic off the page identity, so restore that identity for the global page. #}
+    {% set current_endpoint = "global-settings" if not service_id else current_endpoint %}
+    <form method="POST" action="" data-plugin-settings-form>
+        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        {% if service_id %}
+                            <li class="breadcrumb-item">
+                                <a href="{{ url_for('services.services_page') }}" data-i18n="navigation.services">Services</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{{ url_for('services.services_service_page', service=service_id) }}">{{ service_id }}</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{{ url_for('global_settings.global_settings_page') }}"
+                                   data-i18n="navigation.global_settings">Global settings</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item active" aria-current="page">{{ plugin_data["name"] }}</li>
+                    </ol>
+                </nav>
+                <h5 class="mb-0 don-jose">{{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}</h5>
+                <p class="text-muted mb-0 courier-prime">{{ plugin_data["description"] }}</p>
+            </div>
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                 {% endif %}>
+                <button type="submit"
+                        class="btn btn-sm btn-primary don-jose save-settings{% if is_readonly %} disabled{% endif %}"
+                        {% if is_readonly %}disabled{% endif %}>
+                    <i class="bx bx-save bx-sm"></i>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                </button>
+            </div>
+        </div>
+        <div class="card p-2">
+            {% if filtered_settings %}
+                {% include "models/plugin_settings_body.html" %}
+            {% else %}
+                <div class="card-body text-center text-muted" data-i18n="status.no_settings">
+                    This plugin has no settings for this scope.
+                </div>
+            {% endif %}
+        </div>
+        {% if service_id %}
+            {# Always emitted, whatever the plugin declares -- see the note at the top of this
+               file for why this must come after the body include and must not be guarded. #}
+            <input type="hidden" name="OLD_SERVER_NAME" value="{{ config.get('SERVER_NAME', {}).get('value', service_id) }}">
+            {% for control_key, control_default in [("SERVER_NAME", service_id), ("IS_DRAFT", "no"), ("USE_TEMPLATE", ""), ("USE_UI", "no")] %}
+                <input type="hidden" name="{{ control_key }}" value="{{ config.get(control_key, {}).get('value', control_default) }}">
+            {% endfor %}
+        {% endif %}
+    </form>
+{% endblock %}
+{% block scripts %}
+    {# Shared widget bucket (multiples, file settings, multivalue, multiselect, reset)
+       plus the native-submit normalisation. NEVER load the multi-plugin monolith
+       (js/plugins-settings) alongside it: every handler in both files is
+       document-delegated and would double-fire (one ADD click would clone twice). #}
+    <script src="{{ url_for('static', filename='js/components/settings-widgets.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+{% endblock %}

@@ -43,5 +43,6 @@
         { "id": "504", "label": "504 - Gateway Timeout", "value": "504" }
       ]
     }
-  }
+  },
+  "extensions": { "activation": "always" }
 }

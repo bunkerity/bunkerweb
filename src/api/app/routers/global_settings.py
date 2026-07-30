@@ -112,9 +112,24 @@ def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
     for k, v in payload.root.items():
         to_set[str(k)] = "" if v is None else str(v)
 
+    db = get_db()
+
+    # Validate only the keys in THIS payload, never the merged base dict: a pre-existing
+    # invalid row written before this check existed must not block an unrelated future save.
+    invalid = []
+    for key, value in to_set.items():
+        ok, err = db.is_valid_setting(key, value=value)
+        if not ok:
+            invalid.append(f"{key}: {err}")
+    if invalid:
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": "Invalid settings: " + "; ".join(invalid)},
+        )
+
     base = _current_api_global_overrides()
     base.update(to_set)
-    ret = get_db().save_config(base, "api", changed=True, skip_service_management=True)
+    ret = db.save_config(base, "api", changed=True, skip_service_management=True)
     if isinstance(ret, str):
         code = (
             400

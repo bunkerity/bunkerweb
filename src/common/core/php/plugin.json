@@ -50,5 +50,8 @@
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     }
+  },
+  "extensions": {
+    "activation": { "REMOTE_PHP": "", "LOCAL_PHP": "" }
   }
 }

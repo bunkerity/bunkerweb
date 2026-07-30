@@ -194,5 +194,6 @@
       "reload": false,
       "async": true
     }
-  ]
+  ],
+  "extensions": { "activation": "always" }
 }

@@ -77,5 +77,6 @@
       "regex": "^(yes|no)$",
       "type": "check"
     }
-  }
+  },
+  "extensions": { "activation": "always" }
 }

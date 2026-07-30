@@ -1,0 +1,255 @@
+{% extends "dashboard.html" %}
+{# One template's guided steps for one service. The page posts ONLY the keys the stepper
+   renders plus the control keys below; the route derives the scope
+   (services.py:postable_template_scope) and `restore_unowned_settings` preserves everything
+   outside it.
+
+   The control inputs are not optional, and they always render -- even when a step also names
+   one of these keys (low.json's first step names SERVER_NAME) and even when that field renders
+   disabled (a non-UI-editable method) or is not rendered at all (blacklisted, like IS_DRAFT).
+   `restore_skip` keys are deliberately never restored (app/models/save_scope.py), so whatever
+   this form omits is destroyed: omitting IS_DRAFT publishes a draft service, omitting USE_UI
+   deletes the service's USE_UI row, and omitting USE_TEMPLATE reads as "template removed" --
+   which cascades into every posted value being materialised as a real row, permanently
+   detaching the service from the template it came from.
+
+   They render AFTER the stepper on purpose: request.form.to_dict() keeps the FIRST value for a
+   repeated field name, so an enabled field the stepper renders wins (a rename typed on step 1
+   is kept) while a setting the stepper renders disabled or skips entirely falls through to this
+   hidden fallback (its stored value survives instead of being deleted). One ordering rule
+   covers every case correctly -- no per-key guard can be trusted to cover every way a setting
+   can end up unable to post.
+
+   `novalidate` is load-bearing, not a style choice. models/input_setting.html emits `pattern=`
+   on every text input unconditionally and overrides.css:1637 hides non-active step panes with
+   `display: none !important`; a browser refuses to submit a form containing an invalid
+   NON-FOCUSABLE control and never dispatches the `submit` event, so settings-widgets.js's
+   normalisation would not run either. Without it, an invalid value left on step 7 makes Save do
+   nothing at all -- no message, no toast, no flash.
+
+   `novalidate` alone would leave this page with NO save-time validation at all, which is worse
+   than the dead button it fixes: an invalid value on an in-scope ui-method setting would post,
+   config.py:193 pops it AFTER restore_unowned_settings has already run (services.py:710 then
+   :731), and config_save.py:592 then DELETES the stored row while the user is told only
+   "Variable X is not valid." -- a deletion, not a rejected edit. The replacement gate lives in
+   js/pages/template-settings-page.js: a submit listener that walks EVERY step container (not just
+   the visible one) and navigates to the first invalid step. It is registered on `document` in the
+   CAPTURE phase on purpose, so it runs ahead of settings-widgets.js's normalisation whatever order
+   the script tags end up in; a target-phase listener would let normalisation append its hidden
+   inputs before the cancel, and the next save would then post those stale values first
+   (request.form.to_dict() keeps the FIRST value for a repeated name).
+   Do NOT "fix" anything here by dropping `novalidate`, and do not move that listener to the form.
+
+   The two modals and the toast template live OUTSIDE the form, and their confirm buttons carry an
+   explicit `type="button"` -- the easy-mode originals carry no `type`, which inside a form means
+   `type="submit"`. Either guard alone would do; both, because this is the difference between
+   "Reset template configuration" opening a dialog and it silently saving the service. #}
+{% block page_head %}{% endblock %}
+{% block content %}
+    {# `current_endpoint` is the last URL path segment (main.py), so on this route it is the
+       TEMPLATE id -- and template ids are user-created, so one named "new" or "global-config"
+       would flip the shared body's branches. That body uses it as a custom-config key prefix and
+       in several disabled/badge conditions, so restore the page identity it actually means. #}
+    {% set current_endpoint = service_id %}
+    {# Once per page, exactly as models/plugins_settings_easy.html:2 does. The included body reads
+       `plugins_settings` and deliberately does not derive it (that would call it once per pane). #}
+    {% set plugins_settings = get_plugins_settings() %}
+    {# The route hands over a one-entry {<id>: <data>} dict (services.py:1241); the included body
+       wants the pair, so unpack it once here. `dom_id` is injected by the route
+       (inject_template_dom_ids), not by the API payload. #}
+    {% set template = templates|list|first %}
+    {% set template_data = templates[template] %}
+    <form method="POST" action="" data-plugin-settings-form novalidate>
+        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+        {# Deliberately NAMELESS: read by resetTemplateConfig only, and a `name` here would post a
+           junk key into update_service. It decides what "Reset" means -- restore the saved values
+           on the service's active template, load the template's defaults on any other one. Drop
+           it and the script falls back to a hardcoded "low". #}
+        <input type="hidden" id="used-template" value="{{ selected_template }}">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('services.services_page') }}" data-i18n="navigation.services">Services</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('services.services_service_page', service=service_id) }}">{{ service_id }}</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ template|capitalize }}</li>
+                    </ol>
+                </nav>
+                {# The card header below already carries the template's descriptive name and its
+                   owning plugin's badge, so this line stays short instead of repeating both. #}
+                <h5 class="mb-0 don-jose">{{ template|capitalize }}</h5>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button id="reset-template-config"
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="Reset the current template settings"
+                        data-i18n="tooltip.reset_template_settings">
+                    <i class="bx bx-sm bx-reset"></i>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.reset">Reset</span></span>
+                </button>
+                <button id="fetch-global-config"
+                        type="button"
+                        class="btn btn-sm btn-outline-info"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="Fetch global settings and apply them to the current template"
+                        data-i18n="tooltip.fetch_global_settings">
+                    <i class="bx bx-sm bx-download"></i>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global</span></span>
+                </button>
+                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                     {% endif %}>
+                    <button type="submit"
+                            class="btn btn-sm btn-primary don-jose save-settings{% if is_readonly %} disabled{% endif %}"
+                            {% if is_readonly %}disabled{% endif %}>
+                        <i class="bx bx-save bx-sm"></i>
+                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card tab-content p-2 position-relative">
+            {# The pane <div> is the caller's half of the partial's contract, exactly as
+               models/plugins_settings_easy.html:96-105 emits it: getTemplateContainer selects
+               `.tab-pane[data-template-id="..."]` and scopes the whole stepper through it, so
+               prev/next, the step panes and Reset's step reset all go dead if the only matches are
+               the step panes.
+               Do NOT set template_plugin_id / plugin_dom_id / template_plugin here -- the partial
+               owns and recomputes them, and a caller's values would just be shadowed. #}
+            <div id="navs-templates-{{ template_data['dom_id'] }}"
+                 class="tab-pane fade show active"
+                 role="tabpanel"
+                 data-template-id="{{ template }}"
+                 data-template-dom-id="{{ template_data['dom_id'] }}"
+                 aria-labelledby="navs-templates-{{ template_data['dom_id'] }}-tab">
+                {% with is_active = true %}
+                    {% include "models/template_steps_body.html" %}
+                {% endwith %}
+            </div>
+        </div>
+        {# Always emitted, whatever the template's steps declare -- see the note at the top of this
+           file for why this must come after the body include and must not be guarded. #}
+        <input type="hidden" name="OLD_SERVER_NAME" value="{{ config.get('SERVER_NAME', {}).get('value', service_id) }}">
+        {% for control_key, control_default in [("SERVER_NAME", service_id), ("IS_DRAFT", "no"), ("USE_TEMPLATE", ""), ("USE_UI", "no")] %}
+            <input type="hidden" name="{{ control_key }}" value="{{ config.get(control_key, {}).get('value', control_default) }}">
+        {% endfor %}
+    </form>
+    {# Relocated from models/plugins_settings_easy.html with their ids unchanged --
+       js/pages/template-settings-page.js binds exactly these. #}
+    <div class="modal fade"
+         id="modal-reset-template-config"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="modal.title.reset_template_config">Reset template configuration?</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            data-i18n="aria.label.close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger text-center"
+                         role="alert"
+                         data-i18n="modal.body.reset_template_alert">
+                        Are you sure you want to reset the current template settings and custom configurations?
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button id="confirm-reset-template-config"
+                            type="button"
+                            class="btn btn-outline-danger me-2"
+                            data-bs-dismiss="modal"
+                            data-i18n="modal.button.reset_template_confirm">Reset template configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade"
+         id="modal-fetch-global-config"
+         data-bs-backdrop="static"
+         tabindex="-1"
+         aria-hidden="true"
+         role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="modal.title.fetch_global_settings">Apply global settings?</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            data-i18n="aria.label.close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info" role="alert">
+                        <div class="fw-bold" data-i18n="modal.body.fetch_global_settings_bold">
+                            This will fetch the global settings and apply them to the current template.
+                        </div>
+                        <ul class="mt-2 mb-0 ps-3">
+                            <li data-i18n="modal.body.fetch_global_settings_point_1">Only settings present in this template are updated.</li>
+                            <li data-i18n="modal.body.fetch_global_settings_point_2">Values identical to defaults are ignored.</li>
+                            <li data-i18n="modal.body.fetch_global_settings_point_3">SERVER_NAME is never overridden.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button id="confirm-fetch-global-config"
+                            type="button"
+                            class="btn btn-outline-info"
+                            data-bs-dismiss="modal"
+                            data-i18n="modal.button.fetch_global_settings_confirm">Apply global settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# Hidden clone source for the fetch-global handler's toasts (copied from
+       service_settings.html). flash.html owns only #feedback-toast-container, so without this the
+       handler applies the settings but shows neither the success nor the ERROR toast. #}
+    <div id="feedback-toast"
+         class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border border-warning"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         data-bs-autohide="true">
+        <div class="toast-header d-flex align-items-center text-warning">
+            <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+            <span class="fw-medium me-auto">BunkerWeb Forever</span>
+            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"
+                    data-i18n="aria.label.close"></button>
+        </div>
+        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    {# Order is a hard dependency, not a preference: settings-widgets.js publishes
+       window.BWSettingsWidgets, which template-settings-page.js destructures and hard-fails
+       without. Ace IS required here (unlike the per-plugin page) -- this page always renders
+       custom-config editors; ace-mode-bunkerweb_settings.js is not (raw mode only).
+       NEVER load the multi-plugin monolith (js/plugins-settings) alongside these: every handler
+       in both files is document-delegated and would double-fire (one ADD click clones twice). #}
+    <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/settings-widgets.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/template-settings-page.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+{% endblock %}

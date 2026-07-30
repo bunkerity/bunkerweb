@@ -11,7 +11,6 @@ import io
 import pytest
 
 from app.utils import (  # type: ignore
-    ALWAYS_USED_PLUGINS,
     _csv_escape,
     _sanitize_internal_next,
     bcrypt_cost,
@@ -142,9 +141,8 @@ class TestSettingsFilters:
 
 class TestPluginActive:
     def test_always_used_plugin_is_active_regardless_of_config(self):
-        # membership in ALWAYS_USED_PLUGINS short-circuits before any config lookup
-        pid = ALWAYS_USED_PLUGINS[0]
-        assert is_plugin_active(pid, pid.capitalize(), {}) is True
+        # `errors` declares extensions.activation: "always"; membership short-circuits before any config lookup
+        assert is_plugin_active("errors", "Errors", {}) is True
 
     def test_use_flag_set_activates(self):
         assert is_plugin_active("antibot", "Antibot", {"USE_ANTIBOT": {"value": "captcha"}}) is True

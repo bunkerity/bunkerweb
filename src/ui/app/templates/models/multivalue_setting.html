@@ -1,13 +1,16 @@
 {# usage: {% include "models/multivalue_setting.html" %}
-          -- included from the per-setting loop in plugins_settings.html /
-          plugins_settings_easy.html once setting_data["type"] == "multivalue". #}
+          -- included from the per-setting loop in plugins_settings.html,
+          plugin_settings_body.html or template_steps_body.html once
+          setting_data["type"] == "multivalue". #}
 
 {# Repeatable-value input for BunkerWeb's "multivalue" setting type -- the
    space- (or custom-separator-) joined lists like DNS_RESOLVERS,
    API_WHITELIST_IP, BUNKERWEB_INSTANCES and the PLUGINS_ORDER_* family. One
    hidden input holds the real separator-joined string submitted as
    `setting`; the visible rows are kept in sync with it by
-   static/js/plugins-settings.js's multivalue block (addMultivalueItem /
+   the multivalue block in static/js/plugins-settings.js -- and, on the
+   per-plugin and per-template pages, its copy in
+   static/js/components/settings-widgets.js (addMultivalueItem /
    removeMultivalueItem / updateMultivalueHiddenInput /
    toggleMultivalueVisibility, plus the reset-to-default, apply-template and
    resource-group-picker code paths that rebuild the same rows via
@@ -30,8 +33,8 @@
    topics). Removing is still one click on a chip's x, same
    `.remove-multivalue-item` hook as before. The per-row visible <label> is
    gone too -- it only ever repeated the field's own name ("SETTING #1",
-   "SETTING #2", ...), which plugins_settings.html/plugins_settings_easy.html
-   already render once above this include (`label-{{ setting_id_prefix }}...`);
+   "SETTING #2", ...), which the including template already renders once
+   above this include (`label-{{ setting_id_prefix }}...`);
    each chip input now points at that existing label via aria-labelledby
    instead of duplicating it.
 

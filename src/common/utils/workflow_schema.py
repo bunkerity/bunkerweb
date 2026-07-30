@@ -52,6 +52,31 @@ ACTION_TYPES = ("block", "redirect", "challenge")
 # src/common/core/antibot/plugin.json ("no" excluded — it is the absence of a challenge);
 # a unit test asserts the two never drift.
 CHALLENGE_PROVIDERS = ("cookie", "javascript", "captcha", "recaptcha", "hcaptcha", "turnstile", "mcaptcha", "capjs")
+# What a service must already have configured for a challenge provider to render. Lives here
+# rather than in the compiler because both sides need it: the compiler refuses to ship a rule
+# whose provider cannot render, and the DB layer refuses the *write* that would create one —
+# without the write-time check, the compiler's refusal aborts the whole config push instead of
+# telling the operator, in the form, that the service lacks the credentials.
+# The secrets themselves are never read for their value, only for their presence.
+PROVIDER_REQUIREMENTS = {
+    "recaptcha": ("ANTIBOT_RECAPTCHA_SITEKEY", "ANTIBOT_RECAPTCHA_SECRET"),
+    "hcaptcha": ("ANTIBOT_HCAPTCHA_SITEKEY", "ANTIBOT_HCAPTCHA_SECRET"),
+    "turnstile": ("ANTIBOT_TURNSTILE_SITEKEY", "ANTIBOT_TURNSTILE_SECRET"),
+    "mcaptcha": ("ANTIBOT_MCAPTCHA_SITEKEY", "ANTIBOT_MCAPTCHA_SECRET", "ANTIBOT_MCAPTCHA_URL"),
+    "capjs": ("ANTIBOT_CAPJS_SITEKEY", "ANTIBOT_CAPJS_SECRET"),
+}
+
+
+def challenge_providers(definition: Dict[str, Any], *, enabled_only: bool = True) -> Set[str]:
+    """Every challenge provider an enabled rule of this definition asks for."""
+    providers = set()
+    for rule in definition.get("rules") or []:
+        if enabled_only and not rule.get("enabled", True):
+            continue
+        action = rule.get("action") or {}
+        if action.get("type") == "challenge" and action.get("provider"):
+            providers.add(str(action["provider"]))
+    return providers
 REDIRECT_STATUSES = (301, 302, 303, 307, 308)
 # A block rule normally returns the instance's configured deny status, which is why status
 # is optional. 429 is the single documented override, for a rule whose whole purpose is to

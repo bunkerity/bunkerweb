@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from datetime import datetime
+from functools import lru_cache
 from os import _exit
 from os.path import sep
 from pathlib import Path
@@ -30,6 +31,7 @@ from password_utils import (  # type: ignore  # noqa: F401
     is_bcrypt_hash as is_bcrypt_hash,
     password_exceeds_bcrypt_limit as password_exceeds_bcrypt_limit,
 )
+from plugin_extensions import iter_plugin_activations  # type: ignore
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
@@ -130,27 +132,6 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "9": True,
         "10": True,
     },
-}
-
-ALWAYS_USED_PLUGINS = (
-    "general",
-    "errors",
-    "headers",
-    "misc",
-    "pro",
-    "sessions",
-    "ssl",
-)
-
-PLUGINS_SPECIFICS = {
-    "COUNTRY": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
-    "CUSTOMCERT": {"USE_CUSTOM_SSL": "no"},
-    "INJECT": {"INJECT_BODY": "", "INJECT_HEAD": ""},
-    "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
-    "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
-    "PHP": {"REMOTE_PHP": "", "LOCAL_PHP": ""},
-    "REDIRECT": {"REDIRECT_TO": ""},
-    "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
 
 UI_API_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
@@ -345,20 +326,53 @@ def human_readable_number(value: Union[str, int]) -> str:
     return str(value)
 
 
+# `general` is synthesized from settings.json at db_methods/initialization.py:323 and has no
+# plugin.json, so it cannot declare a manifest. One hardcoded entry, not a table.
+_SYNTHESIZED_ALWAYS_ON = frozenset({"general"})
+
+
+@lru_cache(maxsize=1)
+def get_activation_map() -> dict:
+    """Manifest activation declarations, keyed by plugin id. Cached: manifests are read off
+    disk and only change when plugins are installed, which restarts the UI workers.
+
+    # ponytail: a disk-scan failure here (not a single bad plugin.json — iter_plugin_activations
+    # already isolates those — but e.g. the whole core plugin directory being unreadable) drops
+    # to tier 3 for every plugin, which reads `errors`/`headers`/`misc`/`pro`/`sessions`/`ssl` as
+    # inactive (none declare a USE_* setting). Accepted: this is a scan-directory-level fault,
+    # not a per-plugin one, so it already implies something is badly wrong with the plugin tree;
+    # upgrade path is a second hardcoded `_SYNTHESIZED_ALWAYS_ON`-style fallback set if a bare
+    # "conventions only" mode ever needs to keep reporting these as active during an outage.
+    """
+    try:
+        return iter_plugin_activations()
+    except Exception:  # a broken plugin tree must not take the plugins page down
+        LOGGER.exception("Could not read plugin activation manifests, falling back to conventions")
+        return {}
+
+
 def is_plugin_active(plugin_id: str, plugin_name: str, config: dict) -> bool:
+    """Is this plugin doing anything for this config?
+
+    Three tiers, in order:
+      1. ``extensions.activation`` map in the plugin's own manifest — active when ANY declared
+         setting differs from its declared inactive value.
+      2. ``extensions.activation: "always"`` — always active, no switch.
+      3. the legacy ``USE_<ID>`` / ``USE_<NAME>`` naming convention. This tier is load-bearing:
+         it is what every plugin that declares nothing relies on, including every third-party
+         plugin until it opts in.
+    """
+    if plugin_id in _SYNTHESIZED_ALWAYS_ON:
+        return True
+
+    declaration = get_activation_map().get(plugin_id)
+    if declaration == "always":
+        return True
+    if isinstance(declaration, dict):
+        return any(config.get(key, {"value": inactive})["value"] != inactive for key, inactive in declaration.items())
+
     plugin_name_formatted = plugin_name.replace(" ", "_").upper()
-
-    def plugin_used(plugin_id: str) -> bool:
-        plugin_id = plugin_id.upper()
-        if plugin_id in PLUGINS_SPECIFICS:
-            for key, value in PLUGINS_SPECIFICS[plugin_id].items():
-                if config.get(key, {"value": value})["value"] != value:
-                    return True
-        elif config.get(f"USE_{plugin_id}", config.get(f"USE_{plugin_name_formatted}", {"value": "no"}))["value"] != "no":
-            return True
-        return False
-
-    return plugin_id in ALWAYS_USED_PLUGINS or plugin_used(plugin_id)
+    return config.get(f"USE_{plugin_id.upper()}", config.get(f"USE_{plugin_name_formatted}", {"value": "no"}))["value"] != "no"
 
 
 def _sanitize_internal_next(next_url, default):

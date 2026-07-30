@@ -1,0 +1,109 @@
+{# Resources attached to this service. Read-only in this partial; the detach and
+   attach actions are wired in service-resources.js. Hidden entirely on the "new"
+   page, where no service exists to attach to yet. #}
+{% if service_id %}
+    {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
+    <div id="service-resources-band" class="card mb-4" data-service-id="{{ service_id }}">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0" data-i18n="service.resources.title">Attached resources</h5>
+            </div>
+            <div class="row g-3">
+                {% for family, entry in attachments.items() %}
+                    <div class="col-12 col-md-6 col-xl-3 resource-family" data-family="{{ family }}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-semibold"
+                                  data-i18n="service.resources.family.{{ family }}">{{ family }}</span>
+                            {% if not readonly %}
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary attach-resource"
+                                        data-family="{{ family }}"
+                                        data-i18n="service.resources.attach">Attach</button>
+                            {% endif %}
+                        </div>
+                        {% if entry.error %}
+                            <div class="alert alert-warning py-1 px-2 mb-0 small"
+                                 data-i18n="service.resources.unavailable">Unavailable</div>
+                        {% elif not entry["items"] %}
+                            <div class="text-muted small"
+                                 data-i18n="service.resources.none">None attached</div>
+                        {% else %}
+                            {% for row in entry["items"] %}
+                                {% if family == 'upstream' %}
+                                    {# An upstream row nests its per-service attachments under "services"
+                                       -- a pool attached at both /api and /admin must render two chips,
+                                       one per path, so detaching one leaves the other alone. #}
+                                    {% for att in row.get("services", []) if att.service_id == service_id %}
+                                        <div class="resource-chip d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
+                                             data-family="{{ family }}"
+                                             data-resource-id="{{ row.id }}"
+                                             data-match-path="{{ att.match_path }}">
+                                            <span class="text-truncate">{{ row.get("name") or row.id }} <code>{{ att.match_path }}</code></span>
+                                            {% if not readonly %}
+                                                <button type="button"
+                                                        class="btn btn-sm btn-link text-danger p-0 detach-resource"
+                                                        data-family="{{ family }}"
+                                                        data-resource-id="{{ row.id }}"
+                                                        aria-label="Detach"
+                                                        data-i18n="service.resources.detach">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="resource-chip d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
+                                         data-family="{{ family }}"
+                                         data-resource-id="{{ row.id }}">
+                                        <span class="text-truncate">{{ row.get("name") or row.get("common_name") or row.get("to_url") or row.id }}</span>
+                                        {% if not readonly %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link text-danger p-0 detach-resource"
+                                                    data-family="{{ family }}"
+                                                    data-resource-id="{{ row.id }}"
+                                                    aria-label="Detach"
+                                                    data-i18n="service.resources.detach">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="attach-resource-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST"
+                  action="{{ url_for('services.services_resource_attach', service=service_id) }}"
+                  class="modal-content">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="family" id="attach-family">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="service.resources.attach">Attach</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select class="form-select mb-3" name="resource_id" id="attach-resource-id" required></select>
+                    <div id="attach-match-path-row" class="mb-3 d-none">
+                        <label for="attach-match-path" class="form-label"
+                               data-i18n="service.resources.match_path">Path</label>
+                        <input type="text" class="form-control" name="match_path" id="attach-match-path" value="/">
+                    </div>
+                    <div id="attach-primary-row" class="form-check d-none">
+                        <input class="form-check-input" type="checkbox" name="primary" value="yes" id="attach-primary">
+                        <label class="form-check-label" for="attach-primary"
+                               data-i18n="service.resources.primary">Primary certificate</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-i18n="service.resources.attach">Attach</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="application/json" id="attach-candidates">{{ attach_candidates | tojson }}</script>
+{% endif %}

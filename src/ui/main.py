@@ -22,6 +22,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from app.models.plugin_activation import is_plugin_active_for_service
 from app.models.safe_session_cache import SafeFileSystemCache
 from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, LoginManager, login_required, logout_user
@@ -761,6 +762,7 @@ with app.app_context():
         is_editable_method=is_editable_method,
         url_for=custom_url_for,
         is_plugin_active=is_plugin_active,
+        is_plugin_active_for_service=is_plugin_active_for_service,
         is_ui_api_method=is_ui_api_method,
         can_delete_service=can_delete_service,
         resource_kind_for_setting=resource_kind_for_setting,

@@ -46,5 +46,8 @@
       "select": ["301", "302", "303", "307", "308"],
       "multiple": "redirect"
     }
+  },
+  "extensions": {
+    "activation": { "REDIRECT_TO": "" }
   }
 }

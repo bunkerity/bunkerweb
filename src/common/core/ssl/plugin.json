@@ -96,5 +96,6 @@
       "regex": "^(off|none|[1-9][0-9]*[kKmM])$",
       "type": "text"
     }
-  }
+  },
+  "extensions": { "activation": "always" }
 }

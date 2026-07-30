@@ -889,5 +889,8 @@
       "regex": "^[A-Za-z0-9._\\-]*$",
       "type": "password"
     }
+  },
+  "extensions": {
+    "activation": { "USE_ANTIBOT": "no" }
   }
 }

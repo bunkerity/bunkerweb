@@ -23,5 +23,8 @@
       "regex": "^.*$",
       "type": "text"
     }
+  },
+  "extensions": {
+    "activation": { "INJECT_BODY": "", "INJECT_HEAD": "" }
   }
 }

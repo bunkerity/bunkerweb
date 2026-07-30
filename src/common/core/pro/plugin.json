@@ -23,5 +23,6 @@
       "reload": true,
       "async": true
     }
-  ]
+  ],
+  "extensions": { "activation": "always" }
 }

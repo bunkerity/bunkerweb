@@ -32,6 +32,7 @@
            value="{{ is_draft }}"
            data-original="{% if current_endpoint != 'new' and not clone %}{{ is_draft }}{% else %}no{% endif %}"
            data-default="no">
+    {% include "models/service_resources_band.html" %}
     <div class="tab-content p-0 position-relative">
         <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"
              id="navs-modes-easy"
@@ -74,4 +75,7 @@
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    <script src="{{ url_for('static', filename='js/pages/service-resources.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

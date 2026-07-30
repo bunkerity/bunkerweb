@@ -688,5 +688,8 @@
         { "id": "ZW", "label": "Zimbabwe (ZW)", "value": "ZW" }
       ]
     }
+  },
+  "extensions": {
+    "activation": { "BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": "" }
   }
 }

@@ -11,7 +11,7 @@ from shutil import move, rmtree
 from sys import path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from time import time
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
@@ -34,7 +34,7 @@ from app.dependencies import (
     PRO_PLUGINS_PATH,
 )
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
+from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR, get_activation_map, is_plugin_active
 
 from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
 
@@ -67,13 +67,12 @@ def plugins_page():
     # Remove everything in the tmp folder
     rmtree(tmp_ui_path, ignore_errors=True)
     tmp_ui_path.mkdir(parents=True, exist_ok=True)
-    # `plugins`/`config` come from the global before_request context; pass the two lookup
-    # tables the marketplace grid needs to decide how each core card's switch behaves
-    # (locked "always on" chip vs. a USE_*-bound toggle).
+    # `plugins`/`config` come from the global before_request context; pass the manifest-driven
+    # activation map the marketplace grid needs to decide how each core card's switch behaves
+    # (locked "always on" chip vs. a USE_*-bound toggle vs. a non-toggleable state badge).
     return render_template(
         "plugins.html",
-        always_used_plugins=ALWAYS_USED_PLUGINS,
-        plugins_specifics=PLUGINS_SPECIFICS,
+        plugin_activations=get_activation_map(),
         custom_icons=CUSTOM_PLUGIN_ICONS,
         static_icons=STATIC_PLUGIN_ICONS,
     )
@@ -137,32 +136,98 @@ def delete_plugin():
     def update_plugins(plugins: List[str]):
         wait_applying()
 
-        deleted_plugins = []
-        for plugin in plugins:
-            try:
-                API_CLIENT.delete_plugin(plugin)
-                DATA["TO_FLASH"].append({"content": f"Deleted plugin {plugin} successfully", "type": "success"})
-                deleted_plugins.append(plugin)
-            except ApiClientError as e:
-                if "not found" in e.message.lower() or "does not exist" in e.message.lower():
-                    message = f"Plugin with id {plugin} not found"
-                else:
-                    message = f"Couldn't delete plugin {plugin} in database: {e.message}"
-                DATA["TO_FLASH"].append({"content": message, "type": "error"})
-            except ApiUnavailableError as e:
-                DATA["TO_FLASH"].append({"content": f"Couldn't delete plugin {plugin}: {e.message}", "type": "error"})
+        try:
+            deleted_plugins = []
+            for plugin in plugins:
+                try:
+                    API_CLIENT.delete_plugin(plugin)
+                    DATA["TO_FLASH"].append({"content": f"Deleted plugin {plugin} successfully", "type": "success"})
+                    deleted_plugins.append(plugin)
+                except ApiClientError as e:
+                    if "not found" in e.message.lower() or "does not exist" in e.message.lower():
+                        message = f"Plugin with id {plugin} not found"
+                    else:
+                        message = f"Couldn't delete plugin {plugin} in database: {e.message}"
+                    DATA["TO_FLASH"].append({"content": message, "type": "error"})
+                except ApiUnavailableError as e:
+                    DATA["TO_FLASH"].append({"content": f"Couldn't delete plugin {plugin}: {e.message}", "type": "error"})
 
-        if deleted_plugins:
-            with suppress(ApiClientError, ApiUnavailableError):
-                API_CLIENT.checked_changes(["config"], plugins_changes=deleted_plugins.copy(), value=True)
-
-        DATA["RELOADING"] = False
+            if deleted_plugins:
+                with suppress(ApiClientError, ApiUnavailableError):
+                    API_CLIENT.checked_changes(["config"], plugins_changes=deleted_plugins.copy(), value=True)
+        finally:
+            # Always clear the loading-page flag, even if something above raised unexpectedly.
+            # This runs on a bare ThreadPoolExecutor whose futures are never retrieved (see
+            # toggle_plugin below), so an uncaught exception here would otherwise strand the
+            # user on /loading until the 60s watchdog in main.py clears RELOADING.
+            DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
 
     CONFIG_TASKS_EXECUTOR.submit(update_plugins, plugins)
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
+
+
+def _active_value_for(setting_id: str, inactive: str) -> str:
+    """Derive a schema-legal active value for ``setting_id`` given its inactive value.
+
+    Reads the setting's definition via ``BW_CONFIG.get_plugins_settings()`` -- the same
+    payload ``plugins_settings.html``/``models/select_setting.html`` already render from
+    (a select-typed entry carries ``"type": "select"`` and ``"select": [option, ...]``).
+    Raises ``ValueError`` when no schema-legal active value can be derived (free-text
+    settings such as ``REDIRECT_TO``/``INJECT_BODY`` have no such value).
+    """
+    definition = BW_CONFIG.get_plugins_settings().get(setting_id) or {}
+    setting_type = definition.get("type")
+
+    if setting_type == "select":
+        for option in definition.get("select") or []:
+            if option != inactive:
+                return option
+        raise ValueError(f"{setting_id!r} has no select option distinct from its inactive value {inactive!r}")
+
+    if setting_type == "check":
+        return "no" if inactive == "yes" else "yes"
+
+    raise ValueError(f"{setting_id!r} (type={setting_type!r}) has no derivable active value; not safe to enable from a switch")
+
+
+def resolve_activation_write(plugin_id: str, setting: Optional[str], *, enabled: bool) -> Dict[str, str]:
+    """Values to write to flip ``plugin_id`` on or off, derived from its declared activation.
+
+    Disabling writes EVERY declared key to its inactive value -- a plugin with a second
+    switch (limit's ``USE_LIMIT_CONN`` gates its nginx conf independently of
+    ``USE_LIMIT_REQ``) would otherwise keep enforcing after the UI claims it is off.
+
+    Enabling is only well-defined for a single-key activation whose active value is
+    unambiguous; the caller must not offer a toggle for anything else (raises
+    ``ValueError`` for a multi-key declaration or a setting the plugin does not declare).
+
+    Undeclared plugins (no manifest entry) keep the legacy convention: a plain
+    ``USE_<ID>`` boolean, still guarded by ``USE_SETTING_RX``. A plugin declared
+    ``"always"`` (no switch, ever -- mirrors ``plugins.html``'s ``is_always``) is
+    refused outright: it must never be flippable through this endpoint, even by a
+    crafted ``setting`` that happens to match the ``USE_<ID>`` convention.
+    """
+    declaration = get_activation_map().get(plugin_id)
+    if declaration == "always":
+        raise ValueError(f"{plugin_id!r} is always active and cannot be toggled")
+    if not isinstance(declaration, dict):
+        if not setting or not USE_SETTING_RX.match(setting):
+            raise ValueError(f"No activation declaration and no conventional setting for {plugin_id!r}")
+        return {setting: "yes" if enabled else "no"}
+
+    if not enabled:
+        return dict(declaration)
+
+    if setting is not None and setting not in declaration:
+        raise ValueError(f"{setting!r} is not an activation setting of {plugin_id!r}")
+    if len(declaration) != 1:
+        raise ValueError(f"{plugin_id!r} has a multi-key activation and cannot be enabled from a single switch")
+
+    only_key, inactive = next(iter(declaration.items()))
+    return {only_key: _active_value_for(only_key, inactive)}
 
 
 @plugins.route("/plugins/enable", methods=["POST"])
@@ -196,8 +261,10 @@ def enable_plugin():
 
         try:
             if setting:
-                # Core plugin: flip the master USE_* global setting (save_config marks changes).
-                API_CLIENT.update_global_settings({setting: "yes" if enabled else "no"})
+                # Core plugin: write every value the manifest's activation declares (or, absent
+                # one, the conventional USE_* boolean) instead of blindly writing "yes"/"no" --
+                # a select-typed master setting (e.g. USE_ANTIBOT) has no legal "yes" value.
+                API_CLIENT.update_global_settings(resolve_activation_write(plugin, setting, enabled=enabled))
             else:
                 # External/ui/pro plugin: flip the DB `enabled` flag.
                 API_CLIENT.set_plugin_enabled(plugin, enabled)
@@ -205,12 +272,19 @@ def enable_plugin():
                     API_CLIENT.checked_changes(["config"], plugins_changes=[plugin], value=True)
             state = "enabled" if enabled else "disabled"
             DATA["TO_FLASH"].append({"content": f"Plugin {plugin} {state} successfully", "type": "success"})
-        except ApiClientError as e:
+        except (ApiClientError, ApiUnavailableError) as e:
             DATA["TO_FLASH"].append({"content": f"Couldn't update plugin {plugin}: {e.message}", "type": "error"})
-        except ApiUnavailableError as e:
-            DATA["TO_FLASH"].append({"content": f"Couldn't update plugin {plugin}: {e.message}", "type": "error"})
-
-        DATA["RELOADING"] = False
+        except ValueError as e:
+            # resolve_activation_write rejects an illegal toggle (an "always" plugin, a
+            # multi-key or undeclared activation setting, a free-text activation). This must
+            # be caught explicitly and not just relegated to the finally below: left uncaught,
+            # it vanished with no log and no flash on this bare ThreadPoolExecutor (whose
+            # futures are never retrieved), stranding the user on /loading until the 60s
+            # watchdog in main.py cleared RELOADING.
+            LOGGER.error(f"Rejected plugin toggle for {plugin!r}: {e}")
+            DATA["TO_FLASH"].append({"content": f"Couldn't update plugin {plugin}: {e}", "type": "error"})
+        finally:
+            DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
 
@@ -672,21 +746,19 @@ def custom_plugin_page(plugin: str):
     if not plugin_data:
         return error_message("Plugin not found"), 404
 
-    plugin_id = plugin.upper()
-    plugin_name_formatted = plugin_data["name"].replace(" ", "_").upper()
     db_config = BW_CONFIG.get_config(methods=False)
 
     def plugin_used(prefix: str = "") -> bool:
-        if plugin_id in PLUGINS_SPECIFICS:
-            for key, value in PLUGINS_SPECIFICS[plugin_id].items():
-                if db_config.get(f"{prefix}{key}", value) != value:
-                    return True
-        elif db_config.get(f"{prefix}USE_{plugin_id}", db_config.get(f"{prefix}USE_{plugin_name_formatted}", "no")) != "no":
-            return True
-        return False
+        # Delegate to the single activation authority (manifest map, falling back to the
+        # USE_<ID>/USE_<NAME> convention) instead of re-deriving the rules here, so this
+        # plugin's own page can never disagree with the marketplace grid. is_plugin_active
+        # takes a lowercase plugin id (manifest keys are lowercase) and `{"value": ...}`-shaped
+        # config entries; db_config (methods=False) is flat strings, so wrap it.
+        scoped = {key.removeprefix(prefix): value for key, value in db_config.items() if key.startswith(prefix)} if prefix else db_config
+        return is_plugin_active(plugin, plugin_data["name"], {key: {"value": value} for key, value in scoped.items()})
 
     is_metrics_on = db_config.get("USE_METRICS", "yes") != "no"
-    is_used = plugin in ALWAYS_USED_PLUGINS or plugin_used() or plugin_data["type"] in ("pro", "ui")
+    is_used = plugin_used() or plugin_data["type"] in ("pro", "ui")
 
     if is_metrics_on and not is_used:
         # Check if at least one service is using metrics and/or the plugin

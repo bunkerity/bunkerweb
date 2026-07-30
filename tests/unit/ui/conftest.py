@@ -16,10 +16,29 @@ _UI_ROOT = str(Path(__file__).resolve().parents[3] / "src" / "ui")
 if _UI_ROOT not in sys.path:
     sys.path.insert(0, _UI_ROOT)
 
+import plugin_extensions  # type: ignore  # noqa: E402 — on sys.path via the root conftest
+
 from app.models.ui_database import UIDatabase  # noqa: E402
+from app.utils import get_activation_map  # noqa: E402
 
 from fixtures.db_factory import resolve_uri  # noqa: E402
 from fixtures.engines import reset_schema  # noqa: E402
+
+# `is_plugin_active`'s manifest tier reads plugin.json files through
+# `plugin_extensions.iter_plugin_activations()`, which (by design — see plugin_extensions.py)
+# scans the hardcoded, non-overridable container path `/usr/share/bunkerweb/core`. That path
+# only exists inside a built image (the Dockerfiles `COPY src/common/core core` there); a bare
+# checkout has nothing there. Point the scan at the real manifests in this repo for every UI
+# test, and clear `get_activation_map`'s cache so each test re-reads them under the patched path.
+_REAL_CORE_PLUGINS_PATH = str(Path(__file__).resolve().parents[3] / "src" / "common" / "core")
+
+
+@pytest.fixture(autouse=True)
+def _real_plugin_activation_manifests(monkeypatch):
+    monkeypatch.setattr(plugin_extensions, "CORE_PLUGINS_PATH", _REAL_CORE_PLUGINS_PATH)
+    get_activation_map.cache_clear()
+    yield
+    get_activation_map.cache_clear()
 
 
 @pytest.fixture

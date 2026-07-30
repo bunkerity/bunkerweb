@@ -15,15 +15,17 @@ from json import JSONDecodeError, loads
 from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
 
-from model import Plugins, ResourceAttachments, ResourceGroupUsages, Resources, Services, Workflows  # type: ignore
+from model import Global_values, Plugins, ResourceAttachments, ResourceGroupUsages, Resources, Services, Services_settings, Workflows  # type: ignore
 from sqlalchemy import delete, or_, select, update
 
 from workflow_schema import (  # type: ignore
     MAX_ACTIVE_RULES_PER_SERVICE,
     MAX_PCRE_PER_SERVICE,
     MAX_PREDICATES_PER_SERVICE,
+    PROVIDER_REQUIREMENTS,
     SCHEMA_VERSION,
     canonical_json,
+    challenge_providers,
     collect_group_refs,
     rule_stats,
     validate_definition,
@@ -159,12 +161,20 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
 
     @staticmethod
     def _service_workflows(session) -> Dict[str, List[Dict[str, Any]]]:
-        """Session-taking core of :meth:`get_service_workflows`."""
+        """Session-taking core of :meth:`get_service_workflows`.
+
+        Draft services are excluded. They render nothing, and their settings are absent from
+        the generated config — so compiling their workflows would check a challenge provider's
+        credentials against the (empty) global fallback and abort the whole push for a service
+        that was never going to be served.
+        """
         result: Dict[str, List[Dict[str, Any]]] = {}
         for row in session.execute(
             select(ResourceAttachments.service_id, Resources.id, Resources.name, Workflows.schema_version, Workflows.definition)
             .join(Resources, Resources.id == ResourceAttachments.resource_id)
             .join(Workflows, Workflows.resource_id == Resources.id)
+            .join(Services, Services.id == ResourceAttachments.service_id)
+            .where(Services.is_draft.is_(False))
             .order_by(ResourceAttachments.creation_date, Resources.name)
         ):
             result.setdefault(row.service_id, []).append({"id": row.id, "name": row.name, "schema_version": row.schema_version, "definition": row.definition})
@@ -207,6 +217,48 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
                 return f"Service {service_id} would hold {totals['predicates']} workflow predicates (maximum {MAX_PREDICATES_PER_SERVICE})"
             if totals["pcre"] > MAX_PCRE_PER_SERVICE:
                 return f"Service {service_id} would hold {totals['pcre']} workflow regular expressions (maximum {MAX_PCRE_PER_SERVICE})"
+        return ""
+
+    @staticmethod
+    def _provider_prerequisite_error(session, definition: Optional[Dict[str, Any]], service_ids: List[str]) -> str:
+        """Refuse a write whose challenge rules the target services could not render.
+
+        The compiler enforces the same rule, but it is fail-closed: reaching it means the whole
+        configuration push aborts for *every* service until someone detaches the workflow. This
+        check turns that into a 400 in the operator's form, which is the only reason the
+        compiler's version should ever be unreachable.
+
+        Only the *presence* of each credential is read, never its value.
+        """
+        if definition is None or not service_ids:
+            return ""
+        providers = challenge_providers(definition)
+        required = sorted({setting for provider in providers for setting in PROVIDER_REQUIREMENTS.get(provider, ())})
+        if not required:
+            return ""
+
+        # Multisite settings fall back to the global value, so both scopes are needed.
+        fallback = {
+            row.setting_id: row.value
+            for row in session.execute(select(Global_values.setting_id, Global_values.value).where(Global_values.setting_id.in_(required), Global_values.suffix == 0))
+        }
+        per_service = {
+            (row.service_id, row.setting_id): row.value
+            for row in session.execute(
+                select(Services_settings.service_id, Services_settings.setting_id, Services_settings.value).where(
+                    Services_settings.service_id.in_(service_ids), Services_settings.setting_id.in_(required), Services_settings.suffix == 0
+                )
+            )
+        }
+
+        for service_id in service_ids:
+            for provider in sorted(providers):
+                for setting in PROVIDER_REQUIREMENTS.get(provider, ()):
+                    value = per_service.get((service_id, setting))
+                    if value is None:
+                        value = fallback.get(setting)
+                    if not (value or "").strip():
+                        return f"Service {service_id} cannot serve a {provider} challenge: {setting} is not configured"
         return ""
 
     def _check_name(self, session, name: str, resource_id: str = "") -> Tuple[str, str]:
@@ -300,7 +352,15 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
                 return (errors[0]["message"] if errors else "Invalid workflow definition"), errors
 
             attached = self._attached_service_ids(session, resource_id)
+            if attached:
+                # Lock the target services for the rest of the transaction. Without it two
+                # concurrent saves on two workflows of the same service each read a budget that
+                # is still under the cap, both commit, and the sum blows it — which the
+                # fail-closed compiler then turns into a deployment-wide push failure.
+                session.execute(select(Services.id).where(Services.id.in_(attached)).with_for_update())
             if error := self._service_budget_error(session, resource_id, canonical, attached):
+                return error, []
+            if error := self._provider_prerequisite_error(session, canonical, attached):
                 return error, []
 
             workflow.schema_version = SCHEMA_VERSION
@@ -400,7 +460,10 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
             ).first():
                 return ""  # already attached: idempotent, and nothing changed to signal
 
-            if error := self._service_budget_error(session, resource_id, self._load_definition(workflow.definition), [service_id]):
+            definition = self._load_definition(workflow.definition)
+            if error := self._service_budget_error(session, resource_id, definition, [service_id]):
+                return error
+            if error := self._provider_prerequisite_error(session, definition, [service_id]):
                 return error
 
             # is_primary stays False and match_path stays "": every attached workflow is

@@ -39,7 +39,7 @@ from pathlib import Path
 from re import compile as re_compile
 from sys import modules as sys_modules, path as sys_path
 from types import ModuleType
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 
 # Canonical on-disk plugin roots — HARDCODED (mirrors src/worker/executor.py
 # ALLOWED_ROOTS). Not env-overridable on purpose: external/pro plugins ship
@@ -168,6 +168,52 @@ def iter_certificate_sources(paths=None) -> Dict[str, dict]:
                 "label": str(declaration.get("label") or manifest.get("name") or plugin_id),
                 "renews": bool(declaration.get("renews", False)),
             }
+    return out
+
+
+def iter_plugin_activations(paths=None) -> Dict[str, Any]:
+    """Return every plugin declaring ``extensions.activation``, keyed by plugin id::
+
+        "extensions": { "activation": { "USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no" } }
+        "extensions": { "activation": "always" }
+
+    A map is ``{setting_id: inactive_value}``: the plugin counts as active on a service when
+    ANY declared setting differs from its inactive value. The literal ``"always"`` marks a
+    plugin that is always applied and therefore has no switch.
+
+    Purely declarative — like ``iter_certificate_sources`` and unlike the api/db extensions,
+    this loads no plugin code, so it is deliberately NOT behind ``is_trusted``. Gating it
+    would silently ignore exactly the external plugins the contract exists to serve.
+
+    Malformed declarations are dropped rather than raising: a bad manifest must not take the
+    plugins page down, and the caller falls back to the naming-convention heuristic.
+    """
+    out: Dict[str, Any] = {}
+    for base, _ in _roots(paths):
+        if not base.is_dir():
+            continue
+        for plugin_json in sorted(base.glob("*/plugin.json")):
+            try:
+                manifest = loads(plugin_json.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            if not isinstance(manifest, dict):
+                continue
+            extensions = manifest.get("extensions")
+            if not isinstance(extensions, dict):
+                continue
+            declaration = extensions.get("activation")
+            plugin_id = manifest.get("id") or plugin_json.parent.name
+
+            if declaration == "always":
+                out[plugin_id] = "always"
+                continue
+            if not isinstance(declaration, dict) or not declaration:
+                continue
+            # Values are compared against stored setting values, which are always strings.
+            if not all(isinstance(key, str) and isinstance(value, str) for key, value in declaration.items()):
+                continue
+            out[plugin_id] = dict(declaration)
     return out
 
 

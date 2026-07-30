@@ -1513,6 +1513,7 @@
     "no_item": "No Item",
     "no_notifications": "No notifications to show.",
     "no_search_results": "No items found.",
+    "no_settings": "This plugin has no settings for this scope.",
     "no_steps": "No Steps Available",
     "no_steps_description": "This template does not have any steps to configure.",
     "not_applicable": "N/A",
@@ -2394,5 +2395,22 @@
     "services": "Service enablement",
     "status": "Instance storage",
     "subtitle": "Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls."
+  },
+  "service": {
+    "resources": {
+      "attach": "Attach",
+      "detach": "Detach",
+      "family": {
+        "certificate": "Certificates",
+        "redirect": "Redirects",
+        "upstream": "Upstreams",
+        "workflow": "Workflows"
+      },
+      "match_path": "Path",
+      "none": "None attached",
+      "primary": "Primary certificate",
+      "title": "Attached resources",
+      "unavailable": "Unavailable"
+    }
   }
 }

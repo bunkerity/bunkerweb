@@ -28,23 +28,13 @@ from workflow_schema import (  # type: ignore
     MAX_ARTEFACT_BYTES,
     MAX_PCRE_PER_SERVICE,
     MAX_PREDICATES_PER_SERVICE,
+    PROVIDER_REQUIREMENTS,
     SCHEMA_VERSION,
     canonical_json,
     collect_group_refs,
     rule_stats,
     validate_definition,
 )
-
-# What a service must already have configured for a challenge provider to render. The
-# secrets themselves stay in the service settings and are never copied into the artefact;
-# only their presence is checked.
-PROVIDER_REQUIREMENTS = {
-    "recaptcha": ("ANTIBOT_RECAPTCHA_SITEKEY", "ANTIBOT_RECAPTCHA_SECRET"),
-    "hcaptcha": ("ANTIBOT_HCAPTCHA_SITEKEY", "ANTIBOT_HCAPTCHA_SECRET"),
-    "turnstile": ("ANTIBOT_TURNSTILE_SITEKEY", "ANTIBOT_TURNSTILE_SECRET"),
-    "mcaptcha": ("ANTIBOT_MCAPTCHA_SITEKEY", "ANTIBOT_MCAPTCHA_SECRET", "ANTIBOT_MCAPTCHA_URL"),
-    "capjs": ("ANTIBOT_CAPJS_SITEKEY", "ANTIBOT_CAPJS_SECRET"),
-}
 
 
 def _group_index(db) -> Dict[str, Dict[str, List[str]]]:

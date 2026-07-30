@@ -178,6 +178,29 @@ class Config:
             else:
                 flash(message, "error")
 
+        def reject_value(key: str) -> None:
+            """Reject an invalid *value* without deleting the setting.
+
+            What this function returns is the caller's complete desired state: a key missing
+            from it has its row DELETED (db_methods/config_save.py:592). So dropping a key
+            here turns "you submitted an invalid value" into "your setting is gone" -- e.g. an
+            emptied multiselect posts "", no client gate gets to reject it (the hidden input
+            carries no pattern, and type=hidden is barred from constraint validation), the
+            regex below rejects it, and the stored SSL_PROTOCOLS=TLSv1.3 row dies, silently
+            reverting the service to the global value. Restoring the stored value instead
+            reverts the field, which is what a rejected edit should do; report_error has
+            already told the user why.
+
+            Only for an existing target: on `new` there is nothing stored to fall back on and
+            `config` is the GLOBAL config (routes/services.py:576-579, routes/services.py:1425),
+            so restoring from it would silently seed a brand-new service with a global value
+            nobody asked for.
+            """
+            if not new and key in config:
+                variables[key] = config[key]["value"]
+            else:
+                variables.pop(key, None)
+
         # Iterate over a copy of the items to safely modify the dictionary.
         for key, value in to_check.items():
             # Remove blacklisted variables.
@@ -226,7 +249,7 @@ class Config:
                 if canonical is None:
                     if not self.__ignore_regex_check:
                         report_error(f"Variable {key} is not valid.")
-                        variables.pop(key, None)
+                        reject_value(key)
                         continue
                 else:
                     value = canonical
@@ -250,10 +273,10 @@ class Config:
                 regex_flags = DOTALL if plugins_settings[setting].get("type") == "file" else 0
                 if not self.__ignore_regex_check and re_search(plugins_settings[setting]["regex"], value, regex_flags) is None:
                     report_error(f"Variable {key} is not valid.")
-                    variables.pop(key, None)
+                    reject_value(key)
             except RegexError as e:
                 report_error(f"Invalid regex for setting {setting}: {plugins_settings[setting]['regex']}. Ignoring regex check: {e}")
-                variables.pop(key, None)
+                reject_value(key)
 
         return variables
 
