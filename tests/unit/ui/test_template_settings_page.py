@@ -62,6 +62,9 @@ def _import_services_module():
     dependencies.BW_CONFIG = Mock()
     dependencies.CONFIG_TASKS_EXECUTOR = Mock()
     dependencies.DATA = Mock()
+    # The real one is the image-only /usr/share/bunkerweb/core; point it at the repo so
+    # `core_plugin_order()` reads the SHIPPED order.json instead of falling back to {}.
+    dependencies.CORE_PLUGINS_PATH = Path(__file__).resolve().parents[3] / "src" / "common" / "core"
     qrcode = ModuleType("qrcode")
     qrcode_main = ModuleType("qrcode.main")
     qrcode_main.QRCode = Mock()
@@ -1110,27 +1113,126 @@ def test_settings_ids_use_the_owning_plugin_id(render_template_page):
 
 
 # ======================================================================================
-# D0.1's "no page loads both" invariant, as a rendered/parsed assertion rather than a raw grep:
-# plugin_settings_page.html carries a Jinja comment naming the monolith on purpose, and Jinja
-# strips `{# #}` before render, so a source grep false-positives on exactly the file this
-# invariant is about.
+# D0.1's "no page loads both" invariant, after the monolith is gone (S3.4 T8).
+#
+# It used to name two files -- `js/plugins-settings.js` and `js/components/settings-widgets.js` --
+# because the monolith held a byte-identical COPY of 17 of the widgets module's delegated
+# handlers, so a page loading both double-fired every one (one ADD click cloned twice). Its
+# successor is `js/pages/settings-raw.js`, whose header claims the two files share zero delegated
+# selectors; that claim is what is checked here.
+#
+# Deliberately NOT generalised to "no two scripts may delegate the same selector". Measured over
+# every page: `template_settings_page.html` loads both the widgets module and
+# `template-settings-page.js`, and both delegate `input .plugin-setting` -- on purpose, one doing
+# field regex validation and the other step-indicator styling. Same selector, different
+# behaviour, composed by design. A blanket rule would forbid that and be wrong.
+#
+# Rendered/parsed rather than grepped: plugin_settings_page.html carries a Jinja comment naming
+# the old monolith on purpose, and Jinja strips `{# #}` before render, so a source grep
+# false-positives on exactly the file this invariant is about.
 # ======================================================================================
 
 
 _JINJA_COMMENT_RX = re.compile(r"\{#.*?#\}", re.S)
+# `$(document).on("click", ".add-multiple", ...)`, including the multi-event
+# `$(document).on("input change", ".plugin-setting", ...)` form. Direct bindings
+# (`$(".x").on(...)`) are not delegated off `document` and cannot collide this way.
+_DELEGATED_RX = re.compile(r"""\$\(document\)\.on\(\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']""")
+RAW_JS = STATIC / "js" / "pages" / "settings-raw.js"
+WIDGETS_JS = STATIC / "js" / "components" / "settings-widgets.js"
 
 
-def test_no_template_loads_both_the_monolith_and_the_widgets_module():
-    both = []
+def _delegated(js_path):
+    """`{(event, selector)}`, with jQuery event namespaces (`keydown.rawConfigShortcut`) stripped."""
+    return {(event.split(".")[0], selector) for events, selector in _DELEGATED_RX.findall(js_path.read_text(encoding="utf-8")) for event in events.split()}
+
+
+def test_the_raw_editor_and_the_widgets_module_share_no_delegated_selector():
+    raw, widgets = _delegated(RAW_JS), _delegated(WIDGETS_JS)
+    assert raw, "the delegated-binding extractor found nothing in settings-raw.js"
+    assert widgets, "the delegated-binding extractor found nothing in settings-widgets.js"
+    assert not (raw & widgets), f"both delegate {sorted(raw & widgets)}; a page loading both double-fires them"
+
+
+def test_the_monolith_is_gone_and_nothing_references_it():
+    """It was deleted whole in S3.4 T8: the widget half is `js/components/settings-widgets.js`,
+    the stepper `js/pages/template-settings-page.js`, the raw editor `js/pages/settings-raw.js`,
+    and the easy/advanced panes are gone with it. A leftover reference 404s the script tag and
+    takes the raw editor down with it."""
+    assert not (STATIC / "js" / "plugins-settings.js").exists()
+    for name in ("models/plugins_settings.html", "models/plugins_settings_easy.html"):
+        assert not (TEMPLATES / name).exists()
+    # LIVE references only -- a `<script src=>` or an `{% include %}`. Prose citing the deleted
+    # files as provenance ("extracted out of models/plugins_settings_easy.html") stays true and is
+    # left alone; making this a text sweep would mean rewriting ~25 comments for no behaviour.
     for path in sorted(TEMPLATES.rglob("*.html")):
-        rendered = _JINJA_COMMENT_RX.sub("", path.read_text(encoding="utf-8"))
-        if "js/plugins-settings.js" in rendered and "js/components/settings-widgets.js" in rendered:
-            both.append(path.name)
-    assert both == []
-    # Non-vacuity: both scripts really are loaded somewhere, just never together.
-    sources = [_JINJA_COMMENT_RX.sub("", path.read_text(encoding="utf-8")) for path in TEMPLATES.rglob("*.html")]
-    assert any("js/plugins-settings.js" in src for src in sources)
-    assert any("js/components/settings-widgets.js" in src for src in sources)
+        source = path.read_text(encoding="utf-8")
+        assert "filename='js/plugins-settings.js'" not in source, path.name
+        includes = re.findall(r"{%-?\s*include\s+[\"']([^\"']+)[\"']", source)
+        assert "models/plugins_settings.html" not in includes, path.name
+        assert "models/plugins_settings_easy.html" not in includes, path.name
+
+
+def test_every_page_loading_the_raw_editor_loads_ace_before_it():
+    """`ace.require` runs at settings-raw.js's top level, unguarded -- the documented reason the
+    old monolith killed any page without ace. And `ace-mode-bunkerweb_settings.js` must sit
+    BETWEEN them: it reads `session.$bwRawFold`, which the editor init stashes, and its FoldMode
+    returns "" rather than throwing when that is absent, so a wrong order stops folding in
+    silence."""
+    pages = []
+    for path in sorted(TEMPLATES.rglob("*.html")):
+        source = _JINJA_COMMENT_RX.sub("", path.read_text(encoding="utf-8"))
+        if "js/pages/settings-raw.js" not in source:
+            continue
+        pages.append(path.name)
+        order = [source.index(src) for src in ("libs/ace/src-min/ace.js", "js/pages/ace-mode-bunkerweb_settings.js", "js/pages/settings-raw.js")]
+        assert order == sorted(order), f"{path.name} loads ace, its mode and the raw editor out of order"
+    assert sorted(pages) == ["global_settings.html", "service_settings.html"], pages
+
+
+def test_ctrl_s_is_refused_unless_the_raw_pane_is_the_active_one():
+    """The raw text is server-rendered once and never re-derived from the compose pane (S3.5's
+    job), so an ungated Ctrl-S while compose is showing submits the ORIGINAL config and silently
+    discards every compose edit. The old gate was `currentMode === "raw"`, a variable the deleted
+    mode machinery kept in sync; the pane's own class is what is left."""
+    raw_js = RAW_JS.read_text(encoding="utf-8")
+    start = raw_js.index("keydown.rawConfigShortcut")
+    handler = raw_js[start:]
+    handler = handler[: handler.index("\n  });")]
+    assert "triggerRawConfigSave()" in handler
+    assert '$("#navs-modes-raw").hasClass("active")' in handler, "Ctrl-S no longer checks that the raw pane is the visible one"
+
+
+def test_every_out_of_band_key_the_raw_editor_posts_is_emitted_by_its_page():
+    """The raw editor's payload is the editor TEXT plus three keys that arrive out of band, and
+    each is read from the DOM by a selector no test used to check against the markup. That gap
+    shipped a real bug: `OLD_SERVER_NAME` was read as `#old-server-name`, an id emitted only by
+    models/plugin_settings_body.html -- i.e. only inside the advanced pane -- so deleting the pane
+    (T7) left the raw save posting an empty one, and `Config.edit_service` then raises IndexError
+    inside CONFIG_TASKS_EXECUTOR, which never clears DATA["RELOADING"]: the save is lost and the
+    loading page spins forever. Cross-check the selector against what the page actually renders."""
+    raw_js = RAW_JS.read_text(encoding="utf-8")
+    pages = {
+        "service_settings.html": [
+            ('$("#is-draft")', 'id="is-draft"'),
+            ("$('[name=\"OLD_SERVER_NAME\"]')", 'name="OLD_SERVER_NAME"'),
+        ],
+        "global_settings.html": [('$("#override-non-global-settings")', 'id="override-non-global-settings"')],
+    }
+    for page_name, contracts in pages.items():
+        closure = {page_name}
+        pending = [page_name]
+        while pending:
+            current = pending.pop()
+            source = (TEMPLATES / current).read_text(encoding="utf-8")
+            for included in re.findall(r"{%-?\s*include\s+[\"']([^\"']+)[\"']", source):
+                if included not in closure and (TEMPLATES / included).is_file():
+                    closure.add(included)
+                    pending.append(included)
+        markup = "\n".join((TEMPLATES / name).read_text(encoding="utf-8") for name in closure)
+        for selector, emitted in contracts:
+            assert selector in raw_js, f"settings-raw.js no longer reads {selector}"
+            assert emitted in markup, f"{page_name} renders nothing matching {selector} -- the raw save would post it empty"
 
 
 def test_the_deleted_page_script_is_referenced_by_nobody():
@@ -1257,68 +1359,29 @@ def test_page_script_validation_skips_disabled_fields():
 
 
 # ======================================================================================
-# Regression: easy mode still works after T1 moved the stepper body into
-# models/template_steps_body.html. Nothing in the repo rendered plugins_settings_easy.html
-# before this test.
+# Regression: the surviving half of T1's extraction trap. `models/plugins_settings_easy.html`
+# rendered every template in one pane set, so the body carried the templates loop's index AND
+# the step loops' -- and swapping one for the other broke easy mode invisibly. That template is
+# deleted (S3.4 T8); this page renders exactly one template, so only the inner half is left,
+# and it is still the half that decides which step a user lands on.
 # ======================================================================================
 
 
-@pytest.fixture
-def render_easy_pane():
-    env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
-    env.globals.update(
-        url_for=lambda endpoint, **kwargs: f"/{endpoint}",
-        get_blacklisted_settings=get_blacklisted_settings,
-        get_filtered_settings=get_filtered_settings,
-        get_multiples=get_multiples,
-        is_editable_method=is_editable_method,
-        get_plugins_settings=lambda: PLUGINS_SETTINGS,
-        resource_kind_for_setting=lambda *_: None,
-    )
-
-    def _render(templates):
-        return env.get_template("models/plugins_settings_easy.html").render(
-            templates=templates,
-            config={"SERVER_NAME": {"value": "app.example.com", "method": "ui"}},
-            configs={},
-            clone=None,
-            current_endpoint="app.example.com",
-            service_method="ui",
-            is_draft="no",
-            is_readonly=False,
-            user_readonly=False,
-            selected_template="low",
-            template_method="ui",
-            plugins=PLUGINS,
-            plugin_types=PLUGIN_TYPES,
-            pro_diamond_url="/static/img/pro.svg",
-        )
-
-    return _render
-
-
-def test_easy_mode_still_activates_step_one_of_every_template_pane(render_easy_pane):
-    """The trap T1's extraction could have sprung: the body carries BOTH the templates loop's
-    index (which decides which template pane is active) and the step loops' indices (which
-    decide the active step INSIDE each pane). Swapping an inner one for `is_active` breaks easy
-    mode invisibly.
-
-    Counting `class="tab-pane fade show active"` cannot catch it -- the step panes emit
-    `class="ps-1 pe-1 tab-pane fade show active"`, a different string, so the count passes either
-    way. The load-bearing assertion is that the SECOND template's step 1 is still active."""
-    html = render_easy_pane({"low": LOW, "api": API_TPL})
-
-    for dom_id, step_count in (("low", 11), ("api", 4)):
-        first = re.search(rf'<div id="navs-steps-{dom_id}-1"\s+class="([^"]*)"', html)
-        assert first, f"{dom_id} step 1 pane missing"
-        assert "show active" in first.group(1), f"{dom_id} step 1 is not the active step"
-        assert html.count(f'<div id="navs-steps-{dom_id}-') == step_count
-        # ...and only step 1 is active within that template.
-        actives = re.findall(rf'<div id="navs-steps-{dom_id}-(\d+)"\s+class="[^"]*show active', html)
-        assert actives == ["1"]
-
-    # Exactly one TEMPLATE pane is active, and it is the first one -- the outer loop's index
-    # still drives the outer pane, which is the other half of the same trap.
-    assert html.count('class="tab-pane fade show active"') == 1
-    template_panes = re.findall(r'<div id="navs-templates-([a-z]+)"\s+class="(tab-pane[^"]*)"', html)
-    assert template_panes == [("low", "tab-pane fade show active"), ("api", "tab-pane fade")]
+def test_only_step_one_is_active_on_the_template_page(render_template_page):
+    """Counting `class="tab-pane fade show active"` cannot catch a swapped index -- the step
+    panes emit `class="ps-1 pe-1 tab-pane fade show active"`, a different string, so a count
+    passes either way. Assert on the step ids themselves."""
+    html = render_template_page()
+    first = re.search(r'<div id="navs-steps-low-1"\s+class="([^"]*)"', html)
+    assert first, "step 1 pane missing"
+    assert "show active" in first.group(1), "step 1 is not the active step"
+    actives = re.findall(r'<div id="navs-steps-low-(\d+)"\s+class="[^"]*show active', html)
+    assert actives == ["1"]
+    assert html.count('<div id="navs-steps-low-') == 11
+    # ...and the step NAVIGATION agrees with it. The two are separate `loop.index == 1` tests in
+    # models/template_steps_body.html (the nav item and the pane), so they can drift apart and
+    # leave step 2 highlighted while step 1 is the one on screen.
+    nav_items = re.findall(r'<li class="list-group-item step-navigation-item[^>]*>', html)
+    active_nav = [item for item in nav_items if "show active" in item]
+    assert len(active_nav) == 1, f"{len(active_nav)} step-nav items are active"
+    assert 'data-step="1"' in active_nav[0], "the highlighted step is not the one whose pane is shown"

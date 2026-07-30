@@ -11,10 +11,7 @@
    caller's values would be shadowed) and cannot read them back out of the include.
 
    Reads from the caller's context: `template` and `template_data` (the current entry of
-   `templates`), `is_active` (true when this pane is the visible one; part of the include
-   contract so both call sites are identical -- the body itself has no use for it today, every
-   `loop.index` below belongs to one of the two inner `steps` loops, never to the outer
-   templates loop), `plugins_settings` (the caller's `get_plugins_settings()` result), and the
+   `templates`), `plugins_settings` (the caller's `get_plugins_settings()` result), and the
    request globals `config`, `configs`, `clone`, `current_endpoint`, `is_readonly`,
    `user_readonly`, `selected_template`, `template_method`, `plugins`, `plugin_types`,
    `pro_diamond_url` plus the Jinja global `is_editable_method`.

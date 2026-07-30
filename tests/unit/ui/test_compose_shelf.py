@@ -19,7 +19,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from app.models.plugin_activation import is_plugin_active_for_service
 from app.models.save_scope import control_keys
-from app.utils import get_activation_map, get_blacklisted_settings, get_filtered_settings, is_plugin_active
+from app.utils import get_activation_map, get_blacklisted_settings, get_filtered_settings, is_editable_method, is_plugin_active
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TEMPLATES = REPO_ROOT / "src" / "ui" / "app" / "templates"
@@ -203,6 +203,9 @@ def render_shelf():
         get_filtered_settings=get_filtered_settings,
         is_plugin_active=is_plugin_active,
         is_plugin_active_for_service=is_plugin_active_for_service,
+        # Registered as a real Jinja global in src/ui/main.py:762, like the three above -- the
+        # provenance ladder uses it for the `edited here` rung, so no host page has to pass it.
+        is_editable_method=is_editable_method,
         plugin_types=PLUGIN_TYPES,
     )
 
@@ -608,6 +611,33 @@ def _include_closure(page_name, seen=None):
     return seen
 
 
+_PANE_RX = re.compile(r'id="navs-modes-(?P<pane>[a-z]+)"[^>]*>(?P<body>.*?)</div>', re.DOTALL)
+_JINJA_COMMENT_RX = re.compile(r"{#.*?#}", re.DOTALL)
+
+
+def _markup(source):
+    """The template minus its Jinja comments -- a comment naming `save-settings` (which the
+    compose pane's header does, to say it must not use it) renders nothing and binds nothing."""
+    return _JINJA_COMMENT_RX.sub("", source)
+
+
+def _panes(page_name):
+    """`{pane id: include closure}` for one host page's mode panes.
+
+    Shape-sensitive by design: a page whose panes stop matching this regex returns nothing, and
+    every caller asserts it found some. A silently-empty scan is how this file would go green
+    while the page it guards changed underneath it.
+    """
+    source = (TEMPLATES / page_name).read_text(encoding="utf-8")
+    panes = {}
+    for match in _PANE_RX.finditer(source):
+        closure = set()
+        for included in re.findall(r"{%-?\s*include\s+[\"']([^\"']+)[\"']", match.group("body")):
+            _include_closure(included, closure)
+        panes[match.group("pane")] = closure
+    return panes
+
+
 def test_the_host_page_must_post_the_shelf_through_a_real_form():
     """A page that reaches this shelf must submit it with a REAL form, and must not hand it to
     the monolith's synthetic one.
@@ -619,24 +649,33 @@ def test_the_host_page_must_post_the_shelf_through_a_real_form():
     monolith binds `$(".save-settings").on("click", ...)` (:2025), calls `getFormFromSettings`
     (:2200) and submits it natively (:2214). Copy that class onto a compose Save button and
     `currentMode === "compose"` matches no branch (:1203-1325), so the POST carries only
-    csrf_token + IS_DRAFT + OLD_SERVER_NAME while routes/services.py:1110-1126 still hands it
-    the full shelf scope -- every in-scope key unposted, every one of them deleted.
+    csrf_token + IS_DRAFT + OLD_SERVER_NAME while routes/services.py still hands it the full
+    shelf scope -- every in-scope key unposted, every one of them deleted.
 
-    Trivially true until T7 wires the shelf in; it bites on exactly the commit that would cause
-    the loss, and it is satisfiable in both directions (a plain `type="submit"` button, or a
-    page that no longer loads the monolith)."""
+    SCOPED TO THE SHELF'S OWN PANE, not to the whole page. The original form of this guard
+    banned `save-settings` anywhere in the closure while the monolith loaded, which no page can
+    satisfy: raw mode still saves THROUGH the monolith, so
+    models/plugins_settings_raw.html carries that class by necessity. What actually keeps it
+    harmless is that it lives in a different `tab-pane`, which is `display:none` while compose
+    is active -- so the reachable-button test is per pane, plus a page-level check that no such
+    button sits outside the panes where it would be clickable from compose."""
     for page_name in ("service_settings.html", "global_settings.html"):
-        closure = _include_closure(page_name)
-        if "models/compose_shelf.html" not in closure:
+        panes = _panes(page_name)
+        assert panes, f"{page_name}: the pane scanner matched nothing -- its markup shape changed"
+        shelf_panes = [pane for pane, closure in panes.items() if "models/compose_shelf.html" in closure]
+        if not shelf_panes:
             continue
-        sources = {name: (TEMPLATES / name).read_text(encoding="utf-8") for name in closure if (TEMPLATES / name).is_file()}
-        blob = "\n".join(sources.values())
-        assert "<form" in blob, f"{page_name} reaches the shelf but renders no form to post it"
-        if "js/plugins-settings.js" in blob:
-            offenders = [name for name, source in sources.items() if "save-settings" in source]
-            assert (
-                not offenders
-            ), f"{page_name} loads the monolith and carries save-settings in {offenders}: the shelf would be submitted through getFormFromSettings"
+        source = _markup((TEMPLATES / page_name).read_text(encoding="utf-8"))
+        for pane in shelf_panes:
+            sources = {name: _markup((TEMPLATES / name).read_text(encoding="utf-8")) for name in panes[pane] if (TEMPLATES / name).is_file()}
+            blob = "\n".join(sources.values())
+            assert "<form" in blob, f"{page_name}#{pane} reaches the shelf but renders no form to post it"
+            offenders = [name for name, text in sources.items() if "save-settings" in text]
+            assert not offenders, f"{page_name}#{pane} carries save-settings in {offenders}: the shelf would be submitted through getFormFromSettings"
+        # Outside every pane -- a floating or sticky Save rendered by the page body itself stays
+        # clickable while the compose pane is the visible one.
+        outside = _PANE_RX.sub("", source)
+        assert "save-settings" not in outside, f"{page_name} renders a save-settings button outside the mode panes"
 
 
 # --------------------------------------------------------------------------------------
@@ -697,3 +736,289 @@ def test_attachment_makes_a_resource_backed_plugin_read_live(render_shelf):
     assert row["attrs"]["data-shelf-on"] == "true"
     box = next(attrs for _, attrs in row["tags"] if attrs.get("type") == "checkbox")
     assert "checked" not in box
+
+
+# --------------------------------------------------------------------------------------
+# The provenance ladder (plan D3, T4). The conditions OVERLAP, so what is under test here
+# is the ORDER as much as the predicates: `from <tpl>` and `default` both hold on a
+# template overlay, `from global` and `default` both hold on an inherited untouched
+# default, `edited here` and `managed via api` both hold on a service's own `api` row.
+# --------------------------------------------------------------------------------------
+
+
+def chip_of(parser, plugin_id):
+    """The one provenance chip on a row, as ``(rung, mixed, per-key breakdown)``.
+
+    ``None`` when the row carries no chip at all -- a real state (an always-on plugin
+    declares no activation key, so there is nothing whose provenance could be reported)
+    and one several mutations below collapse INTO, which is why it is a value rather than
+    an exception."""
+    row = parser.rows[plugin_id]
+    chips = [attrs for _, attrs in row["tags"] if attrs.get("data-shelf-provenance")]
+    assert len(chips) <= 1, f"{plugin_id}: {len(chips)} chips, the ladder must yield exactly one"
+    if not chips:
+        return None
+    return (chips[0]["data-shelf-provenance"], "data-shelf-provenance-mixed" in chips[0], chips[0]["data-shelf-provenance-keys"])
+
+
+def test_from_global_and_default_are_told_apart_by_the_method_not_by_the_value(render_shelf):
+    """`entry["global"] == True` does NOT mean "from global": `get_config` seeds every
+    declared setting with `global: True, method: "default"` (config_read.py:310-316), so a
+    plain untouched plugin default satisfies it too. `method != "default"` is the only term
+    that separates them, and without it the `default` chip never renders at all.
+
+    The second half is the defect the per-plugin page ships today: `plugin_settings_body.html:85`
+    tests `setting_value != setting_default` instead, so a global explicitly set BACK to the
+    plugin default renders no chip -- the service is coupled to a global someone is actively
+    managing and the UI says nothing. `USE_BROTLI` defaults to "no", so the second case is a
+    `ui`-method global whose value is exactly the default: a value comparison cannot see it."""
+    untouched = parse_shelf(render_shelf(config={"USE_BROTLI": {"value": "no", "method": "default", "global": True}}))
+    assert chip_of(untouched, "brotli") == ("default", False, "USE_BROTLI: Default")
+
+    explicit = parse_shelf(render_shelf(config={"USE_BROTLI": {"value": "no", "method": "ui", "global": True}}))
+    assert chip_of(explicit, "brotli") == ("global", False, "USE_BROTLI: From global")
+
+    differing = parse_shelf(render_shelf(config={"USE_BROTLI": {"value": "yes", "method": "ui", "global": True}}))
+    assert chip_of(differing, "brotli") == ("global", False, "USE_BROTLI: From global")
+
+
+@pytest.mark.parametrize("inherited", [False, True], ids=["service-overlay", "global-overlay"])
+def test_a_template_overlay_outranks_both_global_and_default(inherited, render_shelf):
+    """A template overlay is written with `method: "default"` (config_read.py:353, :398), so it
+    satisfies the `default` rung too -- and it OVERWRITES an inherited global entry, blocked
+    only by a service's own non-default row (config_read.py:392). Real precedence is
+    own row > template > global inheritance > plugin default, so a ladder that reached
+    `default` (or `global`) first would mislabel every templated service.
+
+    Both overlay shapes are exercised: the per-service one carries `global: False` (shape H)
+    and the global-level one `global: True` (shape G)."""
+    config = {"USE_BROTLI": {"value": "yes", "method": "default", "global": inherited, "template": "low"}}
+    parser = parse_shelf(render_shelf(config=config))
+    assert chip_of(parser, "brotli") == ("template", False, "USE_BROTLI: From template")
+
+
+def test_an_own_api_row_reads_managed_via_api_rather_than_edited_here(render_shelf):
+    """Both hold: `api` IS in EDITABLE_METHODS (app/utils.py:138-139), so a service's own `api`
+    row is simultaneously "edited here" and "managed via api". The api rung wins because the
+    operator can change it here but whatever writes it through the API will write it again --
+    and that is what the shipped per-plugin page's badge already says
+    (plugin_settings_body.html:69-77)."""
+    parser = parse_shelf(render_shelf(config={"USE_BROTLI": {"value": "yes", "method": "api", "global": False}}))
+    assert chip_of(parser, "brotli") == ("api", False, "USE_BROTLI: Managed via API")
+    # ...and a ui/wizard row, which only the `edited here` rung matches, still reaches it.
+    for method in ("ui", "wizard"):
+        edited = parse_shelf(render_shelf(config={"USE_BROTLI": {"value": "yes", "method": method, "global": False}}))
+        assert chip_of(edited, "brotli") == ("edited", False, "USE_BROTLI: Edited here"), method
+
+
+def test_an_attachment_outranks_every_per_key_rung(render_shelf):
+    """The seventh source the read model cannot see: `src/common/gen/main.py:142-149` expands
+    attached redirects and upstreams into flat settings at GENERATION time, so `get_config`
+    reports REDIRECT_TO empty while the redirect is live. A per-key chip would say `default`
+    on a row that is demonstrably doing something.
+
+    Derived as the disagreement between `is_plugin_active_for_service` and `is_plugin_active`,
+    which differ on exactly the attachment short-circuit (plugin_activation.py:40-42) -- the
+    same row with no attachment must fall straight back to the per-key ladder."""
+    attached = parse_shelf(render_shelf(attachments={"redirect": {"items": [{"id": "r1"}], "error": None}}))
+    assert chip_of(attached, "redirect") == ("attachment", False, "REDIRECT_TO: Default")
+
+    detached = parse_shelf(render_shelf(attachments={"redirect": {"items": [], "error": "workflows API is gone"}}))
+    assert chip_of(detached, "redirect") == ("default", False, "REDIRECT_TO: Default")
+
+    # A plugin with no resource family is never attributed to one, whatever is attached.
+    assert chip_of(attached, "brotli") == ("default", False, "USE_BROTLI: Default")
+
+
+def test_clone_outranks_every_db_derived_rung(render_shelf):
+    """`clone` is not a DB field: `routes/services.py:1001` injects it on /services/new?clone=,
+    and that page rewrites every rendered method to "default"
+    (plugin_settings_body.html:21-27) -- so every DB-derived rung collapses there and dropping
+    this one loses the page's only "this differs from the source" signal.
+
+    Unreachable from the shelf TODAY (D0.1 defers /services/new to its own slice, so the shelf
+    is the edit surface only), which is exactly why it is pinned here: the rung costs one
+    branch, and the slice that reuses this partial for creation would otherwise lose the chip
+    silently rather than visibly."""
+    config = {"USE_BROTLI": {"value": "yes", "method": "ui", "global": True, "clone": True}}
+    parser = parse_shelf(render_shelf(config=config))
+    assert chip_of(parser, "brotli") == ("clone", False, "USE_BROTLI: Cloned")
+
+
+def test_a_row_the_scope_refused_says_who_set_it(render_shelf):
+    """scheduler / autoconf / manual on this page's own scope match NO other rung, so without
+    an explicit one the row falls off the end of the ladder and renders bare -- on precisely
+    the row the operator most needs an explanation for, since it is the one
+    `shelf_plugin_scope` refused to make postable.
+
+    The `managed` rung uses the SAME `global_page or not entry["global"]` term as the scope's
+    `disabled` formula, so the two cannot drift: chip `managed` <=> kind `locked`."""
+    for method in ("scheduler", "autoconf", "manual"):
+        parser = parse_shelf(render_shelf(config={"USE_BROTLI": {"value": "yes", "method": method, "global": False}}))
+        assert chip_of(parser, "brotli") == ("managed", False, "USE_BROTLI: Set externally"), method
+        assert parser.rows["brotli"]["attrs"]["data-shelf-kind"] == "locked"
+        assert parser.rows["brotli"]["posts"] == []
+        # The method itself is named, not just "somebody else".
+        label = next(attrs for _, attrs in parser.rows["brotli"]["tags"] if attrs.get("data-i18n") == "compose.provenance.managed")
+        assert json.loads(label["data-i18n-options"]) == {"method": method}
+
+
+def test_no_rendered_row_is_ever_left_bare(render_shelf):
+    """The complement of the test above: every method a stored row can carry must land on some
+    rung. A ladder missing one leaves that row with no chip at all, and "no chip" is a state
+    the shelf legitimately has -- so the exact set of chipless rows is pinned rather than
+    merely counted, or a mutation that drops a rung would hide inside it.
+
+    The six are the always-on plugins that declare no activation key at all (`extensions.
+    activation: "always"` with no USE_<ID>/USE_<NAME> setting, plus the synthesized `general`):
+    there is nothing whose provenance could be reported, and the row already says "Always on"."""
+    for method in ("default", "ui", "api", "wizard", "scheduler", "autoconf", "manual"):
+        for global_flag in (False, True):
+            parser = parse_shelf(render_shelf(config={"USE_BROTLI": {"value": "yes", "method": method, "global": global_flag}}))
+            assert chip_of(parser, "brotli") is not None, f"{method} global={global_flag} reaches no rung"
+    parser = parse_shelf(render_shelf())
+    assert sorted(plugin_id for plugin_id in parser.rows if chip_of(parser, plugin_id) is None) == [
+        "errors",
+        "general",
+        "headers",
+        "misc",
+        "sessions",
+        "ssl",
+    ]
+
+
+def test_global_scope_has_no_from_global_rung(render_shelf):
+    """There is nothing to inherit from on /global-settings, so an explicitly set global reads
+    `edited here` there and `from global` only on a service page. Same
+    `global_page or not entry["global"]` asymmetry `shelf_plugin_scope` and
+    plugin_settings_body.html:20 use for `disabled`, so the chip and the control agree."""
+    config = {"USE_BROTLI": {"value": "yes", "method": "ui", "global": True}}
+    assert chip_of(parse_shelf(render_shelf(config=config, global_page=True)), "brotli") == ("edited", False, "USE_BROTLI: Edited here")
+    assert chip_of(parse_shelf(render_shelf(config=config)), "brotli") == ("global", False, "USE_BROTLI: From global")
+
+
+def test_a_multi_key_row_shows_the_strongest_rung_and_says_the_keys_disagree(render_shelf):
+    """A shelf row covers a WHOLE PLUGIN. `limit` declares three keys, and they can resolve
+    from three different places at once. The chip reports the strongest rung the ladder
+    reached and marks itself `mixed` with the full per-key breakdown, because an unqualified
+    "edited here" over three keys would claim a precision the data does not carry."""
+    config = {
+        "USE_LIMIT_REQ": {"value": "no", "method": "ui", "global": False},
+        "USE_LIMIT_REQ_GLOBAL": {"value": "no", "method": "default", "global": True},
+        "USE_LIMIT_CONN": {"value": "yes", "method": "ui", "global": True},
+    }
+    rung, mixed, detail = chip_of(parse_shelf(render_shelf(config=config)), "limit")
+    assert (rung, mixed) == ("edited", True)
+    assert detail == "USE_LIMIT_REQ: Edited here; USE_LIMIT_REQ_GLOBAL: Default; USE_LIMIT_CONN: From global"
+
+    # Agreeing keys are NOT mixed -- otherwise the marker would be noise on every multi-key row.
+    agreed = {key: {"value": "no", "method": "ui", "global": False} for key in REAL_ACTIVATION_MAP["limit"]}
+    assert chip_of(parse_shelf(render_shelf(config=agreed)), "limit")[1] is False
+
+
+CHANGED_CASES = [
+    {"id": "untouched", "config": {}},
+    {"id": "edited-here", "config": {"USE_BROTLI": {"value": "yes", "method": "ui", "global": False}}},
+    {"id": "from-global", "config": {"USE_BROTLI": {"value": "yes", "method": "ui", "global": True}}},
+    {"id": "template-overlay", "config": {"USE_BROTLI": {"value": "yes", "method": "default", "global": False, "template": "low"}}},
+    {"id": "api-row", "config": {"USE_BROTLI": {"value": "yes", "method": "api", "global": False}}},
+    {"id": "scheduler-row", "config": {"USE_BROTLI": {"value": "yes", "method": "scheduler", "global": False}}},
+    {"id": "attachment", "config": {}, "attachments": {"redirect": {"items": [{"id": "r1"}], "error": None}}},
+    {"id": "global-page", "config": {"USE_BROTLI": {"value": "yes", "method": "ui", "global": True}}, "global_page": True},
+]
+
+
+@pytest.mark.parametrize("case", CHANGED_CASES, ids=lambda case: case["id"])
+def test_the_changed_filter_means_exactly_the_chip(case, render_shelf):
+    """WHICH default "Changed" means, settled: not the plugin default -- from an attachment, a
+    template, global settings, the API, or an edit here. Reading it off the chip is what makes
+    the answer sayable at all, because `entry["default"]` is TWO different things (the plugin
+    default on an inherited key, the GLOBAL VALUE on a service's own row,
+    config_read.py:249), so `value != default` computes a different question per row.
+
+    T3 shipped it as "any declared key has a non-default method", which disagreed with the
+    chip on two rows: a template overlay carries `method: "default"` and an attachment-backed
+    row has no stored key at all, so both read UNCHANGED while their chip said otherwise."""
+    kwargs = {key: value for key, value in case.items() if key != "id"}
+    parser = parse_shelf(render_shelf(**kwargs))
+    for plugin_id, row in parser.rows.items():
+        chip = chip_of(parser, plugin_id)
+        expected = chip is not None and chip[0] != "default"
+        assert (row["attrs"]["data-shelf-changed"] == "true") is expected, f"{plugin_id}: chip {chip}"
+
+
+def test_the_chip_is_display_only(render_shelf):
+    """ABSOLUTE CONSTRAINT: a chip may not move a key in or out of scope, and may not add an
+    input. The whole provenance span must contribute nothing to the payload -- an in-scope key
+    the form does not post is DELETED, and a key the form posts that the scope does not claim
+    is a write nobody authorised."""
+    cases = [
+        {},
+        {"config": {"USE_BROTLI": {"value": "yes", "method": "api", "global": False}}},
+        {"config": {"USE_BROTLI": {"value": "yes", "method": "default", "global": False, "template": "low"}}},
+        {"attachments": {"redirect": {"items": [{"id": "r1"}], "error": None}}},
+        {"global_page": True},
+    ]
+    for kwargs in cases:
+        parser = parse_shelf(render_shelf(**kwargs))
+        for plugin_id, row in parser.rows.items():
+            assert set(row["posts"]) == _expected_scope(plugin_id, kwargs.get("config"), global_page=kwargs.get("global_page", False))
+        # Nothing the chip renders is a form control or carries a name.
+        for row in parser.rows.values():
+            inside = False
+            for tag, attrs in row["tags"]:
+                if attrs.get("class") == "shelf-provenance" or "shelf-chip" in (attrs.get("class") or ""):
+                    inside = True
+                if inside:
+                    assert tag not in ("input", "select", "textarea", "button"), tag
+                    assert not attrs.get("name"), attrs
+                if tag == "a":  # the trailing chevron closes the provenance region
+                    inside = False
+
+
+def test_rendering_never_mutates_a_config_entry(render_shelf):
+    """`get_config` hands out SHARED dict objects across services (config_read.py:193-202), and
+    treating one as this row's own is what shipped the global-settings short-circuit bug fixed
+    in e78f065b7. The ladder is pure reads -- no `entry | {...}`, no `.update()`, and no
+    `entry["file_name"]` either, which is absent from three of the five entry shapes."""
+    from copy import deepcopy
+
+    config = _config({"USE_BROTLI": {"value": "yes", "method": "ui", "global": True}})
+    before = deepcopy(config)
+    env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
+    env.globals.update(
+        url_for=lambda endpoint, **kwargs: "/" + endpoint,
+        get_filtered_settings=get_filtered_settings,
+        is_plugin_active=is_plugin_active,
+        is_plugin_active_for_service=is_plugin_active_for_service,
+        is_editable_method=is_editable_method,
+        plugin_types=PLUGIN_TYPES,
+    )
+    env.get_template("models/compose_shelf.html").render(
+        plugins=REAL_PLUGINS,
+        config=config,
+        activation_map=REAL_ACTIVATION_MAP,
+        shelf_plugin_scope=shelf_plugin_scope,
+        control_keys=control_keys,
+        blacklisted_settings=get_blacklisted_settings(False),
+        global_page=False,
+        is_pro_version=False,
+        is_readonly=False,
+        service_id="app.example.com",
+        attachments={},
+    )
+    assert config == before
+
+
+def test_every_ladder_rung_has_an_english_label():
+    """New i18n keys go in en.json only (the en-only policy; the other locales are backfilled
+    by a later translation pass). A rung whose key is missing renders its Jinja fallback in
+    English forever and never gets translated, which is invisible until a translator looks."""
+    source = (TEMPLATES / "models" / "compose_shelf.html").read_text(encoding="utf-8")
+    provenance = json.loads((REPO_ROOT / "src" / "ui" / "app" / "static" / "locales" / "en.json").read_text(encoding="utf-8"))["compose"]["provenance"]
+    # The chip's `data-i18n` interpolates the rung, so the key set IS the ladder. Read both
+    # off the template rather than transcribed, or a new rung drifts past this silently.
+    ladder = set(json.loads(re.search(r"set provenance_ladder = (\[[^\]]+\])", source).group(1).replace("'", '"')))
+    assert ladder == set(provenance), f"missing en.json keys: {sorted(ladder - set(provenance))}"
+    assert ladder == set(re.findall(r'^\s+"([a-z]+)": \{"icon"', source, re.M)), "every rung needs an icon/class/title too"
+    assert "{{method}}" in provenance["managed"], "the externally-set chip must name the method that set it"

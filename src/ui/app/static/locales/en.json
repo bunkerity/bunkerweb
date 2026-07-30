@@ -240,8 +240,19 @@
       "on": "On"
     },
     "locked": "No control here",
+    "provenance": {
+      "api": "Managed via API",
+      "attachment": "From attachment",
+      "clone": "Cloned",
+      "default": "Default",
+      "edited": "Edited here",
+      "global": "From global",
+      "managed": "Set by {{method}}",
+      "template": "From template"
+    },
     "set_value": "Set a value…",
-    "show_more": "Show {{count}} more"
+    "show_more": "Show {{count}} more",
+    "unavailable": "The plugin list could not be loaded, so this page cannot be edited safely. Reload once the API answers."
   },
   "configs": {
     "subtitle": "Custom NGINX configuration snippets for your services — create, edit, and manage HTTP, ModSecurity, and stream-level overrides."
@@ -1055,6 +1066,7 @@
   },
   "mode": {
     "advanced": "Advanced",
+    "compose": "Compose",
     "easy": "Easy",
     "raw": "Raw"
   },
@@ -2302,7 +2314,7 @@
     "conditions": "Conditions",
     "delete": "Delete workflow",
     "delete_confirm": "This workflow and all of its rules will be permanently deleted.",
-    "empty_text": "A workflow is an ordered list of rules you attach to services: a condition tree, an optional rate threshold, and one action \u2014 challenge, block or redirect.",
+    "empty_text": "A workflow is an ordered list of rules you attach to services: a condition tree, an optional rate threshold, and one action — challenge, block or redirect.",
     "empty_title": "No workflows yet",
     "enabled": "Enabled",
     "new": "New workflow",
@@ -2316,6 +2328,18 @@
     "threshold_count": "Requests",
     "threshold_window": "Per (seconds)",
     "truncated": "Only the first 500 workflows are displayed. Narrow the list through the API for the complete result."
+  },
+  "request_path": {
+    "client": "Client",
+    "source": "Plugin execution order for the {{phase}} phase, from {{setting}} — a display order, not a per-request trace.",
+    "terminal": {
+      "inline": "Backend",
+      "none": "Nothing served",
+      "pool": "Upstream pool",
+      "root": "Local files"
+    },
+    "title": "Request path",
+    "unordered": "No declared position in the {{phase}} phase; it runs after the ordered plugins, alphabetically."
   },
   "resource_groups": {
     "add_entry": "Add entry",
@@ -2412,16 +2436,31 @@
   "service": {
     "resources": {
       "attach": "Attach",
+      "conflict": {
+        "inline": "{{service}} already serves {{path}} through its own {{family}} settings. Clear those settings for {{path}}, or use a different path.",
+        "primary": "“{{name}}” is currently the primary certificate for this service and will be demoted without further warning. The primary is the one actually deployed.",
+        "resource": "{{service}} already serves {{path}} through the {{kind}} “{{name}}”. Detach “{{name}}”, or give one of them a different path.",
+        "stream": "A stream service proxies every connection to a single backend, and {{service}} already uses the upstream “{{name}}”. Detach it first.",
+        "stream_inline": "{{service}} already has its own backend in REVERSE_PROXY_HOST. Clear that setting to let the upstream take over."
+      },
       "detach": "Detach",
       "family": {
         "certificate": "Certificates",
         "redirect": "Redirects",
+        "template": "Template",
         "upstream": "Upstreams",
         "workflow": "Workflows"
       },
       "match_path": "Path",
       "none": "None attached",
       "primary": "Primary certificate",
+      "template": {
+        "none": "No template",
+        "note": "Not a resource: a template is a setting. It applies on Save, and switching it moves many settings at once.",
+        "pending": "Applies on save",
+        "switching": "Saving switches this service from “{{from}}” to “{{to}}”. The values the current template supplied are dropped and {{to}}’s are applied — many settings move at once.",
+        "unwired": "This page does not post USE_TEMPLATE, so the template cannot be changed from here."
+      },
       "title": "Attached resources",
       "unavailable": "Unavailable"
     }

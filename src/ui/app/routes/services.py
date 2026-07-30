@@ -2,18 +2,19 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from io import BytesIO
+from functools import lru_cache
 from itertools import chain
-from json import dumps
+from json import dumps, loads
 from time import time
 from typing import Any, Dict, List, Optional, Set, Tuple
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from regex import search, sub
 
-from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
+from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, CORE_PLUGINS_PATH, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.models.save_scope import control_keys, restore_unowned_settings
-from app.models.service_attachments import attached_ids, failed_families, get_service_attachments
+from app.models.service_attachments import attached_ids, failed_families, get_service_attachments, resource_conflict_context
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
 from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
@@ -442,21 +443,21 @@ def resolve_save_mode(mode: Optional[str], default: str) -> str:
     `mode` is an ordinary query argument, not a route segment -- the pills are client-side tabs
     and `handleModeChange` (static/js/plugins-settings.js:565-595) syncs the URL with
     `history.pushState`. A bookmark, a stale tab or a Back navigation can therefore hand this
-    route any string at all, so an unrecognised value must land on the pane the page actually
-    RENDERS for it, which is the page's own GET default -- `easy` for a service
-    (:1130), `advanced` for global settings (global_settings.py:192). Anything else pairs a
-    rendered pane with a different pane's save contract, and the mismatch is measured in deleted
-    rows: `Database.save_config` deletes any in-scope key the form did not post
-    (db_methods/config_save.py:592).
+    route any string at all, so the fallback must be the branch that cannot destroy an
+    unexpected payload: `Database.save_config` deletes any in-scope key the form did not post
+    (db_methods/config_save.py:592), so the cost of guessing wrong is measured in deleted rows.
 
-    In particular an absent mode must keep resolving to `easy` on the service page while the easy
-    pane still exists and is still the default: its save deliberately strips `?mode=`
-    (static/js/plugins-settings.js:577-580) so a bare POST and an easy-pane POST are
-    indistinguishable, and the stepper posts only USE_TEMPLATE plus the step-named keys. Handing
-    that payload the compose scope deletes every in-scope activation key no step names. The easy
-    branch's indiscriminate re-injection (:816-818) is strictly more preserving than any declared
-    scope, so falling through to it destroys nothing. T7/T8 revisit this when the compose pane
-    replaces easy as the default.
+    THE FALLBACK IS NOT THE PAGE'S DEFAULT PANE, AND SINCE T7 IT IS DELIBERATELY NOT. Compose is
+    what both pages now render by default, but the compose pane is a real `<form>` whose action
+    carries `?mode=compose` literally (models/compose_pane.html), so a compose payload always
+    says so and never needs the fallback. What still arrives with no mode at all is anything the
+    monolith submits with `?mode=` stripped, and resolving THAT to `compose` would hand a partial
+    payload the shelf's full scope. `easy` (service) and `advanced` (global) both stay preserving
+    -- easy re-injects every stored value indiscriminately (:836-839), advanced declares no scope
+    at all -- so falling through to them destroys nothing whatever posted.
+
+    T8 removes the easy branch with the pane; the service fallback then becomes whichever branch
+    is still the preserving one, never the compose scope.
 
     routes/templates.py's own VIEW_MODES is a different feature that happens to share the
     chrome; it is not routed through here.
@@ -1069,6 +1070,23 @@ def inject_template_dom_ids(templates_data: Dict[str, dict]) -> Dict[str, dict]:
     return templates_data
 
 
+@lru_cache(maxsize=1)
+def core_plugin_order() -> Dict[str, List[str]]:
+    """`core/order.json`, the `{phase: [plugin ids]}` map the request-path strip fills pass 2 from.
+
+    Cached: it is a shipped file that only changes with the image, and the strip reads it on every
+    service page render. Missing or unreadable is not an error -- the partial documents `{}` as a
+    supported value (a service whose `PLUGINS_ORDER_<PHASE>` was overridden with a partial list then
+    shows the remainder in the unordered group instead of in the middle; nothing is ever dropped).
+    """
+    try:
+        order = loads((CORE_PLUGINS_PATH / "order.json").read_text(encoding="utf-8"))
+    except BaseException as e:  # noqa: B036 -- a strip that cannot be ordered must not 500 the page
+        LOGGER.debug(f"Could not read the core plugin order: {e}")
+        return {}
+    return order if isinstance(order, dict) else {}
+
+
 @services.route("/services/<string:service>", methods=["GET", "POST"])
 @login_required
 def services_service_page(service: str):
@@ -1146,12 +1164,12 @@ def services_service_page(service: str):
             service = variables["SERVER_NAME"].split(" ")[0]
 
         arguments = {}
-        # Which PANE to come back to, which is not the same question as which save path ran:
-        # `resolve_save_mode` collapses easy/advanced/compose into one save contract, while the
+        # Which PANE to come back to, which is not the same question as which save path ran: the
         # user is still looking at whichever tab they submitted from. Keyed off the raw argument
-        # so this stays a display decision. The pills own it from S3.4's chrome slice on.
-        requested_mode = request.args.get("mode", "easy")
-        if requested_mode != "easy":
+        # so this stays a display decision, and compared against `compose` because that is this
+        # page's GET default -- omitting the argument lands back on it.
+        requested_mode = request.args.get("mode", "compose")
+        if requested_mode != "compose":
             arguments["mode"] = requested_mode
         if request.args.get("type", "all") != "all":
             arguments["type"] = request.args["type"]
@@ -1172,7 +1190,9 @@ def services_service_page(service: str):
             )
         )
 
-    mode = request.args.get("mode", "easy")
+    # Compose is this page's default pane since S3.4's chrome slice. The SAVE default stays
+    # `easy` on purpose -- see resolve_save_mode.
+    mode = request.args.get("mode", "compose")
     search_type = request.args.get("type", "all")
     template = request.args.get("template", "low")
 
@@ -1253,6 +1273,7 @@ def services_service_page(service: str):
     for family in failed_families(attachments):
         flash(f"Could not fetch attached {family}s for this service.", "error")
 
+    service_id = "" if service == "new" else service
     return render_template(
         "service_settings.html",
         config=db_config,
@@ -1264,7 +1285,20 @@ def services_service_page(service: str):
         current_template=template,
         attachments=attachments,
         attach_candidates=attach_candidates,
-        service_id="" if service == "new" else service,
+        service_id=service_id,
+        # The compose shelf's required context (models/compose_shelf.html documents why none of
+        # it is defaulted): the scope function ITSELF, so the row's markup and the save path can
+        # never derive it differently, and the activation map read once here rather than per row
+        # -- `is_plugin_active` re-reads it internally and returns {} on a scan failure, which
+        # would silently drop every plugin to the USE_<ID> convention.
+        shelf_plugin_scope=shelf_plugin_scope,
+        activation_map=get_activation_map(),
+        control_keys=control_keys,
+        global_page=False,
+        # What the attach dialog needs to refuse a conflict before the API does; `db_config` adds
+        # the inline half of the location namespace (app/models/service_attachments.py).
+        resource_conflicts=resource_conflict_context(attachments, service_id, db_config),
+        plugin_order=core_plugin_order(),
     )
 
 

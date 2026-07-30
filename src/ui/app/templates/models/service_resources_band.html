@@ -1,16 +1,105 @@
 {# Resources attached to this service. Read-only in this partial; the detach and
    attach actions are wired in service-resources.js. Hidden entirely on the "new"
-   page, where no service exists to attach to yet. #}
+   page, where no service exists to attach to yet.
+
+   ==================== TEMPLATE IS THE ODD FAMILY OUT ====================
+   It leads the row because it overrides more effective values than any single resource,
+   and it is NOT an API resource: `USE_TEMPLATE` is a plain multisite `text` setting, so
+   there is nothing to attach to. It is therefore deliberately NOT a member of
+   `RESOURCE_FAMILIES` -- adding it would send `family=template` to
+   services_resource_attach, whose `_ATTACH_METHODS` lookup rejects it ("Unknown resource
+   type"), and would drag it into `attached_ids` / `failed_families` too. It renders as a
+   sibling column, before the loop.
+
+   Its control posts NOTHING. It carries no `name`, and service-resources.js writes the
+   chosen id into the ONE `input[name="USE_TEMPLATE"]` the page already emits -- the compose
+   shelf's trailing control-key input (models/compose_shelf.html:299-312). That is the whole
+   point of doing it this way: `USE_TEMPLATE` is in the service `restore_skip`
+   (models/save_scope.py:57) and is therefore NEVER restored, so a save that posts it twice,
+   or not at all, is a data loss. `request.form.to_dict()` keeps the FIRST value for a
+   repeated name, and this partial's position relative to the compose form is the host page's
+   choice -- so the only way to guarantee exactly one value from inside this file is to add
+   no named input at all. If the page renders no such input, the picker greys itself rather
+   than silently no-op'ing (see the JS).
+
+   ==================== CONFLICTS, SURFACED BEFORE THEY HAPPEN ====================
+   `resource_conflicts` (app/models/service_attachments.py:resource_conflict_context) is the
+   server-side view of the three rules the API enforces on attach:
+     * the per-service HTTP location namespace (db_methods/locations.py:88-109), which an
+       upstream and a redirect share with the service's own inline settings;
+     * one stream pool per service (db_methods/upstreams.py:120-133);
+     * `is_primary` uniqueness, which SILENTLY demotes the previous primary
+       (db_methods/certificates.py:588-591).
+   It defaults to `{}`: unwired, the dialog warns about less than the API refuses, which
+   costs a round trip and an error flash. The opposite -- inventing a rule -- would block a
+   legal attach, so nothing here is a hard-required context variable. #}
 {% if service_id %}
     {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
+    {% set conflicts = resource_conflicts | default({}) %}
+    {% set service_templates = templates | default({}) %}
+    {% set template_entry = (config | default({})).get("USE_TEMPLATE") or {} %}
+    {% set service_template = template_entry.get("value", "") %}
+    {# Same gate the rest of the page applies to a non-UI-authored setting: offering a picker
+       whose value the save layer will not honour is worse than offering none.
+       `allow_default=True` is load-bearing -- a service with no template still has a
+       USE_TEMPLATE row at method "default" (get_service(full=True) returns every setting), and
+       is_editable_method(app/utils.py:224-237) rejects "default" unless asked, which would lock
+       the picker on exactly the services that most need it. #}
+    {% set template_locked = readonly or not is_editable_method(template_entry.get("method", "ui"), allow_default=True) %}
     <div id="service-resources-band" class="card mb-4" data-service-id="{{ service_id }}">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0" data-i18n="service.resources.title">Attached resources</h5>
             </div>
             <div class="row g-3">
+                <div class="col-12 col-md-6 col-xl resource-family" data-family="template">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold" data-i18n="service.resources.family.template">Template</span>
+                        <span class="badge bg-warning text-dark d-none"
+                              id="service-template-pending"
+                              data-i18n="service.resources.template.pending">Applies on save</span>
+                    </div>
+                    {% if template_locked %}
+                        <div class="resource-chip d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
+                             data-family="template">
+                            <span class="text-truncate">{{ (service_templates.get(service_template) or {}).get("name") or service_template or "" }}</span>
+                        </div>
+                        {% if not service_template %}
+                            <div class="text-muted small" data-i18n="service.resources.none">None attached</div>
+                        {% endif %}
+                    {% else %}
+                        {# No `name` on purpose -- see the header. `data-current` is the stored value,
+                           so the JS can tell a real switch from a pick that lands back on it. #}
+                        <select class="form-select form-select-sm"
+                                id="service-template-picker"
+                                data-current="{{ service_template }}"
+                                aria-describedby="service-template-note">
+                            <option value="" {% if not service_template %}selected{% endif %}
+                                    data-i18n="service.resources.template.none">No template</option>
+                            {# `ui` is the internal template the UI writes its own configs under, the
+                               same one models/plugins_settings_easy.html:27 filters out of the picker. #}
+                            {% for tpl, tpl_data in service_templates.items() if tpl != "ui" %}
+                                <option value="{{ tpl }}" {% if tpl == service_template %}selected{% endif %}>{{ tpl_data.get("name") or tpl }}</option>
+                            {% endfor %}
+                            {% if service_template and (service_template not in service_templates or service_template == "ui") %}
+                                {# A stored template that is not in the list would otherwise leave the
+                                   FIRST option selected, so the picker would misreport the service as
+                                   templateless. Carry it, exactly as the compose shelf's picker does. #}
+                                <option value="{{ service_template }}" selected>{{ service_template }}</option>
+                            {% endif %}
+                        </select>
+                    {% endif %}
+                    <div class="form-text small"
+                         id="service-template-note"
+                         data-i18n="service.resources.template.note">
+                        Not a resource: a template is a setting. It applies on Save, and switching it moves many settings at once.
+                    </div>
+                    <div class="alert alert-warning py-1 px-2 mt-2 mb-0 small d-none"
+                         id="service-template-warning"
+                         role="alert"></div>
+                </div>
                 {% for family, entry in attachments.items() %}
-                    <div class="col-12 col-md-6 col-xl-3 resource-family" data-family="{{ family }}">
+                    <div class="col-12 col-md-6 col-xl resource-family" data-family="{{ family }}">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-semibold"
                                   data-i18n="service.resources.family.{{ family }}">{{ family }}</span>
@@ -98,12 +187,22 @@
                         <label class="form-check-label" for="attach-primary"
                                data-i18n="service.resources.primary">Primary certificate</label>
                     </div>
+                    {# The API refuses these two; the dialog says so first and disables Attach. #}
+                    <div id="attach-conflict"
+                         class="alert alert-danger py-1 px-2 mt-3 mb-0 small d-none"
+                         role="alert"></div>
+                    {# is_primary is NOT a refusal -- it demotes the current primary and says
+                       nothing. Warn, never block. #}
+                    <div id="attach-primary-warning"
+                         class="alert alert-warning py-1 px-2 mt-3 mb-0 small d-none"
+                         role="alert"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" data-i18n="service.resources.attach">Attach</button>
+                    <button type="submit" class="btn btn-primary" id="attach-submit" data-i18n="service.resources.attach">Attach</button>
                 </div>
             </form>
         </div>
     </div>
     <script type="application/json" id="attach-candidates">{{ attach_candidates | tojson }}</script>
+    <script type="application/json" id="attach-conflicts">{{ conflicts | tojson }}</script>
 {% endif %}

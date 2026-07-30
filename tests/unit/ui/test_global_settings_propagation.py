@@ -48,6 +48,9 @@ def _import_route_module(source: Path = ROUTE_PATH) -> ModuleType:
     dependencies.BW_CONFIG = Mock()
     dependencies.CONFIG_TASKS_EXECUTOR = Mock()
     dependencies.DATA = Mock()
+    # The real one is the image-only /usr/share/bunkerweb/core; point it at the repo so
+    # `core_plugin_order()` reads the SHIPPED order.json instead of falling back to {}.
+    dependencies.CORE_PLUGINS_PATH = Path(__file__).resolve().parents[3] / "src" / "common" / "core"
     qrcode = ModuleType("qrcode")
     qrcode_main = ModuleType("qrcode.main")
     qrcode_main.QRCode = Mock()

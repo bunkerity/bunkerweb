@@ -8,8 +8,8 @@ from flask_login import login_required
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.models.save_scope import control_keys, restore_unowned_settings
-from app.routes.services import postable_scope, postable_shelf_scope, resolve_plugin, resolve_save_mode
-from app.utils import LOGGER, flash, get_blacklisted_settings, is_readonly_request
+from app.routes.services import postable_scope, postable_shelf_scope, resolve_plugin, resolve_save_mode, shelf_plugin_scope
+from app.utils import LOGGER, flash, get_activation_map, get_blacklisted_settings, is_readonly_request
 
 from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
 
@@ -174,7 +174,10 @@ def global_settings_page():
         CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services, file_setting_names, scope=scope)
 
         arguments = {}
-        if request.args.get("mode", "advanced") != "advanced":
+        # Compared against this page's GET default (compose), not against the SAVE fallback
+        # (advanced): this decides which pane to land back on, and omitting the argument lands on
+        # the default one. See resolve_save_mode for why the two differ.
+        if request.args.get("mode", "compose") != "compose":
             arguments["mode"] = request.args["mode"]
         if request.args.get("type", "all") != "all":
             arguments["type"] = request.args["type"]
@@ -189,9 +192,33 @@ def global_settings_page():
     elif request.args.get("as_json", "false").lower() == "true":
         return global_config
 
-    mode = request.args.get("mode", "advanced")
+    # Compose is this page's default pane since S3.4's chrome slice. The SAVE default stays
+    # `advanced` on purpose -- see resolve_save_mode.
+    mode = request.args.get("mode", "compose")
     search_type = request.args.get("type", "all")
-    return render_template("global_settings.html", mode=mode, type=search_type)
+    return render_template(
+        "global_settings.html",
+        mode=mode,
+        type=search_type,
+        # `full=True`, unlike the `config` main.py injects into every template
+        # (main.py:1297, which omits it). The shelf reads activation off this map and
+        # `is_plugin_active` defaults an ABSENT key to its INACTIVE value, so the injected map
+        # would render every on-by-default plugin as off -- and the POST scope is computed from
+        # THIS one (postable_shelf_scope above), so the two must be the same map or the shelf's
+        # markup and its declared scope disagree, which is how in-scope keys go unposted and get
+        # deleted (db_methods/config_save.py:592).
+        config=global_config,
+        # The shelf's required context; see models/compose_shelf.html for why none of it is
+        # defaulted, and app/models/save_scope.py for why `control_keys(True)` is empty.
+        shelf_plugin_scope=shelf_plugin_scope,
+        activation_map=get_activation_map(),
+        control_keys=control_keys,
+        global_page=True,
+        # NOT derived from `service_id`, which is also "" on /services/new -- this page has no
+        # service at all, and the flag is what stops the shelf emitting SERVER_NAME (the service
+        # LIST at global scope) as a control key.
+        service_id="",
+    )
 
 
 @global_settings.route("/global-settings/plugins/<string:plugin>", methods=["GET", "POST"])

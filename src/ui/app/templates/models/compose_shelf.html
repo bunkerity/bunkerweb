@@ -46,7 +46,8 @@
 
    ======================== REQUIRED CONTEXT ========================
    Beyond the page's usual `plugins` / `config` / `is_pro_version` / `is_readonly` and the
-   `get_filtered_settings` / `is_plugin_active*` / `plugin_types` Jinja globals, the including
+   `get_filtered_settings` / `is_plugin_active*` / `is_editable_method` / `plugin_types` Jinja
+   globals (all registered in src/ui/main.py, so no page has to pass them), the including
    page MUST provide:
 
      shelf_plugin_scope  app/routes/services.py's function itself -- the single source for
@@ -85,6 +86,96 @@
    Include INSIDE that form and LAST, after any page-level control (the draft toggle, the
    template picker): first-value-wins means a rendered enabled control beats the trailing
    hidden fallbacks emitted at the bottom of this file. #}
+{# ===================== THE PROVENANCE LADDER (plan D3, T4) =====================
+   ONE chip per row, chosen by an EXPLICIT FIRST-MATCH ladder. The order is the whole
+   design, because several conditions are simultaneously true and nothing in the data
+   ranks them: `from <tpl>` and `default` both hold on a template overlay, `from global`
+   and `default` both hold on an inherited untouched default, `edited here` and
+   `managed via api` both hold on a service's own `api` row. Rungs, and why each one
+   precedes the next:
+
+     1 attachment  ROW-level, and above every per-key rung because the attached resource
+                   is expanded into flat settings only at generation time
+                   (src/common/gen/main.py:142-149). `get_config` therefore reports this
+                   plugin's own keys EMPTY while the resource is demonstrably live, so any
+                   per-key chip would describe rows that are not what is in force.
+     2 clone       above every DB-derived rung because the clone page rewrites the rendered
+                   method to "default" (plugin_settings_body.html:21-27): every other rung
+                   collapses to `default` there, and dropping this one loses that page's
+                   only "this differs from the source" signal.
+     3 api         above `edited here`, which it also satisfies (`api` IS in
+                   EDITABLE_METHODS, app/utils.py) -- the operator can edit it here, but
+                   whatever writes it through the API will write it again.
+     4 template    above `from global` AND above `default`. In the read model a template
+                   overlay OVERWRITES an inherited global entry and is blocked only by a
+                   service's OWN non-default row (config_read.py:392), so the real
+                   precedence is own row > template > global inheritance > plugin default.
+                   The overlay carries `method: "default"` (config_read.py:353, :398), so
+                   it satisfies `default` too -- testing `default` first would mislabel
+                   every templated service.
+     5 edited      a row stored on THIS page's own scope, by ui/wizard.
+     6 managed     the same scope, by scheduler/autoconf/manual: not editable here, which
+                   is exactly why `shelf_plugin_scope` gave the row no control. Without
+                   this rung such a row falls off the end of the ladder and renders bare.
+     7 global      above `default`, and its `method != "default"` term is the ONLY thing
+                   separating the two: `entry["global"] == True` is ALSO true for a plain
+                   untouched plugin default (config_read.py:310-316 seeds
+                   `global: True, method: "default"`), so without that term the `default`
+                   chip never renders at all. Do NOT reach for
+                   plugin_settings_body.html:85's `setting_value != setting_default`
+                   instead -- that suppresses the chip for a global explicitly set to the
+                   plugin default, a live defect on the per-plugin page today.
+     8 default     last, because it is the only rung that claims nothing.
+
+   Rungs 5/6 vs 7 use `global_page or not entry["global"]` -- the SAME asymmetry
+   `shelf_plugin_scope` and plugin_settings_body.html:20 use to decide `disabled`. One
+   formula, so the chip and the control cannot disagree: a row whose chip says `managed`
+   is exactly a row the scope refused to make postable. On /global-settings there is no
+   "from global" to inherit from, so an explicitly set global reads `edited here` there.
+
+   THE TRI-STATE IS NOT STABLE AND THIS CHIP DOES NOT CLAIM IT IS. `_is_default_value`
+   (db_methods/config_save.py:109-141) compares a posted value against the GLOBAL VALUE IN
+   THE PAYLOAD, not against `setting["default"]`, and skips equal-to-inherited rows on
+   insert (:1067-1069) / DELETES them on update (:1097-1108). Turning a plugin off while
+   the global is already off writes NOTHING, so the row keeps rendering `from global`
+   rather than "explicitly off"; saving a value that happens to equal the global silently
+   turns `edited here` into `from global` and re-couples the service to future global
+   edits. These chips render what ACTUALLY RESOLVES on the next read. No code here, and no
+   code downstream, may assume a write produced a row -- which is why the ladder reads
+   `method`/`global`/`template` and never "what did we just post".
+
+   A ROW COVERS A WHOLE PLUGIN, NOT ONE SETTING. `limit` declares three keys, `country`
+   and `inject` and `php` two. When the declared keys land on DIFFERENT rungs the chip
+   shows the STRONGEST one (lowest number above) and is marked `mixed`: a trailing `+`,
+   `data-shelf-provenance-mixed`, and the full per-key breakdown in
+   `data-shelf-provenance-keys` and the tooltip. It deliberately claims no more than
+   "at least one declared key resolves this way, and not all of them do" -- collapsing
+   three keys to one unqualified chip would imply a precision the row does not have.
+
+   Derivation is PURE READS of `config[key]`. Nothing here copies-then-mutates because
+   nothing here mutates at all: `get_config` hands out SHARED dict objects across services
+   (config_read.py:193-202), and treating a shared entry as this row's own is what shipped
+   the global-settings short-circuit bug fixed in e78f065b7. No `file_name` read either --
+   only two of the five entry shapes set that key. #}
+{% set provenance_ladder = ["attachment", "clone", "api", "template", "edited", "managed", "global", "default"] %}
+{% set provenance_chips = {
+    "attachment": {"icon": "bx-package", "class": "bg-info-subtle text-dark", "label": "From attachment",
+                   "title": "Active because a resource is attached to this service, not because of a setting stored here."},
+    "clone": {"icon": "bx-copy-alt", "class": "bg-primary-subtle text-dark", "label": "Cloned",
+              "title": "Copied from the cloned service. Nothing is stored until you save."},
+    "api": {"icon": "bx-code-curly", "class": "bg-info-subtle text-dark", "label": "Managed via API",
+            "title": "Last written through the API. You can change it here, but whatever writes it through the API can change it back."},
+    "template": {"icon": "bx-spreadsheet", "class": "bg-secondary text-white", "label": "From template",
+                 "title": "Supplied by the template. Saving a different value stores a service override the template no longer controls."},
+    "edited": {"icon": "bx-pencil", "class": "bg-success-subtle text-dark", "label": "Edited here",
+               "title": "Stored on this service, so it no longer follows global settings. Saving a value that happens to equal the global one REMOVES the override and this row goes back to following global."},
+    "managed": {"icon": "bx-lock-alt", "class": "bg-warning-subtle text-dark", "label": "Set externally",
+                "title": "Written by another actor and not editable from this page."},
+    "global": {"icon": "bx-globe", "class": "bg-primary-subtle text-dark", "label": "From global",
+               "title": "Inherited from global settings; no override is stored for this service. Switching it to whatever the global already is stores nothing, so this row keeps following global."},
+    "default": {"icon": "bx-minus", "class": "bg-secondary-subtle text-body-secondary", "label": "Default",
+                "title": "Nothing stored anywhere: the value the plugin ships with."}
+} %}
 {% set shelf_attachments = attachments | default({}) %}
 {% set is_stream = (not global_page) and (config.get("SERVER_TYPE") or {}).get("value", "http") == "stream" %}
 {% set counts = namespace(total=0, on=0, locked=0, folded=0) %}
@@ -136,9 +227,58 @@
         {% endif %}
         {% set row_on = (not pro_locked) and is_plugin_active_for_service(plugin, plugin_data["name"], config, shelf_attachments) %}
         {% set row = namespace(changed=false, count=0, active=false) %}
-        {% for key in declared_keys if (config.get(key) or {}).get("method", "default") != "default" %}
-            {% set row.changed = true %}
+        {# The ladder, per declared key. See the header block for the order and for why each
+           rung precedes the next. `is_plugin_active_for_service` differs from
+           `is_plugin_active` on exactly one branch -- the resource-attachment short-circuit
+           (models/plugin_activation.py:40-42) -- so their disagreement IS "this row is live
+           because of an attachment". Derived that way rather than from `_RESOURCE_BACKED`
+           because that map is Python-side only, and a second copy of it here is precisely
+           the drift the settings-driven loop exists to avoid. #}
+        {% set from_attachment = row_on and not is_plugin_active(plugin, plugin_data["name"], config) %}
+        {% set prov = namespace(rungs=[], detail=[], method="") %}
+        {% for key in declared_keys %}
+            {% set prov_entry = config.get(key) or {} %}
+            {% set prov_method = prov_entry.get("method", "default") %}
+            {# Same formula as shelf_plugin_scope's `disabled` term: at global scope every row
+               is this page's own, at service scope only a non-inherited one is. #}
+            {% set prov_owned = global_page or not prov_entry.get("global") %}
+            {% if prov_entry.get("clone") %}
+                {% set prov_rung = "clone" %}
+            {% elif prov_method == "api" %}
+                {% set prov_rung = "api" %}
+            {% elif prov_entry.get("template") %}
+                {% set prov_rung = "template" %}
+            {% elif prov_owned and is_editable_method(prov_method) %}
+                {% set prov_rung = "edited" %}
+            {% elif prov_owned and prov_method != "default" %}
+                {% set prov_rung = "managed" %}
+            {% elif prov_method != "default" %}
+                {% set prov_rung = "global" %}
+            {% else %}
+                {% set prov_rung = "default" %}
+            {% endif %}
+            {% set prov.rungs = prov.rungs + [prov_rung] %}
+            {% set prov.detail = prov.detail + [key ~ ": " ~ provenance_chips[prov_rung]["label"]] %}
+            {% if prov_rung == "managed" and not prov.method %}{% set prov.method = prov_method %}{% endif %}
         {% endfor %}
+        {# First match wins, and the ladder is the ranking -- so "strongest rung any declared
+           key reached". An always-on row declares no key at all and gets no chip. #}
+        {% set best = namespace(rung="") %}
+        {% for candidate in provenance_ladder if not best.rung and ((candidate == "attachment" and from_attachment) or candidate in prov.rungs) %}
+            {% set best.rung = candidate %}
+        {% endfor %}
+        {% set prov_mixed = best.rung != "attachment" and (prov.rungs | reject("equalto", best.rung) | list | length) > 0 %}
+        {# RECONCILED WITH THE LADDER (D3): T3 shipped `changed` as "any declared key has a
+           non-default method", which silently disagreed with the chip on two rows -- a
+           template overlay carries `method: "default"` and an attachment-backed row has no
+           stored key at all, so both read UNCHANGED while their chip says otherwise. Reading
+           it off the chip settles WHICH default the filter means: NOT the plugin default,
+           whether that comes from an attachment, a template, global settings, the API or an
+           edit here. It is deliberately not a value comparison -- `entry["default"]` is the
+           plugin default on an inherited key but the GLOBAL VALUE on a service's own row
+           (config_read.py:249), so `value != default` computes two different things
+           depending on whether a row happens to exist. #}
+        {% set row.changed = best.rung not in ("", "default") %}
         {# Derived from THIS row's own `declaration`, never from `is_plugin_active` -- that
            helper re-reads `get_activation_map()` internally (app/utils.py), which returns {}
            on a scan failure and drops every plugin to the USE_<ID> tier-3 convention. With the
@@ -256,10 +396,24 @@
                            {% if kind == "switch" %}data-shelf-sibling data-shelf-inactive="{{ declaration[key] if declaration is mapping else 'no' }}"{% endif %}>
                 {% endfor %}
             </span>
-            {# T4 fills the provenance ladder here (from <tpl> / from global / edited here /
-               managed via api / from attachment / cloned / default). Left empty on purpose --
-               a chip derived from a shared `get_config` entry must copy before mutating. #}
-            <span class="shelf-provenance" data-plugin="{{ plugin }}"></span>
+            {# The ladder's verdict. Display only: it adds no input, posts nothing, and cannot
+               move a key in or out of `shelf_plugin_scope`. #}
+            <span class="shelf-provenance" data-plugin="{{ plugin }}">
+                {% if best.rung %}
+                    {% set chip = provenance_chips[best.rung] %}
+                    {% set chip_label = ("Set by " ~ prov.method) if best.rung == "managed" else chip["label"] %}
+                    <span class="badge rounded-pill {{ chip['class'] }} shelf-chip"
+                          data-shelf-provenance="{{ best.rung }}"
+                          {% if prov_mixed %}data-shelf-provenance-mixed="true"{% endif %}
+                          data-shelf-provenance-keys="{{ prov.detail | join('; ') }}"
+                          title="{{ chip['title'] }}{% if prov_mixed %} The declared keys disagree — {{ prov.detail | join('; ') }}.{% endif %}">
+                        <i class="bx {{ chip['icon'] }} bx-xs align-middle" aria-hidden="true"></i>
+                        <span data-i18n="compose.provenance.{{ best.rung }}"
+                              {% if best.rung == "managed" %}data-i18n-options='{{ {"method": prov.method} | tojson }}'{% endif %}>{{ chip_label }}</span>
+                        {% if prov_mixed %}<span aria-hidden="true">+</span>{% endif %}
+                    </span>
+                {% endif %}
+            </span>
             <a href="{{ plugin_page }}"
                class="shelf-chevron btn btn-sm btn-link p-0"
                aria-label="{{ plugin_data['name'] }}">
@@ -278,10 +432,19 @@
                 {{ counts.on }} on · {{ counts.total }} available · {{ counts.locked }} locked
             </span>
             <div class="btn-group btn-group-sm" role="group" aria-label="Filter plugins">
-                {% for value, label, i18n_key in [("on", "On", "compose.filter.on"), ("all", "All", "compose.filter.all"), ("changed", "Changed", "compose.filter.changed")] %}
+                {# "Changed" says WHICH default it means, because there are two: `entry["default"]`
+                   is the plugin default on an inherited key and the GLOBAL VALUE on a service's
+                   own row (config_read.py:249). This filter compares no values at all -- it is
+                   the provenance chip, so it means "not the plugin default". #}
+                {% for value, label, i18n_key, hint in [
+                    ("on", "On", "compose.filter.on", "Plugins currently doing something for this service."),
+                    ("all", "All", "compose.filter.all", "Every plugin with a setting that applies here."),
+                    ("changed", "Changed", "compose.filter.changed", "Not at the plugin default: from an attachment, a template, global settings, the API, or edited here. Not a value comparison — a stored override counts even when its value equals the default.")
+                ] %}
                     <button type="button"
                             class="btn btn-outline-primary shelf-filter{% if value == 'all' %} active{% endif %}"
                             data-shelf-filter="{{ value }}"
+                            title="{{ hint }}"
                             data-i18n="{{ i18n_key }}">{{ label }}</button>
                 {% endfor %}
             </div>

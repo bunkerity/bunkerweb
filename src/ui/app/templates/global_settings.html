@@ -13,9 +13,12 @@
     {% set blacklisted_settings = get_blacklisted_settings(true) %}
     {% set service_method = "ui" %}
     <div class="tab-content p-0 position-relative">
-        <div class="tab-pane fade{% if mode == 'advanced' %} show active{% endif %}"
-             id="navs-modes-advanced"
-             role="tabpanel">{% include "models/plugins_settings.html" %}</div>
+        {# Compose is this page's default pane; the advanced pane is gone and per-plugin editing
+           lives on /global-settings/plugins/<plugin> (S3.2). models/plugins_settings.html was
+           deleted with the monolith in T8. #}
+        <div class="tab-pane fade{% if mode != 'raw' %} show active{% endif %}"
+             id="navs-modes-compose"
+             role="tabpanel">{% include "models/compose_pane.html" %}</div>
         <div class="tab-pane position-relative fade{% if mode == 'raw' %} show active{% endif %}"
              id="navs-modes-raw"
              role="tabpanel">{% include "models/plugins_settings_raw.html" %}</div>
@@ -29,8 +32,14 @@
     <script src="{{ url_for('static', filename='js/pages/ace-mode-bunkerweb_settings.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
-    <script src="{{ url_for('static', filename='js/plugins-settings.js') }}"
+    <script src="{{ url_for('static', filename='js/pages/settings-raw.js') }}"
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    {# Namespaced `[data-shelf-*]` / `.shelf-*` only, so it collides with neither the raw editor
+       nor the widgets module. The shelf stays correct without it: every row still posts its
+       stored value, so a throw here is a lost switch, never a lost row. #}
+    <script src="{{ url_for('static', filename='js/components/compose-shelf.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

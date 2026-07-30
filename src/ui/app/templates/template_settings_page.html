@@ -129,9 +129,7 @@
                  data-template-id="{{ template }}"
                  data-template-dom-id="{{ template_data['dom_id'] }}"
                  aria-labelledby="navs-templates-{{ template_data['dom_id'] }}-tab">
-                {% with is_active = true %}
-                    {% include "models/template_steps_body.html" %}
-                {% endwith %}
+                {% include "models/template_steps_body.html" %}
             </div>
         </div>
         {# Always emitted, whatever the template's steps declare -- see the note at the top of this

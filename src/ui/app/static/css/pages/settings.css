@@ -44,30 +44,10 @@
   background-color: var(--bw-bg-card);
 }
 
-/* ---- Plugin sidebar (kit .split-list category list) ------------------------- */
-.plugin-steps-container {
-  position: sticky;
-  top: 150px;
-}
-.plugin-steps-container .step-navigation-list {
-  border: 1px solid var(--bw-border);
-  border-radius: 10px;
-  background: var(--bw-bg-card);
-  padding: 6px;
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-}
-.plugin-steps-container .plugin-navigation-item {
-  margin-bottom: 0.25rem;
-  border-radius: 0.5rem;
-}
-.plugin-steps-container .plugin-navigation-item:last-child {
-  margin-bottom: 0;
-}
-
 /* ---- Save bar: the navy CTA already comes from btn-primary don-jose; keep the
    sticky bar reading as the kit page-head actions strip. --------------------- */
-.sticky-card .save-settings {
+.sticky-card .save-settings,
+.sticky-card .compose-save {
   min-width: 96px;
   justify-content: center;
 }

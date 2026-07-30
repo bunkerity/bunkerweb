@@ -43,6 +43,10 @@ def _import_services_module(source: Path = SERVICES_ROUTE) -> ModuleType:
     dependencies.BW_CONFIG = Mock()
     dependencies.CONFIG_TASKS_EXECUTOR = Mock()
     dependencies.DATA = Mock()
+    # The real one is the image-only /usr/share/bunkerweb/core. Point it at the repo so
+    # `core_plugin_order()` reads the SHIPPED order.json rather than exercising its fallback --
+    # a Mock() here would make it return {} and every ordering assertion vacuous.
+    dependencies.CORE_PLUGINS_PATH = CORE_PLUGINS
     qrcode = ModuleType("qrcode")
     qrcode_main = ModuleType("qrcode.main")
     qrcode_main.QRCode = Mock()

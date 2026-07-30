@@ -26,20 +26,20 @@
            id="service-method"
            name="service_method"
            value="{{ service_method }}">
-    <input type="hidden"
-           id="is-draft"
-           name="IS_DRAFT"
-           value="{{ is_draft }}"
-           data-original="{% if current_endpoint != 'new' and not clone %}{{ is_draft }}{% else %}no{% endif %}"
-           data-default="no">
+    {# OUTSIDE the compose form, and it must stay there: this partial renders a `<form>` of its
+       own for attach/detach (models/service_resources_band.html:169) and HTML has no nested
+       forms -- the parser would close the compose form at the inner tag and orphan the shelf.
+       Its template picker reaches the shelf's USE_TEMPLATE input by name, across that boundary
+       (static/js/pages/service-resources.js:66). #}
     {% include "models/service_resources_band.html" %}
     <div class="tab-content p-0 position-relative">
-        <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"
-             id="navs-modes-easy"
-             role="tabpanel">{% include "models/plugins_settings_easy.html" %}</div>
-        <div class="tab-pane fade{% if mode == 'advanced' %} show active{% endif %}"
-             id="navs-modes-advanced"
-             role="tabpanel">{% include "models/plugins_settings.html" %}</div>
+        {# Compose is this page's default pane, so `mode` is anything-but-raw here. The easy and
+           advanced panes are gone: per-plugin editing lives on /services/<svc>/plugins/<plugin>
+           (S3.2) and per-template editing on /services/<svc>/templates/<tpl> (S3.3). Both
+           partials were deleted with the monolith in T8. #}
+        <div class="tab-pane fade{% if mode != 'raw' %} show active{% endif %}"
+             id="navs-modes-compose"
+             role="tabpanel">{% include "models/compose_pane.html" %}</div>
         <div class="tab-pane position-relative fade{% if mode == 'raw' %} show active{% endif %}"
              id="navs-modes-raw"
              role="tabpanel">{% include "models/plugins_settings_raw.html" %}</div>
@@ -71,10 +71,16 @@
     <script src="{{ url_for('static', filename='js/pages/ace-mode-bunkerweb_settings.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
-    <script src="{{ url_for('static', filename='js/plugins-settings.js') }}"
+    <script src="{{ url_for('static', filename='js/pages/settings-raw.js') }}"
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    {# Namespaced `[data-shelf-*]` / `.shelf-*` only, so it collides with neither the raw editor
+       nor the widgets module. The shelf stays correct without it: every row still posts its
+       stored value, so a throw here is a lost switch, never a lost row. #}
+    <script src="{{ url_for('static', filename='js/components/compose-shelf.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
     <script src="{{ url_for('static', filename='js/pages/service-resources.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>

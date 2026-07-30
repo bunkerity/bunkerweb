@@ -1,0 +1,239 @@
+{# The request-path strip: `client > <active plugins, in phase order> > <terminal>`.
+
+   ======================== DISPLAY ONLY -- READ THIS FIRST ========================
+   This partial emits NO `<input>`, NO `<select>`, and nothing carrying a `name`
+   attribute, and it must never grow one. It is designed to be included INSIDE the
+   compose `<form>`, where a single stray named control would join the payload:
+   `Database.save_config` treats a POST as the complete desired state, so an extra
+   name changes what is written and a shifted `first-value-wins` order changes what
+   the shelf's own fallbacks post (db_methods/config_save.py:592). Pinned by
+   tests/unit/ui/test_request_path_strip.py::test_the_strip_posts_absolutely_nothing.
+
+   ======================== WHAT THE ORDER ACTUALLY IS ========================
+   NGINX runs plugins per PHASE, and `src/common/core/order.json` is keyed by phase
+   (init, init_worker, set, ssl_certificate, access, headers, log, preread, ...) --
+   it is not a flat list. The phase that answers "what does an inbound request pass
+   through" is:
+
+     * `access`  for an http service  -- the admission/control phase, where every
+       plugin that can allow, deny, challenge or rate-limit a request runs
+       (`src/bw/lua/bunkerweb/utils.lua:1205-1223` for the canonical phase list).
+     * `preread` for a stream service -- the TCP analogue, which runs before the
+       connection is proxied.
+
+   `init`/`init_worker`/`timer` are startup and background, `set`/`ssl_certificate`
+   are pre-admission plumbing, and `headers`/`log` run on the way back out. None of
+   them answer the question.
+
+   THE SOURCE IS THE SETTING, NOT order.json, AND THAT IS DELIBERATE.
+   `helpers.order_plugins` (src/bw/lua/bunkerweb/helpers.lua:165-205) builds each
+   phase in three passes:
+     1. the ids named by the `PLUGINS_ORDER_<PHASE>` SETTING  (:174-182)
+     2. the ids from order.json not already taken               (:184-190)
+     3. everything else implementing the phase, appended and sorted alphabetically (:192-202)
+   Pass 1 WINS, and `PLUGINS_ORDER_ACCESS`'s shipped default
+   (src/common/settings.json, `plugins-order-access`) already disagrees with
+   order.json: it swaps `bunkernet` and `crowdsec`. So on every stock service
+   order.json is wrong about two nodes, and `PLUGINS_ORDER_ACCESS`/`_PREREAD` are
+   `context: multisite`, i.e. per-service and already in `config` -- no query, no
+   endpoint, no file read. This strip therefore orders by the setting (pass 1),
+   fills from `plugin_order` when the page supplies it (pass 2), and appends the
+   rest alphabetically (pass 3), which is the same algorithm the runtime uses.
+
+   ======================== REQUIRED CONTEXT ========================
+     plugins      every installed plugin, `BW_CONFIG.get_plugins()` shape (main.py
+                  injects it into every template).
+     config       this service's config, methods included -- the same `db_config`
+                  the shelf reads.
+     service_id   the service. Empty ("/services/new") suppresses the strip: there
+                  is no service to trace, and `config` there is the GLOBAL config.
+     attachments  `build_service_attachments()`'s `{family: {items, error}}`.
+                  Optional; defaults to empty, which only loses the terminal pool.
+     plugin_order OPTIONAL `{phase: [plugin ids]}` -- the parsed `core/order.json`,
+                  used as pass 2 above. Defaults to `{}`, in which case a service
+                  whose `PLUGINS_ORDER_<PHASE>` was overridden with a PARTIAL list
+                  shows the remainder in the unordered group instead of in the
+                  middle. Nothing is ever dropped either way. Reading order.json
+                  needs Python (CORE_PLUGINS_PATH/order.json) and belongs to
+                  whoever assembles the page.
+
+   Judging "is this plugin active" uses the SHIPPED helper
+   `is_plugin_active_for_service` (app/models/plugin_activation.py) -- the same one
+   the shelf's `row_on` uses. Never a second copy: a resource-backed plugin
+   (`workflows` above all) reads active only through that helper's attachment
+   lookup, and `workflows` has zero multisite settings, so it renders no shelf row
+   while sitting at `access` index 16. Walking the shelf's rows instead of `plugins`
+   would silently lose it on exactly the services that have a workflow attached.
+
+   ======================== THE TWO SEGMENTS ========================
+   ORDERED   -- active plugins named by the phase order, in that order.
+   UNORDERED -- every other active plugin that has at least one multisite setting,
+                appended alphabetically and rendered muted. This is a DEFINED
+                position, not a fallback: it is exactly runtime pass 3. External and
+                PRO plugins can never be in order.json (a shipped file) and land
+                here; so do the 17 core plugins that ship only `confs/` and no Lua,
+                `modsecurity` being the one an operator most needs to see.
+                Two carve-outs, both narrow:
+                  * zero multisite settings -> not part of THIS service's path (it
+                    cannot be configured per-service and the phase order does not
+                    place it). Drops `pro`, whose activation is "always".
+                    `get_filtered_settings` is the same emptiness test the shelf's
+                    loop uses.
+                  * `general` -- the synthesized settings bag, no plugin.json and no
+                    Lua, force-active through `_SYNTHESIZED_ALWAYS_ON`. Same
+                    by-name carve-out models/compose_shelf.html already makes.
+                A PRO plugin without a licence is not running, so it is not a node
+                (same `pro_locked` test as the shelf).
+
+   ======================== THE TERMINAL ========================
+   D5 says "the attached upstream pool when reverseproxy is active, else the locally
+   served root", which has no node for the commonest shape in the field: an INLINE
+   `REVERSE_PROXY_HOST_<n>` with no attachment at all (REVERSE_PROXY_HOST is
+   `"multiple": "reverse-proxy"`). The chain below is pool -> inline -> local root ->
+   nothing, and it keys off the backend actually configured rather than off
+   `reverseproxy`'s activation verdict -- which is wrong for a gRPC-only pool
+   (`_RESOURCE_BACKED` maps every upstream family member to `reverseproxy` with no
+   protocol filter, while upstream_resolver writes `USE_GRPC` for a grpc pool).
+
+   An upstream row has NO top-level `match_path`: the path lives on the ATTACHMENT,
+   under `services`, one entry per attachment
+   (db_methods/upstreams.py:_upstream_dict / _upstream_attachments). And
+   `get_upstreams(service_id=...)` filters the ROWS, never the nested list, so the
+   `service_id` filter below is load-bearing -- indexing `[0]` reads ANOTHER
+   service's path. Several pools => the one at `/`, else the first by path; that is
+   a DISPLAY choice, since NGINX picks a location by longest-prefix match at request
+   time and the three orderings the API can hand us (`Resources.name`,
+   `(service_id, match_path)`, `(creation_date, name)`) are none of them "by path".
+   Stream pools store `match_path = ""` by construction, so a `== "/"` test never
+   matches one -- sorting handles it, since "" sorts first. #}
+{% if service_id %}
+    {% set rp_attachments = attachments | default({}) %}
+    {% set rp_order = plugin_order | default({}) %}
+    {% set rp_pro = is_pro_version | default(false) %}
+    {% set is_stream = (config.get("SERVER_TYPE") or {}).get("value", "http") == "stream" %}
+    {% set phase = "preread" if is_stream else "access" %}
+    {% set order_setting = "PLUGINS_ORDER_PREREAD" if is_stream else "PLUGINS_ORDER_ACCESS" %}
+
+    {# Pass 1 then pass 2. `PLUGINS_ORDER_*` is a `multivalue` setting: space separated. #}
+    {% set seq = namespace(ids=((config.get(order_setting) or {}).get("value", "") | string).split()) %}
+    {% for plugin_id in rp_order.get(phase) or [] if plugin_id not in seq.ids %}
+        {% set seq.ids = seq.ids + [plugin_id] %}
+    {% endfor %}
+
+    {% set live = namespace(ids=[], tail=[]) %}
+    {% for plugin, plugin_data in plugins.items() %}
+        {# `stream: no` means the plugin does nothing on a stream server, so it is not on the
+           path. Same field and same test the compose shelf on this very page already applies
+           (models/compose_shelf.html: `stream_excluded`, which renders "Does not support STREAM
+           mode") -- without this the two panels of one page contradict each other, and `errors`,
+           `headers` and `modsecurity` all declare it. Covers the ordered segment as well as the
+           tail, because both are filtered through `live.ids`. #}
+        {% if not (is_stream and plugin_data.get("stream") == "no") and not (plugin_data.get("type") == "pro" and not rp_pro) and is_plugin_active_for_service(plugin, plugin_data.get("name", plugin), config, rp_attachments) %}
+            {% set live.ids = live.ids + [plugin] %}
+            {% if plugin not in seq.ids and plugin != "general" and get_filtered_settings(plugin_data.get("settings") or {}) %}
+                {% set live.tail = live.tail + [plugin] %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% set nodes = (seq.ids | select("in", live.ids) | list) + (live.tail | sort) %}
+    {% set ordered_count = seq.ids | select("in", live.ids) | list | length %}
+
+    {# ---- terminal candidates: attached pools first, then inline hosts ---- #}
+    {% set pool_protocols = ["stream"] if is_stream else ["http", "grpc"] %}
+    {% set backends = namespace(rows=[]) %}
+    {% for row in ((rp_attachments.get("upstream") or {}).get("items") or []) if row.get("protocol") in pool_protocols %}
+        {% for att in row.get("services") or [] if att.get("service_id") == service_id %}
+            {% set backends.rows = backends.rows + [{"kind": "pool", "protocol": row.get("protocol"), "label": row.get("name") or row.get("id"), "path": att.get("match_path") or ("" if is_stream else "/")}] %}
+        {% endfor %}
+    {% endfor %}
+    {# Pools and inline hosts are ONE candidate set, never "pools else inline". An attached pool
+       does not suppress an inline backend: utils/upstream_resolver.py:19-23 -- "Inline settings
+       are never renumbered or removed -- they keep their suffixes and their NGINX precedence,
+       pools take the ones left over" -- and `_attach_location` (:117-141) aborts only when the
+       SAME path is claimed twice. Inline at `/` plus a pool at `/api` is a supported, ordinary
+       configuration, and short-circuiting on pools named the pool as the terminal for `/`, which
+       is simply the wrong host. Merging also lets the sort below honour this partial's own
+       documented rule (the one at `/`, else the shallowest) instead of contradicting it. #}
+    {# `REVERSE_PROXY_URL` has no meaning on a stream server (the stream conf proxies the
+       whole connection), hence the `none` url base there. #}
+    {% set inline_families = [("REVERSE_PROXY_HOST", none, "USE_REVERSE_PROXY", "stream")] if is_stream else [("REVERSE_PROXY_HOST", "REVERSE_PROXY_URL", "USE_REVERSE_PROXY", "http"), ("GRPC_HOST", "GRPC_URL", "USE_GRPC", "grpc")] %}
+    {% for host_base, url_base, use_key, protocol in inline_families if (config.get(use_key) or {}).get("value", "no") == "yes" %}
+        {% for stored, entry in config.items() if (stored == host_base or stored.startswith(host_base ~ "_")) and entry.get("value") %}
+            {% set suffix = stored[host_base | length:] %}
+            {% set backends.rows = backends.rows + [{"kind": "inline", "protocol": protocol, "label": entry.get("value"), "path": "" if url_base is none else ((config.get(url_base ~ suffix) or {}).get("value") or "/")}] %}
+        {% endfor %}
+    {% endfor %}
+    {# D5's "the one matching `/`, else the first by path" needs no `/` special case: every
+       non-stream path is forced to start with `/` (upstreams.py:attach_upstream) and `/` is the
+       shortest string with that prefix, so it always sorts first when present. A stream pool's
+       `""` sorts first for the same reason, and there can only ever be one of those. #}
+    {% set by_path = backends.rows | sort(attribute="path") %}
+    {% set backend = by_path | first if by_path else none %}
+    {# ONE source for the terminal kind: the marker attribute and the rendered badge must never
+       be able to disagree, which is exactly what two copies of this condition would allow. #}
+    {% set terminal_kind = backend.kind if backend else ("root" if (not is_stream) and (config.get("SERVE_FILES") or {}).get("value", "yes") == "yes" else "none") %}
+
+    <div id="request-path-strip"
+         class="card mb-4"
+         data-request-path
+         data-request-phase="{{ phase }}"
+         data-request-order-source="{{ order_setting }}">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
+                <span class="fw-semibold" data-i18n="request_path.title">Request path</span>
+                <span class="text-muted small"
+                      data-i18n="request_path.source"
+                      data-i18n-options='{{ {"phase": phase, "setting": order_setting} | tojson }}'>
+                    Plugin execution order for the {{ phase }} phase, from {{ order_setting }} — a display order, not a per-request trace.
+                </span>
+            </div>
+            <ol class="list-unstyled d-flex flex-nowrap align-items-center gap-1 mb-0 overflow-auto pb-1">
+                <li class="d-inline-flex align-items-center gap-1" data-request-node="client" data-request-node-kind="client">
+                    <span class="badge rounded-pill bg-secondary-subtle text-body" data-i18n="request_path.client">Client</span>
+                </li>
+                {% for plugin in nodes %}
+                    {% set unordered = loop.index0 >= ordered_count %}
+                    <li class="d-inline-flex align-items-center gap-1"
+                        data-request-node="{{ plugin }}"
+                        data-request-node-kind="{{ 'unordered' if unordered else 'ordered' }}">
+                        <i class="bx bx-chevron-right text-muted" aria-hidden="true"></i>
+                        {# i18n.js:32-33 translates the `title` and leaves the text alone when an
+                           element has both -- which is what this badge needs, since its text is a
+                           plugin NAME and only the tooltip is translatable. #}
+                        <span class="badge rounded-pill {{ 'bg-body-secondary text-muted border border-secondary-subtle border-opacity-50' if unordered else 'bg-primary-subtle text-body' }}"
+                              {% if unordered %}title="No declared position in the {{ phase }} phase; it runs after the ordered plugins, alphabetically."
+                              data-i18n="request_path.unordered"
+                              data-i18n-options='{{ {"phase": phase} | tojson }}'{% endif %}>
+                            {{ plugins[plugin].get("name", plugin) }}
+                        </span>
+                    </li>
+                {% endfor %}
+                <li class="d-inline-flex align-items-center gap-1"
+                    data-request-node="terminal"
+                    data-request-node-kind="terminal"
+                    data-request-terminal="{{ terminal_kind }}">
+                    <i class="bx bx-chevron-right text-muted" aria-hidden="true"></i>
+                    {% if backend %}
+                        <span class="badge rounded-pill bg-success-subtle text-body">
+                            <span data-i18n="request_path.terminal.{{ backend.kind }}">{{ "Upstream pool" if backend.kind == "pool" else "Backend" }}</span>
+                            <span class="fw-semibold">{{ backend.label }}</span>
+                            {% if backend.path %}<code>{{ backend.path }}</code>{% endif %}
+                            <span class="text-muted">{{ backend.protocol }}</span>
+                        </span>
+                    {% elif terminal_kind == "root" %}
+                        {# misc/confs/server-http/serve-files.conf:1-2 -- ROOT_FOLDER when set,
+                           otherwise /var/www/html/<first server name>. #}
+                        <span class="badge rounded-pill bg-success-subtle text-body">
+                            <span data-i18n="request_path.terminal.root">Local files</span>
+                            <code>{{ (config.get("ROOT_FOLDER") or {}).get("value", "") or ("/var/www/html/" ~ service_id) }}</code>
+                        </span>
+                    {% else %}
+                        {# `SERVE_FILES=no` renders `root /nowhere;`, and a stream server with no
+                           pool and no REVERSE_PROXY_HOST proxies nothing at all. #}
+                        <span class="badge rounded-pill bg-warning-subtle text-body" data-i18n="request_path.terminal.none">Nothing served</span>
+                    {% endif %}
+                </li>
+            </ol>
+        </div>
+    </div>
+{% endif %}

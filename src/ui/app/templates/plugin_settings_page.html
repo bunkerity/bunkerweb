@@ -17,6 +17,16 @@
    hidden fallback (its stored value survives instead of being deleted). One ordering rule
    covers every case correctly -- no per-key guard needed, and no per-key guard can be trusted
    to cover every way a setting can end up unable to post (blacklisted, disabled, PRO-locked). #}
+{% block head %}
+    {# `.bw-setting-frame` is styled here and nowhere else, and models/plugin_settings_body.html
+       renders it -- which since S3.4's chrome slice happens on THIS page rather than in the
+       service page's advanced pane, the only surface that used to load this stylesheet
+       alongside global_settings.html. Without it every setting on this page renders as a bare
+       unframed field. #}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/settings.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block page_head %}{% endblock %}
 {% block content %}
     {% set blacklisted_settings = get_blacklisted_settings(not service_id) %}

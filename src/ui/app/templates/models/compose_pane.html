@@ -1,0 +1,166 @@
+{# The compose pane: the REAL form that posts the shelf, shared by service_settings.html and
+   global_settings.html.
+
+   ========================= WHY THIS IS A FORM AND NOT A DIV =========================
+   `models/compose_shelf.html`'s header states it as a blocker, and it is the whole reason this
+   partial exists: the shelf's payload must NEVER be harvested by `getFormFromSettings`
+   (static/js/plugins-settings.js:1075), which drops every non-`.plugin-setting-file-text`
+   hidden input, flattens checkboxes to "yes"/"no" and has no `compose` branch at all -- while
+   the route still hands that POST the full shelf scope, so every in-scope key would be unposted
+   and `Database.save_config` deletes an in-scope key the payload omits
+   (db_methods/config_save.py:592).
+
+   Two rules follow, and both are pinned by tests/unit/ui/test_compose_page_assembly.py:
+     * the Save button below is a plain `type="submit"` and MUST NOT carry `save-settings`,
+       the class the monolith binds its click handler to (:2025);
+     * nothing that posts may live outside this form. The raw pane keeps `save-settings`
+       because raw mode still goes through the monolith -- that is safe only because its
+       button lives inside the raw tab-pane, which is `display:none` while compose is active.
+
+   `action` carries `?mode=compose` EXPLICITLY rather than relying on the URL the pills push:
+   `resolve_save_mode` falls back to the page's preserving branch (easy / advanced) for an
+   absent mode, and the shelf's scope must only ever be declared for a payload this form
+   actually produced. The other query args are carried through because the route reads them on
+   POST -- `clone` above all (routes/services.py:1099), without which /services/new?clone=x
+   silently creates an empty service.
+
+   ============================== REQUIRED CONTEXT ==============================
+   Everything `models/compose_shelf.html` requires (see its header: `shelf_plugin_scope`,
+   `activation_map`, `control_keys`, `blacklisted_settings`, `global_page`, `service_id`, plus
+   the globals main.py injects), and on the service page only -- guarded by `not global_page`,
+   which Jinja never evaluates at global scope -- `service_method`, `is_draft`, `clone`,
+   `current_endpoint` and `templates`.
+
+   ORDER IS LOAD-BEARING. `request.form.to_dict()` keeps the FIRST value for a repeated name,
+   and the shelf emits its control-key fallbacks LAST, so every real control here must be
+   rendered BEFORE the include: the draft toggle's `#is-draft`, the new page's SERVER_NAME and
+   its USE_TEMPLATE picker all win over the fallback that would otherwise post the stored (or
+   on /services/new, the GLOBAL) value. #}
+{% set compose_query = request.args.to_dict() %}
+{% set compose_mode_arg = compose_query.update({"mode": "compose"}) %}
+{% if not plugins %}
+    {# NO FORM AT ALL when the plugin map is empty, and this is a data-loss guard rather than a
+       cosmetic one. `main.py` parks `plugins = {}` whenever the per-request `get_plugins()`
+       raises, so a transient API failure renders a shelf with ZERO rows -- while the SAVE
+       recomputes the scope from its own fresh `BW_CONFIG.get_plugins()` (routes/services.py,
+       routes/global_settings.py) and would therefore claim every activation key the empty page
+       never posted. In scope and unposted means the row is deleted
+       (db_methods/config_save.py:592). An error the operator can retry is the right outcome;
+       a Save button that silently wipes activation is not. #}
+    <div class="alert alert-danger" role="alert" id="compose-unavailable">
+        <i class="bx bx-error-circle me-1" aria-hidden="true"></i>
+        <span data-i18n="compose.unavailable">The plugin list could not be loaded, so this page cannot be edited safely. Reload once the API answers.</span>
+    </div>
+{% else %}
+<form method="POST"
+      action="?{{ compose_query | urlencode }}"
+      id="compose-form"
+      class="compose-form">
+    {# No `id="csrf_token"`: the raw pane already owns that id (models/plugins_settings_raw.html:2)
+       and service-resources.js reads it by id for its own detach form. A second element with the
+       same id would be an invalid document for no gain -- this input is submitted natively. #}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if not global_page %}
+        {# Mutated in place by the `.toggle-draft` handler (plugins-settings.js:2217) and read by
+           raw mode's own save, both by id -- so it works from inside this form. It has to BE
+           inside it: IS_DRAFT is a control key the shelf also emits a fallback for, and
+           `variables.pop("IS_DRAFT", "no")` (routes/services.py:1110) publishes the service when
+           the payload omits it. #}
+        <input type="hidden"
+               id="is-draft"
+               name="IS_DRAFT"
+               value="{{ is_draft }}"
+               data-original="{% if current_endpoint != 'new' and not clone %}{{ is_draft }}{% else %}no{% endif %}"
+               data-default="no">
+    {% endif %}
+    <div class="card p-1 mb-4 sticky-card">
+        <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 p-1">
+            {% if global_page %}
+                {# Re-homed from the dying advanced pane, exactly once. It is the ONLY producer of
+                   OVERRIDE_NON_GLOBAL_SERVICES, which global_settings.py:152 pops before anything
+                   else runs -- it is a form control, not a setting. #}
+                <input type="hidden"
+                       id="override-non-global-settings"
+                       name="OVERRIDE_NON_GLOBAL_SERVICES"
+                       value="no">
+                <button type="button"
+                        id="override-non-global-settings-toggle"
+                        class="btn btn-sm btn-outline-secondary toggle-override-non-global"
+                        aria-pressed="false"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="When enabled, edited global settings also override service values that are not inherited from global settings.">
+                    <i class="bx bx-sm bx-toggle-left"></i>
+                    <span class="d-none d-lg-inline">&nbsp;<span>Override services</span></span>
+                </button>
+            {% else %}
+                <div {% if current_endpoint != 'new' and not is_editable_method(service_method) %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary toggle-draft {% if current_endpoint != 'new' and not is_editable_method(service_method) %}disabled{% endif %}">
+                        <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
+                        <span class="d-none d-md-inline">&nbsp;
+                            {% if is_draft == 'yes' %}
+                                <span data-i18n="status.draft">Draft</span>
+                            {% else %}
+                                <span data-i18n="status.online">Online</span>
+                            {% endif %}
+                        </span>
+                    </button>
+                </div>
+            {% endif %}
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                 {% endif %}>
+                {# `type="submit"`, and deliberately NOT `.save-settings` -- see the header. #}
+                <button type="submit"
+                        class="btn btn-sm btn-primary don-jose compose-save"
+                        {% if is_readonly %}disabled{% endif %}>
+                    <i class="bx bx-save bx-sm"></i>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% if not global_page and not service_id %}
+        {# /services/new. Both keys are control keys the shelf emits a fallback for, and on this
+           page `config` is the GLOBAL config -- whose SERVER_NAME is the SERVICE LIST. Left to
+           the fallback, creating a service would post every existing service's name as the new
+           one's. A real input, rendered first, is the only correct answer.
+           USE_TEMPLATE gets a picker here for the same first-value-wins reason: the resources
+           band (which owns it on an existing service) does not render on /services/new. #}
+        <div class="card mb-4">
+            <div class="card-body row g-3">
+                <div class="col-12 col-md-6">
+                    <label for="compose-server-name"
+                           class="form-label"
+                           data-i18n="form.label.server_name">Server Name</label>
+                    <input type="text"
+                           class="form-control"
+                           id="compose-server-name"
+                           name="SERVER_NAME"
+                           value=""
+                           placeholder="www.example.com"
+                           autocomplete="off"
+                           required>
+                    <input type="hidden" name="OLD_SERVER_NAME" value="">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label for="compose-template"
+                           class="form-label"
+                           data-i18n="navigation.templates">Templates</label>
+                    <select class="form-select" id="compose-template" name="USE_TEMPLATE">
+                        <option value="" data-i18n="badge.no_template">No Template</option>
+                        {% for template in (templates | default({})) if template != "ui" %}
+                            <option value="{{ template }}" {% if template == "low" %}selected{% endif %}>{{ template | capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {# Display only -- it emits nothing with a `name`, and self-gates on `service_id`, so it
+       renders nothing at global scope. #}
+    {% include "models/request_path_strip.html" %}
+    {# LAST: its trailing control-key fallbacks must lose first-value-wins to everything above. #}
+    {% include "models/compose_shelf.html" %}
+</form>
+{% endif %}

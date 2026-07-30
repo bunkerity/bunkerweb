@@ -17,9 +17,17 @@
                            / news controls moved to the topbar (navbar.html). #}
                         {% block page_head %}
                         <!-- prettier-ignore -->
+                        {# GATED ON THE BLUEPRINT, NEVER ON A PATH SUBSTRING. Service ids are
+                           hostnames, so `"templates" in request.path` is true for a service
+                           named templates.example.com and `"services" in request.path` for one
+                           named services.example.com -- the first already renders with the wrong
+                           pills today. The three list pages (services.html, templates.html) and
+                           every per-plugin / per-template page override this block, so they
+                           never reach the pills whatever their blueprint. #}
+                        {% set pane_blueprint = request.blueprint if request.blueprint in ("services", "templates", "global_settings") else "" %}
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             {% include "breadcrumb.html" %}
-                            {% if current_endpoint == "global-config" or current_endpoint == "global-settings" or (current_endpoint != "services" and "services" in request.path) or (current_endpoint != "templates" and "templates" in request.path) %}
+                            {% if pane_blueprint %}
                                 <!-- Floating button to toggle the menu -->
                                 <div class="position-fixed bottom-0 start-0 m-3 d-lg-none"
                                      id="floating-modes-menu">
@@ -37,7 +45,7 @@
                                     <div class="collapse mt-2" id="mode-selection-floating">
                                         <ul class="nav nav-pills flex-column bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm mode-selection-menu"
                                             role="tablist">
-                                            {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
+                                            {% if pane_blueprint == "templates" %}
                                                 <li class="nav-item mb-1" role="presentation">
                                                     <button type="button"
                                                             class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
@@ -51,19 +59,18 @@
                                                         <span class="don-jose" data-i18n="mode.easy">Easy</span>
                                                     </button>
                                                 </li>
-                                            {% endif %}
-                                            {% if "templates" not in request.path %}
+                                            {% else %}
                                                 <li class="nav-item mb-1" role="presentation">
                                                     <button type="button"
-                                                            class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
+                                                            class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode != 'raw' %} active{% endif %}"
                                                             role="tab"
                                                             data-bs-toggle="tab"
-                                                            data-bs-target="#navs-modes-advanced"
-                                                            aria-controls="navs-modes-advanced"
-                                                            {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
-                                                        <i class="bx bx-shield-quarter bx-sm"></i>
+                                                            data-bs-target="#navs-modes-compose"
+                                                            aria-controls="navs-modes-compose"
+                                                            {% if mode != 'raw' %}aria-selected="true"{% endif %}>
+                                                        <i class="bx bx-layer bx-sm"></i>
                                                         &nbsp;
-                                                        <span class="don-jose" data-i18n="mode.advanced">Advanced</span>
+                                                        <span class="don-jose" data-i18n="mode.compose">Compose</span>
                                                     </button>
                                                 </li>
                                             {% endif %}
@@ -85,7 +92,7 @@
                                 </div>
                                 <ul class="nav nav-pills flex-column flex-md-row d-none d-lg-flex mode-selection-menu"
                                     role="tablist">
-                                    {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
+                                    {% if pane_blueprint == "templates" %}
                                         <li class="nav-item me-0 me-sm-3" role="presentation">
                                             <button type="button"
                                                     class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
@@ -99,19 +106,18 @@
                                                 <span class="d-none d-sm-inline don-jose" data-i18n="mode.easy">Easy</span>
                                             </button>
                                         </li>
-                                    {% endif %}
-                                    {% if "templates" not in request.path %}
+                                    {% else %}
                                         <li class="nav-item me-0 me-sm-3" role="presentation">
                                             <button type="button"
-                                                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
+                                                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode != 'raw' %} active{% endif %}"
                                                     role="tab"
                                                     data-bs-toggle="tab"
-                                                    data-bs-target="#navs-modes-advanced"
-                                                    aria-controls="navs-modes-advanced"
-                                                    {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
-                                                <i class="bx bx-shield-quarter bx-xs"></i>
+                                                    data-bs-target="#navs-modes-compose"
+                                                    aria-controls="navs-modes-compose"
+                                                    {% if mode != 'raw' %}aria-selected="true"{% endif %}>
+                                                <i class="bx bx-layer bx-xs"></i>
                                                 &nbsp;
-                                                <span class="d-none d-sm-inline don-jose" data-i18n="mode.advanced">Advanced</span>
+                                                <span class="d-none d-sm-inline don-jose" data-i18n="mode.compose">Compose</span>
                                             </button>
                                         </li>
                                     {% endif %}

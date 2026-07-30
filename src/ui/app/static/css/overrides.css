@@ -1537,12 +1537,6 @@ div.dtsp-panesContainer
   }
 }
 
-#floating-settings-button {
-  bottom: 2.1rem !important;
-  right: 1.5rem !important;
-  z-index: 1080;
-}
-
 /* Service field transition effects */
 .service-field {
   max-height: 0;
@@ -1995,92 +1989,6 @@ span.cursor-pointer ~ .reset-setting {
   [data-news-row-home] .card-text.courier-prime {
     font-size: 0.85rem;
   }
-}
-
-/* Plugin navigation item styles */
-.plugin-navigation-item {
-  border-left: 3px solid transparent;
-  transition: all 0.25s ease;
-  margin-bottom: 0.5rem;
-  border-radius: 0.375rem;
-}
-
-.plugin-navigation-item.active {
-  border-left-color: var(--bs-primary);
-  background-color: rgba(var(--bs-primary-rgb), 0.08);
-  box-shadow: 0 2px 6px rgba(var(--bs-primary-rgb), 0.15);
-}
-
-.plugin-navigation-item:hover:not(.active) {
-  background-color: rgba(var(--bs-primary-rgb), 0.05);
-  border-left-color: rgba(var(--bs-primary-rgb), 0.4);
-}
-
-.plugin-navigation-item .step-number {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease-in-out;
-}
-
-.plugin-navigation-item.active .step-number {
-  transform: scale(1.1);
-}
-
-.plugin-navigation-item:hover .step-number:not(.active) {
-  transform: scale(1.05);
-}
-
-.plugin-navigation-item .step-details {
-  transition: all 0.25s ease;
-}
-
-.plugin-navigation-item.active .step-details .fw-bold {
-  color: var(--bs-primary) !important;
-}
-
-.plugin-navigation-item small.text-muted {
-  transition: opacity 0.2s ease;
-  opacity: 0.7;
-}
-
-.plugin-navigation-item:hover small.text-muted,
-.plugin-navigation-item.active small.text-muted {
-  opacity: 1;
-}
-
-/* Keep plugin headers stable when descriptions are long */
-.plugin-settings-header-content {
-  min-width: 0;
-}
-
-.plugin-settings-description {
-  max-width: 100%;
-  margin-bottom: 0;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 767.98px) {
-  .plugin-settings-actions {
-    width: 100%;
-  }
-}
-
-/* Fade effect for plugin tab panes */
-.plugin-tab-pane {
-  opacity: 0;
-  transition: opacity 0.2s;
-  display: none;
-}
-.plugin-tab-pane.show {
-  display: block;
-}
-.plugin-tab-pane.fade-in {
-  opacity: 1;
 }
 
 /*
