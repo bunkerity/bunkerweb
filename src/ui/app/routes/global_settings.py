@@ -28,11 +28,26 @@ def update_global_config(
     # Edit check fields and remove already existing ones
     config = BW_CONFIG.get_config(methods=True, with_drafts=True)
 
+    services = config["SERVER_NAME"]["value"].split()
+
     # Global settings have never had a restore pass: the page posts every key, so
     # absence meant deletion and that was fine. A per-plugin page posts only its own
     # keys, so without this it would delete every other global setting -- the same
     # data-loss bug fixed for services in S3.1, at global scope.
-    global_config_entries = {key: value for key, value in config.items() if value.get("global", True)}
+    #
+    # `config` is NOT global_only (the propagation loop below needs the service rows), and a
+    # service that merely INHERITS a multisite global shares that global's dict object
+    # (db_methods/config_read.py:202 does `config.setdefault(f"{service}_{key}", value)`), so
+    # `<svc>_<KEY>` carries `global: True` too. Keeping those here would put a key no global form
+    # ever posts into the "was something removed?" loop below, which can then never conclude
+    # "nothing changed" -- every no-op save would report success and trigger a reload. Same
+    # `startswith(f"{service}_")` rule the rest of the codebase splits the two namespaces with
+    # (models/config.py:132-137, db_methods/config_read.py:266). Dropping them from the payload
+    # is safe: gen_conf re-materialises every service setting from get_services()
+    # (models/config.py:52-64), which is already how a service's OWN row -- `global: False`, so
+    # never restored even before this -- survives a global save.
+    service_prefixes = tuple(f"{service}_" for service in services)
+    global_config_entries = {key: value for key, value in config.items() if value.get("global", True) and not key.startswith(service_prefixes)}
     variables = restore_unowned_settings(
         variables,
         global_config_entries,
@@ -41,7 +56,6 @@ def update_global_config(
         template_unchanged=True,
     )
 
-    services = config["SERVER_NAME"]["value"].split()
     variables_to_check = variables.copy()
     has_file_name_changes = False
 

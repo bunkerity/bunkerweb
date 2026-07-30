@@ -143,3 +143,24 @@ def test_valid_global_change_leaves_own_overrides_alone_without_the_flag():
 
     assert payload["svc2_SSL_PROTOCOLS"] == "TLSv1.2"
     assert "svc1_SSL_PROTOCOLS" not in payload, "without the flag a service's own override is untouched"
+
+
+def test_identical_repost_takes_the_no_change_short_circuit():
+    """A save that changes nothing must say so -- and must not trigger a scheduler reload.
+
+    Regression guard for the `global_config_entries` rewrite. `config` here is NOT `global_only`,
+    and an INHERITING service key shares its global's dict object (see `_stored_config`), so
+    `svc2_SSL_PROTOCOLS` carries `global: True`. Keeping such keys in `global_config_entries` put a
+    key no global form ever posts into the "was something removed?" loop: `restore_unowned_settings`
+    only restores keys whose method is NOT ui/api/wizard (`save_scope.py`), so for any global an
+    admin has ever set from the UI the inherited key was never in `variables`, `no_removed_settings`
+    went False unconditionally, and this short-circuit could never fire -- every no-op save reported
+    a false success and set CONFIG_CHANGED.
+
+    `SERVER_NAME` is deliberately method `scheduler` in the fixture: it IS restored, so it cannot be
+    what keeps the loop happy, and the assertion below turns on the service-prefixed keys alone.
+    """
+    payload, flashed = _run_update({"SSL_PROTOCOLS": "TLSv1.2 TLSv1.3"}, override=True)
+
+    assert payload is None, "nothing changed, so nothing should have been sent to save"
+    assert flashed == ["The global settings were not edited because no values were changed."]
