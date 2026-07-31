@@ -23,6 +23,10 @@ if not lru then
 	require "bunkerweb.logger":new("METRICS"):log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
 
+-- Keys this worker wrote to Redis on the previous sync, so the next one can tell which
+-- ones the LRU has since evicted. Nothing else ever deletes their Redis counterpart.
+local synced_redis_keys = {}
+
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
@@ -210,6 +214,21 @@ end
 -- EXPIRE is denyoom-safe, so it must run under OOM to make these pinning keys
 -- and this worker's metrics keys evictable; it bypasses the redis_ok breaker
 -- (dead socket returns an ignored error).
+-- An evicted key keeps its last value in Redis forever, so it goes on being served by
+-- the plugin pages and counts against maxmemory. A TTL only bounds that to its own
+-- expiry, and only for keys that were still in the LRU when one was last applied.
+local function reap_evicted_redis_keys(self, wid, live_keys)
+	for key in pairs(synced_redis_keys) do
+		if not live_keys[key] then
+			local ok, err = self:redis_call("del", "metrics:" .. key .. ":" .. wid)
+			if not ok then
+				self:log_throttled(ERR, "reap_evicted", "Can't delete evicted metric " .. key .. " from Redis: " .. err)
+			end
+		end
+	end
+	synced_redis_keys = live_keys
+end
+
 local function refresh_request_ttls(self, ttl, wid)
 	if not ttl or ttl <= 0 then
 		return
@@ -461,8 +480,18 @@ function metrics:timer()
 		end
 	end
 
+	local lru_keys = lru:get_keys()
+	-- Built from the snapshot rather than from the writes below, so a key skipped because
+	-- the OOM breaker tripped or because it was raced out mid-loop is not taken for evicted.
+	local live_keys = {}
+	for _, key in ipairs(lru_keys) do
+		if key ~= "setup" and key ~= "requests" then
+			live_keys[key] = true
+		end
+	end
+
 	-- Loop on all keys
-	for _, key in ipairs(lru:get_keys()) do
+	for _, key in ipairs(lru_keys) do
 		-- Get LRU data
 		local value = lru:get(key)
 		-- get_keys() returns a snapshot and every redis_call below yields, so a
@@ -605,6 +634,9 @@ function metrics:timer()
 
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
+		if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+			reap_evicted_redis_keys(self, wid, live_keys)
+		end
 	end
 	if redis_connected and ttl > 0 then
 		refresh_request_ttls(self, ttl, wid)

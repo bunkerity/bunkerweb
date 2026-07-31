@@ -106,7 +106,9 @@ function badbehavior:log()
 	self:set_metric("counters", "status_" .. status, 1)
 	self:set_metric("counters", "ip_" .. self.ctx.bw.remote_addr, 1)
 	local request_uri = self.ctx.bw.request_uri or "-"
-	self:set_metric("counters", "url_" .. request_uri, 1)
+	-- count the path, not the full URI : a query string would mint a counter per scanned
+	-- parameter, which is unbounded and drowns the top URLs chart in single hits
+	self:set_metric("counters", "url_" .. (self.ctx.bw.uri or "-"), 1)
 	self:set_metric("tables", "increments_" .. self.ctx.bw.remote_addr, {
 		date = self.ctx.bw.start_time,
 		id = self.ctx.bw.request_id,
