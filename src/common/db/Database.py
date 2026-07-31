@@ -93,6 +93,14 @@ DEFAULT_POOL_TIMEOUT = 5
 DEFAULT_POOL_RECYCLE = 1800
 DEFAULT_POOL_PRE_PING = True
 
+# Methods that mean "a human edited this through a first-class interface". They overwrite
+# one another freely. "wizard" belongs here: the setup wizard creates its service with that
+# method and then writes the service's settings as "ui", so the two must be interchangeable
+# or every later edit of that service is silently dropped. What makes the wizard service
+# special is that it cannot be deleted, which is enforced separately and deliberately not
+# by this set.
+EDITABLE_METHODS = frozenset({"ui", "api", "wizard"})
+
 
 def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
     @wraps(func)
@@ -443,8 +451,8 @@ class Database:
         """
         Compatibility rules for overwriting a setting's existing method:
         - autoconf wins over everything (and only autoconf overwrites autoconf).
-        - ui and api are interchangeable.
-        - scheduler (env-var origin) overwrites ui/api only when the caller asserts the
+        - ui, api and wizard are interchangeable (see EDITABLE_METHODS).
+        - scheduler (env-var origin) overwrites those only when the caller asserts the
           setting was explicitly declared in the environment (allow_scheduler_override),
           so config-as-code stays authoritative without default-filled scheduler passes
           wiping UI/API customizations; the reverse stays blocked to protect in-session
@@ -458,9 +466,9 @@ class Database:
             return True
         if current_method == "autoconf":
             return new_method == "autoconf"
-        if {new_method, current_method} <= {"ui", "api"}:
+        if {new_method, current_method} <= EDITABLE_METHODS:
             return True
-        if new_method == "scheduler" and current_method in ("ui", "api"):
+        if new_method == "scheduler" and current_method in EDITABLE_METHODS:
             return allow_scheduler_override
         return new_method == current_method
 
