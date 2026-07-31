@@ -656,10 +656,12 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
                 config_row["type"] = config_row["type"].strip().replace("-", "_").lower()
                 session.add(Template_custom_configs(**config_row))
 
+            # The timestamp must move with the flag -- see the note in config_save.py: the
+            # scheduler and the job that acknowledges a change both key off it.
             session.execute(
                 update(Plugins)
                 .filter(Plugins.id.in_(set(plugin.id for plugin in session.execute(select(Plugins.id)).all())))
-                .values({Plugins.config_changed: True})
+                .values({Plugins.config_changed: True, Plugins.last_config_change: datetime.now().astimezone()})
                 .execution_options(synchronize_session=False)
             )
 
@@ -696,10 +698,12 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
                 return "Template is currently used by a service"
 
             session.delete(template)
+            # The timestamp must move with the flag -- see the note in config_save.py: the
+            # scheduler and the job that acknowledges a change both key off it.
             session.execute(
                 update(Plugins)
                 .filter(Plugins.id.in_(set(plugin.id for plugin in session.execute(select(Plugins.id)).all())))
-                .values({Plugins.config_changed: True})
+                .values({Plugins.config_changed: True, Plugins.last_config_change: datetime.now().astimezone()})
                 .execution_options(synchronize_session=False)
             )
 

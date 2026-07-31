@@ -213,7 +213,15 @@ class Config:
                 sleep(5)
 
         if not ready:
-            raise Exception("Too many retries while waiting for scheduler to apply configuration...")
+            # Deliberately not fatal. The flags above are now held until the job that applies a
+            # change acknowledges it, rather than being cleared the moment the scheduler
+            # dispatched that job -- which is what makes a lost configuration recoverable. The
+            # cost is that they legitimately stay set for as long as the push takes, and
+            # push-configs shares one worker with certbot and the blocklist downloads on the
+            # heavy lane. Raising here would turn "the worker is busy, or down" into an autoconf
+            # outage. Proceeding is what the 240s timeout already meant; the only question was
+            # whether giving up should be loud or fatal.
+            self.__logger.warning("Scheduler has not finished applying the configuration after 240s; proceeding anyway")
 
         if waited:
             self.__logger.info("Scheduler is ready, proceeding")

@@ -24,6 +24,11 @@ from jobs import Job  # type: ignore
 LOGGER = getLogger("CERTIFICATES")
 JOB = Job(LOGGER, __file__)
 
+# Snapshot the change flags before reading anything we are about to act on, so the
+# acknowledgement at the end can compare-and-clear: a certificate change that lands while this
+# job runs keeps a newer watermark, is not acknowledged, and is picked up on the next poll.
+METADATA_SNAPSHOT = JOB.db.get_metadata()
+
 status = 0
 
 
@@ -103,5 +108,19 @@ except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running deploy-certificates.py :\n{e}")
+
+# Acknowledge the certificate change this run applied. The scheduler used to clear this flag in
+# the same iteration that dispatched this job, so a run that never happened left nothing to
+# re-dispatch; clearing it here at least means the job ran.
+#
+# Known ceiling, and it is why this is not the whole fix: "ran" is not "reached the instances".
+# This job writes the material and exits 1; the actual /cache push and reload happen afterwards
+# in the worker's debounced reload path, so a failure THERE is acknowledged as success. Closing
+# that needs the certificates flag to travel with the push, which belongs to the certificates
+# chantier rather than here. Still strictly better than clearing before the job even started.
+if status in (0, 1):
+    error = JOB.db.clear_applied_changes(METADATA_SNAPSHOT, ("certificates",))
+    if error:
+        LOGGER.error(f"Could not acknowledge the applied certificate changes: {error}")
 
 sys_exit(status)

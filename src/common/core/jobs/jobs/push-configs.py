@@ -123,6 +123,28 @@ def acquire_lease(client, lock_owner: str, reclaimable: bool) -> bool:
     return True
 
 
+def acknowledge_changes(db: Database, metadata_snapshot, reason: str) -> None:
+    """Tell the database this run applied the changes it read, and only those.
+
+    The scheduler used to clear the change flags in the same iteration that DISPATCHED this job.
+    Dispatch is fire-and-forget -- there is no result backend -- so a push that never completed
+    left the flags already clear and nothing re-dispatched it: instances kept serving the
+    previous configuration indefinitely.
+
+    Acknowledging here, from the run that actually pushed, closes that. `metadata_snapshot` is
+    taken before this job reads anything, and the clear is a compare-and-set against each
+    change's `last_*_change` watermark, so a change that landed WHILE this run worked has a
+    newer watermark, is not acknowledged, and gets picked up on the next poll.
+    """
+    error = db.clear_applied_changes(metadata_snapshot)
+    if error:
+        # Not fatal: leaving a flag set costs a redundant push next poll, which is the safe
+        # direction. Clearing it wrongly would cost a lost configuration.
+        LOGGER.error(f"Could not acknowledge the applied changes ({reason}): {error}")
+    else:
+        LOGGER.info(f"Acknowledged the configuration changes applied by this run ({reason})")
+
+
 def _materialize_custom_configs(db: Database) -> None:
     LOGGER.info("Materializing custom configs from DB ...")
     CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
@@ -421,11 +443,28 @@ try:
         sys_exit(0)
 
     db = Database(LOGGER)
+
+    # Snapshot the change flags BEFORE reading anything we are about to apply. Everything below
+    # -- the materialize calls, and gen/main.py inside _render_nginx_configs, which opens its own
+    # connection later still -- reads the database strictly after this point, so any change that
+    # lands from here on carries a newer watermark than the snapshot and will not be acknowledged
+    # by this run. Snapshotting after the reads would swallow it.
+    metadata_snapshot = db.get_metadata()
+
     _purge_retired_caches(db)
 
     instances = [inst for inst in db.get_instances(with_credential=True) if inst.get("status") != "down"]
     if not instances:
         LOGGER.warning("No live BunkerWeb instances registered; nothing to push")
+        # Acknowledge anyway. With no instance registered there is nothing this change could be
+        # applied to, and holding the flags set would leave the UI waiting on a push that can
+        # never happen -- the state a fresh install sits in throughout the setup wizard.
+        # Registering an instance raises `instances_changed` (db_methods/instances.py:86), so a
+        # real push follows as soon as there is somewhere to push to.
+        # ponytail: known ceiling -- if the whole fleet is momentarily marked down during a
+        # change, this acknowledges without pushing and the fleet stays stale until the next
+        # change, because update_instance() does not re-raise instances_changed.
+        acknowledge_changes(db, metadata_snapshot, "no live instances")
         sys_exit(0)
 
     if target_hostnames:
@@ -454,6 +493,14 @@ try:
     reload_ok = _trigger_reload(api_caller)
     if reload_ok:
         LOGGER.info("Push and reload completed successfully")
+        # Only here. Gating on the exit code instead would acknowledge four paths that reach
+        # exit 0 having pushed nothing (the lease skip, no live instances, no target match, and
+        # a failed push whose reload still succeeded), and `Jobs_runs.success` is likewise true
+        # for all of them -- neither is a statement that instances took the new configuration.
+        if push_ok:
+            acknowledge_changes(db, metadata_snapshot, "pushed and reloaded")
+        else:
+            LOGGER.warning("Not acknowledging the changes: at least one artifact push failed, so a re-push is still owed")
     else:
         LOGGER.error("Reload failed on at least one instance")
         if snapshot is not None and _restore_from_snapshot(snapshot, api_caller):

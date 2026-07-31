@@ -4,7 +4,7 @@ from contextlib import suppress
 from datetime import datetime
 from json import dumps
 from os import environ, urandom
-from typing import Any, Dict, List, Literal, Mapping, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Literal, Mapping, Optional, Sequence, Set, Tuple, Union
 
 from certificate_utils import ACTIVE_KEY_ENV, KEYS_ENV  # type: ignore
 from model import Metadata, Plugins  # type: ignore
@@ -16,6 +16,10 @@ from .common import DatabaseMixinBase, retry_on_transient_db_errors
 # Key id of the database-stored fallback keyring. The keyring is a mapping, so a future
 # rotation adds "db-v2" alongside it rather than replacing this entry.
 DB_KEYRING_KEY_ID = "db-v1"
+# Change flags a JOB owns the acknowledgement of, each paired with a `last_<key>_change`
+# watermark that only its setters write. "config" is deliberately absent: it clears nothing
+# (see `checked_changes`), it only latches `first_config_saved`.
+CLEARABLE_CHANGES = ("custom_configs", "external_plugins", "pro_plugins", "instances", "certificates")
 # Secrets that PATCH /metadata must never be able to overwrite: replacing the keyring makes
 # every stored private key and per-instance credential undecryptable, and planting a known
 # key would compromise everything encrypted afterwards.
@@ -215,6 +219,75 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
                         continue
 
                     setattr(metadata, key, value)
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    @retry_on_transient_db_errors
+    def clear_applied_changes(self, snapshot: Mapping[str, Any], keys: Optional[Sequence[str]] = None) -> str:
+        """Acknowledge the changes a job has just applied — and only those.
+
+        The scheduler used to clear the change flags in the same breath as *dispatching* the job
+        that applies them, which is fire-and-forget (no result backend). A push that never
+        completed — worker killed and the delivery abandoned, dispatch refused, the job failing —
+        therefore left the flags already clear, so nothing ever re-dispatched it and every
+        instance kept serving the previous configuration with only a failed job run as evidence.
+
+        Clearing belongs to whoever did the work. That moves the risk from "lost update on the
+        failure path" to "lost update on the success path": a change landing WHILE the job runs
+        must not be acknowledged by it. Hence compare-and-clear — `snapshot` is a `get_metadata()`
+        taken before the job read the data it applied, and a flag is only cleared while its
+        `last_*_change` watermark still holds the snapshotted value. Anything newer belongs to a
+        change this run never saw: the flag stays set and the scheduler re-dispatches.
+
+        This deliberately never WRITES a `last_*_change`. Those columns are written by the
+        setters alone, which is what makes them usable as generation tokens; moving one here
+        would destroy the very value the next comparison depends on.
+
+        Known residual: on MySQL and MariaDB these columns are second-resolution `DATETIME`, so
+        two changes inside the same second share a watermark and the second one can be
+        acknowledged by a run that never saw it. That is a ~1s window against the previous
+        behaviour's window of the entire push, and closing it needs `DATETIME(6)` — a migration
+        across four engines, which belongs to the Alembic closure work rather than here.
+        """
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                for key in keys or CLEARABLE_CHANGES:
+                    # The `_changed` test is an optimization, not a guard: a flag that was not
+                    # set in the snapshot cannot be wrongly cleared anyway, because a change
+                    # arriving since would have moved the watermark the WHERE compares. It only
+                    # skips UPDATEs that would match nothing or write False over False.
+                    if key not in CLEARABLE_CHANGES or not snapshot.get(f"{key}_changed"):
+                        continue
+                    watermark = snapshot.get(f"last_{key}_change")
+                    timestamp_column = getattr(Metadata, f"last_{key}_change")
+                    session.execute(
+                        update(Metadata)
+                        .where(Metadata.id == 1, timestamp_column.is_(None) if watermark is None else timestamp_column == watermark)
+                        .values({getattr(Metadata, f"{key}_changed"): False})
+                    )
+
+                # `plugins_config_changed` arrives from `get_metadata` already shaped as
+                # {plugin_id: last_config_change} (see above), so each plugin carries its own
+                # token and they are cleared one by one -- never with a WHERE-less UPDATE over
+                # every row, which is what `checked_changes(plugins_changes="all")` does and why
+                # it erases changes it never looked at.
+                if not keys or "plugins_config" in keys:
+                    for plugin_id, watermark in (snapshot.get("plugins_config_changed") or {}).items():
+                        session.execute(
+                            update(Plugins)
+                            .where(
+                                Plugins.id == plugin_id,
+                                Plugins.last_config_change.is_(None) if watermark is None else Plugins.last_config_change == watermark,
+                            )
+                            .values({Plugins.config_changed: False})
+                        )
+
                 session.commit()
             except BaseException as e:
                 return str(e)

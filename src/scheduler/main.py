@@ -101,6 +101,11 @@ if not HEALTHCHECK_INTERVAL.isdigit():
     HEALTHCHECK_INTERVAL = 30
 
 HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
+
+# A change flag is now cleared by the job that applies it, not by us on dispatch. So a flag
+# still set this long after our last dispatch means that dispatch never landed, and nothing
+# else will ever retry it.
+APPLY_RETRY_INTERVAL = int(getenv("APPLY_RETRY_INTERVAL", "300") or 300)
 HEALTHCHECK_EVENT = Event()
 HEALTHCHECK_LOGGER = getLogger("SCHEDULER.HEALTHCHECK")
 
@@ -807,10 +812,10 @@ if __name__ == "__main__":
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CERTIFICATES_NEED_DEPLOYMENT = False
-        CHANGES = []
 
         changed_plugins = []
         old_changes = {}
+        last_dispatch = None
         healthcheck_job_run = False
 
         while True:
@@ -868,12 +873,27 @@ if __name__ == "__main__":
             else:
                 LOGGER.error("One or more BunkerWeb instances are unreachable")
 
-            try:
-                ret = API_CLIENT.checked_changes(CHANGES, plugins_changes="all", value=False)
-                if ret:
-                    LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-            except BaseException as e:
-                LOGGER.error(f"Error while setting changes to checked in the database: {e}")
+            # The change flags are NOT cleared here any more. This ran in the same iteration that
+            # dispatched push-configs, which is fire-and-forget (no result backend), so a push
+            # that never completed left the flags clear and nothing ever re-dispatched it --
+            # instances kept serving the previous configuration with only a failed job run as
+            # evidence. The job that applies a change now acknowledges it, compare-and-set
+            # against the watermark it read (Database.clear_applied_changes).
+            #
+            # What remains is the one thing `checked_changes` does that is not a clear: "config"
+            # only latches `first_config_saved` (db_methods/metadata.py), which autoconf's
+            # readiness gate blocks on. Never call it with an empty list -- `changes or [...]`
+            # in that method turns `[]` into a blanket clear of every flag, including ones the
+            # scheduler does not own.
+            if CONFIG_NEED_GENERATION:
+                try:
+                    ret = API_CLIENT.checked_changes(["config"], value=False)
+                    if ret:
+                        LOGGER.error(f"An error occurred when latching first_config_saved in the database : {ret}")
+                except BaseException as e:
+                    LOGGER.error(f"Error while latching first_config_saved in the database: {e}")
+
+            last_dispatch = datetime.now().astimezone()
 
             FIRST_START = False
             NEED_RELOAD = False
@@ -882,7 +902,6 @@ if __name__ == "__main__":
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
-            INSTANCES_NEED_GENERATION = False
             CERTIFICATES_NEED_DEPLOYMENT = False
             changed_plugins.clear()
 
@@ -953,8 +972,7 @@ if __name__ == "__main__":
 
                     # check if the plugins have changed since last time
                     if changes["pro_plugins_changed"] and (
-                        not API_CLIENT.readonly
-                        or not changes["last_pro_plugins_change"]
+                        not changes["last_pro_plugins_change"]
                         or not old_changes
                         or old_changes["last_pro_plugins_change"] != changes["last_pro_plugins_change"]
                     ):
@@ -965,8 +983,7 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     if changes["external_plugins_changed"] and (
-                        not API_CLIENT.readonly
-                        or not changes["last_external_plugins_change"]
+                        not changes["last_external_plugins_change"]
                         or not old_changes
                         or old_changes["last_external_plugins_change"] != changes["last_external_plugins_change"]
                     ):
@@ -978,8 +995,7 @@ if __name__ == "__main__":
 
                     # check if the custom configs have changed since last time
                     if changes["custom_configs_changed"] and (
-                        not API_CLIENT.readonly
-                        or not changes["last_custom_configs_change"]
+                        not changes["last_custom_configs_change"]
                         or not old_changes
                         or old_changes["last_custom_configs_change"] != changes["last_custom_configs_change"]
                     ):
@@ -989,12 +1005,14 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     # check if the config have changed since last time
-                    if changes["plugins_config_changed"] and (
-                        not API_CLIENT.readonly
-                        or not changes.get("last_plugins_config_change")
-                        or not old_changes
-                        or old_changes["plugins_config_changed"] != changes["plugins_config_changed"]
-                    ):
+                    # No `not API_CLIENT.readonly` short-circuit: the flags now survive until
+                    # the job acknowledges them, so an un-guarded truthiness test would
+                    # re-dispatch push-configs and re-run SCHEDULER.reload() every second while
+                    # a push is in flight. The dict is {plugin_id: last_config_change}, so a
+                    # genuinely new change moves a timestamp and compares unequal.
+                    # (A `not changes.get("last_plugins_config_change")` clause used to sit
+                    # here; that key is never in the dict built above, so it was always true.)
+                    if changes["plugins_config_changed"] and (not old_changes or old_changes["plugins_config_changed"] != changes["plugins_config_changed"]):
                         LOGGER.info("Plugins config changed, generating ...")
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
@@ -1003,13 +1021,9 @@ if __name__ == "__main__":
 
                     # check if the instances have changed since last time
                     if changes["instances_changed"] and (
-                        not API_CLIENT.readonly
-                        or not changes["last_instances_change"]
-                        or not old_changes
-                        or old_changes["last_instances_change"] != changes["last_instances_change"]
+                        not changes["last_instances_change"] or not old_changes or old_changes["last_instances_change"] != changes["last_instances_change"]
                     ):
                         LOGGER.info("Instances changed, generating ...")
-                        INSTANCES_NEED_GENERATION = True
                         PRO_PLUGINS_NEED_GENERATION = True
                         PLUGINS_NEED_GENERATION = True
                         CONFIGS_NEED_GENERATION = True
@@ -1021,8 +1035,7 @@ if __name__ == "__main__":
                     # the templates — so only the deployment job runs; it pushes the cache and
                     # requests the reload itself when it actually wrote something.
                     if changes["certificates_changed"] and (
-                        not API_CLIENT.readonly
-                        or not changes["last_certificates_change"]
+                        not changes["last_certificates_change"]
                         or not old_changes
                         or old_changes.get("last_certificates_change") != changes["last_certificates_change"]
                     ):
@@ -1031,6 +1044,26 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     old_changes = changes.copy()
+
+                    # Re-arm. A flag still set this long after the last dispatch means that
+                    # dispatch never landed -- the broker was down so the dispatch was refused,
+                    # the worker was killed and the delivery abandoned past its retry limit, the
+                    # job failed to render, or it skipped on a lease it could not take. None of
+                    # those produce a new timestamp, so the dedup above would sit on them
+                    # forever. Forgetting what we last saw makes the next poll treat the pending
+                    # flags as new and dispatch again.
+                    # ponytail: fixed interval, no backoff -- add one only if flapping shows up.
+                    still_pending = bool(changes["plugins_config_changed"]) or any(
+                        changes[key]
+                        for key in ("pro_plugins_changed", "external_plugins_changed", "custom_configs_changed", "instances_changed", "certificates_changed")
+                    )
+                    if still_pending and last_dispatch is not None and (datetime.now().astimezone() - last_dispatch).total_seconds() >= APPLY_RETRY_INTERVAL:
+                        LOGGER.warning(
+                            f"Configuration changes are still pending {APPLY_RETRY_INTERVAL}s after the last dispatch; "
+                            "the job that should have applied them never completed. Dispatching again ..."
+                        )
+                        old_changes = {}
+                        last_dispatch = None
                 except BaseException:
                     LOGGER.debug(format_exc())
                     if errors > 5:
@@ -1042,31 +1075,22 @@ if __name__ == "__main__":
             if NEED_RELOAD:
                 APPLYING_CHANGES.set()
                 LOGGER.debug(f"Changes: {changes}")
-                CHANGES.clear()
-
-                if INSTANCES_NEED_GENERATION:
-                    CHANGES.append("instances")
 
                 if CERTIFICATES_NEED_DEPLOYMENT:
-                    CHANGES.append("certificates")
                     SCHEDULER.run_single("deploy-certificates")
 
                 if CONFIGS_NEED_GENERATION:
-                    CHANGES.append("custom_configs")
                     generate_custom_configs(API_CLIENT.get_custom_configs())
 
                 if PLUGINS_NEED_GENERATION:
-                    CHANGES.append("external_plugins")
                     generate_external_plugins()
                     SCHEDULER.update_jobs()
 
                 if PRO_PLUGINS_NEED_GENERATION:
-                    CHANGES.append("pro_plugins")
                     generate_external_plugins(PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 if CONFIG_NEED_GENERATION:
-                    CHANGES.append("config")
                     old_env = env.copy()
                     env = API_CLIENT.get_config()
                     _strip_bootstrap_env(env)

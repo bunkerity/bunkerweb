@@ -431,10 +431,16 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                             metadata.last_custom_configs_change = datetime.now().astimezone()
 
                     if changed_plugins:
+                        # `last_config_change` must move with the flag. `get_metadata` exports
+                        # this as `{plugin_id: last_config_change}` and the scheduler compares
+                        # that map against the previous poll to decide whether a change is new
+                        # -- so a flag raised without a fresh timestamp is indistinguishable
+                        # from the one before it, and whoever acknowledges the change cannot
+                        # tell "the change I applied" from "one that landed while I worked".
                         session.execute(
                             update(Plugins)
                             .filter(Plugins.id.in_(changed_plugins))
-                            .values({Plugins.config_changed: True})
+                            .values({Plugins.config_changed: True, Plugins.last_config_change: datetime.now().astimezone()})
                             .execution_options(synchronize_session=False)
                         )
 
