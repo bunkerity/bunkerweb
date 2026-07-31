@@ -8,6 +8,7 @@
 - [SECURITY] `ui`: *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
 - [SECURITY] `core`: client-supplied `X-SSL-*` request headers are stripped before reaching an upstream. With mTLS header forwarding off, or on any PHP-FPM service, a client could spoof `X-SSL-Client-Verify: SUCCESS`. See the mTLS documentation to re-publish them when another proxy terminates mTLS.
 - [BUGFIX] `core`: application-generated upstream 403 responses remain in access logs without appearing as unknown Security Reports or being reported to BunkerNet.
+- [BUGFIX] `modsecurity`: `USE_MODSECURITY_GLOBAL_CRS` no longer breaks the configuration when no service is defined yet, where an empty allowed-methods list surfaced as a syntax error in the CRS setup file. (Fixes #3761)
 - [BUGFIX] `ui`: settings on a service created by the setup wizard can be edited again. Every change was silently discarded, with no error and the old value redrawn, because the wizard's own method was not recognized as compatible with the UI's. (Fixes #3751)
 - [BUGFIX] `cli`: `bwcli ban` and `bwcli unban` reported success even when every instance refused the request, so a ban that was never lifted looked lifted. (Fixes #3759)
 - [BUGFIX] `ui`: serve `/favicon.ico`; the 404 counted toward the badbehavior threshold and could ban an administrator out of the web UI on default settings. (Refs #3759)

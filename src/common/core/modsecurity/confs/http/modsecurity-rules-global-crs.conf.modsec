@@ -84,7 +84,7 @@ SecAction \
   nolog,\
   pass,\
   t:none,\
-  setvar:'tx.allowed_methods={{ allowed_methods_list | join(" ") }}'"
+  setvar:'tx.allowed_methods={{ (allowed_methods_list | join(" ")) or ALLOWED_METHODS.replace("|", " ") }}'"
   {% endif %}
 
   {% if USE_MODSECURITY_CRS == "yes" -%}
