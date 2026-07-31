@@ -3,6 +3,7 @@
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from ipaddress import ip_address
 from json import dumps, loads
 from os import getenv, sep
 from os.path import join
@@ -110,6 +111,25 @@ CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 def normalize_server_names(server_names: str) -> Set[str]:
     """Return a normalized set of server names split on comma/space, lowercased and trimmed."""
     return {part.strip().lower() for part in server_names.replace(",", " ").split() if part.strip()}
+
+
+def unissuable_names(names: List[str]) -> List[str]:
+    """Return the names no public ACME CA can issue for: IP literals and single-label hosts.
+
+    Nothing else rejects them, so they reach certbot, fail on every run and keep the whole job
+    red even when every other service got its certificate.
+    """
+    unissuable = []
+    for name in names:
+        candidate = name.strip().lower().removeprefix("*.")
+        try:
+            ip_address(candidate)
+        except ValueError:
+            if "." not in candidate.rstrip("."):
+                unissuable.append(name)
+        else:
+            unissuable.append(name)
+    return unissuable
 
 
 def filter_wildcard_names(names: Set[str]) -> Set[str]:
@@ -405,6 +425,20 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
             wildcard = False
 
     server_names = server_names_val.split()
+
+    unissuable = unissuable_names(server_names)
+    if unissuable:
+        issuable = [name for name in server_names if name not in unissuable]
+        if activated:
+            LOGGER.warning(
+                f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
+                + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
+            )
+        if issuable:
+            server_names = issuable
+        else:
+            misconfigured = misconfigured or activated
+            activated = False
 
     return server_names, {
         "server_names": "",
