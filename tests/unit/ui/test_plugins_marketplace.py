@@ -21,6 +21,7 @@ from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 import plugin_extensions  # type: ignore  # noqa: E402 -- on sys.path via the root conftest
+from app.utils import get_filtered_settings  # noqa: E402
 
 TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
 LOCALES = TEMPLATES.parent / "static" / "locales"
@@ -84,6 +85,9 @@ def _render(**context):
         csrf_token=lambda: "test-token",
         url_for=_url_for,
         is_plugin_active=_fake_is_plugin_active,
+        # The activation link is gated on the SHELF'S own loop filter, so the grid must resolve
+        # the real function -- an Undefined here would silently make every link vanish.
+        get_filtered_settings=get_filtered_settings,
     )
     base = dict(
         plugins={},
@@ -106,8 +110,21 @@ def _render(**context):
     return env.get_template("plugins.html").render(**base)
 
 
-def _plugin(type="core", name=None, description="d", version="1.0", method="manual", page=False, enabled=True, icon=None):  # noqa: A002
-    return {"type": type, "name": name, "description": description, "version": version, "method": method, "page": page, "enabled": enabled, "icon": icon}
+def _plugin(type="core", name=None, description="d", version="1.0", method="manual", page=False, enabled=True, icon=None, settings=None):  # noqa: A002
+    # `settings` defaults to one multisite entry because that is what makes a plugin appear in the
+    # compose shelf, and therefore what makes its card eligible for an activation link. Pass {} for
+    # the settings-less plugins (certificates, jobs, templates) that must NOT get one.
+    return {
+        "type": type,
+        "name": name,
+        "description": description,
+        "version": version,
+        "method": method,
+        "page": page,
+        "enabled": enabled,
+        "icon": icon,
+        "settings": {"USE_X": {"context": "multisite", "default": "no"}} if settings is None else settings,
+    }
 
 
 def _card_slice(html, plugin_id):
@@ -795,3 +812,36 @@ def test_the_shelf_unfolds_the_row_a_link_names():
     hook = script[script.index("shelf-row-") :]  # noqa: E203
     assert "expanded = true" in hook
     assert "scrollIntoView" in hook
+
+
+def test_no_card_links_to_a_shelf_row_the_shelf_would_not_render():
+    """THE DEFECT THE RUNNING STACK FOUND, in its general form.
+
+    The card's link and the shelf's row live on two different pages, so no rendered-markup
+    assertion about either one alone can see a mismatch between them. On the real stack three core
+    plugins -- `certificates`, `jobs`, `templates` -- shipped a link to a row that does not exist:
+    all three declare ZERO settings, and the shelf's loop is
+    `for plugin, plugin_data in plugins.items() if get_filtered_settings(...)`, so they never enter
+    it. The link landed on a page where its fragment named nothing.
+
+    Computed over the REAL shipped manifests rather than a fixture, because the failure was a set
+    difference between what ships and what the two templates each decide to render.
+    """
+    # Source-level half: both templates must gate on the SAME function. Asserting the two
+    # computed sets are equal would be vacuous -- one expression evaluated twice always agrees.
+    grid = (TEMPLATES / "plugins.html").read_text(encoding="utf-8")
+    shelf = (TEMPLATES / "models" / "compose_shelf.html").read_text(encoding="utf-8")
+    before = grid[: grid.index("plugin-activation-link")].splitlines()
+    link_gate = next(line for line in reversed(before) if line.lstrip().startswith("{% if "))
+    assert "get_filtered_settings(" in link_gate, f"the link is gated on something else: {link_gate.strip()}"
+    assert "if get_filtered_settings(" in shelf, "the shelf stopped filtering its loop on get_filtered_settings"
+
+    # Behavioural half, over what actually ships.
+    settings_less = {
+        manifest.parent.name for manifest in CORE_PLUGINS_PATH.glob("*/plugin.json") if not json.loads(manifest.read_text(encoding="utf-8")).get("settings", {})
+    }
+    assert settings_less, "no settings-less core plugin ships any more -- this guard has gone vacuous"
+    for plugin_id in sorted(settings_less):
+        html = _render(plugins={plugin_id: _plugin(name=plugin_id.title(), settings={})}, config={})
+        card = _card_slice(html, plugin_id)
+        assert "plugin-activation-link" not in card, f"{plugin_id} has no shelf row but its card links to one"

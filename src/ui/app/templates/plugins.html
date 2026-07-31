@@ -169,12 +169,20 @@
                                     <i class="bx bx-trash bx-xs" aria-hidden="true"></i>
                                 </button>
                             {% endif %}
-                            {% if is_core and not is_always %}
+                            {% if is_core and not is_always and get_filtered_settings(plugin_data.get('settings', {}), true) %}
                                 {# Replaces the switch this card used to render for core plugins.
                                    Deep-links the shelf ROW, not the shelf: the row may be folded
                                    away when the plugin is inactive, which is exactly when someone
                                    follows this link, so compose-shelf.js unfolds the row named by
-                                   the fragment. #}
+                                   the fragment.
+
+                                   The predicate is the SHELF'S OWN loop filter
+                                   (compose_shelf.html:182), not an approximation of it: a plugin
+                                   with no settings -- certificates, jobs, templates all ship zero
+                                   -- never enters that loop, so a link to its row would land on a
+                                   page where the fragment names nothing. Measured on the running
+                                   stack; a rendered-markup test cannot see it, because the two
+                                   sides live on different pages. #}
                                 <a role="button"
                                    class="btn btn-icon btn-outline-primary btn-sm plugin-activation-link"
                                    href="{{ url_for('global_settings.global_settings_page') }}#shelf-row-{{ plugin }}"
