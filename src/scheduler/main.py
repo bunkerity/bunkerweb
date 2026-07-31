@@ -19,7 +19,7 @@ from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
 from threading import Event, Lock
-from time import sleep
+from time import monotonic, sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Set, Union, cast
 
@@ -208,6 +208,49 @@ def stop(status):
     HEALTHY_PATH.unlink(missing_ok=True)
     SCHEDULER_TASKS_EXECUTOR.shutdown(wait=False)
     _exit(status)
+
+
+def wait_for_reachable_instance(timeout: int = 60) -> bool:
+    """Wait for an instance to answer, put the ones that did back in SCHEDULER.apis.
+
+    Nothing orders the instance before the scheduler: the two systemd units share only
+    After=network.target, and depends_on merely waits for the container to exist. So on a
+    reboot the config sends that run during startup hit an instance that is not listening
+    yet and drop it from SCHEDULER.apis, which then skips both the first-start push and the
+    reload after the once-jobs -- and nothing puts it back, because send_file_to_bunkerweb
+    only re-adds an instance whose send succeeded, and it has none left to send to. The
+    instance keeps its loading configuration (no vhost, so no certificate either) until
+    healthcheck_job takes over, and that is only scheduled once every once-job has finished.
+    """
+    assert SCHEDULER is not None
+    deadline = monotonic() + timeout
+    announced = False
+
+    while True:
+        reachable = False
+        for db_instance in SCHEDULER.db.get_instances():
+            with suppress(BaseException):
+                # A "loading" answer counts: the instance is listening and will take the config.
+                if not API.from_instance(db_instance).request("GET", "health")[0]:
+                    continue
+                reachable = True
+                endpoint = f"{_instance_endpoint(db_instance)}/"
+                with SCHEDULER_LOCK:
+                    if all(api.endpoint != endpoint for api in SCHEDULER.apis):
+                        LOGGER.debug(f"Adding {endpoint} to the list of reachable instances")
+                        SCHEDULER.apis.append(API.from_instance(db_instance))
+
+        if reachable:
+            return True
+
+        if monotonic() >= deadline:
+            LOGGER.warning(f"No BunkerWeb instance answered within {timeout}s, skipping the initial configuration push ...")
+            return False
+
+        if not announced:
+            LOGGER.info(f"Waiting up to {timeout}s for a BunkerWeb instance to answer before sending the initial configuration ...")
+            announced = True
+        sleep(2)
 
 
 def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGGER, *, api_caller: Optional[ApiCaller] = None):
@@ -1063,7 +1106,10 @@ if __name__ == "__main__":
 
             # On first start, generate config and reload instances BEFORE running
             # plugin jobs — plugins need their API endpoints loaded on instances
-            if FIRST_START and CONFIG_NEED_GENERATION and SCHEDULER.apis:
+            # wait_for_reachable_instance() also repopulates SCHEDULER.apis, so it replaces the
+            # bare "do we have an instance" check that used to guard this branch — by now the
+            # startup sends have already emptied that list whenever the instance is still booting.
+            if FIRST_START and CONFIG_NEED_GENERATION and wait_for_reachable_instance():
                 LOGGER.info("First start: generating and sending initial configuration before running jobs ...")
                 if generate_configs():
                     first_start_futures = [
