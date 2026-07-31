@@ -522,7 +522,10 @@ class GatewayController(KubernetesController):
                         if isinstance(match, dict):
                             path = match.get("path")
                             if isinstance(path, dict) and path.get("value"):
-                                path_value = path.get("value")
+                                path_value = path["value"]
+                                # anchor regex paths so the template renders them as a regex location
+                                if path.get("type") == "RegularExpression" and not path_value.startswith("^"):
+                                    path_value = f"^{path_value}"
 
                         if listener_protocol == "TCP":
                             reverse_proxy_host = f"{backend_name}.{backend_namespace}.svc.{self._domain_name}"
