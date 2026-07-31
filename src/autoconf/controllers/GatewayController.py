@@ -801,8 +801,7 @@ class GatewayController(KubernetesController):
 
         # Add all IPs to the gateway status
         for ip in ips:
-            ip_match = self._ip_pattern.match(ip)
-            if ip_match:
+            if self._is_ip_address(ip):
                 patch_body["status"]["addresses"].append({"type": "IPAddress", "value": ip})
             else:
                 patch_body["status"]["addresses"].append({"type": "Hostname", "value": ip})
