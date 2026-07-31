@@ -8,6 +8,7 @@
 - [SECURITY] `ui`: *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
 - [SECURITY] `core`: client-supplied `X-SSL-*` request headers are stripped before reaching an upstream. With mTLS header forwarding off, or on any PHP-FPM service, a client could spoof `X-SSL-Client-Verify: SUCCESS`. See the mTLS documentation to re-publish them when another proxy terminates mTLS.
 - [BUGFIX] `core`: application-generated upstream 403 responses remain in access logs without appearing as unknown Security Reports or being reported to BunkerNet.
+- [BUGFIX] `ui`: CSV, Excel and clipboard exports no longer contain raw HTML; the formula-injection guard had replaced the formatters that strip it. (Fixes #3770)
 - [BUGFIX] `autoconf`: write IPv6 load balancer addresses to the Ingress and Gateway status as addresses, not hostnames, which Kubernetes rejected with a 422 on dual-stack clusters. (Fixes #3771)
 - [BUGFIX] `modsecurity`: `USE_MODSECURITY_GLOBAL_CRS` no longer breaks the configuration when no service is defined yet, where an empty allowed-methods list surfaced as a syntax error in the CRS setup file. (Fixes #3761)
 - [BUGFIX] `ui`: settings on a service created by the setup wizard can be edited again. Every change was silently discarded, with no error and the old value redrawn, because the wizard's own method was not recognized as compatible with the UI's. (Fixes #3751)
