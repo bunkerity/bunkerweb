@@ -80,6 +80,20 @@
   }
 
   apply();
+
+  // The marketplace card links here per plugin (#shelf-row-<id>) instead of rendering its own
+  // activation switch (S5). An inactive plugin's row is folded -- `display: none` -- and that is
+  // exactly the row someone arrives wanting, so the fragment has to unfold before the browser can
+  // scroll to it. Native anchor scrolling has already given up by the time this runs, hence the
+  // explicit scrollIntoView.
+  const targeted = location.hash.startsWith("#shelf-row-")
+    ? document.getElementById(location.hash.slice(1))
+    : null;
+  if (targeted && targeted.hasAttribute("data-shelf-row")) {
+    expanded = true;
+    apply();
+    targeted.scrollIntoView({ block: "center" });
+  }
 })();
 
 // -------------------------------------------------------- unsaved-edit guard (S3.5)

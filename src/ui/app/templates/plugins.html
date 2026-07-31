@@ -66,15 +66,14 @@
             {% set is_core = (ptype == 'core') %}
             {% set activation = plugin_activations.get(plugin) %}
             {% set is_always = activation == 'always' or plugin == 'general' %}
-            {% set use_key = 'USE_' ~ plugin|upper %}
-            {% if use_key not in config %}{% set use_key = 'USE_' ~ pname|replace(' ', '_')|upper %}{% endif %}
-            {# The key this card's switch posts, or none for "no switch, render the state badge".
-               A map-declared plugin is switchable exactly when the shared activation writer can
-               derive BOTH directions for it -- routes/plugins.py:activation_toggle_setting names
-               the key, and country / redirect / inject / php come back absent and keep the badge.
-               Everything else keeps the tier-3 USE_<ID>-in-config convention. #}
-            {% set toggle_key = (activation_toggles|default({})).get(plugin) if activation is mapping else (use_key if use_key in config else none) %}
-            {% set core_toggleable = is_core and not is_always and toggle_key %}
+            {# S5: this card no longer writes a core plugin's activation. A core plugin's switch used
+               to post an activation key to /plugins/enable, which is the same write the global
+               compose shelf makes -- two write paths, two derivations of "what is the active
+               value" (this one in Python, the shelf's in Jinja), for one user action. The card now
+               shows STATE and links to the shelf, which owns activation for both pages.
+               The switch below survives for external / pro / ui plugins only, where it means
+               something this card alone can do: flip the DB `enabled` flag, i.e. installed or not.
+               That is why the two are split by MEANING rather than deduplicated into one control. #}
             {% if is_core %}
                 {% set state_on = true if is_always else is_plugin_active(plugin, pname, config) %}
             {% else %}
@@ -130,7 +129,7 @@
                         <div class="plugin-state">
                             {% if is_core and is_always %}
                                 {{ badge(text="Core / always on", i18n_key="plugins.marketplace.always_on", variant="secondary", icon="bx-lock-alt") }}
-                            {% elif is_core and not core_toggleable %}
+                            {% elif is_core %}
                                 {% if state_on %}
                                     {{ badge(text="Active", i18n_key="plugins.marketplace.active", variant="success", icon="bx-check") }}
                                 {% else %}
@@ -142,7 +141,6 @@
                                       class="plugin-toggle-form mb-0">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden" name="plugin" value="{{ plugin }}" />
-                                    {% if core_toggleable %}<input type="hidden" name="setting" value="{{ toggle_key }}" />{% endif %}
                                     <input type="hidden" name="enabled" value="{{ 'yes' if state_on else 'no' }}" class="plugin-enabled-field" />
                                     <label class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
                                         <input class="form-check-input plugin-switch mt-0"
@@ -170,6 +168,23 @@
                                         data-i18n-options='{"name": "{{ pname }}"}'>
                                     <i class="bx bx-trash bx-xs" aria-hidden="true"></i>
                                 </button>
+                            {% endif %}
+                            {% if is_core and not is_always %}
+                                {# Replaces the switch this card used to render for core plugins.
+                                   Deep-links the shelf ROW, not the shelf: the row may be folded
+                                   away when the plugin is inactive, which is exactly when someone
+                                   follows this link, so compose-shelf.js unfolds the row named by
+                                   the fragment. #}
+                                <a role="button"
+                                   class="btn btn-icon btn-outline-primary btn-sm plugin-activation-link"
+                                   href="{{ url_for('global_settings.global_settings_page') }}#shelf-row-{{ plugin }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   data-bs-original-title="Manage activation of {{ pname }} in global settings"
+                                   data-i18n="tooltip.link.manage_activation"
+                                   data-i18n-options='{"name": "{{ pname }}"}'>
+                                    <i class="bx bx-toggle-left bx-xs" aria-hidden="true"></i>
+                                </a>
                             {% endif %}
                             {% if is_core or has_page %}
                                 <a role="button"

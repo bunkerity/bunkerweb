@@ -10,6 +10,7 @@ standalone-Jinja-env pattern.
 
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -151,60 +152,46 @@ class TestGridRender:
         assert "plugins.marketplace.always_on" in card
         assert "plugin-switch" not in card  # no toggle for always-on core
 
-    def test_core_toggleable_has_switch_bound_to_use_setting(self):
-        # gzip's manifest declares no `extensions.activation` -- undeclared, so it falls to the
-        # tier-3 conventional USE_<ID> switch. antibot no longer exercises this path (see
-        # test_core_specific_declared_activation_shows_badge_no_switch below): its manifest now
-        # declares {"USE_ANTIBOT": "no"}, which makes it core_specific instead of core_toggleable.
-        gzip_plugin = _plugin(name="Gzip")
-        html = _render(plugins={"gzip": gzip_plugin}, config={"USE_GZIP": {"value": "yes"}})
-        card = _card_slice(html, "gzip")
-        assert "plugin-switch" in card
-        assert 'name="setting" value="USE_GZIP"' in card
-        assert "checked" in card  # USE_GZIP=yes -> on
-
-    def test_map_declared_plugin_gets_a_switch_bound_to_its_declared_key(self):
-        # S3.4 T2: the read-only badge for map-declared core plugins is gone now that the shared
-        # writer can flip them. antibot declares {"USE_ANTIBOT": "no"} -- a 9-value select, so the
-        # switch must post the DECLARED key and let the writer pick a legal value, never "yes".
-        html = _render(plugins={"antibot": ALL_PLUGINS["antibot"]}, config=CONFIG, activation_toggles={"antibot": "USE_ANTIBOT"})
-        card = _card_slice(html, "antibot")
-        assert "plugin-switch" in card
-        assert 'name="setting" value="USE_ANTIBOT"' in card
-        assert "plugins.marketplace.active" not in card  # the badge it replaces
-
-    def test_map_declared_plugin_the_writer_refuses_keeps_the_state_badge(self):
-        # country's BLACKLIST_COUNTRY/WHITELIST_COUNTRY are multiselect: no derivable active
-        # value, and locked with the PO as count + chevron. The route leaves it out of
-        # activation_toggles, so the card must fall back to the read-only badge.
-        html = _render(plugins={"country": ALL_PLUGINS["country"]}, config=CONFIG, activation_toggles={"antibot": "USE_ANTIBOT"})
-        card = _card_slice(html, "country")
-        assert "plugin-switch" not in card
-        assert 'name="setting"' not in card
-        assert "plugins.marketplace.inactive" in card  # USE_COUNTRY=no -> inactive state badge
-
-    def test_absent_activation_toggles_degrades_every_map_plugin_to_the_badge(self):
-        # plugins_page swallows a get_plugins_settings() failure and passes nothing; a card must
-        # then render the read-only badge rather than a switch it cannot honour.
-        html = _render(plugins={"antibot": ALL_PLUGINS["antibot"], "country": ALL_PLUGINS["country"]}, config=CONFIG)
-        for plugin_id in ("antibot", "country"):
+    # S5: a core card reports activation and links to the shelf; it never writes it. Before S5
+    # `antibot` got a switch here and `country` did not, decided by whether a Python writer could
+    # derive both directions -- a second implementation of a rule the shelf already had in Jinja.
+    def test_no_core_card_renders_a_switch(self):
+        html = _render(plugins={k: ALL_PLUGINS[k] for k in ("general", "antibot", "country")}, config=CONFIG)
+        for plugin_id in ("general", "antibot", "country"):
             card = _card_slice(html, plugin_id)
             assert "plugin-switch" not in card, plugin_id
             assert 'name="setting"' not in card, plugin_id
+            assert "plugin-toggle-form" not in card, plugin_id
 
-    def test_map_declared_switch_never_borrows_the_use_id_convention(self):
-        # limit's tier-3 name would be USE_LIMIT, which is not a setting at all. The switch must
-        # post the key activation_toggles names, not the convention-derived one.
-        html = _render(plugins={"limit": _plugin(name="Limit")}, config=CONFIG, activation_toggles={"limit": "USE_LIMIT_REQ"})
-        card = _card_slice(html, "limit")
-        assert 'name="setting" value="USE_LIMIT_REQ"' in card
-        assert 'value="USE_LIMIT"' not in card
+    def test_a_core_card_reports_state_and_links_to_the_shelf(self):
+        html = _render(plugins={"antibot": ALL_PLUGINS["antibot"], "country": ALL_PLUGINS["country"]}, config=CONFIG)
+        active = _card_slice(html, "antibot")  # USE_ANTIBOT=yes
+        inactive = _card_slice(html, "country")  # USE_COUNTRY=no
+        assert "plugins.marketplace.active" in active
+        assert "plugins.marketplace.inactive" in inactive
+        for plugin_id, card in (("antibot", active), ("country", inactive)):
+            # `_url_for` collapses an endpoint to /<endpoint>, so the host part is the stub's,
+            # not a real path; the fragment is what this test is about.
+            assert f'href="/global_settings.global_settings_page#shelf-row-{plugin_id}"' in card, plugin_id
+            # Word-bounded: a bare substring check also passes for `plugin-activation-linkX`,
+            # which is a renamed (i.e. unstyled, unqueryable) class. Mutation caught exactly that.
+            assert re.search(r'class="[^"]*\bplugin-activation-link\b[^"]*"', card), plugin_id
+
+    def test_an_always_on_core_card_offers_no_activation_link(self):
+        """There is nothing to manage: the plugin is on unconditionally, and a link into the shelf
+        would land on a row that renders a locked chip rather than a control."""
+        card = _card_slice(_render(plugins={"general": ALL_PLUGINS["general"]}, config=CONFIG), "general")
+        assert "plugins.marketplace.always_on" in card
+        assert "plugin-activation-link" not in card
 
     def test_external_has_switch_without_setting(self):
+        """The switch survives S5 for external / pro / ui plugins, where it means the one thing the
+        shelf cannot express: the DB `enabled` flag, i.e. installed or not."""
         html = _render(plugins={"myext": ALL_PLUGINS["myext"]}, config={})
         card = _card_slice(html, "myext")
         assert "plugin-switch" in card
         assert 'name="setting"' not in card  # non-core: DB enabled flag, no USE_ setting
+        assert "plugin-activation-link" not in card  # its activation IS its installation
         assert 'data-enabled="true"' in html
 
     def test_disabled_external_switch_unchecked(self):
@@ -448,39 +435,6 @@ def test_activation_map_reaches_the_template(plugins_page_context):
     assert activations.get("limit") == {"USE_LIMIT_REQ": "no", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
 
 
-def test_marketplace_offers_a_switch_exactly_for_the_activations_the_writer_can_flip(plugins_page_context, route_app):
-    """The read-only badge for map-declared core plugins is dropped, but only where the shared
-    writer can actually derive both directions -- otherwise the card would offer a switch that
-    flashes an error. Asserted against the REAL manifests, so a new/changed activation
-    declaration shows up here rather than as a dead switch in production."""
-    module, _ = route_app
-    toggles = plugins_page_context()["activation_toggles"]
-    # switchable: single-key check/select activations, and limit's all-`check` multi-key one
-    assert toggles["antibot"] == "USE_ANTIBOT"
-    assert toggles["customcert"] == "USE_CUSTOM_SSL"
-    assert toggles["letsencrypt"] == "AUTO_LETS_ENCRYPT"  # matches no USE_<ID> convention
-    assert toggles["selfsigned"] == "GENERATE_SELF_SIGNED_SSL"  # ditto
-    assert toggles["limit"] == "USE_LIMIT_REQ"
-    # refused: list-shaped (country multiselect, redirect multiple) and free text (inject, php)
-    for refused in ("country", "redirect", "inject", "php"):
-        assert refused not in toggles, refused
-    # "always" declarations are never flippable
-    for always in ("errors", "headers", "misc", "pro", "sessions", "ssl"):
-        assert always not in toggles, always
-
-
-def test_an_env_without_plugin_schemas_degrades_to_no_toggles(plugins_page_context, route_app):
-    """`main.py:1262-1265` swallows a get_plugins() failure and parks `{}`. With no schemas the
-    route can derive nothing, and every map-declared card must fall back to the read-only badge
-    rather than offering a switch it cannot honour."""
-    module, _ = route_app
-    module.BW_CONFIG.get_plugins_settings.side_effect = RuntimeError("must not be called")
-    try:
-        assert plugins_page_context(env={"plugins": {}, "config": {}})["activation_toggles"] == {}
-    finally:
-        module.BW_CONFIG.get_plugins_settings.side_effect = None
-
-
 def test_the_marketplace_page_adds_no_api_round_trip(plugins_page_context, route_app):
     """Definitions come off g._env, which this request already paid for. A fetch here would be a
     second get_plugins() per page load."""
@@ -521,26 +475,6 @@ def test_enable_external_true(route_app, monkeypatch):
     client.set_plugin_enabled.assert_called_once_with("myext", True)
 
 
-def test_core_setting_toggle_calls_update_global_settings(route_app, monkeypatch):
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    _call_enable(module, app, monkeypatch, {"plugin": "antibot", "enabled": "no", "setting": "USE_ANTIBOT"}, client)
-    client.update_global_settings.assert_called_once_with({"USE_ANTIBOT": "no"})
-    client.set_plugin_enabled.assert_not_called()
-
-
-def test_invalid_setting_rejected(route_app, monkeypatch):
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    monkeypatch.setattr(module, "handle_error", lambda *a, **k: "REJECTED")
-    result = _call_enable(module, app, monkeypatch, {"plugin": "antibot", "enabled": "no", "setting": "DROP TABLE"}, client)
-    assert result == "REJECTED"
-    client.update_global_settings.assert_not_called()
-    client.set_plugin_enabled.assert_not_called()
-
-
 def test_readonly_blocks(route_app, monkeypatch):
     module, app = route_app
     client = module.API_CLIENT
@@ -561,27 +495,6 @@ def test_non_admin_blocks(route_app, monkeypatch):
     with app.test_request_context("/plugins/enable", method="POST", data={"plugin": "myext", "enabled": "no"}):
         resp = module.enable_plugin.__wrapped__()
     assert resp.status_code == 403
-
-
-def test_rejected_toggle_flashes_error_and_clears_reloading(route_app, monkeypatch, caplog):
-    """S0 review, Important #1: resolve_activation_write raises ValueError for an "always"
-    plugin (crafted-POST scenario: plugin=headers&enabled=yes&setting=USE_HEADERS -- passes
-    USE_SETTING_RX, passes CSRF/admin, then rejected downstream). toggle_plugin runs on a bare
-    ThreadPoolExecutor whose futures are never retrieved, so before the fix this exception
-    vanished with no log and no flash, and DATA["RELOADING"] was never reset to False --
-    stranding the user on /loading until the 60s watchdog. Both must now happen."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    with caplog.at_level("ERROR", logger="UI"):
-        _call_enable(module, app, monkeypatch, {"plugin": "headers", "enabled": "yes", "setting": "USE_HEADERS"}, client)
-    client.update_global_settings.assert_not_called()
-    assert module.DATA["RELOADING"] is False
-    assert module.DATA["TO_FLASH"], "expected an error flash, got none"
-    flashed = module.DATA["TO_FLASH"][-1]
-    assert flashed["type"] == "error"
-    assert "headers" in flashed["content"]
-    assert any("headers" in record.message for record in caplog.records)
 
 
 # ======================================================================================
@@ -608,298 +521,6 @@ def test_rejected_toggle_flashes_error_and_clears_reloading(route_app, monkeypat
 
 def _write(module, plugin_id, setting, *, settings=None, **kwargs):
     return module.resolve_activation_write(plugin_id, setting, settings=_REAL_CORE_SETTINGS if settings is None else settings, **kwargs)
-
-
-def test_settings_is_a_required_kwarg(route_app):
-    """MED-6: the writer must never source schemas itself. A default here had zero production
-    callers once both surfaces read from `g._env`, and would let a caller silently re-add a
-    per-call API round-trip that no test would catch."""
-    module, _ = route_app
-    with pytest.raises(TypeError):
-        module.resolve_activation_write("gzip", "USE_GZIP", enabled=True)
-
-
-def test_disable_writes_every_declared_key(route_app):
-    module, _ = route_app
-    assert _write(module, "limit", None, enabled=False) == {"USE_LIMIT_REQ": "no", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
-
-
-def test_enable_a_multi_key_activation_writes_every_declared_key(route_app):
-    """The T1 shelf contract: a row owns every key `shelf_plugin_scope` returns, and an in-scope
-    key the form does not post is DELETED (db_methods/config_save.py:592). Posting USE_LIMIT_REQ
-    alone would delete USE_LIMIT_CONN's row, fall it back to its "yes" default, and silently turn
-    the connection limiter ON from an operator enabling the request limiter."""
-    module, _ = route_app
-    declared = module.get_activation_map()["limit"]
-    written = _write(
-        module,
-        "limit",
-        "USE_LIMIT_REQ",
-        enabled=True,
-        current_values={"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no", "USE_LIMIT_REQ_GLOBAL": "no"},
-    )
-    assert set(written) == set(declared), "every declared key must be written, not just the toggled one"
-    assert written["USE_LIMIT_REQ"] == "yes"
-
-
-def test_enable_a_multi_key_activation_keeps_siblings_at_their_current_value(route_app):
-    """Siblings are re-posted at what they CURRENTLY resolve to, never at their schema default:
-    USE_LIMIT_CONN defaults to "yes", so writing the default would switch the connection limiter
-    back on behind an operator who had turned it off."""
-    module, _ = route_app
-    written = _write(
-        module,
-        "limit",
-        "USE_LIMIT_REQ",
-        enabled=True,
-        current_values={"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no", "USE_LIMIT_REQ_GLOBAL": "yes"},
-    )
-    assert written["USE_LIMIT_CONN"] == "no", "sibling clobbered with its default instead of its current value"
-    assert written["USE_LIMIT_REQ_GLOBAL"] == "yes"
-
-
-def test_enable_refuses_to_guess_a_sibling_whose_current_value_is_unknown(route_app):
-    """The sibling rule is fail-CLOSED. Falling back to the schema default is the exact clobber it
-    exists to prevent: USE_LIMIT_CONN defaults to "yes", and Database.py:463 lets the resulting
-    `api` write overwrite an operator's `ui` "no"."""
-    module, _ = route_app
-    with pytest.raises(ValueError):
-        _write(module, "limit", "USE_LIMIT_REQ", enabled=True)
-    with pytest.raises(ValueError):
-        _write(module, "limit", "USE_LIMIT_REQ", enabled=True, current_values={"USE_LIMIT_CONN": "no"})  # REQ_GLOBAL missing
-
-
-def test_a_multiple_activation_key_is_refused_in_both_directions(route_app):
-    """redirect's REDIRECT_TO is `"multiple": "redirect"`: the live values live under
-    REDIRECT_TO_<n>, which redirect.conf iterates, so writing the bare base name claims "off"
-    while every suffixed redirect keeps serving. Refuse rather than lie -- and refuse ON too,
-    since a free-text key has no derivable active value anyway."""
-    module, _ = route_app
-    assert module.get_activation_map()["redirect"] == {"REDIRECT_TO": ""}, "fixture premise"
-    with pytest.raises(ValueError):
-        _write(module, "redirect", "REDIRECT_TO", enabled=False)
-    with pytest.raises(ValueError):
-        _write(module, "redirect", "REDIRECT_TO", enabled=True)
-
-
-def test_a_multiselect_activation_key_is_refused_in_both_directions(route_app):
-    """country's BLACKLIST_COUNTRY/WHITELIST_COUNTRY are `type: multiselect` -- locked with the
-    PO as a count + chevron, never a switch, and excluded from the shelf's scope, so a write here
-    would post keys the page does not own."""
-    module, _ = route_app
-    for enabled in (True, False):
-        with pytest.raises(ValueError):
-            _write(module, "country", "BLACKLIST_COUNTRY", enabled=enabled)
-
-
-def test_a_declared_activation_key_outside_the_use_convention_is_accepted(route_app):
-    """AUTO_LETS_ENCRYPT / GENERATE_SELF_SIGNED_SSL match no USE_<...> pattern; the endpoint's
-    pre-thread guard has to consult the manifest or those two plugins can never be toggled."""
-    module, _ = route_app
-    assert module.is_activation_setting("letsencrypt", "AUTO_LETS_ENCRYPT") is True
-    assert module.is_activation_setting("selfsigned", "GENERATE_SELF_SIGNED_SSL") is True
-    # ...and the manifest is a TIGHTER gate than the regex, not a looser one
-    assert module.is_activation_setting("letsencrypt", "USE_SOMETHING_ELSE") is False
-    assert module.is_activation_setting("gzip", "USE_GZIP") is True  # undeclared: regex convention
-    assert module.is_activation_setting("gzip", "DROP TABLE") is False
-
-
-def test_enable_writes_a_schema_legal_value_for_a_select_activation(route_app):
-    module, _ = route_app
-    assert _write(module, "antibot", "USE_ANTIBOT", enabled=False) == {"USE_ANTIBOT": "no"}
-    written = _write(module, "antibot", "USE_ANTIBOT", enabled=True)
-    assert written["USE_ANTIBOT"] != "yes"  # "yes" is not a legal USE_ANTIBOT value
-    assert written["USE_ANTIBOT"] != "no"  # must actually flip it on
-    assert written["USE_ANTIBOT"] in _REAL_CORE_SETTINGS["USE_ANTIBOT"]["select"]
-
-
-def test_enable_writes_a_schema_legal_value_for_a_check_activation(route_app):
-    module, _ = route_app
-    assert _write(module, "letsencrypt", "AUTO_LETS_ENCRYPT", enabled=True) == {"AUTO_LETS_ENCRYPT": "yes"}
-    assert _write(module, "letsencrypt", "AUTO_LETS_ENCRYPT", enabled=False) == {"AUTO_LETS_ENCRYPT": "no"}
-
-
-def test_enable_rejects_a_setting_the_plugin_does_not_declare(route_app):
-    """The endpoint must not flip an arbitrary USE_* just because it matches a name pattern.
-
-    `current_values` covers every DECLARED key, so the sibling rule cannot fire and the only rule
-    left that can raise is the one under test. Without that, this passed with the check deleted --
-    the undeclared name became the "toggled" key, antibot's real key became a value-less sibling,
-    and the sibling rule raised instead. Caught by mutating the check away."""
-    module, _ = route_app
-    with pytest.raises(ValueError):
-        _write(module, "antibot", "USE_SOMETHING_ELSE", enabled=True, current_values={"USE_ANTIBOT": "no"})
-
-
-def test_enable_a_multi_key_activation_defaults_to_the_first_declared_key(route_app):
-    """A shelf row carries one switch and names no key; dict order is manifest order, so "first
-    declared" is well-defined and stable."""
-    module, _ = route_app
-    written = _write(module, "limit", None, enabled=True, current_values={"USE_LIMIT_CONN": "no", "USE_LIMIT_REQ_GLOBAL": "no"})
-    assert written["USE_LIMIT_REQ"] == "yes"
-    assert written["USE_LIMIT_CONN"] == "no"
-
-
-def test_enable_rejects_free_text_activation(route_app):
-    """A free-text activation has no derivable active value -- it must never be offered as a
-    simple switch. inject/php are the only live cases: REDIRECT_TO is free text too, but it is
-    `multiple` and so refused one step earlier, which
-    test_a_multiple_activation_key_is_refused_in_both_directions owns."""
-    module, _ = route_app
-    for plugin_id, key in (("inject", "INJECT_BODY"), ("php", "REMOTE_PHP")):
-        # Supply EVERY declared key's current value. With `current_values={}` the sibling rule
-        # raises first, so this test passed even with the free-text guard removed -- it was
-        # asserting the wrong rule. Caught by mutating `_active_value_for` to stop raising.
-        with pytest.raises(ValueError):
-            _write(module, plugin_id, key, enabled=True, current_values=dict(module.get_activation_map()[plugin_id]))
-
-
-def test_always_active_plugin_cannot_be_toggled(route_app):
-    """errors/headers/misc/pro/sessions/ssl declare "always" -- no switch, ever, even via a
-    crafted setting name that happens to match the USE_<ID> convention."""
-    module, _ = route_app
-    with pytest.raises(ValueError):
-        _write(module, "headers", "USE_HEADERS", enabled=True)
-    with pytest.raises(ValueError):
-        _write(module, "headers", None, enabled=False)
-
-
-def test_undeclared_plugin_keeps_conventional_use_boolean(route_app):
-    module, _ = route_app
-    assert _write(module, "gzip", "USE_GZIP", enabled=True) == {"USE_GZIP": "yes"}
-    assert _write(module, "gzip", "USE_GZIP", enabled=False) == {"USE_GZIP": "no"}
-
-
-def test_undeclared_plugin_still_rejects_non_conventional_setting(route_app):
-    module, _ = route_app
-    with pytest.raises(ValueError):
-        _write(module, "gzip", "DROP TABLE", enabled=True)
-    with pytest.raises(ValueError):
-        _write(module, "gzip", None, enabled=True)
-
-
-def test_toggle_plugin_route_writes_schema_legal_value_end_to_end(route_app, monkeypatch):
-    """The wired-up /plugins/enable endpoint must go through resolve_activation_write, not
-    a hardcoded "yes"/"no", for its core branch."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    _call_enable(module, app, monkeypatch, {"plugin": "antibot", "enabled": "yes", "setting": "USE_ANTIBOT"}, client)
-    client.update_global_settings.assert_called_once()
-    args, _kwargs = client.update_global_settings.call_args
-    written = args[0]
-    assert written["USE_ANTIBOT"] != "yes"
-    assert written["USE_ANTIBOT"] in _REAL_CORE_SETTINGS["USE_ANTIBOT"]["select"]
-
-
-def test_enabling_a_multi_key_plugin_end_to_end_uses_the_resolved_sibling_values(route_app, monkeypatch):
-    """The route hands the writer this request's RESOLVED config. A sibling explicitly turned off
-    must come back written as "no" -- USE_LIMIT_CONN's schema default is "yes", so any path that
-    guesses re-arms the connection limiter behind the operator (and Database.py:463 lets an `api`
-    write overwrite a `ui` one, so the guess would land)."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    env = {
-        "plugins": _REAL_CORE_PLUGIN_ENV,
-        "config": {**_REAL_CORE_CONFIG, "USE_LIMIT_CONN": {"value": "no"}, "USE_LIMIT_REQ": {"value": "no"}},
-    }
-    _call_enable(module, app, monkeypatch, {"plugin": "limit", "enabled": "yes", "setting": "USE_LIMIT_REQ"}, client, env=env)
-    written = client.update_global_settings.call_args.args[0]
-    assert written == {"USE_LIMIT_REQ": "yes", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
-
-
-@pytest.mark.parametrize("plugin_id,key", [("country", "BLACKLIST_COUNTRY"), ("redirect", "REDIRECT_TO")])
-def test_a_list_shaped_plugin_writes_nothing_when_the_schemas_are_missing(route_app, monkeypatch, plugin_id, key):
-    """FAIL CLOSED on a MISSING schema, not just a missing value. `_is_list_shaped({})` is False,
-    so reading an absent definition as "scalar" made this refusal fail OPEN -- and `main.py:
-    1262-1265` parks `{}` whenever the per-request get_plugins() failed, so it was reachable from
-    a stale tab or a resubmit. Measured before the fix: `redirect` OFF wrote REDIRECT_TO="" while
-    every REDIRECT_TO_<n> kept serving, and `country` OFF wiped both lists."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    _call_enable(module, app, monkeypatch, {"plugin": plugin_id, "enabled": "no", "setting": key}, client, env={"plugins": {}, "config": {}})
-    client.update_global_settings.assert_not_called()
-    assert module.DATA["RELOADING"] is False
-    assert module.DATA["TO_FLASH"][-1]["type"] == "error"
-
-
-def test_enabling_with_no_resolved_config_aborts_instead_of_guessing(route_app, monkeypatch, caplog):
-    """FAIL CLOSED. `main.py:1296-1299` swallows a get_config() failure and parks `{}`; with no
-    current value for a sibling the writer must refuse rather than fall back to its schema default.
-    An aborted toggle flashes an error; a guessed one silently re-arms a limiter."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    with caplog.at_level("ERROR", logger="UI"):
-        _call_enable(
-            module, app, monkeypatch, {"plugin": "limit", "enabled": "yes", "setting": "USE_LIMIT_REQ"}, client, env={"plugins": _REAL_CORE_PLUGIN_ENV}
-        )
-    client.update_global_settings.assert_not_called()
-    assert module.DATA["RELOADING"] is False
-    assert module.DATA["TO_FLASH"][-1]["type"] == "error"
-
-
-def test_disabling_a_multi_key_plugin_end_to_end_needs_no_api_read(route_app, monkeypatch):
-    """OFF is a pure function of the manifest plus this request's already-fetched schemas, so the
-    route must reach the API only to write -- and must still write every declared key."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    module.BW_CONFIG.reset_mock()
-    _call_enable(module, app, monkeypatch, {"plugin": "limit", "enabled": "no", "setting": "USE_LIMIT_CONN"}, client)
-    written = client.update_global_settings.call_args.args[0]
-    assert written == {"USE_LIMIT_REQ": "no", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
-    module.BW_CONFIG.get_config.assert_not_called()
-    module.BW_CONFIG.get_plugins_settings.assert_not_called()
-
-
-def test_enabling_antibot_from_a_switch_picks_cookie(route_app, monkeypatch):
-    """PINNED ON PURPOSE. USE_ANTIBOT is a 9-value select and `_active_value_for` takes the first
-    option that is not the inactive one, i.e. the manifest's array order -- so a bare on/off switch
-    silently selects "cookie", the lightest of the nine modes. That is a decision, not an accident:
-    reordering core/antibot/plugin.json's `select` changes what a marketplace toggle turns on.
-    D2 gives the compose shelf a MODE PICKER for this shape rather than a switch."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    _call_enable(module, app, monkeypatch, {"plugin": "antibot", "enabled": "yes", "setting": "USE_ANTIBOT"}, client)
-    assert client.update_global_settings.call_args.args[0] == {"USE_ANTIBOT": "cookie"}
-
-
-def test_off_then_on_does_not_restore_a_multi_key_plugins_siblings(route_app):
-    """DOCUMENTED ASYMMETRY, not a bug to silently fix: OFF drives every declared key to its
-    inactive value, so a following ON restores only the toggled key. One switch owning three keys
-    cannot remember what they were; the per-plugin page is where the siblings come back."""
-    module, _ = route_app
-    off = _write(module, "limit", "USE_LIMIT_REQ", enabled=False)
-    back_on = _write(module, "limit", "USE_LIMIT_REQ", enabled=True, current_values=off)
-    assert back_on == {"USE_LIMIT_REQ": "yes", "USE_LIMIT_REQ_GLOBAL": "no", "USE_LIMIT_CONN": "no"}
-
-
-def test_a_declared_non_use_setting_survives_the_pre_thread_guard(route_app, monkeypatch):
-    """AUTO_LETS_ENCRYPT fails USE_SETTING_RX; before T2 the guard rejected it outright, so
-    letsencrypt could not be toggled from the marketplace at all."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    monkeypatch.setattr(module, "handle_error", lambda *a, **k: "REJECTED")
-    result = _call_enable(module, app, monkeypatch, {"plugin": "letsencrypt", "enabled": "yes", "setting": "AUTO_LETS_ENCRYPT"}, client)
-    assert result != "REJECTED"
-    client.update_global_settings.assert_called_once_with({"AUTO_LETS_ENCRYPT": "yes"})
-
-
-def test_a_setting_the_plugin_does_not_declare_is_still_rejected_before_the_thread(route_app, monkeypatch):
-    """The manifest gate is TIGHTER than the regex it replaces: a well-formed USE_* that the
-    plugin does not declare must never reach update_global_settings."""
-    module, app = route_app
-    client = module.API_CLIENT
-    client.reset_mock()
-    monkeypatch.setattr(module, "handle_error", lambda *a, **k: "REJECTED")
-    result = _call_enable(module, app, monkeypatch, {"plugin": "letsencrypt", "enabled": "yes", "setting": "USE_MODSECURITY"}, client)
-    assert result == "REJECTED"
-    client.update_global_settings.assert_not_called()
 
 
 # ======================================================================================
@@ -1106,3 +727,71 @@ def test_the_restricted_notice_is_distinct_from_the_no_page_one():
     assert markup.index("{% elif restricted %}") < markup.index("{% elif no_page %}")
     locales = json.loads((LOCALES / "en.json").read_text(encoding="utf-8"))
     assert "restricted_to_admins" in locales["plugin"]["page"]["status"]
+
+
+# --------------------------------------------------------------------------------------
+# S5: /plugins/enable means INSTALLED-OR-NOT, and nothing else
+# --------------------------------------------------------------------------------------
+#
+# This route used to carry a second meaning. For a core plugin -- which cannot be DB-toggled at
+# all -- the grid passed a `setting` name and the route wrote that plugin's activation value
+# globally, through `resolve_activation_write`: a second derivation of "what is the active value"
+# beside the one models/compose_shelf.html already had in Jinja, reached by a second write path.
+# S5 split the two by meaning. The tests below pin the half that matters after the split: the
+# route no longer writes settings AT ALL, so a crafted POST cannot make it.
+
+
+def test_enable_never_writes_a_global_setting(route_app, monkeypatch):
+    """The strong form: whatever the form carries, this route touches only the enabled flag."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    _call_enable(module, app, monkeypatch, {"plugin": "antibot", "enabled": "yes", "setting": "USE_ANTIBOT"}, client)
+    client.update_global_settings.assert_not_called()
+    client.set_plugin_enabled.assert_called_once_with("antibot", True)
+
+
+def test_a_crafted_setting_parameter_is_inert(route_app, monkeypatch):
+    """A POST naming another plugin's key -- the shape the old `is_activation_setting` guard
+    existed to reject, and whose own docstring recorded that it trusted the manifest to declare
+    only its own keys, something nothing verifies. With no write path left there is nothing for a
+    crafted key to reach, which is why the guard could be deleted rather than hardened."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    _call_enable(module, app, monkeypatch, {"plugin": "myext", "enabled": "no", "setting": "SERVER_NAME"}, client)
+    client.update_global_settings.assert_not_called()
+    client.set_plugin_enabled.assert_called_once_with("myext", False)
+
+
+def test_a_toggle_failure_still_flashes_and_clears_reloading(route_app, monkeypatch):
+    """`toggle_plugin` runs on a bare ThreadPoolExecutor whose futures are never retrieved, so an
+    uncaught exception there vanishes with no log and no flash while the user waits on /loading
+    for main.py's 60s watchdog. The broad `except` is what prevents that, and it must survive the
+    narrowing of this route."""
+    module, app = route_app
+    client = module.API_CLIENT
+    client.reset_mock()
+    client.set_plugin_enabled.side_effect = RuntimeError("boom")
+    _call_enable(module, app, monkeypatch, {"plugin": "myext", "enabled": "yes"}, client)
+    client.set_plugin_enabled.side_effect = None
+    assert module.DATA["RELOADING"] is False
+    assert any("Couldn't update plugin myext" in flash["content"] for flash in module.DATA["TO_FLASH"])
+
+
+def test_the_shelf_row_carries_the_anchor_the_card_links_to():
+    """The card's link and the shelf's row id are one contract across two files; a rename on
+    either side leaves a link that silently lands at the top of the page."""
+    shelf = (TEMPLATES / "models" / "compose_shelf.html").read_text(encoding="utf-8")
+    grid = (TEMPLATES / "plugins.html").read_text(encoding="utf-8")
+    assert 'id="shelf-row-{{ plugin }}"' in shelf
+    assert "#shelf-row-{{ plugin }}" in grid
+
+
+def test_the_shelf_unfolds_the_row_a_link_names():
+    """An inactive plugin's row is folded (`display: none`) and that is exactly the row someone
+    arrives wanting, so the fragment must unfold before anything can scroll to it."""
+    script = (TEMPLATES.parent / "static" / "js" / "components" / "compose-shelf.js").read_text(encoding="utf-8")
+    hook = script[script.index("shelf-row-") :]  # noqa: E203
+    assert "expanded = true" in hook
+    assert "scrollIntoView" in hook

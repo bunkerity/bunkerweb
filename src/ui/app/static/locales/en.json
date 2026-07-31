@@ -1941,7 +1941,8 @@
       "view_config": "View Custom Config {{name}}",
       "view_file": "View {{filename}}",
       "view_service": "View Service {{service}}",
-      "view_template": "View Template {{template}}"
+      "view_template": "View Template {{template}}",
+      "manage_activation": "Manage activation of {{name}} in global settings"
     },
     "modal": {
       "title": {
