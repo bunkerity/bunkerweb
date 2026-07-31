@@ -14,7 +14,7 @@ local unescape_uri = ngx.unescape_uri
 
 -- Default cap for the per-worker LRU: governs both the slot count (distinct
 -- counter/table keys held) and the per-key event-history array length. Overridden
--- per-worker from the MAX_LRU_HISTORY global setting once init_worker() runs and
+-- per-worker from the MAX_LRU_HISTORY global setting once init_workers() runs and
 -- self.variables is populated.
 local DEFAULT_MAX_LRU_HISTORY = 1000
 
@@ -259,11 +259,14 @@ function metrics:initialize(ctx)
 	self.metrics_datastore = datastore:new(dict)
 end
 
-function metrics:init_worker()
+-- init_workers(), not init_worker(): the latter is gated behind a shared "misc_ready" flag
+-- and runs once per instance, so it would resize a single worker's LRU and leave every other
+-- one on the default. This is per-worker VM state, so it needs the per-worker phase.
+function metrics:init_workers()
 	-- Resize the per-worker LRU using the configured MAX_LRU_HISTORY (global setting).
 	-- Until this runs, the module-level default LRU sized at DEFAULT_MAX_LRU_HISTORY is
 	-- used. The resize is skipped when the configured value matches the default to avoid
-	-- dropping any entries collected between module load and init_worker.
+	-- dropping any entries collected between module load and here.
 	local max_lru_history = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
 	if max_lru_history < 1 then
 		max_lru_history = DEFAULT_MAX_LRU_HISTORY
