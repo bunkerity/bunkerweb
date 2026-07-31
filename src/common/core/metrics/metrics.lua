@@ -493,8 +493,12 @@ function metrics:timer()
 		end
 	end
 
-	-- Loop on all keys
-	for _, key in ipairs(lru_keys) do
+	-- Loop on all keys, coldest first. get_keys() hands them back hottest first and lru:get()
+	-- promotes what it reads, so walking forward reverses the whole queue on every cycle and
+	-- the next insertion evicts the hottest key instead of the coldest. Walking backwards
+	-- promotes them in the order they already had, leaving it unchanged.
+	for idx = #lru_keys, 1, -1 do
+		local key = lru_keys[idx]
 		-- Get LRU data
 		local value = lru:get(key)
 		-- get_keys() returns a snapshot and every redis_call below yields, so a
