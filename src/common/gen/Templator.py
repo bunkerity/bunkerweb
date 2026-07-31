@@ -453,9 +453,11 @@ class Templator:
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
         self._render_global()
-        servers = [self._config.get("SERVER_NAME", "www.example.com").strip()]
+        server_name = self._config.get("SERVER_NAME", "www.example.com").strip()
+        # an empty SERVER_NAME renders no server at all, like multisite already does, instead of an empty server_name directive
+        servers = [server_name] if server_name else []
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split()
+            servers = server_name.split()
 
         effective_cpus = effective_cpu_count()
         if len(servers) >= effective_cpus * 2:

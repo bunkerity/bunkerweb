@@ -4,7 +4,10 @@ local plugin = require "bunkerweb.plugin"
 local ssl = class("ssl", plugin)
 
 local ngx = ngx
+local sub = string.sub
 local HTTP_MOVED_PERMANENTLY = ngx.HTTP_MOVED_PERMANENTLY
+
+local ACME_CHALLENGE_PREFIX = "/.well-known/acme-challenge/"
 
 function ssl:initialize(ctx)
 	-- Call parent initialize
@@ -12,6 +15,14 @@ function ssl:initialize(ctx)
 end
 
 function ssl:access()
+	-- ssl runs before letsencrypt in the access chain, so its whitelist never gets the chance to
+	-- run and the challenge is answered with a 301. ACME servers follow it, which silently makes
+	-- an HTTP-01 validation depend on port 443 being reachable and on the TLS handshake working
+	-- for a name that has no certificate yet.
+	if self.ctx.bw.uri ~= nil and sub(self.ctx.bw.uri, 1, #ACME_CHALLENGE_PREFIX) == ACME_CHALLENGE_PREFIX then
+		return self:ret(true, "no redirect to HTTPS for the ACME challenge")
+	end
+
 	-- Check if we need to redirect to HTTPS
 	if
 		self.ctx.bw.scheme == "http"

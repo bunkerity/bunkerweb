@@ -3,6 +3,7 @@
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from ipaddress import ip_address
 from json import dumps, loads
 from os import getenv, sep
 from os.path import join
@@ -110,6 +111,25 @@ CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 def normalize_server_names(server_names: str) -> Set[str]:
     """Return a normalized set of server names split on comma/space, lowercased and trimmed."""
     return {part.strip().lower() for part in server_names.replace(",", " ").split() if part.strip()}
+
+
+def unissuable_names(names: List[str]) -> List[str]:
+    """Return the names no public ACME CA can issue for: IP literals and single-label hosts.
+
+    Nothing else rejects them, so they reach certbot, fail on every run and keep the whole job
+    red even when every other service got its certificate.
+    """
+    unissuable = []
+    for name in names:
+        candidate = name.strip().lower().removeprefix("*.")
+        try:
+            ip_address(candidate)
+        except ValueError:
+            if "." not in candidate.rstrip("."):
+                unissuable.append(name)
+        else:
+            unissuable.append(name)
+    return unissuable
 
 
 def filter_wildcard_names(names: Set[str]) -> Set[str]:
@@ -405,6 +425,20 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
             wildcard = False
 
     server_names = server_names_val.split()
+
+    unissuable = unissuable_names(server_names)
+    if unissuable:
+        issuable = [name for name in server_names if name not in unissuable]
+        if activated:
+            LOGGER.warning(
+                f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
+                + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
+            )
+        if issuable:
+            server_names = issuable
+        else:
+            misconfigured = misconfigured or activated
+            activated = False
 
     return server_names, {
         "server_names": "",
@@ -895,9 +929,15 @@ try:
     LOGGER_CERTBOT.debug(f"Certbot output:\n{stdout}")
 
     # ? Check if the command was successful
-    if proc.returncode != 0:
-        LOGGER.error(f"Failed to fetch existing certificates, force the generation of certificates: \n{stdout}")
-        services = {service: config | {"force_renew": True} for service, config in services.items()}
+    listing_ok = proc.returncode == 0
+    if not listing_ok:
+        # Failing to list is a diagnostic failure, not proof the certificates are gone. Renewing
+        # every service on that basis burns the ACME rate limits and repeats on every start, so
+        # trust the lineages on disk instead and only issue for services that have none.
+        LOGGER.error(f"Failed to fetch existing certificates, falling back to the certificates found on disk: \n{stdout}")
+        for service in services:
+            if DATA_PATH.joinpath("live", service, "fullchain.pem").is_file():
+                existing_certificates[service] = {"active": False, "unparsed": True}
     else:
         # ? Parse existing certificates
         for certificate_block in stdout.split("Certificate Name: ")[1:]:
@@ -956,6 +996,11 @@ try:
 
         existing_cert = existing_certificates[server_name]
         existing_cert["active"] = True
+
+        if existing_cert.get("unparsed"):
+            # Nothing to compare the live certificate against, so leave it alone; certbot-renew
+            # still picks it up on its daily run once it is close enough to expiry.
+            continue
 
         if not config["disable_psl_check"]:
             if psl_lines is None:
@@ -1101,7 +1146,9 @@ try:
                     LOGGER.debug(f"Removed unused credential file: {file.name}")
 
         # * Clearing all no longer needed certificates
-        if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
+        if not listing_ok:
+            LOGGER.warning("Skipping the cleanup of old certificates: the certificate listing failed, so nothing can be declared unused.")
+        elif getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
             for service, data in existing_certificates.items():
                 if not data["active"]:
                     LOGGER.warning(f"Certificate for {service} does not exist anymore, removing...")
@@ -1127,7 +1174,9 @@ try:
                 continue
 
             configured_hash = str(config.get("zerossl_api_key_hash") or "")
-            if config.get("exists"):
+            # Only trust "exists" when the listing parsed: the on-disk fallback never got to
+            # compare the API key, so recording it here would swallow a rotation for good.
+            if config.get("exists") and listing_ok:
                 updated_zerossl_api_key_hashes[service] = configured_hash
                 continue
 

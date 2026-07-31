@@ -130,10 +130,37 @@ function bwCsvSafe(value) {
     btn.action = function (e, dt, button, config) {
       config = config || {};
       config.exportOptions = config.exportOptions || {};
+
+      // Buttons' own default formatters are what call ``stripData``, which is what
+      // removes the markup from a cell. Replacing them outright therefore exported raw
+      // ``innerHTML`` (badges, links, icons) into every CSV / XLSX / clipboard payload,
+      // so compose with it instead of overwriting it.
+      //
+      // ``stripData`` reads its flags from the second argument and treats a *present*
+      // object with a falsy ``stripHtml`` as "do not strip", so the library defaults have
+      // to be restated here; passing ``exportOptions`` alone would silently disable it
+      // again. Anything the page sets explicitly still wins.
+      const stripConfig = $.extend(
+        {
+          stripHtml: true,
+          stripNewlines: true,
+          decodeEntities: true,
+          trim: true,
+        },
+        config.exportOptions,
+      );
+      const stripThenEscape = function (value) {
+        return bwCsvSafe($.fn.dataTable.Buttons.stripData(value, stripConfig));
+      };
+
       config.exportOptions.format = $.extend(
         {},
         config.exportOptions.format || {},
-        { body: bwCsvSafe, header: bwCsvSafe, footer: bwCsvSafe },
+        {
+          body: stripThenEscape,
+          header: stripThenEscape,
+          footer: stripThenEscape,
+        },
       );
       return origAction.call(this, e, dt, button, config);
     };

@@ -7,8 +7,8 @@ from user_agents import parse
 
 from app.models.totp import totp as TOTP
 
-from app.dependencies import DATA, DB
-from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, add_revoked_sessions, flash, gen_password_hash, password_exceeds_bcrypt_limit
+from app.dependencies import DB
+from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit, revoke_sessions
 
 from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
@@ -303,11 +303,11 @@ def edit_profile():
         # session for this user, so a parallel or stolen session cannot outlive the
         # credential it was authenticated with. Reuses the same revocation path as
         # /profile/wipe-other-sessions; the current session is ended by the logout below.
-        DATA.load_from_file()
         other_ids = [db_session["id"] for db_session in DB.get_ui_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")]
-        DATA["REVOKED_SESSIONS"] = add_revoked_sessions(DATA.get("REVOKED_SESSIONS", {}), other_ids)
-        DATA.write_to_file()
-        DB.delete_ui_user_old_sessions(current_user.username)
+        err = revoke_sessions(other_ids)
+        if err:
+            LOGGER.error(f"Couldn't revoke the other sessions after the password change: {err}")
+        DB.delete_ui_user_old_sessions(current_user.username, keep_session_id=session.get("session_id"))
         return redirect(url_for("logout.logout_page"))
 
     return redirect(url_for("profile.profile_page"))
@@ -324,12 +324,12 @@ def wipe_old_sessions():
     if not current_user.check_password(request.form["password"]):
         return handle_error("The current password is incorrect.", "profile")
 
-    DATA.load_from_file()
     other_ids = [db_session["id"] for db_session in DB.get_ui_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")]
-    DATA["REVOKED_SESSIONS"] = add_revoked_sessions(DATA.get("REVOKED_SESSIONS", {}), other_ids)
-    DATA.write_to_file()
+    err = revoke_sessions(other_ids)
+    if err:
+        return handle_error(f"Couldn't revoke the other sessions: {err}", "profile")
 
-    ret = DB.delete_ui_user_old_sessions(current_user.username)
+    ret = DB.delete_ui_user_old_sessions(current_user.username, keep_session_id=session.get("session_id"))
     if ret:
         return handle_error(f"Couldn't wipe the other sessions in the database: {ret}", "profile")
 

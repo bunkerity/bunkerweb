@@ -451,11 +451,14 @@ def _sanitize_internal_next(next_url, default):
     return decoded or default
 
 
-# Revoked UI session ids are kept in DATA["REVOKED_SESSIONS"] (file-backed, checked on every
-# request) so a logged-out / wiped / password-changed session is rejected before its server-side
-# store entry naturally expires. Without pruning this set grows without bound. A revoked id only
-# needs to be retained until the session it names can no longer exist, i.e. the maximum session
-# lifetime; after that the store entry is gone and the id is dead weight.
+# Revoked UI session ids are kept in the same store that backs Flask-Session -- Redis when
+# USE_REDIS=yes, otherwise the SafeFileSystemCache under LIB_DIR -- so revocation gets exactly the
+# durability and the sharing of the sessions it guards. They used to live in DATA, which is
+# file-backed under /var/tmp (outside the container's persistent volume) and per-container, so a
+# container recreate forgot every revocation while the session entries under LIB_DIR survived, and
+# revocation never propagated across UI replicas.
+# The backend expires the keys itself, so there is no pruning to do here. A revoked id only needs
+# to be retained until the session it names can no longer exist, i.e. the maximum session lifetime.
 REVOKED_SESSION_TTL_FALLBACK_SECONDS = 30 * 24 * 3600  # used only if no lifetime is configured
 
 
@@ -473,31 +476,74 @@ def _revoked_session_ttl_seconds():
     return ttl if ttl > 0 else REVOKED_SESSION_TTL_FALLBACK_SECONDS
 
 
-def prune_revoked_sessions(revoked, now_ts=None, ttl_seconds=None):
-    """Return a {session_id: revoked_at_epoch} dict with entries older than the TTL dropped.
+def _session_store_backend():
+    """``(redis_client, key_prefix)`` or ``(cachelib_cache, None)``, whichever backs Flask-Session.
 
-    Tolerates the legacy ``list[str]`` format (no timestamps): those entries are migrated and
-    stamped at ``now`` so a format change never silently un-revokes a still-live session.
+    Same two-branch shape as main.py's ``_delete_session_store_entry``. ``(None, None)`` if the
+    session interface exposes neither, which only happens if the backend failed to initialise.
     """
-    if now_ts is None:
-        now_ts = datetime.now().timestamp()
-    if ttl_seconds is None:
-        ttl_seconds = _revoked_session_ttl_seconds()
-    if isinstance(revoked, dict):
-        return {sid: ts for sid, ts in revoked.items() if isinstance(ts, (int, float)) and (now_ts - ts) < ttl_seconds}
-    if isinstance(revoked, (list, tuple, set)):
-        return {str(sid): now_ts for sid in revoked if sid}
-    return {}
+    interface = getattr(current_app, "session_interface", None)
+    client = getattr(interface, "client", None)
+    if client is not None:
+        return client, getattr(interface, "key_prefix", "") or ""
+    return getattr(interface, "cache", None), None
 
 
-def add_revoked_sessions(revoked, ids):
-    """Prune stale entries, then add ``ids`` stamped at now. Returns the updated dict."""
-    now_ts = datetime.now().timestamp()
-    pruned = prune_revoked_sessions(revoked, now_ts)
-    for sid in ids:
-        if sid:
-            pruned[str(sid)] = now_ts
-    return pruned
+def _revoked_session_key(session_id, prefix) -> str:
+    return f"{prefix}revoked:{session_id}" if prefix is not None else f"revoked:{session_id}"
+
+
+def revoke_sessions(ids) -> str:
+    """Mark session ids revoked for as long as the sessions they name can still exist.
+
+    Returns "" on success or an error string, matching the Database method convention, so a
+    caller that must not silently half-revoke (wipe-other-sessions) can surface the failure.
+    """
+    ids = [sid for sid in ids if sid]
+    if not ids:
+        return ""
+
+    backend, prefix = _session_store_backend()
+    if backend is None:
+        return "No session backend available to record the revocation"
+
+    ttl = _revoked_session_ttl_seconds()
+    try:
+        for sid in ids:
+            key = _revoked_session_key(sid, prefix)
+            if prefix is not None:
+                backend.setex(key, ttl, b"1")
+            else:
+                backend.set(key, True, timeout=ttl)
+    except BaseException as e:
+        LOGGER.exception("Couldn't record revoked session ids")
+        return str(e)
+
+    return ""
+
+
+def is_session_revoked(session_id) -> bool:
+    """Whether this session id has been revoked. Checked on every authenticated request.
+
+    Fails open on a backend error, which is safe here: the same backend stores the sessions
+    themselves, so if it is unreachable the session cannot be loaded and the request is
+    unauthenticated long before this check runs.
+    """
+    if not session_id:
+        return False
+
+    backend, prefix = _session_store_backend()
+    if backend is None:
+        return False
+
+    key = _revoked_session_key(session_id, prefix)
+    try:
+        if prefix is not None:
+            return bool(backend.exists(key))
+        return bool(backend.get(key))
+    except BaseException:
+        LOGGER.exception(f"Couldn't check whether session {session_id} is revoked")
+        return False
 
 
 # OWASP lists \t (0x09) and \r (0x0D) as spreadsheet-injection leaders, but defusedcsv's

@@ -202,7 +202,11 @@ class CLI(ApiCaller):
             data = {"ip": ip, "ban_scope": ban_scope}
             if service:
                 data["service"] = service
-            if self.send_to_apis("POST", "/unban", data=data):
+            if not self.apis:
+                return False, self.__format_error(f"Failed to unban {ip}: no BunkerWeb instance to send the request to")
+            # send_to_apis returns (ok, responses); testing the tuple itself is always truthy
+            ok, _ = self.send_to_apis("POST", "/unban", data=data)
+            if ok:
                 if service:
                     success_msg = (
                         f"{self.ICON_UNLOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been unbanned from service {self.CYAN}{service}{self.RESET}"
@@ -244,7 +248,11 @@ class CLI(ApiCaller):
 
         try:
             data = {"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}
-            if self.send_to_apis("POST", "/ban", data=data):
+            if not self.apis:
+                return False, self.__format_error(f"Failed to ban {ip}: no BunkerWeb instance to send the request to")
+            # send_to_apis returns (ok, responses); testing the tuple itself is always truthy
+            ok, _ = self.send_to_apis("POST", "/ban", data=data)
+            if ok:
                 scope_text = f"{self.GREEN}globally{self.RESET}" if ban_scope == "global" else f"for service {self.CYAN}{service}{self.RESET}"
                 if not exp:
                     duration = f"{self.RED}permanently{self.RESET}"
@@ -264,11 +272,14 @@ class CLI(ApiCaller):
         """Get all bans from the system"""
         servers = {}
 
+        if not self.apis:
+            return False, self.__format_error("Failed to retrieve ban information: no BunkerWeb instance to query")
+
         try:
             ret, resp = self.send_to_apis("GET", "/bans", response=True)
         except BaseException as e:
             return False, self.__format_error(f"Failed to get bans: {e}")
-        if not ret:
+        if not ret or not resp:
             return False, self.__format_error("Failed to retrieve ban information")
 
         for k, v in resp.items():

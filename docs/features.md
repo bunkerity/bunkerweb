@@ -164,7 +164,6 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
     | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
     | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `KEEP_CONFIG_ON_RESTART` | `no`    | global    | No       | **Keep Config on Restart:** Keep the configuration on restart. Set to 'yes' to prevent config reset on restart. |
     | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
 
 === "Nginx Settings"
@@ -4342,7 +4341,7 @@ Follow these steps to deploy mutual TLS with confidence:
 | `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                    |
 | `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.        |
 | `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                      |
-| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window).                                                                                                     |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window). Client-supplied `X-SSL-*` headers are always stripped on ingress, so these values cannot be spoofed. |
 | `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                        |
 | `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain. |
 | `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                           |
@@ -4355,6 +4354,17 @@ Follow these steps to deploy mutual TLS with confidence:
 
 !!! info "Trusted certificate vs. verification"
     BunkerWeb reuses the same CA bundle for client verification and for building trust chains, keeping revocation checks and handshake validation consistent.
+
+!!! info "Inbound `X-SSL-*` headers are always stripped"
+    BunkerWeb removes every client-supplied `X-SSL-*` request header before the request reaches your application, on every site, whether or not mTLS is enabled, and on HTTP/1.1, HTTP/2 and HTTP/3 alike. Only the values BunkerWeb derives from the verified TLS handshake are forwarded, and only when `MTLS_FORWARD_CLIENT_HEADERS` is `yes`, so a client cannot spoof `X-SSL-Client-Verify: SUCCESS`.
+
+    If BunkerWeb sits behind another proxy that terminates mTLS and injects these headers itself, capture the value before the strip and re-publish it. Add a custom `server-http` configuration:
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    then forward it with `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"`. `REVERSE_PROXY_HEADERS` alone does not work: `$http_x_ssl_client_verify` is already empty by the time `proxy_set_header` evaluates it, whereas `set` runs in the server-rewrite phase, before the strip.
 
 !!! warning "Per-path mTLS requires optional mode"
     NGINX's `ssl_verify_client` directive is server-scope only — it cannot be set per `location`. To require a certificate on some paths only, set `MTLS_VERIFY_CLIENT` to `optional` so the handshake completes for every path, then list the protected paths in `MTLS_URL_n`. BunkerWeb enforces the certificate per-request in Lua on the matching URLs. Use `optional` for real enforcement: `optional_no_ca` skips CA chain validation, so a matching URL would accept any presented certificate and provides no meaningful protection. If you leave `MTLS_VERIFY_CLIENT` at `on` while setting `MTLS_URL_n`, NGINX rejects certificate-less clients during the handshake before BunkerWeb can apply the per-path logic, so enforcement stays site-wide (BunkerWeb logs a warning at startup in this case). If an `MTLS_URL_n` value is not a valid regex, BunkerWeb fails closed — requests are denied (`403`) and the offending pattern is logged — rather than silently letting the path through; fix the pattern to restore service.

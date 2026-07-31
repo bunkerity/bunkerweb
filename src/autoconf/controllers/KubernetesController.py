@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+from ipaddress import ip_address
 from logging import DEBUG
 from os import getenv, sep
 from pathlib import Path
-from re import compile as re_compile, split as re_split
+from re import split as re_split
 from threading import Lock, Thread
 from time import sleep, time
 from traceback import format_exc
@@ -52,7 +53,6 @@ class KubernetesController(Controller):
             self._logger.info("Using custom SSL CA certificate")
 
         self._corev1 = client.CoreV1Api()
-        self._ip_pattern = re_compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
 
         self._use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower().strip() == "yes"
         self._logger.info(f"Using Pod {'FQDN' if self._use_fqdn else 'IP'} as hostname")
@@ -928,6 +928,19 @@ class KubernetesController(Controller):
             self._logger.debug(format_exc())
 
         return None
+
+    @staticmethod
+    def _is_ip_address(address: str) -> bool:
+        """True for an IPv4 or IPv6 literal, False for a DNS name.
+
+        Kubernetes keeps addresses and hostnames in separate status fields and validates the
+        hostname one as an RFC 1123 name, so an IPv6 literal filed as a hostname is rejected
+        with a 422. `ip_address` accepts both families; anything it refuses is a real hostname.
+        """
+        with suppress(ValueError):
+            ip_address(address)
+            return True
+        return False
 
     def _status_patch_enabled(self) -> bool:
         return True

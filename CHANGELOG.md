@@ -1,6 +1,33 @@
 # Changelog
 
-## v1.6.14~rc2 - 2026/07/??
+## v1.6.14~rc3 - 2026/07/??
+
+- [SECURITY] `ui`: a TOTP code can no longer be used more than once. The replay guard never persisted the last accepted time step, leaving a captured code valid for the rest of its 30 second window.
+- [SECURITY] `ui`: removed the year-long "remember me" token, which survived logout, password changes and *Wipe other sessions* and bypassed IP/User-Agent pinning and the absolute session cap. "Remember me" now marks the session cookie permanent, so it still survives a browser restart but is a normal revocable session; raise both `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS` to stay logged in longer. Existing tokens are rejected and deleted on the next request.
+- [SECURITY] `ui`: revoked sessions are recorded in the session store (Redis when enabled) instead of a file outside the persistent volume, where recreating the container forgot every revocation and revocations never reached other replicas.
+- [SECURITY] `ui`: *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
+- [SECURITY] `core`: client-supplied `X-SSL-*` request headers are stripped before reaching an upstream. With mTLS header forwarding off, or on any PHP-FPM service, a client could spoof `X-SSL-Client-Verify: SUCCESS`. See the mTLS documentation to re-publish them when another proxy terminates mTLS.
+- [SECURITY] `linux`: the `API_TOKEN` set in `/etc/bunkerweb/variables.env` is applied to the configuration BunkerWeb starts with, instead of being dropped so that the API accepted untokenized requests until the scheduler pushed the real configuration.
+- [BUGFIX] `core`: `KEEP_CONFIG_ON_RESTART` is no longer listed as a setting. It is read by the entrypoint before the database is reachable, so setting it from the web UI never had any effect; set it in the environment, or in `/etc/bunkerweb/variables.env` on Linux, as before.
+- [BUGFIX] `core`: application-generated upstream 403 responses remain in access logs without appearing as unknown Security Reports or being reported to BunkerNet.
+- [BUGFIX] `scheduler`: push the configuration before running the jobs on every change, not only on the first start, so a new service already has its `server{}` when `certbot-new` asks Let's Encrypt to validate it. (Fixes #3772)
+- [BUGFIX] `letsencrypt`: skip services whose only names are IP addresses or single-label hosts, which no public CA can issue for, instead of asking for a certificate on every run and keeping the job red for every other service. (Refs #3772)
+- [BUGFIX] `ssl`: `AUTO_REDIRECT_HTTP_TO_HTTPS` and `REDIRECT_HTTP_TO_HTTPS` no longer redirect the ACME challenge, which made an HTTP-01 validation depend on port 443 being reachable. (Refs #3772)
+- [BUGFIX] `scheduler`: wait for an instance to answer before pushing the initial configuration, instead of leaving it on its loading configuration (no service, no certificate) until the once-jobs finish. (Refs #3773)
+- [BUGFIX] `letsencrypt`: when listing the existing certificates fails, keep the ones already on disk instead of deleting and re-issuing every certificate, which burned the ACME rate limits on each restart. (Refs #3773)
+- [BUGFIX] `metrics`: the Redis sync no longer reverses the per-worker cache ordering on every pass, which made `MAX_LRU_HISTORY` evict the busiest counters first instead of the least used ones.
+- [BUGFIX] `metrics`: apply `MAX_LRU_HISTORY` in every worker instead of a single one, so the per-worker metrics cache is really capped at the configured size.
+- [BUGFIX] `metrics`: delete a counter from Redis once it is evicted from a worker's cache, instead of leaving it there with its last value forever. (Refs #3758)
+- [BUGFIX] `badbehavior`: count blocked requests per path instead of per full URI, so a query string stops minting a counter per scanned parameter. (Refs #3758)
+- [BUGFIX] `reverseproxy`: a `REVERSE_PROXY_URL` starting with `^` or ending with `$` renders as a regex location instead of a prefix that broke the configuration or matched nothing. (Fixes #3768)
+- [BUGFIX] `ui`: CSV, Excel and clipboard exports no longer contain raw HTML; the formula-injection guard had replaced the formatters that strip it. (Fixes #3770)
+- [BUGFIX] `autoconf`: write IPv6 load balancer addresses to the Ingress and Gateway status as addresses, not hostnames, which Kubernetes rejected with a 422 on dual-stack clusters. (Fixes #3771)
+- [BUGFIX] `modsecurity`: `USE_MODSECURITY_GLOBAL_CRS` no longer breaks the configuration when no service is defined yet, where an empty allowed-methods list surfaced as a syntax error in the CRS setup file. (Fixes #3761)
+- [BUGFIX] `ui`: settings on a service created by the setup wizard can be edited again. Every change was silently discarded, with no error and the old value redrawn, because the wizard's own method was not recognized as compatible with the UI's. (Fixes #3751)
+- [BUGFIX] `cli`: `bwcli ban` and `bwcli unban` reported success even when every instance refused the request, so a ban that was never lifted looked lifted. (Fixes #3759)
+- [BUGFIX] `ui`: serve `/favicon.ico`; the 404 counted toward the badbehavior threshold and could ban an administrator out of the web UI on default settings. (Refs #3759)
+
+## v1.6.14~rc2 - 2026/07/29
 
 - [PERF] `ui`: make the Reports, Logs, and Home pages fast when many blocked-request reports are stored in Redis: fetch a single report by id from the newest end instead of scanning the whole list, share the Home page aggregation across workers through Redis instead of recomputing it in every worker, cache the Logs line count until the file changes or is rotated, and pause the Reports auto-refresh while the browser tab is in the background. Also honor the `k`/`m` suffix on `METRICS_MAX_BLOCKED_REQUESTS_REDIS` when bounding report reads.
 - [PERF] `ui`: memoize the plugin catalog and rebuild it only when plugins change instead of on every request, cutting the fixed overhead paid on every page load.
