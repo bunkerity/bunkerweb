@@ -7,6 +7,7 @@
 - [SECURITY] `ui`: revoked sessions are recorded in the session store (Redis when enabled) instead of a file outside the persistent volume, where recreating the container forgot every revocation and revocations never reached other replicas.
 - [SECURITY] `ui`: *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
 - [SECURITY] `core`: client-supplied `X-SSL-*` request headers are stripped before reaching an upstream. With mTLS header forwarding off, or on any PHP-FPM service, a client could spoof `X-SSL-Client-Verify: SUCCESS`. See the mTLS documentation to re-publish them when another proxy terminates mTLS.
+- [SECURITY] `linux`: the `API_TOKEN` set in `/etc/bunkerweb/variables.env` is applied to the configuration BunkerWeb starts with, instead of being dropped so that the API accepted untokenized requests until the scheduler pushed the real configuration.
 - [BUGFIX] `core`: application-generated upstream 403 responses remain in access logs without appearing as unknown Security Reports or being reported to BunkerNet.
 - [BUGFIX] `scheduler`: wait for an instance to answer before pushing the initial configuration, instead of leaving it on its loading configuration (no service, no certificate) until the once-jobs finish. (Refs #3773)
 - [BUGFIX] `letsencrypt`: when listing the existing certificates fails, keep the ones already on disk instead of deleting and re-issuing every certificate, which burned the ACME rate limits on each restart. (Refs #3773)
