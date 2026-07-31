@@ -8,6 +8,7 @@
 - [SECURITY] `ui`: *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
 - [SECURITY] `core`: client-supplied `X-SSL-*` request headers are stripped before reaching an upstream. With mTLS header forwarding off, or on any PHP-FPM service, a client could spoof `X-SSL-Client-Verify: SUCCESS`. See the mTLS documentation to re-publish them when another proxy terminates mTLS.
 - [BUGFIX] `core`: application-generated upstream 403 responses remain in access logs without appearing as unknown Security Reports or being reported to BunkerNet.
+- [BUGFIX] `letsencrypt`: when listing the existing certificates fails, keep the ones already on disk instead of deleting and re-issuing every certificate, which burned the ACME rate limits on each restart. (Refs #3773)
 - [BUGFIX] `metrics`: apply `MAX_LRU_HISTORY` in every worker instead of a single one, so the per-worker metrics cache is really capped at the configured size.
 - [BUGFIX] `metrics`: delete a counter from Redis once it is evicted from a worker's cache, instead of leaving it there with its last value forever. (Refs #3758)
 - [BUGFIX] `badbehavior`: count blocked requests per path instead of per full URI, so a query string stops minting a counter per scanned parameter. (Refs #3758)

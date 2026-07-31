@@ -895,9 +895,15 @@ try:
     LOGGER_CERTBOT.debug(f"Certbot output:\n{stdout}")
 
     # ? Check if the command was successful
-    if proc.returncode != 0:
-        LOGGER.error(f"Failed to fetch existing certificates, force the generation of certificates: \n{stdout}")
-        services = {service: config | {"force_renew": True} for service, config in services.items()}
+    listing_ok = proc.returncode == 0
+    if not listing_ok:
+        # Failing to list is a diagnostic failure, not proof the certificates are gone. Renewing
+        # every service on that basis burns the ACME rate limits and repeats on every start, so
+        # trust the lineages on disk instead and only issue for services that have none.
+        LOGGER.error(f"Failed to fetch existing certificates, falling back to the certificates found on disk: \n{stdout}")
+        for service in services:
+            if DATA_PATH.joinpath("live", service, "fullchain.pem").is_file():
+                existing_certificates[service] = {"active": False, "unparsed": True}
     else:
         # ? Parse existing certificates
         for certificate_block in stdout.split("Certificate Name: ")[1:]:
@@ -956,6 +962,11 @@ try:
 
         existing_cert = existing_certificates[server_name]
         existing_cert["active"] = True
+
+        if existing_cert.get("unparsed"):
+            # Nothing to compare the live certificate against, so leave it alone; certbot-renew
+            # still picks it up on its daily run once it is close enough to expiry.
+            continue
 
         if not config["disable_psl_check"]:
             if psl_lines is None:
@@ -1101,7 +1112,9 @@ try:
                     LOGGER.debug(f"Removed unused credential file: {file.name}")
 
         # * Clearing all no longer needed certificates
-        if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
+        if not listing_ok:
+            LOGGER.warning("Skipping the cleanup of old certificates: the certificate listing failed, so nothing can be declared unused.")
+        elif getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
             for service, data in existing_certificates.items():
                 if not data["active"]:
                     LOGGER.warning(f"Certificate for {service} does not exist anymore, removing...")
@@ -1127,7 +1140,9 @@ try:
                 continue
 
             configured_hash = str(config.get("zerossl_api_key_hash") or "")
-            if config.get("exists"):
+            # Only trust "exists" when the listing parsed: the on-disk fallback never got to
+            # compare the API key, so recording it here would swallow a rotation for good.
+            if config.get("exists") and listing_ok:
                 updated_zerossl_api_key_hashes[service] = configured_hash
                 continue
 
