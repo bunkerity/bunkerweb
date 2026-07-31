@@ -81,3 +81,37 @@
 
   apply();
 })();
+
+// -------------------------------------------------------- unsaved-edit guard (S3.5)
+// The mode pills stopped being tabs and became links (templates/models/mode_pills.html), so
+// leaving Compose for Raw is a real navigation and every unsaved switch, control key and
+// template choice on this form would go with it -- silently, because the server re-renders
+// from the database. `beforeunload` is the native answer and it also covers the cases a click
+// handler on the pills would miss: the browser Back button, closing the tab, and the resource
+// band's own attach/detach form (which posts from OUTSIDE this form and would equally discard
+// these edits -- warning there is correct, not a false positive).
+//
+// Separate IIFE from the shelf above on purpose: this guards the whole compose FORM, which
+// also holds the draft toggle, /services/new's SERVER_NAME and the template picker's target --
+// none of them inside `#compose-shelf`.
+(() => {
+  const form = document.getElementById("compose-form");
+  if (!form) return;
+
+  let dirty = false;
+  // `input` alone misses checkbox/select/file; `change` alone misses typing. Both, capture
+  // phase, so a handler that stops propagation (the shelf's own switch does not, but the
+  // widgets module is free to) cannot hide an edit from this.
+  form.addEventListener("input", () => (dirty = true), true);
+  form.addEventListener("change", () => (dirty = true), true);
+  // Fires before `beforeunload` on a native submit, so a Save must never warn.
+  form.addEventListener("submit", () => (dirty = false));
+
+  window.addEventListener("beforeunload", (event) => {
+    if (!dirty) return;
+    // Both halves are required: `preventDefault()` is the modern spec, `returnValue` is what
+    // older engines read. The string itself is ignored -- every browser shows its own text.
+    event.preventDefault();
+    event.returnValue = "";
+  });
+})();

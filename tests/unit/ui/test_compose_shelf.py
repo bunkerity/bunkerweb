@@ -593,9 +593,8 @@ def _include_closure(page_name, seen=None):
     """Every template reachable from `page_name` through literal `{% include "..." %}`.
 
     Transitive on purpose: the established shape is a one-line include of a per-mode partial
-    (`service_settings.html:39-45` includes `models/plugins_settings_easy.html` and friends),
-    so T7 will almost certainly reach this shelf through a `models/plugins_settings_compose.html`
-    rather than directly. A guard that greps the two page files for the literal name would go
+    (`service_settings.html` included one per pane), so T7 will almost certainly reach this shelf
+    through a compose partial of its own rather than directly. A guard that greps the two page files for the literal name would go
     permanently silent on exactly that commit. Only literal includes are followed -- an
     `{% include some_var %}` would escape this, and none exists today.
     """
@@ -642,10 +641,10 @@ def test_the_host_page_must_post_the_shelf_through_a_real_form():
     """A page that reaches this shelf must submit it with a REAL form, and must not hand it to
     the monolith's synthetic one.
 
-    `getFormFromSettings` (static/js/plugins-settings.js:1075) ignores its `elem` argument and
-    harvests fixed selectors -- `getTemplateContainer(currentTemplate)` (:1206) and
-    `$("div[id^='navs-plugins-']")` (:1216) -- so merely LOADING that file cannot reach the
-    shelf, and both host pages already load it for raw mode. The hazard is the TRIGGER: the
+    The monolith's `getFormFromSettings` ignored its `elem` argument and harvested fixed
+    selectors -- `getTemplateContainer(currentTemplate)` and `$("div[id^='navs-plugins-']")` --
+    so merely LOADING that file could not reach the shelf, and both host pages already loaded it
+    for raw mode. The hazard is the TRIGGER: the
     monolith binds `$(".save-settings").on("click", ...)` (:2025), calls `getFormFromSettings`
     (:2200) and submits it natively (:2214). Copy that class onto a compose Save button and
     `currentMode === "compose"` matches no branch (:1203-1325), so the POST carries only

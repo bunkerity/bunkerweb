@@ -440,24 +440,28 @@ SAVE_MODES: Tuple[str, ...] = ("easy", "advanced", "raw", "compose")
 def resolve_save_mode(mode: Optional[str], default: str) -> str:
     """Normalise the client-supplied `mode` down to what the SAVE path understands.
 
-    `mode` is an ordinary query argument, not a route segment -- the pills are client-side tabs
-    and `handleModeChange` (static/js/plugins-settings.js:565-595) syncs the URL with
-    `history.pushState`. A bookmark, a stale tab or a Back navigation can therefore hand this
-    route any string at all, so the fallback must be the branch that cannot destroy an
-    unexpected payload: `Database.save_config` deletes any in-scope key the form did not post
-    (db_methods/config_save.py:592), so the cost of guessing wrong is measured in deleted rows.
+    `mode` is an ordinary query argument, not a route segment. A bookmark, a stale tab or a Back
+    navigation can therefore hand this route any string at all, so the fallback must be the
+    branch that cannot destroy an unexpected payload: `Database.save_config` deletes any in-scope
+    key the form did not post (db_methods/config_save.py:592), so the cost of guessing wrong is
+    measured in deleted rows.
 
     THE FALLBACK IS NOT THE PAGE'S DEFAULT PANE, AND SINCE T7 IT IS DELIBERATELY NOT. Compose is
     what both pages now render by default, but the compose pane is a real `<form>` whose action
     carries `?mode=compose` literally (models/compose_pane.html), so a compose payload always
-    says so and never needs the fallback. What still arrives with no mode at all is anything the
-    monolith submits with `?mode=` stripped, and resolving THAT to `compose` would hand a partial
-    payload the shelf's full scope. `easy` (service) and `advanced` (global) both stay preserving
-    -- easy re-injects every stored value indiscriminately (:836-839), advanced declares no scope
-    at all -- so falling through to them destroys nothing whatever posted.
+    says so and never needs the fallback. Resolving an ABSENT mode to `compose` would hand some
+    other, partial payload the shelf's full scope. `easy` (service) and `advanced` (global) both
+    stay preserving -- easy re-injects every stored value indiscriminately (see update_service),
+    advanced declares no scope at all -- so falling through to them destroys nothing whatever
+    posted.
 
-    T8 removes the easy branch with the pane; the service fallback then becomes whichever branch
-    is still the preserving one, never the compose scope.
+    Since S3.5 every pane states its own mode, so the fallback is a guard rather than a live
+    path: the pills are LINKS carrying `?mode=raw` / no mode at all (models/mode_pills.html) and
+    the raw editor posts to `window.location.href`. That is not cosmetic. Between T7 and S3.5 no
+    code emitted `mode=raw` at all, so a raw save silently ran the `easy` branch -- whose
+    re-injection put back every key the raw text no longer contained, making a DELETED LINE a
+    no-op, and which skips the multisite `<server_name>_` prefix strip below. Anything that makes
+    the pane on screen and the branch here disagree reopens that.
 
     routes/templates.py's own VIEW_MODES is a different feature that happens to share the
     chrome; it is not routed through here.
@@ -495,7 +499,8 @@ def shelf_plugin_scope(
     * ``extensions.activation: "always"``, or the synthesized always-on ``general``: the row says
       "Always on" and has no switch.
     * A declared activation key of `global` context on a service page. That also covers "the
-      settings-driven loop renders no row for this plugin at all" (models/plugins_settings.html:137):
+      settings-driven loop renders no row for this plugin at all" -- the test the deleted advanced
+      pane used to make before rendering a plugin's nav entry:
       a plugin with zero multisite settings cannot have a multisite activation key, so the per-key
       filter below is the same test as a `get_filtered_settings` emptiness check -- mutation-checked
       as equivalent, and `.get("context")` here does not raise on the malformed manifest that
@@ -685,8 +690,8 @@ def postable_template_scope(
 ) -> Set[str]:
     """The keys this page's form can actually submit, and is therefore authoritative for.
 
-    Mirrors the `disabled` computation in the stepper markup (models/plugins_settings_easy.html,
-    extracted into models/template_steps_body.html). A disabled input posts nothing, and an
+    Mirrors the `disabled` computation in the stepper markup (models/template_steps_body.html,
+    extracted out of the since-deleted easy pane). A disabled input posts nothing, and an
     in-scope key that is not posted has its row deleted (db_methods/config_save.py:592) -- so
     claiming authority over a key the form cannot send is silent data destruction, not a
     harmless over-claim. Deliberately conservative: when in doubt a key is left OUT, which

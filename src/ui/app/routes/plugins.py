@@ -184,7 +184,7 @@ def _active_value_for(setting_id: str, inactive: str, definitions: Dict[str, dic
     """Derive a schema-legal active value for ``setting_id`` given its inactive value.
 
     ``definitions`` is a ``{setting_id: definition}`` map in the shape
-    ``plugins_settings.html``/``models/select_setting.html`` already render from (a select-typed
+    ``models/select_setting.html`` already renders from (a select-typed
     entry carries ``"type": "select"`` and ``"select": [option, ...]``). Always passed in, never
     fetched here. Raises ``ValueError`` when no schema-legal active value can be derived (free-text
     settings such as ``INJECT_BODY``/``REMOTE_PHP`` have no such value).

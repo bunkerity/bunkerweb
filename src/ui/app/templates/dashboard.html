@@ -43,98 +43,18 @@
                                     </button>
                                     <!-- Collapsible floating menu -->
                                     <div class="collapse mt-2" id="mode-selection-floating">
-                                        <ul class="nav nav-pills flex-column bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm mode-selection-menu"
-                                            role="tablist">
-                                            {% if pane_blueprint == "templates" %}
-                                                <li class="nav-item mb-1" role="presentation">
-                                                    <button type="button"
-                                                            class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
-                                                            role="tab"
-                                                            data-bs-toggle="tab"
-                                                            data-bs-target="#navs-modes-easy"
-                                                            aria-controls="navs-modes-easy"
-                                                            {% if mode == 'easy' %}aria-selected="true"{% endif %}>
-                                                        <i class="bx bx-customize bx-sm"></i>
-                                                        &nbsp;
-                                                        <span class="don-jose" data-i18n="mode.easy">Easy</span>
-                                                    </button>
-                                                </li>
-                                            {% else %}
-                                                <li class="nav-item mb-1" role="presentation">
-                                                    <button type="button"
-                                                            class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode != 'raw' %} active{% endif %}"
-                                                            role="tab"
-                                                            data-bs-toggle="tab"
-                                                            data-bs-target="#navs-modes-compose"
-                                                            aria-controls="navs-modes-compose"
-                                                            {% if mode != 'raw' %}aria-selected="true"{% endif %}>
-                                                        <i class="bx bx-layer bx-sm"></i>
-                                                        &nbsp;
-                                                        <span class="don-jose" data-i18n="mode.compose">Compose</span>
-                                                    </button>
-                                                </li>
-                                            {% endif %}
-                                            <li class="nav-item" role="presentation">
-                                                <button type="button"
-                                                        class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'raw' %} active{% endif %}"
-                                                        role="tab"
-                                                        data-bs-toggle="tab"
-                                                        data-bs-target="#navs-modes-raw"
-                                                        aria-controls="navs-modes-raw"
-                                                        {% if mode == 'raw' %}aria-selected="true"{% endif %}>
-                                                    <i class="bx bx-notepad bx-sm"></i>
-                                                    &nbsp;
-                                                    <span class="don-jose" data-i18n="mode.raw">Raw</span>
-                                                </button>
-                                            </li>
-                                        </ul>
+                                        {% set pill_ul_class = "nav nav-pills flex-column bg-" ~ ("white" if theme == "light" else "dark") ~ " p-2 rounded shadow-sm mode-selection-menu" %}
+                                        {% set pill_first_li_class = "nav-item mb-1" %}
+                                        {% set pill_icon_size = "bx-sm" %}
+                                        {% set pill_label_class = "don-jose" %}
+                                        {% include "models/mode_pills.html" %}
                                     </div>
                                 </div>
-                                <ul class="nav nav-pills flex-column flex-md-row d-none d-lg-flex mode-selection-menu"
-                                    role="tablist">
-                                    {% if pane_blueprint == "templates" %}
-                                        <li class="nav-item me-0 me-sm-3" role="presentation">
-                                            <button type="button"
-                                                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
-                                                    role="tab"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#navs-modes-easy"
-                                                    aria-controls="navs-modes-easy"
-                                                    {% if mode == 'easy' %}aria-selected="true"{% endif %}>
-                                                <i class="bx bx-customize bx-xs"></i>
-                                                &nbsp;
-                                                <span class="d-none d-sm-inline don-jose" data-i18n="mode.easy">Easy</span>
-                                            </button>
-                                        </li>
-                                    {% else %}
-                                        <li class="nav-item me-0 me-sm-3" role="presentation">
-                                            <button type="button"
-                                                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode != 'raw' %} active{% endif %}"
-                                                    role="tab"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#navs-modes-compose"
-                                                    aria-controls="navs-modes-compose"
-                                                    {% if mode != 'raw' %}aria-selected="true"{% endif %}>
-                                                <i class="bx bx-layer bx-xs"></i>
-                                                &nbsp;
-                                                <span class="d-none d-sm-inline don-jose" data-i18n="mode.compose">Compose</span>
-                                            </button>
-                                        </li>
-                                    {% endif %}
-                                    <li class="nav-item" role="presentation">
-                                        <button type="button"
-                                                class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'raw' %} active{% endif %}"
-                                                role="tab"
-                                                data-bs-toggle="tab"
-                                                data-bs-target="#navs-modes-raw"
-                                                aria-controls="navs-modes-raw"
-                                                {% if mode == 'raw' %}aria-selected="true"{% endif %}>
-                                            <i class="bx bx-notepad bx-xs"></i>
-                                            &nbsp;
-                                            <span class="d-none d-sm-inline don-jose" data-i18n="mode.raw">Raw</span>
-                                        </button>
-                                    </li>
-                                </ul>
+                                {% set pill_ul_class = "nav nav-pills flex-column flex-md-row d-none d-lg-flex mode-selection-menu" %}
+                                {% set pill_first_li_class = "nav-item me-0 me-sm-3" %}
+                                {% set pill_icon_size = "bx-xs" %}
+                                {% set pill_label_class = "d-none d-sm-inline don-jose" %}
+                                {% include "models/mode_pills.html" %}
                             {% endif %}
                         </div>
                         {% endblock %}

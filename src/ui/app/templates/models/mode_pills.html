@@ -1,0 +1,93 @@
+{# The mode switcher, rendered twice by dashboard.html (the small-screen floating menu and the
+   desktop bar). The caller owns the styling and sets, before the include:
+   `pill_ul_class`, `pill_first_li_class`, `pill_icon_size`, `pill_label_class`.
+   Reads `pane_blueprint` and `mode` from the caller's context.
+
+   ================ WHY /services AND /global-settings NAVIGATE INSTEAD OF TABBING ================
+   On those two pages the pills are LINKS, not `data-bs-toggle="tab"` buttons, and that is the
+   whole point of S3.5 rather than a styling choice. Compose and Raw are two views of the SAME
+   configuration, and a client-side tab switch showed the raw editor exactly as the server
+   rendered it at page load -- so unsaved compose edits were invisible there, and saving from raw
+   silently wrote the stale twin back over them. Navigating re-renders BOTH panes from the
+   database, which makes a stale twin impossible by construction instead of by a merge routine
+   that has to be kept correct.
+
+   It also repairs the pane/branch disagreement T7 opened. `mode` is a query argument, not a
+   route segment; the monolith's `handleModeChange` kept it in sync with `history.pushState`, and
+   that machinery died with the pane switcher. From then on Raw changed no URL, the raw editor's
+   synthetic form posts to `window.location.href` (js/pages/settings-raw.js:132), and
+   `resolve_save_mode` therefore fell back to `easy` -- whose indiscriminate re-injection
+   (routes/services.py, update_service) puts back every stored key the payload omitted, so
+   DELETING A LINE IN THE RAW EDITOR became a silent no-op and the multisite `<server_name>_`
+   prefix strip never ran. An `href` carrying `?mode=raw` is what makes the pane the user is
+   looking at and the branch the server runs the same fact.
+
+   /templates/<id> keeps real tabs: `template_edit.html` renders `#navs-modes-easy` and
+   `#navs-modes-raw` itself and switches between them client-side (js/pages/template_edit.js),
+   with its own `view_mode` round-trip. Different feature, same chrome -- do not unify them.
+
+   Query handling: both hrefs are built from `request.args` so `clone` and `type` survive a
+   switch (dropping `clone` on /services/new silently creates an EMPTY service). They are
+   RELATIVE -- `?a=b`, never `/services/...` -- because a hardcoded absolute path breaks when the
+   UI is mounted behind REVERSE_PROXY_URL, and a misdirected request carries the `__Host-`
+   session cookie with it. The compose href drops `mode` entirely rather than setting
+   `mode=compose`, because compose is the GET default on both pages; `?mode=` must stay absent
+   from ordinary navigation so that the only payloads declaring it are the ones the compose form
+   itself produces (models/compose_pane.html builds its action separately, and deliberately DOES
+   state `mode=compose` there). #}
+{% set nav_links = pane_blueprint in ("services", "global_settings") %}
+{% set compose_query = request.args.to_dict() %}
+{% set _compose_drop_mode = compose_query.pop("mode", none) %}
+{% set raw_query = request.args.to_dict() %}
+{% set _raw_set_mode = raw_query.update({"mode": "raw"}) %}
+{% set raw_active = mode == 'raw' %}
+<ul class="{{ pill_ul_class }}"{% if not nav_links %} role="tablist"{% endif %}>
+    {% if pane_blueprint == "templates" %}
+        <li class="{{ pill_first_li_class }}" role="presentation">
+            <button type="button"
+                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
+                    role="tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#navs-modes-easy"
+                    aria-controls="navs-modes-easy"
+                    {% if mode == 'easy' %}aria-selected="true"{% endif %}>
+                <i class="bx bx-customize {{ pill_icon_size }}"></i>
+                &nbsp;
+                <span class="{{ pill_label_class }}" data-i18n="mode.easy">Easy</span>
+            </button>
+        </li>
+    {% else %}
+        <li class="{{ pill_first_li_class }}"{% if not nav_links %} role="presentation"{% endif %}>
+            <a class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if not raw_active %} active{% endif %}"
+               href="?{{ compose_query | urlencode }}"
+               {% if not raw_active %}aria-current="page"{% endif %}>
+                <i class="bx bx-layer {{ pill_icon_size }}"></i>
+                &nbsp;
+                <span class="{{ pill_label_class }}" data-i18n="mode.compose">Compose</span>
+            </a>
+        </li>
+    {% endif %}
+    <li class="nav-item"{% if not nav_links %} role="presentation"{% endif %}>
+        {% if nav_links %}
+            <a class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if raw_active %} active{% endif %}"
+               href="?{{ raw_query | urlencode }}"
+               {% if raw_active %}aria-current="page"{% endif %}>
+                <i class="bx bx-notepad {{ pill_icon_size }}"></i>
+                &nbsp;
+                <span class="{{ pill_label_class }}" data-i18n="mode.raw">Raw</span>
+            </a>
+        {% else %}
+            <button type="button"
+                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if raw_active %} active{% endif %}"
+                    role="tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#navs-modes-raw"
+                    aria-controls="navs-modes-raw"
+                    {% if raw_active %}aria-selected="true"{% endif %}>
+                <i class="bx bx-notepad {{ pill_icon_size }}"></i>
+                &nbsp;
+                <span class="{{ pill_label_class }}" data-i18n="mode.raw">Raw</span>
+            </button>
+        {% endif %}
+    </li>
+</ul>

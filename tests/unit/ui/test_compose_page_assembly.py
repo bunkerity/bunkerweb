@@ -14,6 +14,7 @@ where the two failures are:
 import ast
 import re
 import sys
+from urllib.parse import parse_qs, urlparse
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -448,8 +449,11 @@ def test_the_pills_are_gated_on_the_blueprint_not_on_a_path_substring():
 
 def test_every_pill_target_is_a_pane_some_page_renders():
     """A pill pointing at a pane no page renders is a dead tab; a pane no pill reaches is
-    unreachable configuration."""
-    targets = set(re.findall(r'data-bs-target="#navs-modes-([a-z]+)"', _page("dashboard.html")))
+    unreachable configuration. Both pill shapes count: since S3.5 the service and global pills
+    are LINKS carrying a `mode`, and only the templates page still tabs to a `data-bs-target`."""
+    pills = _page("models/mode_pills.html")
+    targets = set(re.findall(r'data-bs-target="#navs-modes-([a-z]+)"', pills))
+    targets |= {_pill_mode(href) for href in re.findall(r'href="\?{{ ([a-z_]+) \| urlencode }}"', pills)}
     assert targets == {"compose", "easy", "raw"}, f"pill targets are {sorted(targets)}"
     rendered = set()
     for page_name in HOST_PAGES + ("template_edit.html",):
@@ -458,11 +462,150 @@ def test_every_pill_target_is_a_pane_some_page_renders():
     assert rendered <= targets, f"panes no pill can reach: {sorted(rendered - targets)}"
 
 
+def _pill_mode(query_var):
+    """`compose_query` / `raw_query` -> the pane that href lands on."""
+    return query_var.removesuffix("_query")
+
+
 def test_the_easy_pill_is_the_templates_blueprint_only():
+    pills = _page("models/mode_pills.html")
+    matches = list(re.finditer(r'data-bs-target="#navs-modes-easy"', pills))
+    assert matches, "no easy pill found at all -- this test would pass vacuously"
+    for match in matches:
+        preceding = pills[: match.start()]
+        assert 'pane_blueprint == "templates"' in preceding
+        branch = preceding[preceding.rindex('pane_blueprint == "templates"') :]  # noqa: E203
+        assert "{% else %}" not in branch
+
+
+# --------------------------------------------------------------------------------------
+# S3.5 -- the pills navigate, so the pane on screen and the save branch cannot disagree
+# --------------------------------------------------------------------------------------
+
+
+@pytest.fixture
+def render_pills():
+    env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
+
+    def _render(*, blueprint="services", mode="compose", args=None):
+        return env.get_template("models/mode_pills.html").render(
+            request=_Request(args, blueprint=blueprint),
+            pane_blueprint=blueprint,
+            mode=mode,
+            pill_ul_class="nav nav-pills",
+            pill_first_li_class="nav-item",
+            pill_icon_size="bx-xs",
+            pill_label_class="don-jose",
+        )
+
+    return _render
+
+
+def _hrefs(html):
+    return re.findall(r'href="([^"]*)"', html)
+
+
+@pytest.mark.parametrize("blueprint", ("services", "global_settings"))
+def test_the_service_and_global_pills_are_links_not_tabs(render_pills, blueprint):
+    """A client-side tab switch left the raw editor showing the text the server rendered at page
+    load -- unsaved compose edits were invisible in it, and saving from raw wrote that stale twin
+    back over them. Navigating re-renders both panes from the database instead."""
+    html = render_pills(blueprint=blueprint)
+    assert 'data-bs-toggle="tab"' not in html
+    assert "data-bs-target=" not in html
+    assert 'role="tablist"' not in html
+    assert len(_hrefs(html)) == 2, _hrefs(html)
+
+
+def test_the_templates_pills_stay_tabs(render_pills):
+    """/templates/<id> renders BOTH its panes itself and switches between them client-side
+    (template_edit.js, its own view_mode). Different feature, same chrome."""
+    html = render_pills(blueprint="templates", mode="easy")
+    assert 'data-bs-toggle="tab"' in html
+    assert 'role="tablist"' in html
+    assert _hrefs(html) == []
+    assert "navs-modes-easy" in html and "navs-modes-raw" in html
+
+
+def test_the_raw_pill_routes_a_raw_save_to_the_raw_branch(render_pills):
+    """THE REGRESSION THIS SLICE CLOSES. The raw editor posts to `window.location.href`
+    (settings-raw.js), so the pill's href IS the save's `mode`. Between T7 and S3.5 nothing
+    emitted `mode=raw`, `resolve_save_mode` fell back to `easy`, and easy's indiscriminate
+    re-injection put back every key the raw text no longer held -- deleting a line became a
+    no-op. Asserted through the real route function, not against a literal."""
+    raw_href = [href for href in _hrefs(render_pills(mode="compose")) if "mode=raw" in href]
+    assert raw_href, "no pill carries mode=raw"
+    query = parse_qs(urlparse(raw_href[0]).query)
+    assert _services.resolve_save_mode(query["mode"][0], "easy") == "raw"
+
+
+def test_the_compose_pill_declares_no_mode_at_all(render_pills):
+    """Compose is the GET default on both pages, so the pill omits `mode` rather than setting
+    `mode=compose`. Only the compose FORM may declare compose (models/compose_pane.html builds
+    its own action): a declared compose hands the payload the shelf's full scope, and an in-scope
+    key the payload did not post is DELETED."""
+    hrefs = _hrefs(render_pills(mode="raw"))
+    compose_href = [href for href in hrefs if "mode=raw" not in href]
+    assert len(compose_href) == 1, hrefs
+    assert "mode" not in parse_qs(urlparse(compose_href[0]).query)
+    assert _services.resolve_save_mode(None, "easy") != "compose"
+
+
+@pytest.mark.parametrize("arg,value", (("clone", "other.example.com"), ("type", "core")))
+def test_the_pills_preserve_every_other_query_argument(render_pills, arg, value):
+    """Dropping `clone` on /services/new silently creates an EMPTY service instead of a copy
+    (routes/services.py reads it on POST)."""
+    for href in _hrefs(render_pills(args={arg: value})):
+        assert parse_qs(urlparse(href).query).get(arg) == [value], href
+
+
+@pytest.mark.parametrize("mode,expected", (("raw", "raw"), ("compose", "compose"), ("easy", "compose"), ("advanced", "compose")))
+def test_the_active_pill_is_the_pane_the_page_renders(render_pills, mode, expected):
+    """The panes activate on `mode != 'raw'` (service_settings.html / global_settings.html), so a
+    bookmarked `mode=easy` renders compose and the pill must agree with it."""
+    html = render_pills(mode=mode)
+    active = re.findall(r'href="([^"]*)"[^>]*aria-current', html.replace("\n", " "))
+    assert len(active) == 1, html
+    landed = "raw" if "mode=raw" in active[0] else "compose"
+    assert landed == expected
+
+
+def test_the_chrome_still_includes_the_pills():
+    """Every other test in this block renders `models/mode_pills.html` directly, so all of them
+    stay green if dashboard.html simply stops including it and the switcher vanishes. That is the
+    shape of the regression T7 shipped -- markup deleted out from under a contract nothing
+    re-checked. The include must also stay INSIDE the blueprint gate: outside it, the service and
+    template LIST pages grow a mode switcher for panes they do not render."""
     head = _page("dashboard.html")
-    for match in re.finditer(r'data-bs-target="#navs-modes-easy"', head):
-        preceding = head[: match.start()]
-        assert preceding.rindex('pane_blueprint == "templates"') > preceding.rindex("{% if pane_blueprint %}")
+    start = head.index("{% block page_head %}")
+    block = head[start : head.index("{% endblock %}", start)]  # noqa: E203
+    assert block.count('{% include "models/mode_pills.html" %}') == 2, "the floating and desktop menus both render it"
+    gate = block.index("{% if pane_blueprint %}")
+    assert all(m > gate for m in _find_all(block, '{% include "models/mode_pills.html" %}'))
+
+
+def _find_all(haystack, needle):
+    start = 0
+    while (found := haystack.find(needle, start)) != -1:
+        yield found
+        start = found + 1
+
+
+def test_the_pills_never_hardcode_an_absolute_path():
+    """A hardcoded /services/... breaks when the UI is mounted behind REVERSE_PROXY_URL, and the
+    misdirected request carries the `__Host-` session cookie and a valid CSRF token with it."""
+    for href in re.findall(r'href="([^"]*)"', _page("models/mode_pills.html")):
+        assert href.startswith("?"), href
+
+
+def test_the_compose_form_warns_before_a_navigation_discards_it():
+    """The pills stopped being tabs, so leaving compose now drops every unsaved switch, control
+    key and template choice. Without the guard that is silent."""
+    script = (REPO_ROOT / "src" / "ui" / "app" / "static" / "js" / "components" / "compose-shelf.js").read_text(encoding="utf-8")
+    assert 'getElementById("compose-form")' in script
+    registration = script.index('addEventListener("beforeunload"')
+    assert "returnValue" in script[registration:], "beforeunload without returnValue is ignored by older engines"
+    assert 'addEventListener("submit"' in script[:registration], "a Save would warn about its own navigation"
 
 
 # --------------------------------------------------------------------------------------
