@@ -65,11 +65,34 @@ def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
 
 
 def _cleanup_stale_plugin_dirs() -> None:
-    for pattern in (".*.tmp-*", ".*.bak-*"):
-        for stale_dir in PRO_PLUGINS_DIR.glob(pattern):
-            if stale_dir.is_dir():
-                LOGGER.warning(f"Found stale Pro plugin directory {stale_dir}, cleaning it up ...")
-                rmtree(stale_dir, ignore_errors=True)
+    """Sweep leftovers from an interrupted install -- but never throw away the last good copy.
+
+    `_install_plugin_atomically` renames the live directory to `.<id>.bak-<uuid>` and only then
+    renames the new one into place. A process killed between those two renames leaves NO live
+    directory, with the previous version surviving solely as that backup; deleting it here
+    unconditionally destroyed the only local copy. Same reasoning, and same fix, as
+    `misc/jobs/download-plugins.py` -- the two jobs share this install pattern.
+    """
+    for stale_dir in PRO_PLUGINS_DIR.glob(".*.bak-*"):
+        if not stale_dir.is_dir():
+            continue
+        plugin_id = stale_dir.name[1:].rsplit(".bak-", 1)[0]
+        live_dir = PRO_PLUGINS_DIR.joinpath(plugin_id)
+        if plugin_id and not live_dir.exists():
+            LOGGER.warning(f"Pro plugin {plugin_id} is missing but a backup from an interrupted install survives, restoring it ...")
+            try:
+                stale_dir.rename(live_dir)
+            except OSError as e:
+                LOGGER.error(f"Could not restore Pro plugin {plugin_id} from {stale_dir}, leaving it in place: {e}")
+            continue
+
+        LOGGER.warning(f"Found stale Pro plugin directory {stale_dir}, cleaning it up ...")
+        rmtree(stale_dir, ignore_errors=True)
+
+    for stale_dir in PRO_PLUGINS_DIR.glob(".*.tmp-*"):
+        if stale_dir.is_dir():
+            LOGGER.warning(f"Found stale Pro plugin directory {stale_dir}, cleaning it up ...")
+            rmtree(stale_dir, ignore_errors=True)
 
 
 def _install_plugin_atomically(plugin_path: Path, new_plugin_path: Path) -> None:

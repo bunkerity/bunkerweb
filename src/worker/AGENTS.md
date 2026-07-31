@@ -31,6 +31,6 @@ pre-commit run --all-files
 ## Pitfalls
 
 - Dev compose does not volume-mount Worker source; rebuild and recreate `bw-worker` for code changes.
-- `task_acks_late=False` means a crash mid-job will not requeue the task.
+- `task_acks_late=True` + `task_reject_on_worker_lost=True`: delivery is **at-least-once**, so a job killed mid-run is re-run from the start. `tasks.py` bounds redeliveries per dispatch (`WORKER_MAX_DELIVERY_ATTEMPTS`, default 3) because those flags switch off Celery's own loop protection.
 - `worker_max_tasks_per_child=1` makes every job pay child init cost.
 - No Celery result backend is configured; durable evidence must go through DB job runs or logs.

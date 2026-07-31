@@ -23,8 +23,23 @@ app.conf.update(
     event_serializer="json",
     accept_content=["json"],
     result_accept_content=["json"],
-    task_acks_late=False,
-    task_reject_on_worker_lost=False,
+    # At-least-once delivery. With acks_late=False the broker acked on RECEIPT, so a worker
+    # killed mid-job lost that job silently -- no retry, no error, and the scheduler believed
+    # it ran. A certbot renewal that never happened looks identical to one that did.
+    #
+    # These two settings cover different halves and both are needed:
+    #   * acks_late alone covers the whole worker/container dying (nothing ever acks, the
+    #     broker redelivers);
+    #   * it does NOT cover a single prefork child killed by a signal -- Celery acknowledges
+    #     those even under acks_late, deliberately, to stop a task that segfaults from looping
+    #     forever (celery/worker/request.py::on_failure). reject_on_worker_lost overrides that,
+    #     which is what catches the common case: the cgroup OOM-killing a heavy job.
+    #
+    # Removing Celery's loop protection means we owe our own bound: tasks.py counts deliveries
+    # per task id and drops a job that keeps killing its worker. Do not enable one without the
+    # other.
+    task_acks_late=True,
+    task_reject_on_worker_lost=True,
     task_track_started=True,
     task_time_limit=1800,
     task_soft_time_limit=900,

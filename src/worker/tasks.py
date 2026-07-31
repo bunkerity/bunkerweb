@@ -1,4 +1,5 @@
 import os
+from contextlib import suppress
 from datetime import datetime
 
 from worker.app import app, get_worker_db
@@ -76,10 +77,59 @@ def job_shadow_name(task, args, kwargs, options) -> str:
     return "job.unknown"
 
 
-def _request_reload_debounced(apis, broker_url: str, logger) -> None:
+# How many times one dispatched job may be delivered before we give up on it. Celery's own
+# loop protection (acknowledge a task whose child died by signal) is switched off in app.py so
+# an OOM-killed job is actually retried, so this is the bound that replaces it: a job that
+# reliably kills its worker would otherwise be requeued forever, taking the worker down with it
+# on every lap and starving every other job in the lane.
+MAX_DELIVERY_ATTEMPTS = int(os.getenv("WORKER_MAX_DELIVERY_ATTEMPTS", "3") or 3)
+
+
+def _broker_client(broker_url: str):
+    """Redis client for the broker, with timeouts. NEVER call `Redis.from_url` bare here.
+
+    Both callers run on the job's critical path, and the conditions that make a worker die --
+    a netsplit, a fenced node, a dropped security group -- are exactly the ones that black-hole
+    the broker rather than refusing the connection. redis-py defaults to `socket_timeout=None`,
+    so a bare client blocks forever: the job would hang until `task_time_limit` (1800s) fires,
+    and a time-limit kill ACKs the message (`acks_on_failure_or_timeout` defaults True), losing
+    the job silently -- reintroducing the exact bug at-least-once delivery exists to fix.
+    """
     import redis
 
-    client = redis.Redis.from_url(broker_url)
+    return redis.Redis.from_url(broker_url, socket_timeout=2, socket_connect_timeout=2)
+
+
+def _delivery_attempt(task_id: str, broker_url: str, logger) -> int:
+    """Return which delivery of ``task_id`` this is, 1-based. 0 means "could not tell".
+
+    The counter lives in the broker rather than in the process because the whole point is to
+    survive the process dying. The key is the task id, which the API sets to the run id and
+    Celery preserves across a redelivery, so a *rescheduled* run of the same job gets a fresh
+    id and a fresh count -- this bounds retries of one dispatch, never the job itself.
+
+    Fails OPEN: if the broker cannot be reached the job runs. A counter that cannot be read is
+    a reason to lose visibility, not a reason to refuse work.
+    """
+    if not task_id:
+        return 0
+    try:
+        client = _broker_client(broker_url)
+        key = f"bw:job_attempt:{task_id}"
+        attempt = int(client.incr(key))  # type: ignore[arg-type]  # sync client returns int, not an awaitable
+        if attempt == 1:
+            # Long enough to outlive any redelivery of this dispatch, short enough that the
+            # keys do not accumulate. Every dispatch mints a new task id, so this only ever
+            # garbage-collects.
+            client.expire(key, 86400)
+        return attempt
+    except Exception as exc:
+        logger.warning(f"Could not read the delivery counter, running the job unbounded: {exc}")
+        return 0
+
+
+def _request_reload_debounced(apis, broker_url: str, logger) -> None:
+    client = _broker_client(broker_url)
     if not client.set("bw:reload_pending", "1", nx=True, ex=10):
         logger.info("Reload already pending, skipping duplicate request")
         return
@@ -98,16 +148,17 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
     bind=True,
     name="worker.execute_job",
     shadow_name=job_shadow_name,
-    acks_late=False,
+    # Mirrors app.conf. The decorator wins over the app config, so leaving this at False would
+    # have silently kept early-acking no matter what app.py says -- see the comment there for
+    # why both halves are on.
+    acks_late=True,
     track_started=True,
 )
 def execute_job(self, job_data: dict) -> dict:
     from logger import setup_logger  # type: ignore
 
     logger = setup_logger("WORKER")
-    executor = JobExecutor(logger)
     db = get_worker_db()
-    apis = _get_apis()
 
     name = job_data.get("name", "unknown")
     plugin = job_data.get("plugin_id", "unknown")
@@ -115,7 +166,33 @@ def execute_job(self, job_data: dict) -> dict:
     broker_url = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
     start = datetime.now().astimezone()
 
-    logger.info(f"[{run_id}] Starting job {plugin}/{name}")
+    # Count this delivery before doing anything expensive. A job that OOM-kills its worker gets
+    # requeued (reject_on_worker_lost), comes back here, and would loop forever otherwise; the
+    # run is recorded as failed so the operator sees the job dying rather than silence.
+    attempt = _delivery_attempt(self.request.id or run_id, broker_url, logger)
+    if attempt > MAX_DELIVERY_ATTEMPTS:
+        logger.error(
+            f"[{run_id}] Job {plugin}/{name} has been delivered {attempt} times "
+            f"(limit {MAX_DELIVERY_ATTEMPTS}) -- it keeps killing its worker. Giving up on this dispatch."
+        )
+        if db:
+            with suppress(Exception):
+                db.add_job_run(name, False, start, datetime.now().astimezone())
+        return {
+            "duration_seconds": 0.0,
+            "name": name,
+            "needs_reload": False,
+            "plugin": plugin,
+            "return_code": 2,
+            "run_id": run_id,
+            "success": False,
+            "abandoned_after_attempts": attempt,
+        }
+
+    executor = JobExecutor(logger)
+    apis = _get_apis()
+
+    logger.info(f"[{run_id}] Starting job {plugin}/{name}" + (f" (delivery {attempt})" if attempt > 1 else ""))
 
     saved_env = os.environ.copy()
     safe_env = saved_env.copy()
@@ -135,6 +212,13 @@ def execute_job(self, job_data: dict) -> dict:
         # compiled defaults. The scheduler no longer runs jobs in-process, so it
         # can no longer provide this env — the worker must.
         os.environ.update(_load_job_config_env(db, logger))
+
+        # Identity of THIS dispatch, stable across a redelivery (Celery keeps the task id). A
+        # job that takes a distributed lease needs it: without an owner token it cannot tell a
+        # lease held by another run from the one its own killed delivery left behind, and the
+        # retry then skips itself. Set after the config overlay so a stored setting cannot
+        # shadow it, and before the per-job env so an explicit override still wins.
+        os.environ["BW_JOB_RUN_ID"] = self.request.id or run_id
 
         job_env = job_data.get("env")
         if isinstance(job_env, dict):

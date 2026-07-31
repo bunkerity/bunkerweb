@@ -15,6 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_pem_private_key
 
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
@@ -50,6 +51,33 @@ def normalize_algorithm_name(algorithm: str) -> str:
             return algorithm, None
 
     return algorithm, None
+
+
+def key_matches_certificate(key_path: Path, certificate: x509.Certificate) -> bool:
+    """Does this private key actually go with this certificate?
+
+    Nothing else in the validity gate below can tell: `openssl x509 -checkend`, the algorithm,
+    the subject and the dates are all properties of the CERTIFICATE ALONE, so a certificate
+    paired with the wrong key looks perfectly valid and is never regenerated -- while nginx
+    fails every handshake for that server.
+
+    The pair can come apart because the two halves are persisted one after the other
+    (`cache_file("cert.pem")` then `cache_file("key.pem")` at the end of this job): a process
+    killed between them commits a new certificate against the old key, and the next run writes
+    that mismatched pair back to disk from the cache. Comparing the public halves repairs it
+    whatever the cause -- an interrupted run, a half-restored backup, or a hand-edited file.
+
+    A key that cannot be parsed counts as a mismatch: regenerating is always safe here (the
+    material is self-signed and disposable) and is the correct answer for a corrupt file too.
+    """
+    try:
+        private_key = load_pem_private_key(key_path.read_bytes(), password=None, backend=default_backend())
+        return private_key.public_key().public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo) == certificate.public_key().public_bytes(
+            Encoding.DER, PublicFormat.SubjectPublicKeyInfo
+        )
+    except BaseException as e:
+        LOGGER.debug(f"Could not read the private key at {key_path}: {e}")
+        return False
 
 
 def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path) -> Tuple[bool, int]:
@@ -112,6 +140,8 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 )
             elif not_valid_after < datetime.now(tz=not_valid_after.tzinfo):
                 LOGGER.warning(f"Self-signed certificate for {first_server} has expired, regenerating ...")
+            elif not key_matches_certificate(key_path, certificate):
+                LOGGER.warning(f"Private key for {first_server} does not match its self-signed certificate, regenerating ...")
             else:
                 LOGGER.info(f"Self-signed certificate for {first_server} is valid")
                 return True, 0

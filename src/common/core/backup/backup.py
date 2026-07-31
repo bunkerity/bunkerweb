@@ -3,7 +3,7 @@
 from datetime import datetime
 import re
 from json import dumps, loads
-from os import getenv
+from os import getenv, replace
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
@@ -54,6 +54,29 @@ def update_cache_file(db: Database, backup_dir: Path) -> str:
 
     LOGGER.info("Backup cache file updated successfully")
     return ""
+
+
+def write_backup_archive(backup_file: Path, member_name: str, payload: bytes) -> None:
+    """Publish a backup archive atomically: build under `.zip.tmp`, then rename.
+
+    Writing straight to the final name published a HALF-WRITTEN archive under a name every
+    other part of the feature treats as a finished backup. A killed run therefore produced a
+    truncated file that `update_cache_file` listed (:46), `bwcli restore` offered, and -- worst
+    -- that counted toward BACKUP_ROTATION, so rotation deleted a GOOD backup to make room for
+    a corrupt one (jobs/backup-data.py:93-105). At-least-once delivery makes that failure more
+    frequent, but it was never dependent on it.
+
+    `os.replace` is atomic within a directory, so the final name only ever appears complete;
+    `backup-*.zip` does not match the temporary name, so an interrupted run is inert until the
+    job sweeps it. The chmod deliberately happens BEFORE the rename: the payload is a full
+    database dump, and chmod-after would publish it world-readable for the length of a syscall.
+    """
+    tmp_file = backup_file.with_suffix(".zip.tmp")
+    with ZipFile(tmp_file, "w", compression=ZIP_DEFLATED) as zipf:
+        zipf.writestr(member_name, payload)
+
+    tmp_file.chmod(0o600)
+    replace(tmp_file, backup_file)
 
 
 def backup_database(current_time: datetime, db: Database = None, backup_dir: Path = BACKUP_DIR):
@@ -194,10 +217,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
         LOGGER.error("Failed to dump the database: Timeout reached")
         sys_exit(1)
 
-    with ZipFile(backup_file, "w", compression=ZIP_DEFLATED) as zipf:
-        zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
-
-    backup_file.chmod(0o600)
+    write_backup_archive(backup_file, backup_file.with_suffix(".sql").name, proc.stdout)
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
     return db, backup_file

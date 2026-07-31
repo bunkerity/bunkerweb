@@ -66,11 +66,41 @@ def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
 
 
 def _cleanup_stale_plugin_dirs() -> None:
-    for pattern in (".*.tmp-*", ".*.bak-*"):
-        for stale_dir in EXTERNAL_PLUGINS_DIR.glob(pattern):
-            if stale_dir.is_dir():
-                LOGGER.warning(f"Found stale plugin directory {stale_dir}, cleaning it up ...")
-                rmtree(stale_dir, ignore_errors=True)
+    """Sweep leftovers from an interrupted install -- but never throw away the last good copy.
+
+    `_install_plugin_atomically` renames the live directory to `.<id>.bak-<uuid>` and only then
+    renames the new one into its place. A process killed between those two renames leaves NO
+    live directory at all, with the previous version surviving solely as that backup. Deleting
+    it unconditionally (which is what this used to do) destroyed the only local copy: the DB row
+    still claimed the plugin was installed, and if the re-download then failed the plugin simply
+    vanished until the scheduler rebuilt it from the stored tarball.
+
+    So a backup is promoted back when its live directory is missing, and only deleted once the
+    live one is present. `.tmp-` dirs are always removed -- a half-finished copy of the NEW
+    version is never worth keeping.
+    """
+    for stale_dir in EXTERNAL_PLUGINS_DIR.glob(".*.bak-*"):
+        if not stale_dir.is_dir():
+            continue
+        plugin_id = stale_dir.name[1:].rsplit(".bak-", 1)[0]
+        live_dir = EXTERNAL_PLUGINS_DIR.joinpath(plugin_id)
+        if plugin_id and not live_dir.exists():
+            LOGGER.warning(f"Plugin {plugin_id} is missing but a backup from an interrupted install survives, restoring it ...")
+            try:
+                stale_dir.rename(live_dir)
+            except OSError as e:
+                # Leave it on disk. It is the only copy, so an unremovable backup is a far
+                # better outcome than a deleted one.
+                LOGGER.error(f"Could not restore plugin {plugin_id} from {stale_dir}, leaving it in place: {e}")
+            continue
+
+        LOGGER.warning(f"Found stale plugin directory {stale_dir}, cleaning it up ...")
+        rmtree(stale_dir, ignore_errors=True)
+
+    for stale_dir in EXTERNAL_PLUGINS_DIR.glob(".*.tmp-*"):
+        if stale_dir.is_dir():
+            LOGGER.warning(f"Found stale plugin directory {stale_dir}, cleaning it up ...")
+            rmtree(stale_dir, ignore_errors=True)
 
 
 def _install_plugin_atomically(plugin_path: Path, new_plugin_path: Path) -> None:

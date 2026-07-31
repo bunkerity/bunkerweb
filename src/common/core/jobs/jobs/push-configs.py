@@ -18,6 +18,7 @@ from subprocess import DEVNULL, STDOUT, run as subprocess_run
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
+from uuid import uuid4
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -90,6 +91,36 @@ RETIRED_CACHE_PATHS = {
 def _redis_client():
     broker_url = getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
     return redis.Redis.from_url(broker_url, socket_timeout=5)
+
+
+def acquire_lease(client, lock_owner: str, reclaimable: bool) -> bool:
+    """Take the push-configs lease, reclaiming one this same dispatch left behind.
+
+    The lease is released in a `finally`, which a SIGKILL never reaches, so a worker killed
+    mid-push leaves it held for up to LOCK_TTL. Job delivery is at-least-once, so the next run
+    is very often the redelivery of the dispatch that was killed -- and with the old
+    timestamp-valued lease it could not tell its own orphan from a genuinely concurrent run. It
+    exited 0, was recorded as a SUCCESS, and every instance carried on serving the previous
+    configuration until something else happened to dispatch a push.
+
+    `lock_owner` is the Celery task id, which is stable across a redelivery, so an owner match
+    means "this is my own orphan" and nothing else. `reclaimable` is False when there is no task
+    id to match on (bwcli, an older worker): then a failed acquisition is always someone else's,
+    which is the safe reading.
+    """
+    if client.set(LOCK_KEY, lock_owner, nx=True, ex=LOCK_TTL):
+        return True
+
+    if not reclaimable:
+        return False
+
+    holder = client.get(LOCK_KEY)
+    if holder is None or holder.decode("utf-8", "replace") != lock_owner:
+        return False
+
+    LOGGER.warning("Reclaiming the lease left behind by an interrupted delivery of this same run")
+    client.set(LOCK_KEY, lock_owner, ex=LOCK_TTL)
+    return True
 
 
 def _materialize_custom_configs(db: Database) -> None:
@@ -369,9 +400,17 @@ try:
     target_hostnames_env = getenv("PUSH_CONFIGS_TARGETS", "").strip()
     target_hostnames = {h for h in target_hostnames_env.split() if h} or None
 
+    # The worker exports the Celery task id, which is stable across a redelivery of the same
+    # dispatch -- that is what makes the lease reclaimable below. Outside the worker (bwcli, an
+    # older worker) there is no such id, so fall back to a value that is unique per process and
+    # can therefore never match an existing holder: no id means no reclaiming, which is the
+    # safe direction.
+    run_id = getenv("BW_JOB_RUN_ID", "").strip()
+    lock_owner = run_id or f"anonymous-{uuid4()}"
+
     try:
         client = _redis_client()
-        lock_acquired = bool(client.set(LOCK_KEY, str(int(datetime.now().timestamp())), nx=True, ex=LOCK_TTL))
+        lock_acquired = acquire_lease(client, lock_owner, bool(run_id))
     except BaseException as e:
         LOGGER.warning(f"Could not acquire Redis lock ({e}); proceeding without coordination")
         client = None

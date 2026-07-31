@@ -26,6 +26,13 @@ try:
     backup_dir = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
     backup_dir.mkdir(parents=True, exist_ok=True)
 
+    # A run killed mid-archive leaves the partial file `backup_database` was building. It is
+    # inert -- no `backup-*.zip` glob matches it -- but nothing else ever removes it, so sweep
+    # it here rather than letting half-written database dumps accumulate on disk forever.
+    for stale in backup_dir.glob("backup-*.zip.tmp"):
+        LOGGER.warning(f"Removing leftover partial backup {stale.name} from an interrupted run ...")
+        stale.unlink(missing_ok=True)
+
     force_backup = getenv("FORCE_BACKUP", "no") == "yes"
     current_time = datetime.now().astimezone()
 

@@ -169,6 +169,19 @@ try:
 
     JOB = Job(LOGGER, __file__)
 
+    # Discard any staging tree left by an interrupted run, exactly as the end of this job does
+    # (the two rmtree calls at the bottom). Both cleanups only run on a clean exit, so a killed
+    # run leaves half-copied plugin directories behind -- and the check further down treats the
+    # mere *existence* of NEW_PLUGINS_DIR/<plugin_id> as "already extracted, skip", so that
+    # partial directory would be adopted as complete, copied over the live CRS_PLUGINS_DIR and
+    # cached in the database. Services would then include a plugin's -config.conf with none of
+    # its rule files behind it.
+    #
+    # Safe to purge: every run re-downloads and re-extracts each plugin URL before this loop, so
+    # anything discarded here is rebuilt from the fresh download -- including a plugin that a
+    # previous run had MOVED out of CRS_PLUGINS_DIR into staging.
+    rmtree(NEW_PLUGINS_DIR, ignore_errors=True)
+
     downloaded_plugins: Dict[str, Set[str]] = {}
     service_plugins: Dict[str, Set[str]] = {service: set() for service in services}
 
