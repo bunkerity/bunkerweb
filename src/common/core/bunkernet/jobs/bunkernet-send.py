@@ -27,6 +27,56 @@ exit_status = 0
 
 BATCH_SIZE = 100
 
+
+def send_pending_reports(reports: list, force_send: bool, send, persist, logger) -> tuple:
+    """Send reports to BunkerNet in batches, recording what is still owed after every batch.
+
+    Returns ``(remaining_reports, cache_failed)``.
+
+    The persist used to happen only once, after every batch had gone out. Delivery is
+    at-least-once (``src/worker/app.py``), so a worker killed part-way through -- most likely
+    during the two-second sleep between batches, which is where this job spends nearly all of
+    its wall-clock -- was redelivered, re-read an untouched ``reports.json`` and re-sent every
+    batch it had already delivered. Persisting per batch bounds the duplicate to the single
+    batch in flight.
+
+    ``send`` and ``persist`` are injected so the loop is testable; the module-level script is a
+    thin caller.
+    """
+    remaining = len(reports)
+    while force_send or remaining >= BATCH_SIZE:
+        force_send = False
+
+        batch, reports = reports[:BATCH_SIZE], reports[BATCH_SIZE:]
+
+        logger.info(f"Sending {len(batch)} / {remaining} reports to BunkerNet API ...")
+        ok, status, data = send(batch)
+        logger.debug(f"Send reports API reply - ok: {ok}, status: {status}, data: {data}")
+
+        if not ok or status in (429, 403):
+            reports = batch + reports  # Add batch back to reports
+
+            if not ok:
+                logger.error(f"Error while sending data to BunkerNet API: {data}")
+            elif status == 429:
+                logger.warning("BunkerNet API rate limit reached, will retry later")
+            else:  # status == 403
+                logger.warning("BunkerNet instance banned, will retry later")
+            return reports, False
+
+        remaining = len(reports)
+
+        # Record the send before sleeping, not after the loop.
+        if not persist(reports):
+            return reports, True
+
+        if remaining >= BATCH_SIZE:
+            logger.info("Sleeping 2 seconds before next batch...")
+            sleep(2)
+
+    return reports, False
+
+
 try:
     # Check if at least a server has BunkerNet activated
     bunkernet_activated = False
@@ -97,44 +147,24 @@ try:
     if force_send:
         LOGGER.info("Forcing send of cached reports as they are older than 24 hours")
 
-    # Process reports in batches of 100
-    remaining = len(reports)
-    while force_send or remaining >= BATCH_SIZE:
-        force_send = False
-
-        batch, reports = reports[:BATCH_SIZE], reports[BATCH_SIZE:]
-
-        LOGGER.info(f"Sending {len(batch)} / {remaining} reports to BunkerNet API ...")
-        ok, status, data = send_reports(batch)
-        LOGGER.debug(f"Send reports API reply - ok: {ok}, status: {status}, data: {data}")
-
-        if not ok or status in (429, 403):
-            reports = batch + reports  # Add batch back to reports
-            remaining = len(reports)
-
-            if not ok:
-                LOGGER.error(f"Error while sending data to BunkerNet API: {data}")
-            elif status == 429:
-                LOGGER.warning("BunkerNet API rate limit reached, will retry later")
-            else:  # status == 403
-                LOGGER.warning("BunkerNet instance banned, will retry later")
-            break
-
-        remaining = len(reports)
-
-        if remaining >= BATCH_SIZE:
-            LOGGER.info("Sleeping 2 seconds before next batch...")
-            sleep(2)
-
-    if reports:
-        LOGGER.info(f"Caching {remaining} reports...")
-        cached_data["reports"] = reports
-
-        # Cache the remaining reports
+    def cache_remaining_reports(remaining_reports: list) -> bool:
+        """Persist the reports still owed to BunkerNet."""
+        cached_data["reports"] = remaining_reports
         cached, err = JOB.cache_file("reports.json", dumps(cached_data, indent=2).encode())
         if not cached:
             LOGGER.error(f"Failed to cache reports.json :\n{err}")
-            status = 2
+        return cached
+
+    reports, cache_failed = send_pending_reports(reports, force_send, send_reports, cache_remaining_reports, LOGGER)
+    if cache_failed:
+        exit_status = 2
+
+    if reports:
+        LOGGER.info(f"Caching {len(reports)} reports...")
+        # `status` was assigned here instead of `exit_status`, so a failure to cache the
+        # outstanding reports was reported as a success and silently dropped them.
+        if not cache_remaining_reports(reports):
+            exit_status = 2
     else:
         deleted, err = JOB.del_cache("reports.json")
         if not deleted:

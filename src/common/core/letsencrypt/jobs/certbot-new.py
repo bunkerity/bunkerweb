@@ -813,6 +813,40 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
     return False
 
 
+def persist_issued_certificate(service: str) -> None:
+    """Write the Let's Encrypt tree back to the DB cache as soon as a certificate exists on disk.
+
+    The single ``cache_dir`` at the very end of this job used to be the only persist, and
+    everything between issuance and it -- the remaining services, the credential cleanup, the
+    ZeroSSL hash bookkeeping -- is time during which the freshly issued material exists ONLY on
+    the worker's local disk. Delivery is at-least-once (``src/worker/app.py``), so a worker killed
+    in that window is redelivered, and ``Job.restore_cache`` rmtrees DATA_PATH and re-extracts the
+    *pre-issuance* blob. Certbot then sees no lineage and orders the same SAN set again, spending
+    one of Let's Encrypt's five duplicate certificates per week -- a limit that locks the domain
+    out for a week once hit, and one this job can burn through in five kills.
+
+    Persisting per service bounds the loss to the one certificate in flight. Same guards as the
+    final persist, for the same reason: never overwrite a good DB row with a disk state that a
+    failed restore left empty or inconsistent.
+    """
+    if not JOB.restore_ok:
+        LOGGER.error(f"[Service: {service}] Not persisting the issued certificate: the initial cache restore failed, so disk state is not trustworthy.")
+        return
+
+    consistent, reason = letsencrypt_cache_consistent(DATA_PATH)
+    if not consistent:
+        LOGGER.error(f"[Service: {service}] Not persisting the issued certificate: Let's Encrypt state is inconsistent ({reason}).")
+        return
+
+    with le_cache_write_lock():
+        cached, err = JOB.cache_dir(DATA_PATH)
+
+    if not cached:
+        LOGGER.error(f"[Service: {service}] Failed to persist the issued certificate to the db cache: {err}")
+    else:
+        LOGGER.info(f"[Service: {service}] Persisted the issued certificate to the db cache")
+
+
 try:
     # ? Load services configuration
     server_names = getenv("SERVER_NAME", "www.example.com").strip()
@@ -1048,6 +1082,9 @@ try:
                         config["exists"] = success
                         if success:
                             status = 1 if status == 0 else status
+                            # Persist now, not at the end of the job: a redelivery restores the
+                            # DB blob over DATA_PATH, so anything not yet in the DB is re-ordered.
+                            persist_issued_certificate(service)
                         else:
                             status = 2
             else:
@@ -1055,6 +1092,7 @@ try:
                     config["exists"] = generate_certificate(service, config, cmd_env)
                     if config["exists"]:
                         status = 1 if status == 0 else status
+                        persist_issued_certificate(service)
                     else:
                         status = 2
         finally:

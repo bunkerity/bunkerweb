@@ -38,7 +38,6 @@ try:
     bunkernet_id = JOB.get_cache("instance.id")
 
     # Register instance
-    registered = False
     if not bunkernet_id:
         LOGGER.info("No BunkerNet ID found in db cache, Registering instance on BunkerNet API ...")
         ok, status, data = register()
@@ -69,20 +68,22 @@ try:
 
         assert isinstance(bunkernet_id, str), f"Received invalid bunkernet id : {bunkernet_id}"
 
-        registered = True
-        exit_status = 1
-        LOGGER.info(f"Successfully registered on BunkerNet API with instance id {data['data']}")
-    else:
-        bunkernet_id = bunkernet_id.decode()
-        LOGGER.info(f"Already registered on BunkerNet API with instance id {bunkernet_id}")
-
-    # Update cache with new bunkernet ID
-    if registered:
+        # Persist the id immediately. register() has already had its effect on the remote side,
+        # and delivery is at-least-once (src/worker/app.py): a worker killed between here and the
+        # cache write is redelivered, finds no id in the cache, and registers a SECOND time --
+        # orphaning the first registration on BunkerNet with no way to reclaim it. Everything
+        # else in this job is bookkeeping and can safely be redone.
         cached, err = JOB.cache_file("instance.id", bunkernet_id.encode())
         if not cached:
             LOGGER.error(f"Error while saving BunkerNet data to db cache : {err}")
         else:
             LOGGER.info("Successfully saved BunkerNet data to db cache")
+
+        exit_status = 1
+        LOGGER.info(f"Successfully registered on BunkerNet API with instance id {data['data']}")
+    else:
+        bunkernet_id = bunkernet_id.decode()
+        LOGGER.info(f"Already registered on BunkerNet API with instance id {bunkernet_id}")
 except SystemExit as e:
     exit_status = e.code
 except BaseException as e:
