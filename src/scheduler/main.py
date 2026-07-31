@@ -1104,13 +1104,16 @@ if __name__ == "__main__":
                 LOGGER.warning("Waiting for the failover backup to finish ...")
                 sleep(1)
 
-            # On first start, generate config and reload instances BEFORE running
-            # plugin jobs — plugins need their API endpoints loaded on instances
-            # wait_for_reachable_instance() also repopulates SCHEDULER.apis, so it replaces the
-            # bare "do we have an instance" check that used to guard this branch — by now the
-            # startup sends have already emptied that list whenever the instance is still booting.
-            if FIRST_START and CONFIG_NEED_GENERATION and wait_for_reachable_instance():
-                LOGGER.info("First start: generating and sending initial configuration before running jobs ...")
+            # Generate and reload BEFORE running the jobs whenever both are pending, not only on
+            # the first start: plugins need their API endpoints loaded on the instances, and jobs
+            # validate against the running configuration. certbot-new is the expensive case — a
+            # service added now has no server{} on the instance yet, so an ACME probe falls to the
+            # default server, and the job is "once", so nothing retries until the next change.
+            # On the first start the instance may still be booting, hence the wait (which also
+            # repopulates SCHEDULER.apis, emptied by the startup sends); later it is already known.
+            pre_push_done = False
+            if CONFIG_NEED_GENERATION and RUN_JOBS_ONCE and (wait_for_reachable_instance() if FIRST_START else SCHEDULER.apis):
+                LOGGER.info("Generating and sending the configuration before running jobs ...")
                 if generate_configs():
                     first_start_futures = [
                         SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
@@ -1126,6 +1129,7 @@ if __name__ == "__main__":
                         timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                     )
                     CONFIG_NEED_GENERATION = False
+                    pre_push_done = True
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once
@@ -1149,9 +1153,10 @@ if __name__ == "__main__":
                                 "Affected plugins will run with stale or empty on-disk cache."
                             )
                 healthcheck_job_run = False
-                # Jobs may have created files needed by config templates (e.g. api-server-cert.pem)
-                if FIRST_START:
-                    LOGGER.info("First start: regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
+                # Jobs may have created files needed by config templates (e.g. api-server-cert.pem),
+                # so undo the flag the push above cleared and let the normal path render again.
+                if pre_push_done:
+                    LOGGER.info("Regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
                     CONFIG_NEED_GENERATION = True
 
             if CONFIG_NEED_GENERATION:

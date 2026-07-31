@@ -9,6 +9,7 @@
 - [SECURITY] `core`: client-supplied `X-SSL-*` request headers are stripped before reaching an upstream. With mTLS header forwarding off, or on any PHP-FPM service, a client could spoof `X-SSL-Client-Verify: SUCCESS`. See the mTLS documentation to re-publish them when another proxy terminates mTLS.
 - [SECURITY] `linux`: the `API_TOKEN` set in `/etc/bunkerweb/variables.env` is applied to the configuration BunkerWeb starts with, instead of being dropped so that the API accepted untokenized requests until the scheduler pushed the real configuration.
 - [BUGFIX] `core`: application-generated upstream 403 responses remain in access logs without appearing as unknown Security Reports or being reported to BunkerNet.
+- [BUGFIX] `scheduler`: push the configuration before running the jobs on every change, not only on the first start, so a new service already has its `server{}` when `certbot-new` asks Let's Encrypt to validate it. (Fixes #3772)
 - [BUGFIX] `scheduler`: wait for an instance to answer before pushing the initial configuration, instead of leaving it on its loading configuration (no service, no certificate) until the once-jobs finish. (Refs #3773)
 - [BUGFIX] `letsencrypt`: when listing the existing certificates fails, keep the ones already on disk instead of deleting and re-issuing every certificate, which burned the ACME rate limits on each restart. (Refs #3773)
 - [BUGFIX] `metrics`: apply `MAX_LRU_HISTORY` in every worker instead of a single one, so the per-worker metrics cache is really capped at the configured size.
