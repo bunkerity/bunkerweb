@@ -77,7 +77,7 @@
                             <option value="" {% if not service_template %}selected{% endif %}
                                     data-i18n="service.resources.template.none">No template</option>
                             {# `ui` is the internal template the UI writes its own configs under, the
-                               same one models/plugins_settings_easy.html:27 filters out of the picker. #}
+                               same one the deleted easy pane filtered out of its own picker. #}
                             {% for tpl, tpl_data in service_templates.items() if tpl != "ui" %}
                                 <option value="{{ tpl }}" {% if tpl == service_template %}selected{% endif %}>{{ tpl_data.get("name") or tpl }}</option>
                             {% endfor %}

@@ -189,39 +189,14 @@ def test_declared_plugins_are_inactive_on_an_empty_config_unless_always():
         assert is_plugin_active(plugin_id, manifest.get("name", plugin_id), {}) is False, plugin_id
 
 
-# --- Task 7 wiring: the plugin-activated nav icon (models/plugins_settings.html:157) ----------
+# --- Task 7 wiring: the plugin-activated nav icon ---------------------------------------------
 #
-# `plugins_settings.html` is `{% include %}`-d from both `service_settings.html` (which passes
-# `attachments`) and `global_settings.html` (which does not -- global settings has no service to
-# attach resources to). The template guards the missing-in-global-settings case with
-# `attachments|default({})`. This test exercises that exact expression pattern -- function call
-# plus the `|default` filter on a possibly-undefined name -- against the real
-# `is_plugin_active_for_service`, without dragging in the rest of the ~500-line template and its
-# app-wide context-processor globals (plugin_types, pro_diamond_url, etc.) that a full-page render
-# would require.
-
-
-def test_plugin_activated_icon_expression_is_attachment_aware_with_default_guard():
-    from jinja2 import Environment
-
-    from app.models.plugin_activation import is_plugin_active_for_service
-
-    env = Environment()
-    env.globals["is_plugin_active_for_service"] = is_plugin_active_for_service
-    template = env.from_string("{{ 'ACTIVE' if is_plugin_active_for_service(plugin, name, config, attachments|default({})) else 'INACTIVE' }}")
-
-    # Service-page context: REDIRECT_TO is empty (settings alone say inactive) but a redirect
-    # resource is attached -- must read ACTIVE.
-    rendered = template.render(
-        plugin="redirect",
-        name="Redirect",
-        config={"REDIRECT_TO": {"value": ""}},
-        attachments={"redirect": {"items": [{"id": "r1"}], "error": None}},
-    )
-    assert rendered == "ACTIVE"
-
-    # Global-settings context: `attachments` is not in the render context at all (not merely
-    # empty) -- `|default({})` must keep this from raising, falling through to the plain
-    # settings-based verdict (still inactive here).
-    rendered = template.render(plugin="redirect", name="Redirect", config={"REDIRECT_TO": {"value": ""}})
-    assert rendered == "INACTIVE"
+# Removed in S3.4 T9. It rendered `{{ ... is_plugin_active_for_service(..., attachments|default({})) }}`
+# as a standalone Jinja string, mirroring `models/plugins_settings.html:157` -- a file T8 deleted.
+# No template uses that expression any more: `models/compose_shelf.html:228` and
+# `models/request_path_strip.html:131` pass `shelf_attachments` / `rp_attachments`, deliberately
+# WITHOUT a `|default` (a missing one must raise, and the host-page contract test in
+# `test_compose_page_assembly.py` derives the required names from the partials themselves). The
+# attachment-aware behaviour it covered is exercised through real renders by
+# `test_compose_shelf.py::test_attachment_makes_a_resource_backed_plugin_read_live` and
+# `::test_an_attachment_outranks_every_per_key_rung`, and at function level above (Task 7 block).

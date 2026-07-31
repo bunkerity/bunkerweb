@@ -15,8 +15,13 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
+#
+# `disable_existing_loggers=False` is deliberate. The default (True) disables every logger not
+# named in alembic.ini -- harmless when alembic runs as its own process (entrypoint.sh, the linux
+# scheduler script), but this module is also imported in-process by the migration unit tests, and
+# there it silently kills BunkerWeb's already-created loggers for the rest of the interpreter.
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

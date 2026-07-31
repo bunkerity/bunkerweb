@@ -1,8 +1,8 @@
 /* ============================================================================
    Global config (settings) page — page-scoped chrome.
-   Loaded only by global_settings.html, so the selectors below (which also match
-   the shared models/plugins_settings.html partial used by service_settings.html)
-   restyle the settings page WITHOUT leaking to the service config pages.
+   Loaded only by global_settings.html, so the selectors below (which also match the
+   settings markup service_settings.html renders) restyle the settings page WITHOUT
+   leaking to the service config pages.
 
    Mirrors the kit's Global-config layout (ui_kits/admin/settings.css +
    configure.js:59-200): each setting sits in a bordered card, and the plugin

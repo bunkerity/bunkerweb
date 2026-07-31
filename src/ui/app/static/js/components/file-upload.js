@@ -15,8 +15,8 @@
    page-specific business logic, wired by whichever page adopts this macro --
    same division of responsibility as plugins.js / template_edit.js today.
 
-   variant="inline" needs no such file -- it's wired for free by the
-   already-shipped static/js/plugins-settings.js (class + data-attribute
+   variant="inline" needs no such file -- it's wired for free by
+   static/js/components/settings-widgets.js (class + data-attribute
    driven, not page-specific).
    ============================================================================ */
 (function () {

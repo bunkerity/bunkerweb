@@ -85,7 +85,7 @@
       const label = (opt.getAttribute("data-label") || "").toLowerCase();
       const visible = !q || label.indexOf(q) !== -1;
       // d-none (not inline style) to match the existing house convention for filtered
-      // rows -- see filterMultiselectOptions() in static/js/plugins-settings.js.
+      // rows -- see filterMultiselectOptions() in static/js/components/settings-widgets.js.
       li.classList.toggle("d-none", !visible);
       if (visible) anyVisible = true;
     });

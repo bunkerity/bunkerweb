@@ -10,7 +10,7 @@
      - logs.html's `#copy-logs` -- its own inline handler in pages/logs.js,
        copies the ACE editor's selected text;
      - plugins_settings_raw.html's `.copy-settings` -- its own inline handler in
-       plugins-settings.js, copies the raw editor value, already uses
+       pages/settings-raw.js, copies the raw editor value, already uses
        i18next's "tooltip.copied" key for the feedback text.
    All three show the same feedback (swap data-bs-original-title and
    `.tooltip("show")`, restore after ~2s) via three separate hand-rolled click
@@ -75,7 +75,7 @@
      copied_i18n    i18next key (NOT a data-i18n scan target -- read directly
                     by copy-button.js at click time) for copied_label.
                     Defaults to the existing "tooltip.copied" key, already
-                    used by plugins-settings.js for the same feedback text.
+                    used by pages/settings-raw.js for the same feedback text.
      disabled       renders the trigger disabled. variant='button' gets the
                     native `disabled` attribute; variant='addon' (a <span>,
                     no native disabled state) gets aria-disabled="true" plus

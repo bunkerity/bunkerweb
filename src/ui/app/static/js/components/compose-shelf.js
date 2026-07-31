@@ -1,10 +1,10 @@
 // Behaviour for the compose shelf (templates/models/compose_shelf.html): the multi-key
 // switch, the On/All/Changed filter and the "Show N more" fold.
 //
-// SAFE TO LOAD BESIDE EITHER settings-widgets.js OR plugins-settings.js. Every selector
+// SAFE TO LOAD BESIDE EITHER settings-widgets.js OR pages/settings-raw.js. Every selector
 // here is namespaced `[data-shelf-*]` / `.shelf-*` and exists only inside the shelf, so
-// none of the 17 delegated selectors those two files duplicate can double-fire through
-// this one. (Those two still must never load together -- see settings-widgets.js's header.)
+// nothing here can double-fire through another module. (Those two share zero delegated
+// selectors since T8 -- see settings-widgets.js's header.)
 //
 // Vanilla on purpose: it needs no jQuery, no bootstrap and no i18next, so it cannot be
 // killed by a throw in another module's init. The shelf's correctness must not depend on

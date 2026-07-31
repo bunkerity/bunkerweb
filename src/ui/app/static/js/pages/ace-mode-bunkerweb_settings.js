@@ -14,13 +14,13 @@
  *      (ace-mode-bunkerweb_log.js), so a large cert no longer floods the editor.
  *
  * Whether a line starts a real setting and whether that setting is multiline
- * capable is decided by predicates that plugins-settings.js stashes on the
+ * capable is decided by predicates that js/pages/settings-raw.js stashes on the
  * session (`session.$bwRawFold`) from the server-emitted #raw-known-keys list —
  * the SAME source of truth as the save-time parser (issue #3651). Without those
  * predicates the mode simply does not fold.
  *
  * Registered as "ace/mode/bunkerweb_settings". Loaded as a classic deferred
- * script AFTER ace.js and BEFORE the plugins-settings.js module so the mode is
+ * script AFTER ace.js and BEFORE the js/pages/settings-raw.js module so the mode is
  * in ACE's registry before session.setMode() runs.
  */
 ace.define(
@@ -82,7 +82,7 @@ ace.define(
     oop.inherits(FoldMode, BaseFoldMode);
 
     (function () {
-      // Predicates stashed on the session by plugins-settings.js. They depend on
+      // Predicates stashed on the session by js/pages/settings-raw.js. They depend on
       // the server-emitted #raw-known-keys, so the FoldMode never hard-codes the
       // schema.
       var folds = function (session) {

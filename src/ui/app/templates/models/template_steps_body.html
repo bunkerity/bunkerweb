@@ -2,9 +2,10 @@
 {# One template's stepper pane body: the card header, the "template in use" gate, the steps nav,
    the step panes with their settings grid, the per-step custom-config ace editors, and the
    no-steps / template-in-use empty states.
-   Included by models/plugins_settings_easy.html (the easy pane, one call per template inside
-   its `templates` loop) and, once S3.3 lands it, by template_settings_page.html (the
-   per-template page, one call total). The caller owns the pane <div> itself -- its id,
+   Included by template_settings_page.html (the per-template page, one call total) and by
+   nothing else -- models/plugins_settings_easy.html, the easy pane that called it once per
+   template inside its `templates` loop, was deleted in S3.4 T8. The caller owns the pane <div>
+   itself -- its id,
    `data-template-id`, `data-template-dom-id` and `aria-labelledby` -- and this partial owns
    everything inside it, including the three `{% set %}`s below: a caller must NOT set
    `template_plugin_id` / `plugin_dom_id` / `template_plugin` (they are recomputed here and the

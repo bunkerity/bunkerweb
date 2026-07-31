@@ -3,18 +3,18 @@
 
    ========================= WHY THIS IS A FORM AND NOT A DIV =========================
    `models/compose_shelf.html`'s header states it as a blocker, and it is the whole reason this
-   partial exists: the shelf's payload must NEVER be harvested by `getFormFromSettings`
-   (static/js/plugins-settings.js:1075), which drops every non-`.plugin-setting-file-text`
-   hidden input, flattens checkboxes to "yes"/"no" and has no `compose` branch at all -- while
-   the route still hands that POST the full shelf scope, so every in-scope key would be unposted
-   and `Database.save_config` deletes an in-scope key the payload omits
+   partial exists: the shelf's payload must NEVER be harvested by the raw pane's serialiser
+   (`buildRawForm`, static/js/pages/settings-raw.js:129 -- `getFormFromSettings` in the deleted
+   monolith), which reads the ace editor and posts neither the shelf's hidden inputs nor its
+   control keys -- while the route still hands that POST the full shelf scope, so every in-scope
+   key would be unposted and `Database.save_config` deletes an in-scope key the payload omits
    (db_methods/config_save.py:592).
 
    Two rules follow, and both are pinned by tests/unit/ui/test_compose_page_assembly.py:
      * the Save button below is a plain `type="submit"` and MUST NOT carry `save-settings`,
-       the class the monolith binds its click handler to (:2025);
+       the class the raw editor binds its click handler to (settings-raw.js:296);
      * nothing that posts may live outside this form. The raw pane keeps `save-settings`
-       because raw mode still goes through the monolith -- that is safe only because its
+       because raw mode still saves through that handler -- that is safe only because its
        button lives inside the raw tab-pane, which is `display:none` while compose is active.
 
    `action` carries `?mode=compose` EXPLICITLY rather than relying on the URL the pills push:
@@ -61,7 +61,7 @@
        same id would be an invalid document for no gain -- this input is submitted natively. #}
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     {% if not global_page %}
-        {# Mutated in place by the `.toggle-draft` handler (plugins-settings.js:2217) and read by
+        {# Mutated in place by the `.toggle-draft` handler (settings-raw.js:316) and read by
            raw mode's own save, both by id -- so it works from inside this form. It has to BE
            inside it: IS_DRAFT is a control key the shelf also emits a fallback for, and
            `variables.pop("IS_DRAFT", "no")` (routes/services.py:1110) publishes the service when

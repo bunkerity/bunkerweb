@@ -648,7 +648,7 @@ button.list-group-item-secondary.active {
 
 /* templates/flash.html size variant -- "md" is the pre-existing default (no class, no
    override needed). Targets .bs-toast by descendant selector so page-owned toasts that get
-   cloned into #feedback-toast-container (static/js/plugins-settings.js) size the same way. */
+   cloned into #feedback-toast-container (static/js/pages/settings-raw.js) size the same way. */
 .toast-container-sm .bs-toast {
   --bs-toast-max-width: 280px;
   font-size: 0.8125rem;
@@ -2058,7 +2058,7 @@ span.cursor-pointer ~ .reset-setting {
 
 /* Multivalue setting styles -- chip/tag row (models/multivalue_setting.html:
    type + Enter adds a chip, click the x removes one; JS in
-   plugins-settings.js's multivalue block keeps rows/hidden input in sync) */
+   components/settings-widgets.js's multivalue block keeps rows/hidden input in sync) */
 .multivalue-container {
   width: 100%;
 }

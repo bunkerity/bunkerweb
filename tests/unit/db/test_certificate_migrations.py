@@ -1,3 +1,4 @@
+from logging import getLogger
 from pathlib import Path
 
 from alembic import command
@@ -46,3 +47,22 @@ def test_sqlite_upgrade_creates_resource_tables(tmp_path, monkeypatch):
     finally:
         engine.dispose()
     assert {"bw_resources", "bw_certificates", "bw_resource_attachments", "bw_resource_groups", "bw_resource_group_entries"} <= tables
+
+
+def test_loading_the_alembic_env_in_process_does_not_disable_existing_loggers(tmp_path, monkeypatch):
+    """`env.py` calls `logging.config.fileConfig`, whose default `disable_existing_loggers=True`
+    disables every logger not named in `alembic.ini`. That is harmless when alembic owns its own
+    process (`entrypoint.sh`, `bunkerweb-scheduler.sh`), but this file loads `env.py` *in-process*,
+    and the default silently killed the UI's module-level `LOGGER` for the rest of the pytest
+    session -- `test_plugins_marketplace.py::test_rejected_toggle_flashes_error_and_clears_reloading`
+    failed in a full-suite run and passed standalone. Ordering is not a guard, so this is."""
+    victim = getLogger("bw_test_logger_created_before_alembic_runs")
+    assert victim.disabled is False
+
+    monkeypatch.setenv("DATABASE_URI", f"sqlite:///{tmp_path / 'logging.sqlite3'}")
+    monkeypatch.chdir(ALEMBIC)
+    config = Config("alembic.ini")
+    config.set_main_option("version_locations", "sqlite_versions")
+    command.stamp(config, "base")
+
+    assert victim.disabled is False

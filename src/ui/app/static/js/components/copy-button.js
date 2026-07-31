@@ -14,7 +14,7 @@
  *      that element's .value (inputs/textareas) or .textContent otherwise.
  *
  * Feedback matches the existing convention already used by main.js /
- * plugins-settings.js / components/recovery-code.js: swap
+ * pages/settings-raw.js / components/recovery-code.js: swap
  * data-bs-original-title and call .tooltip("show"), restore after 2s.
  * data-copied-i18n (an i18next key) is preferred when i18next is loaded;
  * otherwise falls back to the trigger's own data-copied-label.

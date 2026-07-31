@@ -1,8 +1,9 @@
 {% from 'macros/docs_link.html' import docs_url %}
 {% from "components/button.html" import button %}
 {# One plugin's settings: the non-multiple grid, then its `multiple` groups.
-   Included by models/plugins_settings.html (the current advanced pane, one call per plugin)
-   and by plugin_settings_page.html (the per-plugin page, one call total). Reads `plugin`,
+   Included by plugin_settings_page.html (the per-plugin page, one call total) and by nothing
+   else -- models/plugins_settings.html, the advanced pane that called it once per plugin, was
+   deleted with the monolith in S3.4 T8. Reads `plugin`,
    `plugin_data` and `filtered_settings` from the caller's context, like the widget partials
    it includes read `setting` and `setting_data`.
 

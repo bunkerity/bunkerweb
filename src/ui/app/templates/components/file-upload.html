@@ -26,9 +26,9 @@
    .plugin-setting-file-upload / .plugin-setting-file-upload-display / .plugin-setting-file-manual /
    .plugin-setting-file-status / .plugin-setting-file-mode-toggle / data-upload-target /
    data-manual-target / data-file-input)
-   already wired generically (by class + data-attribute, not by page or id) in the already-shipped
-   `static/js/plugins-settings.js` (and setup.html's own `static/js/pages/setup.js`, which wires the
-   same classes independently) -- so this variant needs **no companion JS** on any page that already
+   already wired generically (by class + data-attribute, not by page or id) in
+   `static/js/components/settings-widgets.js` (and setup.html's own `static/js/pages/setup.js`,
+   which wires the same classes independently) -- so this variant needs **no companion JS** on any page that already
    includes one of those scripts, same as this project's checkbox.html/label.html precedent. The
    hidden input always carries the bare `.plugin-setting` class too (not just
    `.plugin-setting-file-text`) since that's the umbrella class both scripts use to find/validate
@@ -97,8 +97,9 @@
      aria_labelledby         id of an external <label> (e.g. from components/label.html) naming
                              this field -- reproduces input_setting.html's aria-labelledby wiring.
      toggle_upload_label / toggle_manual_label   the mode-toggle button's two tooltip/aria texts
-                             (data-upload-label / data-manual-label -- plugins-settings.js swaps
-                             the visible tooltip between them at runtime).
+                             (data-upload-label / data-manual-label -- settings-widgets.js, and
+                             setup.js on the wizard, swap the visible tooltip between them at
+                             runtime).
      toggle_i18n_key         data-i18n key applied to the toggle button (translates whichever
                              label is showing at initial render, i.e. toggle_upload_label -- see
                              "Not covered" below for the runtime-relabeling gap).
@@ -113,7 +114,7 @@
        models/input_setting.html -- pass those via `attrs` on the hidden value input, or keep
        rendering that button yourself right after the macro call, same as today.
      - Runtime i18n relabeling of the inline toggle's tooltip when the mode flips (upload <->
-       manual) -- plugins-settings.js swaps `data-bs-original-title` between the two
+       manual) -- settings-widgets.js swaps `data-bs-original-title` between the two
        data-*-label values directly; i18next's data-i18n only retranslates the label shown at
        initial render. Not solved here -- flag it if a caller actually needs live-relabeled
        tooltips on language switch.

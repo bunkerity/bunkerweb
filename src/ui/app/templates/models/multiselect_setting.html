@@ -3,9 +3,10 @@
                                         {% include "models/multiselect_setting.html" %} #}
 
 {# Dropdown+search+checkbox control for a single "multiselect" plugin setting, shared by
-   models/plugins_settings.html (both the regular and "multiple" settings sections),
    models/plugin_settings_body.html and models/template_steps_body.html (the stepper body,
-   extracted out of models/plugins_settings_easy.html). This is an `{% include %}`, not a components/*.html
+   extracted out of the since-deleted models/plugins_settings_easy.html). Its third caller,
+   models/plugins_settings.html, went with the monolith in S3.4 T8.
+   This is an `{% include %}`, not a components/*.html
    macro -- like models/select_setting.html, models/checkbox_setting.html and models/
    multivalue_setting.html, it reads its inputs straight off the caller's own render
    context (setting, setting_data, setting_value, setting_default, setting_method,
@@ -17,9 +18,10 @@
    Every class/data-* attribute already here (multiselect-container, multiselect-toggle,
    [data-selected-badge], multiselect-menu, multiselect-search, multiselect-search-container,
    multiselect-selected-only-btn, multiselect-options, multiselect-option, [data-option-id],
-   no-options-message, [data-selected-count]) is read by static/js/plugins-settings.js's
-   ".multiselect-container" init block -- that file, not this one, owns dropdown open/close,
-   search/filter and "show selected only" behaviour. Untouched below.
+   no-options-message, [data-selected-count]) is read by
+   static/js/components/settings-widgets.js's ".multiselect-container" init block -- that file,
+   not this one, owns dropdown open/close, search/filter and "show selected only" behaviour.
+   Untouched below.
 
    `multiselect_chips` -- optional context var, `false` when the caller never sets it (every
    existing call site keeps rendering byte-identical output) -- layers two ideas from the
@@ -28,14 +30,14 @@
         option, each with a small "x" that unchecks it without opening the dropdown.
         Rendered server-side from `selected_values` for a correct first paint, then kept in
         sync by the same JS that already reruns on every checkbox change
-        (static/js/plugins-settings.js's updateMultiselectDisplay -> renderMultiselectChips).
+        (settings-widgets.js's updateMultiselectDisplay -> renderMultiselectChips).
      2. an "eye" button next to the toggle that opens a components/modal.html instance
         showing the same chips at a more readable size/width -- useful once a setting has
         more selected options (or longer labels, e.g. antibot's country list) than
         comfortably fit in the chip row before it wraps to several lines.
    Both are opt-in via the same flag (not two separate flags) because the task that
    introduced them treats "chips + eye modal" as one UI, not two independently toggleable
-   ones -- see static/js/plugins-settings.js's renderMultiselectChips for the shared JS.
+   ones -- see settings-widgets.js's renderMultiselectChips for the shared JS.
 
    Deliberately NOT composed:
      - components/badge.html -- its <span> macro has no slot for a nested dismiss control,

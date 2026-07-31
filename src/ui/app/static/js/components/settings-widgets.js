@@ -2,25 +2,26 @@
 // pane/mode chrome: the per-plugin page (plugin_settings_page.html) and the per-service
 // template page. It carries the widget bucket -- multiple-group add/remove, reset-to-
 // default/global, file settings, multivalue chips, multiselect dropdowns, live regex
-// feedback -- plus the normalisation a NATIVE form submit needs (plugins-settings.js
-// submits through a synthetic form instead, so those pages never needed it).
+// feedback -- plus the normalisation a NATIVE form submit needs (the deleted monolith
+// submitted through a synthetic form instead, so those pages never needed it).
 //
-// This is a DELIBERATE DUPLICATE of code that still lives in plugins-settings.js.
-// It is not deduplicated because every one of these handlers is `$(document).on(...)`
-// delegated and selector-based: a page loading both files would double-fire all of them
-// (a single click on `.add-multiple` would clone the group twice). Sharing them would
-// mean deleting ~1200 lines out of an untested 4149-line closure whose only verification
-// is manual. So instead: NO PAGE MAY LOAD BOTH FILES.
+// It began as a DELIBERATE DUPLICATE of code in plugins-settings.js, not deduplicated
+// because every one of these handlers is `$(document).on(...)` delegated and selector-based:
+// a page loading both files would double-fire all of them (a single click on `.add-multiple`
+// would clone the group twice).
 //
-//   /services/<svc>, /global-settings            -> plugins-settings.js
 //   /services/<svc>/plugins/<id>, /global-settings/plugins/<id>, template page
 //                                                -> settings-widgets.js
 //
-// Removal trigger: S3.4 retires the advanced pane; plugins-settings.js's copy dies with
-// it and this file becomes the only one. Until then, fix bugs in BOTH.
+// DONE as of S3.4 T8: the duplicate died with `plugins-settings.js`, so this file is the only
+// copy. `/services/<svc>` and `/global-settings` no longer render a settings grid at all --
+// they load `js/pages/settings-raw.js`, which shares zero delegated selectors with this file
+// (pinned by test_template_settings_page.py::
+// test_the_raw_editor_and_the_widgets_module_share_no_delegated_selector).
 //
-// Deliberate deltas from the copied source:
-//   1. `.add-multiple` is delegated here; the monolith binds it directly at :1717, which
+// Deliberate deltas from the copied source (kept as the record of what was changed on the
+// way out of the monolith, since the original is no longer there to diff against):
+//   1. `.add-multiple` is delegated here; the monolith bound it directly, which
 //      covers no group added after DOM-ready. Hygiene rather than a live-bug fix -- the
 //      clones this handler makes never carry an ADD button of their own (see the note at
 //      the handler) -- but the direct binding is wrong in principle, so it does not
@@ -35,9 +36,11 @@
 //   3. The native-submit normalisation folded in from the deleted
 //      js/pages/plugin-settings-page.js, plus a new ace-editor pass.
 //
-// `ace` is NEVER referenced at module top level (nor anywhere else) -- `const AceRange =
-// ace.require(...)` at plugins-settings.js:2521 is exactly why loading the monolith on a
-// page without ace silently kills every statement below it. Ace content still reaches the
+// `ace` is NEVER referenced at module top level (nor anywhere else) -- the monolith's
+// top-level `const AceRange = ace.require(...)` is exactly why loading it on a
+// page without ace silently killed every statement below it (the rule survives it:
+// js/pages/settings-raw.js inherited that line, so its host pages must load ace first).
+// Ace content still reaches the
 // POST: the submit handler reads the editor's `data-source` mirror textarea instead.
 //
 // Deps, all loaded by base.html before {% block scripts %}: jQuery (:183), the Bootstrap
@@ -905,7 +908,7 @@ $(document).ready(() => {
   // Multivalue functionality -- chip/tag rows (type + Enter adds a chip,
   // click the x removes one; see models/multivalue_setting.html for the
   // markup + why). Rows are plain divs now, no per-row <label> (that
-  // duplicated the field's own name -- plugins_settings.html already
+  // duplicated the field's own name -- the including settings loop
   // renders one label above this whole field), so updateMultivalueLabels
   // only has ids left to resync after an add/remove shifts indices.
   const updateMultivalueLabels = ($container) => {
@@ -1629,8 +1632,8 @@ $(document).ready(() => {
   //
   // Native-submit normalisation (folded in from the deleted
   // js/pages/plugin-settings-page.js). These pages post the real <form>; they do not
-  // load plugins-settings.js, whose getFormFromSettings builds a synthetic form for
-  // the multi-plugin panes. Three widget types need normalising first, because for
+  // load js/pages/settings-raw.js, whose buildRawForm builds a synthetic form out of the
+  // ace editor. Three widget types need normalising first, because for
   // them "absent" and "off" look the same to the browser but mean opposite things to
   // the save: an omitted in-scope key is DELETED (db_methods/config_save.py:592), not
   // left alone.
@@ -1710,8 +1713,8 @@ $(document).ready(() => {
 
       // Ace editors (custom configs) have NO named field of their own: the editor
       // syncs into a `data-source` mirror textarea that carries no `name`, and the only
-      // code that ever produced a named field for it is getFormFromSettings
-      // (plugins-settings.js:1209-1216), which these pages do not use -- so without
+      // code that ever produced a named field for it was the monolith's getFormFromSettings
+      // (deleted in T8; its successor buildRawForm is raw-only) -- so without
       // this the edited config never reaches the POST. Read the mirror, not the `ace`
       // global: this module must load and work with ace undefined. Unchanged content
       // (still equal to the template default) is deliberately not posted, which is what

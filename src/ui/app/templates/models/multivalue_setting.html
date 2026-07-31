@@ -1,16 +1,13 @@
 {# usage: {% include "models/multivalue_setting.html" %}
-          -- included from the per-setting loop in plugins_settings.html,
-          plugin_settings_body.html or template_steps_body.html once
-          setting_data["type"] == "multivalue". #}
+          -- included from the per-setting loop in plugin_settings_body.html
+          or template_steps_body.html once setting_data["type"] == "multivalue". #}
 
 {# Repeatable-value input for BunkerWeb's "multivalue" setting type -- the
    space- (or custom-separator-) joined lists like DNS_RESOLVERS,
    API_WHITELIST_IP, BUNKERWEB_INSTANCES and the PLUGINS_ORDER_* family. One
    hidden input holds the real separator-joined string submitted as
-   `setting`; the visible rows are kept in sync with it by
-   the multivalue block in static/js/plugins-settings.js -- and, on the
-   per-plugin and per-template pages, its copy in
-   static/js/components/settings-widgets.js (addMultivalueItem /
+   `setting`; the visible rows are kept in sync with it by the multivalue
+   block in static/js/components/settings-widgets.js (addMultivalueItem /
    removeMultivalueItem / updateMultivalueHiddenInput /
    toggleMultivalueVisibility, plus the reset-to-default, apply-template and
    resource-group-picker code paths that rebuild the same rows via

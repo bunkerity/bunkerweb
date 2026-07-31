@@ -66,19 +66,18 @@
    fallback would post an empty one and update_service aborts with "the server name was not
    provided".
 
-   ============ BLOCKER FOR WHOEVER ASSEMBLES THE PAGE (T7), NOT A NOTE ============
-   The compose pane MUST be wrapped in a REAL `<form method="POST">`, and its payload MUST
-   NOT be harvested by `getFormFromSettings` (static/js/plugins-settings.js:1075). Today
-   `/services/<svc>` has no form at all -- the monolith builds a synthetic one, and it:
-
-     * DROPS every `type="hidden"` input that is not `.plugin-setting-file-text` (:1118-1123),
-       which is every OFF fallback, every multi-key sibling and every opener key here;
-     * rewrites a checkbox to a flat "yes"/"no" (:1132-1134), discarding the `value` this
-       partial computes so an untouched save stops being a no-op;
-     * has branches for `easy` / `advanced` / `raw` only (:1203-1325), so `mode=compose`
-       matches NOTHING and the POST carries neither the shelf nor the control keys -- while
-       routes/services.py:1110-1126 still hands that POST the full shelf scope. Every
-       in-scope key is then unposted, and unposted means DELETED.
+   ================ THE HOST PAGE MUST WRAP THIS IN A REAL FORM (T7, DONE) ================
+   Closed by models/compose_pane.html, which owns the `<form method="POST">`. Kept because the
+   requirement did not go away with the monolith: this partial's payload must be submitted
+   NATIVELY and must never be rebuilt by a JS serialiser. The monolith's `getFormFromSettings`
+   would have DROPPED every `type="hidden"` input that is not `.plugin-setting-file-text` (every
+   OFF fallback, every multi-key sibling and every opener key here), flattened a checkbox to
+   "yes"/"no" (discarding the `value` this partial computes, so an untouched save stops being a
+   no-op), and had no `mode=compose` branch at all -- while routes/services.py:1110-1126 still
+   hands that POST the full shelf scope. Every in-scope key would then be unposted, and unposted
+   means DELETED. Its successor, `buildRawForm` (static/js/pages/settings-raw.js:129), is raw-only
+   and never sees this markup -- which is exactly why the compose Save button must not carry
+   `save-settings`.
 
    Pinned by test_compose_shelf.py::test_the_host_page_must_wrap_the_shelf_in_a_real_form,
    which bites the moment a page includes this partial.

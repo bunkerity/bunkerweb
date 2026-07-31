@@ -14,7 +14,7 @@
        `new bootstrap.Tooltip(el)`.
      - static/js/i18n.js re-syncs the visible bubble's text via
        bootstrap.Tooltip.getInstance(el).setContent(...) whenever the locale changes.
-     - Pages that inject markup after load (plugins-settings.js, modules/setting_controls.js)
+     - Pages that inject markup after load (components/settings-widgets.js, modules/setting_controls.js)
        already call `new bootstrap.Tooltip(el)` themselves on the new node -- do the same
        for anything you inject dynamically via this macro; nothing new to wire up.
 
