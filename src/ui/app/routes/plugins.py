@@ -948,6 +948,30 @@ def custom_plugin_page(plugin: str):
     plugin_page = ""
 
     if is_used and is_metrics_on:
+        # A plugin-shipped page is CODE, not data, and loading one executes it twice over:
+        # `run_action(..., "pre_render")` below does `SourceFileLoader(...).load_module()` and
+        # calls into it with `app=current_app`, and `template.html` is rendered through a
+        # NON-sandboxed `jinja2.Environment` with `current_app.jinja_env.globals` merged in.
+        # Either one is arbitrary execution in the UI process, with reach to API_CLIENT, the
+        # Flask secret and the biscuit private key.
+        #
+        # Every other route that touches plugins already gates on admin -- /plugins/delete,
+        # /plugins/enable, /plugins/refresh, /plugins/upload, and this very route's POST arm
+        # ("Plugin management is restricted to administrators"). The GET arm did not, and
+        # `reader` is a seeded role whose entire permission set is ["read"]
+        # (db_methods/ui_users.py) while the biscuit middleware maps GET -> "read"
+        # (models/biscuit.py) -- so a read-only account got code execution by loading a page.
+        # Executing is not reading. The gate goes BEFORE the extraction, so a non-admin request
+        # never unpacks a plugin tarball either.
+        #
+        # The cost is real and accepted: a reader can no longer see a plugin's own dashboard.
+        # Giving that back safely needs a sandboxed render AND a trusted-plugin story (the PRO
+        # licence-hardening chantier owns the second half) -- not a looser gate here.
+        if not current_user.admin:
+            return render_template(
+                "plugin_page.html", plugin_page="", plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render={}, restricted=True
+            )
+
         # Try loading from filesystem first
         plugin_fs_path = get_plugin_path(plugin)
         tmp_page_dir = None

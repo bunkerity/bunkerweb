@@ -995,12 +995,16 @@ def test_custom_plugin_page_is_used_true_via_service_scoped_dict_declaration(rou
     through its {prefix}-scoped dict comprehension + is_plugin_active delegation, same as the
     old PLUGINS_SPECIFICS-driven code did. Asserted indirectly: is_used=True is what lets the
     route reach the filesystem/API page lookup at all, so with both stubbed to "no page found"
-    the observable outcome is the 404 from that branch rather than the is_used=False fallthrough."""
+    the observable outcome is the 404 from that branch rather than the is_used=False fallthrough.
+
+    Admin is now part of "reaches the page lookup": loading a plugin-shipped page executes plugin
+    code, so the route refuses a non-admin before it looks the page up at all."""
     module, app = route_app
     module.BW_CONFIG.reset_mock(return_value=True, side_effect=True)
     module.API_CLIENT.reset_mock(return_value=True, side_effect=True)
     module.BW_CONFIG.get_plugins.return_value = {"limit": _LIMIT_PLUGIN_DATA}
     module.BW_CONFIG.get_config.return_value = _limit_db_config(**{"app1.example.com_USE_LIMIT_REQ": "yes"})
+    monkeypatch.setattr(module, "current_user", SimpleNamespace(admin=True))
     monkeypatch.setattr(module, "get_plugin_path", lambda plugin_id: None)
     module.API_CLIENT.get_plugin_page.return_value = None
     with app.test_request_context("/plugins/limit"):
@@ -1023,3 +1027,82 @@ def test_custom_plugin_page_is_used_false_when_inactive_everywhere(route_app, mo
     assert captured["is_used"] is False
     assert captured["is_metrics"] is True
     module.API_CLIENT.get_plugin_page.assert_not_called()
+
+
+# --------------------------------------------------------------------------------------
+# S4 gate: loading a plugin-shipped page EXECUTES that plugin's code
+# --------------------------------------------------------------------------------------
+#
+# `custom_plugin_page` serves GET and POST from one view. The POST arm has always refused a
+# non-admin ("Plugin management is restricted to administrators"), and so do /plugins/delete,
+# /plugins/enable, /plugins/refresh and /plugins/upload. The GET arm reached
+# `run_action(plugin, "pre_render")` -- `SourceFileLoader(...).load_module()` called with
+# `app=current_app` -- and rendered the plugin's own template.html through a NON-sandboxed
+# jinja2.Environment, with no admin check at all. `reader` is a seeded role whose whole
+# permission set is ["read"] (db_methods/ui_users.py) and the biscuit middleware maps
+# GET -> "read", so a read-only account got code execution by loading a page.
+
+
+@pytest.fixture
+def plugin_page_call(route_app, monkeypatch, tmp_path):
+    """Drive the real `custom_plugin_page` GET arm far enough to reach the execution gate."""
+    module, app = route_app
+
+    def _call(*, admin, plugin="myext", with_ui_dir=True):
+        module.API_CLIENT.reset_mock()
+        monkeypatch.setattr(module, "TMP_DIR", tmp_path / "tmp")
+        monkeypatch.setattr(module, "current_user", SimpleNamespace(admin=admin))
+        module.BW_CONFIG.get_plugins.return_value = {plugin: {"name": "My Ext", "type": "pro", "settings": {}}}
+        module.BW_CONFIG.get_config.return_value = {"USE_METRICS": "yes", "SERVER_NAME": "www.example.com"}
+
+        plugin_root = tmp_path / "plugins" / plugin
+        if with_ui_dir:
+            (plugin_root / "ui").mkdir(parents=True, exist_ok=True)
+            (plugin_root / "ui" / "template.html").write_text("<p>owned</p>", encoding="utf-8")
+            (plugin_root / "ui" / "actions.py").write_text("def pre_render(**kwargs):\n    return {'status': 'ok'}\n", encoding="utf-8")
+        monkeypatch.setattr(module, "get_plugin_path", lambda _: plugin_root if with_ui_dir else None)
+
+        captured = {}
+        monkeypatch.setattr(module, "render_template", lambda name, **context: captured.update(context) or "")
+        ran = []
+        monkeypatch.setattr(module, "run_action", lambda *a, **k: ran.append((a, k)) or {"status": "ok"})
+
+        with app.test_request_context(f"/plugins/{plugin}", method="GET"):
+            module.custom_plugin_page.__wrapped__(plugin)
+        return captured, ran
+
+    return _call
+
+
+def test_a_non_admin_never_executes_plugin_code(plugin_page_call):
+    context, ran = plugin_page_call(admin=False)
+    assert ran == [], "run_action reached on a non-admin GET -- that is arbitrary plugin Python in the UI process"
+    assert context.get("restricted") is True
+    assert context.get("plugin_page") == "", "the plugin's own template must not be rendered either"
+
+
+def test_an_admin_still_gets_the_plugin_page(plugin_page_call):
+    """The gate must not break the supported case, or it would read as 'plugin pages are gone'."""
+    _, ran = plugin_page_call(admin=True)
+    assert ran, "an admin GET no longer reaches the plugin's pre_render"
+
+
+def test_the_gate_precedes_the_tarball_extraction(route_app, plugin_page_call):
+    """Ordering, not just presence: below the gate the route pulls the plugin blob from the API and
+    untars it. A non-admin request must not get that far -- refusing only after unpacking
+    attacker-supplied archive members is a weaker position for no benefit. `get_plugin_page` is
+    the fetch that feeds the untar, so its absence is the ordering claim."""
+    module, _ = route_app
+    context, _ = plugin_page_call(admin=False, with_ui_dir=False)
+    assert context.get("restricted") is True
+    module.API_CLIENT.get_plugin_page.assert_not_called()
+
+
+def test_the_restricted_notice_is_distinct_from_the_no_page_one():
+    """Reusing `no_page` would tell a reader to "restart the web UI" to fix a permission refusal --
+    a support ticket by construction."""
+    markup = (TEMPLATES / "plugin_page.html").read_text(encoding="utf-8")
+    assert "plugin.page.status.restricted_to_admins" in markup
+    assert markup.index("{% elif restricted %}") < markup.index("{% elif no_page %}")
+    locales = json.loads((LOCALES / "en.json").read_text(encoding="utf-8"))
+    assert "restricted_to_admins" in locales["plugin"]["page"]["status"]

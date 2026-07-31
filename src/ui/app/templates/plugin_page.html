@@ -57,6 +57,20 @@
                 </p>
             </div>
         </div>
+    {% elif restricted %}
+        {# Rendering a plugin-shipped page EXECUTES that plugin's code -- `pre_render` is loaded
+           with SourceFileLoader and called with `app=current_app`, and template.html goes through
+           a non-sandboxed Jinja environment. That is why the route only does it for an admin, and
+           why this branch says so plainly rather than reusing `no_page`'s "restart the web UI"
+           text, which would send a reader chasing a fault that does not exist. #}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="text-center text-primary">
+                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
+                   data-i18n="plugin.page.status.restricted_to_admins">
+                    This plugin ships its own page, which runs plugin code. Only administrators can load it.
+                </p>
+            </div>
+        </div>
     {% elif no_page %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
