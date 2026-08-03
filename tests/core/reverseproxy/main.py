@@ -203,6 +203,34 @@ try:
 
                 print("✅ The reverse proxy cache status and native URL purge are behaving as expected", flush=True)
 
+                # scope="all" takes a different Lua branch than the per-URL purge above: it
+                # captures /_proxy-cache/purge-all (api.lua:713-723) instead of reconstructing
+                # a cache key. Only the URL branch was covered, so a regression in purge-all
+                # would have shipped silently.
+                cache_statuses = []
+                for _ in range(5):
+                    resp = session.get(cache_url, headers={"Host": "www.example.com"}, verify=False, allow_redirects=True)
+                    cache_statuses.append(resp.headers.get("X-Proxy-Cache", ""))
+                    if cache_statuses[-1] == "HIT":
+                        break
+
+                if "HIT" not in cache_statuses:
+                    print(f"❌ The reverse proxy cache did not repopulate before the purge-all ({cache_statuses}), exiting ...", flush=True)
+                    exit(1)
+
+                resp = session.post("http://www.example.com:5000/proxy-cache/purge", headers=api_headers, json={"scope": "all"})
+                purge_result = resp.json().get("data", {}) if resp.status_code == 200 else {}
+                if resp.status_code != 200 or purge_result.get("purged") is not True:
+                    print(f"❌ The reverse proxy cache purge-all failed ({resp.status_code}: {resp.text}), exiting ...", flush=True)
+                    exit(1)
+
+                resp = session.get(cache_url, headers={"Host": "www.example.com"}, verify=False, allow_redirects=True)
+                if resp.headers.get("X-Proxy-Cache") != "MISS":
+                    print(f"❌ The cache was not empty after the purge-all ({resp.headers.get('X-Proxy-Cache')}), exiting ...", flush=True)
+                    exit(1)
+
+                print("✅ The reverse proxy cache native purge-all is behaving as expected", flush=True)
+
     print("✅ All tests passed", flush=True)
 except SystemExit as e:
     exit(e.code)
