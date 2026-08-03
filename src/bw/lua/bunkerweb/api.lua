@@ -8,6 +8,7 @@ local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local helpers = require "bunkerweb.helpers"
 local process = require "ngx.process"
+local pushswap = require "bunkerweb.pushswap"
 local rsignal = require "resty.signal"
 local upload = require "resty.upload"
 local utils = require "bunkerweb.utils"
@@ -301,40 +302,42 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	file:flush()
 	file:close()
-	local staging = "/var/tmp/bunkerweb/staging_" .. self.ctx.bw.uri:sub(2)
-	local backup = "/var/tmp/bunkerweb/backup_" .. self.ctx.bw.uri:sub(2)
-	local cmds = {
-		-- Extract into a staging area first (validates the archive before touching destination)
-		"rm -rf " .. staging,
-		"mkdir -p " .. staging,
-		"tar xzf " .. tmp .. " -C " .. staging,
-		-- Create backup of current destination contents
-		"rm -rf " .. backup,
-		"mkdir -p " .. backup,
-		"cp -R " .. destination .. "/. " .. backup .. "/ 2>/dev/null; true",
-		-- Replace destination contents; if cp fails, restore from backup; only cleanup backup on success
-		"rm -rf "
-			.. destination
-			.. "/* && cp -R "
-			.. staging
-			.. "/. "
-			.. destination
-			.. "/ && rm -rf "
-			.. backup
-			.. " || { cp -R "
-			.. backup
-			.. "/. "
-			.. destination
-			.. "/ 2>/dev/null; false; }",
-		-- Cleanup temporaries (backup already removed on success above)
-		"rm -rf " .. staging,
-		"rm -f " .. tmp,
-	}
-	for _, cmd in ipairs(cmds) do
-		local status = execute(cmd)
-		if status ~= 0 then
-			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
-		end
+	-- An unchanged push is the common case: the scheduler sends these directories on
+	-- every start whether or not their content changed. Skipping it means a live
+	-- worker never loses its plugin tree for a push that would change nothing.
+	local digest = pushswap.digest_file(tmp)
+	if digest and pushswap.read_applied(destination) == digest then
+		os.remove(tmp)
+		return self:response(HTTP_OK, "success", "already applied at " .. destination)
+	end
+
+	-- Extract into a staging area inside the destination first: it validates the
+	-- archive before anything is touched, and keeps every later rename on the same
+	-- filesystem even when the destination is a mount point.
+	local staging = destination .. "/" .. pushswap.RESERVED_PREFIX .. "staging"
+	local extract = "rm -rf '"
+		.. staging
+		.. "' && mkdir -p '"
+		.. staging
+		.. "' && tar xzf '"
+		.. tmp
+		.. "' -C '"
+		.. staging
+		.. "'"
+	if execute(extract) ~= 0 then
+		execute("rm -rf '" .. staging .. "'")
+		os.remove(tmp)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "cannot extract archive")
+	end
+
+	local ok, err = pushswap.swap(destination, staging)
+	os.remove(tmp)
+	if not ok then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
+	end
+
+	if digest then
+		pushswap.write_applied(destination, digest)
 	end
 	return self:response(HTTP_OK, "success", "saved data at " .. destination)
 end
