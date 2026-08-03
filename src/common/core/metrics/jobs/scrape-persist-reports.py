@@ -82,6 +82,37 @@ try:
     if failures:
         exit_status = 2
     LOGGER.info(f"Persisted blocked-request reports from {len(instances_data)} instance(s) ({scraped} records).")
+
+    # Sampled baseline of normal traffic, collected only when METRICS_BASELINE_SAMPLE_RATE is
+    # non-zero. Separate endpoint, separate table: bw_metrics_requests is filtered on read by
+    # the report clause (4xx or detect), so a baseline row stored there would be invisible.
+    # Dedup is again on (instance_hostname, request_id), so re-scraping the buffer is idempotent.
+    if getenv("METRICS_BASELINE_SAMPLE_RATE", "0") != "0":
+        resp, baseline_data = caller.send_to_apis("GET", "/metrics/baseline", response=True)
+        baseline_scraped = 0
+        baseline_failures = 0
+        for hostname, data in (baseline_data or {}).items():
+            if not isinstance(data, dict) or data.get("status") != "success":
+                LOGGER.warning(f"Skipping baseline from {hostname}: unsuccessful metrics response.")
+                continue
+            payload = data.get("msg")
+            if not isinstance(payload, dict):
+                LOGGER.warning(f"Skipping baseline from {hostname}: unexpected metrics payload shape.")
+                continue
+            records = payload.get("baseline") or []
+            if not records:
+                continue
+            err = JOB.db.batch_upsert_metrics_baseline(records, instance_hostname=hostname)
+            if err:
+                LOGGER.error(f"Failed to persist baseline from {hostname}: {err}")
+                baseline_failures += 1
+                continue
+            baseline_scraped += len(records)
+
+        if baseline_failures:
+            exit_status = 2
+        if baseline_scraped:
+            LOGGER.info(f"Persisted traffic baseline from {len(baseline_data or {})} instance(s) ({baseline_scraped} records).")
 except SystemExit as e:
     exit_status = e.code
 except BaseException as e:

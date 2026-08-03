@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import and_, delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
-from model import Requests  # type: ignore
+from model import Baseline, Requests  # type: ignore
 
 from .common import DatabaseMixinBase, retry_on_transient_db_errors
 
@@ -130,6 +130,63 @@ def _build_request_row(request_id: str, record: Dict[str, Any], instance_hostnam
     )
 
 
+def _int_or_none(value: Any) -> Optional[int]:
+    """Coerce a scraped numeric to int, or None. NGINX hands some of these back as strings,
+    and $upstream_response_time is a comma-separated list when several upstreams were tried —
+    a value we would rather drop than half-parse into a misleading number."""
+    if value is None or isinstance(value, bool):
+        return None
+    with suppress(TypeError, ValueError):
+        return int(float(value))
+    return None
+
+
+def _float_or_none(value: Any) -> Optional[float]:
+    if value is None or isinstance(value, bool):
+        return None
+    with suppress(TypeError, ValueError):
+        return float(value)
+    return None
+
+
+def _str_or_none(value: Any, limit: int) -> Optional[str]:
+    """Truncate to the column width. A cipher name or content-type longer than its column
+    would abort the whole batch on MySQL/MariaDB rather than lose one field."""
+    if value is None or value == "":
+        return None
+    return str(value)[:limit]
+
+
+def _build_baseline_row(request_id: str, record: Dict[str, Any], instance_hostname: str, created_at: datetime) -> Baseline:
+    """Build a ``Baseline`` row from a scraped sample. Deliberately no ``ip``: the sample
+    models traffic shape, not identity."""
+    return Baseline(
+        request_id=request_id,
+        instance_hostname=instance_hostname,
+        date=_to_datetime(record.get("date")),
+        server_name=str(record.get("server_name") or "")[:256],
+        method=str(record.get("method") or "")[:16],
+        uri=str(record.get("uri") or ""),
+        status=int(record.get("status") or 0),
+        request_time=_float_or_none(record.get("request_time")),
+        request_length=_int_or_none(record.get("request_length")),
+        body_bytes_sent=_int_or_none(record.get("body_bytes_sent")),
+        upstream_time=_float_or_none(record.get("upstream_time")),
+        connection_requests=_int_or_none(record.get("connection_requests")),
+        http_version=_str_or_none(record.get("http_version"), 16),
+        scheme=_str_or_none(record.get("scheme"), 8),
+        content_type=_str_or_none(record.get("content_type"), 256),
+        content_length=_int_or_none(record.get("content_length")),
+        ssl_protocol=_str_or_none(record.get("ssl_protocol"), 16),
+        ssl_cipher=_str_or_none(record.get("ssl_cipher"), 64),
+        country=str(record.get("country") or "")[:16],
+        asn_number=_int_or_none(record.get("asn_number")),
+        ip_version=_int_or_none(record.get("ip_version")),
+        user_agent=record.get("user_agent"),
+        created_at=created_at,
+    )
+
+
 def _report_clause():
     """A row is a report when it was blocked (4xx) or merely detected (any status)."""
     return or_(and_(Requests.status >= 400, Requests.status < 500), Requests.security_mode == "detect")
@@ -169,6 +226,18 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         The periodic scrape job is the single writer per instance; a rare concurrent insert that races
         the existence check is absorbed by re-querying and re-inserting only the still-missing remainder
         (rather than aborting the whole batch on the unique-constraint violation)."""
+        return self._batch_upsert_by_request_id(Requests, _build_request_row, records, instance_hostname, "metrics")
+
+    @retry_on_transient_db_errors
+    def batch_upsert_metrics_baseline(self, records: List[Dict[str, Any]], *, instance_hostname: str = "") -> str:
+        """Insert sampled baseline rows. Same idempotent re-scrape contract as the blocked
+        reports: dedup on ``(instance_hostname, request_id)``. Returns "" on success."""
+        return self._batch_upsert_by_request_id(Baseline, _build_baseline_row, records, instance_hostname, "baseline")
+
+    def _batch_upsert_by_request_id(self, model, build_row, records: List[Dict[str, Any]], instance_hostname: str, label: str) -> str:
+        """Shared insert path for the two scraped tables: both are keyed on
+        ``(instance_hostname, request_id)`` and both are written by the same once-a-minute job,
+        so they need identical duplicate collapsing and conflict handling."""
         if not records:
             return ""
 
@@ -191,10 +260,8 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
             # Two attempts: on a concurrent unique-conflict, re-query the stored ids (now including the
             # racing rows) and re-insert only the remainder, so one conflict never drops the whole batch.
             for _attempt in (1, 2):
-                existing = set(
-                    session.scalars(select(Requests.request_id).where(Requests.instance_hostname == instance_hostname, Requests.request_id.in_(ids))).all()
-                )
-                to_add = [_build_request_row(rid, by_id[rid], instance_hostname, now) for rid in ids if rid not in existing]
+                existing = set(session.scalars(select(model.request_id).where(model.instance_hostname == instance_hostname, model.request_id.in_(ids))).all())
+                to_add = [build_row(rid, by_id[rid], instance_hostname, now) for rid in ids if rid not in existing]
                 if not to_add:
                     return ""
                 session.add_all(to_add)
@@ -208,7 +275,7 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
                     return str(e)
         # both attempts hit a persistent unique conflict (abnormal for a single writer) — surface it
         # rather than reporting a silent success that hides un-inserted rows / a real constraint bug.
-        return last_error or "metrics batch upsert: unresolved unique conflict after retry"
+        return last_error or f"{label} batch upsert: unresolved unique conflict after retry"
 
     @retry_on_transient_db_errors
     def get_metrics_requests(
@@ -413,32 +480,52 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
     @retry_on_transient_db_errors
     def cleanup_metrics_by_age(self, days: int) -> str:
         """Delete reports older than ``days``. Returns ``"Removed N metrics requests by age"``."""
+        return self._cleanup_by_age(Requests, days, "metrics requests")
+
+    @retry_on_transient_db_errors
+    def cleanup_metrics_by_count(self, max_rows: int) -> str:
+        """Keep only the ``max_rows`` newest reports. Returns ``"Removed N metrics requests by count"``."""
+        return self._cleanup_by_count(Requests, max_rows, "metrics requests")
+
+    @retry_on_transient_db_errors
+    def cleanup_baseline_by_age(self, days: int) -> str:
+        """Delete baseline samples older than ``days``.
+
+        The baseline needs its own retention, and a much tighter one: at 1% of 10k req/s it
+        grows by ~8.6M rows a day against the blocked table's 1M-row total default, so sharing
+        the reports policy would let it swamp the database."""
+        return self._cleanup_by_age(Baseline, days, "baseline records")
+
+    @retry_on_transient_db_errors
+    def cleanup_baseline_by_count(self, max_rows: int) -> str:
+        """Keep only the ``max_rows`` newest baseline samples."""
+        return self._cleanup_by_count(Baseline, max_rows, "baseline records")
+
+    def _cleanup_by_age(self, model, days: int, label: str) -> str:
         removed = 0
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
             cutoff = datetime.now().astimezone() - timedelta(days=days)
-            removed = session.execute(delete(Requests).where(Requests.date < cutoff), execution_options={"synchronize_session": False}).rowcount
+            removed = session.execute(delete(model).where(model.date < cutoff), execution_options={"synchronize_session": False}).rowcount
             try:
                 session.commit()
             except BaseException as e:
                 return str(e)
-        return f"Removed {removed} metrics requests by age"
+        return f"Removed {removed} {label} by age"
 
-    @retry_on_transient_db_errors
-    def cleanup_metrics_by_count(self, max_rows: int) -> str:
-        """Keep only the ``max_rows`` newest reports. Returns ``"Removed N metrics requests by count"``."""
+    def _cleanup_by_count(self, model, max_rows: int, label: str) -> str:
         removed = 0
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
-            rows_count = session.scalar(select(func.count()).select_from(Requests)) or 0
+            rows_count = session.scalar(select(func.count()).select_from(model)) or 0
             if rows_count > max_rows:
-                ids_to_delete = session.scalars(select(Requests.id).order_by(Requests.date.asc()).limit(rows_count - max_rows)).all()
+                ids_to_delete = session.scalars(select(model.id).order_by(model.date.asc()).limit(rows_count - max_rows)).all()
                 if ids_to_delete:
-                    removed = session.execute(delete(Requests).where(Requests.id.in_(ids_to_delete)), execution_options={"synchronize_session": False}).rowcount
+                    removed = session.execute(delete(model).where(model.id.in_(ids_to_delete)), execution_options={"synchronize_session": False}).rowcount
                 try:
                     session.commit()
                 except BaseException as e:
                     return str(e)
-        return f"Removed {removed} metrics requests by count"
+        return f"Removed {removed} {label} by count"

@@ -95,6 +95,24 @@
       "regex": "^\\d+[kKmM]?$",
       "type": "text"
     },
+    "METRICS_BASELINE_RETENTION_DAYS": {
+      "context": "global",
+      "default": "14",
+      "help": "Maximum age (in days) of sampled baseline records before the retention job deletes them. Deliberately shorter than the blocked-report retention: a baseline grows far faster, and a model is trained on recent normal behaviour rather than on history.",
+      "id": "metrics-baseline-retention-days",
+      "label": "Baseline retention (days)",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+      "context": "global",
+      "default": "2000000",
+      "help": "Maximum number of sampled baseline records to keep; the retention job deletes the oldest rows beyond this count. Separate from the blocked-report cap because the two tables grow at very different rates.",
+      "id": "metrics-baseline-retention-max-rows",
+      "label": "Baseline retention (max rows)",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
     "METRICS_SAVE_TO_REDIS": {
       "context": "global",
       "default": "yes",

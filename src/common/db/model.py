@@ -3,7 +3,7 @@
 from datetime import datetime
 from json import dumps, loads
 from typing import Any, ClassVar, List, Optional
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText, false, true
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText, false, true
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -291,6 +291,56 @@ class Requests(Base):
     security_mode: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
     asn_number: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     asn_org: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class Baseline(Base):
+    """Sampled records of NORMAL (non-blocked) traffic, for anomaly detection.
+
+    Deliberately a separate table from ``bw_metrics_requests``: that one is filtered on read
+    by ``_report_clause()`` (4xx or detect), so a baseline row stored there would be invisible
+    to every existing query — and dropping the clause to expose it would break every count,
+    facet, timeseries and retention path that depends on it.
+
+    Rows are sampled in Lua, scraped from instances and deduplicated on
+    ``(instance_hostname, request_id)`` like the blocked table. No FK: multi-instance.
+
+    **No client IP column, by design.** This models traffic *shape*, not identity; recording
+    every ordinary visitor's address is a far larger privacy commitment than recording the
+    ones that were blocked. ``request_id`` is NGINX-generated and carries no identity.
+    """
+
+    __tablename__ = "bw_metrics_baseline"
+    __table_args__ = (
+        UniqueConstraint("instance_hostname", "request_id", name="uq_bw_metrics_baseline_instance_request"),
+        Index("ix_bw_metrics_baseline_date_server", "date", "server_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    instance_hostname: Mapped[str] = mapped_column(String(256), nullable=False, default="", index=True)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    server_name: Mapped[str] = mapped_column(String(256), nullable=False, default="", index=True)
+    method: Mapped[str] = mapped_column(String(16), nullable=False, default="")
+    # Templated in Lua (ids collapsed to <n>/<uuid>/<hex>) before it ever reaches here: a raw
+    # path is one distinct value per request and a poor feature.
+    uri: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    status: Mapped[int] = mapped_column(Integer, nullable=False, default=0, index=True)
+    request_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    request_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    body_bytes_sent: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    upstream_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    connection_requests: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    http_version: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
+    scheme: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
+    content_type: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    content_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    ssl_protocol: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
+    ssl_cipher: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    country: Mapped[str] = mapped_column(String(16), nullable=False, default="")
+    asn_number: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    ip_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 

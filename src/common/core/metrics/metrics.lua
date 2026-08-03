@@ -471,6 +471,10 @@ function metrics:log(bypass_checks)
 		if request_id and should_sample(crc32_short(request_id), rate) then
 			local baseline = lru:get("baseline") or {}
 			table_insert(baseline, {
+				-- Dedup key for the scrape, exactly like the blocked buffer: the job re-reads
+				-- the whole buffer every minute, so without it an overlapping scrape would
+				-- insert the same request twice. NGINX-generated, carries no client identity.
+				id = request_id,
 				date = self.ctx.bw.start_time or time(),
 				server_name = self.ctx.bw.server_name,
 				method = self.ctx.bw.request_method,

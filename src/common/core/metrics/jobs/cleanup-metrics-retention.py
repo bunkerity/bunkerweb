@@ -33,6 +33,21 @@ try:
         LOGGER.error(by_count)
         sys_exit(1)
     LOGGER.info(by_count)
+
+    # The baseline has its own, tighter policy: it grows far faster than the blocked reports,
+    # so sharing their retention would let it swamp the database. Cleaned even when sampling
+    # has since been switched back off, so disabling it still drains what was collected.
+    baseline_by_age = DB.cleanup_baseline_by_age(int(getenv("METRICS_BASELINE_RETENTION_DAYS", "14")))
+    if not baseline_by_age.startswith("Removed"):
+        LOGGER.error(baseline_by_age)
+        sys_exit(1)
+    LOGGER.info(baseline_by_age)
+
+    baseline_by_count = DB.cleanup_baseline_by_count(int(getenv("METRICS_BASELINE_RETENTION_MAX_ROWS", "2000000")))
+    if not baseline_by_count.startswith("Removed"):
+        LOGGER.error(baseline_by_count)
+        sys_exit(1)
+    LOGGER.info(baseline_by_count)
 except SystemExit as e:
     status = e.code
 except BaseException as e:
