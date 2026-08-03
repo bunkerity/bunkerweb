@@ -44,6 +44,41 @@ local function is_reserved(name)
 	return name:sub(1, #pushswap.RESERVED_PREFIX) == pushswap.RESERVED_PREFIX
 end
 
+-- os.execute returns a status number on LuaJIT and a boolean on Lua 5.2+.
+local function run(cmd)
+	local ok = execute(cmd)
+	if type(ok) == "number" then
+		return ok == 0
+	end
+	return ok == true
+end
+
+-- Move one directory entry, preferring rename(2) so the replacement is atomic.
+--
+-- overlayfs, which every container integration runs on, cannot rename a directory
+-- that still lives in the image's lower layer and reports EXDEV. Anything shipped
+-- in the image hits this on the first push after a container starts. Falling back
+-- to a copy keeps that case working; the original is only dropped once the copy
+-- succeeded, so the entry is still recoverable if a later one fails.
+local function move_entry(from, to)
+	local ok, err = rename(from, to)
+	if ok then
+		return true
+	end
+	-- cp would descend into an existing directory instead of replacing it, so a
+	-- destination that is somehow still occupied is a hard failure, not a merge.
+	if run("test -e " .. quote(to)) then
+		return false, err
+	end
+	if not run("cp -a " .. quote(from) .. " " .. quote(to)) then
+		return false, err
+	end
+	if not run("rm -rf " .. quote(from)) then
+		return false, err
+	end
+	return true
+end
+
 function pushswap.digest_file(path)
 	local fh = open(path, "rb")
 	if not fh then
@@ -102,12 +137,32 @@ function pushswap.swap(destination, staging)
 	local trash = destination .. "/" .. pushswap.RESERVED_PREFIX .. "trash"
 	execute("rm -rf " .. quote(trash) .. " && mkdir -p " .. quote(trash))
 
+	-- Every rename is recorded so a failure part-way through can be undone in
+	-- reverse. A placement must be undone before the park it sits on top of:
+	-- restoring the old entry while the new one still occupies the name fails
+	-- with ENOTEMPTY, which would leave the destination half applied.
 	local undo = {}
 	local function rollback()
+		local stuck = {}
 		for i = #undo, 1, -1 do
-			rename(undo[i].from, undo[i].to)
+			local ok = move_entry(undo[i].from, undo[i].to)
+			if not ok then
+				stuck[#stuck + 1] = undo[i].to
+			end
 		end
 		execute("rm -rf " .. quote(trash))
+		if #stuck > 0 then
+			return "rollback incomplete, left in place: " .. table.concat(stuck, ", ")
+		end
+		return nil
+	end
+
+	local function abort(message)
+		local incomplete = rollback()
+		if incomplete then
+			return false, message .. " (" .. incomplete .. ")"
+		end
+		return false, message
 	end
 
 	local incoming = {}
@@ -116,27 +171,25 @@ function pushswap.swap(destination, staging)
 		local target = destination .. "/" .. name
 		if existing[name] then
 			local parked = trash .. "/" .. name
-			local ok, err = rename(target, parked)
+			local ok, err = move_entry(target, parked)
 			if not ok then
-				rollback()
-				return false, "cannot park " .. name .. ": " .. tostring(err)
+				return abort("cannot park " .. name .. ": " .. tostring(err))
 			end
 			undo[#undo + 1] = { from = parked, to = target }
 		end
-		local ok, err = rename(staging .. "/" .. name, target)
+		local ok, err = move_entry(staging .. "/" .. name, target)
 		if not ok then
-			rollback()
-			return false, "cannot place " .. name .. ": " .. tostring(err)
+			return abort("cannot place " .. name .. ": " .. tostring(err))
 		end
+		undo[#undo + 1] = { from = target, to = staging .. "/" .. name }
 	end
 
 	for name in pairs(existing) do
 		if not incoming[name] and not is_reserved(name) then
 			local parked = trash .. "/" .. name
-			local ok, err = rename(destination .. "/" .. name, parked)
+			local ok, err = move_entry(destination .. "/" .. name, parked)
 			if not ok then
-				rollback()
-				return false, "cannot sweep " .. name .. ": " .. tostring(err)
+				return abort("cannot sweep " .. name .. ": " .. tostring(err))
 			end
 			undo[#undo + 1] = { from = parked, to = destination .. "/" .. name }
 		end

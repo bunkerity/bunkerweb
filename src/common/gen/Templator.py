@@ -626,7 +626,11 @@ class Templator:
         real_path = self._output / "variables.env"
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            config_lines = [f"{k}={v}\n" for k, v in self._full_config.items()]
+            # Sorted so two runs over the same settings produce byte-identical output.
+            # Instances skip a push whose archive matches the one already applied, and
+            # dict insertion order here varies between runs, which alone was enough to
+            # make every /confs push look like a change.
+            config_lines = [f"{k}={v}\n" for k, v in sorted(self._full_config.items())]
             real_path.write_text("".join(config_lines))
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")
