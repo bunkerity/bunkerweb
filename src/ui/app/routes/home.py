@@ -139,11 +139,15 @@ def home_page():
         certs_expiring=certs_expiring,
         # Deferred to the async GET /home/metrics fetch (home.js) -- shipped empty so the
         # chart containers + their hidden -data divs exist for the client to populate.
+        # `top_reasons` is deliberately NOT here: unlike these, its card renders no server-side
+        # rows at all (home.html:217-223 is an empty `#home-top-reasons-body` that home.js
+        # fills with DOM APIs, because reason strings are untrusted). Passing an empty list
+        # read as "the server still computes this", which is how its tests came to assert a
+        # context key the template never used.
         request_countries={},
         request_ips={},
         blocked_unique_ips=0,
         time_buckets={},
-        top_reasons=[],
         countries_count=0,
     )
 

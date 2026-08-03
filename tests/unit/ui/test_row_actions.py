@@ -156,15 +156,39 @@ def _instances_context(status="up", is_readonly=False, user_readonly=False, meth
     )
 
 
+def _button_with_class(html, class_value):
+    """The opening `<button>` tag carrying exactly `class_value`, or None.
+
+    Deliberately NOT an adjacency regex. These assertions used to require
+    `class="..."` to be immediately followed by `data-instance=...`; the a11y pass in
+    `feed8103a` inserted `aria-label` + `data-i18n-aria-label` between the two on the
+    reload/stop buttons, and the delete button puts `data-instance` *before* `class`
+    altogether -- so the old pattern only ever matched `ping` by accident. Attribute order is
+    not a contract and pinning it turns an accessibility improvement into a test failure;
+    what matters is that the hook and the class sit on the same element.
+    """
+    match = re.search(r"<button\b[^>]*" + re.escape(f'class="{class_value}"') + r"[^>]*>", html)
+    return match.group(0) if match else None
+
+
 def test_instances_row_actions_use_icon_btn_and_keep_behavioral_hooks():
     html = _render_dashboard_page("instances.html", **_instances_context())
 
     assert 'class="row-actions"' in html
-    assert re.search(r'class="icon-btn ping-instance"\s+data-instance="bw-1"', html)
-    assert re.search(r'class="icon-btn reload-instance"\s+data-instance="bw-1"', html)
-    assert re.search(r'class="icon-btn stop-instance"\s+data-instance="bw-1"', html)
-    assert re.search(r'class="icon-btn danger delete-instance"', html)
-    assert 'data-instance="bw-1"' in html
+    for action in ("ping-instance", "reload-instance", "stop-instance"):
+        button = _button_with_class(html, f"icon-btn {action}")
+        assert button, action
+        # The JS delegates off the class and reads the target from data-instance, so both must
+        # be on the same button for the action to fire against the right host.
+        assert 'data-instance="bw-1"' in button, action
+        # The a11y pass's label must survive: an icon-only button has no accessible name
+        # without it. The lookbehind is load-bearing -- a plain `"aria-label=" in button`
+        # is also satisfied by `data-i18n-aria-label=`, which every one of these buttons
+        # carries, so it passes even with the real attribute deleted.
+        assert re.search(r'(?<![-\w])aria-label="', button), action
+    delete_button = _button_with_class(html, "icon-btn danger delete-instance")
+    assert delete_button
+    assert 'data-instance="bw-1"' in delete_button
     # scoped past the row-actions marker: the page-head band's own "Create instance"
     # CTA (a legitimately colored button living earlier on the page) must not trip
     # this row-actions-only check.

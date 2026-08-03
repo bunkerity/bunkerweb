@@ -122,18 +122,24 @@ def test_home_page_loads_flatpickr_before_range_picker_js():
 # ── Mini-tile row + picker-driven trend tile / chart mount points ──────────────────
 
 
-def test_home_page_renders_trend_tile_and_timeseries_chart_mounts():
+def test_home_page_renders_trend_chip_and_timeseries_chart_mounts():
+    """The blocked-requests trend is a chip in the status band, not a KPI tile.
+
+    It was `#home-tile-trend` carrying `bw-kpi-value` until the home-kit reskin
+    (`4b3fda4e3`) folded the headline into the status band as `#home-blocked-trend`
+    (home.html:105-115). Either way the template's job is unchanged: ship the mount point and
+    its i18n key, because home-dashboard.js writes the value from the range picker.
+    """
     html = _render_home()
 
-    assert 'id="home-tile-trend"' in html
-    # The trend tile is the KPI tile immediately inside the #home-tile-trend wrapper; its
-    # value span (written by home-dashboard.js) must carry bw-kpi-value.
-    trend_tile = html.split('id="home-tile-trend"', 1)[1].split("</div>", 1)[0]
-    assert "bw-kpi-value" in trend_tile
+    assert 'id="home-blocked-trend"' in html
+    trend_chip = html.split('id="home-blocked-trend"', 1)[1].split("</span>", 1)[0]
+    assert 'data-i18n="dashboard.status.trend_vs_prev"' in trend_chip
     assert 'id="home-timeseries-chart"' in html
+    # chart-area.html emits the hidden `<id>-data` div the chart script reads its series from.
     assert 'id="home-timeseries-chart-data"' in html
 
-    for i18n_key in ("dashboard.tile.trend", "dashboard.tile.bans_active", "dashboard.tile.jobs", "dashboard.chart.timeseries.title"):
+    for i18n_key in ("dashboard.status.trend_vs_prev", "dashboard.tile.bans_active", "dashboard.tile.jobs", "dashboard.chart.timeseries.title"):
         assert f'data-i18n="{i18n_key}"' in html, i18n_key
         assert _resolves_in_locale(LOCALE, i18n_key), i18n_key
 
@@ -148,27 +154,29 @@ def test_home_page_mini_tiles_render_honest_values():
 # ── "Top reasons for blocks" card ───────────────────────────────────────────────────
 
 
-def test_home_page_top_reasons_card_renders_rows_when_present():
-    html = _render_home(
-        top_reasons=[
-            {"reason": "modsecurity", "count": 30, "pct": 75.0},
-            {"reason": "antibot", "count": 10, "pct": 25.0},
-        ]
-    )
+def test_home_page_top_reasons_card_is_a_client_filled_mount():
+    """The card is a mount point now, not a server-rendered table.
+
+    Two tests used to live here, asserting the rows (`modsecurity`, `75.0%`) and the
+    `status.no_data` empty state came out of Jinja. Both moved into home.js: it fetches
+    /home/metrics and builds the rows with DOM APIs — deliberately, because reason strings are
+    untrusted and must never reach innerHTML — and renders the same `status.no_data` cell when
+    the list is empty (home.js:60-97). So the template owes exactly three things, and passing
+    `top_reasons` into it must change nothing.
+    """
+    html = _render_home(top_reasons=[{"reason": "modsecurity", "count": 30, "pct": 75.0}])
 
     assert 'data-i18n="dashboard.card.top_reasons.title"' in html
     assert _resolves_in_locale(LOCALE, "dashboard.card.top_reasons.title")
-    assert "modsecurity" in html
-    assert "antibot" in html
-    assert "75.0%" in html
-    assert "25.0%" in html
-
-
-def test_home_page_top_reasons_card_shows_empty_state_when_absent():
-    html = _render_home(top_reasons=[])
-
-    reasons_card = html.split('data-i18n="dashboard.card.top_reasons.title"', 1)[1]
-    assert 'data-i18n="status.no_data"' in reasons_card.split('data-i18n="onboarding.title"', 1)[0]
+    # The async wrapper home.js hides the spinner on, and the empty tbody it fills.
+    assert 'id="requests-reasons-async"' in html
+    assert '<tbody id="home-top-reasons-body"></tbody>' in html
+    # The card renders no row data at all -- if this leaks server-side again, the untrusted
+    # reason string is back in a Jinja context instead of behind createTextNode.
+    assert "modsecurity" not in html
+    assert "75.0%" not in html
+    # Both i18n keys the JS writes must still exist for it to resolve.
+    assert _resolves_in_locale(LOCALE, "status.no_data")
 
 
 # ── "Getting started" checklist -- flips per item, hides once all done ─────────────

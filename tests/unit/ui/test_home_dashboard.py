@@ -157,23 +157,34 @@ def test_home_page_context_happy_path(route_app, monkeypatch):
     assert captured["mfa_enabled"] is True
     assert captured["jobs_count"] == 2
     assert captured["bans_active"] == 2
-    assert captured["top_reasons"] == [
-        {"reason": "modsecurity", "count": 30, "pct": 75.0},
-        {"reason": "antibot", "count": 10, "pct": 25.0},
-    ]
+    # The heavy aggregation is NOT part of this context any more: home.py:140-148 ships the
+    # chart series empty on purpose so the shell paints before /home/metrics answers. Asserting
+    # they are empty is the actual contract -- a non-empty value here would mean the heavy
+    # aggregation crept back onto the first paint. `top_reasons` computation moved wholesale and
+    # is covered in the /home/metrics section below.
+    assert captured["request_countries"] == {}
+    assert captured["request_ips"] == {}
+    assert captured["time_buckets"] == {}
+    assert captured["blocked_unique_ips"] == 0
+    assert captured["countries_count"] == 0
+    client.get_metrics_requests.assert_not_called()
 
 
 def test_home_page_context_defaults_to_empty_state_on_api_failure(route_app, monkeypatch):
-    """Every new context piece is fetched independently under its own try/except, so one
-    failing dependency (metadata, jobs, bans, reason facets) must degrade only its own
-    field to a safe empty value -- never blow up the whole page."""
+    """Every context piece is fetched independently under its own try/except, so one failing
+    dependency (metadata, jobs, bans) must degrade only its own field to a safe empty value --
+    never blow up the whole page.
+
+    The reason-facet call is deliberately absent: it moved to /home/metrics, so asserting
+    `top_reasons == []` here would pass against a hardcoded `[]` and prove nothing. Its real
+    degradation is covered by test_home_metrics_degrades_to_empty_top_reasons_when_the_facet_api_fails.
+    """
     module, client, instances_utils, app = route_app
     _stub_home_aggregates(instances_utils)
     instances_utils.get_bans.side_effect = Exception("redis unreachable")
     client.get_services.return_value = []
     client.get_metadata.side_effect = module.ApiUnavailableError("metadata down")
     client.get_jobs.side_effect = module.ApiClientError("jobs down")
-    client.get_metrics_requests.side_effect = module.ApiClientError("metrics down")
     monkeypatch.setattr(module, "current_user", SimpleNamespace(totp_secret=None))
     captured = _render_and_capture(module, monkeypatch)
 
@@ -185,49 +196,77 @@ def test_home_page_context_defaults_to_empty_state_on_api_failure(route_app, mon
     assert captured["mfa_enabled"] is False
     assert captured["jobs_count"] == 0
     assert captured["bans_active"] == 0
-    assert captured["top_reasons"] == []
 
 
-def test_home_page_top_reasons_pct_uses_reason_total_not_grand_total_of_all_facets(route_app, monkeypatch):
+# ── GET /home/metrics -- the heavy aggregation, moved off the first paint ────────────
+#
+# top_reasons used to be computed in home_page() and asserted through the render context.
+# It now lives here (home.py:151-198), fetched by home.js after first paint, so these three
+# assertions follow the logic rather than the route: same rules, new caller. The endpoint had
+# NO tests at all before this -- the split moved the code and left its coverage behind.
+
+
+def _call_home_metrics(module, app):
+    """/home/metrics is @login_required + @cors_required, unwrapped the same way the
+    /home/dashboard tests below unwrap the identical decorator pair."""
+    with app.test_request_context("/home/metrics"):
+        return module.home_metrics.__wrapped__.__wrapped__().get_json()
+
+
+def test_home_metrics_top_reasons_pct_uses_reason_total_not_grand_total_of_all_facets(route_app):
     """reason_facets holds ONLY the "reason" pane's counts (already extracted from
     pane_counts before top_reasons is built) -- percentages must be computed against the
     sum of those reason totals, not accidentally against some other facet's total."""
     module, client, instances_utils, app = route_app
     _stub_home_aggregates(instances_utils)
-    instances_utils.get_bans.return_value = []
-    client.get_services.return_value = []
-    client.get_metadata.return_value = {}
-    client.get_jobs.return_value = {}
     client.get_metrics_requests.return_value = {
         "pane_counts": {
             "reason": {"modsecurity": {"total": 3, "count": 3}},
             "country": {"US": {"total": 100, "count": 100}},
         }
     }
-    monkeypatch.setattr(module, "current_user", SimpleNamespace(totp_secret=None))
-    captured = _render_and_capture(module, monkeypatch)
 
-    with app.test_request_context("/home"):
-        module.home_page.__wrapped__()
-
-    assert captured["top_reasons"] == [{"reason": "modsecurity", "count": 3, "pct": 100.0}]
+    assert _call_home_metrics(module, app)["top_reasons"] == [{"reason": "modsecurity", "count": 3, "pct": 100.0}]
 
 
-def test_home_page_top_reasons_limited_to_five_by_count_desc(route_app, monkeypatch):
+def test_home_metrics_top_reasons_limited_to_five_by_count_desc(route_app):
     module, client, instances_utils, app = route_app
     _stub_home_aggregates(instances_utils)
-    instances_utils.get_bans.return_value = []
-    client.get_services.return_value = []
-    client.get_metadata.return_value = {}
-    client.get_jobs.return_value = {}
     client.get_metrics_requests.return_value = {"pane_counts": {"reason": {f"reason{i}": {"total": i, "count": i} for i in range(1, 8)}}}
-    monkeypatch.setattr(module, "current_user", SimpleNamespace(totp_secret=None))
-    captured = _render_and_capture(module, monkeypatch)
 
-    with app.test_request_context("/home"):
-        module.home_page.__wrapped__()
+    payload = _call_home_metrics(module, app)
 
-    assert [row["reason"] for row in captured["top_reasons"]] == ["reason7", "reason6", "reason5", "reason4", "reason3"]
+    assert [row["reason"] for row in payload["top_reasons"]] == ["reason7", "reason6", "reason5", "reason4", "reason3"]
+
+
+def test_home_metrics_degrades_to_empty_top_reasons_when_the_facet_api_fails(route_app):
+    """The facet call has its own try/except: a metrics outage empties this one field rather
+    than erroring the dashboard. Asserted here because home_page() no longer calls it at all,
+    which made the equivalent assertion in the home_page failure test vacuous."""
+    module, client, instances_utils, app = route_app
+    _stub_home_aggregates(instances_utils)
+    client.get_metrics_requests.side_effect = module.ApiClientError("metrics down")
+
+    assert _call_home_metrics(module, app)["top_reasons"] == []
+
+
+def test_home_metrics_degrades_to_an_empty_payload_when_the_aggregation_raises(route_app):
+    """The 7-day aggregation is wrapped in a bare `except Exception` (home.py:163-167) so a
+    Redis failure returns an empty 200 payload, not a 500 -- the chart containers are already
+    on the page and would otherwise sit spinning forever."""
+    module, client, instances_utils, app = route_app
+    _stub_home_aggregates(instances_utils)
+    instances_utils.get_home_aggregates.side_effect = Exception("redis unreachable")
+    client.get_metrics_requests.return_value = {}
+
+    payload = _call_home_metrics(module, app)
+
+    assert payload["status"] == "success"
+    assert payload["request_countries"] == {}
+    assert payload["request_ips"] == {}
+    assert payload["blocked_unique_ips"] == 0
+    assert payload["time_buckets"] == {}
+    assert payload["countries_count"] == 0
 
 
 # ── POST /home/dashboard -- mirrors reports_dashboard's start/end/bucket parsing and
