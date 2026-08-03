@@ -6,7 +6,11 @@ import pytest
 SOURCE = Path(__file__).resolve().parents[3] / "src" / "common" / "core" / "jobs" / "jobs" / "push-configs.py"
 
 
+WARNINGS = []
+
+
 def _load_cache_functions(cache_path, failover_path):
+    WARNINGS.clear()
     tree = ast.parse(SOURCE.read_text())
     names = {"RETIRED_CACHE_ROWS", "RETIRED_CACHE_PATHS"}
     body = [
@@ -22,6 +26,9 @@ def _load_cache_functions(cache_path, failover_path):
 
         def error(self, _message):
             pass
+
+        def warning(self, message):
+            WARNINGS.append(message)
 
     namespace = {
         "BytesIO": __import__("io").BytesIO,
@@ -95,13 +102,52 @@ def test_retired_certificate_caches_are_deleted_and_never_materialized(tmp_path)
     assert source.index("_purge_retired_caches(db)") < source.index("snapshot = _snapshot_failover()")
 
 
-def test_retired_certificate_cache_db_failure_is_fatal(tmp_path):
+def test_retired_certificate_cache_db_failure_is_not_fatal(tmp_path):
+    """A row that will not delete must not cost the fleet its configuration.
+
+    This asserted `pytest.raises(RuntimeError)` until 2026-08-03. The raise ran before any instance
+    was contacted, so one transient `(1146, "Table 'db.bw_jobs_cache' doesn't exist")` on a freshly
+    forked Celery child aborted the entire push and left every instance serving the old
+    configuration. `_materialize_caches` skips every RETIRED_CACHE_ROWS entry, so a surviving row
+    never reaches disk nor an instance: it is worth a warning, not a dead push.
+    """
+
     class Database:
-        @staticmethod
-        def delete_job_cache(_file_name, *, job_name):
+        def __init__(self):
+            self.calls = []
+
+        def delete_job_cache(self, file_name, *, job_name):
+            self.calls.append((job_name, file_name))
             return f"{job_name} database busy"
 
     purge, _ = _load_cache_functions(tmp_path / "cache", tmp_path / "failover")
+    db = Database()
 
-    with pytest.raises(RuntimeError, match="Failed to purge retired caches from the database"):
+    assert purge(db) is None
+    # Every row is still attempted -- one failing delete must not short-circuit the others.
+    assert len(db.calls) == 6
+    assert WARNINGS, "a swallowed purge failure must still be reported"
+
+
+def test_an_undeletable_retired_key_file_still_aborts_the_push(tmp_path, monkeypatch):
+    """The asymmetry with the test above is deliberate, and it is the security-relevant half.
+
+    Everything left under CACHE_PATH once this returns is copied into the failover snapshot
+    (`_snapshot_failover`) and shipped to every instance (`_push_all`), and the retired entries
+    include `api-server-cert.key` and `default-server-cert.key`. Aborting the push beats
+    redistributing retired private keys, so an unlink failure must keep propagating.
+    """
+
+    def unlink_denied(self, missing_ok=False):
+        raise PermissionError(13, "Permission denied")
+
+    monkeypatch.setattr(Path, "unlink", unlink_denied)
+    purge, _ = _load_cache_functions(tmp_path / "cache", tmp_path / "failover")
+
+    class Database:
+        @staticmethod
+        def delete_job_cache(_file_name, *, job_name):
+            return ""
+
+    with pytest.raises(PermissionError):
         purge(Database())

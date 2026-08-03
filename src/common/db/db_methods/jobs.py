@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from contextlib import suppress
 from datetime import datetime
 from sys import argv
 from typing import Any, Dict, List, Optional, Union
@@ -56,11 +57,21 @@ class DatabaseJobsMixin(DatabaseMixinBase):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.execute(delete(Jobs_cache).filter_by(**filters), execution_options={"synchronize_session": False})
-
             try:
+                # The DELETE belongs inside the try, not just the COMMIT. This method documents a
+                # string return, and every caller reads it that way -- api/routers/cache.py:152
+                # aggregates it into a per-file error list. A statement-level failure (missing
+                # table, dead connection) raised straight past all of them: the API purge 500s the
+                # whole batch instead of reporting one file, and push-configs aborted the entire
+                # configuration push over a cache row.
+                session.execute(delete(Jobs_cache).filter_by(**filters), execution_options={"synchronize_session": False})
                 session.commit()
             except BaseException as e:
+                # Swallowing the error here means _db_session never sees it and never rolls back,
+                # and it yields a SCOPED session whose failed transaction would then poison every
+                # later query made through it. Roll back or the next caller pays for this one.
+                with suppress(Exception):
+                    session.rollback()
                 return str(e)
 
         return ""

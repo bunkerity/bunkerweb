@@ -227,6 +227,25 @@ def _materialize_plugins(db: Database, target: Path, *, pro: bool) -> None:
 
 
 def _purge_retired_caches(db: Database) -> None:
+    """Drop the cache rows and files left behind by PREVIOUS versions.
+
+    The two failure modes are deliberately NOT treated the same.
+
+    A ROW that will not delete is a non-event, so it only warns. `_materialize_caches` skips every
+    RETIRED_CACHE_ROWS entry, so a surviving row never reaches disk and never reaches an instance.
+    This used to raise, and it cost the fleet its configuration once: a single transient
+    `(1146, "Table 'db.bw_jobs_cache' doesn't exist")` on a freshly forked Celery child came out of
+    here, and since this runs before any instance is contacted, every instance carried on serving
+    the previous configuration -- to protect a row whose only cost is disk. Note this does NOT make
+    the push survive a structurally missing `bw_jobs_cache`: `_materialize_caches` reads that same
+    table a few lines below and that read is load-bearing.
+
+    A FILE that will not delete stays fatal, and that is the point of the asymmetry. The retired
+    entries include `api-server-cert.key` and `default-server-cert.key`, and whatever is still
+    under CACHE_PATH after this point gets copied into the failover snapshot (`_snapshot_failover`)
+    and pushed to every instance (`_push_all`). Aborting beats redistributing retired private keys,
+    so no exception is caught below.
+    """
     errors = []
     for job_name, file_name in RETIRED_CACHE_ROWS:
         error = db.delete_job_cache(file_name, job_name=job_name)
@@ -241,7 +260,7 @@ def _purge_retired_caches(db: Database) -> None:
             cache_root.joinpath(plugin_id, file_name).unlink(missing_ok=True)
 
     if errors:
-        raise RuntimeError(f"Failed to purge retired caches from the database: {'; '.join(errors)}")
+        LOGGER.warning(f"Could not purge some retired cache rows from the database: {'; '.join(errors)}")
 
 
 def _materialize_caches(db: Database) -> None:
