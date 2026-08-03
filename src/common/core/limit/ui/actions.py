@@ -26,7 +26,7 @@ def pre_render(**kwargs):
         metrics = kwargs["bw_instances_utils"].get_metrics("limit")
         ret["counter_limited_global"]["value"] = int(metrics.get("counter_limited_global", 0))
         format_data = [
-            {"URL": f"/{key.split('/', 1)[1] if '/' in key else ''}", "count": int(value)}
+            {"URL": key.replace("counter_limited_uri_", "", 1) or "/", "count": int(value)}
             for key, value in metrics.items()
             if key.startswith("counter_limited_uri_")
         ]

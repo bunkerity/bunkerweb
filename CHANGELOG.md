@@ -30,6 +30,7 @@
 - [BUGFIX] `ui`: serve `/favicon.ico`; the 404 counted toward the badbehavior threshold and could ban an administrator out of the web UI on default settings. (Refs #3759)
 - [BUGFIX] `linux`: commands dropped to the nginx user get a writable `HOME` instead of root's, which made SSL PostgreSQL connections fail on an unreadable `/root/.postgresql/postgresql.crt`. (Fixes #3354)
 - [BUGFIX] `ui`: stopping the temporary setup web UI no longer raises a `TypeError` in the signal handler. (Fixes #3345)
+- [BUGFIX] `metrics`: `badbehavior`, `authbasic` and `limit` no longer build metric keys from request data, where one cache slot per client IP, username or URI let a scan flood evict every other plugin's metrics. The `limit` top URLs chart now shows the matched rule instead of the raw URI. (Refs #3475)
 
 ## v1.6.14~rc2 - 2026/07/29
 

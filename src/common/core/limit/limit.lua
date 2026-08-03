@@ -214,9 +214,13 @@ function limit:access()
 	-- Check if URI is limited
 	local uri = self.ctx.bw.uri
 	local rate = self.rules["/"]
+	-- Keep the rule that matched : the counter below is keyed by it rather than by the raw
+	-- URI, whose values come from the client and are unbounded.
+	local matched_rule = "/"
 	for pattern, r in pairs(self.rules) do
 		if pattern ~= "/" and regex_match(uri, pattern) then
 			rate = r
+			matched_rule = pattern
 			break
 		end
 	end
@@ -232,7 +236,7 @@ function limit:access()
 	end
 
 	if limited then
-		self:set_metric("counters", "limited_uri_" .. uri, 1)
+		self:set_metric("counters", "limited_uri_" .. matched_rule, 1)
 		local security_mode = get_security_mode(self.ctx)
 		local msg
 		if security_mode == "block" then
