@@ -147,7 +147,8 @@ try:
         if not consistent:
             LOGGER.error(
                 "Skipping db cache update to avoid persisting an inconsistent Let's Encrypt state "
-                f"({reason}). The DB cache row is left untouched; investigate accounts/ recovery before the next renew."
+                f"({reason}). The DB cache row is left untouched. Renewals for the affected certificates fail until an "
+                "account exists for their CA; the next run repoints them automatically once one does."
             )
             # If certbot itself succeeded, the fresh certs are already on disk — signal a reload
             # (ret=1) so nginx picks them up. Persistence failure is logged separately above; do

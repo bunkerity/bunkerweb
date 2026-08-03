@@ -49,6 +49,7 @@ from letsencrypt_utils import (
     ZEROSSL_BOT_SCRIPT,
     attach_job_log_file,
     build_certbot_env,
+    detect_orphan_renewals,
     extract_provider,
     get_expected_acme_directory,
     le_cache_write_lock,
@@ -630,6 +631,12 @@ def _purge_stale_account(accounts_root: Path, account_id: str) -> None:
     Walks for the `<account_id>/regr.json` under accounts_root (CA-agnostic:
     LE 2-level, ZeroSSL 3-level) and rmtree's its parent. Best-effort — failures
     are logged, not raised, so the retry still proceeds.
+
+    Certbot records the account id in every renewal conf it writes, and nothing here rewrites
+    those, so removing the directory strands each conf that names it: `certbot renew` then fails
+    AccountNotFound for that lineage. repoint_orphan_renewals moves them onto the replacement
+    account on the next job start. Name them here anyway, because otherwise the cause and the
+    symptom show up in different runs and look unrelated.
     """
     if not account_id or not accounts_root.is_dir():
         return
@@ -638,6 +645,12 @@ def _purge_stale_account(accounts_root: Path, account_id: str) -> None:
             if regr.parent.name == account_id:
                 LOGGER.warning(f"Purging stale ACME account {account_id} (server reports it no longer exists) so the next attempt re-registers.")
                 rmtree(regr.parent, ignore_errors=True)
+                stranded = sorted(orphan["cert_name"] for orphan in detect_orphan_renewals(accounts_root.parent) if orphan["account"] == account_id)
+                if stranded:
+                    LOGGER.warning(
+                        f"Renewal conf(s) {stranded} still reference ACME account {account_id}; they will be repointed at "
+                        "the replacement account on the next Let's Encrypt job run."
+                    )
     except OSError as e:
         LOGGER.error(f"Failed to purge stale account {account_id}: {e}")
 
@@ -1207,7 +1220,8 @@ try:
             if not consistent:
                 LOGGER.error(
                     "Skipping db cache update to avoid persisting an inconsistent Let's Encrypt state "
-                    f"({reason}). The DB cache row is left untouched; investigate accounts/ recovery before the next renew."
+                    f"({reason}). The DB cache row is left untouched. Renewals for the affected certificates fail until an "
+                    "account exists for their CA; the next run repoints them automatically once one does."
                 )
                 # If certbot itself succeeded, the fresh certs are already on disk — signal a reload
                 # (ret=1) so nginx picks them up. Persistence failure is logged separately above; do

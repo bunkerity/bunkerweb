@@ -20,6 +20,8 @@ from datetime import datetime, timezone
 from os.path import sep
 from pathlib import Path
 from shutil import move, rmtree
+from stat import S_IMODE
+from tempfile import mkstemp
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 # Shared sentinel: UI heal/delete and scheduler renew/new flock this path so the last writer
@@ -159,6 +161,143 @@ def detect_orphan_renewals(data_path: Path) -> List[Dict[str, str]]:
         if account_id and account_id not in on_disk_accounts:
             orphans.append({"cert_name": conf.stem, "account": account_id, "server": server})
     return orphans
+
+
+# Certbot maps an ACME server URL to a directory path under accounts/ by dropping the scheme and
+# turning every URL path segment into a directory segment. Mirrored here instead of imported from
+# the letsencrypt plugin: that plugin imports this module, so the dependency only runs one way.
+#
+# Certbot also lets a v2 server reuse a v1-era account tree (LE_REUSE_SERVERS in its constants),
+# recursing into the older path when the current one misses. Repointing has to follow that same
+# fallback, otherwise it fails to see accounts that certbot itself would happily load.
+_LE_REUSE_SERVER_PATHS = {
+    "acme-v02.api.letsencrypt.org/directory": "acme-v01.api.letsencrypt.org/directory",
+    "acme-staging-v02.api.letsencrypt.org/directory": "acme-staging.api.letsencrypt.org/directory",
+}
+
+# Certbot opens all three of these when it loads an account. A directory missing any one of them
+# raises AccountStorageError, so it is not a usable repoint target even though the account-id scan
+# above (which keys off regr.json alone) counts it as present.
+_ACCOUNT_REQUIRED_FILES = ("regr.json", "private_key.json", "meta.json")
+
+
+def _server_subpath(server_url: str) -> str:
+    """Relative path under accounts/ that certbot derives from an ACME server URL."""
+    url = server_url.strip()
+    for scheme in ("https://", "http://"):
+        if url.startswith(scheme):
+            url = url.removeprefix(scheme)
+            break
+    return url.strip("/")
+
+
+def _usable_accounts_under(accounts_root: Path, subpath: str) -> List[Path]:
+    """Loadable account dirs directly under accounts/<subpath>/, newest registration first."""
+    if not subpath:
+        return []
+    scoped = accounts_root.joinpath(*subpath.split("/"))
+    usable: List[Tuple[float, str, Path]] = []
+    with suppress(OSError):
+        for account_dir in scoped.iterdir():
+            if not account_dir.is_dir() or not all(account_dir.joinpath(name).is_file() for name in _ACCOUNT_REQUIRED_FILES):
+                continue
+            mtime = 0.0
+            with suppress(OSError):
+                mtime = account_dir.stat().st_mtime
+            usable.append((mtime, account_dir.name, account_dir))
+    # Newest first mirrors how the issuance path picks an account, so a repointed conf and the next
+    # `--account` handed to certbot converge on the same one instead of splitting the tree in two.
+    # The name is a tiebreak only, to keep the choice stable when mtimes collide.
+    return [entry[2] for entry in sorted(usable, reverse=True)]
+
+
+def _rewrite_account_reference(conf: Path, old_account: str, new_account: str) -> bool:
+    """Swap the `account` line of a renewal conf, preserving mode. Returns True if rewritten."""
+    try:
+        original = conf.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    lines = original.splitlines(keepends=True)
+    changed = False
+    for index, line in enumerate(lines):
+        key, sep_char, value = line.partition("=")
+        if sep_char and key.strip() == "account" and value.strip() == old_account:
+            # Safe as a plain replace: the key and the exact value are already matched, so the
+            # only occurrence on this line is the id itself. Keeps spacing and line ending intact.
+            lines[index] = line.replace(old_account, new_account, 1)
+            changed = True
+    if not changed:
+        return False
+
+    # Rename into place so a scheduler crash mid-write can never leave certbot a truncated conf.
+    fd, tmp_name = mkstemp(dir=conf.parent.as_posix(), prefix=f".{conf.name}.", suffix=".tmp")
+    tmp_path = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write("".join(lines))
+        with suppress(OSError):
+            tmp_path.chmod(S_IMODE(conf.lstat().st_mode))
+        tmp_path.replace(conf)
+    except OSError:
+        with suppress(OSError):
+            tmp_path.unlink()
+        return False
+    return True
+
+
+def repoint_orphan_renewals(data_path: Path, logger=None) -> List[str]:
+    """Repoint renewal confs whose ACME account is gone at an account that still exists.
+
+    An account id is only a directory name. Certbot recomputes the id from the key it loads and
+    never checks it against the directory that key came from, so rewriting the reference restores
+    renewals for zero ACME traffic. Deleting the lineage instead, which is what the UI heal does,
+    forces a fresh order per certificate and spends the duplicate-certificate budget.
+
+    Candidates are scoped to the CA the conf already names, plus certbot's own v1 fallback, so a
+    production account can never be substituted into a staging lineage or vice versa. A conf with
+    no `server` is left alone rather than guessed at. Returns the cert names rewritten.
+    """
+    renewal_dir = data_path.joinpath("renewal")
+    accounts_root = data_path.joinpath("accounts")
+    repointed: List[str] = []
+
+    for orphan in detect_orphan_renewals(data_path):
+        cert_name, missing_account, server = orphan["cert_name"], orphan["account"], orphan["server"]
+        conf = renewal_dir.joinpath(f"{cert_name}.conf")
+
+        subpath = _server_subpath(server)
+        if not subpath:
+            if logger is not None:
+                logger.warning(
+                    f"Renewal conf '{cert_name}' references missing ACME account {missing_account} but names no server; "
+                    "leaving it alone, since guessing a CA could bind it to the wrong one."
+                )
+            continue
+
+        searched = [subpath]
+        candidates = _usable_accounts_under(accounts_root, subpath)
+        fallback = _LE_REUSE_SERVER_PATHS.get(subpath)
+        if not candidates and fallback:
+            searched.append(fallback)
+            candidates = _usable_accounts_under(accounts_root, fallback)
+
+        if not candidates:
+            if logger is not None:
+                logger.error(
+                    f"Renewal conf '{cert_name}' references missing ACME account {missing_account} and no usable "
+                    f"replacement is registered for {server} (searched accounts/{', accounts/'.join(searched)}). "
+                    "Renewals for it keep failing until an account for that CA exists."
+                )
+            continue
+
+        replacement = candidates[0]
+        if _rewrite_account_reference(conf, missing_account, replacement.name):
+            repointed.append(cert_name)
+            if logger is not None:
+                logger.warning(f"Repointed renewal conf '{cert_name}' from missing ACME account {missing_account} to {replacement.name}.")
+
+    return repointed
 
 
 # Filesystem-safe cert name regex. Same character class certbot uses internally,

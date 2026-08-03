@@ -186,8 +186,15 @@ def extract_provider(
         if logger is not None:
             # Never log raw `ve`/`format_exc()`: pydantic v2's ValidationError stringification embeds
             # the raw input dict, which would leak the operator's DNS API token / secret key into the
-            # scheduler log. Log only the field locations and error types.
-            errors = [(".".join(str(part) for part in err["loc"]), err["type"]) for err in ve.errors()]
+            # scheduler log. The leak lives in `input` (the raw credential mapping) and in `ctx`
+            # (which carries the ValueError object), never in `msg` — so strip those structurally
+            # instead of by convention, and keep `msg`, the only field that says what is wrong.
+            # A model-level validator failure carries an empty `loc`, which is why this used to
+            # print `('', 'value_error')` and tell the operator nothing at all.
+            errors = [
+                (".".join(str(part) for part in err["loc"]) or "<credentials>", err["type"], err["msg"])
+                for err in ve.errors(include_url=False, include_context=False, include_input=False)
+            ]
             logger.error(f"[Service: {service}] Error while validating credentials, skipping generation: {errors}")
         return None
 
@@ -495,9 +502,11 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
 # re-exporting from a single module instead of maintaining parallel implementations.
 from letsencrypt_consistency import (  # noqa: E402,F401
     detect_broken_lineages,
+    detect_orphan_renewals,
     le_cache_write_lock,
     letsencrypt_cache_consistent,
     purge_lineage,
+    repoint_orphan_renewals,
     sanitize_le_cache,
 )
 
@@ -519,21 +528,36 @@ def _le_cache_checksum(job, file_name: str):
 
 
 def sanitize_and_persist(job, data_path: Path, logger) -> List[str]:
-    """Quarantine broken renewal lineages and persist the cleaned tree back to the DB cache.
+    """Repair the LE tree on disk and persist it back to the DB cache.
 
-    A broken lineage (see detect_broken_lineages) makes `certbot certificates`/`renew` fail to
-    parse, and because the whole etc/ tree is one DB cache blob restored on every job start, the
-    break reappears forever unless it is both removed AND written back. When something was
-    quarantined and the initial restore succeeded, re-cache immediately so the fix survives the
-    next restore. Returns the quarantined cert names.
+    Two repairs, both of which stick only if they are written back: a broken lineage (see
+    detect_broken_lineages) makes `certbot certificates`/`renew` fail to parse, and a renewal conf
+    naming a deleted ACME account makes every renewal fail AccountNotFound. Because the whole etc/
+    tree is one DB cache blob restored on every job start, either break reappears forever unless it
+    is both fixed AND written back — and where there is no blob to restore from, as on a Kubernetes
+    node whose cache volume outlives the database, the damage on disk is all there is.
+
+    Returns the quarantined cert names — that value gates the "no live certs" data-loss check in
+    the callers, so repointed confs deliberately do not count towards it.
     """
-    # Snapshot the cache-row checksum BEFORE sanitizing. Job.__init__ restored data_path OUTSIDE
+    # Snapshot the cache-row checksum BEFORE repairing. Job.__init__ restored data_path OUTSIDE
     # le_cache_write_lock, so a UI heal that rewrites the row after our restore must not be
     # clobbered by persisting our stale pre-heal snapshot (which would resurrect a healed orphan).
     file_name = f"folder:{data_path.as_posix()}.tgz"
     before = _le_cache_checksum(job, file_name)
+    repointed = repoint_orphan_renewals(data_path, logger)
     names = sanitize_le_cache(data_path, logger)
-    if names and getattr(job, "restore_ok", False):
+    # A repoint that only half-succeeded (some confs moved, others with no account to move to) is
+    # not worth a write on its own, so check before persisting for that reason alone. Deliberately
+    # not applied when a lineage was quarantined: that write has to happen regardless, or the
+    # quarantine does not survive the next restore and the same lineage is quarantined again every
+    # run, accumulating a timestamped copy each time.
+    if repointed and not names:
+        consistent, reason = letsencrypt_cache_consistent(data_path)
+        if not consistent:
+            logger.error(f"Repointed {len(repointed)} renewal conf(s) but the tree is still inconsistent ({reason}); not persisting yet.")
+            return names
+    if (names or repointed) and getattr(job, "restore_ok", False):
         try:
             with le_cache_write_lock():
                 # Re-read under the lock: if the row changed since our restore, our tree is stale.

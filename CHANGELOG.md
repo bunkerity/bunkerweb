@@ -31,6 +31,8 @@
 - [BUGFIX] `linux`: commands dropped to the nginx user get a writable `HOME` instead of root's, which made SSL PostgreSQL connections fail on an unreadable `/root/.postgresql/postgresql.crt`. (Fixes #3354)
 - [BUGFIX] `ui`: stopping the temporary setup web UI no longer raises a `TypeError` in the signal handler. (Fixes #3345)
 - [BUGFIX] `metrics`: `badbehavior`, `authbasic` and `limit` no longer build metric keys from request data, where one cache slot per client IP, username or URI let a scan flood evict every other plugin's metrics. The `limit` top URLs chart now shows the matched rule instead of the raw URI. (Refs #3475)
+- [BUGFIX] `letsencrypt`: renewal configurations pointing at a removed ACME account are moved to a surviving account of the same CA, instead of failing every renewal with `AccountNotFound`. No certificate is re-issued. (Fixes #3783)
+- [BUGFIX] `letsencrypt`: DNS credential errors name the missing setting instead of logging `[('', 'value_error')]`. (Refs #3783)
 
 ## v1.6.14~rc2 - 2026/07/29
 
