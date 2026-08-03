@@ -19,6 +19,19 @@ local date = os.date
 local encode = cjson.encode
 local decode = cjson.decode
 
+local function limit_global_delay(rate_time)
+	if rate_time == "s" then
+		return 1
+	elseif rate_time == "m" then
+		return 60
+	elseif rate_time == "h" then
+		return 3600
+	elseif rate_time == "d" then
+		return 86400
+	end
+	return 1
+end
+
 local limit_req_timestamps = function(rate_max, rate_time, timestamps)
 	-- Compute new timestamps
 	local updated = false
@@ -292,7 +305,7 @@ function limit:limit_req(rate_max, rate_time)
 			local ok, err = self.datastore:set_with_retries(
 				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
 				encode(timestamps),
-				delay
+				limit_global_delay(rate_time)
 			)
 			if not ok then
 				return nil, "can't update timestamps : " .. err
@@ -412,19 +425,6 @@ function limit:limit_req_redis(rate_max, rate_time)
 	-- Return timestamps
 	self.clusterstore:close()
 	return timestamps, "success"
-end
-
-local function limit_global_delay(rate_time)
-	if rate_time == "s" then
-		return 1
-	elseif rate_time == "m" then
-		return 60
-	elseif rate_time == "h" then
-		return 3600
-	elseif rate_time == "d" then
-		return 86400
-	end
-	return 1
 end
 
 -- Global (aggregate, per-service) rate limit : fixed-window counter, not the timestamp

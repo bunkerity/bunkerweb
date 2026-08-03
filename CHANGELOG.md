@@ -35,6 +35,7 @@
 - [BUGFIX] `letsencrypt`: DNS credential errors name the missing setting instead of logging `[('', 'value_error')]`. (Refs #3783)
 - [BUGFIX] `letsencrypt`: certbot output is logged in full instead of being cut short whenever certbot writes faster than the job reads. The last lines were the ones lost, which hid the failure reason and could skip the stale-account recovery those lines trigger. (Refs #3783)
 - [BUGFIX] `letsencrypt`: a certbot renewal that stops responding is now killed after 15 minutes. The timeout existed but could never fire, so the job stayed blocked until the container was restarted.
+- [BUGFIX] `limit`: the local copy of the rate-limit counters written when Redis is enabled now expires with its window instead of never, where one permanent entry per client and URL filled the shared memory zone and evicted other plugins' data.
 
 ## v1.6.14~rc2 - 2026/07/29
 
