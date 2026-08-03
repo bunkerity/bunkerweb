@@ -1,0 +1,1163 @@
+/* ============================================================================
+   bw-flow — the rule-ladder pattern for the security workflow editor.
+
+   Ported from the design kit (.claude/BunkerWeb Design System/ui_kits/admin/
+   flow.css + components/rule-flow.js). Kit tokens mapped onto the bridge
+   overrides.css already ships, same mapping the home page port uses:
+     kit --shadow-sm  -> --bw-shadow-sm      kit --font-mono -> --font-courier-prime
+     kit --bw-bg-body -> --bw-bg-subtle      kit --font-body -> inherit
+     kit :root[data-theme="dark"] -> [data-bs-theme="dark"]  (the attr this app toggles)
+   The kit repeats every accent rule in a dark block because it carries a
+   separate --bw-theme token. Here one local --wf-accent carries it instead, so
+   the dark section only holds what is genuinely a different look rather than a
+   different accent.
+
+   A workflow is an ORDERED list of rules evaluated top to bottom; the first
+   rule that matches runs its single action and stops everything below it. The
+   pattern therefore has exactly one spatial axis: vertical position = priority.
+   No free positioning, no branching, no merge.
+
+   Structure:
+     .bw-flow                    the ladder
+       .bw-flow-item               rail gutter + card, one per step
+         .bw-flow-rail               vertical line + order marker
+         .bw-flow-node               terminal / rule card
+       .bw-flow-link               labelled fall-through connector
+   ============================================================================ */
+
+.bw-flow {
+  --rail: 46px;
+  --flow-line: var(--bw-border);
+  --wf-accent: var(--bs-primary);
+  display: flex;
+  flex-direction: column;
+}
+[data-bs-theme="dark"] .bw-flow {
+  --flow-line: color-mix(in srgb, var(--wf-accent) 30%, transparent);
+  /* The navy --bs-primary disappears on a dark card; this is the same light
+     blue the home page already uses for dark-mode accents. */
+  --wf-accent: #82b8db;
+}
+
+.bw-flow-item {
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  align-items: stretch;
+}
+
+/* ---------- rail ---------- */
+.bw-flow-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.bw-flow-rail::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--flow-line);
+}
+.bw-flow-item:first-child .bw-flow-rail::before {
+  top: 22px;
+}
+.bw-flow-item:last-child .bw-flow-rail::before {
+  bottom: 22px;
+}
+.bw-flow-mark {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--bs-primary);
+  color: #fff;
+  border: 0;
+  font-family: var(--font-courier-prime);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px var(--bw-bg-card);
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+[data-bs-theme="dark"] .bw-flow-mark {
+  background: var(--bs-secondary);
+}
+.bw-flow-mark:hover {
+  background: var(--bs-bw-green);
+}
+.bw-flow-mark:focus-visible {
+  outline: 0;
+  box-shadow:
+    0 0 0 4px var(--bw-bg-card),
+    0 0 0 7px color-mix(in srgb, var(--wf-accent) 25%, transparent);
+}
+.bw-flow-mark[disabled] {
+  cursor: default;
+  background: var(--bw-fg-4);
+}
+.bw-flow-mark.is-off {
+  background: var(--bw-bg-card);
+  color: var(--bw-fg-3);
+  border: 2px dashed var(--bw-border);
+}
+.bw-flow-dot {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bw-bg-card);
+  border: 2px solid var(--flow-line);
+  box-shadow: 0 0 0 4px var(--bw-bg-card);
+}
+.bw-flow-dot.is-end {
+  border-color: var(--bw-fg-4);
+  background: var(--bw-fg-4);
+}
+
+/* ---------- connector between steps ---------- */
+.bw-flow-link {
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  min-height: 26px;
+}
+.bw-flow-link-line {
+  position: relative;
+}
+.bw-flow-link-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--flow-line);
+}
+.bw-flow-link-lbl {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--bw-fg-3);
+  padding: 2px 0 2px 2px;
+}
+.bw-flow-link-lbl .bx {
+  font-size: 13px;
+}
+
+/* ---------- node cards ---------- */
+.bw-flow-node {
+  background: var(--bw-bg-card);
+  border: 1px solid color-mix(in srgb, var(--wf-accent) 12%, transparent);
+  border-radius: 12px;
+  box-shadow: var(--bw-shadow-sm);
+  margin: 4px 0;
+  overflow: hidden;
+}
+[data-bs-theme="dark"] .bw-flow-node,
+[data-bs-theme="dark"] .bw-flow-terminal {
+  border-color: color-mix(in srgb, var(--wf-accent) 22%, transparent);
+}
+.bw-flow-terminal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--wf-accent) 4%, var(--bw-bg-card));
+  border: 1px solid color-mix(in srgb, var(--wf-accent) 12%, transparent);
+  border-radius: 12px;
+  margin: 4px 0;
+}
+[data-bs-theme="dark"] .bw-flow-terminal {
+  background: color-mix(in srgb, var(--wf-accent) 7%, var(--bw-bg-card));
+}
+.bw-flow-terminal-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--bs-primary);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+[data-bs-theme="dark"] .bw-flow-terminal-ic {
+  background: var(--bs-secondary);
+}
+.bw-flow-terminal-ic .bx {
+  font-size: 17px;
+}
+.bw-flow-terminal.is-end {
+  background: var(--bw-bg-card);
+  border-style: dashed;
+}
+.bw-flow-terminal.is-end .bw-flow-terminal-ic {
+  background: transparent;
+  color: var(--bw-fg-3);
+  border: 1px dashed var(--bw-border);
+}
+.bw-flow-terminal strong {
+  display: block;
+  font-size: 13.5px;
+  color: var(--wf-accent);
+}
+.bw-flow-terminal small {
+  display: block;
+  font-size: 12px;
+  color: var(--bw-fg-3);
+}
+
+/* rule head */
+.bw-flow-rule.is-open {
+  border-color: color-mix(in srgb, var(--wf-accent) 32%, transparent);
+}
+[data-bs-theme="dark"] .bw-flow-rule.is-open {
+  border-color: color-mix(in srgb, var(--wf-accent) 45%, transparent);
+}
+.bw-flow-rule.is-off {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--bw-fg-4) 6%, var(--bw-bg-card));
+}
+.bw-flow-rule.is-off .bw-flow-head-name {
+  color: var(--bw-fg-3);
+}
+.bw-flow-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+}
+.bw-flow-head-main {
+  flex: 1;
+  min-width: 0;
+}
+.bw-flow-head-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--wf-accent);
+}
+.bw-flow-head-name .bw-flow-untitled {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--bw-fg-3);
+}
+.bw-flow-head-sum {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--bw-fg-2);
+  text-wrap: pretty;
+}
+.bw-flow-head-sum.is-pending {
+  color: var(--bw-fg-4);
+  font-style: italic;
+}
+.bw-flow-rule.is-open .bw-flow-head-sum {
+  display: none;
+}
+.bw-flow-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.bw-flow-iconbtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--bw-fg-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.bw-flow-iconbtn:hover:not([disabled]) {
+  background: color-mix(in srgb, var(--wf-accent) 10%, transparent);
+  color: var(--wf-accent);
+}
+.bw-flow-iconbtn[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+.bw-flow-iconbtn .bx {
+  font-size: 16px;
+}
+.bw-flow-rule.is-open .bw-flow-caret {
+  transform: rotate(180deg);
+}
+.bw-flow-caret {
+  transition: transform 0.18s ease-in-out;
+}
+.bw-flow-name-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--wf-accent);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+.bw-flow-name-input:hover:not([disabled]) {
+  border-color: var(--bw-border);
+}
+.bw-flow-name-input:focus-visible {
+  outline: 0;
+  border-color: var(--wf-accent);
+  background: var(--bw-bg-card);
+}
+
+/* action badge */
+.bw-flow-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+}
+.bw-flow-act .bx {
+  font-size: 13px;
+}
+.bw-flow-act .p {
+  font-family: var(--font-courier-prime);
+  font-size: 11px;
+  opacity: 0.85;
+}
+.bw-flow-act.t-block {
+  background: color-mix(in srgb, var(--bs-danger) 14%, transparent);
+  color: color-mix(in srgb, var(--bs-danger) 78%, #000);
+}
+.bw-flow-act.t-redirect {
+  background: color-mix(in srgb, var(--bs-bw-blue) 12%, transparent);
+  color: var(--bs-bw-blue);
+}
+.bw-flow-act.t-challenge {
+  background: color-mix(in srgb, var(--bs-warning) 20%, transparent);
+  color: color-mix(in srgb, var(--bs-warning) 55%, #000);
+}
+.bw-flow-act.is-off {
+  background: transparent;
+  border-color: var(--bw-border);
+  color: var(--bw-fg-3);
+}
+[data-bs-theme="dark"] .bw-flow-act.t-block {
+  background: color-mix(in srgb, var(--bs-danger) 22%, transparent);
+  color: color-mix(in srgb, var(--bs-danger) 58%, #fff);
+}
+[data-bs-theme="dark"] .bw-flow-act.t-redirect {
+  background: color-mix(in srgb, var(--wf-accent) 16%, transparent);
+  color: var(--wf-accent);
+}
+[data-bs-theme="dark"] .bw-flow-act.t-challenge {
+  background: color-mix(in srgb, var(--bs-warning) 20%, transparent);
+  color: var(--bs-warning);
+}
+
+/* rule outcome footer — the semantics, always visible */
+.bw-flow-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--bw-border);
+  font-size: 11.5px;
+  color: var(--bw-fg-2);
+  background: color-mix(in srgb, var(--wf-accent) 2%, transparent);
+}
+[data-bs-theme="dark"] .bw-flow-foot {
+  background: color-mix(in srgb, var(--wf-accent) 5%, transparent);
+}
+.bw-flow-foot .bx {
+  font-size: 14px;
+  color: var(--wf-accent);
+}
+.bw-flow-foot strong {
+  font-weight: 600;
+}
+.bw-flow-rule.is-off .bw-flow-foot {
+  color: var(--bw-fg-3);
+}
+.bw-flow-rule.is-off .bw-flow-foot .bx {
+  color: var(--bw-fg-4);
+}
+
+/* ---------- rule body: If / Then clauses ---------- */
+.bw-flow-body {
+  border-top: 1px solid var(--bw-border);
+}
+.bw-flow-clause {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 12px;
+  padding: 14px;
+}
+.bw-flow-clause + .bw-flow-clause {
+  border-top: 1px dashed var(--bw-border);
+}
+.bw-flow-clause-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bw-fg-3);
+  padding-top: 7px;
+}
+.bw-flow-clause.is-then .bw-flow-clause-lbl {
+  color: var(--wf-accent);
+}
+.bw-flow-clause-main {
+  min-width: 0;
+}
+
+/* ---------- condition tree ---------- */
+.bw-flow-group {
+  border: 1px solid var(--bw-border);
+  border-radius: 10px;
+  padding: 8px 10px 10px;
+  background: color-mix(in srgb, var(--wf-accent) 2%, var(--bw-bg-card));
+}
+.bw-flow-group[data-depth="2"] {
+  background: color-mix(in srgb, var(--wf-accent) 4%, var(--bw-bg-card));
+}
+.bw-flow-group[data-depth="3"] {
+  background: color-mix(in srgb, var(--wf-accent) 6%, var(--bw-bg-card));
+}
+.bw-flow-group[data-depth="4"] {
+  background: color-mix(in srgb, var(--wf-accent) 8%, var(--bw-bg-card));
+}
+.bw-flow-group[data-depth="5"] {
+  background: color-mix(in srgb, var(--wf-accent) 10%, var(--bw-bg-card));
+}
+[data-bs-theme="dark"] .bw-flow-group {
+  border-color: color-mix(in srgb, var(--wf-accent) 18%, transparent);
+  background: color-mix(in srgb, var(--wf-accent) 5%, var(--bw-bg-card));
+}
+[data-bs-theme="dark"] .bw-flow-group[data-depth="2"] {
+  background: color-mix(in srgb, var(--wf-accent) 9%, var(--bw-bg-card));
+}
+[data-bs-theme="dark"] .bw-flow-group[data-depth="3"] {
+  background: color-mix(in srgb, var(--wf-accent) 13%, var(--bw-bg-card));
+}
+[data-bs-theme="dark"] .bw-flow-group[data-depth="4"] {
+  background: color-mix(in srgb, var(--wf-accent) 17%, var(--bw-bg-card));
+}
+[data-bs-theme="dark"] .bw-flow-group[data-depth="5"] {
+  background: color-mix(in srgb, var(--wf-accent) 21%, var(--bw-bg-card));
+}
+.bw-flow-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bw-flow-group-meta {
+  font-size: 11px;
+  color: var(--bw-fg-3);
+}
+.bw-flow-op {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+.bw-flow-op .bx {
+  font-size: 12px;
+}
+.bw-flow-op.op-all {
+  background: var(--bs-primary);
+  color: #fff;
+}
+[data-bs-theme="dark"] .bw-flow-op.op-all {
+  background: var(--bs-secondary);
+}
+.bw-flow-op.op-any {
+  background: var(--bs-bw-blue);
+  color: #fff;
+}
+.bw-flow-op.op-not {
+  background: transparent;
+  color: var(--bs-danger);
+  border-color: color-mix(in srgb, var(--bs-danger) 45%, transparent);
+}
+[data-bs-theme="dark"] .bw-flow-op.op-not {
+  color: color-mix(in srgb, var(--bs-danger) 62%, #fff);
+  border-color: color-mix(in srgb, var(--bs-danger) 50%, transparent);
+}
+.bw-flow-op[disabled] {
+  cursor: default;
+  opacity: 0.75;
+}
+.bw-flow-kids {
+  position: relative;
+  margin: 8px 0 0 4px;
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bw-flow-kids::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -2px;
+  bottom: 13px;
+  width: 2px;
+  background: color-mix(in srgb, var(--wf-accent) 22%, transparent);
+  border-radius: 2px;
+}
+.bw-flow-kid {
+  position: relative;
+}
+.bw-flow-kid::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 15px;
+  width: 10px;
+  height: 2px;
+  background: color-mix(in srgb, var(--wf-accent) 22%, transparent);
+}
+[data-bs-theme="dark"] .bw-flow-kids::before,
+[data-bs-theme="dark"] .bw-flow-kid::before {
+  background: color-mix(in srgb, var(--wf-accent) 32%, transparent);
+}
+.bw-flow-join {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bw-fg-4);
+  margin-left: -6px;
+}
+
+/* predicate row */
+.bw-flow-pred {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  padding: 7px 9px;
+}
+.bw-flow-pred > .bw-flow-err {
+  grid-column: 1 / -1;
+}
+.bw-flow-pred-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.bw-flow-pred-type .bx {
+  font-size: 15px;
+  color: var(--bs-secondary);
+}
+/* Keyed on the class, never on the ancestor: the group predicate renders its kind picker
+   inside .bw-flow-vals rather than in the operator slot, and a descendant selector would
+   leave that one select unstyled — a light box on a dark card. */
+.bw-flow-pred-type-select {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wf-accent);
+  background: var(--bw-bg-card);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-family: inherit;
+}
+.bw-flow-pred-type-select:hover:not([disabled]) {
+  border-color: var(--bw-border);
+}
+.bw-flow-pred-op {
+  font-size: 11.5px;
+  color: var(--bw-fg-3);
+  flex-shrink: 0;
+}
+.bw-flow-pred-op-select {
+  font-size: 11.5px;
+  color: var(--bw-fg-2);
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 6px;
+  padding: 2px 5px;
+  font-family: inherit;
+}
+.bw-flow-pred-rm {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bw-fg-4);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.bw-flow-pred-rm:hover {
+  background: color-mix(in srgb, var(--bs-danger) 12%, transparent);
+  color: var(--bs-danger);
+}
+.bw-flow-pred-rm .bx {
+  font-size: 15px;
+}
+.bw-flow-vals {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.bw-flow-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-courier-prime);
+  font-size: 11.5px;
+  color: var(--wf-accent);
+  background: color-mix(in srgb, var(--wf-accent) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--wf-accent) 14%, transparent);
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+[data-bs-theme="dark"] .bw-flow-val {
+  background: color-mix(in srgb, var(--wf-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--wf-accent) 25%, transparent);
+}
+.bw-flow-val.is-regex {
+  border-color: color-mix(in srgb, var(--bs-warning) 55%, transparent);
+  background: color-mix(in srgb, var(--bs-warning) 12%, transparent);
+  color: color-mix(in srgb, var(--bs-warning) 50%, #000);
+}
+[data-bs-theme="dark"] .bw-flow-val.is-regex {
+  color: var(--bs-warning);
+  border-color: color-mix(in srgb, var(--bs-warning) 45%, transparent);
+  background: color-mix(in srgb, var(--bs-warning) 10%, transparent);
+}
+.bw-flow-val-rm {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+}
+.bw-flow-val-rm:hover {
+  opacity: 1;
+}
+.bw-flow-val-input {
+  font-family: var(--font-courier-prime);
+  font-size: 11.5px;
+  color: var(--wf-accent);
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 5px;
+  padding: 2px 7px;
+  /* Sized to its content rather than to the row: a URI or a group name is a value like any
+     other chip beside it, not a full-width form field. */
+  flex: 0 1 26rem;
+  min-width: 11rem;
+  max-width: 100%;
+}
+.bw-flow-val-input:focus-visible {
+  outline: 0;
+  border-color: var(--wf-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wf-accent) 12%, transparent);
+}
+.bw-flow-more {
+  border: 0;
+  background: transparent;
+  font-size: 11.5px;
+  color: var(--wf-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-family: inherit;
+}
+.bw-flow-more:hover {
+  color: var(--bs-bw-green);
+}
+.bw-flow-addrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.bw-flow-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px dashed var(--bw-border);
+  background: transparent;
+  color: var(--bw-fg-2);
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.bw-flow-add:hover:not([disabled]) {
+  border-color: var(--wf-accent);
+  color: var(--wf-accent);
+  border-style: solid;
+}
+.bw-flow-add[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- rate threshold (a match gate, never an action) ---------- */
+.bw-flow-gate {
+  position: relative;
+  margin-top: 8px;
+  border: 1px solid color-mix(in srgb, var(--bs-secondary) 40%, transparent);
+  border-radius: 10px;
+  padding: 9px 40px 9px 11px;
+  background: color-mix(in srgb, var(--bs-secondary) 5%, var(--bw-bg-card));
+}
+[data-bs-theme="dark"] .bw-flow-gate {
+  background: color-mix(in srgb, var(--wf-accent) 7%, var(--bw-bg-card));
+  border-color: color-mix(in srgb, var(--wf-accent) 28%, transparent);
+}
+.bw-flow-gate > .bw-flow-pred-rm {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.bw-flow-gate-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--bw-fg-1);
+}
+.bw-flow-gate-row .bx {
+  font-size: 15px;
+  color: var(--bs-secondary);
+}
+[data-bs-theme="dark"] .bw-flow-gate-row .bx {
+  color: var(--wf-accent);
+}
+.bw-flow-gate-num {
+  width: 74px;
+  font-family: var(--font-courier-prime);
+  font-size: 12.5px;
+  padding: 4px 7px;
+  border: 1px solid var(--bw-border);
+  border-radius: 6px;
+  background: var(--bw-bg-card);
+  color: var(--wf-accent);
+}
+.bw-flow-gate-num:focus-visible {
+  outline: 0;
+  border-color: var(--wf-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wf-accent) 12%, transparent);
+}
+.bw-flow-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--bw-fg-3);
+  border: 1px solid var(--bw-border);
+}
+.bw-flow-gate-help {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: var(--bw-fg-3);
+  line-height: 1.45;
+}
+
+/* ---------- action (exactly one, terminal) ---------- */
+.bw-flow-acts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+@media (max-width: 720px) {
+  .bw-flow-acts {
+    grid-template-columns: 1fr;
+  }
+}
+.bw-flow-pick {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  border: 1px solid var(--bw-border);
+  background: var(--bw-bg-card);
+  border-radius: 10px;
+  padding: 9px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.bw-flow-pick .bx {
+  font-size: 17px;
+  color: var(--bw-fg-3);
+  margin-top: 1px;
+}
+.bw-flow-pick b {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--bw-fg-1);
+}
+.bw-flow-pick span {
+  display: block;
+  font-size: 11px;
+  color: var(--bw-fg-3);
+  line-height: 1.4;
+}
+.bw-flow-pick:hover:not([disabled]) {
+  border-color: var(--wf-accent);
+}
+.bw-flow-pick[aria-checked="true"] {
+  border-color: var(--wf-accent);
+  background: color-mix(in srgb, var(--wf-accent) 6%, var(--bw-bg-card));
+}
+[data-bs-theme="dark"] .bw-flow-pick[aria-checked="true"] {
+  background: color-mix(in srgb, var(--wf-accent) 10%, var(--bw-bg-card));
+}
+.bw-flow-pick[aria-checked="true"] .bx,
+.bw-flow-pick[aria-checked="true"] b {
+  color: var(--wf-accent);
+}
+.bw-flow-pick[disabled] {
+  cursor: default;
+  opacity: 0.7;
+}
+.bw-flow-params {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bw-flow-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bw-flow-field > label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bw-fg-3);
+}
+.bw-flow-field input,
+.bw-flow-field select {
+  font-size: 12.5px;
+  padding: 5px 8px;
+  border: 1px solid var(--bw-border);
+  border-radius: 6px;
+  background: var(--bw-bg-card);
+  color: var(--bw-fg-1);
+  font-family: inherit;
+}
+.bw-flow-field input.mono {
+  font-family: var(--font-courier-prime);
+  color: var(--wf-accent);
+  min-width: 280px;
+}
+.bw-flow-field input:focus-visible,
+.bw-flow-field select:focus-visible {
+  outline: 0;
+  border-color: var(--wf-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wf-accent) 12%, transparent);
+}
+.bw-flow-terminalnote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--bw-fg-3);
+}
+.bw-flow-terminalnote .bx {
+  font-size: 14px;
+}
+
+/* ---------- validation ---------- */
+.bw-flow-invalid {
+  border-color: var(--bs-danger) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bs-danger) 14%, transparent);
+}
+.bw-flow-err {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--bs-danger);
+}
+[data-bs-theme="dark"] .bw-flow-err {
+  color: color-mix(in srgb, var(--bs-danger) 58%, #fff);
+}
+.bw-flow-err .bx {
+  font-size: 14px;
+  margin-top: 1px;
+}
+.bw-flow-flash {
+  animation: bwFlowFlash 1.4s ease-out 1;
+}
+@keyframes bwFlowFlash {
+  0%,
+  40% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--bs-danger) 30%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--bs-danger) 0%, transparent);
+  }
+}
+
+/* ---------- trace: hovering a rule shows what it shadows ---------- */
+.bw-flow.is-tracing .bw-flow-item.is-dead,
+.bw-flow.is-tracing .bw-flow-link.is-dead {
+  opacity: 0.34;
+}
+.bw-flow.is-tracing .bw-flow-item.is-dead .bw-flow-node {
+  box-shadow: none;
+}
+.bw-flow.is-tracing .bw-flow-item.is-above .bw-flow-rail::before,
+.bw-flow.is-tracing .bw-flow-link.is-above .bw-flow-link-line::before {
+  background: color-mix(in srgb, var(--wf-accent) 55%, transparent);
+}
+.bw-flow-item,
+.bw-flow-link {
+  transition: opacity 0.18s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bw-flow-caret,
+  .bw-flow-item,
+  .bw-flow-link,
+  .bw-flow-mark,
+  .bw-flow-pick {
+    transition: none;
+  }
+  .bw-flow-flash {
+    animation: none;
+  }
+}
+
+/* ---------- popovers: move-to-position + rule / condition menus ---------- */
+.bw-flow-menu {
+  position: absolute;
+  z-index: 1040;
+  min-width: 210px;
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px -12px
+    color-mix(in srgb, var(--bs-primary) 55%, transparent);
+  padding: 6px;
+}
+.bw-flow-menu-hd {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bw-fg-4);
+  padding: 5px 8px;
+}
+.bw-flow-menu button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--bw-fg-1);
+  padding: 7px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.bw-flow-menu button:hover:not([disabled]) {
+  background: color-mix(in srgb, var(--wf-accent) 8%, transparent);
+  color: var(--wf-accent);
+}
+[data-bs-theme="dark"] .bw-flow-menu button:hover:not([disabled]) {
+  background: color-mix(in srgb, var(--wf-accent) 12%, transparent);
+}
+.bw-flow-menu button[disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+.bw-flow-menu button.danger:hover {
+  background: color-mix(in srgb, var(--bs-danger) 10%, transparent);
+  color: var(--bs-danger);
+}
+.bw-flow-menu .sep {
+  height: 1px;
+  background: var(--bw-border);
+  margin: 5px 4px;
+}
+.bw-flow-menu .bx {
+  font-size: 16px;
+}
+.bw-flow-menu .n {
+  font-family: var(--font-courier-prime);
+  font-size: 11px;
+  color: var(--bw-fg-3);
+  margin-left: auto;
+}
+
+/* ---------- drag ---------- */
+.bw-flow-grip {
+  cursor: grab;
+  color: var(--bw-fg-4);
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  padding: 2px;
+}
+.bw-flow-grip:hover {
+  color: var(--wf-accent);
+}
+.bw-flow-item.is-dragging {
+  opacity: 0.5;
+}
+.bw-flow-item.is-dropbefore .bw-flow-node {
+  box-shadow: 0 -3px 0 0 var(--wf-accent);
+}
+.bw-flow-item.is-dropafter .bw-flow-node {
+  box-shadow: 0 3px 0 0 var(--wf-accent);
+}
+.bw-flow[data-readonly] .bw-flow-grip,
+.bw-flow[data-readonly] .bw-flow-mark {
+  cursor: default;
+}
+
+/* Read-only database: what is left is disabled, so it must also read as text. A control
+   that still looks like a control invites an edit the API will refuse. */
+.bw-flow[data-readonly] select,
+.bw-flow[data-readonly] input {
+  appearance: none;
+  background-image: none;
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--bw-fg-2);
+  padding-left: 0;
+  cursor: default;
+}
+
+/* ---------- page chrome around the ladder ---------- */
+.wf-canvas {
+  background: var(--bw-bg-subtle);
+  border-radius: 12px;
+  padding: 16px 20px 20px;
+}
+.wf-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--bw-fg-3);
+  padding: 10px 2px 0;
+}
+.wf-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.wf-legend .bx {
+  font-size: 14px;
+}
+.wf-cap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--bw-fg-3);
+  margin-top: 12px;
+  padding-left: 46px;
+}
+.wf-errors ol {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wf-err-jump {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+.wf-err-jump:hover {
+  text-decoration-color: currentColor;
+}
+.wf-err-path {
+  font-family: var(--font-courier-prime);
+  font-size: 11px;
+  opacity: 0.85;
+}
+.wf-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

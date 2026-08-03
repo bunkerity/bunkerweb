@@ -2387,6 +2387,14 @@
     "truncated": "Sadece ilk 500 ana sunucu görüntülenir. Tam sonucu elde etmek için API ile listeyi daraltın."
   },
   "workflows": {
+    "act_block": "Block",
+    "act_challenge": "Challenge",
+    "act_code": "Status",
+    "act_provider": "Antibot provider",
+    "act_redirect": "Redirect",
+    "act_status": "Deny status",
+    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
+    "act_url": "Destination URL",
     "action": "Sonra",
     "add_rule": "Kural ekle",
     "all": "Tümü",
@@ -2401,17 +2409,68 @@
     "empty_text": "Bir iş akışı, hizmetlere eklediğiniz kuralların sıralı bir listesidir: bir koşul ağacı, isteğe bağlı bir hız eşiği ve bir eylem — meydan okuma, engelle veya yönlendirme.",
     "empty_title": "Henüz hiç iş akışı yok",
     "enabled": "Enabled",
+    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
+    "entry_title": "Every request to an attached service",
+    "errors": {
+      "body": "Nothing is applied — the running policy is unchanged."
+    },
+    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
+    "exit_title": "No rule matched",
+    "gate": {
+      "and": "and only once the same client IP has made more than",
+      "chip": "match gate",
+      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+    },
+    "legend": {
+      "fall": "No match falls to the next rule",
+      "gate": "A rate threshold gates the match, it is not an action",
+      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
+      "stop": "A match runs one action and stops"
+    },
+    "link": {
+      "noMatch": "no match"
+    },
+    "menu": {
+      "bottom": "Run last",
+      "delete": "Delete rule",
+      "duplicate": "Duplicate below",
+      "toggle": "Disable rule",
+      "top": "Run first"
+    },
+    "move": {
+      "first": "Run first",
+      "last": "Run last"
+    },
     "new": "Yeni iş akışı",
     "no_rules": "Henüz hiç kural yok. Bu politikayı oluşturmaya başlamak için bir tane ekleyin.",
     "not_attached": "Eklendi değil",
     "order_help": "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir.",
     "readonly": "Veritabanı okumak için yalnızcadır. İş akışları incelenebilir, ancak değiştirilemez.",
+    "rule": {
+      "disabled": "Disabled",
+      "if": "If",
+      "onMatch": "If it matches",
+      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
+      "stopTail": ", evaluation stops here — no rule below is reached."
+    },
     "rules": "Kurallar",
     "search": "Ad veya açıklama arayın...",
     "threshold": "Sadece bir hızın üzerinde",
     "threshold_count": "İstekler",
     "threshold_window": "Her (saniye)",
-    "truncated": "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için API'i kullanın."
+    "tree": {
+      "addCondition": "Condition",
+      "addGroup": "Group",
+      "all": "All of",
+      "any": "Any of",
+      "empty": "Empty group — add a condition, it cannot be saved like this.",
+      "not": "None of",
+      "removeGroup": "Remove group"
+    },
+    "truncated": "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için API'i kullanın.",
+    "value": {
+      "add": "Value"
+    }
   },
   "request_path": {
     "client": "Müşteri",

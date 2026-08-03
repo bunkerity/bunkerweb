@@ -2387,6 +2387,14 @@
     "truncated": "فقط پہلے 500 آپ اسٹریم دکھائے جاتے ہیں۔ مکمل نتائج کے لیے API کے ذریعے فہرست کو محدود کریں۔"
   },
   "workflows": {
+    "act_block": "Block",
+    "act_challenge": "Challenge",
+    "act_code": "Status",
+    "act_provider": "Antibot provider",
+    "act_redirect": "Redirect",
+    "act_status": "Deny status",
+    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
+    "act_url": "Destination URL",
     "action": "پھر",
     "add_rule": "قواعد کو شامل کریں",
     "all": "سب",
@@ -2401,17 +2409,68 @@
     "empty_text": "ایک ورک فلو سروسز سے منسلک قوانین کا ایک ترتیب ہے: ایک شرط کا درخت، ایک اختیاری ریٹ کا حد، اور ایک عمل - چیلنج، بلاک یا ری ڈائریکٹ۔",
     "empty_title": "اب تک کوئی ورک فلو نہیں",
     "enabled": "Enabled",
+    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
+    "entry_title": "Every request to an attached service",
+    "errors": {
+      "body": "Nothing is applied — the running policy is unchanged."
+    },
+    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
+    "exit_title": "No rule matched",
+    "gate": {
+      "and": "and only once the same client IP has made more than",
+      "chip": "match gate",
+      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+    },
+    "legend": {
+      "fall": "No match falls to the next rule",
+      "gate": "A rate threshold gates the match, it is not an action",
+      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
+      "stop": "A match runs one action and stops"
+    },
+    "link": {
+      "noMatch": "no match"
+    },
+    "menu": {
+      "bottom": "Run last",
+      "delete": "Delete rule",
+      "duplicate": "Duplicate below",
+      "toggle": "Disable rule",
+      "top": "Run first"
+    },
+    "move": {
+      "first": "Run first",
+      "last": "Run last"
+    },
     "new": "نیا ورک فلو",
     "no_rules": "اب تک کوئی قانون نہیں. اس پالیسی بنانے کے لیے ایک شامل کریں.",
     "not_attached": "جوڑا نہیں گیا",
     "order_help": "قوانین ترتیب کے مطابق کاٹے جاتے ہیں اور پہلے جو ملا وہ جیتتا ہے۔ ایک ریٹ کا حد کے ساتھ ایک قانون صرف اس وقت ملا جب حد переви ہوتی ہے، اس لیے ایک کم حد ٹریفک کو پکڑ سکتی ہے۔",
     "readonly": "ڈیٹا بیسreadonly ہے۔ ورک فلو کا جائزہ لیا جا سکتا ہے لیکن تبدیل نہیں کیا جا سکتا۔",
+    "rule": {
+      "disabled": "Disabled",
+      "if": "If",
+      "onMatch": "If it matches",
+      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
+      "stopTail": ", evaluation stops here — no rule below is reached."
+    },
     "rules": "قوانین",
     "search": "نام یا وضاحت کی تلاش کریں...",
     "threshold": "فقط ریٹ کے اوپر",
     "threshold_count": "درخواستیں",
     "threshold_window": "(دקות)",
-    "truncated": "فقط پہلے 500 ورک فلو دکھائے جاتے ہیں۔ مکمل نتیجہ کے لیے API کے ذریعے فہرست کو محدود کریں۔"
+    "tree": {
+      "addCondition": "Condition",
+      "addGroup": "Group",
+      "all": "All of",
+      "any": "Any of",
+      "empty": "Empty group — add a condition, it cannot be saved like this.",
+      "not": "None of",
+      "removeGroup": "Remove group"
+    },
+    "truncated": "فقط پہلے 500 ورک فلو دکھائے جاتے ہیں۔ مکمل نتیجہ کے لیے API کے ذریعے فہرست کو محدود کریں۔",
+    "value": {
+      "add": "Value"
+    }
   },
   "request_path": {
     "client": "کلاینٹ",

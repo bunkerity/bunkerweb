@@ -1,15 +1,29 @@
-/* Security workflow rule editor.
+/* Security workflow rule editor — the bw-flow rule ladder.
  *
- * Ordered cards, not a canvas: a workflow is a list of rules evaluated top to bottom, and
- * the first effective match wins, so the vertical order on screen *is* the semantics.
+ * A workflow is an ORDERED list of rules evaluated top to bottom and the first effective
+ * match wins, so the vertical order on screen *is* the semantics. The ladder draws exactly
+ * that and nothing more: no canvas, no branching, no parallel path, no trigger — the
+ * evaluation engine has none of those, and drawing one would promise a capability that
+ * does not exist.
  *
- * The editor never decides what is valid. It serialises the cards into the canonical
+ * The editor never decides what is valid. It serialises the ladder into the canonical
  * definition and asks the API, which runs the same validator the database and the compiler
- * run — so "it validates here" means "it will save and it will compile".
+ * run — so "it validates here" means "it will save and it will compile". Error paths come
+ * back addressing one node (rules[2].condition.nodes[1].values[3]) and are painted onto
+ * that exact node.
+ *
+ * Two addressing schemes live side by side, each doing one job:
+ *   data-wf-node  the SCHEMA path — what the API's error paths address.
+ *   data-wf-key   a client-side node identity — what mutations act on, so nothing has to
+ *                 parse a path back into a tree.
+ *
+ * NOT is unary in the schema ({op:"not", node:{...}}), but reads best as a "None of" group.
+ * The view keeps a NOT group and serialises it as not(any(...)) — identical semantics, and
+ * it round-trips.
  *
  * PRO extension point: condition and action types come from window.BW_WORKFLOW_TYPES. A PRO
- * bundle pushes its own entries before DOMContentLoaded and gets them in the same selectors,
- * on the same page — no fork, no second editor.
+ * bundle pushes its own entries before DOMContentLoaded and gets them in the same menus, on
+ * the same page — no fork, no second editor.
  */
 (function () {
   "use strict";
@@ -23,21 +37,23 @@
         placeholder: "203.0.113.0/24",
       },
       { op: "country", label: "Country", kind: "list", placeholder: "FR" },
-      { op: "asn", label: "ASN", kind: "list", placeholder: "64496" },
+      { op: "asn", label: "ASN", kind: "list", placeholder: "AS64496" },
       { op: "method", label: "HTTP method", kind: "list", placeholder: "POST" },
       { op: "uri", label: "URI", kind: "uri" },
       { op: "group", label: "Resource group", kind: "group" },
     ],
     actions: [
-      { type: "challenge", label: "Show a challenge" },
-      { type: "block", label: "Block" },
-      { type: "redirect", label: "Redirect" },
+      { type: "challenge", label: "Challenge", blurb: "Prove it is human" },
+      { type: "block", label: "Block", blurb: "Deny the request" },
+      { type: "redirect", label: "Redirect", blurb: "Send it elsewhere" },
     ],
   };
 
-  // Mirrors workflow_schema.MAX_TREE_DEPTH; the API refuses anything deeper anyway, this
-  // only stops the operator building something that cannot be saved.
+  // Mirrors workflow_schema.py. The API refuses anything past these anyway; the editor only
+  // uses them to stop an operator building something that can never be saved.
   var MAX_DEPTH = 5;
+  var MAX_RULES = 50;
+  var MAX_PREDICATES_PER_RULE = 32;
   var CHALLENGE_PROVIDERS = [
     "cookie",
     "javascript",
@@ -49,27 +65,63 @@
     "capjs",
   ];
   var REDIRECT_STATUSES = [301, 302, 303, 307, 308];
+  // A block rule normally answers the instance's configured deny status; 429 is the single
+  // documented override, for a rule whose whole purpose is capping a rate.
+  var BLOCK_STATUSES = [429];
   var GROUP_KINDS = ["ip", "country", "asn"];
+  var URI_MATCHES = {
+    exact: "is exactly",
+    prefix: "starts with",
+    regex: "matches the regex",
+  };
+  var VALUE_CAP = 8;
 
-  var rulesEl,
-    emptyEl,
-    validationEl,
-    readonly = false,
-    groups = {},
-    validateTimer = null;
+  var LEAF_META = {
+    ip: { icon: "bx-network-chart", verb: "is in", mono: true },
+    country: { icon: "bx-flag", verb: "is" },
+    asn: { icon: "bx-sitemap", verb: "is", mono: true },
+    method: { icon: "bx-transfer", verb: "is" },
+    uri: { icon: "bx-link", verb: "matches", mono: true },
+    group: { icon: "bx-collection", verb: "is in the group" },
+  };
+  var ACTION_META = {
+    block: { icon: "bx-block", tone: "t-block" },
+    redirect: { icon: "bx-log-out-circle", tone: "t-redirect" },
+    challenge: { icon: "bx-shield-quarter", tone: "t-challenge" },
+  };
+  var OPS = { all: "All of", any: "Any of", not: "None of" };
 
-  function el(tag, className, text) {
-    var node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-  }
+  var STATE = {
+    rules: [],
+    open: null,
+    shown: null,
+    errors: {},
+    errorList: [],
+    summaries: {},
+    readonly: false,
+    groups: {},
+  };
 
-  function option(value, label, selected) {
-    var node = el("option", null, label);
-    node.value = value;
-    if (selected) node.selected = true;
-    return node;
+  var ladderEl, emptyEl, panelEl, liveEl, capEl;
+  var validateTimer = null;
+  var keySeed = 0;
+  var dragId = null;
+
+  // ---- helpers ---------------------------------------------------------------------
+
+  function esc(value) {
+    return String(value === null || value === undefined ? "" : value).replace(
+      /[&<>"']/g,
+      function (char) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[char];
+      },
+    );
   }
 
   function conditionSpec(op) {
@@ -80,410 +132,15 @@
     return list[0];
   }
 
-  // ---- node rendering --------------------------------------------------------------
-
-  function renderNode(node, depth) {
-    if (node && (node.op === "all" || node.op === "any"))
-      return renderCombinator(node, depth);
-    if (node && node.op === "not") return renderNot(node, depth);
-    return renderLeaf(node || { op: "ip", values: [] });
+  function leafMeta(op) {
+    return LEAF_META[op] || { icon: "bx-filter-alt", verb: "matches" };
   }
 
-  function nodeToolbar(container, depth, onAddLeaf, onAddGroup, onRemove) {
-    var bar = el("div", "d-flex gap-2 mt-2");
-    var addLeaf = el(
-      "button",
-      "btn btn-outline-secondary btn-sm",
-      "+ condition",
-    );
-    addLeaf.type = "button";
-    addLeaf.addEventListener("click", onAddLeaf);
-    bar.appendChild(addLeaf);
-
-    var addGroup = el("button", "btn btn-outline-secondary btn-sm", "+ group");
-    addGroup.type = "button";
-    // Nothing deeper than MAX_DEPTH can be saved, so the button turns itself off rather
-    // than letting the operator build a tree the API will reject.
-    if (depth >= MAX_DEPTH - 1) addGroup.disabled = true;
-    addGroup.addEventListener("click", onAddGroup);
-    bar.appendChild(addGroup);
-
-    if (onRemove) {
-      var remove = el(
-        "button",
-        "btn btn-outline-danger btn-sm ms-auto",
-        "remove group",
-      );
-      remove.type = "button";
-      remove.addEventListener("click", onRemove);
-      bar.appendChild(remove);
-    }
-    container.appendChild(bar);
+  function actionMeta(type) {
+    return ACTION_META[type] || { icon: "bx-run", tone: "t-block" };
   }
 
-  function renderCombinator(node, depth) {
-    var wrapper = el(
-      "fieldset",
-      "wf-node wf-combinator border-start ps-3 py-2",
-    );
-    wrapper.dataset.op = node.op;
-    wrapper.dataset.depth = String(depth);
-
-    var head = el("div", "d-flex align-items-center gap-2 mb-2");
-    var select = el(
-      "select",
-      "form-select form-select-sm w-auto wf-combinator-op",
-    );
-    select.appendChild(option("all", "Match ALL of", node.op === "all"));
-    select.appendChild(option("any", "Match ANY of", node.op === "any"));
-    select.addEventListener("change", function () {
-      wrapper.dataset.op = select.value;
-      scheduleValidate();
-    });
-    head.appendChild(select);
-    wrapper.appendChild(head);
-
-    var children = el("div", "wf-children");
-    (node.nodes || []).forEach(function (child) {
-      children.appendChild(renderNode(child, depth + 1));
-    });
-    wrapper.appendChild(children);
-
-    nodeToolbar(
-      wrapper,
-      depth,
-      function () {
-        children.appendChild(renderLeaf({ op: "ip", values: [] }));
-        scheduleValidate();
-      },
-      function () {
-        children.appendChild(
-          renderCombinator(
-            { op: "all", nodes: [{ op: "ip", values: [] }] },
-            depth + 1,
-          ),
-        );
-        scheduleValidate();
-      },
-      depth > 1
-        ? function () {
-            wrapper.remove();
-            scheduleValidate();
-          }
-        : null,
-    );
-    return wrapper;
-  }
-
-  function renderNot(node, depth) {
-    // NOT holds exactly one child, so it renders as a modifier on that child rather than as
-    // a container the operator could accidentally leave empty.
-    var inner = renderNode(node.node, depth);
-    inner.dataset.negated = "yes";
-    var toggle = inner.querySelector(".wf-negate");
-    if (toggle) toggle.checked = true;
-    return inner;
-  }
-
-  function renderLeaf(node) {
-    var wrapper = el(
-      "div",
-      "wf-node wf-leaf d-flex flex-wrap gap-2 align-items-center mb-2",
-    );
-    wrapper.dataset.op = node.op;
-
-    var negate = el("div", "form-check form-switch mb-0");
-    var negateInput = el("input", "form-check-input wf-negate");
-    negateInput.type = "checkbox";
-    negateInput.setAttribute("role", "switch");
-    negateInput.setAttribute("aria-label", "Negate this condition");
-    negate.appendChild(negateInput);
-    var negateLabel = el("label", "form-check-label small", "not");
-    negate.appendChild(negateLabel);
-    negateInput.addEventListener("change", function () {
-      wrapper.dataset.negated = negateInput.checked ? "yes" : "";
-      scheduleValidate();
-    });
-    wrapper.appendChild(negate);
-
-    var opSelect = el("select", "form-select form-select-sm w-auto wf-leaf-op");
-    window.BW_WORKFLOW_TYPES.conditions.forEach(function (spec) {
-      opSelect.appendChild(option(spec.op, spec.label, spec.op === node.op));
-    });
-    wrapper.appendChild(opSelect);
-
-    var args = el(
-      "div",
-      "wf-leaf-args d-flex flex-wrap gap-2 align-items-center flex-grow-1",
-    );
-    wrapper.appendChild(args);
-
-    var remove = el("button", "btn btn-outline-danger btn-sm", "×");
-    remove.type = "button";
-    remove.setAttribute("aria-label", "Remove this condition");
-    remove.addEventListener("click", function () {
-      wrapper.remove();
-      scheduleValidate();
-    });
-    wrapper.appendChild(remove);
-
-    opSelect.addEventListener("change", function () {
-      wrapper.dataset.op = opSelect.value;
-      renderLeafArgs(args, { op: opSelect.value });
-      scheduleValidate();
-    });
-    renderLeafArgs(args, node);
-    return wrapper;
-  }
-
-  function renderLeafArgs(container, node) {
-    container.innerHTML = "";
-    var spec = conditionSpec(node.op);
-
-    if (spec.kind === "uri") {
-      var match = el(
-        "select",
-        "form-select form-select-sm w-auto wf-uri-match",
-      );
-      ["exact", "prefix", "regex"].forEach(function (value) {
-        match.appendChild(option(value, value, node.match === value));
-      });
-      match.addEventListener("change", scheduleValidate);
-      container.appendChild(match);
-
-      var value = el(
-        "input",
-        "form-control form-control-sm wf-uri-value flex-grow-1",
-      );
-      value.placeholder = "/login";
-      value.value = node.value || "";
-      value.addEventListener("input", scheduleValidate);
-      container.appendChild(value);
-      return;
-    }
-
-    if (spec.kind === "group") {
-      var kind = el(
-        "select",
-        "form-select form-select-sm w-auto wf-group-kind",
-      );
-      GROUP_KINDS.forEach(function (value) {
-        kind.appendChild(option(value, value, node.kind === value));
-      });
-      container.appendChild(kind);
-
-      var picker = el(
-        "select",
-        "form-select form-select-sm wf-group-id flex-grow-1",
-      );
-      var refresh = function () {
-        picker.innerHTML = "";
-        var selectedKind = kind.value;
-        var found = false;
-        Object.keys(groups).forEach(function (groupId) {
-          var entries = (groups[groupId] || {}).entries || [];
-          var holdsKind = entries.some(function (entry) {
-            return entry.kind === selectedKind;
-          });
-          // Only groups actually holding that kind are offered: a reference to an empty
-          // one is refused by the validator rather than quietly matching nothing.
-          if (!holdsKind) return;
-          found = true;
-          picker.appendChild(
-            option(
-              groupId,
-              (groups[groupId] || {}).name || groupId,
-              node.group_id === groupId,
-            ),
-          );
-        });
-        if (!found)
-          picker.appendChild(
-            option("", "no group holds " + selectedKind + " entries", true),
-          );
-      };
-      kind.addEventListener("change", function () {
-        refresh();
-        scheduleValidate();
-      });
-      picker.addEventListener("change", scheduleValidate);
-      refresh();
-      container.appendChild(picker);
-      return;
-    }
-
-    var values = el(
-      "input",
-      "form-control form-control-sm wf-values flex-grow-1",
-    );
-    values.placeholder = spec.placeholder || "";
-    values.value = (node.values || []).join(" ");
-    values.addEventListener("input", scheduleValidate);
-    container.appendChild(values);
-    var help = el("span", "form-text", "space separated");
-    container.appendChild(help);
-  }
-
-  // ---- serialisation ---------------------------------------------------------------
-
-  function serializeNode(node) {
-    var payload;
-    if (node.classList.contains("wf-combinator")) {
-      var children = node.querySelector(".wf-children");
-      var nodes = [];
-      Array.prototype.forEach.call(children.children, function (child) {
-        if (child.classList.contains("wf-node"))
-          nodes.push(serializeNode(child));
-      });
-      payload = { op: node.dataset.op || "all", nodes: nodes };
-    } else {
-      var op = node.dataset.op;
-      if (op === "uri") {
-        payload = {
-          op: "uri",
-          match: node.querySelector(".wf-uri-match").value,
-          value: node.querySelector(".wf-uri-value").value.trim(),
-        };
-      } else if (op === "group") {
-        payload = {
-          op: "group",
-          kind: node.querySelector(".wf-group-kind").value,
-          group_id: node.querySelector(".wf-group-id").value,
-        };
-      } else {
-        var raw = node.querySelector(".wf-values").value.trim();
-        payload = { op: op, values: raw ? raw.split(/\s+/) : [] };
-      }
-    }
-    if (node.dataset.negated === "yes") return { op: "not", node: payload };
-    return payload;
-  }
-
-  function serializeRule(card) {
-    var conditionRoot = card.querySelector(".wf-rule-condition > .wf-node");
-    var rule = {
-      id: card.dataset.ruleId,
-      name: card.querySelector(".wf-rule-name").value.trim(),
-      enabled: card.querySelector(".wf-rule-enabled").checked,
-      condition: conditionRoot ? serializeNode(conditionRoot) : null,
-      threshold: null,
-      action: serializeAction(card),
-    };
-    if (card.querySelector(".wf-threshold-enabled").checked) {
-      rule.threshold = {
-        count: parseInt(card.querySelector(".wf-threshold-count").value, 10),
-        window: parseInt(card.querySelector(".wf-threshold-window").value, 10),
-        key: "ip",
-      };
-    }
-    return rule;
-  }
-
-  function serializeAction(card) {
-    var type = card.querySelector(".wf-action-type").value;
-    var args = card.querySelector(".wf-action-args");
-    if (type === "challenge")
-      return {
-        type: "challenge",
-        provider: args.querySelector(".wf-provider").value,
-      };
-    if (type === "redirect") {
-      return {
-        type: "redirect",
-        url: args.querySelector(".wf-redirect-url").value.trim(),
-        status: parseInt(args.querySelector(".wf-redirect-status").value, 10),
-      };
-    }
-    var status = args.querySelector(".wf-block-status");
-    // An unset status means "use the instance's configured deny status".
-    return status && status.checked
-      ? { type: "block", status: 429 }
-      : { type: "block" };
-  }
-
-  function serialize() {
-    var rules = [];
-    Array.prototype.forEach.call(
-      rulesEl.querySelectorAll(".wf-rule"),
-      function (card) {
-        rules.push(serializeRule(card));
-      },
-    );
-    return { schema_version: 1, rules: rules };
-  }
-
-  // ---- action arguments ------------------------------------------------------------
-
-  function renderActionArgs(card, action) {
-    var container = card.querySelector(".wf-action-args");
-    container.innerHTML = "";
-    var type = card.querySelector(".wf-action-type").value;
-
-    if (type === "challenge") {
-      var label = el("label", "form-label small", "Provider");
-      container.appendChild(label);
-      var provider = el("select", "form-select form-select-sm wf-provider");
-      CHALLENGE_PROVIDERS.forEach(function (value) {
-        provider.appendChild(
-          option(value, value, action && action.provider === value),
-        );
-      });
-      provider.addEventListener("change", scheduleValidate);
-      container.appendChild(provider);
-      return;
-    }
-
-    if (type === "redirect") {
-      var row = el("div", "row g-2");
-      var urlCol = el("div", "col-8");
-      var url = el("input", "form-control form-control-sm wf-redirect-url");
-      url.placeholder = "https://example.com/denied";
-      url.value = (action && action.url) || "";
-      url.addEventListener("input", scheduleValidate);
-      urlCol.appendChild(url);
-      row.appendChild(urlCol);
-
-      var statusCol = el("div", "col-4");
-      var status = el(
-        "select",
-        "form-select form-select-sm wf-redirect-status",
-      );
-      REDIRECT_STATUSES.forEach(function (value) {
-        status.appendChild(
-          option(
-            String(value),
-            String(value),
-            action && action.status === value,
-          ),
-        );
-      });
-      status.addEventListener("change", scheduleValidate);
-      statusCol.appendChild(status);
-      row.appendChild(statusCol);
-      container.appendChild(row);
-      return;
-    }
-
-    var check = el("div", "form-check form-switch");
-    var input = el("input", "form-check-input wf-block-status");
-    input.type = "checkbox";
-    input.setAttribute("role", "switch");
-    input.checked = !!(action && action.status === 429);
-    input.addEventListener("change", scheduleValidate);
-    check.appendChild(input);
-    check.appendChild(
-      el(
-        "label",
-        "form-check-label small",
-        "Answer 429 instead of the deny status",
-      ),
-    );
-    container.appendChild(check);
-  }
-
-  // ---- rule cards ------------------------------------------------------------------
-
-  function newRuleId() {
+  function newId() {
     if (window.crypto && window.crypto.randomUUID)
       return window.crypto.randomUUID().replace(/-/g, "");
     // Ids only have to be unique inside one workflow, never secret.
@@ -494,244 +151,2010 @@
     );
   }
 
-  function addRule(rule) {
-    var template = document.getElementById("wf-rule-template");
-    var card = template.content.firstElementChild.cloneNode(true);
-    card.dataset.ruleId = (rule && rule.id) || newRuleId();
-    card.querySelector(".wf-rule-name").value = (rule && rule.name) || "";
-    card.querySelector(".wf-rule-enabled").checked =
-      !rule || rule.enabled !== false;
+  function say(message) {
+    if (liveEl) liveEl.textContent = message;
+  }
 
-    card.querySelector(".wf-rule-condition").appendChild(
-      renderNode(
-        (rule && rule.condition) || {
-          op: "all",
-          nodes: [{ op: "ip", values: [] }],
-        },
-        1,
-      ),
-    );
+  // ---- view model ------------------------------------------------------------------
 
-    var thresholdToggle = card.querySelector(".wf-threshold-enabled");
-    var thresholdFields = card.querySelectorAll(".wf-threshold-fields");
-    var syncThreshold = function () {
-      Array.prototype.forEach.call(thresholdFields, function (field) {
-        field.classList.toggle("d-none", !thresholdToggle.checked);
+  function key(node) {
+    node._k = "n" + ++keySeed;
+    return node;
+  }
+
+  /* Schema -> view. The only rewrite is NOT: the schema holds exactly one child, the view
+     holds a "None of" group, and not(any(...)) is the canonical form of both. An older
+     not(<leaf>) becomes a one-child group, which serialises back as not(any([leaf])) — the
+     same meaning, so nothing is lost. */
+  function fromSchema(node) {
+    if (!node || typeof node !== "object") return key({ op: "ip", values: [] });
+    if (node.op === "all" || node.op === "any") {
+      return key({ op: node.op, nodes: (node.nodes || []).map(fromSchema) });
+    }
+    if (node.op === "not") {
+      var inner = node.node;
+      if (inner && inner.op === "any")
+        return key({ op: "not", nodes: (inner.nodes || []).map(fromSchema) });
+      return key({ op: "not", nodes: inner ? [fromSchema(inner)] : [] });
+    }
+    if (node.op === "uri")
+      return key({
+        op: "uri",
+        match: node.match || "prefix",
+        value: node.value || "",
       });
+    if (node.op === "group")
+      return key({
+        op: "group",
+        kind: node.kind || "ip",
+        group_id: node.group_id || "",
+      });
+    return key({
+      op: node.op || "ip",
+      values: (node.values || []).map(String),
+    });
+  }
+
+  function toSchema(node) {
+    if (node.op === "all" || node.op === "any") {
+      return { op: node.op, nodes: node.nodes.map(toSchema) };
+    }
+    if (node.op === "not") {
+      return {
+        op: "not",
+        node: { op: "any", nodes: node.nodes.map(toSchema) },
+      };
+    }
+    if (node.op === "uri")
+      return { op: "uri", match: node.match, value: node.value };
+    if (node.op === "group")
+      return { op: "group", kind: node.kind, group_id: node.group_id };
+    return { op: node.op, values: node.values.slice() };
+  }
+
+  function serialize() {
+    return {
+      schema_version: 1,
+      rules: STATE.rules.map(function (rule) {
+        return {
+          id: rule.id,
+          name: rule.name,
+          enabled: rule.enabled,
+          condition: toSchema(rule.condition),
+          threshold: rule.threshold
+            ? {
+                count: rule.threshold.count,
+                window: rule.threshold.window,
+                key: "ip",
+              }
+            : null,
+          action: Object.assign({}, rule.action),
+        };
+      }),
     };
-    if (rule && rule.threshold) {
-      thresholdToggle.checked = true;
-      card.querySelector(".wf-threshold-count").value = rule.threshold.count;
-      card.querySelector(".wf-threshold-window").value = rule.threshold.window;
-    }
-    syncThreshold();
-    thresholdToggle.addEventListener("change", function () {
-      syncThreshold();
-      scheduleValidate();
-    });
-
-    var actionSelect = card.querySelector(".wf-action-type");
-    window.BW_WORKFLOW_TYPES.actions.forEach(function (spec) {
-      actionSelect.appendChild(
-        option(
-          spec.type,
-          spec.label,
-          rule && rule.action && rule.action.type === spec.type,
-        ),
-      );
-    });
-    actionSelect.addEventListener("change", function () {
-      renderActionArgs(card, null);
-      scheduleValidate();
-    });
-    renderActionArgs(card, rule && rule.action);
-
-    card
-      .querySelector(".wf-rule-name")
-      .addEventListener("input", scheduleValidate);
-    card
-      .querySelector(".wf-rule-enabled")
-      .addEventListener("change", scheduleValidate);
-    card
-      .querySelector(".wf-rule-remove")
-      .addEventListener("click", function () {
-        card.remove();
-        syncEmpty();
-        scheduleValidate();
-      });
-    card.querySelector(".wf-rule-up").addEventListener("click", function () {
-      var previous = card.previousElementSibling;
-      if (previous) rulesEl.insertBefore(card, previous);
-      scheduleValidate();
-    });
-    card.querySelector(".wf-rule-down").addEventListener("click", function () {
-      var next = card.nextElementSibling;
-      if (next) rulesEl.insertBefore(next, card);
-      scheduleValidate();
-    });
-
-    if (readonly) {
-      Array.prototype.forEach.call(
-        card.querySelectorAll("input, select, button, textarea"),
-        function (field) {
-          field.disabled = true;
-        },
-      );
-    }
-
-    rulesEl.appendChild(card);
-    syncEmpty();
-    return card;
   }
 
-  function syncEmpty() {
-    emptyEl.classList.toggle(
-      "d-none",
-      rulesEl.querySelectorAll(".wf-rule").length > 0,
+  function isGroup(node) {
+    return node.op === "all" || node.op === "any" || node.op === "not";
+  }
+
+  /* The model layer, exported on its own so it can be exercised without a DOM — the
+     serialiser is the one thing here that, if it drifts from workflow_schema.py, makes every
+     save fail. tests/unit/ui/test_workflow_editor_roundtrip.py runs it through the real
+     validator. PRO bundles reuse it to seed rules. */
+  window.BW_WORKFLOW_MODEL = { fromSchema: fromSchema, toSchema: toSchema };
+
+  /* Walks the whole ladder for one node key and returns it with its parent, so a mutation
+     never has to parse a path back into a tree. */
+  function locate(nodeKey) {
+    var found = null;
+    STATE.rules.forEach(function (rule) {
+      if (found) return;
+      (function walk(node, parent, index) {
+        if (found) return;
+        if (node._k === nodeKey) {
+          found = { rule: rule, node: node, parent: parent, index: index };
+          return;
+        }
+        if (isGroup(node))
+          node.nodes.forEach(function (child, i) {
+            walk(child, node, i);
+          });
+      })(rule.condition, null, -1);
+    });
+    return found;
+  }
+
+  function ruleById(id) {
+    for (var i = 0; i < STATE.rules.length; i++) {
+      if (STATE.rules[i].id === id) return STATE.rules[i];
+    }
+    return null;
+  }
+
+  function countLeaves(node) {
+    return isGroup(node)
+      ? node.nodes.reduce(function (total, child) {
+          return total + countLeaves(child);
+        }, 0)
+      : 1;
+  }
+
+  function countRegex(rule) {
+    return (function walk(node) {
+      if (isGroup(node))
+        return node.nodes.reduce(function (total, child) {
+          return total + walk(child);
+        }, 0);
+      return node.op === "uri" && node.match === "regex" ? 1 : 0;
+    })(rule.condition);
+  }
+
+  function newLeaf(op) {
+    if (op === "uri") return key({ op: "uri", match: "prefix", value: "/" });
+    if (op === "group")
+      return key({ op: "group", kind: "ip", group_id: firstGroupFor("ip") });
+    return key({ op: op, values: [] });
+  }
+
+  function newRule() {
+    return {
+      id: newId(),
+      name: "",
+      enabled: true,
+      condition: key({ op: "all", nodes: [newLeaf("uri")] }),
+      threshold: null,
+      action: { type: "block" },
+    };
+  }
+
+  /* Only groups actually holding that kind are offered: a reference to one that holds none
+     is refused by the validator rather than quietly matching nothing. */
+  function groupsFor(kind) {
+    return Object.keys(STATE.groups).filter(function (id) {
+      return ((STATE.groups[id] || {}).entries || []).some(function (entry) {
+        return entry.kind === kind;
+      });
+    });
+  }
+
+  function firstGroupFor(kind) {
+    return groupsFor(kind)[0] || "";
+  }
+
+  function groupName(id) {
+    return (STATE.groups[id] || {}).name || id;
+  }
+
+  // ---- rendering -------------------------------------------------------------------
+
+  function errId(path) {
+    return (
+      "wf-err-" +
+      String(path)
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
     );
   }
 
-  // ---- validation ------------------------------------------------------------------
+  function errorAt(path) {
+    // A NOT group is not(any(...)) in the schema, so an error raised on the inner ANY
+    // belongs to the group the operator can actually see.
+    return STATE.errors[path] || STATE.errors[path + ".node"] || null;
+  }
+
+  function errBlock(path, message) {
+    return (
+      '<div class="bw-flow-err" id="' +
+      errId(path) +
+      '">' +
+      '<i class="bx bx-error-circle" aria-hidden="true"></i><span>' +
+      esc(message) +
+      "</span></div>"
+    );
+  }
+
+  function invalidAttrs(path, message) {
+    return message
+      ? ' aria-invalid="true" aria-describedby="' + errId(path) + '"'
+      : "";
+  }
+
+  function selectHtml(cls, options, value, label) {
+    var body = options
+      .map(function (item) {
+        var optValue = typeof item === "object" ? item.value : item;
+        var optLabel = typeof item === "object" ? item.label : item;
+        return (
+          '<option value="' +
+          esc(optValue) +
+          '"' +
+          (String(optValue) === String(value) ? " selected" : "") +
+          ">" +
+          esc(optLabel) +
+          "</option>"
+        );
+      })
+      .join("");
+    return (
+      '<select class="' +
+      cls +
+      '" aria-label="' +
+      esc(label) +
+      '"' +
+      (STATE.readonly ? " disabled" : "") +
+      ">" +
+      body +
+      "</select>"
+    );
+  }
+
+  function valueChips(node, path) {
+    var values = node.values || [];
+    var open = STATE.shown.has(node._k);
+    var list = open ? values : values.slice(0, VALUE_CAP);
+    var messages = [];
+    var html = list
+      .map(function (value, index) {
+        var valuePath = path + ".values[" + index + "]";
+        var message = STATE.errors[valuePath];
+        if (message) messages.push(errBlock(valuePath, message));
+        var remove = STATE.readonly
+          ? ""
+          : '<button type="button" class="bw-flow-val-rm" data-wf-rmval="' +
+            node._k +
+            ":" +
+            index +
+            '" aria-label="Remove ' +
+            esc(value) +
+            '">' +
+            '<i class="bx bx-x" aria-hidden="true"></i></button>';
+        // A flagged chip is focusable and names its own message, so the reason reaches
+        // keyboard and screen-reader users instead of living in a colour alone.
+        return (
+          '<span class="bw-flow-val' +
+          (message ? " bw-flow-invalid" : "") +
+          '" data-wf-node="' +
+          esc(valuePath) +
+          '"' +
+          (message ? ' tabindex="0"' : ' tabindex="-1"') +
+          invalidAttrs(valuePath, message) +
+          ">" +
+          esc(value) +
+          remove +
+          "</span>"
+        );
+      })
+      .join("");
+    if (values.length > VALUE_CAP) {
+      html +=
+        '<button type="button" class="bw-flow-more" data-wf-morevals="' +
+        node._k +
+        '">' +
+        (open ? "Show fewer" : "+" + (values.length - VALUE_CAP) + " more") +
+        "</button>";
+    }
+    if (!STATE.readonly) {
+      html +=
+        '<button type="button" class="bw-flow-add" data-wf-addval="' +
+        node._k +
+        '">' +
+        '<i class="bx bx-plus" aria-hidden="true"></i><span data-i18n="workflows.value.add">Value</span></button>';
+    }
+    return '<div class="bw-flow-vals">' + html + "</div>" + messages.join("");
+  }
+
+  function leafBody(node, path) {
+    if (node.op === "uri") {
+      var valueMessage = STATE.errors[path + ".value"];
+      if (STATE.readonly) {
+        return (
+          '<div class="bw-flow-vals"><span class="bw-flow-val' +
+          (node.match === "regex" ? " is-regex" : "") +
+          '">' +
+          esc(node.value) +
+          "</span></div>"
+        );
+      }
+      return (
+        '<div class="bw-flow-vals">' +
+        '<input class="bw-flow-val-input' +
+        (node.match === "regex" ? " is-regex" : "") +
+        (valueMessage ? " bw-flow-invalid" : "") +
+        '"' +
+        ' data-wf-uri="' +
+        node._k +
+        '" data-wf-node="' +
+        esc(path + ".value") +
+        '" value="' +
+        esc(node.value) +
+        '"' +
+        ' spellcheck="false" aria-label="URI value"' +
+        invalidAttrs(path + ".value", valueMessage) +
+        ">" +
+        "</div>" +
+        (valueMessage ? errBlock(path + ".value", valueMessage) : "")
+      );
+    }
+    if (node.op === "group") {
+      var available = groupsFor(node.kind);
+      var idMessage =
+        STATE.errors[path + ".group_id"] || STATE.errors[path + ".kind"];
+      var picker = available.length
+        ? selectHtml(
+            "bw-flow-val-input",
+            available.map(function (id) {
+              return { value: id, label: groupName(id) };
+            }),
+            node.group_id,
+            "Resource group",
+          )
+        : '<span class="bw-flow-val">no group holds ' +
+          esc(node.kind) +
+          " entries</span>";
+      return (
+        '<div class="bw-flow-vals" data-wf-group="' +
+        node._k +
+        '" data-wf-node="' +
+        esc(path + ".group_id") +
+        '"' +
+        invalidAttrs(path + ".group_id", idMessage) +
+        ">" +
+        selectHtml(
+          "bw-flow-pred-op-select",
+          GROUP_KINDS,
+          node.kind,
+          "Group kind",
+        ) +
+        picker +
+        "</div>" +
+        (idMessage ? errBlock(path + ".group_id", idMessage) : "")
+      );
+    }
+    return valueChips(node, path);
+  }
+
+  function predicate(node, path) {
+    var meta = leafMeta(node.op);
+    var spec = conditionSpec(node.op);
+    var message = errorAt(path);
+    var verb =
+      node.op === "uri"
+        ? STATE.readonly
+          ? URI_MATCHES[node.match] || "matches"
+          : selectHtml(
+              "bw-flow-pred-op-select",
+              Object.keys(URI_MATCHES).map(function (k) {
+                return { value: k, label: URI_MATCHES[k] };
+              }),
+              node.match,
+              "URI match mode",
+            )
+        : node.op === "group"
+          ? "is in"
+          : (node.values || []).length > 1
+            ? "is one of"
+            : meta.verb;
+    var typePicker = STATE.readonly
+      ? "<span>" + esc(spec.label) + "</span>"
+      : selectHtml(
+          "bw-flow-pred-type-select",
+          window.BW_WORKFLOW_TYPES.conditions.map(function (item) {
+            return { value: item.op, label: item.label };
+          }),
+          node.op,
+          "Condition type",
+        );
+    return (
+      '<div class="bw-flow-pred' +
+      (message ? " bw-flow-invalid" : "") +
+      '" data-wf-node="' +
+      esc(path) +
+      '" data-wf-key="' +
+      node._k +
+      '"' +
+      invalidAttrs(path, message) +
+      ' tabindex="-1">' +
+      '<span class="bw-flow-pred-type"><i class="bx ' +
+      meta.icon +
+      '" aria-hidden="true"></i>' +
+      typePicker +
+      "</span>" +
+      '<span class="bw-flow-pred-op">' +
+      verb +
+      "</span>" +
+      leafBody(node, path) +
+      (STATE.readonly
+        ? ""
+        : '<button type="button" class="bw-flow-pred-rm" data-wf-rmnode="' +
+          node._k +
+          '" title="Remove condition" aria-label="Remove condition">' +
+          '<i class="bx bx-trash" aria-hidden="true"></i></button>') +
+      (message ? errBlock(path, message) : "") +
+      "</div>"
+    );
+  }
+
+  /* Schema depth, not view depth: a NOT group costs two levels because it serialises as
+     not(any(...)). The button turns itself off at the cap rather than letting the operator
+     build a tree the API will reject. */
+  function childPath(node, path, index) {
+    return node.op === "not"
+      ? path + ".node.nodes[" + index + "]"
+      : path + ".nodes[" + index + "]";
+  }
+
+  function cost(node) {
+    return node.op === "not" ? 2 : 1;
+  }
+
+  function group(node, path, depth) {
+    var message = errorAt(path);
+    var children = node.nodes || [];
+    var childDepth = depth + cost(node);
+    var opLabel = OPS[node.op];
+    var opButton = STATE.readonly
+      ? '<span class="bw-flow-op op-' +
+        node.op +
+        `" data-i18n="workflows.tree.${node.op}">` +
+        opLabel +
+        "</span>"
+      : '<button type="button" class="bw-flow-op op-' +
+        node.op +
+        '" data-wf-op="' +
+        node._k +
+        '"' +
+        ' aria-label="Change combinator, currently ' +
+        esc(opLabel) +
+        '">' +
+        `<span data-i18n="workflows.tree.${node.op}">` +
+        opLabel +
+        "</span>" +
+        '<i class="bx bx-chevron-down" aria-hidden="true"></i></button>';
+    var meta =
+      node.op === "not"
+        ? "matches when none of these are true"
+        : children.length +
+          " condition" +
+          (children.length === 1 ? "" : "s") +
+          " — " +
+          (node.op === "all"
+            ? "all must be true"
+            : "at least one must be true");
+    var join = node.op === "all" ? "and" : "or";
+    var canNest = childDepth + 1 <= MAX_DEPTH;
+    return (
+      '<div class="bw-flow-group' +
+      (message ? " bw-flow-invalid" : "") +
+      '" data-depth="' +
+      depth +
+      '" data-wf-node="' +
+      esc(path) +
+      '" data-wf-key="' +
+      node._k +
+      '"' +
+      invalidAttrs(path, message) +
+      ' tabindex="-1">' +
+      '<div class="bw-flow-group-head">' +
+      opButton +
+      '<span class="bw-flow-group-meta">' +
+      esc(meta) +
+      "</span></div>" +
+      '<div class="bw-flow-kids">' +
+      children
+        .map(function (child, index) {
+          var kidPath = childPath(node, path, index);
+          return (
+            '<div class="bw-flow-kid">' +
+            (index > 0 ? '<div class="bw-flow-join">' + join + "</div>" : "") +
+            (isGroup(child)
+              ? group(child, kidPath, childDepth)
+              : predicate(child, kidPath)) +
+            "</div>"
+          );
+        })
+        .join("") +
+      (children.length
+        ? ""
+        : '<div class="bw-flow-group-meta" data-i18n="workflows.tree.empty">Empty group — add a condition, it cannot be saved like this.</div>') +
+      "</div>" +
+      (STATE.readonly
+        ? ""
+        : '<div class="bw-flow-addrow">' +
+          '<button type="button" class="bw-flow-add" data-wf-addpred="' +
+          node._k +
+          '">' +
+          '<i class="bx bx-plus" aria-hidden="true"></i><span data-i18n="workflows.tree.addCondition">Condition</span></button>' +
+          '<button type="button" class="bw-flow-add" data-wf-addgroup="' +
+          node._k +
+          '"' +
+          (canNest ? "" : " disabled") +
+          ">" +
+          '<i class="bx bx-layer-plus" aria-hidden="true"></i><span data-i18n="workflows.tree.addGroup">Group</span></button>' +
+          (depth > 1
+            ? '<button type="button" class="bw-flow-add" data-wf-rmnode="' +
+              node._k +
+              '">' +
+              '<i class="bx bx-trash" aria-hidden="true"></i><span data-i18n="workflows.tree.removeGroup">Remove group</span></button>'
+            : "") +
+          "</div>") +
+      (message ? errBlock(path, message) : "") +
+      "</div>"
+    );
+  }
+
+  /* The threshold is part of the "if": below it the rule simply does not match and
+     evaluation continues downward. It is never an action. */
+  function gate(rule, path) {
+    if (!rule.threshold) {
+      if (STATE.readonly) return "";
+      return (
+        '<div class="bw-flow-addrow"><button type="button" class="bw-flow-add" data-wf-addgate="' +
+        esc(rule.id) +
+        '">' +
+        '<i class="bx bx-filter" aria-hidden="true"></i>' +
+        '<span data-i18n="workflows.threshold">Only above a rate</span></button></div>'
+      );
+    }
+    var message = errorAt(path + ".threshold");
+    var disabled = STATE.readonly ? " disabled" : "";
+    return (
+      '<div class="bw-flow-gate' +
+      (message ? " bw-flow-invalid" : "") +
+      '" data-wf-node="' +
+      esc(path + ".threshold") +
+      '"' +
+      invalidAttrs(path + ".threshold", message) +
+      ' tabindex="-1">' +
+      '<div class="bw-flow-gate-row">' +
+      '<i class="bx bx-filter" aria-hidden="true"></i>' +
+      '<span data-i18n="workflows.gate.and">and only once the same client IP has made more than</span>' +
+      '<input class="bw-flow-gate-num" type="number" min="1" max="100000" value="' +
+      esc(rule.threshold.count) +
+      '"' +
+      ' data-wf-gate="count" aria-label="Request count"' +
+      disabled +
+      ">" +
+      '<span data-i18n="workflows.threshold_count">Requests</span>' +
+      '<input class="bw-flow-gate-num" type="number" min="1" max="86400" value="' +
+      esc(rule.threshold.window) +
+      '"' +
+      ' data-wf-gate="window" aria-label="Window in seconds"' +
+      disabled +
+      ">" +
+      '<span data-i18n="workflows.threshold_window">Per (seconds)</span>' +
+      '<span class="bw-flow-chip" data-i18n="workflows.gate.chip">match gate</span>' +
+      "</div>" +
+      (STATE.readonly
+        ? ""
+        : '<button type="button" class="bw-flow-pred-rm" data-wf-rmgate="' +
+          esc(rule.id) +
+          '" title="Remove threshold" aria-label="Remove rate threshold">' +
+          '<i class="bx bx-trash" aria-hidden="true"></i></button>') +
+      '<p class="bw-flow-gate-help" data-i18n="workflows.gate.help">Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own.</p>' +
+      (message ? errBlock(path + ".threshold", message) : "") +
+      "</div>"
+    );
+  }
+
+  function actionParams(rule, path) {
+    var action = rule.action;
+    var disabled = STATE.readonly ? " disabled" : "";
+    if (action.type === "redirect") {
+      var urlMessage = STATE.errors[path + ".action.url"];
+      return (
+        '<div class="bw-flow-field" style="flex:1">' +
+        '<label for="wf-act-url" data-i18n="workflows.act_url">Destination URL</label>' +
+        '<input id="wf-act-url" class="mono' +
+        (urlMessage ? " bw-flow-invalid" : "") +
+        '" type="text" value="' +
+        esc(action.url || "") +
+        '"' +
+        ' placeholder="https://example.com/denied" data-wf-param="url" spellcheck="false"' +
+        ' data-wf-node="' +
+        esc(path + ".action.url") +
+        '"' +
+        invalidAttrs(path + ".action.url", urlMessage) +
+        disabled +
+        ">" +
+        (urlMessage ? errBlock(path + ".action.url", urlMessage) : "") +
+        "</div>" +
+        '<div class="bw-flow-field"><label for="wf-act-code" data-i18n="workflows.act_code">Status</label>' +
+        selectHtml(
+          "wf-act-status-select",
+          REDIRECT_STATUSES,
+          action.status || 302,
+          "Redirect status",
+        ) +
+        "</div>"
+      );
+    }
+    if (action.type === "challenge") {
+      return (
+        '<div class="bw-flow-field"><label for="wf-act-provider" data-i18n="workflows.act_provider">Antibot provider</label>' +
+        selectHtml(
+          "wf-act-provider-select",
+          CHALLENGE_PROVIDERS,
+          action.provider || "javascript",
+          "Antibot provider",
+        ) +
+        "</div>"
+      );
+    }
+    if (action.type === "block") {
+      var options = [{ value: "", label: "The instance's deny status" }].concat(
+        BLOCK_STATUSES.map(function (status) {
+          return { value: status, label: String(status) };
+        }),
+      );
+      return (
+        '<div class="bw-flow-field"><label for="wf-act-status" data-i18n="workflows.act_status">Deny status</label>' +
+        selectHtml(
+          "wf-act-status-select",
+          options,
+          action.status === undefined || action.status === null
+            ? ""
+            : action.status,
+          "Deny status",
+        ) +
+        "</div>"
+      );
+    }
+    return "";
+  }
+
+  function actionEditor(rule, path) {
+    var message =
+      STATE.errors[path + ".action"] || STATE.errors[path + ".action.type"];
+    var picks = window.BW_WORKFLOW_TYPES.actions
+      .map(function (spec) {
+        var meta = actionMeta(spec.type);
+        return (
+          '<button type="button" class="bw-flow-pick" role="radio" aria-checked="' +
+          (rule.action.type === spec.type ? "true" : "false") +
+          '"' +
+          ' data-wf-action="' +
+          esc(spec.type) +
+          '"' +
+          (STATE.readonly ? " disabled" : "") +
+          ">" +
+          '<i class="bx ' +
+          meta.icon +
+          '" aria-hidden="true"></i>' +
+          `<span><b data-i18n="workflows.act_${esc(spec.type)}">` +
+          esc(spec.label) +
+          "</b>" +
+          "<span>" +
+          esc(spec.blurb || "") +
+          "</span></span></button>"
+        );
+      })
+      .join("");
+    return (
+      '<div role="radiogroup" aria-label="Terminal action"><div class="bw-flow-acts">' +
+      picks +
+      "</div>" +
+      '<div class="bw-flow-params" data-wf-node="' +
+      esc(path + ".action") +
+      '"' +
+      invalidAttrs(path + ".action", message) +
+      ' tabindex="-1">' +
+      actionParams(rule, path) +
+      "</div>" +
+      (message ? errBlock(path + ".action", message) : "") +
+      '<div class="bw-flow-terminalnote"><i class="bx bx-stop-circle" aria-hidden="true"></i>' +
+      '<span data-i18n="workflows.act_terminal">One action per rule, and it ends evaluation — there is no true / false path out of a rule.</span></div>' +
+      "</div>"
+    );
+  }
+
+  function actionBadge(rule) {
+    var meta = actionMeta(rule.action.type);
+    var param =
+      rule.action.type === "challenge"
+        ? rule.action.provider || ""
+        : rule.action.type === "redirect"
+          ? rule.action.status || 302
+          : rule.action.status || "deny status";
+    return (
+      '<span class="bw-flow-act ' +
+      meta.tone +
+      (rule.enabled ? "" : " is-off") +
+      '">' +
+      '<i class="bx ' +
+      meta.icon +
+      '" aria-hidden="true"></i>' +
+      `<span data-i18n="workflows.act_${esc(rule.action.type)}">` +
+      esc(rule.action.type) +
+      "</span>" +
+      '<span class="p">' +
+      esc(param) +
+      "</span></span>"
+    );
+  }
+
+  function ruleNode(rule, index) {
+    var path = "rules[" + index + "]";
+    var open = STATE.open.has(rule.id);
+    var position = index + 1;
+    var classes = ["bw-flow-node", "bw-flow-rule"];
+    if (open) classes.push("is-open");
+    if (!rule.enabled) classes.push("is-off");
+
+    var name = STATE.readonly
+      ? '<span class="bw-flow-head-name">' +
+        (rule.name
+          ? esc(rule.name)
+          : '<span class="bw-flow-untitled">Untitled rule</span>') +
+        "</span>"
+      : '<input class="bw-flow-name-input wf-rule-name" maxlength="128" placeholder="Rule name" value="' +
+        esc(rule.name) +
+        '"' +
+        ' data-wf-name="' +
+        esc(rule.id) +
+        '" aria-label="Name of rule ' +
+        position +
+        '">';
+
+    var caret =
+      '<button type="button" class="bw-flow-iconbtn" data-wf-toggleopen="' +
+      esc(rule.id) +
+      '" aria-expanded="' +
+      (open ? "true" : "false") +
+      '"' +
+      ' title="' +
+      (open ? "Collapse" : "Expand") +
+      ' rule" aria-label="' +
+      (open ? "Collapse" : "Expand") +
+      " rule " +
+      position +
+      '">' +
+      '<i class="bx bx-chevron-down bw-flow-caret" aria-hidden="true"></i></button>';
+    var tools = STATE.readonly
+      ? caret
+      : '<button type="button" class="bw-flow-grip" data-wf-grip="' +
+        esc(rule.id) +
+        '" aria-hidden="true" tabindex="-1" title="Drag to reorder">' +
+        '<i class="bx bx-grid-vertical"></i></button>' +
+        '<button type="button" class="bw-flow-iconbtn" data-wf-move="up:' +
+        esc(rule.id) +
+        '"' +
+        (index === 0 ? " disabled" : "") +
+        ' title="Move up — runs earlier" aria-label="Move rule ' +
+        position +
+        ' up"><i class="bx bx-up-arrow-alt" aria-hidden="true"></i></button>' +
+        '<button type="button" class="bw-flow-iconbtn" data-wf-move="down:' +
+        esc(rule.id) +
+        '"' +
+        (index === STATE.rules.length - 1 ? " disabled" : "") +
+        ' title="Move down — runs later" aria-label="Move rule ' +
+        position +
+        ' down"><i class="bx bx-down-arrow-alt" aria-hidden="true"></i></button>' +
+        '<button type="button" class="bw-flow-iconbtn" data-wf-menu="' +
+        esc(rule.id) +
+        '" aria-haspopup="menu" title="More"' +
+        ' aria-label="More actions for rule ' +
+        position +
+        '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button>' +
+        caret;
+
+    var summary = STATE.summaries[rule.id];
+    var head =
+      '<div class="bw-flow-head"><div class="bw-flow-head-main">' +
+      '<div class="bw-flow-head-name">' +
+      name +
+      (rule.enabled
+        ? ""
+        : '<span class="bw-flow-chip" data-i18n="workflows.rule.disabled">Disabled</span>') +
+      "</div>" +
+      '<div class="bw-flow-head-sum' +
+      (summary ? "" : " is-pending") +
+      '" data-wf-summary="' +
+      esc(rule.id) +
+      '">' +
+      esc(summary || "Not validated yet") +
+      "</div></div>" +
+      actionBadge(rule) +
+      '<div class="bw-flow-tools">' +
+      tools +
+      "</div></div>";
+
+    var body = open
+      ? '<div class="bw-flow-body">' +
+        '<div class="bw-flow-clause is-if"><div class="bw-flow-clause-lbl" data-i18n="workflows.rule.if">If</div><div class="bw-flow-clause-main">' +
+        group(rule.condition, path + ".condition", 1) +
+        gate(rule, path) +
+        "</div></div>" +
+        '<div class="bw-flow-clause is-then"><div class="bw-flow-clause-lbl" data-i18n="workflows.action">Then</div><div class="bw-flow-clause-main">' +
+        actionEditor(rule, path) +
+        "</div></div></div>"
+      : "";
+
+    var foot = rule.enabled
+      ? '<div class="bw-flow-foot"><i class="bx bx-check-circle" aria-hidden="true"></i>' +
+        '<span><strong data-i18n="workflows.rule.onMatch">If it matches</strong>' +
+        '<span data-i18n="workflows.rule.stopTail">, evaluation stops here — no rule below is reached.</span></span></div>'
+      : '<div class="bw-flow-foot"><i class="bx bx-minus-circle" aria-hidden="true"></i>' +
+        '<span data-i18n="workflows.rule.skipped">Disabled — skipped entirely, as if it were not in the list.</span></div>';
+
+    return (
+      '<article class="' +
+      classes.join(" ") +
+      '" data-wf-rule="' +
+      esc(rule.id) +
+      '" data-wf-node="' +
+      esc(path) +
+      '" tabindex="-1"' +
+      ' aria-label="Rule ' +
+      position +
+      " of " +
+      STATE.rules.length +
+      " — " +
+      esc(rule.name || "untitled") +
+      '">' +
+      head +
+      body +
+      foot +
+      "</article>"
+    );
+  }
+
+  function link(label, index) {
+    return (
+      '<div class="bw-flow-link" data-wf-link="' +
+      index +
+      '"><div class="bw-flow-link-line"></div>' +
+      (label
+        ? '<div class="bw-flow-link-lbl"><i class="bx bx-down-arrow-alt" aria-hidden="true"></i>' +
+          '<span data-i18n="workflows.link.noMatch">' +
+          label +
+          "</span></div>"
+        : "") +
+      "</div>"
+    );
+  }
+
+  function terminal(kind, title, subtitle, icon, i18n) {
+    return (
+      '<div class="bw-flow-item"><div class="bw-flow-rail"><span class="bw-flow-dot' +
+      (kind === "end" ? " is-end" : "") +
+      '"></span></div>' +
+      '<div class="bw-flow-terminal' +
+      (kind === "end" ? " is-end" : "") +
+      '">' +
+      '<span class="bw-flow-terminal-ic"><i class="bx ' +
+      icon +
+      '" aria-hidden="true"></i></span>' +
+      '<div><strong data-i18n="' +
+      i18n +
+      '">' +
+      title +
+      '</strong><small data-i18n="' +
+      i18n.replace("_title", "_sub") +
+      '">' +
+      subtitle +
+      "</small></div></div></div>"
+    );
+  }
+
+  function ladderHtml() {
+    var html =
+      '<div class="bw-flow"' +
+      (STATE.readonly ? ' data-readonly="1"' : "") +
+      " data-wf-ladder>";
+    html += terminal(
+      "entry",
+      "Every request to an attached service",
+      "Workflows run in attachment order; rules inside this one run top to bottom.",
+      "bx-log-in-circle",
+      "workflows.entry_title",
+    );
+    STATE.rules.forEach(function (rule, index) {
+      html += link(index === 0 ? "" : "no match", index);
+      html +=
+        '<div class="bw-flow-item" data-wf-item="' +
+        esc(rule.id) +
+        '" data-wf-index="' +
+        index +
+        '">' +
+        '<div class="bw-flow-rail">' +
+        (STATE.readonly
+          ? '<span class="bw-flow-mark' +
+            (rule.enabled ? "" : " is-off") +
+            '" aria-hidden="true">' +
+            (index + 1) +
+            "</span>"
+          : '<button type="button" class="bw-flow-mark' +
+            (rule.enabled ? "" : " is-off") +
+            '" data-wf-pos="' +
+            esc(rule.id) +
+            '" aria-haspopup="menu"' +
+            ' title="Position ' +
+            (index + 1) +
+            " of " +
+            STATE.rules.length +
+            ' — click to move"' +
+            ' aria-label="Rule ' +
+            (index + 1) +
+            " of " +
+            STATE.rules.length +
+            ', change position">' +
+            (index + 1) +
+            "</button>") +
+        "</div>" +
+        ruleNode(rule, index) +
+        "</div>";
+    });
+    html += link("no match", STATE.rules.length);
+    html += terminal(
+      "end",
+      "No rule matched",
+      "The request continues to the next attached workflow, then to the rest of the security stack.",
+      "bx-log-out-circle",
+      "workflows.exit_title",
+    );
+    return html + "</div>";
+  }
+
+  function capHtml() {
+    var count = STATE.rules.length;
+    if (!count) return "";
+    // MAX_PREDICATES_PER_RULE is a per-rule cap, so the figure shown against it is the worst
+    // single rule, never the workflow-wide sum.
+    var worst = Math.max.apply(
+      null,
+      STATE.rules.map(function (rule) {
+        return countLeaves(rule.condition);
+      }),
+    );
+    var regexes = STATE.rules.reduce(function (total, rule) {
+      return total + countRegex(rule);
+    }, 0);
+    return (
+      '<i class="bx bx-info-circle" aria-hidden="true"></i><span>' +
+      count +
+      " of " +
+      MAX_RULES +
+      " rules · largest rule uses " +
+      worst +
+      " of " +
+      MAX_PREDICATES_PER_RULE +
+      " predicates · " +
+      regexes +
+      " regex" +
+      (regexes === 1 ? "" : "es") +
+      " in this workflow</span>"
+    );
+  }
+
+  function render(focusSelector) {
+    var count = STATE.rules.length;
+    ladderEl.innerHTML = count ? ladderHtml() : "";
+    ladderEl.classList.toggle("d-none", !count);
+    emptyEl.classList.toggle("d-none", count > 0);
+    capEl.innerHTML = capHtml();
+    var addButton = document.getElementById("wf-add-rule");
+    if (addButton && !STATE.readonly) addButton.disabled = count >= MAX_RULES;
+    if (focusSelector) {
+      var target = document.querySelector(focusSelector);
+      if (target) target.focus({ preventScroll: true });
+    }
+  }
+
+  // ---- validation painting ---------------------------------------------------------
+
+  function panelHtml() {
+    if (!STATE.errorList.length) return "";
+    return (
+      '<div class="alert alert-danger wf-errors" role="alert">' +
+      "<strong>" +
+      STATE.errorList.length +
+      " problem" +
+      (STATE.errorList.length === 1 ? "" : "s") +
+      " block" +
+      (STATE.errorList.length === 1 ? "s" : "") +
+      " the save.</strong> " +
+      '<span data-i18n="workflows.errors.body">Nothing is applied — the running policy is unchanged.</span>' +
+      "<ol>" +
+      STATE.errorList
+        .map(function (error) {
+          return (
+            '<li><button type="button" class="wf-err-jump" data-wf-jump="' +
+            esc(error.path) +
+            '">' +
+            esc(error.message) +
+            "</button>" +
+            '<div class="wf-err-path">' +
+            esc(error.path) +
+            " · " +
+            esc(error.code) +
+            "</div></li>"
+          );
+        })
+        .join("") +
+      "</ol></div>"
+    );
+  }
+
+  /* Paints the API's answer without re-rendering: a re-render while someone is typing in a
+     value would take the caret with it. */
+  function paint() {
+    Array.prototype.forEach.call(
+      ladderEl.querySelectorAll(".bw-flow-invalid"),
+      function (node) {
+        node.classList.remove("bw-flow-invalid");
+        node.removeAttribute("aria-invalid");
+        node.removeAttribute("aria-describedby");
+      },
+    );
+    Array.prototype.forEach.call(
+      ladderEl.querySelectorAll(".bw-flow-err"),
+      function (node) {
+        node.remove();
+      },
+    );
+
+    Object.keys(STATE.errors).forEach(function (path) {
+      var target = nodeAt(path);
+      if (!target) return;
+      target.classList.add("bw-flow-invalid");
+      target.setAttribute("aria-invalid", "true");
+      target.setAttribute("aria-describedby", errId(path));
+      if (target.classList.contains("bw-flow-val"))
+        target.setAttribute("tabindex", "0");
+      var block = document.createElement("div");
+      block.innerHTML = errBlock(path, STATE.errors[path]);
+      var host =
+        target.closest(
+          ".bw-flow-pred, .bw-flow-group, .bw-flow-gate, .bw-flow-params, .bw-flow-field",
+        ) || target;
+      host.appendChild(block.firstChild);
+    });
+
+    STATE.rules.forEach(function (rule) {
+      var host = ladderEl.querySelector(
+        '[data-wf-summary="' + CSS.escape(rule.id) + '"]',
+      );
+      if (!host) return;
+      var summary = STATE.summaries[rule.id];
+      host.textContent = summary || "Not validated yet";
+      host.classList.toggle("is-pending", !summary);
+    });
+
+    panelEl.innerHTML = panelHtml();
+  }
+
+  /* An error path addresses a schema node; the closest rendered ancestor owns the message
+     when the exact node has no element of its own (an unset URI value, for instance). */
+  function nodeAt(path) {
+    var probe = path;
+    while (probe) {
+      var found = ladderEl.querySelector(
+        '[data-wf-node="' + CSS.escape(probe) + '"]',
+      );
+      if (found) return found;
+      var cut = probe.replace(/(\.[a-z_]+|\[\d+\])$/, "");
+      if (cut === probe) return null;
+      probe = cut;
+    }
+    return null;
+  }
+
+  function jump(path) {
+    var match = /^rules\[(\d+)\]/.exec(path);
+    if (!match) return;
+    var rule = STATE.rules[parseInt(match[1], 10)];
+    if (!rule) return;
+    STATE.open.add(rule.id);
+    // A long value list may be hiding the offending chip — reveal it.
+    var valueMatch = /\.values\[(\d+)\]$/.exec(path);
+    if (valueMatch) {
+      var owner = nodeOwnerKey(path.replace(/\.values\[\d+\]$/, ""));
+      if (owner) STATE.shown.add(owner);
+    }
+    render();
+    paint();
+    // setTimeout, not requestAnimationFrame: rAF never fires while the page is in a hidden
+    // or background frame, which would silently drop the landing.
+    window.setTimeout(function () {
+      var element = nodeAt(path);
+      if (!element) return;
+      var rect = element.getBoundingClientRect();
+      if (rect.top < 80 || rect.bottom > window.innerHeight - 40) {
+        window.scrollTo({ top: rect.top + window.scrollY - 160 });
+      }
+      element.classList.remove("bw-flow-flash");
+      void element.offsetWidth;
+      element.classList.add("bw-flow-flash");
+      // Land on a real control inside the offending node when there is one, so keyboard and
+      // screen-reader users can act on it — never on a destructive button.
+      var focusable = element.matches("input, select")
+        ? element
+        : element.querySelector("input, select") || element;
+      focusable.focus();
+      say("Jumped to " + path + ": " + (STATE.errors[path] || ""));
+    }, 0);
+  }
+
+  function nodeOwnerKey(path) {
+    var element = ladderEl.querySelector(
+      '[data-wf-node="' + CSS.escape(path) + '"]',
+    );
+    return element ? element.getAttribute("data-wf-key") : null;
+  }
+
+  // ---- mutations -------------------------------------------------------------------
+
+  function touch(focusSelector) {
+    render(focusSelector);
+    paint();
+    scheduleValidate();
+  }
+
+  function moveRule(id, to, how) {
+    var from = STATE.rules.findIndex(function (rule) {
+      return rule.id === id;
+    });
+    if (from === -1) return;
+    var total = STATE.rules.length;
+    to = Math.max(0, Math.min(total - 1, to));
+    if (to === from) return;
+    var moved = STATE.rules.splice(from, 1)[0];
+    STATE.rules.splice(to, 0, moved);
+    touch('[data-wf-rule="' + CSS.escape(id) + '"]');
+    say(
+      (moved.name || "The rule") +
+        " moved to position " +
+        (to + 1) +
+        " of " +
+        total +
+        (how ? " — " + how : "") +
+        ". It now runs " +
+        (to === 0
+          ? "first"
+          : to === total - 1
+            ? "last"
+            : "after " + (STATE.rules[to - 1].name || "the rule above")) +
+        ".",
+    );
+  }
+
+  function removeNode(nodeKey) {
+    var hit = locate(nodeKey);
+    if (!hit || !hit.parent) return;
+    hit.parent.nodes.splice(hit.index, 1);
+    touch();
+  }
+
+  // ---- popovers --------------------------------------------------------------------
+
+  function closeMenus() {
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".bw-flow-menu"),
+      function (menu) {
+        menu.remove();
+      },
+    );
+  }
+
+  function placeMenu(menu, anchor, alignRight) {
+    var rect = anchor.getBoundingClientRect();
+    document.body.appendChild(menu);
+    var top = rect.bottom + window.scrollY + 6;
+    if (rect.bottom + menu.offsetHeight + 12 > window.innerHeight) {
+      top = Math.max(
+        window.scrollY + 8,
+        rect.top + window.scrollY - menu.offsetHeight - 6,
+      );
+    }
+    menu.style.top = top + "px";
+    menu.style.left =
+      (alignRight
+        ? Math.max(8, rect.right + window.scrollX - menu.offsetWidth)
+        : rect.left + window.scrollX) + "px";
+    var first = menu.querySelector("button:not([disabled])");
+    if (first) first.focus();
+  }
+
+  function menuElement(dataset) {
+    var menu = document.createElement("div");
+    menu.className = "bw-flow-menu";
+    menu.setAttribute("role", "menu");
+    Object.keys(dataset).forEach(function (name) {
+      menu.dataset[name] = dataset[name];
+    });
+    return menu;
+  }
+
+  function positionMenu(anchor, id) {
+    closeMenus();
+    var index = STATE.rules.findIndex(function (rule) {
+      return rule.id === id;
+    });
+    var total = STATE.rules.length;
+    var menu = menuElement({ rule: id });
+    menu.innerHTML =
+      '<div class="bw-flow-menu-hd">Runs at position ' +
+      (index + 1) +
+      " of " +
+      total +
+      "</div>" +
+      '<button type="button" role="menuitem" data-wf-moveto="0"' +
+      (index === 0 ? " disabled" : "") +
+      ">" +
+      '<i class="bx bx-chevrons-up" aria-hidden="true"></i><span data-i18n="workflows.move.first">Run first</span></button>' +
+      '<button type="button" role="menuitem" data-wf-moveto="' +
+      (total - 1) +
+      '"' +
+      (index === total - 1 ? " disabled" : "") +
+      ">" +
+      '<i class="bx bx-chevrons-down" aria-hidden="true"></i><span data-i18n="workflows.move.last">Run last</span></button>' +
+      '<div class="sep"></div>' +
+      STATE.rules
+        .map(function (rule, position) {
+          return (
+            '<button type="button" role="menuitem" data-wf-moveto="' +
+            position +
+            '"' +
+            (position === index ? " disabled" : "") +
+            ">" +
+            '<i class="bx ' +
+            (position < index
+              ? "bx-up-arrow-alt"
+              : position > index
+                ? "bx-down-arrow-alt"
+                : "bx-check") +
+            '" aria-hidden="true"></i>' +
+            "<span>" +
+            (position === index ? "Stays at" : "Move to") +
+            " position " +
+            (position + 1) +
+            "</span>" +
+            '<span class="n">' +
+            esc((rule.name || "untitled").slice(0, 18)) +
+            "</span></button>"
+          );
+        })
+        .join("");
+    placeMenu(menu, anchor);
+  }
+
+  function ruleMenu(anchor, id) {
+    closeMenus();
+    var index = STATE.rules.findIndex(function (rule) {
+      return rule.id === id;
+    });
+    var rule = STATE.rules[index];
+    var menu = menuElement({ rule: id });
+    menu.innerHTML =
+      '<button type="button" role="menuitem" data-wf-act="toggle"><i class="bx ' +
+      (rule.enabled ? "bx-pause-circle" : "bx-play-circle") +
+      '" aria-hidden="true"></i>' +
+      '<span data-i18n="workflows.menu.toggle">' +
+      (rule.enabled ? "Disable rule" : "Enable rule") +
+      "</span></button>" +
+      '<button type="button" role="menuitem" data-wf-act="duplicate"' +
+      (STATE.rules.length >= MAX_RULES ? " disabled" : "") +
+      ">" +
+      '<i class="bx bx-duplicate" aria-hidden="true"></i><span data-i18n="workflows.menu.duplicate">Duplicate below</span></button>' +
+      '<div class="sep"></div>' +
+      '<button type="button" role="menuitem" data-wf-act="top"' +
+      (index === 0 ? " disabled" : "") +
+      ">" +
+      '<i class="bx bx-chevrons-up" aria-hidden="true"></i><span data-i18n="workflows.menu.top">Run first</span></button>' +
+      '<button type="button" role="menuitem" data-wf-act="bottom"' +
+      (index === STATE.rules.length - 1 ? " disabled" : "") +
+      ">" +
+      '<i class="bx bx-chevrons-down" aria-hidden="true"></i><span data-i18n="workflows.menu.bottom">Run last</span></button>' +
+      '<div class="sep"></div>' +
+      '<button type="button" role="menuitem" class="danger" data-wf-act="delete">' +
+      '<i class="bx bx-trash" aria-hidden="true"></i><span data-i18n="workflows.menu.delete">Delete rule</span></button>';
+    placeMenu(menu, anchor, true);
+  }
+
+  function opMenu(anchor, nodeKey) {
+    closeMenus();
+    var hit = locate(nodeKey);
+    if (!hit) return;
+    var menu = menuElement({ node: nodeKey });
+    var items = [
+      ["all", "All of", "Matches only when every condition inside is true."],
+      ["any", "Any of", "Matches as soon as one condition inside is true."],
+      [
+        "not",
+        "None of",
+        "Matches when none of the conditions inside are true.",
+      ],
+    ];
+    menu.innerHTML = items
+      .map(function (item) {
+        return (
+          '<button type="button" role="menuitem" data-wf-setop="' +
+          item[0] +
+          '"' +
+          (hit.node.op === item[0] ? " disabled" : "") +
+          ">" +
+          '<i class="bx ' +
+          (hit.node.op === item[0] ? "bx-check" : "bx-radio-circle") +
+          '" aria-hidden="true"></i>' +
+          `<span><b data-i18n="workflows.tree.${item[0]}">` +
+          item[1] +
+          "</b></span></button>"
+        );
+      })
+      .join("");
+    placeMenu(menu, anchor);
+  }
+
+  function addConditionMenu(anchor, nodeKey) {
+    closeMenus();
+    var menu = menuElement({ node: nodeKey });
+    menu.innerHTML = window.BW_WORKFLOW_TYPES.conditions
+      .map(function (spec) {
+        return (
+          '<button type="button" role="menuitem" data-wf-newpred="' +
+          esc(spec.op) +
+          '">' +
+          '<i class="bx ' +
+          leafMeta(spec.op).icon +
+          '" aria-hidden="true"></i><span>' +
+          esc(spec.label) +
+          "</span></button>"
+        );
+      })
+      .join("");
+    placeMenu(menu, anchor);
+  }
+
+  // ---- inline value entry ----------------------------------------------------------
+
+  function inlineValue(host, nodeKey) {
+    var hit = locate(nodeKey);
+    if (!hit) return;
+    var input = document.createElement("input");
+    input.type = "text";
+    input.className = "bw-flow-val-input";
+    input.setAttribute("aria-label", "New value");
+    input.placeholder = conditionSpec(hit.node.op).placeholder || "";
+    host.replaceWith(input);
+    input.focus();
+    var done = false;
+    var commit = function (keep) {
+      if (done) return;
+      done = true;
+      var value = input.value.trim();
+      if (keep && value) hit.node.values.push(value);
+      touch();
+    };
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        commit(true);
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        commit(false);
+      }
+    });
+    input.addEventListener("blur", function () {
+      commit(true);
+    });
+  }
+
+  // ---- API -------------------------------------------------------------------------
+
+  function post(url, body) {
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": document.getElementById("wf-csrf").value,
+      },
+      body: JSON.stringify(body),
+    }).then(function (response) {
+      return response.json();
+    });
+  }
 
   function scheduleValidate() {
     if (validateTimer) window.clearTimeout(validateTimer);
     validateTimer = window.setTimeout(validate, 400);
   }
 
-  function clearErrors() {
-    Array.prototype.forEach.call(
-      rulesEl.querySelectorAll(".wf-rule-errors"),
-      function (node) {
-        node.textContent = "";
-      },
-    );
-    Array.prototype.forEach.call(
-      rulesEl.querySelectorAll(".wf-rule-summary"),
-      function (node) {
-        node.textContent = "";
-      },
-    );
-  }
-
-  function ruleCardAt(index) {
-    return rulesEl.querySelectorAll(".wf-rule")[index] || null;
-  }
-
-  function paintErrors(errors) {
-    (errors || []).forEach(function (error) {
-      // Paths look like rules[2].condition.nodes[1]; the leading index is what tells us
-      // which card owns the message.
-      var match = /^rules\[(\d+)\]/.exec(error.path || "");
-      var card = match ? ruleCardAt(parseInt(match[1], 10)) : null;
-      var target = card ? card.querySelector(".wf-rule-errors") : validationEl;
-      var line = el("div", null, (error.path || "") + " — " + error.message);
-      if (target === validationEl) line.className = "alert alert-danger py-2";
-      target.appendChild(line);
+  function setErrors(errors) {
+    STATE.errorList = errors || [];
+    STATE.errors = {};
+    STATE.errorList.forEach(function (error) {
+      STATE.errors[error.path] = error.message;
     });
   }
 
   function validate() {
-    clearErrors();
-    validationEl.innerHTML = "";
-    fetch(document.getElementById("wf-validate-url").value, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": document.getElementById("wf-csrf").value,
-      },
-      body: JSON.stringify({ definition: serialize() }),
+    if (!STATE.rules.length) {
+      setErrors([]);
+      STATE.summaries = {};
+      paint();
+      return;
+    }
+    post(document.getElementById("wf-validate-url").value, {
+      definition: serialize(),
     })
-      .then(function (response) {
-        return response.json();
-      })
       .then(function (body) {
         if (body.status !== "success") {
-          validationEl.appendChild(
-            el(
-              "div",
-              "alert alert-warning py-2",
-              body.message || "Could not validate",
-            ),
-          );
+          panelEl.innerHTML =
+            '<div class="alert alert-warning" role="alert">' +
+            esc(body.message || "Could not validate") +
+            "</div>";
           return;
         }
         if (body.valid) {
-          (body.summaries || []).forEach(function (summary, index) {
-            var card = ruleCardAt(index);
-            if (card)
-              card.querySelector(".wf-rule-summary").textContent =
-                summary.summary;
+          setErrors([]);
+          STATE.summaries = {};
+          (body.summaries || []).forEach(function (entry, index) {
+            var rule = STATE.rules[index];
+            if (rule) STATE.summaries[rule.id] = entry.summary;
           });
-          return;
+        } else {
+          setErrors(body.errors);
         }
-        paintErrors(body.errors);
+        paint();
       })
       .catch(function () {
-        validationEl.appendChild(
-          el(
-            "div",
-            "alert alert-warning py-2",
-            "Could not reach the validation endpoint",
-          ),
-        );
+        panelEl.innerHTML =
+          '<div class="alert alert-warning" role="alert">Could not reach the validation endpoint</div>';
       });
   }
 
   function save() {
     var button = document.getElementById("wf-save");
     button.disabled = true;
-    fetch(document.getElementById("wf-save-url").value, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": document.getElementById("wf-csrf").value,
-      },
-      body: JSON.stringify({ definition: serialize() }),
+    post(document.getElementById("wf-save-url").value, {
+      definition: serialize(),
     })
-      .then(function (response) {
-        return response.json();
-      })
       .then(function (body) {
         if (body.status === "success") {
           window.location.reload();
           return;
         }
-        validationEl.innerHTML = "";
-        validationEl.appendChild(
-          el(
-            "div",
-            "alert alert-danger py-2",
-            body.message || "Could not save",
-          ),
-        );
+        panelEl.innerHTML =
+          '<div class="alert alert-danger" role="alert">' +
+          esc(body.message || "Could not save") +
+          "</div>";
         button.disabled = false;
       })
       .catch(function () {
-        validationEl.innerHTML = "";
-        validationEl.appendChild(
-          el(
-            "div",
-            "alert alert-danger py-2",
-            "Could not reach the save endpoint",
-          ),
-        );
+        panelEl.innerHTML =
+          '<div class="alert alert-danger" role="alert">Could not reach the save endpoint</div>';
         button.disabled = false;
       });
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    rulesEl = document.getElementById("wf-rules");
-    emptyEl = document.getElementById("wf-empty");
-    validationEl = document.getElementById("wf-validation");
-    if (!rulesEl) return;
+  // ---- wiring ----------------------------------------------------------------------
 
-    readonly = document.getElementById("wf-readonly").value === "yes";
+  function ruleFromEvent(target) {
+    var card = target.closest("[data-wf-rule]");
+    return card ? ruleById(card.dataset.wfRule) : null;
+  }
+
+  function trace(index) {
+    var ladder = ladderEl.querySelector("[data-wf-ladder]");
+    if (!ladder) return;
+    var items = ladder.querySelectorAll("[data-wf-item]");
+    var links = ladder.querySelectorAll("[data-wf-link]");
+    if (index === null) {
+      ladder.classList.remove("is-tracing");
+      Array.prototype.forEach.call(items, function (el) {
+        el.classList.remove("is-dead", "is-above");
+      });
+      Array.prototype.forEach.call(links, function (el) {
+        el.classList.remove("is-dead", "is-above");
+      });
+      return;
+    }
+    ladder.classList.add("is-tracing");
+    Array.prototype.forEach.call(items, function (el) {
+      var position = parseInt(el.dataset.wfIndex, 10);
+      el.classList.toggle("is-dead", position > index);
+      el.classList.toggle("is-above", position < index);
+    });
+    Array.prototype.forEach.call(links, function (el) {
+      var position = parseInt(el.dataset.wfLink, 10);
+      el.classList.toggle("is-dead", position > index);
+      el.classList.toggle("is-above", position <= index);
+    });
+  }
+
+  function wireLadder(root) {
+    root.addEventListener("click", function (event) {
+      var target = event.target;
+      var hit = function (selector) {
+        return target.closest(selector);
+      };
+
+      var jumpButton = hit("[data-wf-jump]");
+      if (jumpButton) return jump(jumpButton.dataset.wfJump);
+
+      var toggle = hit("[data-wf-toggleopen]");
+      if (toggle) {
+        var id = toggle.dataset.wfToggleopen;
+        STATE.open.has(id) ? STATE.open.delete(id) : STATE.open.add(id);
+        render('[data-wf-toggleopen="' + CSS.escape(id) + '"]');
+        paint();
+        return;
+      }
+
+      var move = hit("[data-wf-move]");
+      if (move) {
+        var parts = move.dataset.wfMove.split(":");
+        var index = STATE.rules.findIndex(function (rule) {
+          return rule.id === parts[1];
+        });
+        return moveRule(parts[1], parts[0] === "up" ? index - 1 : index + 1);
+      }
+
+      var position = hit("[data-wf-pos]");
+      if (position) return positionMenu(position, position.dataset.wfPos);
+      var more = hit("[data-wf-menu]");
+      if (more) return ruleMenu(more, more.dataset.wfMenu);
+      var op = hit("[data-wf-op]");
+      if (op) return opMenu(op, op.dataset.wfOp);
+      var addCondition = hit("[data-wf-addpred]");
+      if (addCondition)
+        return addConditionMenu(addCondition, addCondition.dataset.wfAddpred);
+
+      var addGroup = hit("[data-wf-addgroup]");
+      if (addGroup && !addGroup.disabled) {
+        var groupHit = locate(addGroup.dataset.wfAddgroup);
+        if (groupHit) {
+          groupHit.node.nodes.push(
+            key({ op: "any", nodes: [newLeaf("country")] }),
+          );
+          touch();
+        }
+        return;
+      }
+
+      var addGate = hit("[data-wf-addgate]");
+      if (addGate) {
+        var gated = ruleById(addGate.dataset.wfAddgate);
+        if (gated) {
+          gated.threshold = { count: 10, window: 60, key: "ip" };
+          touch();
+          say(
+            "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+          );
+        }
+        return;
+      }
+
+      var removeGate = hit("[data-wf-rmgate]");
+      if (removeGate) {
+        var ungated = ruleById(removeGate.dataset.wfRmgate);
+        if (ungated) {
+          ungated.threshold = null;
+          touch();
+        }
+        return;
+      }
+
+      var removeNodeButton = hit("[data-wf-rmnode]");
+      if (removeNodeButton)
+        return removeNode(removeNodeButton.dataset.wfRmnode);
+
+      var removeValue = hit("[data-wf-rmval]");
+      if (removeValue) {
+        var split = removeValue.dataset.wfRmval.split(":");
+        var valueHit = locate(split[0]);
+        if (valueHit) {
+          valueHit.node.values.splice(parseInt(split[1], 10), 1);
+          touch();
+          if (!valueHit.node.values.length)
+            say(
+              "Last value removed — this condition cannot be saved until it holds one.",
+            );
+        }
+        return;
+      }
+
+      var moreValues = hit("[data-wf-morevals]");
+      if (moreValues) {
+        var valueKey = moreValues.dataset.wfMorevals;
+        STATE.shown.has(valueKey)
+          ? STATE.shown.delete(valueKey)
+          : STATE.shown.add(valueKey);
+        render();
+        paint();
+        return;
+      }
+
+      var addValue = hit("[data-wf-addval]");
+      if (addValue) return inlineValue(addValue, addValue.dataset.wfAddval);
+
+      var action = hit("[data-wf-action]");
+      if (action && !action.disabled) {
+        var actionRule = ruleFromEvent(action);
+        if (!actionRule || actionRule.action.type === action.dataset.wfAction)
+          return;
+        var type = action.dataset.wfAction;
+        actionRule.action =
+          type === "redirect"
+            ? { type: "redirect", url: "", status: 302 }
+            : type === "challenge"
+              ? { type: "challenge", provider: "javascript" }
+              : { type: "block" };
+        touch();
+        say(
+          "Action changed to " +
+            type +
+            ". It is still the only action, and it still stops evaluation.",
+        );
+        return;
+      }
+
+      // Clicking the head background — not a control — toggles the rule.
+      var head = hit(".bw-flow-head");
+      if (head && !target.closest("button, input, select, a, .bw-flow-act")) {
+        var card = head.closest("[data-wf-rule]");
+        if (card) {
+          var cardId = card.dataset.wfRule;
+          STATE.open.has(cardId)
+            ? STATE.open.delete(cardId)
+            : STATE.open.add(cardId);
+          render();
+          paint();
+        }
+      }
+    });
+
+    // Typing never re-renders: the model is updated in place and the API's answer is
+    // painted onto the existing DOM, so the caret stays where the operator put it.
+    root.addEventListener("input", function (event) {
+      var target = event.target;
+      var name = target.closest("[data-wf-name]");
+      if (name) {
+        var named = ruleById(name.dataset.wfName);
+        if (named) named.name = name.value;
+        return scheduleValidate();
+      }
+      var uri = target.closest("[data-wf-uri]");
+      if (uri) {
+        var uriHit = locate(uri.dataset.wfUri);
+        if (uriHit) uriHit.node.value = uri.value;
+        return scheduleValidate();
+      }
+      var param = target.closest("[data-wf-param]");
+      if (param) {
+        var paramRule = ruleFromEvent(param);
+        if (paramRule) paramRule.action[param.dataset.wfParam] = param.value;
+        return scheduleValidate();
+      }
+      var gateInput = target.closest("[data-wf-gate]");
+      if (gateInput) {
+        var gateRule = ruleFromEvent(gateInput);
+        if (gateRule && gateRule.threshold) {
+          gateRule.threshold[gateInput.dataset.wfGate] = Math.max(
+            1,
+            parseInt(gateInput.value, 10) || 1,
+          );
+        }
+        scheduleValidate();
+      }
+    });
+
+    root.addEventListener("change", function (event) {
+      var target = event.target;
+      if (target.classList.contains("bw-flow-pred-type-select")) {
+        var typeHit = locate(target.closest("[data-wf-key]").dataset.wfKey);
+        if (typeHit && typeHit.parent) {
+          var replacement = newLeaf(target.value);
+          typeHit.parent.nodes[typeHit.index] = replacement;
+          touch();
+        }
+        return;
+      }
+      if (target.classList.contains("bw-flow-pred-op-select")) {
+        var host = target.closest("[data-wf-key]");
+        var opHit = host ? locate(host.dataset.wfKey) : null;
+        if (!opHit) return;
+        if (opHit.node.op === "uri") opHit.node.match = target.value;
+        else if (opHit.node.op === "group") {
+          opHit.node.kind = target.value;
+          opHit.node.group_id = firstGroupFor(target.value);
+        }
+        touch();
+        return;
+      }
+      if (
+        target.closest("[data-wf-group]") &&
+        target.classList.contains("bw-flow-val-input")
+      ) {
+        var groupHit = locate(target.closest("[data-wf-key]").dataset.wfKey);
+        if (groupHit) {
+          groupHit.node.group_id = target.value;
+          touch();
+        }
+        return;
+      }
+      if (target.classList.contains("wf-act-status-select")) {
+        var statusRule = ruleFromEvent(target);
+        if (statusRule) {
+          if (statusRule.action.type === "block") {
+            if (target.value === "") delete statusRule.action.status;
+            else statusRule.action.status = parseInt(target.value, 10);
+          } else {
+            statusRule.action.status = parseInt(target.value, 10);
+          }
+          touch();
+        }
+        return;
+      }
+      if (target.classList.contains("wf-act-provider-select")) {
+        var providerRule = ruleFromEvent(target);
+        if (providerRule) {
+          providerRule.action.provider = target.value;
+          touch();
+        }
+      }
+    });
+
+    // Reordering must not depend on a pointer: the arrows, the numbered marker menu and
+    // Alt + ↑ / ↓ all reach the same move, and every move is announced.
+    root.addEventListener("keydown", function (event) {
+      if (
+        !event.altKey ||
+        (event.key !== "ArrowUp" && event.key !== "ArrowDown")
+      )
+        return;
+      var card = event.target.closest("[data-wf-rule]");
+      if (!card || STATE.readonly) return;
+      event.preventDefault();
+      var id = card.dataset.wfRule;
+      var index = STATE.rules.findIndex(function (rule) {
+        return rule.id === id;
+      });
+      moveRule(id, event.key === "ArrowUp" ? index - 1 : index + 1, "keyboard");
+    });
+
+    // Hovering a rule dims everything it would shadow — first-match-wins, without a graph.
+    root.addEventListener("pointerover", function (event) {
+      var item = event.target.closest("[data-wf-item]");
+      trace(item ? parseInt(item.dataset.wfIndex, 10) : null);
+    });
+    root.addEventListener("pointerleave", function () {
+      trace(null);
+    });
+    root.addEventListener("focusin", function (event) {
+      var item = event.target.closest("[data-wf-item]");
+      if (item) trace(parseInt(item.dataset.wfIndex, 10));
+    });
+
+    root.addEventListener("pointerdown", function (event) {
+      var grip = event.target.closest("[data-wf-grip]");
+      if (!grip) return;
+      var item = grip.closest("[data-wf-item]");
+      if (item) item.setAttribute("draggable", "true");
+    });
+    root.addEventListener("dragstart", function (event) {
+      var item = event.target.closest("[data-wf-item]");
+      if (!item) return;
+      dragId = item.dataset.wfItem;
+      item.classList.add("is-dragging");
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", dragId);
+      }
+    });
+    root.addEventListener("dragover", function (event) {
+      var item = event.target.closest("[data-wf-item]");
+      if (!dragId || !item || item.dataset.wfItem === dragId) return;
+      event.preventDefault();
+      var rect = item.getBoundingClientRect();
+      var after = event.clientY > rect.top + rect.height / 2;
+      Array.prototype.forEach.call(
+        root.querySelectorAll(".is-dropbefore, .is-dropafter"),
+        function (el) {
+          el.classList.remove("is-dropbefore", "is-dropafter");
+        },
+      );
+      item.classList.add(after ? "is-dropafter" : "is-dropbefore");
+    });
+    root.addEventListener("drop", function (event) {
+      var item = event.target.closest("[data-wf-item]");
+      if (!dragId || !item) return;
+      event.preventDefault();
+      var to = STATE.rules.findIndex(function (rule) {
+        return rule.id === item.dataset.wfItem;
+      });
+      var from = STATE.rules.findIndex(function (rule) {
+        return rule.id === dragId;
+      });
+      var target = item.classList.contains("is-dropafter") ? to + 1 : to;
+      if (from < target) target -= 1;
+      moveRule(dragId, target, "drag");
+      dragId = null;
+    });
+    root.addEventListener("dragend", function () {
+      Array.prototype.forEach.call(
+        root.querySelectorAll(".is-dragging, .is-dropbefore, .is-dropafter"),
+        function (el) {
+          el.classList.remove("is-dragging", "is-dropbefore", "is-dropafter");
+        },
+      );
+      Array.prototype.forEach.call(
+        root.querySelectorAll("[data-wf-item][draggable]"),
+        function (el) {
+          el.removeAttribute("draggable");
+        },
+      );
+      dragId = null;
+    });
+  }
+
+  /* The menus live on <body>, so their actions are wired on the document rather than on the
+     ladder they were opened from. */
+  function wireMenus() {
+    document.addEventListener("click", function (event) {
+      var target = event.target;
+
+      var moveTo = target.closest("[data-wf-moveto]");
+      if (moveTo && !moveTo.disabled) {
+        var host = moveTo.closest(".bw-flow-menu");
+        closeMenus();
+        return moveRule(
+          host.dataset.rule,
+          parseInt(moveTo.dataset.wfMoveto, 10),
+        );
+      }
+
+      var setOp = target.closest("[data-wf-setop]");
+      if (setOp && !setOp.disabled) {
+        var opHost = setOp.closest(".bw-flow-menu");
+        var opHit = locate(opHost.dataset.node);
+        closeMenus();
+        if (opHit) {
+          opHit.node.op = setOp.dataset.wfSetop;
+          touch();
+        }
+        return;
+      }
+
+      var newPred = target.closest("[data-wf-newpred]");
+      if (newPred) {
+        var predHost = newPred.closest(".bw-flow-menu");
+        var predHit = locate(predHost.dataset.node);
+        closeMenus();
+        if (predHit) {
+          if (countLeaves(predHit.rule.condition) >= MAX_PREDICATES_PER_RULE) {
+            say(
+              "This rule already holds " +
+                MAX_PREDICATES_PER_RULE +
+                " conditions, the maximum.",
+            );
+            return;
+          }
+          predHit.node.nodes.push(newLeaf(newPred.dataset.wfNewpred));
+          touch();
+        }
+        return;
+      }
+
+      var ruleAction = target.closest("[data-wf-act]");
+      if (ruleAction && !ruleAction.disabled) {
+        var actHost = ruleAction.closest(".bw-flow-menu");
+        var id = actHost.dataset.rule;
+        var index = STATE.rules.findIndex(function (rule) {
+          return rule.id === id;
+        });
+        var rule = STATE.rules[index];
+        closeMenus();
+        if (!rule) return;
+        switch (ruleAction.dataset.wfAct) {
+          case "toggle":
+            rule.enabled = !rule.enabled;
+            touch();
+            say(
+              (rule.name || "The rule") +
+                (rule.enabled
+                  ? " enabled — it is evaluated again at position " +
+                    (index + 1)
+                  : " disabled — it is skipped entirely and rules below it now see those requests") +
+                ".",
+            );
+            break;
+          case "duplicate": {
+            if (STATE.rules.length >= MAX_RULES) return;
+            var copy = fromSchemaRule(toSchemaRule(rule));
+            copy.id = newId();
+            copy.name = (rule.name || "Rule") + " (copy)";
+            STATE.rules.splice(index + 1, 0, copy);
+            touch();
+            say(
+              "Copy inserted at position " +
+                (index + 2) +
+                ". It can never match while the original above it is enabled.",
+            );
+            break;
+          }
+          case "top":
+            moveRule(id, 0);
+            break;
+          case "bottom":
+            moveRule(id, STATE.rules.length - 1);
+            break;
+          case "delete":
+            if (
+              window.confirm(
+                "Delete this rule? Everything below it moves up one position.",
+              )
+            ) {
+              STATE.rules.splice(index, 1);
+              STATE.open.delete(id);
+              touch();
+              say("Rule deleted. " + STATE.rules.length + " rules remain.");
+            }
+            break;
+        }
+        return;
+      }
+
+      if (
+        !target.closest(
+          ".bw-flow-menu, [data-wf-pos], [data-wf-menu], [data-wf-op], [data-wf-addpred]",
+        )
+      )
+        closeMenus();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeMenus();
+    });
+  }
+
+  function toSchemaRule(rule) {
+    return {
+      id: rule.id,
+      name: rule.name,
+      enabled: rule.enabled,
+      condition: toSchema(rule.condition),
+      threshold: rule.threshold,
+      action: rule.action,
+    };
+  }
+
+  function fromSchemaRule(raw) {
+    return {
+      id: raw.id || newId(),
+      name: raw.name || "",
+      enabled: raw.enabled !== false,
+      condition: fromSchema(raw.condition || { op: "all", nodes: [] }),
+      threshold: raw.threshold
+        ? {
+            count: raw.threshold.count,
+            window: raw.threshold.window,
+            key: "ip",
+          }
+        : null,
+      action: Object.assign({}, raw.action || { type: "block" }),
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    ladderEl = document.getElementById("wf-rules");
+    emptyEl = document.getElementById("wf-empty");
+    panelEl = document.getElementById("wf-validation");
+    liveEl = document.getElementById("wf-live");
+    capEl = document.getElementById("wf-cap");
+    if (!ladderEl) return;
+
+    STATE.open = new Set();
+    STATE.shown = new Set();
+    STATE.readonly = document.getElementById("wf-readonly").value === "yes";
     try {
-      groups = JSON.parse(document.getElementById("wf-groups").value || "{}");
+      STATE.groups = JSON.parse(
+        document.getElementById("wf-groups").value || "{}",
+      );
     } catch (error) {
-      groups = {};
+      STATE.groups = {};
     }
 
     var definition = { rules: [] };
@@ -742,19 +2165,30 @@
     } catch (error) {
       definition = { rules: [] };
     }
-    (definition.rules || []).forEach(addRule);
-    syncEmpty();
+    STATE.rules = (definition.rules || []).map(fromSchemaRule);
+
+    render();
+    wireLadder(ladderEl);
+    wireMenus();
 
     var addButton = document.getElementById("wf-add-rule");
     if (addButton) {
       addButton.addEventListener("click", function () {
-        addRule(null);
-        scheduleValidate();
+        if (STATE.rules.length >= MAX_RULES) return;
+        var rule = newRule();
+        STATE.rules.push(rule);
+        STATE.open.add(rule.id);
+        touch('[data-wf-rule="' + CSS.escape(rule.id) + '"]');
+        say(
+          "Rule added at position " +
+            STATE.rules.length +
+            " — last, so every rule above it is checked first.",
+        );
       });
     }
     var saveButton = document.getElementById("wf-save");
     if (saveButton) saveButton.addEventListener("click", save);
 
-    if (definition.rules && definition.rules.length) validate();
+    if (STATE.rules.length) validate();
   });
 })();

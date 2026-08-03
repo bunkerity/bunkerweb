@@ -2305,6 +2305,14 @@
     "truncated": "Only the first 500 upstreams are displayed. Narrow the list through the API for the complete result."
   },
   "workflows": {
+    "act_block": "Block",
+    "act_challenge": "Challenge",
+    "act_code": "Status",
+    "act_provider": "Antibot provider",
+    "act_redirect": "Redirect",
+    "act_status": "Deny status",
+    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
+    "act_url": "Destination URL",
     "action": "Then",
     "add_rule": "Add rule",
     "all": "All",
@@ -2319,17 +2327,68 @@
     "empty_text": "A workflow is an ordered list of rules you attach to services: a condition tree, an optional rate threshold, and one action — challenge, block or redirect.",
     "empty_title": "No workflows yet",
     "enabled": "Enabled",
+    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
+    "entry_title": "Every request to an attached service",
+    "errors": {
+      "body": "Nothing is applied — the running policy is unchanged."
+    },
+    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
+    "exit_title": "No rule matched",
+    "gate": {
+      "and": "and only once the same client IP has made more than",
+      "chip": "match gate",
+      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+    },
+    "legend": {
+      "fall": "No match falls to the next rule",
+      "gate": "A rate threshold gates the match, it is not an action",
+      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
+      "stop": "A match runs one action and stops"
+    },
+    "link": {
+      "noMatch": "no match"
+    },
+    "menu": {
+      "bottom": "Run last",
+      "delete": "Delete rule",
+      "duplicate": "Duplicate below",
+      "toggle": "Disable rule",
+      "top": "Run first"
+    },
+    "move": {
+      "first": "Run first",
+      "last": "Run last"
+    },
     "new": "New workflow",
     "no_rules": "No rule yet. Add one to start building this policy.",
     "not_attached": "Not attached",
     "order_help": "Rules are evaluated in order and the first one that matches wins. A rule with a rate threshold only matches once the threshold is exceeded, so a lower rule can catch the traffic below it.",
     "readonly": "The database is read-only. Workflows can be inspected but not changed.",
+    "rule": {
+      "disabled": "Disabled",
+      "if": "If",
+      "onMatch": "If it matches",
+      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
+      "stopTail": ", evaluation stops here — no rule below is reached."
+    },
     "rules": "Rules",
     "search": "Search name or description...",
     "threshold": "Only above a rate",
     "threshold_count": "Requests",
     "threshold_window": "Per (seconds)",
-    "truncated": "Only the first 500 workflows are displayed. Narrow the list through the API for the complete result."
+    "tree": {
+      "addCondition": "Condition",
+      "addGroup": "Group",
+      "all": "All of",
+      "any": "Any of",
+      "empty": "Empty group — add a condition, it cannot be saved like this.",
+      "not": "None of",
+      "removeGroup": "Remove group"
+    },
+    "truncated": "Only the first 500 workflows are displayed. Narrow the list through the API for the complete result.",
+    "value": {
+      "add": "Value"
+    }
   },
   "request_path": {
     "client": "Client",

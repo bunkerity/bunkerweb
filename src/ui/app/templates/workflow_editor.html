@@ -3,6 +3,11 @@
 {% from "components/button.html" import button %}
 {% from "components/card.html" import card %}
 {% from "components/page-head.html" import page_head %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/workflow_editor.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block page_head %}{% endblock %}
 {% block content %}
     {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
@@ -21,15 +26,30 @@
 
     {{ alert(message="Rules are evaluated in order and the first one that matches wins. A rule with a rate threshold only matches once the threshold is exceeded, so a lower rule can catch the traffic below it.", message_key="workflows.order_help", variant="info", icon="bx-info-circle", classes="mb-4") }}
 
+    {# Validation summary. Every entry jumps to the node its path addresses. #}
     <div id="wf-validation" class="mb-4"></div>
 
     {% call card(classes="p-4 min-vh-70") %}
-        <div id="wf-rules"></div>
+        {# The ladder is rendered by workflow_editor.js from the definition below: a rule's
+           position in it is its priority, so the markup is built from the ordered list
+           rather than cloned per card. #}
+        <div class="wf-canvas" id="wf-rules"></div>
         <div id="wf-empty" class="text-center text-muted py-5 d-none">
-            <i class="bx bx-sitemap display-6 d-block mb-2" aria-hidden="true"></i>
+            <i class="bx bx-git-commit display-6 d-block mb-2" aria-hidden="true"></i>
             <span data-i18n="workflows.no_rules">No rule yet. Add one to start building this policy.</span>
         </div>
+        <div class="wf-cap" id="wf-cap"></div>
+        <div class="wf-legend">
+            <span><i class="bx bx-down-arrow-alt" aria-hidden="true"></i><span data-i18n="workflows.legend.fall">No match falls to the next rule</span></span>
+            <span><i class="bx bx-check-circle" aria-hidden="true"></i><span data-i18n="workflows.legend.stop">A match runs one action and stops</span></span>
+            <span><i class="bx bx-filter" aria-hidden="true"></i><span data-i18n="workflows.legend.gate">A rate threshold gates the match, it is not an action</span></span>
+            <span><i class="bx bx-move-vertical" aria-hidden="true"></i><span data-i18n="workflows.legend.move">Drag, use the arrows, or press Alt + ↑ / ↓ to reorder</span></span>
+        </div>
     {% endcall %}
+
+    {# Every reorder, toggle and jump is announced here, so the ladder is followable without
+       seeing it move. #}
+    <div class="wf-sr" role="status" aria-live="polite" id="wf-live"></div>
 
     {# The editor is seeded from these, and posts back to the same two endpoints. Attribute
        values are JSON so the page never re-parses rendered markup to recover its own state. #}
@@ -39,60 +59,6 @@
     <input type="hidden" id="wf-validate-url" value="{{ workflows_url }}/{{ workflow.id }}/validate" />
     <input type="hidden" id="wf-save-url" value="{{ workflows_url }}/{{ workflow.id }}/save" />
     <input type="hidden" id="wf-csrf" value="{{ csrf_token() }}" />
-
-    {# Rule card skeleton, cloned by the editor. Kept in the template rather than built in JS
-       so the markup stays greppable and translatable like every other page. #}
-    <template id="wf-rule-template">
-        <div class="wf-rule border rounded p-3 mb-3" data-rule-id="">
-            <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
-                <div class="form-check form-switch mb-0">
-                    <input class="form-check-input wf-rule-enabled" type="checkbox" role="switch" checked />
-                    <label class="form-check-label small" data-i18n="workflows.enabled">Enabled</label>
-                </div>
-                <input class="form-control form-control-sm wf-rule-name flex-grow-1" maxlength="128" placeholder="Rule name" />
-                <button type="button" class="btn btn-outline-secondary btn-sm wf-rule-up" aria-label="Move rule up">
-                    <i class="bx bx-up-arrow-alt" aria-hidden="true"></i>
-                </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm wf-rule-down" aria-label="Move rule down">
-                    <i class="bx bx-down-arrow-alt" aria-hidden="true"></i>
-                </button>
-                <button type="button" class="btn btn-outline-danger btn-sm wf-rule-remove" aria-label="Remove rule">
-                    <i class="bx bx-trash" aria-hidden="true"></i>
-                </button>
-            </div>
-
-            <label class="form-label small text-uppercase" data-i18n="workflows.conditions">Conditions</label>
-            <div class="wf-rule-condition mb-3"></div>
-
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input wf-threshold-enabled" type="checkbox" role="switch" />
-                        <label class="form-check-label small" data-i18n="workflows.threshold">Only above a rate</label>
-                    </div>
-                </div>
-                <div class="col-md-4 wf-threshold-fields d-none">
-                    <label class="form-label small" data-i18n="workflows.threshold_count">Requests</label>
-                    <input class="form-control form-control-sm wf-threshold-count" type="number" min="1" value="10" />
-                </div>
-                <div class="col-md-4 wf-threshold-fields d-none">
-                    <label class="form-label small" data-i18n="workflows.threshold_window">Per (seconds)</label>
-                    <input class="form-control form-control-sm wf-threshold-window" type="number" min="1" max="86400" value="60" />
-                </div>
-            </div>
-
-            <div class="row g-3 mt-1 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label small" data-i18n="workflows.action">Then</label>
-                    <select class="form-select form-select-sm wf-action-type"></select>
-                </div>
-                <div class="col-md-8 wf-action-args"></div>
-            </div>
-
-            <div class="wf-rule-summary small text-muted mt-3"></div>
-            <div class="wf-rule-errors small text-danger mt-1"></div>
-        </div>
-    </template>
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/pages/workflow_editor.js') }}" nonce="{{ script_nonce }}" defer></script>

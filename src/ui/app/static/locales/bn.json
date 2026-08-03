@@ -2387,6 +2387,14 @@
     "truncated": "শুধুমাত্র প্রথম 500 আপস্ট্রিম প্রদর্শিত। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সরু করুন।"
   },
   "workflows": {
+    "act_block": "Block",
+    "act_challenge": "Challenge",
+    "act_code": "Status",
+    "act_provider": "Antibot provider",
+    "act_redirect": "Redirect",
+    "act_status": "Deny status",
+    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
+    "act_url": "Destination URL",
     "action": "তারপর",
     "add_rule": "নিয়ম যোগ করুন",
     "all": "সব",
@@ -2401,17 +2409,68 @@
     "empty_text": "একটি ওয়ার্কফ্লো হল পরিষেবাগুলিতে যুক্ত করা নিয়মগুলির একটি সাজানো তালিকা: একটি শর্ত গাছ, একটি ঐচ্ছিক হার থ্রেশহোল্ড এবং একটি অ্যাকশন - চ্যালেঞ্জ, ব্লক বা রিডাইরেক্ট।",
     "empty_title": "এখন পর্যন্ত কোনো ওয়ার্কফ্লো নেই",
     "enabled": "Enabled",
+    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
+    "entry_title": "Every request to an attached service",
+    "errors": {
+      "body": "Nothing is applied — the running policy is unchanged."
+    },
+    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
+    "exit_title": "No rule matched",
+    "gate": {
+      "and": "and only once the same client IP has made more than",
+      "chip": "match gate",
+      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+    },
+    "legend": {
+      "fall": "No match falls to the next rule",
+      "gate": "A rate threshold gates the match, it is not an action",
+      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
+      "stop": "A match runs one action and stops"
+    },
+    "link": {
+      "noMatch": "no match"
+    },
+    "menu": {
+      "bottom": "Run last",
+      "delete": "Delete rule",
+      "duplicate": "Duplicate below",
+      "toggle": "Disable rule",
+      "top": "Run first"
+    },
+    "move": {
+      "first": "Run first",
+      "last": "Run last"
+    },
     "new": "নতুন ওয়ার্কফ্লো",
     "no_rules": "এখন কোনো নিয়ম নেই। এই নীতি তৈরি করা শুরু করার জন্য একটি যোগ করুন।",
     "not_attached": "যুক্ত নয়",
     "order_help": "নিয়মগুলি ক্রমানুসারে মূল্যায়ন করা হয় এবং প্রথম যেটির সাথে মিলে যায় সেটি কার্যকর হবে। একটি হার থ্রেশহোল্ড সহ একটি নিয়ম শুধুমাত্র তখনই মিলে যায় যখন থ্রেশহোল্ড অতিক্রম করা হয়, তাই একটি নিম্ন নিয়মটি সেই ট্র্যাফিককে ধরতে পারে যা এটির নিচে রয়েছে।",
     "readonly": "ডাটাবেসটি শুধুমাত্র পড়ার জন্য। ওয়ার্কফ্লোগুলি পরিদর্শন করা যেতে পারে কিন্তু পরিবর্তন করা যায় না।",
+    "rule": {
+      "disabled": "Disabled",
+      "if": "If",
+      "onMatch": "If it matches",
+      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
+      "stopTail": ", evaluation stops here — no rule below is reached."
+    },
     "rules": "নিয়ম",
     "search": "নাম বা বর্ণনা অনুসন্ধান করুন...",
     "threshold": "শুধুমাত্র একটি নির্দিষ্ট হার",
     "threshold_count": "অনুরোধ",
     "threshold_window": "প্রতি (সেকেন্ড)",
-    "truncated": "শুধুমাত্র প্রথম 500 ওয়ার্কফ্লো দেখানো হচ্ছে। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সংকুচিত করুন।"
+    "tree": {
+      "addCondition": "Condition",
+      "addGroup": "Group",
+      "all": "All of",
+      "any": "Any of",
+      "empty": "Empty group — add a condition, it cannot be saved like this.",
+      "not": "None of",
+      "removeGroup": "Remove group"
+    },
+    "truncated": "শুধুমাত্র প্রথম 500 ওয়ার্কফ্লো দেখানো হচ্ছে। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সংকুচিত করুন।",
+    "value": {
+      "add": "Value"
+    }
   },
   "request_path": {
     "client": "ক্লায়েন্ট",

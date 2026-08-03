@@ -2387,6 +2387,14 @@
     "truncated": "Apenas os primeiros 500 upstream são exibidos. Refine a lista através do API para obter o resultado completo."
   },
   "workflows": {
+    "act_block": "Block",
+    "act_challenge": "Challenge",
+    "act_code": "Status",
+    "act_provider": "Antibot provider",
+    "act_redirect": "Redirect",
+    "act_status": "Deny status",
+    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
+    "act_url": "Destination URL",
     "action": "Então",
     "add_rule": "Adicionar regra",
     "all": "Todos",
@@ -2401,17 +2409,68 @@
     "empty_text": "Um fluxo de trabalho é uma lista ordenada de regras que anexamos a serviços: uma árvore de condições, um limite de taxa opcional e uma ação — desafio, bloqueio ou redirecionamento.",
     "empty_title": "Nenhum fluxo de trabalho ainda",
     "enabled": "Enabled",
+    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
+    "entry_title": "Every request to an attached service",
+    "errors": {
+      "body": "Nothing is applied — the running policy is unchanged."
+    },
+    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
+    "exit_title": "No rule matched",
+    "gate": {
+      "and": "and only once the same client IP has made more than",
+      "chip": "match gate",
+      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+    },
+    "legend": {
+      "fall": "No match falls to the next rule",
+      "gate": "A rate threshold gates the match, it is not an action",
+      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
+      "stop": "A match runs one action and stops"
+    },
+    "link": {
+      "noMatch": "no match"
+    },
+    "menu": {
+      "bottom": "Run last",
+      "delete": "Delete rule",
+      "duplicate": "Duplicate below",
+      "toggle": "Disable rule",
+      "top": "Run first"
+    },
+    "move": {
+      "first": "Run first",
+      "last": "Run last"
+    },
     "new": "Novo fluxo de trabalho",
     "no_rules": "Nenhuma regra ainda. Adicione uma para começar a construir esta política.",
     "not_attached": "Não anexado",
     "order_help": "As regras são avaliadas em ordem e a primeira que corresponde vence. Uma regra com um limite de taxa só corresponde quando o limite é excedido, por isso uma regra inferior pode capturar o tráfego abaixo dela.",
     "readonly": "O banco de dados é de apenas leitura. Os fluxos de trabalho podem ser inspecionados, mas não podem ser alterados.",
+    "rule": {
+      "disabled": "Disabled",
+      "if": "If",
+      "onMatch": "If it matches",
+      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
+      "stopTail": ", evaluation stops here — no rule below is reached."
+    },
     "rules": "Regras",
     "search": "Pesquisar nome ou descrição...",
     "threshold": "Apenas acima de uma taxa",
     "threshold_count": "Solicitações",
     "threshold_window": "Por (segundos)",
-    "truncated": "Apenas os primeiros 500 fluxos de trabalho são exibidos. Refine a lista através do API para obter o resultado completo."
+    "tree": {
+      "addCondition": "Condition",
+      "addGroup": "Group",
+      "all": "All of",
+      "any": "Any of",
+      "empty": "Empty group — add a condition, it cannot be saved like this.",
+      "not": "None of",
+      "removeGroup": "Remove group"
+    },
+    "truncated": "Apenas os primeiros 500 fluxos de trabalho são exibidos. Refine a lista através do API para obter o resultado completo.",
+    "value": {
+      "add": "Value"
+    }
   },
   "request_path": {
     "client": "Cliente",
