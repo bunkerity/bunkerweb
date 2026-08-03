@@ -45,6 +45,52 @@ local function accumulate_timer(acc, sample)
 	return acc
 end
 
+-- Longest templated URI kept in a baseline record. Past this the tail carries no signal a
+-- model can use and only costs storage.
+local MAX_TEMPLATED_URI = 200
+
+-- Decide whether a request joins the sampled baseline. `hash` is a stable hash of the
+-- request id and `rate` a percentage.
+-- Deterministic on purpose: math.random() has no per-worker seeding here, and a stable
+-- decision keeps every subrequest of one request on the same side of the sample.
+local function should_sample(hash, rate)
+	rate = tonumber(rate) or 0
+	-- Full rate short-circuits so a request with no usable id is still sampled. There is no
+	-- matching guard for rate <= 0: `hash % 100` is always 0..99, so the comparison below
+	-- already rejects everything at 0 or below.
+	if rate >= 100 then
+		return true
+	end
+	if type(hash) ~= "number" then
+		return false
+	end
+	return hash % 100 < rate
+end
+
+-- Collapse the parts of a path that are unique per user or per object. A raw URI is both a
+-- cardinality bomb (one distinct value per request, the problem requests:facet:url already
+-- has) and a poor feature: a model should learn that "GET /api/user/<n>" is ordinary, not
+-- memorise every id it has ever seen.
+local function template_uri(uri)
+	if type(uri) ~= "string" then
+		return nil
+	end
+	local out = uri:gsub("%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x", "<uuid>")
+	-- Long hex runs (tokens, hashes, object ids) before the digit pass, which would otherwise
+	-- only chew the numeric part of them.
+	out = out:gsub("%x+", function(token)
+		if #token >= 16 then
+			return "<hex>"
+		end
+		return token
+	end)
+	out = out:gsub("%d+", "<n>")
+	if #out > MAX_TEMPLATED_URI then
+		out = out:sub(1, MAX_TEMPLATED_URI) .. "..."
+	end
+	return out
+end
+
 -- Combine two {count, sum, max} aggregates coming from different workers. Counts and sums
 -- add; max is the larger of the two. Kept separate from accumulate_timer because that one
 -- folds a raw duration and this one folds an already-aggregated peer.
@@ -71,6 +117,7 @@ local HTTP_OK = ngx.HTTP_OK
 local worker = ngx.worker
 local worker_id = worker.id
 
+local crc32_short = ngx.crc32_short
 local get_reason = utils.get_reason
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
@@ -409,6 +456,51 @@ function metrics:log(bypass_checks)
 		local counter = lru:get(lru_key)
 		lru:set(lru_key, (counter or 0) + 1)
 	end
+	-- Sampled baseline of NORMAL traffic. The record above only ever exists when a plugin set
+	-- a reason, so the table describes exclusively what was blocked and an anomaly model has
+	-- no notion of what ordinary traffic looks like. Every field here is already resolved by
+	-- fill_ctx or is a free log-phase NGINX variable, so collection costs no new work on the
+	-- request path -- the cost is storage, which is why the sample rate defaults to 0.
+	--
+	-- The client IP is deliberately NOT stored: this is a model of traffic *shape*, not of
+	-- who sent it, and recording every ordinary visitor's address is a far larger privacy
+	-- commitment than recording the ones that got blocked.
+	if not reason then
+		local rate = self.variables["METRICS_BASELINE_SAMPLE_RATE"]
+		local request_id = self.ctx.bw.request_id
+		if request_id and should_sample(crc32_short(request_id), rate) then
+			local baseline = lru:get("baseline") or {}
+			table_insert(baseline, {
+				date = self.ctx.bw.start_time or time(),
+				server_name = self.ctx.bw.server_name,
+				method = self.ctx.bw.request_method,
+				uri = template_uri(self.ctx.bw.uri),
+				status = ngx.status,
+				request_time = tonumber(ngx.var.request_time),
+				request_length = tonumber(ngx.var.request_length),
+				body_bytes_sent = tonumber(ngx.var.body_bytes_sent),
+				upstream_time = tonumber(ngx.var.upstream_response_time),
+				connection_requests = tonumber(ngx.var.connection_requests),
+				http_version = self.ctx.bw.http_version,
+				scheme = self.ctx.bw.scheme,
+				content_type = self.ctx.bw.http_content_type,
+				content_length = tonumber(self.ctx.bw.http_content_length),
+				ssl_protocol = ngx.var.ssl_protocol,
+				ssl_cipher = ngx.var.ssl_cipher,
+				country = self.ctx.bw.country,
+				asn_number = self.ctx.bw.asn_number,
+				ip_version = self.ctx.bw.ip_version,
+				user_agent = self.ctx.bw.http_user_agent,
+			})
+			-- Drop oldest first, like the blocked buffer. A burst silently biases the sample
+			-- rather than growing memory; lowering the rate is the fix, not a bigger cap.
+			local max_baseline = parse_count(self.variables["METRICS_MAX_BASELINE_REQUESTS"]) or 1000
+			while #baseline > max_baseline do
+				table_remove(baseline, 1)
+			end
+			lru:set("baseline", baseline)
+		end
+	end
 	-- Whole-request duration, taken from NGINX's own accounting rather than measured in Lua:
 	-- $request_time costs nothing here, needs no update_time(), and is the single most useful
 	-- feature for the anomaly baseline. Unlike the per-plugin timers it is always collected.
@@ -579,6 +671,13 @@ function metrics:timer()
 
 				-- Update LRU cache
 				lru:set("requests", value)
+			-- Timer aggregates are a {count, sum, max} hash. The list sync below iterates
+			-- table values with ipairs, so it would DEL the key and push nothing, leaving an
+			-- empty Redis key and burning a DEL per timer per tick. They are read from the
+			-- shm through GET /metrics/<plugin>, which needs no Redis, so skip them here.
+			-- ponytail: no cross-instance timer aggregation. Sync them as a Redis hash if a
+			-- consumer ever needs it.
+			elseif key:match("_timer_") then -- luacheck: ignore 542
 			elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 				-- Sync other metrics (counters and tables) to Redis with optimized data structures
 				local redis_key = "metrics:" .. key .. ":" .. wid

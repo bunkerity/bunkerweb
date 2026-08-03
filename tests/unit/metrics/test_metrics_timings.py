@@ -40,7 +40,8 @@ def _extract(name: str) -> str:
 
 def _run_lua(body: str) -> str:
     assert LUA is not None
-    script = _extract("accumulate_timer") + "\n" + _extract("merge_timer") + "\n" + body
+    preamble = "\n".join(_extract(name) for name in ("should_sample", "template_uri", "accumulate_timer", "merge_timer"))
+    script = "local MAX_TEMPLATED_URI = 200\n" + preamble + "\n" + body
     result = subprocess.run([LUA, "-"], input=script, capture_output=True, text=True)
     assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
     return result.stdout.strip()
@@ -187,6 +188,138 @@ def test_the_api_merges_timer_keys_on_their_own_terms():
     assert "for _, metric_value in ipairs(data) do" in api_body
 
 
+# --- baseline sampling -------------------------------------------------------------
+
+
+@needs_lua
+def test_sampling_is_disabled_at_rate_zero():
+    """The default. Nothing may be recorded until an operator opts in."""
+    out = _run_lua(
+        """
+        print(tostring(should_sample(0, 0)), tostring(should_sample(50, 0)),
+              tostring(should_sample(99, "0")), tostring(should_sample(1, nil)))
+    """
+    )
+    assert out == "false\tfalse\tfalse\tfalse"
+
+
+@needs_lua
+def test_the_rate_is_read_from_a_string():
+    """Settings arrive from self.variables as strings, never as numbers."""
+    out = _run_lua(
+        """
+        print(tostring(should_sample(0, "100")), tostring(should_sample(50, "1")))
+    """
+    )
+    assert out == "true\tfalse"
+
+
+@needs_lua
+def test_a_full_rate_takes_everything_and_a_negative_rate_takes_nothing():
+    out = _run_lua(
+        """
+        print(tostring(should_sample(0, 100)), tostring(should_sample(999, 150)),
+              tostring(should_sample(0, -1)))
+    """
+    )
+    assert out == "true\ttrue\tfalse"
+
+
+@needs_lua
+def test_sampling_is_deterministic_for_a_given_hash():
+    """Same request id must land on the same side every time, or subrequests of one
+    request would disagree about whether they are being sampled."""
+    out = _run_lua(
+        """
+        local a = should_sample(12345, 10)
+        local b = should_sample(12345, 10)
+        print(tostring(a == b), tostring(should_sample(4, 5)), tostring(should_sample(7, 5)))
+    """
+    )
+    # 4 % 100 = 4 < 5 -> sampled; 7 % 100 = 7 >= 5 -> not sampled.
+    assert out == "true\ttrue\tfalse"
+
+
+@needs_lua
+def test_the_sample_rate_is_honoured_across_the_hash_space():
+    out = _run_lua(
+        """
+        local n = 0
+        for h = 0, 9999 do if should_sample(h, 7) then n = n + 1 end end
+        print(n)
+    """
+    )
+    assert out == "700", "7% of 10000 evenly-spread hashes"
+
+
+@needs_lua
+def test_a_missing_hash_is_never_sampled():
+    out = _run_lua(
+        """
+        print(tostring(should_sample(nil, 50)), tostring(should_sample("abc", 50)))
+    """
+    )
+    assert out == "false\tfalse"
+
+
+@needs_lua
+def test_a_full_rate_samples_even_without_a_usable_hash():
+    """This is what the rate >= 100 short-circuit is for: at 100% a request with no id
+    must still be recorded rather than silently dropped."""
+    out = _run_lua(
+        """
+        print(tostring(should_sample(nil, 100)), tostring(should_sample("abc", 100)))
+    """
+    )
+    assert out == "true\ttrue"
+
+
+# --- URI templating ----------------------------------------------------------------
+
+
+@needs_lua
+def test_identifiers_are_collapsed_out_of_the_path():
+    """Raw URIs are one distinct value per request — a cardinality bomb and a poor
+    feature. The model should learn "/api/user/<n>" is ordinary, not memorise every id."""
+    out = _run_lua(
+        """
+        print(template_uri("/api/user/12345/posts"))
+        print(template_uri("/o/3f2504e0-4f89-11d3-9a0c-0305e82c3301/edit"))
+        print(template_uri("/dl/a1b2c3d4e5f6a7b8c9d0/file"))
+    """
+    )
+    assert out.split("\n") == ["/api/user/<n>/posts", "/o/<uuid>/edit", "/dl/<hex>/file"]
+
+
+@needs_lua
+def test_an_ordinary_path_survives_untouched():
+    out = _run_lua(
+        """
+        print(template_uri("/login"))
+        print(template_uri("/health"))
+    """
+    )
+    assert out.split("\n") == ["/login", "/health"]
+
+
+@needs_lua
+def test_a_very_long_path_is_truncated():
+    out = _run_lua(
+        """
+        local long = "/" .. string.rep("z", 400)
+        local t = template_uri(long)
+        print(#t, t:sub(-3))
+    """
+    )
+    assert out == "203\t..."
+
+
+@needs_lua
+def test_a_missing_uri_yields_nil():
+    out = _run_lua("print(tostring(template_uri(nil)))")
+    assert out == "nil"
+
+
 # --- structural wiring -------------------------------------------------------------
 
 
@@ -238,6 +371,66 @@ def test_request_duration_is_collected_unconditionally():
     assert "tonumber(ngx.var.request_time)" in log_body
     assert 'lru:set("metrics_timer_request"' in log_body
     assert "METRICS_COLLECT_TIMINGS" not in log_body
+
+
+def test_the_baseline_uses_its_own_buffer_not_the_blocked_one():
+    """Reusing `requests` would put the O(n) Redis TRIM script and its eight per-entry
+    facet HINCRBYs on baseline volume."""
+    metrics = METRICS_LUA.read_text(encoding="utf-8")
+    log_body = metrics.split("function metrics:log(")[1].split("\nfunction metrics:")[0]
+    baseline = log_body.split("if not reason then")[1].split("\n\t-- Whole-request")[0]
+    assert 'lru:get("baseline")' in baseline and 'lru:set("baseline"' in baseline
+    assert '"requests"' not in baseline
+
+
+def test_only_non_blocked_requests_join_the_baseline():
+    """A blocked request already has a row in bw_metrics_requests; sampling it here would
+    both double-count it and poison the notion of 'normal'."""
+    log_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:log(")[1].split("\nfunction metrics:")[0]
+    assert "if not reason then" in log_body
+
+
+def test_sampling_is_deterministic_not_random():
+    log_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:log(")[1].split("\nfunction metrics:")[0]
+    assert "should_sample(crc32_short(request_id)" in log_body
+    assert "math.random" not in log_body
+
+
+def test_the_baseline_never_records_the_client_ip():
+    """A model of traffic shape does not need identity, and recording every ordinary
+    visitor's address is a far larger privacy commitment than recording blocked ones."""
+    log_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:log(")[1].split("\nfunction metrics:")[0]
+    baseline = log_body.split("if not reason then")[1].split("\n\t-- Whole-request")[0]
+    assert "remote_addr" not in baseline
+    assert "ip =" not in baseline
+
+
+def test_the_baseline_buffer_is_capped():
+    log_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:log(")[1].split("\nfunction metrics:")[0]
+    baseline = log_body.split("if not reason then")[1].split("\n\t-- Whole-request")[0]
+    assert "METRICS_MAX_BASELINE_REQUESTS" in baseline
+    assert "table_remove(baseline, 1)" in baseline, "drop oldest first"
+
+
+def test_timer_aggregates_are_excluded_from_the_redis_list_sync():
+    """The list sync iterates table values with ipairs, which yields nothing on a
+    {count, sum, max} hash — it would DEL the key and push nothing back."""
+    timer_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:timer()")[1]
+    assert 'elseif key:match("_timer_") then' in timer_body
+    sync = timer_body.index('elseif key:match("_timer_") then')
+    generic = timer_body.index('METRICS_SAVE_TO_REDIS"] == "yes" then')
+    assert sync < generic, "the timer skip must come before the generic list sync"
+
+
+def test_the_baseline_settings_are_declared():
+    plugin = json.loads(PLUGIN_JSON.read_text(encoding="utf-8"))
+    rate = plugin["settings"]["METRICS_BASELINE_SAMPLE_RATE"]
+    assert rate["context"] == "global"
+    assert rate["default"] == "0", "must ship disabled: there is no consumer yet and the volume is large"
+    # 0-100 only; a typo'd 1000 would sample everything.
+    assert re.fullmatch(rate["regex"], "100") and re.fullmatch(rate["regex"], "0")
+    assert not re.fullmatch(rate["regex"], "101") and not re.fullmatch(rate["regex"], "1000")
+    assert plugin["settings"]["METRICS_MAX_BASELINE_REQUESTS"]["context"] == "global"
 
 
 def test_the_setting_is_declared_as_a_global_check():

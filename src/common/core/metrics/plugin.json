@@ -77,6 +77,24 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "METRICS_BASELINE_SAMPLE_RATE": {
+      "context": "global",
+      "default": "0",
+      "help": "Percentage of non-blocked requests recorded as a traffic baseline, for anomaly detection to learn what normal looks like (`0` disables it, `1` samples one request in a hundred). Sampling is deterministic on the request id, so the decision is stable across subrequests. The client IP is never stored. Collection adds no work on the request path, but the volume is large: at 1% of 10k req/s this is roughly 8.6 million records a day, so raise it deliberately.",
+      "id": "metrics-baseline-sample-rate",
+      "label": "Traffic baseline sample rate (%)",
+      "regex": "^(100|[0-9]{1,2})$",
+      "type": "number"
+    },
+    "METRICS_MAX_BASELINE_REQUESTS": {
+      "context": "global",
+      "default": "1k",
+      "help": "Maximum number of sampled baseline records to hold per worker before the oldest are dropped. Accepts a plain integer or `k`/`m` shorthand. A burst that overflows this buffer biases the sample rather than growing memory, so lower the sample rate instead of raising this.",
+      "id": "metrics-max-baseline-requests",
+      "label": "Metrics max baseline requests",
+      "regex": "^\\d+[kKmM]?$",
+      "type": "text"
+    },
     "METRICS_SAVE_TO_REDIS": {
       "context": "global",
       "default": "yes",
