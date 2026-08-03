@@ -40,7 +40,7 @@ def _extract(name: str) -> str:
 
 def _run_lua(body: str) -> str:
     assert LUA is not None
-    preamble = "\n".join(_extract(name) for name in ("should_sample", "template_uri", "accumulate_timer", "merge_timer"))
+    preamble = "\n".join(_extract(name) for name in ("should_sample", "template_uri", "accumulate_timer", "merge_timer", "parse_timer_key"))
     script = "local MAX_TEMPLATED_URI = 200\n" + preamble + "\n" + body
     result = subprocess.run([LUA, "-"], input=script, capture_output=True, text=True)
     assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
@@ -318,6 +318,58 @@ def test_a_very_long_path_is_truncated():
 def test_a_missing_uri_yields_nil():
     out = _run_lua("print(tostring(template_uri(nil)))")
     assert out == "nil"
+
+
+# --- reading timings back out ------------------------------------------------------
+
+
+@needs_lua
+def test_a_timing_key_splits_into_plugin_and_phase():
+    out = _run_lua(
+        """
+        print(parse_timer_key("blacklist_timer_access_0"))
+        print(parse_timer_key("metrics_timer_request_3"))
+    """
+    )
+    assert out.split("\n") == ["blacklist\taccess", "metrics\trequest"]
+
+
+@needs_lua
+def test_a_phase_name_containing_an_underscore_survives():
+    """`header_filter` is a real phase. Splitting on the last underscore would return
+    'header' and silently merge two different phases together."""
+    out = _run_lua('print(parse_timer_key("errors_timer_header_filter_12"))')
+    assert out == "errors\theader_filter"
+
+
+@needs_lua
+def test_non_timing_keys_are_ignored():
+    """The same shm holds counters, tables and the request buffers."""
+    out = _run_lua(
+        """
+        print(tostring(parse_timer_key("blacklist_counter_foo_0")))
+        print(tostring(parse_timer_key("requests_0")))
+        print(tostring(parse_timer_key("baseline_0")))
+        print(tostring(parse_timer_key(nil)))
+    """
+    )
+    assert out.split("\n") == ["nil", "nil", "nil", "nil"]
+
+
+def test_timings_have_their_own_endpoint():
+    """A prefix filter can only reach one plugin at a time, so the grouped view needs a
+    dedicated route rather than the generic /metrics/<prefix> one."""
+    metrics = METRICS_LUA.read_text(encoding="utf-8")
+    api_body = metrics.split("function metrics:api()")[1].split("\nfunction metrics:")[0]
+    assert 'if filter == "timings" then' in api_body
+    assert "return self:api_timings()" in api_body
+
+
+def test_the_timings_endpoint_merges_workers_and_nests_by_plugin_and_phase():
+    metrics = METRICS_LUA.read_text(encoding="utf-8")
+    body = metrics.split("function metrics:api_timings()")[1].split("\nfunction metrics:")[0]
+    assert "parse_timer_key(key)" in body
+    assert "merge_timer(timings[plugin_id][phase], decoded)" in body
 
 
 # --- structural wiring -------------------------------------------------------------

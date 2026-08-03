@@ -39,6 +39,9 @@ def _load_router():
         "bw_metrics.routers": ModuleType("bw_metrics.routers"),
         "bw_metrics.auth": ModuleType("bw_metrics.auth"),
         "bw_metrics.auth.guard": ModuleType("bw_metrics.auth.guard"),
+        # /metrics/timings fans out to instances instead of reading the DB, so the router
+        # imports the instance caller the way web_cache does.
+        "bw_metrics.deps": ModuleType("bw_metrics.deps"),
         "bw_metrics.utils": ModuleType("bw_metrics.utils"),
     }
     names["fastapi"].APIRouter = _Router
@@ -48,6 +51,7 @@ def _load_router():
     names["bw_metrics.routers"].__path__ = []
     names["bw_metrics.auth"].__path__ = []
     names["bw_metrics.auth.guard"].guard = object()
+    names["bw_metrics.deps"].get_instances_api_caller = object()
     names["bw_metrics.utils"].get_db = Mock()
     with patch.dict(sys.modules, names):
         path = ROOT / "src" / "api" / "app" / "routers" / "metrics.py"

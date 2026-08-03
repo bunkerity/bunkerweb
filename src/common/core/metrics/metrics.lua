@@ -779,6 +779,13 @@ function metrics:api()
 		return self:api_requests_query()
 	end
 
+	-- Timing aggregates are keyed <plugin>_timer_<phase>, so the prefix filter below can only
+	-- reach one plugin at a time. An operator wants the whole picture at once, hence a
+	-- dedicated endpoint returning them nested by plugin and phase.
+	if filter == "timings" then
+		return self:api_timings()
+	end
+
 	-- Loop on keys
 	local metrics_data = {}
 	for _, key in ipairs(self.metrics_datastore:keys()) do
@@ -820,6 +827,36 @@ function metrics:api()
 		end
 	end
 	return self:ret(true, metrics_data, HTTP_OK)
+end
+
+-- Split a shm timing key into its plugin and phase. Keys are `<plugin>_timer_<phase>_<wid>`
+-- and a phase name may itself contain an underscore (`header_filter`), so the worker suffix
+-- is anchored to the end rather than split on the last underscore.
+local function parse_timer_key(key)
+	if type(key) ~= "string" then
+		return nil
+	end
+	return key:match("^(.-)_timer_(.-)_%d+$")
+end
+
+function metrics:api_timings()
+	-- One entry per (plugin, phase), summed across this instance's workers. Whole-request
+	-- duration shows up here too, as plugin "metrics" / phase "request".
+	local timings = {}
+	for _, key in ipairs(self.metrics_datastore:keys()) do
+		local plugin_id, phase = parse_timer_key(key)
+		if plugin_id and phase then
+			local data = self.metrics_datastore:get(key)
+			if data then
+				local ok, decoded = pcall(decode, data)
+				if ok and type(decoded) == "table" then
+					timings[plugin_id] = timings[plugin_id] or {}
+					timings[plugin_id][phase] = merge_timer(timings[plugin_id][phase], decoded)
+				end
+			end
+		end
+	end
+	return self:ret(true, timings, HTTP_OK)
 end
 
 function metrics:api_requests_query()

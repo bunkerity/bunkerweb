@@ -1,13 +1,42 @@
 #!/usr/bin/env python3
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
+from ..deps import get_instances_api_caller
 from ..utils import get_db
 
 router = APIRouter(prefix="/metrics", tags=["metrics"])
+
+
+def _merge_timing(accumulator: Dict[str, float], sample: Dict[str, Any]) -> Dict[str, float]:
+    """Fold one instance's {count, sum, max} aggregate into the running total.
+
+    Counts and sums add, max is the larger of the two -- the same arithmetic the Lua side
+    uses to combine workers, applied one level up to combine instances.
+    """
+    count = _number(sample.get("count"))
+    total = _number(sample.get("sum"))
+    peak = _number(sample.get("max"))
+    if not accumulator:
+        return {"count": count, "sum": total, "max": peak}
+    accumulator["count"] += count
+    accumulator["sum"] += total
+    accumulator["max"] = max(accumulator["max"], peak)
+    return accumulator
+
+
+def _number(value: Any) -> float:
+    """Coerce a scraped aggregate field to a number. A malformed entry from one instance
+    must not take down the whole fan-out."""
+    if isinstance(value, bool) or value is None:
+        return 0.0
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def _parse_search_panes(raw: str) -> Dict[str, List[str]]:
@@ -22,6 +51,56 @@ def _parse_search_panes(raw: str) -> Dict[str, List[str]]:
         if field and selected:
             filters[field] = selected
     return filters
+
+
+@router.get("/timings", dependencies=[Depends(guard)])
+def query_metrics_timings(api_caller=Depends(get_instances_api_caller)) -> JSONResponse:
+    """Report how long each plugin takes in each request phase, merged across instances.
+
+    Unlike the other endpoints here, timings are not persisted: they live in each instance's
+    shared memory and are read by fanning out, the same way the web-cache router reads cache
+    status. Whole-request duration appears as plugin ``metrics`` / phase ``request``.
+    """
+    ok, responses = api_caller.send_to_apis("GET", "/metrics/timings", response=True)
+    responses = responses or {}
+
+    merged: Dict[str, Dict[str, Dict[str, float]]] = {}
+    for response in responses.values():
+        if not isinstance(response, dict) or response.get("status") != "success":
+            continue
+        payload = response.get("msg")
+        if not isinstance(payload, dict):
+            continue
+        for plugin_id, phases in payload.items():
+            if not isinstance(phases, dict):
+                continue
+            for phase, sample in phases.items():
+                if not isinstance(sample, dict):
+                    continue
+                merged.setdefault(plugin_id, {})[phase] = _merge_timing(merged.get(plugin_id, {}).get(phase, {}), sample)
+
+    # mean is derived rather than stored: it is what an operator actually reads, and keeping
+    # it out of the aggregate means workers and instances stay mergeable by plain addition.
+    for phases in merged.values():
+        for stats in phases.values():
+            stats["mean"] = (stats["sum"] / stats["count"]) if stats["count"] else 0.0
+
+    if not responses:
+        status_code, status = 503, "error"
+    elif ok:
+        status_code, status = 200, "success"
+    else:
+        status_code, status = 207, "partial"
+
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": status,
+            "timings": merged,
+            "instances": responses,
+            "message": None if responses else "No BunkerWeb instance reported timings",
+        },
+    )
 
 
 @router.get("/requests", dependencies=[Depends(guard)])
