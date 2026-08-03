@@ -2,6 +2,7 @@
 
 ## v1.6.14~rc3 - 2026/07/??
 
+- [SECURITY] `api`: a configuration or plugin push no longer empties the target directory on a live instance while it copies the new content in, which made every request to every service fail for the duration of the copy. Entries are now swapped one at a time with a rename, and a push whose content is unchanged is skipped entirely instead of rewriting an identical tree on every Scheduler start.
 - [SECURITY] `ui`: a TOTP code can no longer be used more than once. The replay guard never persisted the last accepted time step, leaving a captured code valid for the rest of its 30 second window.
 - [SECURITY] `ui`: removed the year-long "remember me" token, which survived logout, password changes and *Wipe other sessions* and bypassed IP/User-Agent pinning and the absolute session cap. "Remember me" now marks the session cookie permanent, so it still survives a browser restart but is a normal revocable session; raise both `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS` to stay logged in longer. Existing tokens are rejected and deleted on the next request.
 - [SECURITY] `ui`: revoked sessions are recorded in the session store (Redis when enabled) instead of a file outside the persistent volume, where recreating the container forgot every revocation and revocations never reached other replicas.
@@ -27,6 +28,8 @@
 - [BUGFIX] `ui`: settings on a service created by the setup wizard can be edited again. Every change was silently discarded, with no error and the old value redrawn, because the wizard's own method was not recognized as compatible with the UI's. (Fixes #3751)
 - [BUGFIX] `cli`: `bwcli ban` and `bwcli unban` reported success even when every instance refused the request, so a ban that was never lifted looked lifted. (Fixes #3759)
 - [BUGFIX] `ui`: serve `/favicon.ico`; the 404 counted toward the badbehavior threshold and could ban an administrator out of the web UI on default settings. (Refs #3759)
+- [BUGFIX] `linux`: commands dropped to the nginx user get a writable `HOME` instead of root's, which made SSL PostgreSQL connections fail on an unreadable `/root/.postgresql/postgresql.crt`. (Fixes #3354)
+- [BUGFIX] `ui`: stopping the temporary setup web UI no longer raises a `TypeError` in the signal handler. (Fixes #3345)
 
 ## v1.6.14~rc2 - 2026/07/29
 
