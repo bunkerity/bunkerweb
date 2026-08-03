@@ -384,7 +384,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - Health/actions: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
 - **Global settings**
   - `GET /global_settings`: non-defaults by default; add `full=true` for all settings, `methods=true` to include provenance.
-  - `PATCH /global_settings`: upsert API-owned globals; read-only keys are rejected.
+  - `PATCH /global_settings`: upsert API-owned globals; read-only keys are rejected. A setting owned by another source (`scheduler`, i.e. an environment variable, plus `autoconf`, `manual`, `wizard`) cannot be taken over: the whole payload is rejected with `409` naming each key and its owner, and nothing is written. Re-sending a value a foreign-owned key already holds is not a conflict.
 - **Services**
   - `GET /services`: list services (include drafts by default).
   - `GET /services/{service}`: fetch non-defaults or full config (`full=true`); `methods=true` includes provenance.

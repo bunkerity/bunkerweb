@@ -85,6 +85,26 @@ def _scheduler_can_override(ctx: _SaveConfigContext, full_key: str, incoming_val
     return True
 
 
+def _log_ownership_refusal(logger, ctx: _SaveConfigContext, target: str, owner_method: Optional[str]) -> None:
+    """Report a write dropped purely because the incoming method may not overwrite the row's.
+
+    That refusal used to be entirely silent: the caller got an empty changed-plugins set and no
+    way to tell its write had been dropped, which is how `PATCH /global_settings` answered 200
+    "success" having written nothing.
+
+    A SCHEDULER refusal is not that -- it is `_scheduler_can_override` doing its job, and it is
+    the steady state, not an incident. Configurator default-fills every setting before applying
+    the environment, so every ui/api-customised row is refused on every scheduler pass; at WARNING
+    that is one line per customised setting per service per save. Hence debug for scheduler,
+    warning for the callers that actually asked for a specific write and did not get it.
+    """
+    message = f"Refusing to overwrite {target} (owned by method {owner_method}) with method {ctx.method}: value left unchanged"
+    if ctx.method == "scheduler":
+        logger.debug(message)
+    else:
+        logger.warning(message)
+
+
 def _get_setting_file_name(
     ctx: _SaveConfigContext,
     setting_type: str,
@@ -1141,6 +1161,11 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 )
                 if key == "SERVER_NAME":
                     local_changed_services = True
+            elif value_changed:
+                # Refused on ownership grounds only: had the methods been compatible,
+                # should_update_value would be true. Never reached for autoconf (always
+                # compatible) nor on the no-change path.
+                _log_ownership_refusal(self.logger, ctx, f"setting {key} of service {server_name}", service_setting["method"])
 
         return (
             local_to_put,
@@ -1247,6 +1272,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         "values": setting_values,
                     }
                 )
+            elif value_changed:
+                # Same ownership refusal as in the per-service pass — see _log_ownership_refusal.
+                _log_ownership_refusal(self.logger, ctx, f"global setting {key}", global_value.method)
 
         return (
             local_to_put,
@@ -1402,5 +1430,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         "values": setting_values,
                     }
                 )
+            elif value_changed:
+                # Same ownership refusal as in the multisite passes — see _log_ownership_refusal.
+                # This is the pass PATCH /global_settings lands in (skip_service_management=True),
+                # so it is the one that backs that endpoint's 409.
+                _log_ownership_refusal(self.logger, ctx, f"global setting {key}", global_value.method)
 
         return changed_services, service_template_change
