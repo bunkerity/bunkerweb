@@ -68,6 +68,15 @@
       "regex": "^\\d+[kKmM]?$",
       "type": "text"
     },
+    "METRICS_COLLECT_TIMINGS": {
+      "context": "global",
+      "default": "yes",
+      "help": "Measure how long each plugin takes in each request phase, exposed as a count/sum/max aggregate per (plugin, phase). Requires forcing an NGINX time refresh around every plugin call, so it adds roughly a microsecond per request across a full plugin chain; set to `no` to remove that cost entirely. Whole-request duration is always collected and is not affected by this setting.",
+      "id": "metrics-collect-timings",
+      "label": "Collect plugin timings",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "METRICS_SAVE_TO_REDIS": {
       "context": "global",
       "default": "yes",

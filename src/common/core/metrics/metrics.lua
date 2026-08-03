@@ -24,6 +24,46 @@ if not lru then
 	require "bunkerweb.logger":new("METRICS"):log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
 
+-- Fold one duration sample (seconds) into a running aggregate. Kept pure and module-level
+-- so the arithmetic can be exercised on its own.
+-- A negative sample is dropped rather than clamped: it means the clock moved backwards, and
+-- a bogus 0 would drag the mean down while looking like a real observation.
+-- ponytail: count/sum/max yields mean and worst case, not percentiles. Fixed-bucket
+-- histograms are the upgrade path if p95 is ever needed.
+local function accumulate_timer(acc, sample)
+	if type(sample) ~= "number" or sample ~= sample or sample < 0 then
+		return acc
+	end
+	if not acc then
+		return { count = 1, sum = sample, max = sample }
+	end
+	acc.count = acc.count + 1
+	acc.sum = acc.sum + sample
+	if sample > acc.max then
+		acc.max = sample
+	end
+	return acc
+end
+
+-- Combine two {count, sum, max} aggregates coming from different workers. Counts and sums
+-- add; max is the larger of the two. Kept separate from accumulate_timer because that one
+-- folds a raw duration and this one folds an already-aggregated peer.
+local function merge_timer(acc, other)
+	if type(other) ~= "table" then
+		return acc
+	end
+	local count, sum, max = tonumber(other.count) or 0, tonumber(other.sum) or 0, tonumber(other.max) or 0
+	if not acc then
+		return { count = count, sum = sum, max = max }
+	end
+	acc.count = acc.count + count
+	acc.sum = acc.sum + sum
+	if max > acc.max then
+		acc.max = max
+	end
+	return acc
+end
+
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
@@ -369,6 +409,14 @@ function metrics:log(bypass_checks)
 		local counter = lru:get(lru_key)
 		lru:set(lru_key, (counter or 0) + 1)
 	end
+	-- Whole-request duration, taken from NGINX's own accounting rather than measured in Lua:
+	-- $request_time costs nothing here, needs no update_time(), and is the single most useful
+	-- feature for the anomaly baseline. Unlike the per-plugin timers it is always collected.
+	-- log() has no stream counterpart (metrics defines no log_stream), so this is HTTP-only.
+	local request_time = tonumber(ngx.var.request_time)
+	if request_time then
+		lru:set("metrics_timer_request", accumulate_timer(lru:get("metrics_timer_request"), request_time))
+	end
 	-- Get metrics from plugins
 	local all_metrics = self.ctx.bw.metrics
 	if all_metrics then
@@ -387,6 +435,14 @@ function metrics:log(bypass_checks)
 							metric_counter = metric_counter + metric_value
 						end
 						lru:set(lru_key, metric_counter)
+					end
+				-- Fold duration samples into a {count, sum, max} aggregate. One slot per
+				-- (plugin, phase) instead of one per observation, so the timing axis costs a
+				-- bounded number of LRU slots however much traffic flows through it.
+				elseif kind == "timers" then
+					for metric_key, metric_value in pairs(kind_metrics) do
+						local lru_key = plugin_id .. "_timer_" .. metric_key
+						lru:set(lru_key, accumulate_timer(lru:get(lru_key), metric_value))
 					end
 				-- Add table entries
 				elseif kind == "tables" then
@@ -639,7 +695,12 @@ function metrics:api()
 			if ok then
 				data = decoded
 			end
-			if type(data) == "table" then
+			-- Timer aggregates are a {count, sum, max} hash, not an array: the ipairs merge
+			-- below iterates nothing on them and would hand back an empty table for every
+			-- timing key. Merge them on their own terms instead.
+			if key:match("_timer_") and type(data) == "table" then
+				metrics_data[metric_key] = merge_timer(metrics_data[metric_key], data)
+			elseif type(data) == "table" then
 				if not metrics_data[metric_key] then
 					metrics_data[metric_key] = {}
 				end

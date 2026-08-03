@@ -24,6 +24,8 @@ local get_country = utils.get_country
 local get_asn = utils.get_asn
 local get_city = utils.get_city
 local lower = string.lower
+local now = ngx.now
+local update_time = ngx.update_time
 
 local helpers = {}
 
@@ -32,6 +34,11 @@ local geo_country_warned = false
 local geo_asn_warned = false
 local export_vars_warned = false
 local geo_city_warned = false
+
+-- Resolved once per worker. METRICS_COLLECT_TIMINGS is a global setting and a settings
+-- change goes through a reload (which restarts workers), so a per-worker memo is correct
+-- and keeps call_plugin from hitting the datastore on every plugin call.
+local collect_timings = nil
 
 helpers.load_plugin = function(json)
 	-- Open file
@@ -256,13 +263,41 @@ helpers.new_plugin = function(plugin_lua, ctx)
 	return true, plugin_obj
 end
 
+-- Every phase conf (access, log, header, set, preread, ssl_certificate, init, init_worker)
+-- and api.lua reach plugin code through call_plugin, so this is the one place that can time
+-- every plugin in every phase. Returns false outside a request: init/init_worker have no ctx.
+helpers.timings_enabled = function(plugin)
+	if not (plugin.ctx and plugin.ctx.bw) then
+		return false
+	end
+	if collect_timings == nil then
+		collect_timings = get_variable("METRICS_COLLECT_TIMINGS", false) == "yes"
+	end
+	return collect_timings
+end
+
 helpers.call_plugin = function(plugin, method)
 	-- Check if method is present
 	if plugin[method] == nil then
 		return nil, "missing " .. method .. "() method for plugin " .. plugin:get_id()
 	end
-	-- Call method
+	-- Call method. ngx.now() alone reads NGINX's cached time, which only advances when the
+	-- event loop yields -- a CPU-bound plugin would measure exactly 0. update_time() forces
+	-- the refresh; on Linux that is a vDSO gettimeofday (tens of nanoseconds), so the cost is
+	-- ~1us per request across a full plugin chain. Gated all the same.
+	local timed = helpers.timings_enabled(plugin)
+	local started
+	if timed then
+		update_time()
+		started = now()
+	end
 	local ok, ret = pcall(plugin[method], plugin)
+	if timed then
+		update_time()
+		-- Recorded even when the call failed: a plugin that blows up after a slow upstream
+		-- is exactly the one worth seeing in the timings.
+		plugin:set_metric("timers", method, now() - started)
+	end
 	if not ok then
 		return false, plugin:get_id() .. ":" .. method .. "() failed : " .. ret
 	end
