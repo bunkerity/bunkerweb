@@ -462,15 +462,14 @@
   background: rgba(var(--bs-primary-rgb), 0.1);
   max-width: 220px;
 }
+/* Solid, like the .is-warn/.is-danger rules below: those two override the fill
+   entirely, so a green-to-amber ramp only ever rendered in the NORMAL state --
+   a bar that read as "approaching warning" at 10% RAM. */
 .status-band .sb-ram-bar > i {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    var(--bs-bw-green) 0%,
-    var(--bs-warning) 100%
-  );
+  background: var(--bs-bw-green);
 }
 .status-band .sb-ram-bar.is-warn > i {
   background: var(--bs-warning);
