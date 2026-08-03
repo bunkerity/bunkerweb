@@ -6,6 +6,12 @@
     "socials": "Mga Social Media",
     "tagline": "Malakas na Proteksyon, Simpleng Gamitin",
     "title": "About BunkerWeb",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "reddit": "Reddit"
+    },
     "version": "Bersyon: {{version}}"
   },
   "accordion": {
@@ -215,6 +221,7 @@
     "update_duration_all_filtered": "Update duration for all matching bans",
     "use_template": "Use template",
     "edit": "Edit",
+    "verify": "I-verify",
     "view": "View"
   },
   "cache": {
@@ -517,6 +524,13 @@
       "total_requests": {
         "title": "Kabuuang Mga Kahilingan"
       },
+      "certificates": {
+        "title": "Mga Sertipiko"
+      },
+      "upstreams": {
+        "planned": "Sa darating na panahon",
+        "title": "Mga pinagmulan"
+      },
       "top_reasons": {
         "title": "Top reasons for blocks"
       }
@@ -563,6 +577,20 @@
     "welcome": {
       "title": "Welcome back, {{user}}",
       "greeting": "Welcome back,"
+    },
+    "mini": {
+      "across_countries": "sa mga bansa ng {{count}}",
+      "enforced": "kasalukuyang ipinapatupad",
+      "pct_blocked": "{{percent}}% na bloke",
+      "scheduled": "Nagschedule"
+    },
+    "status": {
+      "blocked_of_total": "Na-block ng {{total}}",
+      "free_plan": "Libreng plano",
+      "renews": "Nag-renew",
+      "services_licensed": "Mga serbisyo ng {{count}} na may lisensya",
+      "trend_vs_prev": "kumpara sa nakaraang",
+      "vs_prev": "kumpara sa nakaraang"
     },
     "panel": {
       "timeseries_sub": "Selected range",
@@ -885,9 +913,12 @@
     "read_more": "Magbasa ng Higit Pa",
     "see_more": "Tingnan ang Higit Pa",
     "upgrade": "Mag-upgrade?",
+    "use_authenticator_code": "Gumamit ng code ng pag-authenticate",
+    "use_recovery_code": "Gumamit ng code ng pagbawi",
     "get_support": "Get support"
   },
   "login": {
+    "title": "Mag-login",
     "subtitle": "Mag-log in sa iyong account ng BunkerWeb"
   },
   "logs": {
@@ -1012,6 +1043,7 @@
   "mode": {
     "advanced": "Advanced",
     "easy": "Madali",
+    "compose": "Gumawa",
     "raw": "Raw"
   },
   "navbar": {
@@ -1059,10 +1091,14 @@
     "operate": "Operate",
     "system": "System",
     "edition_community": "Community",
+    "redirects": "Nagrerefer",
+    "upstreams": "Mga upstream",
+    "workflows": "Mga daloy ng trabaho",
     "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "Larawan ng balita",
+    "slide": "Slide",
     "posted_on": "Nai-post noong"
   },
   "newsletter": {
@@ -1084,6 +1120,7 @@
         "not_available": "Ang pahina ng plugin ay hindi pa available sa panahon ng beta phase.",
         "pre_render_error": "Error sa pre-rendering",
         "no_content": "Ang plugin na ito ay hindi nagbibigay ng naka-embed na pahina.",
+        "restricted_to_admins": "Ang plugin na ito ay may sariling pahina, na tumatakbo ang code ng plugin. Maaaring i-load lamang ito ng mga administrator.",
         "dedicated_page_unavailable": "Ang plugin na ito ay pinamamahalaan sa isang dedicated na pahina na hindi pa naka-load. I-restart ang web UI upang ma-access ito."
       }
     },
@@ -1486,6 +1523,11 @@
     "template_in_use_description": "Ang mga pagbabago sa labas ng kasalukuyang template ay hindi pinapayagan. Mangyaring gumawa ng mga pagbabago gamit ang kasalukuyang template o lumipat sa Advanced/Raw mode.",
     "unique_server_name": "Natatanging Pangalan ng Server",
     "up": "Aktibo",
+    "active": "Aktibo",
+    "all_valid": "Lahat ay wasto",
+    "expired": "Nawawala na",
+    "expiring": "Malapit nang mag-expire",
+    "no_settings": "Ang plugin na ito ay walang setting para sa saklaw na ito.",
     "yes": "Oo"
   },
   "step": {
@@ -1865,6 +1907,7 @@
       "view_config": "Tingnan ang Custom Config na {{name}}",
       "view_file": "Tingnan ang {{filename}}",
       "view_service": "Tingnan ang Serbisyo na {{service}}",
+      "manage_activation": "Pamahalaan ang pag-activate ng {{name}} sa mga pangkalahatang setting",
       "view_template": "Tingnan ang Template na {{template}}"
     },
     "modal": {
@@ -2043,6 +2086,10 @@
     "zerossl_api_max_time": "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API."
   },
   "totp": {
+    "cant_access": "Hindi makakuha ng access sa iyong authenticator?",
+    "signing_in": "Pag-login sa BunkerWeb",
+    "subtitle": "Ilagay ang code mula sa iyong app ng authenticator.",
+    "title": "Dalawang-Hakbang",
     "prompt": "Mangyaring ipasok ang iyong TOTP code."
   },
   "certificates": {
@@ -2230,6 +2277,186 @@
     "status": "Imbakan ng instance",
     "subtitle": "Status ng cache ng reverse-proxy, aggregate na mga sukatan ng hit-rate at agarang kontrol sa pagtanggal."
   },
+  "compose": {
+    "always_on": "Laging naka-on",
+    "count": "{{on}} on · {{total}} available · {{locked}} locked",
+    "entries": "{{count}} na-configure",
+    "filter": {
+      "all": "Lahat",
+      "changed": "Binago",
+      "on": "Naka-on"
+    },
+    "locked": "Walang kontrol dito",
+    "provenance": {
+      "api": "Pinamamahalaan sa pamamagitan ng API",
+      "attachment": "Mula sa attachment",
+      "clone": "Kinopya",
+      "default": "Default",
+      "edited": "Binago dito",
+      "global": "Mula sa global",
+      "managed": "Itinakda ng {{method}}",
+      "template": "Mula sa template"
+    },
+    "set_value": "Itakda ang halaga…",
+    "show_more": "Ipakita ang higit pang {{count}}",
+    "unavailable": "Hindi ma-load ang listahan ng plugin, kaya hindi ligtas na mabago ang pahinang ito. I-reload kapag sumagot ang API."
+  },
+  "redirects": {
+    "all": "Lahat",
+    "append_badge": "+ URI",
+    "append_request_uri": "Idagdag ang hinihinging URI sa target",
+    "attach": "Idikit",
+    "attach_copy": "Idikit ang {{name}} ({{from}} → {{to}}) sa isa o higit pang serbisyo.",
+    "code": {
+      "301": "301 — Permanently Moved",
+      "302": "302 — Found",
+      "303": "303 — Tingnan ang iba",
+      "307": "307 — Temporary Redirect",
+      "308": "308 — Permanent Redirect"
+    },
+    "create": "Gumawa ng redirect",
+    "delete_confirm_title": "Burahin ang redirect na ito?",
+    "delete_copy": "Burahin ang redirect {{name}}?",
+    "delete_help": "Hindi maaaring burahin ang redirect na nakakabit sa isang serbisyo. Tanggalin muna ito.",
+    "edit": "I-edit ang redirect",
+    "edit_shared": "Ang redirect na ito ay nakakabit sa serbisyo(y) {{count}}: {{services}}. I-save ang mga pagbabago sa lahat.",
+    "empty_text": "Ang redirect ay isang pangalan na patakaran na ikinakabit sa isa o higit pang serbisyo. Ang mga setting ng REDIRECT_* ay patuloy na gumagana kasama nito.",
+    "empty_title": "Walang redirect pa",
+    "from_path": "Redirect mula sa",
+    "from_path_help": "Landas ng pinagmulan sa mga nakakabit na serbisyo, halimbawa /old.",
+    "new": "Bagong redirect",
+    "not_attached": "Hindi nakakabit",
+    "readonly": "Ang database ay read-only. Maaaring suriin ang mga redirect ngunit hindi mababago.",
+    "save": "I-save ang redirect",
+    "search": "Maghanap ng pangalan, landas ng pinagmulan, o target...",
+    "services_help": "Gamitin ang Ctrl o Command upang piliin ang maraming serbisyo. Maaaring idikit ang isang redirect sa ibang pagkakataon.",
+    "status_code": "Kode ng estado",
+    "to_url": "I-redirect sa",
+    "truncated": "Ang unang 500 redirects lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
+  },
+  "upstreams": {
+    "add_server": "Magdagdag ng server",
+    "all": "Lahat",
+    "attach": "Idikit",
+    "attach_copy": "Idikit {{name}} ({{servers}}) sa isa o higit pang serbisyo.",
+    "backend_ssl": "Makipag-usap TLS sa mga server (https:// / grpcs://)",
+    "balancing": {
+      "ip_hash": "IP hash — parehong kliyente, parehong backend",
+      "least_conn": "Pinakamababang koneksyon",
+      "round_robin": "Round robin (default)"
+    },
+    "create": "Lumikha ng upstream",
+    "delete_confirm_title": "Burahin ba ang upstream na ito?",
+    "delete_copy": "Burahin ang upstream na {{name}}?",
+    "delete_help": "Hindi maaaring burahin ang upstream na nakakabit sa isang serbisyo. Kailangan munang tanggalin ito.",
+    "edit": "I-edit ang upstream",
+    "edit_shared": "Ang upstream na ito ay nakakabit sa serbisyo(y) na {{count}}: {{services}}. I-save ang mga pagbabago para sa lahat.",
+    "empty_text": "Ang upstream ay isang pangalan na pool ng mga backends na ikinakabit sa isa o higit pang serbisyo sa isang reverse proxy path. Ang mga setting na REVERSE_PROXY_HOST ay patuloy na gumagana kasama nito.",
+    "empty_title": "Walang upstream pa",
+    "keepalive": "Panatilihin ang koneksyon",
+    "keepalive_help": "Bilang ng mga koneksyon na pinapanatili ng bawat worker. Tanging HTTP at gRPC; iwanan itong walang laman upang hindi paganahin.",
+    "match_path": "Reverse proxy path",
+    "match_path_help": "Ang lokasyon kung saan ipinapasa ng mga napiling serbisyo ang trapiko sa pool na ito. Hindi ginagamit para sa isang stream pool, na kumukuha ng buong serbisyo.",
+    "method": "Pagbalanse ng trapiko",
+    "name_help": "Mga letra, numero, hyphen at underscore lamang. Hindi pinapayagan ang mga tuldok kaya hindi maaaring maging pareho ang pangalan ng pool at isang tunay na host.",
+    "new": "Bagong upstream",
+    "not_attached": "Hindi nakakabit",
+    "protocol": "Protocol",
+    "protocol_help": "Ang HTTP at gRPC ay nakakabit sa isang path; ang isang pool ng stream ay kumokontrol sa buong serbisyo na TCP/UDP.",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "Stream (TCP/UDP)"
+    },
+    "readonly": "Ang database ay read-only. Maaaring suriin ang mga upstream ngunit hindi mababago.",
+    "role": {
+      "backup": "Backup",
+      "down": "Hindi Aktibo",
+      "primary": "Pangunahin"
+    },
+    "save": "I-save ang upstream",
+    "search": "Maghanap ng pangalan, paglalarawan, o server...",
+    "server_fail_timeout": "Oras ng pagkabigo",
+    "server_host": "Server",
+    "server_max_fails": "Pinakamaraming pagkabigo",
+    "server_role": "Papel",
+    "server_weight": "Bigat",
+    "servers": "Mga Server",
+    "services_help": "Gumamit ng Ctrl o Command upang piliin ang maraming serbisyo. Maaaring ikabit ang isang upstream sa ibang pagkakataon.",
+    "services_hidden": "Ang serbisyo na {{count}} ay nakatago: ang isang upstream na {{protocol}} ay maaari lamang ikabit sa isang tugmang serbisyo.",
+    "truncated": "Ang unang 500 upstream lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
+  },
+  "workflows": {
+    "action": "Pagkatapos",
+    "add_rule": "Magdagdag ng panuntunan",
+    "all": "Lahat",
+    "attach": "Idikit sa mga serbisyo",
+    "attach_help": "Ang mga panuntunan ay ipinapatupad lamang sa mga serbisyo kung saan nakakabit ang isang daloy ng trabaho.",
+    "clone": "Kopyahin ang daloy ng trabaho",
+    "clone_help": "Ang mga panuntunan ay kinokopya; ang mga attachment sa serbisyo ay hindi.",
+    "clone_name": "Pangalan ng kopya",
+    "conditions": "Mga kondisyon",
+    "delete": "Burahin ang daloy ng trabaho",
+    "delete_confirm": "Ang daloy ng trabaho at lahat ng mga panuntunan nito ay permanenteng tatanggalin.",
+    "empty_text": "Ang isang daloy ng trabaho ay isang nakaayos na listahan ng mga panuntunan na ikinakabit sa mga serbisyo: isang puno ng kondisyon, isang opsyon na threshold ng rate, at isang aksyon — hamunin, harangan o i-redirect.",
+    "empty_title": "Walang daloy ng trabaho pa",
+    "enabled": "Enabled",
+    "new": "Bagong daloy ng trabaho",
+    "no_rules": "Walang panuntunan pa. Magdagdag ng isa upang simulan ang pagbuo ng patakarang ito.",
+    "not_attached": "Hindi nakakabit",
+    "order_help": "Ang mga panuntunan ay sinusuri sa pagkakasunod-sunod at ang unang na tumugma ay mananalo. Ang isang panuntunan na may threshold ng rate ay tumutugma lamang kapag ang threshold ay lumampas, kaya ang isang mas mababang panuntunan ay maaaring mahuli ang trapiko sa ibaba nito.",
+    "readonly": "Ang database ay hindi mababago. Maaaring suriin ang mga daloy ng trabaho ngunit hindi mababago.",
+    "rules": "Mga panuntunan",
+    "search": "Maghanap ng pangalan o paglalarawan...",
+    "threshold": "Lamang sa itaas ng rate",
+    "threshold_count": "Mga kahilingan",
+    "threshold_window": "Sa (segundo)",
+    "truncated": "Ang unang 500 daloy ng trabaho lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
+  },
+  "request_path": {
+    "client": "Kliente",
+    "source": "Pagkasunod-sunod ng pagpapatupad ng plugin para sa phase na {{phase}}, mula sa {{setting}} — isang pagkakasunod-sunod ng pagpapakita, hindi isang pagsubaybay bawat kahilingan.",
+    "terminal": {
+      "inline": "Backend",
+      "none": "Walang natanggap",
+      "pool": "Pool ng upstream",
+      "root": "Mga lokal na file"
+    },
+    "title": "Landas ng kahilingan",
+    "unordered": "Walang ipinahayag na posisyon sa phase na {{phase}}; tumatak ito pagkatapos ng mga nakaayos na plugin, sa alpabetikong pagkakasunod."
+  },
+  "service": {
+    "resources": {
+      "attach": "Idikit",
+      "conflict": {
+        "inline": "Ang {{service}} ay nagsisilbi sa {{path}} sa pamamagitan ng sarili nitong mga setting na {{family}}. Linisin ang mga setting na ito para sa {{path}}, o gumamit ng ibang landas.",
+        "primary": "Ang “{{name}}” ay kasalukuyang ang pangunahing sertipiko para sa serbisyong ito at aalisin nang walang karagdagang babala. Ang pangunahing sertipiko ay ang aktwal na ginagamit.",
+        "resource": "Ang {{service}} ay nagsisilbi sa {{path}} sa pamamagitan ng “{{kind}}” na {{name}}. Tanggalin ang “{{name}}”, o bigyan ang isa sa kanila ng ibang landas.",
+        "stream": "Ang isang serbisyo ng stream ay nagpapalitan ng koneksyon sa isang solong backend, at ang {{service}} ay kasalukuyang gumagamit ng upstream na “{{name}}”. Tanggalin muna ito.",
+        "stream_inline": "Ang {{service}} ay may sariling backend sa REVERSE_PROXY_HOST. Linisin ang setting na ito upang hayaan ang upstream na kontrolin."
+      },
+      "detach": "Tanggalin",
+      "family": {
+        "certificate": "Mga Sertipiko",
+        "redirect": "Nagrerebisa",
+        "template": "Template",
+        "upstream": "Mga upstream",
+        "workflow": "Mga daloy ng trabaho"
+      },
+      "match_path": "Path",
+      "none": "Walang nakakabit",
+      "primary": "Pangunahing sertipiko",
+      "template": {
+        "none": "Walang template",
+        "note": "Hindi ito isang mapagkukunan: ang template ay isang setting. Ito ay ina-apply sa pag-save, at ang pagbabago nito ay nagpapalit ng maraming setting nang sabay.",
+        "pending": "Ina-apply sa pag-save",
+        "switching": "Ang pag-save ay nagpapalit sa serbisyong ito mula sa “{{from}}” patungo sa “{{to}}”. Ang mga halaga na ibinibigay ng kasalukuyang template ay tinatanggal at ang mga halaga ng “{{to}}” ay inilalapat — maraming setting ang nagbabago nang sabay.",
+        "unwired": "Ang pahinang ito ay hindi nagpo-post ng USE_TEMPLATE, kaya hindi maaaring baguhin ang template mula dito."
+      },
+      "title": "Mga nakakabit na mapagkukunan",
+      "unavailable": "Hindi magagamit"
+    }
+  },
   "onboarding": {
     "item": {
       "install": "Install BunkerWeb on 1+ host",
@@ -2237,6 +2464,7 @@
       "pro": "Activate BunkerWeb PRO",
       "service": "Register your first service"
     },
+    "pro_tips": "Mga tip para sa PRO",
     "title": "Getting started"
   }
 }

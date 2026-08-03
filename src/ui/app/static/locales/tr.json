@@ -6,6 +6,12 @@
     "socials": "Sosyal Medya",
     "tagline": "Güçlü Koruma, Basitlik",
     "title": "About BunkerWeb",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "reddit": "Reddit"
+    },
     "version": "Versiyon: {{version}}"
   },
   "accordion": {
@@ -215,6 +221,7 @@
     "update_duration_all_filtered": "Update duration for all matching bans",
     "use_template": "Use template",
     "edit": "Edit",
+    "verify": "Doğrula",
     "view": "View"
   },
   "cache": {
@@ -517,6 +524,13 @@
       "total_requests": {
         "title": "Toplam İstekler"
       },
+      "certificates": {
+        "title": "Sertifikalar"
+      },
+      "upstreams": {
+        "planned": "Yakında",
+        "title": "Yukarı akışlar"
+      },
       "top_reasons": {
         "title": "Top reasons for blocks"
       }
@@ -563,6 +577,20 @@
     "welcome": {
       "title": "Welcome back, {{user}}",
       "greeting": "Welcome back,"
+    },
+    "mini": {
+      "across_countries": "{{count}} ülkelerinde",
+      "enforced": "Şu anda uygulanıyor",
+      "pct_blocked": "{{percent}}% engellendi",
+      "scheduled": "Planlanmış"
+    },
+    "status": {
+      "blocked_of_total": "{{total}} ile toplamda bloke",
+      "free_plan": "Ücretsiz plan",
+      "renews": "Yenile",
+      "services_licensed": "{{count}} lisanslı servisler",
+      "trend_vs_prev": "önceki ile karşılaştır",
+      "vs_prev": "önceki ile karşılaştır"
     },
     "panel": {
       "timeseries_sub": "Selected range",
@@ -885,9 +913,12 @@
     "read_more": "Devamını Oku",
     "see_more": "Daha Fazlası",
     "upgrade": "Yükselt?",
+    "use_authenticator_code": "Bir kimlik doğrulama kodu kullan",
+    "use_recovery_code": "Bir kurtarma kodu kullan",
     "get_support": "Get support"
   },
   "login": {
+    "title": "Giriş Yap",
     "subtitle": "BunkerWeb hesabınıza giriş yapın"
   },
   "logs": {
@@ -1012,6 +1043,7 @@
   "mode": {
     "advanced": "Gelişmiş",
     "easy": "Kolay",
+    "compose": "Yaz",
     "raw": "Ham"
   },
   "navbar": {
@@ -1059,10 +1091,14 @@
     "operate": "Operate",
     "system": "System",
     "edition_community": "Community",
+    "redirects": "Yönlendir",
+    "upstreams": "Yukarı akışlar",
+    "workflows": "İş akışları",
     "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "Haber görseli",
+    "slide": "Kaydırma",
     "posted_on": "Yayınlanma tarihi"
   },
   "newsletter": {
@@ -1084,6 +1120,7 @@
         "not_available": "Eklenti sayfası beta aşamasında henüz mevcut değil.",
         "pre_render_error": "Ön işleme hatası",
         "no_content": "Bu eklenti gömülü bir sayfa sunmaz.",
+        "restricted_to_admins": "Bu eklenti kendi sayfasını içerir, bu da eklenti kodunu çalıştırır. Sadece yöneticiler yükleyebilir.",
         "dedicated_page_unavailable": "Bu eklenti, henüz yüklenmemiş özel bir sayfada yönetilir. Erişmek için web arayüzünü yeniden başlatın."
       }
     },
@@ -1486,6 +1523,11 @@
     "template_in_use_description": "Mevcut şablon dışında değişiklik yapılamaz. Lütfen değişiklikleri mevcut şablon üzerinden yapın veya Gelişmiş/Ham moda geçin.",
     "unique_server_name": "Benzersiz Sunucu Adı",
     "up": "Açık",
+    "active": "Aktif",
+    "all_valid": "Tüm geçerli",
+    "expired": "Geçerlilik süresi dolmuş",
+    "expiring": "Sonlanıyor",
+    "no_settings": "Bu eklenti, bu kapsam için ayarlar içermiyor.",
     "yes": "Evet"
   },
   "step": {
@@ -1861,10 +1903,11 @@
       "edit_service": "{{service}} Servisini Düzenle",
       "edit_template": "{{template}} Şablonunu Düzenle",
       "export_config": "{{name}} özel yapılandırmasını dışa aktar",
-      "export_service": "{{name}} Servis Yapılandırmasını Dışa Aktar",
+      "export_service": "{{service}} Servis Yapılandırmasını Dışa Aktar",
       "view_config": "{{name}} Özel Yapılandırmasını Görüntüle",
       "view_file": "{{filename}} Görüntüle",
       "view_service": "{{service}} Servisini Görüntüle",
+      "manage_activation": "{{name}}'i küresel ayarlarda etkinleştir",
       "view_template": "{{template}} Şablonunu Görüntüle"
     },
     "modal": {
@@ -2043,6 +2086,10 @@
     "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre."
   },
   "totp": {
+    "cant_access": "Kimlik doğrulama kodunuza erişemiyor musunuz?",
+    "signing_in": "BunkerWeb'e giriş yap",
+    "subtitle": "Kimlik doğrulama uygulamasından kodu girin.",
+    "title": "İki Faktörlü Kimlik Doğrulama",
     "prompt": "Lütfen TOTP kodunuzu girin."
   },
   "certificates": {
@@ -2230,6 +2277,186 @@
     "status": "Örnek depolama",
     "subtitle": "Ters proxy önbelleği durumu, toplu olarak isabet oran metrikleri ve anında temizleme kontrolleri."
   },
+  "compose": {
+    "always_on": "Her zaman açık",
+    "count": "{{on}} etkin · {{total}} kullanılabilir · {{locked}} kilitli",
+    "entries": "{{count}} yapılandırılmış",
+    "filter": {
+      "all": "Tümü",
+      "changed": "Değişti",
+      "on": "Evet"
+    },
+    "locked": "Burada kontrol yok",
+    "provenance": {
+      "api": "API aracılığıyla yönetilir",
+      "attachment": "Ekli dosyadan",
+      "clone": "Kopyalandı",
+      "default": "Varsayılan",
+      "edited": "İşte düzenlendi",
+      "global": "Küresel",
+      "managed": "{{method}} tarafından ayarlandı",
+      "template": "Şablondan"
+    },
+    "set_value": "Bir değer belirle…",
+    "show_more": "{{count}}'i daha fazla görüntüle",
+    "unavailable": "Eklenti listesi yüklenemedi, bu nedenle bu sayfa güvenli bir şekilde düzenlenemez. API yanıtını bekleyin."
+  },
+  "redirects": {
+    "all": "Tümü",
+    "append_badge": "+ URI",
+    "append_request_uri": "İstenen URI'i hedefte ekle",
+    "attach": "Ekle",
+    "attach_copy": "{{name}}'i ({{from}} → {{to}}) bir veya daha fazla servise ekle.",
+    "code": {
+      "301": "301 — Kalıcı olarak taşındı",
+      "302": "302 — Bulundu",
+      "303": "303 — Diğerleri",
+      "307": "307 — Geçici yönlendirme",
+      "308": "308 — Kalıcı yönlendirme"
+    },
+    "create": "Yönlendirme oluştur",
+    "delete_confirm_title": "Bu yönlendirmeyi sil?",
+    "delete_copy": "{{name}} yönlendirmesini sil?",
+    "delete_help": "Bir servise bağlı olan bir yönlendirme silinemez. Önce ayırın.",
+    "edit": "Yönlendirmeyi düzenle",
+    "edit_shared": "Bu yönlendirme {{count}} servisine (ler) bağlıdır: {{services}}. Değişiklikleri kaydet.",
+    "empty_text": "Bir yönlendirme, bir veya daha fazla servise eklediğiniz adlandırılmış bir kuraldır. REDIRECT_* ayarları, bu ile birlikte çalışmaya devam eder.",
+    "empty_title": "Henüz yönlendirme yok",
+    "from_path": "Yönlendir:",
+    "from_path_help": "Bağlı servislerdeki kaynak yolu, örneğin /old.",
+    "new": "Yeni yönlendirme",
+    "not_attached": "Bağlı değil",
+    "readonly": "Veritabanı okumak için yalnızcadır. Yönlendirmeler incelenebilir, ancak değiştirilemez.",
+    "save": "Yönlendirmeyi kaydet",
+    "search": "Ad, kaynak yolu veya hedefi arayın...",
+    "services_help": "Tamamlamak için Ctrl veya Command kullanın. Daha sonra yönlendirme eklenebilir.",
+    "status_code": "Durum kodu",
+    "to_url": "Yönlendir",
+    "truncated": "Sadece ilk 500 yönlendirme görüntülenir. Tam sonucu görmek için API ile listeyi daraltın."
+  },
+  "upstreams": {
+    "add_server": "Sunucu ekle",
+    "all": "Tümü",
+    "attach": "Ekle",
+    "attach_copy": "{{name}}'i ({{servers}}) bir veya daha fazla sunucuya ekle.",
+    "backend_ssl": "TLS ile sunucularla (https:// / grpcs://) konuş",
+    "balancing": {
+      "ip_hash": "IP hash — aynı istemci, aynı arka uç",
+      "least_conn": "En az bağlantılar",
+      "round_robin": "Döngü (varsayılan)"
+    },
+    "create": "Üst akış oluştur",
+    "delete_confirm_title": "Bu üst akışı sil?",
+    "delete_copy": "{{name}} üst akışını sil?",
+    "delete_help": "Bir hizmete hala bağlı olan bir üst akış silinemez. Önce ayırın.",
+    "edit": "Üst akışı düzenle",
+    "edit_shared": "Bu üst akış, {{count}} hizmet(ler)ine bağlıdır: {{services}}. Tüm değişiklikleri kaydet.",
+    "empty_text": "Bir üst akış, bir veya daha fazla hizmete, ters yönlendirme yolunda eklediğiniz, adlandırılmış bir arka uç havuzu. REVERSE_PROXY_HOST ayarları, buyle birlikte çalışmaya devam eder.",
+    "empty_title": "Henüz üst akış yok",
+    "keepalive": "Yaşam",
+    "keepalive_help": "Her işçi başına tutulan boş bağlantılar. Sadece HTTP ve gRPC; devre dışı bırakmak için boş bırakın.",
+    "match_path": "Ters yönlendirme yolu",
+    "match_path_help": "Seçilen hizmetlerin bu havuzdan yönlendirdiği yer. Bir akış havuzu için, tüm hizmet kullanılır.",
+    "method": "Yük dengeleme",
+    "name_help": "Sadece harfler, rakamlar, tireler ve alt çizgiler. Noktalar reddedildiğinden, bir havuz adı asla gerçek bir ana sunucuyu gölgede tutamaz.",
+    "new": "Yeni ana sunucu",
+    "not_attached": "Bağlanmamış",
+    "protocol": "Protokol",
+    "protocol_help": "HTTP ve gRPC havuzları bir yola bağlıdır; bir akış havuzu, tüm TCP/UDP hizmetini devralır.",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "Akış (TCP/UDP)"
+    },
+    "readonly": "Veritabanı okumak için. Ana sunucular incelenebilir ancak değiştirilemez.",
+    "role": {
+      "backup": "Yedek",
+      "down": "Kapalı",
+      "primary": "Ana"
+    },
+    "save": "Ana sunucuyu kaydet",
+    "search": "Ad, açıklama veya sunucu'yu arayın...",
+    "server_fail_timeout": "Başarısızlık zaman aşımı",
+    "server_host": "Sunucu",
+    "server_max_fails": "Maksimum başarısızlıklar",
+    "server_role": "Rol",
+    "server_weight": "Ağırlık",
+    "servers": "Sunucular",
+    "services_help": "Çoklu hizmetleri seçmek için Ctrl veya Command kullanın. Bir ana sunucu daha sonra bağlanabilir.",
+    "services_hidden": "{{count}} hizmet(leri) gizlendi: Bir {{protocol}} ana sunucu yalnızca eşleşen bir hizmete bağlanabilir.",
+    "truncated": "Sadece ilk 500 ana sunucu görüntülenir. Tam sonucu elde etmek için API ile listeyi daraltın."
+  },
+  "workflows": {
+    "action": "Sonra",
+    "add_rule": "Kural ekle",
+    "all": "Tümü",
+    "attach": "Hizmetlere ekle",
+    "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
+    "clone": "İş akışını kopyala",
+    "clone_help": "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz.",
+    "clone_name": "Kopyanın adı",
+    "conditions": "Koşullar",
+    "delete": "İş akışını sil",
+    "delete_confirm": "Bu iş akışı ve tüm kuralları kalıcı olarak silinir.",
+    "empty_text": "Bir iş akışı, hizmetlere eklediğiniz kuralların sıralı bir listesidir: bir koşul ağacı, isteğe bağlı bir hız eşiği ve bir eylem — meydan okuma, engelle veya yönlendirme.",
+    "empty_title": "Henüz hiç iş akışı yok",
+    "enabled": "Enabled",
+    "new": "Yeni iş akışı",
+    "no_rules": "Henüz hiç kural yok. Bu politikayı oluşturmaya başlamak için bir tane ekleyin.",
+    "not_attached": "Eklendi değil",
+    "order_help": "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir.",
+    "readonly": "Veritabanı okumak için yalnızcadır. İş akışları incelenebilir, ancak değiştirilemez.",
+    "rules": "Kurallar",
+    "search": "Ad veya açıklama arayın...",
+    "threshold": "Sadece bir hızın üzerinde",
+    "threshold_count": "İstekler",
+    "threshold_window": "Her (saniye)",
+    "truncated": "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için API'i kullanın."
+  },
+  "request_path": {
+    "client": "Müşteri",
+    "source": "{{phase}} aşaması için eklenti yürütme sırası, {{setting}}'den — bir görüntüleme sırası, isteğe bağlı bir izleme değil.",
+    "terminal": {
+      "inline": "Arka uç",
+      "none": "Hiçbir şey sunulmadı",
+      "pool": "Ana havuz",
+      "root": "Yerel dosyalar"
+    },
+    "title": "İstek yolu",
+    "unordered": "{{phase}} aşamasında ilan edilmemiş bir konum; sıralı eklentilerden sonra çalışır."
+  },
+  "service": {
+    "resources": {
+      "attach": "Bağla",
+      "conflict": {
+        "inline": "{{service}}, {{path}}'i kendi {{family}} ayarlarıyla zaten sunmaktadır. {{path}} için bu ayarları temizleyin veya farklı bir yol kullanın.",
+        "primary": "\"{{name}}\", şu anda bu servis için ana sertifikadır ve daha fazla uyarı olmadan düşürülecektir. Ana, aslında dağıtılan sertifikadır.",
+        "resource": "{{service}}, {{kind}}'in \"{{name}}\" aracılığıyla {{path}}'i zaten sunmaktadır. \"{{name}}\"'i ayırın veya onlardan birine farklı bir yol verin.",
+        "stream": "Bir akış servisi, her bağlantıyı tek bir arka uçta yönlendirir ve {{service}}, zaten \"{{name}}\"'i kullanmaktadır. Önce onu ayırın.",
+        "stream_inline": "{{service}}, REVERSE_PROXY_HOST'de kendi arka ucuna sahiptir. Bu ayarı temizleyerek ana ucun kontrolünü almasını sağlayın."
+      },
+      "detach": "Ayır",
+      "family": {
+        "certificate": "Sertifikalar",
+        "redirect": "Yönlendirir",
+        "template": "Şablon",
+        "upstream": "Ana uçlar",
+        "workflow": "İş akışları"
+      },
+      "match_path": "Yol",
+      "none": "Hiçbir şey bağlanmadı",
+      "primary": "Ana sertifika",
+      "template": {
+        "none": "Şablon yok",
+        "note": "Kaynak değil: bir şablon bir ayardır. Kaydetmede uygulanır ve değiştirildiğinde birçok ayar aynı anda değiştirilir.",
+        "pending": "Kaydetmede uygulanır",
+        "switching": "Kaydetmek, bu servisi \"{{from}}\"'den \"{{to}}\"'e geçirir. Mevcut şablon tarafından sağlanan değerler silinir ve \"{{to}}\"'in değerleri uygulanır — birçok ayar aynı anda değiştirilir.",
+        "unwired": "Bu sayfa USE_TEMPLATE'i yayınlamaz, bu nedenle şablon burada değiştirilemez."
+      },
+      "title": "Bağlı kaynaklar",
+      "unavailable": "Meşru değil"
+    }
+  },
   "onboarding": {
     "item": {
       "install": "Install BunkerWeb on 1+ host",
@@ -2237,6 +2464,7 @@
       "pro": "Activate BunkerWeb PRO",
       "service": "Register your first service"
     },
+    "pro_tips": "PRO ipuçları",
     "title": "Getting started"
   }
 }

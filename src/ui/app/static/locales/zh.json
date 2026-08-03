@@ -6,6 +6,12 @@
     "socials": "社交媒体",
     "tagline": "强大保护，化繁为简",
     "title": "About BunkerWeb",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "reddit": "Reddit"
+    },
     "version": "版本：{{version}}"
   },
   "accordion": {
@@ -215,6 +221,7 @@
     "update_duration_all_filtered": "Update duration for all matching bans",
     "use_template": "Use template",
     "edit": "Edit",
+    "verify": "验证",
     "view": "View"
   },
   "cache": {
@@ -517,6 +524,13 @@
       "total_requests": {
         "title": "总请求数"
       },
+      "certificates": {
+        "title": "证书"
+      },
+      "upstreams": {
+        "planned": "即将推出",
+        "title": "上游"
+      },
       "top_reasons": {
         "title": "Top reasons for blocks"
       }
@@ -563,6 +577,20 @@
     "welcome": {
       "title": "Welcome back, {{user}}",
       "greeting": "Welcome back,"
+    },
+    "mini": {
+      "across_countries": "在 {{count}} 国家",
+      "enforced": "目前生效",
+      "pct_blocked": "{{percent}}% 被阻止",
+      "scheduled": "计划"
+    },
+    "status": {
+      "blocked_of_total": "已阻止 {{total}} 总计",
+      "free_plan": "免费计划",
+      "renews": "续订",
+      "services_licensed": "{{count}} 服务已授权",
+      "trend_vs_prev": "与前次比较",
+      "vs_prev": "与前次比较"
     },
     "panel": {
       "timeseries_sub": "Selected range",
@@ -885,9 +913,12 @@
     "read_more": "阅读更多",
     "see_more": "查看更多",
     "upgrade": "升级？",
+    "use_authenticator_code": "使用身份验证码",
+    "use_recovery_code": "使用恢复码",
     "get_support": "Get support"
   },
   "login": {
+    "title": "登录",
     "subtitle": "登录到您的 BunkerWeb 帐户"
   },
   "logs": {
@@ -1012,6 +1043,7 @@
   "mode": {
     "advanced": "高级",
     "easy": "简单",
+    "compose": "撰写",
     "raw": "原始"
   },
   "navbar": {
@@ -1059,10 +1091,14 @@
     "operate": "Operate",
     "system": "System",
     "edition_community": "Community",
+    "redirects": "重定向",
+    "upstreams": "上游",
+    "workflows": "工作流程",
     "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "新闻图片",
+    "slide": "滑动",
     "posted_on": "发布于"
   },
   "newsletter": {
@@ -1084,6 +1120,7 @@
         "not_available": "插件页面在 Beta 阶段尚不可用。",
         "pre_render_error": "预渲染错误",
         "no_content": "此插件不提供嵌入式页面。",
+        "restricted_to_admins": "此插件自带页面，运行插件代码。只有管理员才能加载。",
         "dedicated_page_unavailable": "此插件在专属页面中管理，该页面尚未加载。请重启 Web UI 以访问。"
       }
     },
@@ -1486,6 +1523,11 @@
     "template_in_use_description": "不允许在当前模板之外进行更改。请使用当前模板进行更改或切换到高级/原始模式。",
     "unique_server_name": "唯一服务器名称",
     "up": "运行中",
+    "active": "活动",
+    "all_valid": "全部有效",
+    "expired": "已过期",
+    "expiring": "即将到期",
+    "no_settings": "此插件在该范围内没有设置。",
     "yes": "是"
   },
   "step": {
@@ -1664,7 +1706,7 @@
       "raw_validation_step_title": "步骤 {{index}} 必须有一个标题。",
       "raw_validation_steps_required": "模板必须至少包含一个步骤。",
       "readonly_db": "数据库当前为只读。无法更改模板。",
-      "readonly_method": "此模板是在 UI 之外创建的，无法编辑。",
+      "readonly_method": "此模板由 {{method}} 流程创建，无法从 UI 编辑。",
       "readonly_title": "只读",
       "readonly_user": "您具有只读权限。请联系管理员以申请写入权限。",
       "select_config_placeholder": "选择一个配置",
@@ -1861,10 +1903,11 @@
       "edit_service": "编辑服务 {{service}}",
       "edit_template": "编辑模板 {{template}}",
       "export_config": "导出自定义配置 {{name}}",
-      "export_service": "导出服务 {{name}} 配置",
+      "export_service": "导出服务 {{service}} 配置",
       "view_config": "查看自定义配置 {{name}}",
       "view_file": "查看 {{filename}}",
       "view_service": "查看服务 {{service}}",
+      "manage_activation": "在全局设置中管理 {{name}} 的激活",
       "view_template": "查看模板 {{template}}"
     },
     "modal": {
@@ -2043,6 +2086,10 @@
     "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。"
   },
   "totp": {
+    "cant_access": "无法访问您的身份验证器？",
+    "signing_in": "登录 BunkerWeb",
+    "subtitle": "输入来自您的身份验证器应用程序的代码。",
+    "title": "双重验证",
     "prompt": "请输入您的 TOTP 代码。"
   },
   "certificates": {
@@ -2230,6 +2277,186 @@
     "status": "实例存储",
     "subtitle": "反向代理缓存状态，汇总命中率指标和立即清除控制。"
   },
+  "compose": {
+    "always_on": "始终开启",
+    "count": "{{on}} 已启用 · {{total}} 可用 · {{locked}} 已锁定",
+    "entries": "{{count}} 已配置",
+    "filter": {
+      "all": "全部",
+      "changed": "已更改",
+      "on": "开启"
+    },
+    "locked": "此处无控制",
+    "provenance": {
+      "api": "通过 API 管理",
+      "attachment": "来自附件",
+      "clone": "克隆",
+      "default": "默认",
+      "edited": "在此编辑",
+      "global": "来自全局",
+      "managed": "由 {{method}} 设置",
+      "template": "来自模板"
+    },
+    "set_value": "设置值…",
+    "show_more": "显示更多 {{count}}",
+    "unavailable": "插件列表无法加载，因此此页面无法安全编辑。 等待 API 响应后重新加载。"
+  },
+  "redirects": {
+    "all": "全部",
+    "append_badge": "+ URI",
+    "append_request_uri": "将请求的 URI 添加到目标",
+    "attach": "附加",
+    "attach_copy": "将 {{name}} ({{from}} → {{to}}) 附加到一个或多个服务。",
+    "code": {
+      "301": "301 — 永久移动",
+      "302": "302 — 已找到",
+      "303": "303 — 查看其他",
+      "307": "307 — 临时重定向",
+      "308": "308 — 永久重定向"
+    },
+    "create": "创建重定向",
+    "delete_confirm_title": "删除此重定向？",
+    "delete_copy": "删除 {{name}} 重定向？",
+    "delete_help": "附加到服务的重定向无法删除。 先将其分离。",
+    "edit": "编辑重定向",
+    "edit_shared": "此重定向附加到 {{count}} 服务(s)：{{services}}。 保存所有更改。",
+    "empty_text": "重定向是一种名称规则，您将其附加到一个或多个服务。 嵌入式 REDIRECT_* 设置将继续与其一起工作。",
+    "empty_title": "还没有重定向",
+    "from_path": "从",
+    "from_path_help": "附加服务的源路径，例如 /old.",
+    "new": "新建重定向",
+    "not_attached": "未附加",
+    "readonly": "数据库只读。 可以查看重定向，但不能更改。",
+    "save": "保存重定向",
+    "search": "搜索名称、源路径或目标...",
+    "services_help": "使用 Ctrl 或 Command 选择多个服务。 稍后可以添加重定向。",
+    "status_code": "状态码",
+    "to_url": "重定向到",
+    "truncated": "仅显示前 500 个重定向。 通过 API 获取完整结果，缩小列表。"
+  },
+  "upstreams": {
+    "add_server": "添加服务器",
+    "all": "全部",
+    "attach": "附加",
+    "attach_copy": "将 {{name}} ({{servers}}) 附加到一个或多个服务。",
+    "backend_ssl": "与服务器进行 TLS 通信（https:// / grpcs://）",
+    "balancing": {
+      "ip_hash": "1 IP 哈希 — 相同客户端，相同后端",
+      "least_conn": "最少连接",
+      "round_robin": "轮询（默认）"
+    },
+    "create": "创建上游",
+    "delete_confirm_title": "删除此上游？",
+    "delete_copy": "删除上游 {{name}}？",
+    "delete_help": "与服务关联的上游无法删除。首先将其断开连接。",
+    "edit": "编辑上游",
+    "edit_shared": "此上游与 {{count}} 服务(们)关联：{{services}}。保存所有更改。",
+    "empty_text": "上游是一个名称的后端池，您将其连接到一个或多个服务，位于反向代理路径上。 REVERSE_PROXY_HOST 设置与此一起保持工作。",
+    "empty_title": "尚无上游",
+    "keepalive": "保持连接",
+    "keepalive_help": "每工作进程保持的空闲连接。仅适用于 HTTP 和 gRPC；留空以禁用。",
+    "match_path": "反向代理路径",
+    "match_path_help": "选择的服务将流量代理到此池的位置。对于流池，整个服务将被使用。",
+    "method": "负载均衡",
+    "name_help": "只能是字母、数字、连字符和下划线。不允许使用点，因此池名不能与真实主机重叠。",
+    "new": "新的上游",
+    "not_attached": "未连接",
+    "protocol": "协议",
+    "protocol_help": "HTTP 和 gRPC 池连接到一个路径；一个流池继承整个 TCP/UDP 服务。",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "流 (TCP/UDP)"
+    },
+    "readonly": "数据库是只读的。上游可以查看，但不能修改。",
+    "role": {
+      "backup": "备份",
+      "down": "已停止",
+      "primary": "主"
+    },
+    "save": "保存上游",
+    "search": "搜索名称、描述或服务器...",
+    "server_fail_timeout": "超时时间",
+    "server_host": "服务器",
+    "server_max_fails": "最大失败次数",
+    "server_role": "角色",
+    "server_weight": "权重",
+    "servers": "服务器",
+    "services_help": "使用 Ctrl 或 Command 选择多个服务。上游可以稍后连接。",
+    "services_hidden": "{{count}} 服务(们) 已隐藏：{{protocol}} 上游只能连接到匹配的服务。",
+    "truncated": "仅显示前 500 个上游。通过 API 缩小列表以获得完整结果。"
+  },
+  "workflows": {
+    "action": "然后",
+    "add_rule": "添加规则",
+    "all": "全部",
+    "attach": "附加到服务",
+    "attach_help": "规则仅在工作流程附加到的服务上执行。",
+    "clone": "克隆工作流程",
+    "clone_help": "规则会被复制，但服务附加不会被复制。",
+    "clone_name": "副本名称",
+    "conditions": "条件",
+    "delete": "删除工作流程",
+    "delete_confirm": "此工作流程及其所有规则将被永久删除。",
+    "empty_text": "工作流程是一个规则的有序列表，您将其附加到服务上：一个条件树、可选的速率阈值和一个动作——挑战、阻止或重定向。",
+    "empty_title": "目前没有工作流程",
+    "enabled": "Enabled",
+    "new": "新建工作流程",
+    "no_rules": "目前没有规则。添加一个以开始构建此策略。",
+    "not_attached": "未附加",
+    "order_help": "规则按顺序评估，第一个匹配的规则获胜。具有速率阈值的规则只有在阈值超过时才会匹配，因此较低的规则可以捕获低于它的流量。",
+    "readonly": "数据库是只读的。可以查看工作流程，但不能修改。",
+    "rules": "规则",
+    "search": "搜索名称或描述...",
+    "threshold": "仅高于速率",
+    "threshold_count": "请求",
+    "threshold_window": "每（秒）",
+    "truncated": "仅显示前500个工作流程。通过API获取完整结果。"
+  },
+  "request_path": {
+    "client": "客户端",
+    "source": "{{phase}}阶段的插件执行顺序，从{{setting}}开始——显示顺序，而不是按请求跟踪。",
+    "terminal": {
+      "inline": "后端",
+      "none": "未提供服务",
+      "pool": "上游池",
+      "root": "本地文件"
+    },
+    "title": "请求路径",
+    "unordered": "未在 {{phase}} 阶段声明位置；它在按字母顺序排列的插件之后运行。"
+  },
+  "service": {
+    "resources": {
+      "attach": "附加",
+      "conflict": {
+        "inline": "{{service}} 已经通过自己的 {{family}} 设置为 {{path}} 提供服务。清除 {{path}} 的设置，或使用不同的路径。",
+        "primary": "“{{name}}” 目前是此服务的首选证书，并且将不再使用，无需进一步警告。首选证书是指实际部署的证书。",
+        "resource": "{{service}} 已经通过 {{kind}} 的“{{name}}”为 {{path}} 提供服务。分离“{{name}}”，或为它们指定不同的路径。",
+        "stream": "流式服务代理所有连接到一个后端，而 {{service}} 已经使用了上游“{{name}}”。首先分离它。",
+        "stream_inline": "{{service}} 在 REVERSE_PROXY_HOST 中已经有自己的后端。清除该设置，让上游接管。"
+      },
+      "detach": "分离",
+      "family": {
+        "certificate": "证书",
+        "redirect": "重定向",
+        "template": "模板",
+        "upstream": "上游",
+        "workflow": "工作流程"
+      },
+      "match_path": "路径",
+      "none": "未附加",
+      "primary": "首选证书",
+      "template": {
+        "none": "未有模板",
+        "note": "不是资源：模板是一个设置。它在保存时生效，并且切换模板会同时更改许多设置。",
+        "pending": "在保存时生效",
+        "switching": "保存时，此服务从“{{from}}”切换到“{{to}}”。当前模板提供的所有值将被删除，并应用 {{to}} 的值——许多设置同时更改。",
+        "unwired": "此页面无法更改 USE_TEMPLATE，因此模板无法在此处更改。"
+      },
+      "title": "附加的资源",
+      "unavailable": "不可用"
+    }
+  },
   "onboarding": {
     "item": {
       "install": "Install BunkerWeb on 1+ host",
@@ -2237,6 +2464,7 @@
       "pro": "Activate BunkerWeb PRO",
       "service": "Register your first service"
     },
+    "pro_tips": "PRO 提示",
     "title": "Getting started"
   }
 }

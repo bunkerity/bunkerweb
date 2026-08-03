@@ -772,12 +772,101 @@ def _locale_leaf_types(locale, prefix=""):
     return leaves
 
 
+def _flatten_locale(locale, prefix=""):
+    """Same walk as _locale_leaf_types, but keeping the values instead of their types."""
+    leaves = {}
+    for key, value in locale.items():
+        path = f"{prefix}.{key}" if prefix else key
+        if isinstance(value, dict):
+            leaves.update(_flatten_locale(value, path))
+        else:
+            leaves[path] = value
+    return leaves
+
+
 def test_all_locales_match_en_json_structure():
     expected = _locale_leaf_types(json.loads((STATIC / "locales" / "en.json").read_text(encoding="utf-8")))
 
     for path in sorted((STATIC / "locales").glob("*.json")):
         locale = json.loads(path.read_text(encoding="utf-8"))
         assert _locale_leaf_types(locale) == expected, path.name
+
+
+def _interpolation_variables(value):
+    """The set of i18next interpolation variable NAMES in one string.
+
+    Not a `{{.*?}}` scan. Two things break that:
+
+    * ICU MessageFormat nests braces --
+      ``{{count, plural, one {# setting available} other {# settings available}}}`` -- so a
+      non-greedy regex stops at the first ``}}`` and mis-reads the placeholder. Brace depth is
+      tracked instead.
+    * The inner text of an ICU plural **must** be translated, so comparing raw placeholder
+      bodies flags every correct translation as broken. Only the variable name is contractual;
+      everything after the first comma is the format spec and is the translator's to localise.
+
+    A locale may also legitimately collapse an ICU plural to a plain ``{{count}}`` (Chinese,
+    Korean, Turkish have no numeral-plural agreement), which yields the same name set.
+    Returns a set, so repeating a variable for word order is fine too.
+    """
+    names = set()
+    i = 0
+    while (start := value.find("{{", i)) != -1:
+        depth, j = 0, start
+        while j < len(value):
+            if value.startswith("{{", j):
+                depth += 1
+                j += 2
+            elif value.startswith("}}", j):
+                depth -= 1
+                j += 2
+                if depth == 0:
+                    break
+            else:
+                j += 1
+        else:
+            break  # unbalanced -- leave it to the caller's eyes, not this helper
+        # Indices out of the slice on purpose: black formats `value[start + 2 : j - 2]` with
+        # spaces around the colon, which trips flake8 E203 (not in this repo's ignore list).
+        body_start, body_end = start + 2, j - 2
+        names.add(value[body_start:body_end].split(",", 1)[0].strip())
+        i = j
+    return names
+
+
+def test_every_locale_keeps_the_interpolation_variables_en_json_declares():
+    """A translated string must interpolate the same variables as its English source.
+
+    i18next substitutes by NAME, so a renamed, dropped or mistyped variable does not fail
+    loudly -- it renders the literal ``{{name}}`` to the user, or silently drops the value.
+    Nothing caught this class before: the parity test above compares key SETS, so it stays
+    green while the strings themselves are broken.
+
+    Five real defects were live when this test was written (2026-08-03), and they are the
+    shapes to expect: ``tooltip.link.export_service`` used ``{{name}}`` in 14 locales while
+    ``services.html:226`` passes ``{"service": ...}``; Polish
+    ``dashboard.card.services.status`` had ``{{draft}}`` twice and lost ``{{online}}``; and
+    three keys had simply dropped their placeholder (``{{services_count}}``, ``{{services}}``,
+    ``{{method}}``).
+    """
+    locales_dir = STATIC / "locales"
+    en = _flatten_locale(json.loads((locales_dir / "en.json").read_text(encoding="utf-8")))
+    expected = {key: _interpolation_variables(value) for key, value in en.items() if isinstance(value, str)}
+
+    offenders = []
+    for path in sorted(locales_dir.glob("*.json")):
+        if path.name == "en.json":
+            continue
+        locale = _flatten_locale(json.loads(path.read_text(encoding="utf-8")))
+        for key, want in expected.items():
+            value = locale.get(key)
+            if not isinstance(value, str):
+                continue
+            got = _interpolation_variables(value)
+            if got != want:
+                offenders.append(f"{path.name}:{key} expected {sorted(want)} got {sorted(got)}")
+
+    assert not offenders, "interpolation variables diverge from en.json:\n  " + "\n  ".join(offenders)
 
 
 def test_every_data_i18n_key_resolves_in_en_json():

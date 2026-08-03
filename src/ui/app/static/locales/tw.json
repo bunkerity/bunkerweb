@@ -6,6 +6,12 @@
     "socials": "社群媒體",
     "tagline": "強大保護，化繁為簡",
     "title": "About BunkerWeb",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "reddit": "Reddit"
+    },
     "version": "版本：{{version}}"
   },
   "accordion": {
@@ -215,6 +221,7 @@
     "update_duration_all_filtered": "Update duration for all matching bans",
     "use_template": "Use template",
     "edit": "Edit",
+    "verify": "驗證",
     "view": "View"
   },
   "cache": {
@@ -517,6 +524,13 @@
       "total_requests": {
         "title": "總請求數"
       },
+      "certificates": {
+        "title": "憑證"
+      },
+      "upstreams": {
+        "planned": "即將推出",
+        "title": "上游"
+      },
       "top_reasons": {
         "title": "Top reasons for blocks"
       }
@@ -563,6 +577,20 @@
     "welcome": {
       "title": "Welcome back, {{user}}",
       "greeting": "Welcome back,"
+    },
+    "mini": {
+      "across_countries": "在 {{count}} 國家/地區",
+      "enforced": "目前強制執行",
+      "pct_blocked": "{{percent}}% 封鎖",
+      "scheduled": "預約"
+    },
+    "status": {
+      "blocked_of_total": "已封鎖 {{total}} 總計",
+      "free_plan": "免費方案",
+      "renews": "續訂",
+      "services_licensed": "{{count}} 服務已授權",
+      "trend_vs_prev": "與前次比較",
+      "vs_prev": "與前次比較"
     },
     "panel": {
       "timeseries_sub": "Selected range",
@@ -885,9 +913,12 @@
     "read_more": "閱讀更多",
     "see_more": "查看更多",
     "upgrade": "升級？",
+    "use_authenticator_code": "使用驗證碼",
+    "use_recovery_code": "使用恢復碼",
     "get_support": "Get support"
   },
   "login": {
+    "title": "登入",
     "subtitle": "登入您的 BunkerWeb 帳戶"
   },
   "logs": {
@@ -1012,6 +1043,7 @@
   "mode": {
     "advanced": "進階",
     "easy": "簡易",
+    "compose": "撰寫",
     "raw": "原始"
   },
   "navbar": {
@@ -1059,10 +1091,14 @@
     "operate": "Operate",
     "system": "System",
     "edition_community": "Community",
+    "redirects": "重導向",
+    "upstreams": "上游",
+    "workflows": "工作流程",
     "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "新聞圖片",
+    "slide": "滑動",
     "posted_on": "發布於"
   },
   "newsletter": {
@@ -1084,6 +1120,7 @@
         "not_available": "外掛程式頁面在 Beta 階段尚不可用。",
         "pre_render_error": "預先渲染錯誤",
         "no_content": "此外掛不提供內嵌頁面。",
+        "restricted_to_admins": "此外掛程式會載入自己的頁面，並執行外掛程式程式碼。只有管理員才能載入。",
         "dedicated_page_unavailable": "此外掛在專屬頁面中管理，該頁面尚未載入。請重新啟動 Web UI 以存取。"
       }
     },
@@ -1486,6 +1523,11 @@
     "template_in_use_description": "不允許在目前範本之外進行變更。請使用目前範本進行變更或切換到進階/原始模式。",
     "unique_server_name": "唯一伺服器名稱",
     "up": "執行中",
+    "active": "啟用中",
+    "all_valid": "全部有效",
+    "expired": "已過期",
+    "expiring": "即將到期",
+    "no_settings": "此外掛程式在此範圍內沒有設定。",
     "yes": "是"
   },
   "step": {
@@ -1861,10 +1903,11 @@
       "edit_service": "編輯服務 {{service}}",
       "edit_template": "編輯範本 {{template}}",
       "export_config": "匯出自訂設定 {{name}}",
-      "export_service": "匯出服務 {{name}} 設定",
+      "export_service": "匯出服務 {{service}} 設定",
       "view_config": "檢視自訂設定 {{name}}",
       "view_file": "檢視 {{filename}}",
       "view_service": "檢視服務 {{service}}",
+      "manage_activation": "在全局設定中管理 {{name}} 的啟用",
       "view_template": "檢視範本 {{template}}"
     },
     "modal": {
@@ -2043,6 +2086,10 @@
     "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。"
   },
   "totp": {
+    "cant_access": "無法存取您的驗證碼？",
+    "signing_in": "登入 BunkerWeb",
+    "subtitle": "請輸入您驗證碼應用程式中的碼。",
+    "title": "雙重驗證",
     "prompt": "請輸入您的 TOTP 代碼。"
   },
   "certificates": {
@@ -2230,6 +2277,186 @@
     "status": "實例儲存",
     "subtitle": "反向代理緩存狀態，匯總命中率指標和即時清除控制。"
   },
+  "compose": {
+    "always_on": "永遠開啟",
+    "count": "{{on}} 已啟用 · {{total}} 停用 · {{locked}} 鎖定",
+    "entries": "{{count}} 已設定",
+    "filter": {
+      "all": "全部",
+      "changed": "已變更",
+      "on": "開啟"
+    },
+    "locked": "這裡沒有控制",
+    "provenance": {
+      "api": "透過 API 管理",
+      "attachment": "從附件",
+      "clone": "複製",
+      "default": "預設",
+      "edited": "在此編輯",
+      "global": "來自全球",
+      "managed": "由 {{method}} 設定",
+      "template": "來自範本"
+    },
+    "set_value": "設定一個值…",
+    "show_more": "顯示更多 {{count}}",
+    "unavailable": "插件列表無法載入，因此此頁面無法安全編輯。 重新載入後 API 回覆。"
+  },
+  "redirects": {
+    "all": "全部",
+    "append_badge": "+ URI",
+    "append_request_uri": "將要求的 URI 附加到目標",
+    "attach": "附加",
+    "attach_copy": "將 {{name}} ({{from}} → {{to}}) 附加到一個或多個服務。",
+    "code": {
+      "301": "301 — 永久移動",
+      "302": "302 — 已找到",
+      "303": "303 — 請參閱其他",
+      "307": "307 — 暫時重定向",
+      "308": "308 — 永久重定向"
+    },
+    "create": "建立重定向",
+    "delete_confirm_title": "刪除此重定向？",
+    "delete_copy": "刪除 {{name}} 的重定向？",
+    "delete_help": "附加到服務的重定向無法刪除。 請先解除附加。",
+    "edit": "編輯重定向",
+    "edit_shared": "此重定向附加到 {{count}} 服務：{{services}}。 儲存所有變更。",
+    "empty_text": "重定向是一種名稱規則，您將附加到一個或多個服務。 內聯 REDIRECT_* 設定將與其一起運作。",
+    "empty_title": "目前沒有重定向",
+    "from_path": "從",
+    "from_path_help": "附加到服務的路徑，例如 /old.",
+    "new": "建立新的重定向",
+    "not_attached": "未附加",
+    "readonly": "資料庫僅供閱讀。 可以檢視重定向，但無法修改。",
+    "save": "儲存重定向",
+    "search": "搜尋名稱、來源路徑或目標...",
+    "services_help": "使用 Ctrl 或 Command 選擇多個服務。 之後可以附加重導向。",
+    "status_code": "狀態碼",
+    "to_url": "重導向至",
+    "truncated": "僅顯示前 500 個重導向。 使用 API 縮小清單以顯示完整結果。"
+  },
+  "upstreams": {
+    "add_server": "新增伺服器",
+    "all": "全部",
+    "attach": "附加",
+    "attach_copy": "將 {{name}} ({{servers}}) 附加到一個或多個服務。",
+    "backend_ssl": "與伺服器進行 TLS 訊息交換 (https:// / grpcs://)",
+    "balancing": {
+      "ip_hash": "IP 雜項 — 同一客戶端、同一後端",
+      "least_conn": "最少連線",
+      "round_robin": "輪流 (預設)"
+    },
+    "create": "建立 upstream",
+    "delete_confirm_title": "刪除這個 upstream？",
+    "delete_copy": "刪除 upstream {{name}}？",
+    "delete_help": "與服務相關聯的 upstream 無法刪除。 請先解除連結。",
+    "edit": "編輯 upstream",
+    "edit_shared": "這個 upstream 與服務 {{count}} 相關聯：{{services}}。 儲存所有變更。",
+    "empty_text": "upstream 是一個名稱的後端池，您將其連接到一個或多個服務，位於反向代理路徑上。 Inline REVERSE_PROXY_HOST 設定將繼續與其一起運作。",
+    "empty_title": "目前沒有 upstream",
+    "keepalive": "保持連線",
+    "keepalive_help": "每位工作者保持的閒置連線。 僅適用於 HTTP 和 gRPC； 留空以停用。",
+    "match_path": "反向代理路徑",
+    "match_path_help": "選擇的服務將其代理到此池的位置。 對於流池，則取整個服務。",
+    "method": "負載平衡",
+    "name_help": "只能輸入字母、數字、連字符和底線。 點號不允許，因此池名稱永遠不會與實際主機衝突。",
+    "new": "新的上游",
+    "not_attached": "未連接",
+    "protocol": "協議",
+    "protocol_help": "HTTP 和 gRPC 均連接到一個路徑；一個流池會接管整個 TCP/UDP 服務。",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "流 (TCP/UDP)"
+    },
+    "readonly": "資料庫為唯讀。 可以檢視上游，但不能修改。",
+    "role": {
+      "backup": "備份",
+      "down": "已停止",
+      "primary": "主要"
+    },
+    "save": "儲存上游",
+    "search": "搜尋名稱、描述或伺服器...",
+    "server_fail_timeout": "失敗逾時",
+    "server_host": "伺服器",
+    "server_max_fails": "最大失敗次數",
+    "server_role": "角色",
+    "server_weight": "權重",
+    "servers": "伺服器",
+    "services_help": "使用 Ctrl 或 Command 選擇多個服務。 上游可以稍後連接。",
+    "services_hidden": "{{count}} 服務(們) 已隱藏：一個 {{protocol}} 上游只能連接到相符的服務。",
+    "truncated": "僅顯示前 500 個上游。 使用 API 縮小列表以獲得完整結果。"
+  },
+  "workflows": {
+    "action": "然後",
+    "add_rule": "新增規則",
+    "all": "全部",
+    "attach": "連接到服務",
+    "attach_help": "規則僅在工作流程連接到的服務上執行。",
+    "clone": "複製工作流程",
+    "clone_help": "規則會被複製，但服務連接不會。",
+    "clone_name": "複製名稱",
+    "conditions": "條件",
+    "delete": "刪除工作流程",
+    "delete_confirm": "此工作流程及其所有規則將永久刪除。",
+    "empty_text": "工作流程是一個規則的有序列表，您將其連接到服務：一個條件樹、一個可選的速率閾值，以及一個動作 — 挑戰、阻止或重定向。",
+    "empty_title": "目前沒有工作流程",
+    "enabled": "Enabled",
+    "new": "建立新工作流程",
+    "no_rules": "目前沒有規則。添加一個以開始建立此策略。",
+    "not_attached": "未連接",
+    "order_help": "規則會按順序評估，且第一個匹配的規則會生效。具有速率閾值的規則只有在閾值超過時才會匹配，因此較低的規則可以捕獲閾值以下的流量。",
+    "readonly": "資料庫僅供讀取。可以檢視工作流程，但無法修改。",
+    "rules": "規則",
+    "search": "搜尋名稱或描述...",
+    "threshold": "僅限於特定速率",
+    "threshold_count": "請求",
+    "threshold_window": "每 (秒)",
+    "truncated": "僅顯示前 500 個工作流程。通過 API 獲取完整結果以縮小列表。"
+  },
+  "request_path": {
+    "client": "客戶端",
+    "source": "{{phase}} 階段的插件執行順序，從 {{setting}} 開始 — 顯示順序，而不是按請求追蹤。",
+    "terminal": {
+      "inline": "後端",
+      "none": "沒有服務",
+      "pool": "上游池",
+      "root": "本地檔案"
+    },
+    "title": "請求路徑",
+    "unordered": "未在 {{phase}} 階段明確指定位置；它會在已排序的外掛程式之後執行。"
+  },
+  "service": {
+    "resources": {
+      "attach": "附加",
+      "conflict": {
+        "inline": "{{service}} 已經透過自己的 {{family}} 設定，服務 {{path}}。請清除 {{path}} 的設定，或使用不同的路徑。",
+        "primary": "「{{name}}」目前是此服務的主要憑證，且將在沒有警告的情況下被降級。主要的憑證是指實際部署的憑證。",
+        "resource": "{{service}} 已經透過 {{kind}} 的「{{name}}」服務 {{path}}。請解除「{{name}}」，或為其中一個指定不同的路徑。",
+        "stream": "一個流式服務會將所有連接代理到單一後端，而 {{service}} 已經使用上游「{{name}}」。請先解除它。",
+        "stream_inline": "{{service}} 在 REVERSE_PROXY_HOST 中已經有自己的後端。清除此設定，讓上游接管。"
+      },
+      "detach": "解除",
+      "family": {
+        "certificate": "憑證",
+        "redirect": "重定向",
+        "template": "範本",
+        "upstream": "上游",
+        "workflow": "工作流程"
+      },
+      "match_path": "路徑",
+      "none": "未附加",
+      "primary": "主要憑證",
+      "template": {
+        "none": "沒有範本",
+        "note": "不是資源：範本是設定。它適用於儲存時，並且切換它會一次性更改許多設定。",
+        "pending": "適用於儲存",
+        "switching": "儲存時，此服務從「{{from}}」變為「{{to}}」。目前範本提供的值會被移除，並應用「{{to}}」的設定 — 許多設定會一次性更改。",
+        "unwired": "此頁面不會發佈「USE_TEMPLATE」，因此無法在此處更改範本。"
+      },
+      "title": "附加資源",
+      "unavailable": "不可用"
+    }
+  },
   "onboarding": {
     "item": {
       "install": "Install BunkerWeb on 1+ host",
@@ -2237,6 +2464,7 @@
       "pro": "Activate BunkerWeb PRO",
       "service": "Register your first service"
     },
+    "pro_tips": "PRO 提示",
     "title": "Getting started"
   }
 }

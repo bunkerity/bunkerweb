@@ -6,6 +6,12 @@
     "socials": "소셜 미디어",
     "tagline": "단순함 속에 담긴 강력한 보안",
     "title": "About BunkerWeb",
+    "social": {
+      "discord": "디스코드",
+      "instagram": "인스타그램",
+      "linkedin": "링크드인",
+      "reddit": "레딧"
+    },
     "version": "버전: {{version}}"
   },
   "accordion": {
@@ -215,6 +221,7 @@
     "update_duration_all_filtered": "Update duration for all matching bans",
     "use_template": "Use template",
     "edit": "Edit",
+    "verify": "확인",
     "view": "View"
   },
   "cache": {
@@ -517,6 +524,13 @@
       "total_requests": {
         "title": "전체 요청"
       },
+      "certificates": {
+        "title": "인증서"
+      },
+      "upstreams": {
+        "planned": "곧 출시 예정",
+        "title": "상위 시스템"
+      },
       "top_reasons": {
         "title": "Top reasons for blocks"
       }
@@ -564,6 +578,20 @@
       "title": "Welcome back, {{user}}",
       "greeting": "Welcome back,"
     },
+    "mini": {
+      "across_countries": "{{count}} 국가를 통해",
+      "enforced": "현재 적용 중",
+      "pct_blocked": "{{percent}} 차단",
+      "scheduled": "예정됨"
+    },
+    "status": {
+      "blocked_of_total": "{{total}} 전체 사용",
+      "free_plan": "무료 플랜",
+      "renews": "갱신",
+      "services_licensed": "{{count}} 서비스 라이선스",
+      "trend_vs_prev": "이전과 비교",
+      "vs_prev": "이전과 비교"
+    },
     "panel": {
       "timeseries_sub": "Selected range",
       "top_ips_sub": "By request count",
@@ -591,16 +619,16 @@
     "info_empty_reports": "보고서가 없습니다.",
     "info_empty_services": "서비스가 없습니다.",
     "info_empty_templates": "템플릿이 없습니다.",
-    "info_filtered_bans": "(전체 {{MAX}}개의 차단 항목에서 필터링됨)",
-    "info_filtered_cache": "(전체 {{MAX}}개의 캐시 파일에서 필터링됨)",
-    "info_filtered_configs": "(전체 {{MAX}}개의 사용자 정의 설정에서 필터링됨)",
-    "info_filtered_instances": "(전체 {{MAX}}개의 인스턴스에서 필터링됨)",
-    "info_filtered_items": "(전체 {{MAX}}개의 항목에서 필터링됨)",
-    "info_filtered_jobs": "(전체 {{MAX}}개의 작업에서 필터링됨)",
-    "info_filtered_plugins": "(전체 {{MAX}}개의 플러그인에서 필터링됨)",
-    "info_filtered_reports": "(전체 {{MAX}}개의 보고서에서 필터링됨)",
-    "info_filtered_services": "(전체 {{MAX}}개의 서비스에서 필터링됨)",
-    "info_filtered_templates": "(전체 {{MAX}}개의 템플릿에서 필터링됨)",
+    "info_filtered_bans": "(전체 _MAX_개의 차단 항목에서 필터링됨)",
+    "info_filtered_cache": "(전체 _MAX_개의 캐시 파일에서 필터링됨)",
+    "info_filtered_configs": "(전체 _MAX_개의 사용자 정의 설정에서 필터링됨)",
+    "info_filtered_instances": "(전체 _MAX_개의 인스턴스에서 필터링됨)",
+    "info_filtered_items": "(전체 _MAX_개의 항목에서 필터링됨)",
+    "info_filtered_jobs": "(전체 _MAX_개의 작업에서 필터링됨)",
+    "info_filtered_plugins": "(전체 _MAX_개의 플러그인에서 필터링됨)",
+    "info_filtered_reports": "(전체 _MAX_개의 보고서에서 필터링됨)",
+    "info_filtered_services": "(전체 _MAX_개의 서비스에서 필터링됨)",
+    "info_filtered_templates": "(전체 _MAX_개의 템플릿에서 필터링됨)",
     "info_instances": "{{total}}개의 인스턴스 중 {{start}}~{{end}} 표시 중",
     "info_items": "{{total}}개의 항목 중 {{start}}~{{end}} 표시 중",
     "info_jobs": "{{total}}개의 작업 중 {{start}}~{{end}} 표시 중",
@@ -885,9 +913,12 @@
     "read_more": "더 읽어보기",
     "see_more": "더 보기",
     "upgrade": "업그레이드하시겠습니까?",
+    "use_authenticator_code": "인증 코드 사용",
+    "use_recovery_code": "복구 코드 사용",
     "get_support": "Get support"
   },
   "login": {
+    "title": "로그인",
     "subtitle": "BunkerWeb 계정에 로그인"
   },
   "logs": {
@@ -1012,6 +1043,7 @@
   "mode": {
     "advanced": "고급",
     "easy": "간편",
+    "compose": "작성",
     "raw": "원본(Raw)"
   },
   "navbar": {
@@ -1059,10 +1091,14 @@
     "operate": "Operate",
     "system": "System",
     "edition_community": "Community",
+    "redirects": "리디렉션",
+    "upstreams": "업스트림",
+    "workflows": "워크플로우",
     "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "소식 이미지",
+    "slide": "슬라이드",
     "posted_on": "게시일:"
   },
   "newsletter": {
@@ -1084,6 +1120,7 @@
         "not_available": "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다.",
         "pre_render_error": "사전 렌더링 오류",
         "no_content": "이 플러그인은 내장 페이지를 제공하지 않습니다.",
+        "restricted_to_admins": "이 플러그인은 자체 페이지를 제공하며, 플러그인 코드를 실행합니다. 관리자만 로드할 수 있습니다.",
         "dedicated_page_unavailable": "이 플러그인은 아직 로드되지 않은 전용 페이지에서 관리됩니다. 접근하려면 웹 UI를 다시 시작하세요."
       }
     },
@@ -1486,6 +1523,11 @@
     "template_in_use_description": "현재 템플릿 외부에서의 변경은 허용되지 않습니다. 현재 템플릿을 사용하여 수정하거나 고급/원본 모드로 전환하세요.",
     "unique_server_name": "고유한 서버 이름",
     "up": "활성",
+    "active": "활성",
+    "all_valid": "모두 유효",
+    "expired": "만료",
+    "expiring": "만료 예정",
+    "no_settings": "이 플러그인은 이 범위에 대한 설정이 없습니다.",
     "yes": "예"
   },
   "step": {
@@ -1865,6 +1907,7 @@
       "view_config": "사용자 정의 설정 {{name}} 보기",
       "view_file": "{{filename}} 보기",
       "view_service": "서비스 {{service}} 보기",
+      "manage_activation": "전역 설정에서 {{name}} 활성화 관리",
       "view_template": "템플릿 {{template}} 보기"
     },
     "modal": {
@@ -2043,6 +2086,10 @@
     "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다."
   },
   "totp": {
+    "cant_access": "인증 코드를 사용할 수 없으신가요?",
+    "signing_in": "BunkerWeb에 로그인",
+    "subtitle": "인증 앱에서 코드를 입력하세요.",
+    "title": "이중 인증",
     "prompt": "TOTP 코드를 입력해 주세요."
   },
   "certificates": {
@@ -2230,6 +2277,186 @@
     "status": "인스턴스 저장",
     "subtitle": "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어."
   },
+  "compose": {
+    "always_on": "항상 켜짐",
+    "count": "{{on}} 활성화됨 · {{total}} 사용 가능 · {{locked}} 잠김",
+    "entries": "{{count}} 설정됨",
+    "filter": {
+      "all": "전체",
+      "changed": "변경됨",
+      "on": "켜짐"
+    },
+    "locked": "여기에서는 제어 불가",
+    "provenance": {
+      "api": "API를 통해 관리됨",
+      "attachment": "첨부 파일",
+      "clone": "복제",
+      "default": "기본",
+      "edited": "여기 수정",
+      "global": "전역에서",
+      "managed": "{{method}}에 의해 설정",
+      "template": "템플릿에서 생성됨"
+    },
+    "set_value": "값을 설정하세요…",
+    "show_more": "{{count}} 더 보기",
+    "unavailable": "플러그인 목록을 로드할 수 없으므로 이 페이지를 안전하게 수정할 수 없습니다. API에 답변하면 다시 로드하세요."
+  },
+  "redirects": {
+    "all": "전체",
+    "append_badge": "+ URI",
+    "append_request_uri": "요청된 URI을 대상에 추가",
+    "attach": "첨부",
+    "attach_copy": "{{name}} ({{from}} → {{to}})을 하나 이상의 서비스에 첨부",
+    "code": {
+      "301": "301 — 영구적으로 이동",
+      "302": "302 — 찾음",
+      "303": "303 — 다른 참조",
+      "307": "307 — 일시적인 리디렉션",
+      "308": "308 — 영구적인 리디렉션"
+    },
+    "create": "리디렉션 생성",
+    "delete_confirm_title": "이 리디렉션을 삭제하시겠습니까?",
+    "delete_copy": "{{name}} 리디렉션을 삭제하시겠습니까?",
+    "delete_help": "서비스에 첨부된 리디렉션은 삭제할 수 없습니다. 먼저 분리하십시오.",
+    "edit": "리디렉션 편집",
+    "edit_shared": "이 리디렉션은 {{count}} 서비스(들)에 첨부되어 있습니다: {{services}}. 변경 사항을 모두 저장",
+    "empty_text": "리디렉션은 하나 이상의 서비스에 첨부하는 이름이 지정된 규칙입니다. REDIRECT_* 설정은 함께 작동합니다.",
+    "empty_title": "리디렉션 없음",
+    "from_path": "~에서 리디렉션",
+    "from_path_help": "첨부된 서비스의 소스 경로, 예: /old.",
+    "new": "새 리디렉션",
+    "not_attached": "첨부되지 않음",
+    "readonly": "데이터베이스는 읽기 전용입니다. 리디렉션은 검사할 수 있지만 변경할 수 없습니다.",
+    "save": "리디렉션 저장",
+    "search": "이름, 소스 경로 또는 대상 검색...",
+    "services_help": "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 나중에 리디렉션을 추가할 수 있습니다.",
+    "status_code": "상태 코드",
+    "to_url": "리디렉션 대상",
+    "truncated": "첫 500개의 리디렉션만 표시됩니다. 전체 결과를 위해 API를 사용하여 목록을 좁힙니다."
+  },
+  "upstreams": {
+    "add_server": "서버 추가",
+    "all": "전체",
+    "attach": "추가",
+    "attach_copy": "{{name}} ({{servers}})를 하나 이상의 서비스에 추가합니다.",
+    "backend_ssl": "TLS를 서버(https:// / grpcs://)와 통신합니다.",
+    "balancing": {
+      "ip_hash": "IP 해시 — 동일한 클라이언트, 동일한 백엔드",
+      "least_conn": "최소 연결",
+      "round_robin": "순환 (기본값)"
+    },
+    "create": "업스트림 생성",
+    "delete_confirm_title": "이 업스트림 삭제?",
+    "delete_copy": "{{name}} 업스트림 삭제?",
+    "delete_help": "서비스에 연결된 업스트림은 삭제할 수 없습니다. 먼저 분리하십시오.",
+    "edit": "업스트림 편집",
+    "edit_shared": "이 업스트림은 {{count}} 서비스(들)에 연결되어 있습니다: {{services}}. 모든 변경 사항을 저장합니다.",
+    "empty_text": "업스트림은 역방향 프록시 경로에서 하나 이상의 서비스에 연결되는 백엔드의 이름이 지정된 풀입니다. REVERSE_PROXY_HOST 설정은 함께 작동합니다.",
+    "empty_title": "업스트림이 아직 없음",
+    "keepalive": "지속 연결",
+    "keepalive_help": "각 워커당 유지되는 유휴 연결 수. HTTP 및 gRPC만 적용 가능; 비활성화하려면 비워둡니다.",
+    "match_path": "역방향 프록시 경로",
+    "match_path_help": "선택된 서비스가 이 풀로 프록시하는 위치. 스트림 풀의 경우 전체 서비스를 사용합니다.",
+    "method": "로드 밸런싱",
+    "name_help": "알파벳, 숫자, 하이픈, 밑줄만 사용 가능. 점은 사용 불가하며, 풀 이름이 실제 호스트를 가리지 못합니다.",
+    "new": "새로운 업스트림",
+    "not_attached": "연결되지 않음",
+    "protocol": "프로토콜",
+    "protocol_help": "HTTP 및 gRPC 풀은 경로에 연결되어 있습니다. 스트림 풀은 전체 TCP/UDP 서비스를 사용합니다.",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "스트림 (TCP/UDP)"
+    },
+    "readonly": "데이터베이스는 읽기 전용입니다. 업스트림은 확인할 수 있지만 변경할 수 없습니다.",
+    "role": {
+      "backup": "백업",
+      "down": "비활성",
+      "primary": "주"
+    },
+    "save": "업스트림 저장",
+    "search": "이름, 설명 또는 서버 검색...",
+    "server_fail_timeout": "실패 시간 초과",
+    "server_host": "서버",
+    "server_max_fails": "최대 실패 횟수",
+    "server_role": "역할",
+    "server_weight": "가중치",
+    "servers": "서버",
+    "services_help": "Ctrl 또는 Command을 사용하여 여러 서비스를 선택합니다. 업스트림은 나중에 연결할 수 있습니다.",
+    "services_hidden": "{{count}} 서비스(들) 숨김: {{protocol}} 업스트림은 일치하는 서비스에만 연결할 수 있습니다.",
+    "truncated": "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다."
+  },
+  "workflows": {
+    "action": "그 후",
+    "add_rule": "규칙 추가",
+    "all": "전체",
+    "attach": "서비스에 연결",
+    "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
+    "clone": "워크플로우 복제",
+    "clone_help": "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다.",
+    "clone_name": "복제 이름",
+    "conditions": "조건",
+    "delete": "워크플로우 삭제",
+    "delete_confirm": "이 워크플로우와 모든 규칙이 영구적으로 삭제됩니다.",
+    "empty_text": "워크플로우는 서비스에 연결한 규칙의 순서대로 정렬된 목록입니다: 조건 트리, 선택적 속도 임계값, 그리고 하나의 동작 — 도전, 차단 또는 리디렉션.",
+    "empty_title": "워크플로우는 아직 없습니다",
+    "enabled": "Enabled",
+    "new": "새 워크플로우",
+    "no_rules": "규칙은 아직 없습니다. 이 정책을 만들기 시작하려면 하나를 추가하세요.",
+    "not_attached": "연결되지 않음",
+    "order_help": "규칙은 순서대로 평가되며, 일치하는 첫 번째 규칙이 승리합니다. 속도 임계값을 가진 규칙은 임계값이 초과될 때만 일치하므로, 낮은 규칙은 그 아래의 트래픽을 포착할 수 있습니다.",
+    "readonly": "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다.",
+    "rules": "규칙",
+    "search": "이름 또는 설명을 검색하세요...",
+    "threshold": "속도 기준 이상",
+    "threshold_count": "요청",
+    "threshold_window": "(초)",
+    "truncated": "총 500개의 워크플로우만 표시됩니다. 완전한 결과를 위해 API를 사용하여 목록을 좁히세요."
+  },
+  "request_path": {
+    "client": "클라이언트",
+    "source": "{{phase}} 단계의 플러그인 실행 순서, {{setting}}에서 — 표시 순서, 요청별 추적은 아닙니다.",
+    "terminal": {
+      "inline": "백엔드",
+      "none": "서버가 작동하지 않음",
+      "pool": "상류 풀",
+      "root": "로컬 파일"
+    },
+    "title": "요청 경로",
+    "unordered": "{{phase}} 단계에서 선언되지 않은 위치; 정렬된 플러그인 다음에 실행됩니다."
+  },
+  "service": {
+    "resources": {
+      "attach": "연결",
+      "conflict": {
+        "inline": "{{service}}은 자체 {{family}} 설정으로 {{path}}을 제공합니다. {{path}}에 대한 설정을 지우거나 다른 경로를 사용하십시오.",
+        "primary": "“{{name}}”는 현재 이 서비스의 주요 인증서이며, 추가 경고 없이 강등됩니다. 주요 인증서는 실제로 배포된 것입니다.",
+        "resource": "{{service}}은 {{kind}}의 “{{name}}”를 통해 {{path}}을 제공합니다. “{{name}}”를 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오.",
+        "stream": "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, {{service}}은 이미 상류 “{{name}}”를 사용합니다. 먼저 분리하십시오.",
+        "stream_inline": "{{service}}은 REVERSE_PROXY_HOST에 자체 백엔드를 가지고 있습니다. 상류가 제어하도록 설정 설정을 지우십시오."
+      },
+      "detach": "분리",
+      "family": {
+        "certificate": "인증서",
+        "redirect": "경로 재지정",
+        "template": "템플릿",
+        "upstream": "상류",
+        "workflow": "워크플로우"
+      },
+      "match_path": "경로",
+      "none": "연결 없음",
+      "primary": "주요 인증서",
+      "template": {
+        "none": "템플릿 없음",
+        "note": "자원이 아님: 템플릿은 설정입니다. 저장 시 적용되며, 전환하면 여러 설정을 한 번에 변경할 수 있습니다.",
+        "pending": "저장 시 적용",
+        "switching": "저장하면 이 서비스가 “{{from}}”에서 “{{to}}”로 전환됩니다. 현재 템플릿에서 제공된 값은 삭제되고, {{to}}의 값이 적용됩니다. 여러 설정이 한 번에 변경됩니다.",
+        "unwired": "이 페이지는 USE_TEMPLATE을 게시하지 않으므로, 여기서 템플릿을 변경할 수 없습니다."
+      },
+      "title": "연결된 자원",
+      "unavailable": "사용 불가능"
+    }
+  },
   "onboarding": {
     "item": {
       "install": "Install BunkerWeb on 1+ host",
@@ -2237,6 +2464,7 @@
       "pro": "Activate BunkerWeb PRO",
       "service": "Register your first service"
     },
+    "pro_tips": "PRO 팁",
     "title": "Getting started"
   }
 }

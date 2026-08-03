@@ -6,6 +6,12 @@
     "socials": "Redes Sociais",
     "tagline": "Proteção Poderosa, Simplificada",
     "title": "About BunkerWeb",
+    "social": {
+      "discord": "Discord",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "reddit": "Reddit"
+    },
     "version": "Versão: {{version}}"
   },
   "accordion": {
@@ -215,6 +221,7 @@
     "update_duration_all_filtered": "Update duration for all matching bans",
     "use_template": "Use template",
     "edit": "Edit",
+    "verify": "Verificar",
     "view": "View"
   },
   "cache": {
@@ -517,6 +524,13 @@
       "total_requests": {
         "title": "Solicitações Totais"
       },
+      "certificates": {
+        "title": "Certificados"
+      },
+      "upstreams": {
+        "planned": "Em breve",
+        "title": "Fontes"
+      },
       "top_reasons": {
         "title": "Top reasons for blocks"
       }
@@ -563,6 +577,20 @@
     "welcome": {
       "title": "Welcome back, {{user}}",
       "greeting": "Welcome back,"
+    },
+    "mini": {
+      "across_countries": "em vários países {{count}}",
+      "enforced": "atualmente aplicadas",
+      "pct_blocked": "{{percent}}% bloqueado",
+      "scheduled": "Agendado"
+    },
+    "status": {
+      "blocked_of_total": "Bloqueado de {{total}} total",
+      "free_plan": "Plano gratuito",
+      "renews": "Renova",
+      "services_licensed": "Serviços {{count}} licenciados",
+      "trend_vs_prev": "vs anterior",
+      "vs_prev": "vs anterior"
     },
     "panel": {
       "timeseries_sub": "Selected range",
@@ -885,9 +913,12 @@
     "read_more": "Ler Mais",
     "see_more": "Ver Mais",
     "upgrade": "Atualizar?",
+    "use_authenticator_code": "Use um código de autenticação",
+    "use_recovery_code": "Use um código de recuperação",
     "get_support": "Get support"
   },
   "login": {
+    "title": "Iniciar Sessão",
     "subtitle": "Iniciar sessão na sua conta do BunkerWeb"
   },
   "logs": {
@@ -1012,6 +1043,7 @@
   "mode": {
     "advanced": "Avançado",
     "easy": "Fácil",
+    "compose": "Compor",
     "raw": "Bruto"
   },
   "navbar": {
@@ -1059,10 +1091,14 @@
     "operate": "Operate",
     "system": "System",
     "edition_community": "Community",
+    "redirects": "Redireciona",
+    "upstreams": "Servidores upstream",
+    "workflows": "Fluxos de trabalho",
     "edition_pro": "Pro"
   },
   "news": {
     "image_alt": "Imagem da notícia",
+    "slide": "Deslizar",
     "posted_on": "Publicado em"
   },
   "newsletter": {
@@ -1084,6 +1120,7 @@
         "not_available": "A página do plugin ainda não está disponível durante a fase beta.",
         "pre_render_error": "Erro de pré-renderização",
         "no_content": "Este plugin não fornece uma página incorporada.",
+        "restricted_to_admins": "Este plugin tem a sua própria página, que executa o código do plugin. Apenas os administradores podem carregá-lo.",
         "dedicated_page_unavailable": "Este plugin é gerido numa página dedicada que ainda não foi carregada. Reinicie a interface web para lhe aceder."
       }
     },
@@ -1486,6 +1523,11 @@
     "template_in_use_description": "Não são permitidas alterações fora do modelo atual. Por favor, faça as alterações utilizando o modelo atual ou mude para o modo Avançado/Bruto.",
     "unique_server_name": "Nome do Servidor Único",
     "up": "Ativo",
+    "active": "Ativo",
+    "all_valid": "Todos válidos",
+    "expired": "Vencido",
+    "expiring": "A expirar",
+    "no_settings": "Este plugin não tem definições para este âmbito.",
     "yes": "Sim"
   },
   "step": {
@@ -1861,10 +1903,11 @@
       "edit_service": "Editar Serviço {{service}}",
       "edit_template": "Editar Modelo {{template}}",
       "export_config": "Exportar configuração personalizada {{name}}",
-      "export_service": "Exportar Configuração do Serviço {{name}}",
+      "export_service": "Exportar Configuração do Serviço {{service}}",
       "view_config": "Ver Configuração Personalizada {{name}}",
       "view_file": "Ver {{filename}}",
       "view_service": "Ver Serviço {{service}}",
+      "manage_activation": "Gerir a ativação de {{name}} nas definições globais",
       "view_template": "Ver Modelo {{template}}"
     },
     "modal": {
@@ -2043,6 +2086,10 @@
     "zerossl_api_max_time": "Tempo total máximo em segundos para cada pedido da API ZeroSSL."
   },
   "totp": {
+    "cant_access": "Não consegue aceder ao seu código de autenticação?",
+    "signing_in": "Iniciar sessão em BunkerWeb",
+    "subtitle": "Introduza o código da sua aplicação de autenticação.",
+    "title": "Autenticação de dois fatores",
     "prompt": "Por favor, insira seu código TOTP."
   },
   "certificates": {
@@ -2230,6 +2277,186 @@
     "status": "Armazenamento de instância",
     "subtitle": "Estado da cache de reverse-proxy, métricas de taxa de sucesso agregadas e controis de limpeza imediata."
   },
+  "compose": {
+    "always_on": "Ativado sempre",
+    "count": "{{on}} ativo · {{total}} disponível · {{locked}} bloqueado",
+    "entries": "{{count}} configurado",
+    "filter": {
+      "all": "Todos",
+      "changed": "Alterado",
+      "on": "Ativado"
+    },
+    "locked": "Sem controlo aqui",
+    "provenance": {
+      "api": "Gerenciado via API",
+      "attachment": "Do anexo",
+      "clone": "Clonado",
+      "default": "Padrão",
+      "edited": "Editado aqui",
+      "global": "Do global",
+      "managed": "Definido por {{method}}",
+      "template": "Do modelo"
+    },
+    "set_value": "Definir um valor…",
+    "show_more": "Mostrar mais {{count}}",
+    "unavailable": "A lista de plugins não pôde ser carregada, por isso esta página não pode ser editada com segurança. Recarregue após receber as respostas API."
+  },
+  "redirects": {
+    "all": "Todos",
+    "append_badge": "+ URI",
+    "append_request_uri": "Adicionar o URI solicitado ao alvo",
+    "attach": "Anexar",
+    "attach_copy": "Anexar {{name}} ({{from}} → {{to}}) a um ou mais serviços.",
+    "code": {
+      "301": "301 — Movido permanentemente",
+      "302": "302 — Encontrado",
+      "303": "303 — Ver outros",
+      "307": "307 — Redirecionamento temporário",
+      "308": "308 — Redirecionamento permanente"
+    },
+    "create": "Criar redirecionamento",
+    "delete_confirm_title": "Eliminar este redirecionamento?",
+    "delete_copy": "Eliminar o redirecionamento {{name}}?",
+    "delete_help": "Um redirecionamento ainda anexado a um serviço não pode ser eliminado. Desanexe-o primeiro.",
+    "edit": "Editar redirecionamento",
+    "edit_shared": "Este redirecionamento está anexado ao serviço(s) {{count}}: {{services}}. Guardar alterações para todos.",
+    "empty_text": "Um redirecionamento é uma regra nomeada que anexa a um ou mais serviços. As definições inline REDIRECT_* continuam a funcionar em conjunto com ela.",
+    "empty_title": "Nenhum redirecionamento ainda",
+    "from_path": "Redirecionar de",
+    "from_path_help": "Caminho de origem nos serviços anexados, por exemplo /old.",
+    "new": "Novo redirecionamento",
+    "not_attached": "Não anexado",
+    "readonly": "A base de dados é somente leitura. Os redirecionamentos podem ser inspecionados, mas não podem ser alterados.",
+    "save": "Guardar redirecionamento",
+    "search": "Pesquisar por nome, caminho da fonte ou destino...",
+    "services_help": "Use Ctrl ou Command para selecionar vários serviços. Pode anexar uma redireção mais tarde.",
+    "status_code": "Código de estado",
+    "to_url": "Redirecionar para",
+    "truncated": "Apenas os primeiros 500 redireções são exibidos. Refine a lista com API para obter o resultado completo."
+  },
+  "upstreams": {
+    "add_server": "Adicionar servidor",
+    "all": "Todos",
+    "attach": "Anexar",
+    "attach_copy": "Anexar {{name}} ({{servers}}) a um ou mais serviços.",
+    "backend_ssl": "Comunicar com TLS aos servidores (https:// / grpcs://)",
+    "balancing": {
+      "ip_hash": "Hash IP — mesmo cliente, mesmo backend",
+      "least_conn": "Menos conexões",
+      "round_robin": "Round robin (padrão)"
+    },
+    "create": "Criar upstream",
+    "delete_confirm_title": "Eliminar este upstream?",
+    "delete_copy": "Eliminar o upstream {{name}}?",
+    "delete_help": "Um upstream ainda anexado a um serviço não pode ser eliminado. Desanexe-o primeiro.",
+    "edit": "Editar upstream",
+    "edit_shared": "Este upstream está anexado aos serviços {{count}}: {{services}}. Guardar as alterações para todos.",
+    "empty_text": "Um upstream é um conjunto de backends nomeado que anexa a um ou mais serviços numa rota de proxy reverso. As configurações REVERSE_PROXY_HOST funcionam em paralelo.",
+    "empty_title": "Ainda não existem upstreams",
+    "keepalive": "Manter conexão",
+    "keepalive_help": "Conexões em idle mantidas por cada trabalhador. Só funcionam com HTTP e gRPC; deixe em branco para desativar.",
+    "match_path": "Rota de proxy reverso",
+    "match_path_help": "A localização para a qual os serviços selecionados encaminham esta piscina. Ignorado para uma piscina de fluxo, que utiliza todo o serviço.",
+    "method": "Balanceamento de carga",
+    "name_help": "Apenas letras, números, hífens e underlines. Os pontos são rejeitados, por isso um nome de pool nunca pode obscurecer um host real.",
+    "new": "Novo upstream",
+    "not_attached": "Não está associado",
+    "protocol": "Protocolo",
+    "protocol_help": "Os pools HTTP e gRPC estão associados a um caminho; um pool de stream assume todo o serviço TCP/UDP.",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "Stream (TCP/UDP)"
+    },
+    "readonly": "O banco de dados é somente leitura. Os upstream podem ser inspecionados, mas não podem ser alterados.",
+    "role": {
+      "backup": "Backup",
+      "down": "Inativo",
+      "primary": "Primário"
+    },
+    "save": "Guardar upstream",
+    "search": "Pesquisar nome, descrição ou servidor...",
+    "server_fail_timeout": "Tempo limite de falha",
+    "server_host": "Servidor",
+    "server_max_fails": "Máximo de falhas",
+    "server_role": "Papel",
+    "server_weight": "Peso",
+    "servers": "Servidores",
+    "services_help": "Use Ctrl ou Command para selecionar vários serviços. Um upstream pode ser associado posteriormente.",
+    "services_hidden": "O serviço {{count}}(s) oculto(s): um upstream {{protocol}} só pode ser associado a um serviço correspondente.",
+    "truncated": "Apenas os primeiros 500 upstream são exibidos. Refine a lista através do API para obter o resultado completo."
+  },
+  "workflows": {
+    "action": "Então",
+    "add_rule": "Adicionar regra",
+    "all": "Todos",
+    "attach": "Anexar a serviços",
+    "attach_help": "As regras são apenas aplicadas aos serviços aos quais o fluxo de trabalho está anexado.",
+    "clone": "Clonar fluxo de trabalho",
+    "clone_help": "As regras são copiadas; os anexos aos serviços não.",
+    "clone_name": "Nome da cópia",
+    "conditions": "Condições",
+    "delete": "Eliminar fluxo de trabalho",
+    "delete_confirm": "Este fluxo de trabalho e todas as suas regras serão eliminados permanentemente.",
+    "empty_text": "Um fluxo de trabalho é uma lista ordenada de regras que anexamos a serviços: uma árvore de condições, um limite de taxa opcional e uma ação — desafio, bloqueio ou redirecionamento.",
+    "empty_title": "Nenhum fluxo de trabalho ainda",
+    "enabled": "Enabled",
+    "new": "Novo fluxo de trabalho",
+    "no_rules": "Nenhuma regra ainda. Adicione uma para começar a construir esta política.",
+    "not_attached": "Não anexado",
+    "order_help": "As regras são avaliadas em ordem e a primeira que corresponde vence. Uma regra com um limite de taxa só corresponde quando o limite é excedido, por isso uma regra inferior pode capturar o tráfego abaixo dela.",
+    "readonly": "O banco de dados é de apenas leitura. Os fluxos de trabalho podem ser inspecionados, mas não podem ser alterados.",
+    "rules": "Regras",
+    "search": "Pesquisar nome ou descrição...",
+    "threshold": "Apenas acima de uma taxa",
+    "threshold_count": "Solicitações",
+    "threshold_window": "Por (segundos)",
+    "truncated": "Apenas os primeiros 500 fluxos de trabalho são exibidos. Refine a lista através do API para obter o resultado completo."
+  },
+  "request_path": {
+    "client": "Cliente",
+    "source": "Ordem de execução do plugin para a fase {{phase}}, a partir de {{setting}} — uma ordem de exibição, não um rastreamento por solicitação.",
+    "terminal": {
+      "inline": "Backend",
+      "none": "Nenhum serviço ativo",
+      "pool": "Pool upstream",
+      "root": "Ficheiros locais"
+    },
+    "title": "Caminho da solicitação",
+    "unordered": "Não existe uma posição declarada na fase {{phase}}; executa-se após os plugins ordenados, em ordem alfabética."
+  },
+  "service": {
+    "resources": {
+      "attach": "Anexar",
+      "conflict": {
+        "inline": "O {{service}} já serve o {{path}} através das suas próprias definições {{family}}. Limpe estas definições para o {{path}}, ou use um caminho diferente.",
+        "primary": "O “{{name}}” é atualmente o certificado principal para este serviço e será desativado sem aviso prévio. O principal é aquele que está realmente implementado.",
+        "resource": "O {{service}} já serve o {{path}} através do “{{kind}}” {{name}}. Desanexe o “{{name}}”, ou atribua um caminho diferente a um deles.",
+        "stream": "Um serviço de stream proxy todas as conexões para um único backend, e o {{service}} já utiliza o upstream “{{name}}”. Desanexe-o primeiro.",
+        "stream_inline": "O {{service}} já tem o seu próprio backend no REVERSE_PROXY_HOST. Limpe esta definição para permitir que o upstream assuma o controlo."
+      },
+      "detach": "Desanexar",
+      "family": {
+        "certificate": "Certificados",
+        "redirect": "Redireciona",
+        "template": "Modelo",
+        "upstream": "Upstreams",
+        "workflow": "Fluxos de trabalho"
+      },
+      "match_path": "Caminho",
+      "none": "Nenhum anexado",
+      "primary": "Certificado principal",
+      "template": {
+        "none": "Nenhum modelo",
+        "note": "Não é um recurso: um modelo é uma definição. Aplica-se ao Salvar, e alterá-lo move muitas definições de uma só vez.",
+        "pending": "Aplica-se ao Salvar",
+        "switching": "Salvar altera este serviço de “{{from}}” para “{{to}}”. Os valores fornecidos pelo modelo atual são removidos e os do {{to}} são aplicados — muitas definições são alteradas de uma só vez.",
+        "unwired": "Esta página não publica o USE_TEMPLATE, pelo que o modelo não pode ser alterado a partir daqui."
+      },
+      "title": "Recursos anexados",
+      "unavailable": "Indisponível"
+    }
+  },
   "onboarding": {
     "item": {
       "install": "Install BunkerWeb on 1+ host",
@@ -2237,6 +2464,7 @@
       "pro": "Activate BunkerWeb PRO",
       "service": "Register your first service"
     },
+    "pro_tips": "Dicas de PRO",
     "title": "Getting started"
   }
 }
