@@ -33,6 +33,8 @@
 - [BUGFIX] `metrics`: `badbehavior`, `authbasic` and `limit` no longer build metric keys from request data, where one cache slot per client IP, username or URI let a scan flood evict every other plugin's metrics. The `limit` top URLs chart now shows the matched rule instead of the raw URI. (Refs #3475)
 - [BUGFIX] `letsencrypt`: renewal configurations pointing at a removed ACME account are moved to a surviving account of the same CA, instead of failing every renewal with `AccountNotFound`. No certificate is re-issued. (Fixes #3783)
 - [BUGFIX] `letsencrypt`: DNS credential errors name the missing setting instead of logging `[('', 'value_error')]`. (Refs #3783)
+- [BUGFIX] `letsencrypt`: certbot output is logged in full instead of being cut short whenever certbot writes faster than the job reads. The last lines were the ones lost, which hid the failure reason and could skip the stale-account recovery those lines trigger. (Refs #3783)
+- [BUGFIX] `letsencrypt`: a certbot renewal that stops responding is now killed after 15 minutes. The timeout existed but could never fire, so the job stayed blocked until the container was restarted.
 
 ## v1.6.14~rc2 - 2026/07/29
 

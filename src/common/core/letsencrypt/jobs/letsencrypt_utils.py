@@ -1,4 +1,5 @@
 from base64 import b64decode
+from contextlib import suppress
 from json import loads as json_loads
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
@@ -22,8 +23,10 @@ from os import (
 from os.path import join
 from pathlib import Path
 from re import match as re_match
+from subprocess import TimeoutExpired
+from threading import Thread
 from traceback import format_exc
-from typing import Dict, List, Mapping, Optional, Type, Union
+from typing import Callable, Dict, List, Mapping, Optional, Type, Union
 
 from pydantic import ValidationError
 
@@ -486,6 +489,48 @@ def resolve_certbot_entrypoint(
 
     logger.error(message)
     return []
+
+
+def stream_certbot(process, logger_certbot, timeout: float, on_line: Optional[Callable[[str], None]] = None) -> bool:
+    """Log every line certbot writes to stderr, and enforce `timeout` on the run.
+
+    Reading has to happen in its own thread: a `select()` on the pipe reports the raw fd,
+    not the buffered reader in front of it, so once a burst has been pulled into the
+    userspace buffer the fd looks idle and the buffered lines are never drained. Whatever
+    is still buffered when the process exits is then lost, which silently swallows both
+    the certbot diagnostics and the stale-account marker `on_line` is watching for.
+
+    Returns False when the process had to be killed for exceeding `timeout`.
+    """
+
+    def drain():
+        # The pipe can be torn down under the reader once the process is killed.
+        with suppress(OSError, ValueError):
+            for line in process.stderr:
+                stripped = line.strip()
+                logger_certbot.info(stripped)
+                if on_line is not None:
+                    on_line(stripped)
+
+    reader = None
+    if process.stderr is not None:
+        reader = Thread(target=drain, daemon=True)
+        reader.start()
+
+    timed_out = False
+    try:
+        process.wait(timeout=timeout)
+    except TimeoutExpired:
+        timed_out = True
+        process.kill()
+        process.wait()
+    finally:
+        # Bounded on purpose: certbot's hooks inherit stderr, so a hook that outlives a
+        # killed certbot keeps the pipe open and the reader would never see EOF.
+        if reader is not None:
+            reader.join(timeout=5)
+
+    return not timed_out
 
 
 def get_expected_acme_directory(server: str, staging: bool) -> str:

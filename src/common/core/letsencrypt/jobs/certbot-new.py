@@ -9,11 +9,10 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from re import MULTILINE, search
-from select import select
 from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
-from time import monotonic, sleep
+from time import sleep
 from threading import Event, Lock, Thread
 from traceback import format_exc
 from typing import Dict, List, Optional, Set, Tuple, Union
@@ -58,6 +57,7 @@ from letsencrypt_utils import (
     purge_lineage,
     resolve_certbot_entrypoint,
     sanitize_and_persist,
+    stream_certbot,
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
@@ -608,19 +608,9 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
-    deadline = monotonic() + CERTBOT_TIMEOUT
-    while process.poll() is None:
-        if monotonic() > deadline:
-            LOGGER.error(f"certbot delete for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
-            process.kill()
-            process.wait()
-            return 1
-        if process.stderr:
-            rlist, _, _ = select([process.stderr], [], [], 2)
-            if rlist:
-                for line in process.stderr:
-                    LOGGER_CERTBOT.info(line.strip())
-                    break
+    if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT):
+        LOGGER.error(f"certbot delete for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+        return 1
 
     return process.returncode
 
@@ -799,25 +789,17 @@ def certbot_new(
     # re-register when `--account` is pinned, so every retry would reuse the dead
     # account and fail identically. Detect it, then drop the stale account dir so
     # the next attempt (select_account_id → None) registers a fresh account.
-    stale_account_detected = False
-    deadline = monotonic() + CERTBOT_TIMEOUT
-    while process.poll() is None:
-        if monotonic() > deadline:
-            LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
-            process.kill()
-            process.wait()
-            return 1
-        if process.stderr:
-            rlist, _, _ = select([process.stderr], [], [], 2)
-            if rlist:
-                for line in process.stderr:
-                    stripped = line.strip()
-                    LOGGER_CERTBOT.info(stripped)
-                    if "Account" in stripped and "not found" in stripped and ("validate JWS" in stripped or "acme/acct" in stripped):
-                        stale_account_detected = True
-                    break
+    stale_account = Event()
 
-    if stale_account_detected and account_id:
+    def watch_stale_account(line: str) -> None:
+        if "Account" in line and "not found" in line and ("validate JWS" in line or "acme/acct" in line):
+            stale_account.set()
+
+    if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT, watch_stale_account):
+        LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+        return 1
+
+    if stale_account.is_set() and account_id:
         # Purge the canonical store, not paths.config_dir: in concurrent mode config_dir is a
         # throwaway scratch (merged only on success), so purging it leaves DATA_PATH untouched
         # and the stale account is restored next run. Non-concurrent: config_dir == DATA_PATH.

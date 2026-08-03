@@ -4,7 +4,6 @@ from os import getenv, sep
 from os.path import join
 from subprocess import DEVNULL, PIPE, Popen
 from sys import exit as sys_exit, path as sys_path
-from time import monotonic
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -31,6 +30,7 @@ from letsencrypt_utils import (
     resolve_certbot_entrypoint,
     sanitize_and_persist,
     setup_route53_aws_config,
+    stream_certbot,
 )
 
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
@@ -111,17 +111,9 @@ try:
         universal_newlines=True,
         env=cmd_env,
     )
-    deadline = monotonic() + CERTBOT_TIMEOUT
-    while process.poll() is None:
-        if monotonic() > deadline:
-            LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
-            process.kill()
-            process.wait()
-            status = 2
-            break
-        if process.stderr:
-            for line in process.stderr:
-                LOGGER_CERTBOT.info(line.strip())
+    if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT):
+        LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
+        status = 2
 
     if process.returncode and process.returncode != 0:
         status = 2
