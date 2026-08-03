@@ -69,6 +69,50 @@ def _persist_config(config: Dict[str, Any]) -> JSONResponse:
     return JSONResponse(status_code=200, content={"status": "success", "changed_plugins": sorted(list(ret))})
 
 
+def _invalid_variables(variables: Optional[Dict[str, Any]], *, skip: tuple = ()) -> List[str]:
+    """Return "KEY: reason" for every variable the setting's own schema forbids.
+
+    save_config runs no regex check of its own: an unknown key is dropped inside it, and a
+    known key with an illegal value is WRITTEN to Services_settings and echoed back by GET,
+    then dropped at generation time by gen/Configurator.py with a log line. Either way this
+    endpoint used to answer 200 having lost the value -- the defect PATCH /global_settings
+    was fixed for.
+
+    Keys arrive unprefixed and are service-scoped, so multisite=True: the same gate
+    Configurator applies to `<service>_<KEY>`, and how autoconf validates the same kind of
+    key (autoconf/Config.py). extra_services is deliberately NOT passed -- it is only
+    consulted when an already-prefixed key misses the plain lookup (config_read.py), and
+    that branch does not set multisite, so routing through it would silently weaken the
+    very context check this exists to perform.
+
+    Only the keys in THIS payload, never the merged snapshot: a pre-existing invalid row
+    must not block an unrelated future save (same rule as global_settings.py).
+    """
+    db = get_db()
+    invalid = []
+    for key, value in (variables or {}).items():
+        if key in skip:
+            continue
+        # value=None means "check the name only" and would skip value validation entirely.
+        ok, err = db.is_valid_setting(key, value="" if value is None else value, multisite=True)
+        if not ok:
+            invalid.append(f"{key}: {err}")
+    return invalid
+
+
+def _invalid_server_name(name: str) -> Optional[str]:
+    """Return the reason `name` is unusable as a server name, or None.
+
+    An illegal name is not merely dropped: it lands in the global SERVER_NAME roster, and
+    gen/Configurator.py answers an invalid SERVER_NAME with exit(1). The generator is a
+    subprocess so the scheduler survives, but NO config is regenerated for ANY service until
+    the bad name is found and removed. Validate the incoming name only, never the whole
+    roster -- a legacy-invalid sibling must not block an unrelated create.
+    """
+    ok, err = get_db().is_valid_setting("SERVER_NAME", value=name, multisite=True)
+    return None if ok else err
+
+
 def _service_method(service: str) -> Optional[str]:
     for item in get_db().get_services(with_drafts=True):
         if item.get("id") == service:
@@ -88,10 +132,20 @@ def create_service(req: ServiceCreateRequest) -> JSONResponse:
     if not name:
         return JSONResponse(status_code=422, content={"status": "error", "message": "server_name is required"})
 
+    err = _invalid_server_name(name)
+    if err:
+        return JSONResponse(status_code=400, content={"status": "error", "message": f"Invalid server_name: {err}"})
+
     # Reject duplicates
     existing = set((conf.get("SERVER_NAME", "") or "").split())
     if name in existing:
         return JSONResponse(status_code=400, content={"status": "error", "message": f"Service {name} already exists"})
+
+    # SERVER_NAME is not skipped here: unlike the update handler, this one honours
+    # variables["SERVER_NAME"] below, so it is a real write and must be gated.
+    invalid = _invalid_variables(req.variables)
+    if invalid:
+        return JSONResponse(status_code=400, content={"status": "error", "message": "Invalid settings: " + "; ".join(invalid)})
 
     # Draft flag
     conf[f"{name}_IS_DRAFT"] = "yes" if req.is_draft else "no"
@@ -123,12 +177,21 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
     if service not in services_list:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Service {service} not found"})
 
+    # SERVER_NAME is skipped to match the handler: it ignores direct edits to that key below,
+    # so rejecting on a value that is never written would be a 400 for nothing.
+    invalid = _invalid_variables(req.variables, skip=("SERVER_NAME",))
+    if invalid:
+        return JSONResponse(status_code=400, content={"status": "error", "message": "Invalid settings: " + "; ".join(invalid)})
+
     target = service
     # Handle rename
     if req.server_name:
         new_name = req.server_name.split(" ")[0].strip()
         if not new_name:
             return JSONResponse(status_code=422, content={"status": "error", "message": "server_name cannot be empty"})
+        err = _invalid_server_name(new_name)
+        if err:
+            return JSONResponse(status_code=400, content={"status": "error", "message": f"Invalid server_name: {err}"})
         if new_name != service and new_name in services_list:
             return JSONResponse(status_code=400, content={"status": "error", "message": f"Service {new_name} already exists"})
 
