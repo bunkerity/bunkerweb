@@ -1148,9 +1148,17 @@
 .wf-err-jump:hover {
   text-decoration-color: currentColor;
 }
-.wf-err-path {
-  font-family: var(--font-courier-prime);
-  font-size: 11px;
+/* A service-level refusal (budget, missing challenge credential) belongs to the whole
+   document, so it has no node to jump to. Same line, no affordance that does nothing. */
+.wf-err-static {
+  font-size: 12.5px;
+}
+/* The coordinate the ladder actually shows — "Rule 3 — Cap the flood" — replaces the raw
+   schema path that used to be printed here. The path survives as the element's title. */
+.wf-err-where {
+  display: block;
+  font-weight: 600;
+  font-size: 11.5px;
   opacity: 0.85;
 }
 .wf-sr {

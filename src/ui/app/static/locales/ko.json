@@ -2390,6 +2390,8 @@
     "act_block": "Block",
     "act_challenge": "Challenge",
     "act_code": "Status",
+    "act_denyDefault": "The instance's deny status",
+    "act_denyShort": "deny status",
     "act_provider": "Antibot provider",
     "act_redirect": "Redirect",
     "act_status": "Deny status",
@@ -2398,20 +2400,61 @@
     "action": "그 후",
     "add_rule": "규칙 추가",
     "all": "전체",
+    "aria": {
+      "collapse": "Collapse",
+      "combinator": "Change combinator, currently",
+      "conditionType": "Condition type",
+      "denyStatus": "Deny status",
+      "drag": "Drag to reorder",
+      "expand": "Expand",
+      "groupKind": "Group kind",
+      "more": "More",
+      "moveDown": "Move down — runs later",
+      "moveRule": "Move rule",
+      "moveUp": "Move up — runs earlier",
+      "provider": "Antibot provider",
+      "redirectStatus": "Redirect status",
+      "removeCondition": "Remove condition",
+      "removeThreshold": "Remove threshold",
+      "removeThresholdLong": "Remove rate threshold",
+      "removeValue": "Remove value",
+      "requestCount": "Request count",
+      "resourceGroup": "Resource group",
+      "ruleName": "Name of rule {{n}}",
+      "terminalAction": "Terminal action",
+      "uriMatch": "URI match mode",
+      "uriValue": "URI value",
+      "window": "Window in seconds"
+    },
     "attach": "서비스에 연결",
     "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
     "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
+    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
     "clone": "워크플로우 복제",
     "clone_help": "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다.",
     "clone_name": "복제 이름",
+    "confirm": {
+      "deleteRule": "Delete this rule? Everything below it moves up one position."
+    },
+    "copySuffix": " (copy)",
     "delete": "워크플로우 삭제",
     "delete_confirm": "이 워크플로우와 모든 규칙이 영구적으로 삭제됩니다.",
     "empty_text": "워크플로우는 서비스에 연결한 규칙의 순서대로 정렬된 목록입니다: 조건 트리, 선택적 속도 임계값, 그리고 하나의 동작 — 도전, 차단 또는 리디렉션.",
     "empty_title": "워크플로우는 아직 없습니다",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
+    "err": {
+      "save": "Could not save",
+      "saveUnreachable": "Could not reach the save endpoint",
+      "validate": "Could not validate",
+      "validateUnreachable": "Could not reach the validation endpoint"
+    },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged."
+      "body": "Nothing is applied — the running policy is unchanged.",
+      "count": "{{count}} problem(s) block the save.",
+      "rule": "Rule {{n}}",
+      "ruleNamed": "Rule {{n}} — {{name}}",
+      "whole": "This workflow"
     },
     "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
     "exit_title": "No rule matched",
@@ -2451,14 +2494,36 @@
     "rule": {
       "disabled": "Disabled",
       "if": "If",
+      "namePlaceholder": "Rule name",
+      "noun": "Rule",
       "onMatch": "If it matches",
       "skipped": "Disabled — skipped entirely, as if it were not in the list.",
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "규칙",
     "say": {
+      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
+      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
+      "deleted": "Rule deleted. {{count}} rules remain.",
+      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
+      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "jumped": "{{where}}: {{message}}",
+      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
+      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
+      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
+      "ruleAbove": "the rule above",
+      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
+      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
+      "runsAfter": "after {{name}}",
+      "runsFirst": "first",
+      "runsLast": "last",
       "saved": "Rules saved and pushed to the attached services.",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+      "theRule": "The rule",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "via": {
+        "drag": "drag",
+        "keyboard": "keyboard"
+      }
     },
     "search": "이름 또는 설명을 검색하세요...",
     "threshold": "속도 기준 이상",
@@ -2468,14 +2533,35 @@
       "addCondition": "Condition",
       "addGroup": "Group",
       "all": "All of",
+      "allMeta": "{{count}} condition(s) — all must be true",
+      "and": "and",
       "any": "Any of",
+      "anyMeta": "{{count}} condition(s) — at least one must be true",
       "empty": "Empty group — add a condition, it cannot be saved like this.",
+      "noGroupHolds": "no group holds {{kind}} entries",
+      "noneMeta": "matches when none of these are true",
       "not": "None of",
+      "or": "or",
       "removeGroup": "Remove group"
     },
     "truncated": "총 500개의 워크플로우만 표시됩니다. 완전한 결과를 위해 API를 사용하여 목록을 좁히세요.",
+    "untitled": "Untitled rule",
     "value": {
       "add": "Value"
+    },
+    "values": {
+      "fewer": "Show fewer",
+      "more": "+{{n}} more"
+    },
+    "verb": {
+      "asn": "is",
+      "country": "is",
+      "group": "is in the group",
+      "ip": "is in",
+      "isIn": "is in",
+      "isOneOf": "is one of",
+      "method": "is",
+      "uri": "matches"
     }
   },
   "request_path": {

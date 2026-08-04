@@ -9,6 +9,7 @@ Runs the real JS through node — no DOM, no jsdom: the module exports its model
 window.BW_WORKFLOW_MODEL precisely so this needs nothing but two stub globals.
 """
 
+from html.parser import HTMLParser
 from json import dumps, loads
 from pathlib import Path
 from shutil import which
@@ -172,3 +173,101 @@ def test_changing_a_predicate_type_keeps_the_values_it_can(node, tmp_path):
     assert converted[1]["op"] == "method" and converted[1]["values"] == ["FR", "BE"]
     assert converted[2]["op"] == "uri" and "values" not in converted[2]
     assert converted[3]["op"] == "ip" and converted[3]["values"] == []
+
+
+# Enough of a DOM to run the editor's DOMContentLoaded path and capture what it draws. The
+# ladder is built by string concatenation into innerHTML, so a mangled quote in one of the
+# ~30 aria-label/title attributes produces markup no unit test would otherwise see.
+RENDER_HARNESS = """
+const store = {};
+function el(id) {
+  return store[id] || (store[id] = {
+    id, value: "", innerHTML: "", textContent: "", disabled: false,
+    classList: { toggle(){}, add(){}, remove(){}, contains(){return false} },
+    addEventListener(){}, querySelector(){return null},
+    querySelectorAll(){return []}, closest(){return null},
+    setAttribute(){}, removeAttribute(){}, focus(){}, appendChild(){},
+    getBoundingClientRect(){return {top:0,bottom:0}},
+  });
+}
+let ready;
+globalThis.window = globalThis;
+globalThis.addEventListener = function(){};
+globalThis.CSS = { escape: (s) => String(s) };
+globalThis.document = {
+  addEventListener(ev, cb) { if (ev === "DOMContentLoaded") ready = cb; },
+  getElementById: el,
+  querySelector(){ return null },
+  querySelectorAll(){ return [] },
+  createElement(){ return el("tmp") },
+};
+require(process.argv[2]);
+el("wf-readonly").value = "no";
+el("wf-groups").value = JSON.stringify({});
+el("wf-definition").value = process.argv[3];
+ready();
+process.stdout.write(el("wf-rules").innerHTML + "\\n<!--CAP-->\\n" + el("wf-cap").innerHTML);
+"""
+
+
+class _Balance(HTMLParser):
+    VOID = {"input", "img", "br", "hr", "meta", "link"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack, self.unbalanced, self.elements = [], [], []
+
+    def handle_starttag(self, tag, attrs):
+        self.elements.append((tag, dict(attrs)))
+        if tag not in self.VOID:
+            self.stack.append(tag)
+
+    def handle_endtag(self, tag):
+        if tag in self.VOID:
+            return
+        if not self.stack or self.stack[-1] != tag:
+            self.unbalanced.append(f"</{tag}> closes {self.stack[-1] if self.stack else 'nothing'}")
+        else:
+            self.stack.pop()
+
+
+def _render(node, tmp_path, definition):
+    harness = tmp_path / "render.js"
+    harness.write_text(RENDER_HARNESS, encoding="utf-8")
+    result = run([node, str(harness), str(EDITOR), dumps(definition)], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    return result.stdout.split("\n<!--CAP-->\n")
+
+
+def test_the_ladder_renders_well_formed_markup(node, tmp_path):
+    """A rule name carrying quotes must not break out of the attributes that hold it."""
+    definition = {
+        "schema_version": 1,
+        "rules": [dict(DEFINITION["rules"][0], name='Challenge "odd" logins'), DEFINITION["rules"][1]],
+    }
+    ladder, _ = _render(node, tmp_path, definition)
+
+    parser = _Balance()
+    parser.feed(ladder)
+    assert parser.unbalanced == [], parser.unbalanced
+    assert parser.stack == [], f"unclosed: {parser.stack}"
+    assert len(parser.elements) > 40
+
+    # A botched concatenation leaves the tail of a JS expression in the attribute value.
+    for tag, attrs in parser.elements:
+        for name in ("aria-label", "title", "placeholder"):
+            value = attrs.get(name)
+            if value is None:
+                continue
+            assert value.strip(), f"empty {name} on <{tag}>"
+            assert '" +' not in value and "' +" not in value, f"{name}={value!r}"
+
+
+def test_the_first_paint_interpolates_its_own_fallbacks(node, tmp_path):
+    """The editor is deferred and draws before i18next finishes initialising, so the fallback
+    path is a normal first paint. It must substitute {{n}} itself or the operator reads the
+    placeholder."""
+    ladder, cap = _render(node, tmp_path, DEFINITION)
+    assert "{{" not in ladder, [m for m in ladder.split() if "{{" in m][:5]
+    assert "{{" not in cap
+    assert 'aria-label="Name of rule 1"' in ladder

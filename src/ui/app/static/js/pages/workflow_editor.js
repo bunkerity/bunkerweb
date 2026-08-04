@@ -40,7 +40,11 @@
       { op: "asn", label: "ASN", kind: "list", placeholder: "AS64496" },
       { op: "method", label: "HTTP method", kind: "list", placeholder: "POST" },
       { op: "uri", label: "URI", kind: "uri" },
-      { op: "group", label: "Resource group", kind: "group" },
+      {
+        op: "group",
+        label: translate("workflows.aria.resourceGroup", "Resource group"),
+        kind: "group",
+      },
     ],
     actions: [
       { type: "challenge", label: "Challenge", blurb: "Prove it is human" },
@@ -155,9 +159,21 @@
      certificates.js, service-resources.js). escapeValue is off because every value that ends
      up in markup has already been through esc() — letting i18next escape it again yields
      &amp;lt; in a rule name. */
+  function interpolate(text, options) {
+    if (!options) return text;
+    return String(text).replace(/\{\{(\w+)\}\}/g, function (whole, name) {
+      return Object.prototype.hasOwnProperty.call(options, name)
+        ? String(options[name])
+        : whole;
+    });
+  }
+
   function translate(key, fallback, options) {
     if (typeof i18next === "undefined" || !i18next.isInitialized)
-      return fallback;
+      // This file is deferred and the ladder draws before i18next finishes its async init,
+      // so the fallback path is a normal first paint, not an edge case. Interpolate it the
+      // same way i18next would or the operator reads a literal "Rule {{n}}".
+      return interpolate(fallback, options);
     var settings = {
       defaultValue: fallback,
       interpolation: { escapeValue: false },
@@ -181,6 +197,14 @@
     } else if (typeof applyTranslations === "function") {
       applyTranslations();
     }
+  }
+
+  /* A rule with no name still has to be referable in an announcement. */
+  function ruleLabel(rule) {
+    return (
+      (rule && rule.name && rule.name.trim()) ||
+      translate("workflows.say.theRule", "The rule")
+    );
   }
 
   function say(message) {
@@ -472,7 +496,9 @@
             node._k +
             ":" +
             index +
-            '" aria-label="Remove ' +
+            '" aria-label="' +
+            esc(translate("workflows.aria.removeValue", "Remove value")) +
+            " " +
             esc(value) +
             '">' +
             '<i class="bx bx-x" aria-hidden="true"></i></button>';
@@ -498,7 +524,11 @@
         '<button type="button" class="bw-flow-more" data-wf-morevals="' +
         node._k +
         '">' +
-        (open ? "Show fewer" : "+" + (values.length - VALUE_CAP) + " more") +
+        (open
+          ? translate("workflows.values.fewer", "Show fewer")
+          : translate("workflows.values.more", "+{{n}} more", {
+              n: values.length - VALUE_CAP,
+            })) +
         "</button>";
     }
     if (!STATE.readonly) {
@@ -536,7 +566,9 @@
         '" value="' +
         esc(node.value) +
         '"' +
-        ' spellcheck="false" aria-label="URI value"' +
+        ' spellcheck="false" aria-label="' +
+        esc(translate("workflows.aria.uriValue", "URI value")) +
+        '"' +
         invalidAttrs(path + ".value", valueMessage) +
         ">" +
         "</div>" +
@@ -554,10 +586,16 @@
               return { value: id, label: groupName(id) };
             }),
             node.group_id,
-            "Resource group",
+            translate("workflows.aria.resourceGroup", "Resource group"),
           )
-        : '<span class="bw-flow-val">no group holds ' +
-          esc(node.kind) +
+        : '<span class="bw-flow-val">' +
+          esc(
+            translate(
+              "workflows.tree.noGroupHolds",
+              "no group holds {{kind}} entries",
+              { kind: node.kind },
+            ),
+          ) +
           " entries</span>";
       return (
         '<div class="bw-flow-vals" data-wf-group="' +
@@ -571,7 +609,7 @@
           "bw-flow-pred-op-select",
           GROUP_KINDS,
           node.kind,
-          "Group kind",
+          translate("workflows.aria.groupKind", "Group kind"),
         ) +
         picker +
         "</div>" +
@@ -595,13 +633,13 @@
                 return { value: k, label: URI_MATCHES[k] };
               }),
               node.match,
-              "URI match mode",
+              translate("workflows.aria.uriMatch", "URI match mode"),
             )
         : node.op === "group"
-          ? "is in"
+          ? translate("workflows.verb.isIn", "is in")
           : (node.values || []).length > 1
-            ? "is one of"
-            : meta.verb;
+            ? translate("workflows.verb.isOneOf", "is one of")
+            : translate("workflows.verb." + node.op, meta.verb);
     var typePicker = STATE.readonly
       ? "<span>" + esc(spec.label) + "</span>"
       : selectHtml(
@@ -610,7 +648,7 @@
             return { value: item.op, label: item.label };
           }),
           node.op,
-          "Condition type",
+          translate("workflows.aria.conditionType", "Condition type"),
         );
     return (
       '<div class="bw-flow-pred' +
@@ -635,7 +673,11 @@
         ? ""
         : '<button type="button" class="bw-flow-pred-rm" data-wf-rmnode="' +
           node._k +
-          '" title="Remove condition" aria-label="Remove condition">' +
+          '" title="' +
+          esc(translate("workflows.aria.removeCondition", "Remove condition")) +
+          '" aria-label="' +
+          esc(translate("workflows.aria.removeCondition", "Remove condition")) +
+          '">' +
           '<i class="bx bx-trash" aria-hidden="true"></i></button>') +
       (message ? errBlock(path, message) : "") +
       "</div>"
@@ -671,7 +713,14 @@
         '" data-wf-op="' +
         node._k +
         '"' +
-        ' aria-label="Change combinator, currently ' +
+        ' aria-label="' +
+        esc(
+          translate(
+            "workflows.aria.combinator",
+            "Change combinator, currently",
+          ),
+        ) +
+        " " +
         esc(opLabel) +
         '">' +
         `<span data-i18n="workflows.tree.${node.op}">` +
@@ -680,15 +729,23 @@
         '<i class="bx bx-chevron-down" aria-hidden="true"></i></button>';
     var meta =
       node.op === "not"
-        ? "matches when none of these are true"
-        : children.length +
-          " condition" +
-          (children.length === 1 ? "" : "s") +
-          " — " +
-          (node.op === "all"
-            ? "all must be true"
-            : "at least one must be true");
-    var join = node.op === "all" ? "and" : "or";
+        ? translate(
+            "workflows.tree.noneMeta",
+            "matches when none of these are true",
+          )
+        : translate(
+            node.op === "all"
+              ? "workflows.tree.allMeta"
+              : "workflows.tree.anyMeta",
+            node.op === "all"
+              ? "{{count}} condition(s) — all must be true"
+              : "{{count}} condition(s) — at least one must be true",
+            { count: children.length },
+          );
+    var join =
+      node.op === "all"
+        ? translate("workflows.tree.and", "and")
+        : translate("workflows.tree.or", "or");
     var canNest = childDepth + 1 <= MAX_DEPTH;
     return (
       '<div class="bw-flow-group' +
@@ -779,14 +836,18 @@
       '<input class="bw-flow-gate-num" type="number" min="1" max="100000" value="' +
       esc(rule.threshold.count) +
       '"' +
-      ' data-wf-gate="count" aria-label="Request count"' +
+      ' data-wf-gate="count" aria-label="' +
+      esc(translate("workflows.aria.requestCount", "Request count")) +
+      '"' +
       disabled +
       ">" +
       '<span data-i18n="workflows.threshold_count">Requests</span>' +
       '<input class="bw-flow-gate-num" type="number" min="1" max="86400" value="' +
       esc(rule.threshold.window) +
       '"' +
-      ' data-wf-gate="window" aria-label="Window in seconds"' +
+      ' data-wf-gate="window" aria-label="' +
+      esc(translate("workflows.aria.window", "Window in seconds")) +
+      '"' +
       disabled +
       ">" +
       '<span data-i18n="workflows.threshold_window">Per (seconds)</span>' +
@@ -796,7 +857,16 @@
         ? ""
         : '<button type="button" class="bw-flow-pred-rm" data-wf-rmgate="' +
           esc(rule.id) +
-          '" title="Remove threshold" aria-label="Remove rate threshold">' +
+          '" title="' +
+          esc(translate("workflows.aria.removeThreshold", "Remove threshold")) +
+          '" aria-label="' +
+          esc(
+            translate(
+              "workflows.aria.removeThresholdLong",
+              "Remove rate threshold",
+            ),
+          ) +
+          '">' +
           '<i class="bx bx-trash" aria-hidden="true"></i></button>') +
       '<p class="bw-flow-gate-help" data-i18n="workflows.gate.help">Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own.</p>' +
       (message ? errBlock(path + ".threshold", message) : "") +
@@ -831,7 +901,7 @@
           "wf-act-status-select",
           REDIRECT_STATUSES,
           action.status || 302,
-          "Redirect status",
+          translate("workflows.aria.redirectStatus", "Redirect status"),
         ) +
         "</div>"
       );
@@ -843,13 +913,21 @@
           "wf-act-provider-select",
           CHALLENGE_PROVIDERS,
           action.provider || "javascript",
-          "Antibot provider",
+          translate("workflows.aria.provider", "Antibot provider"),
         ) +
         "</div>"
       );
     }
     if (action.type === "block") {
-      var options = [{ value: "", label: "The instance's deny status" }].concat(
+      var options = [
+        {
+          value: "",
+          label: translate(
+            "workflows.act_denyDefault",
+            "The instance's deny status",
+          ),
+        },
+      ].concat(
         BLOCK_STATUSES.map(function (status) {
           return { value: status, label: String(status) };
         }),
@@ -862,7 +940,7 @@
           action.status === undefined || action.status === null
             ? ""
             : action.status,
-          "Deny status",
+          translate("workflows.aria.denyStatus", "Deny status"),
         ) +
         "</div>"
       );
@@ -904,7 +982,9 @@
       })
       .join("");
     return (
-      '<div role="radiogroup" aria-label="Terminal action"><div class="bw-flow-acts">' +
+      '<div role="radiogroup" aria-label="' +
+      esc(translate("workflows.aria.terminalAction", "Terminal action")) +
+      '"><div class="bw-flow-acts">' +
       picks +
       "</div>" +
       '<div class="bw-flow-params" data-wf-node="' +
@@ -928,7 +1008,8 @@
         ? rule.action.provider || ""
         : rule.action.type === "redirect"
           ? rule.action.status || 302
-          : rule.action.status || "deny status";
+          : rule.action.status ||
+            translate("workflows.act_denyShort", "deny status");
     return (
       '<span class="bw-flow-act ' +
       meta.tone +
@@ -962,15 +1043,21 @@
       ? '<span class="bw-flow-head-name">' +
         (rule.name
           ? esc(rule.name)
-          : '<span class="bw-flow-untitled">Untitled rule</span>') +
+          : '<span class="bw-flow-untitled" data-i18n="workflows.untitled">Untitled rule</span>') +
         "</span>"
-      : '<input class="bw-flow-name-input wf-rule-name" maxlength="128" placeholder="Rule name" value="' +
+      : '<input class="bw-flow-name-input wf-rule-name" maxlength="128" placeholder="' +
+        esc(translate("workflows.rule.namePlaceholder", "Rule name")) +
+        '" value="' +
         esc(rule.name) +
         '"' +
         ' data-wf-name="' +
         esc(rule.id) +
-        '" aria-label="Name of rule ' +
-        position +
+        '" aria-label="' +
+        esc(
+          translate("workflows.aria.ruleName", "Name of rule {{n}}", {
+            n: position,
+          }),
+        ) +
         '">';
 
     var caret =
@@ -980,9 +1067,13 @@
       (open ? "true" : "false") +
       '"' +
       ' title="' +
-      (open ? "Collapse" : "Expand") +
+      (open
+        ? translate("workflows.aria.collapse", "Collapse")
+        : translate("workflows.aria.expand", "Expand")) +
       ' rule" aria-label="' +
-      (open ? "Collapse" : "Expand") +
+      (open
+        ? translate("workflows.aria.collapse", "Collapse")
+        : translate("workflows.aria.expand", "Expand")) +
       " rule " +
       position +
       '">' +
@@ -991,25 +1082,37 @@
       ? caret
       : '<button type="button" class="bw-flow-grip" data-wf-grip="' +
         esc(rule.id) +
-        '" aria-hidden="true" tabindex="-1" title="Drag to reorder">' +
+        '" aria-hidden="true" tabindex="-1" title="' +
+        esc(translate("workflows.aria.drag", "Drag to reorder")) +
+        '">' +
         '<i class="bx bx-grid-vertical"></i></button>' +
         '<button type="button" class="bw-flow-iconbtn" data-wf-move="up:' +
         esc(rule.id) +
         '"' +
         (index === 0 ? " disabled" : "") +
-        ' title="Move up — runs earlier" aria-label="Move rule ' +
+        ' title="' +
+        esc(translate("workflows.aria.moveUp", "Move up — runs earlier")) +
+        '" aria-label="' +
+        esc(translate("workflows.aria.moveRule", "Move rule")) +
+        " " +
         position +
         ' up"><i class="bx bx-up-arrow-alt" aria-hidden="true"></i></button>' +
         '<button type="button" class="bw-flow-iconbtn" data-wf-move="down:' +
         esc(rule.id) +
         '"' +
         (index === STATE.rules.length - 1 ? " disabled" : "") +
-        ' title="Move down — runs later" aria-label="Move rule ' +
+        ' title="' +
+        esc(translate("workflows.aria.moveDown", "Move down — runs later")) +
+        '" aria-label="' +
+        esc(translate("workflows.aria.moveRule", "Move rule")) +
+        " " +
         position +
         ' down"><i class="bx bx-down-arrow-alt" aria-hidden="true"></i></button>' +
         '<button type="button" class="bw-flow-iconbtn" data-wf-menu="' +
         esc(rule.id) +
-        '" aria-haspopup="menu" title="More"' +
+        '" aria-haspopup="menu" title="' +
+        esc(translate("workflows.aria.more", "More")) +
+        '"' +
         ' aria-label="More actions for rule ' +
         position +
         '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button>' +
@@ -1187,8 +1290,18 @@
     var regexes = STATE.rules.reduce(function (total, rule) {
       return total + countRegex(rule);
     }, 0);
+    var options = {
+      count: count,
+      maxRules: MAX_RULES,
+      worst: worst,
+      maxPredicates: MAX_PREDICATES_PER_RULE,
+      regexes: regexes,
+    };
     return (
-      '<i class="bx bx-info-circle" aria-hidden="true"></i><span>' +
+      '<i class="bx bx-info-circle" aria-hidden="true"></i>' +
+      '<span data-i18n="workflows.capacity" data-i18n-options=\'' +
+      esc(JSON.stringify(options)) +
+      "'>" +
       count +
       " of " +
       MAX_RULES +
@@ -1221,33 +1334,66 @@
 
   // ---- validation painting ---------------------------------------------------------
 
+  /* "rules[2].condition.nodes[1].values[3]" is an address, not a place. The operator gets the
+     coordinate the ladder actually shows them; the raw path stays as the button's title so
+     support can still ask for it. */
+  function ruleIndexOf(path) {
+    var match = /^rules\[(\d+)\]/.exec(path || "");
+    return match ? parseInt(match[1], 10) : -1;
+  }
+
+  function errorLocation(path) {
+    var index = ruleIndexOf(path);
+    if (index < 0 || !STATE.rules[index])
+      // Budget and provider refusals are a property of the whole document, not of one node.
+      return translate("workflows.errors.whole", "This workflow");
+    var rule = STATE.rules[index];
+    var name = rule.name && rule.name.trim();
+    return name
+      ? translate("workflows.errors.ruleNamed", "Rule {{n}} — {{name}}", {
+          n: index + 1,
+          name: name,
+        })
+      : translate("workflows.errors.rule", "Rule {{n}}", { n: index + 1 });
+  }
+
   function panelHtml() {
     if (!STATE.errorList.length) return "";
+    var count = STATE.errorList.length;
     return (
       '<div class="alert alert-danger wf-errors" role="alert">' +
-      "<strong>" +
-      STATE.errorList.length +
-      " problem" +
-      (STATE.errorList.length === 1 ? "" : "s") +
-      " block" +
-      (STATE.errorList.length === 1 ? "s" : "") +
-      " the save.</strong> " +
+      '<strong data-i18n="workflows.errors.count" data-i18n-options=\'' +
+      esc(JSON.stringify({ count: count })) +
+      "'>" +
+      count +
+      (count === 1
+        ? " problem blocks the save."
+        : " problems block the save.") +
+      "</strong> " +
       '<span data-i18n="workflows.errors.body">Nothing is applied — the running policy is unchanged.</span>' +
       "<ol>" +
       STATE.errorList
         .map(function (error) {
-          return (
-            '<li><button type="button" class="wf-err-jump" data-wf-jump="' +
-            esc(error.path) +
-            '">' +
-            esc(error.message) +
-            "</button>" +
-            '<div class="wf-err-path">' +
-            esc(error.path) +
-            " · " +
-            esc(error.code) +
-            "</div></li>"
-          );
+          var jumpable = ruleIndexOf(error.path) >= 0;
+          var label =
+            '<span class="wf-err-where">' +
+            esc(errorLocation(error.path)) +
+            "</span>" +
+            esc(error.message);
+          // A non-jumpable path had a live button that did nothing when clicked.
+          return jumpable
+            ? '<li><button type="button" class="wf-err-jump" data-wf-jump="' +
+                esc(error.path) +
+                '" title="' +
+                esc(error.path + " · " + error.code) +
+                '">' +
+                label +
+                "</button></li>"
+            : '<li><span class="wf-err-static" title="' +
+                esc(error.path + " · " + error.code) +
+                '">' +
+                label +
+                "</span></li>";
         })
         .join("") +
       "</ol></div>"
@@ -1356,7 +1502,13 @@
         ? element
         : element.querySelector("input, select") || element;
       focusable.focus();
-      say("Jumped to " + path + ": " + (STATE.errors[path] || ""));
+      // Never read the raw schema path aloud — announce where the operator now is.
+      say(
+        translate("workflows.say.jumped", "{{where}}: {{message}}", {
+          where: errorLocation(path),
+          message: STATE.errors[path] || "",
+        }),
+      );
     }, 0);
   }
 
@@ -1386,20 +1538,30 @@
     var moved = STATE.rules.splice(from, 1)[0];
     STATE.rules.splice(to, 0, moved);
     touch('[data-wf-rule="' + CSS.escape(id) + '"]');
+    // The announcement names the consequence, not the mechanic: position alone does not tell
+    // an operator which rule now shadows which.
+    var where =
+      to === 0
+        ? translate("workflows.say.runsFirst", "first")
+        : to === total - 1
+          ? translate("workflows.say.runsLast", "last")
+          : translate("workflows.say.runsAfter", "after {{name}}", {
+              name:
+                (STATE.rules[to - 1].name || "").trim() ||
+                translate("workflows.say.ruleAbove", "the rule above"),
+            });
     say(
-      (moved.name || "The rule") +
-        " moved to position " +
-        (to + 1) +
-        " of " +
-        total +
-        (how ? " — " + how : "") +
-        ". It now runs " +
-        (to === 0
-          ? "first"
-          : to === total - 1
-            ? "last"
-            : "after " + (STATE.rules[to - 1].name || "the rule above")) +
-        ".",
+      translate(
+        "workflows.say.moved",
+        "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
+        {
+          name: ruleLabel(moved),
+          to: to + 1,
+          total: total,
+          how: how ? " — " + translate("workflows.say.via." + how, how) : "",
+          where: where,
+        },
+      ),
     );
   }
 
@@ -1671,7 +1833,10 @@
         if (body.status !== "success") {
           panelEl.innerHTML =
             '<div class="alert alert-warning" role="alert">' +
-            esc(body.message || "Could not validate") +
+            esc(
+              body.message ||
+                translate("workflows.err.validate", "Could not validate"),
+            ) +
             "</div>";
           return;
         }
@@ -1689,7 +1854,14 @@
       })
       .catch(function () {
         panelEl.innerHTML =
-          '<div class="alert alert-warning" role="alert">Could not reach the validation endpoint</div>';
+          '<div class="alert alert-warning" role="alert">' +
+          esc(
+            translate(
+              "workflows.err.validateUnreachable",
+              "Could not reach the validation endpoint",
+            ),
+          ) +
+          "</div>";
       });
   }
 
@@ -1719,13 +1891,22 @@
         }
         panelEl.innerHTML =
           '<div class="alert alert-danger" role="alert">' +
-          esc(body.message || "Could not save") +
+          esc(
+            body.message || translate("workflows.err.save", "Could not save"),
+          ) +
           "</div>";
         button.disabled = false;
       })
       .catch(function () {
         panelEl.innerHTML =
-          '<div class="alert alert-danger" role="alert">Could not reach the save endpoint</div>';
+          '<div class="alert alert-danger" role="alert">' +
+          esc(
+            translate(
+              "workflows.err.saveUnreachable",
+              "Could not reach the save endpoint",
+            ),
+          ) +
+          "</div>";
         button.disabled = false;
       });
   }
@@ -1822,7 +2003,10 @@
           gated.threshold = { count: 10, window: 60, key: "ip" };
           touch();
           say(
-            "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+            translate(
+              "workflows.say.gateAdded",
+              "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+            ),
           );
         }
         return;
@@ -1851,7 +2035,10 @@
           touch();
           if (!valueHit.node.values.length)
             say(
-              "Last value removed — this condition cannot be saved until it holds one.",
+              translate(
+                "workflows.say.lastValueRemoved",
+                "Last value removed — this condition cannot be saved until it holds one.",
+              ),
             );
         }
         return;
@@ -1897,9 +2084,11 @@
               : { type: "block" };
         touch();
         say(
-          "Action changed to " +
-            type +
-            ". It is still the only action, and it still stops evaluation.",
+          translate(
+            "workflows.say.actionChanged",
+            "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
+            { type: type },
+          ),
         );
         return;
       }
@@ -2151,9 +2340,11 @@
         if (predHit) {
           if (countLeaves(predHit.rule.condition) >= MAX_PREDICATES_PER_RULE) {
             say(
-              "This rule already holds " +
-                MAX_PREDICATES_PER_RULE +
-                " conditions, the maximum.",
+              translate(
+                "workflows.say.predicateCap",
+                "This rule already holds {{max}} conditions, the maximum.",
+                { max: MAX_PREDICATES_PER_RULE },
+              ),
             );
             return;
           }
@@ -2178,25 +2369,34 @@
             rule.enabled = !rule.enabled;
             touch();
             say(
-              (rule.name || "The rule") +
-                (rule.enabled
-                  ? " enabled — it is evaluated again at position " +
-                    (index + 1)
-                  : " disabled — it is skipped entirely and rules below it now see those requests") +
-                ".",
+              rule.enabled
+                ? translate(
+                    "workflows.say.ruleEnabled",
+                    "{{name}} enabled — it is evaluated again at position {{n}}.",
+                    { name: ruleLabel(rule), n: index + 1 },
+                  )
+                : translate(
+                    "workflows.say.ruleDisabled",
+                    "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
+                    { name: ruleLabel(rule) },
+                  ),
             );
             break;
           case "duplicate": {
             if (STATE.rules.length >= MAX_RULES) return;
             var copy = fromSchemaRule(toSchemaRule(rule));
             copy.id = newId();
-            copy.name = (rule.name || "Rule") + " (copy)";
+            copy.name =
+              (rule.name || translate("workflows.rule.noun", "Rule")) +
+              translate("workflows.copySuffix", " (copy)");
             STATE.rules.splice(index + 1, 0, copy);
             touch();
             say(
-              "Copy inserted at position " +
-                (index + 2) +
-                ". It can never match while the original above it is enabled.",
+              translate(
+                "workflows.say.duplicated",
+                "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
+                { n: index + 2 },
+              ),
             );
             break;
           }
@@ -2209,13 +2409,22 @@
           case "delete":
             if (
               window.confirm(
-                "Delete this rule? Everything below it moves up one position.",
+                translate(
+                  "workflows.confirm.deleteRule",
+                  "Delete this rule? Everything below it moves up one position.",
+                ),
               )
             ) {
               STATE.rules.splice(index, 1);
               STATE.open.delete(id);
               touch();
-              say("Rule deleted. " + STATE.rules.length + " rules remain.");
+              say(
+                translate(
+                  "workflows.say.deleted",
+                  "Rule deleted. {{count}} rules remain.",
+                  { count: STATE.rules.length },
+                ),
+              );
             }
             break;
         }
@@ -2315,9 +2524,11 @@
         STATE.open.add(rule.id);
         touch('[data-wf-rule="' + CSS.escape(rule.id) + '"]');
         say(
-          "Rule added at position " +
-            STATE.rules.length +
-            " — last, so every rule above it is checked first.",
+          translate(
+            "workflows.say.added",
+            "Rule added at position {{n}} — last, so every rule above it is checked first.",
+            { n: STATE.rules.length },
+          ),
         );
       });
     }

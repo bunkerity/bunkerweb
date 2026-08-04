@@ -2390,6 +2390,8 @@
     "act_block": "Block",
     "act_challenge": "Challenge",
     "act_code": "Status",
+    "act_denyDefault": "The instance's deny status",
+    "act_denyShort": "deny status",
     "act_provider": "Antibot provider",
     "act_redirect": "Redirect",
     "act_status": "Deny status",
@@ -2398,20 +2400,61 @@
     "action": "Ensuite",
     "add_rule": "Ajouter une règle",
     "all": "Tous",
+    "aria": {
+      "collapse": "Collapse",
+      "combinator": "Change combinator, currently",
+      "conditionType": "Condition type",
+      "denyStatus": "Deny status",
+      "drag": "Drag to reorder",
+      "expand": "Expand",
+      "groupKind": "Group kind",
+      "more": "More",
+      "moveDown": "Move down — runs later",
+      "moveRule": "Move rule",
+      "moveUp": "Move up — runs earlier",
+      "provider": "Antibot provider",
+      "redirectStatus": "Redirect status",
+      "removeCondition": "Remove condition",
+      "removeThreshold": "Remove threshold",
+      "removeThresholdLong": "Remove rate threshold",
+      "removeValue": "Remove value",
+      "requestCount": "Request count",
+      "resourceGroup": "Resource group",
+      "ruleName": "Name of rule {{n}}",
+      "terminalAction": "Terminal action",
+      "uriMatch": "URI match mode",
+      "uriValue": "URI value",
+      "window": "Window in seconds"
+    },
     "attach": "Attacher aux services",
     "attach_help": "Les règles ne sont appliquées qu'aux services auxquels un flux de travail est attaché.",
     "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
+    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
     "clone": "Cloner le flux de travail",
     "clone_help": "Les règles sont copiées, les attachements aux services ne le sont pas.",
     "clone_name": "Nom de la copie",
+    "confirm": {
+      "deleteRule": "Delete this rule? Everything below it moves up one position."
+    },
+    "copySuffix": " (copy)",
     "delete": "Supprimer le flux de travail",
     "delete_confirm": "Ce flux de travail et toutes ses règles seront supprimés de manière permanente.",
     "empty_text": "Un flux de travail est une liste ordonnée de règles que vous attachez aux services : un arbre de conditions, un seuil de taux facultatif et une action : défi, blocage ou redirection.",
     "empty_title": "Aucun flux de travail pour le moment",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
+    "err": {
+      "save": "Could not save",
+      "saveUnreachable": "Could not reach the save endpoint",
+      "validate": "Could not validate",
+      "validateUnreachable": "Could not reach the validation endpoint"
+    },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged."
+      "body": "Nothing is applied — the running policy is unchanged.",
+      "count": "{{count}} problem(s) block the save.",
+      "rule": "Rule {{n}}",
+      "ruleNamed": "Rule {{n}} — {{name}}",
+      "whole": "This workflow"
     },
     "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
     "exit_title": "No rule matched",
@@ -2451,14 +2494,36 @@
     "rule": {
       "disabled": "Disabled",
       "if": "If",
+      "namePlaceholder": "Rule name",
+      "noun": "Rule",
       "onMatch": "If it matches",
       "skipped": "Disabled — skipped entirely, as if it were not in the list.",
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Règles",
     "say": {
+      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
+      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
+      "deleted": "Rule deleted. {{count}} rules remain.",
+      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
+      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "jumped": "{{where}}: {{message}}",
+      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
+      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
+      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
+      "ruleAbove": "the rule above",
+      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
+      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
+      "runsAfter": "after {{name}}",
+      "runsFirst": "first",
+      "runsLast": "last",
       "saved": "Rules saved and pushed to the attached services.",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+      "theRule": "The rule",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "via": {
+        "drag": "drag",
+        "keyboard": "keyboard"
+      }
     },
     "search": "Rechercher le nom ou la description...",
     "threshold": "Uniquement au-dessus d'un taux",
@@ -2468,14 +2533,35 @@
       "addCondition": "Condition",
       "addGroup": "Group",
       "all": "All of",
+      "allMeta": "{{count}} condition(s) — all must be true",
+      "and": "and",
       "any": "Any of",
+      "anyMeta": "{{count}} condition(s) — at least one must be true",
       "empty": "Empty group — add a condition, it cannot be saved like this.",
+      "noGroupHolds": "no group holds {{kind}} entries",
+      "noneMeta": "matches when none of these are true",
       "not": "None of",
+      "or": "or",
       "removeGroup": "Remove group"
     },
     "truncated": "Seuls les 500 premiers flux de travail sont affichés. Affinez la liste à l'aide de API pour obtenir le résultat complet.",
+    "untitled": "Untitled rule",
     "value": {
       "add": "Value"
+    },
+    "values": {
+      "fewer": "Show fewer",
+      "more": "+{{n}} more"
+    },
+    "verb": {
+      "asn": "is",
+      "country": "is",
+      "group": "is in the group",
+      "ip": "is in",
+      "isIn": "is in",
+      "isOneOf": "is one of",
+      "method": "is",
+      "uri": "matches"
     }
   },
   "request_path": {
