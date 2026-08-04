@@ -7,6 +7,19 @@ from worker.executor import JobExecutor
 
 SENSITIVE_ENV_KEYS = {"CELERY_BROKER_URL", "JOBS_HMAC_SECRET"}
 
+# Core jobs that take a distributed lease and therefore need a broker of their own.
+#
+# Stripping CELERY_BROKER_URL left push-configs' lease inert in exactly the topology that needs
+# it. A split-container worker has no Redis on localhost, so the job's `redis://localhost:6379/0`
+# fallback could not connect, the acquisition raised, and the except branch runs the push anyway
+# ("proceeding without coordination") -- on every single dispatch. The lease therefore worked
+# only in all-in-one, where a single worker means there is nothing to coordinate with.
+#
+# Re-injected by name so the strip still holds for every other job, including every third-party
+# plugin job. These are core jobs shipped in this tree, and they already receive DATABASE_URI --
+# a strictly more sensitive credential -- so the marginal exposure is nil.
+LEASE_JOBS = frozenset(("push-configs",))
+
 # Config keys returned by Database.get_config() that must NOT overwrite the
 # worker's own runtime env when overlaying settings for a job. Mirrors
 # scheduler/main.py:_strip_bootstrap_env so the loaded config can't clobber the
@@ -198,6 +211,10 @@ def execute_job(self, job_data: dict) -> dict:
     safe_env = saved_env.copy()
     for key in SENSITIVE_ENV_KEYS:
         safe_env.pop(key, None)
+
+    # The one documented exception to the strip above -- see LEASE_JOBS.
+    if name in LEASE_JOBS and saved_env.get("CELERY_BROKER_URL"):
+        safe_env["CELERY_BROKER_URL"] = saved_env["CELERY_BROKER_URL"]
 
     ret = 2
     success = False

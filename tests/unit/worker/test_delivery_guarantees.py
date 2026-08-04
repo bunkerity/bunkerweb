@@ -11,6 +11,7 @@ through ``sys.modules`` -- the same approach ``test_app.py`` uses.
 """
 
 import importlib.util
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -312,3 +313,60 @@ class TestAbandonment:
             result = TASKS.execute_job(_Self(), dict(JOB))
         stub_runtime.run.assert_called_once()
         assert result["success"] is True
+
+
+class TestLeaseBroker:
+    """The broker URL a leased job needs, and the strip that has to keep holding for everyone else.
+
+    ``SENSITIVE_ENV_KEYS`` removes ``CELERY_BROKER_URL`` from every job's environment. That left
+    push-configs' distributed lease inert in split-container deployments: no Redis on localhost,
+    so the acquisition raised and the job's except branch pushed anyway, uncoordinated, on every
+    dispatch. The lease worked only in all-in-one -- the one topology with nothing to coordinate.
+    """
+
+    @staticmethod
+    def _env_seen_by(job_name, stub_runtime, monkeypatch):
+        """Run one job and return the environment its executor actually saw."""
+        seen = {}
+        stub_runtime.run = Mock(side_effect=lambda _data: seen.update(os.environ) or 0)
+        monkeypatch.setattr(TASKS, "get_worker_db", lambda: None)
+        with _with_redis(_FakeRedis()):
+            TASKS.execute_job(_Self(), dict(JOB, name=job_name))
+        return seen
+
+    def test_a_leased_job_can_reach_the_broker(self, stub_runtime, monkeypatch):
+        seen = self._env_seen_by("push-configs", stub_runtime, monkeypatch)
+        assert seen.get("CELERY_BROKER_URL") == BROKER
+
+    def test_every_other_job_still_cannot(self, stub_runtime, monkeypatch):
+        """The exception is an allowlist, not a removal: a third-party plugin job must not gain
+        read access to the broker credentials because one core job needed a lease."""
+        seen = self._env_seen_by("certbot-renew", stub_runtime, monkeypatch)
+        assert "CELERY_BROKER_URL" not in seen
+
+    def test_the_hmac_secret_is_stripped_from_a_leased_job_too(self, stub_runtime, monkeypatch):
+        """Only the broker URL is excepted. Widening it to the whole set would be a real leak."""
+        monkeypatch.setenv("JOBS_HMAC_SECRET", "s3cret")
+        seen = self._env_seen_by("push-configs", stub_runtime, monkeypatch)
+        assert "JOBS_HMAC_SECRET" not in seen
+
+    def test_nothing_is_invented_when_the_worker_has_no_broker_either(self, stub_runtime, monkeypatch):
+        monkeypatch.delenv("CELERY_BROKER_URL", raising=False)
+        seen = self._env_seen_by("push-configs", stub_runtime, monkeypatch)
+        assert "CELERY_BROKER_URL" not in seen
+
+    def test_the_worker_env_is_restored_afterwards(self, stub_runtime, monkeypatch):
+        self._env_seen_by("push-configs", stub_runtime, monkeypatch)
+        assert os.environ.get("CELERY_BROKER_URL") == BROKER
+
+    def test_every_leased_job_names_a_job_that_exists(self):
+        """The set is matched against job_data["name"], so a typo disables the lease silently."""
+        jobs = {path.stem for path in (ROOT / "src" / "common" / "core").glob("*/jobs/*.py")}
+        assert TASKS.LEASE_JOBS <= jobs, sorted(TASKS.LEASE_JOBS - jobs)
+
+    def test_a_job_that_takes_a_lease_is_in_the_set(self):
+        """The other direction: a job reading the lease key without being listed here is back to
+        having no broker, which is the bug this closes."""
+        for path in (ROOT / "src" / "common" / "core").glob("*/jobs/*.py"):
+            if "acquire_lease(" in path.read_text(encoding="utf-8"):
+                assert path.stem in TASKS.LEASE_JOBS, path.stem
