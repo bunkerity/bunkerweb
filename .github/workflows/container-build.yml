@@ -85,13 +85,13 @@ jobs:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7
       - name: Login to Docker Hub
-        uses: docker/login-action@06fb636fac595d6fb4b28a5dfcb21a6f5091859c # v4.5.0
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
         if: inputs.PUSH == true
-        uses: docker/login-action@06fb636fac595d6fb4b28a5dfcb21a6f5091859c # v4.5.0
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -153,7 +153,7 @@ jobs:
       - name: Upload Trivy SARIF report
         if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
         continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
-        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+        uses: github/codeql-action/upload-sarif@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4.37.4
         with:
           sarif_file: trivy-results.sarif
           category: trivy-${{ inputs.IMAGE }}-${{ inputs.ARCH }}
