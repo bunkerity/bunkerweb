@@ -61,10 +61,15 @@ RUN umask 027
 RUN apt-get update && \
   apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 tzdata && \
   rm -rf /var/lib/apt/lists/* && \
-  groupadd -g 102 worker && \
-  useradd -u 102 -g worker -d /usr/share/bunkerweb/worker -s /usr/sbin/nologin -M worker
+  groupadd -g 101 worker && \
+  useradd -u 101 -g worker -d /usr/share/bunkerweb/worker -s /usr/sbin/nologin -M worker
 
-COPY --from=builder --chown=0:102 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
+# 101:101, the same ids the scheduler, API and UI images use, so a stack backed by SQLite can
+# hand all of them the one /data volume holding the database file. The all-in-one image already
+# runs the worker under those ids (supervisor.d/worker.ini runs it as nginx), and the shared
+# helpers/data.sh preflight names "uid 101 and gid 101" in every error it prints -- a worker on
+# any other id was the odd one out, and it cost the SQLite quickstart every background job.
+COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 

@@ -1523,8 +1523,10 @@ services:
       API_TOKEN: "${API_TOKEN}"
       BUNKERWEB_INSTANCES: "bunkerweb"
     volumes:
-      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
-      # so a shared /data would be unreadable to one of them.
+      # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+      # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+      # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+      # the database IS a file under /data.
       - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
@@ -1659,8 +1661,10 @@ services:
       API_TOKEN: "${API_TOKEN}"
       BUNKERWEB_INSTANCES: ""
     volumes:
-      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
-      # so a shared /data would be unreadable to one of them.
+      # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+      # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+      # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+      # the database IS a file under /data.
       - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
@@ -1801,8 +1805,10 @@ services:
       API_TOKEN: "${API_TOKEN}"
       BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
     volumes:
-      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
-      # so a shared /data would be unreadable to one of them.
+      # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+      # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+      # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+      # the database IS a file under /data.
       - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
@@ -1944,8 +1950,10 @@ services:
       API_TOKEN: "${API_TOKEN}"
       BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
     volumes:
-      # Its own volume on purpose: the worker runs as uid 102 and the scheduler as 101,
-      # so a shared /data would be unreadable to one of them.
+      # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+      # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+      # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+      # the database IS a file under /data.
       - bw-worker-storage:/data
     restart: "unless-stopped"
     networks:
