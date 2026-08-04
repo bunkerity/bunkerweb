@@ -2400,15 +2400,14 @@
     "all": "Tutti",
     "attach": "Allega ai servizi",
     "attach_help": "Le regole vengono applicate solo ai servizi a cui è collegato il flusso di lavoro.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Clona flusso di lavoro",
     "clone_help": "Le regole vengono copiate; gli allegamenti ai servizi non.",
     "clone_name": "Nome della copia",
-    "conditions": "Condizioni",
     "delete": "Elimina flusso di lavoro",
     "delete_confirm": "Questo flusso di lavoro e tutte le sue regole verranno eliminati in modo permanente.",
     "empty_text": "Un flusso di lavoro è una lista ordinata di regole che si collegano ai servizi: una condizione, una soglia di velocità opzionale e un'azione — sfida, blocco o reindirizzamento.",
     "empty_title": "Nessun flusso di lavoro ancora",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Nuovo flusso di lavoro",
     "no_rules": "Nessuna regola ancora. Aggiungine una per iniziare a creare questa politica.",
     "not_attached": "Non collegato",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Le regole vengono valutate in ordine e la prima che corrisponde vince. Una regola con una soglia di velocità corrisponde solo quando la soglia viene superata, quindi una regola inferiore può catturare il traffico al di sotto di essa.",
     "readonly": "Il database è di sola lettura. I flussi di lavoro possono essere ispezionati ma non modificati.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Regole",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Cerca nome o descrizione...",
     "threshold": "Solo sopra una velocità",
     "threshold_count": "Richieste",

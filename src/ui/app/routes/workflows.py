@@ -232,5 +232,6 @@ def workflows_save(workflow_id):
         # validates on every change through /validate, which answers 200 with the errors
         # anchored on their nodes, so a save only fails on a race or a stale draft.
         return jsonify({"status": "error", "message": exc.message}), 400
-    flash("Workflow rules saved successfully")
+    # No flash: this is an XHR endpoint, so the message would sit in the session and ambush the
+    # operator on whatever page they opened next. The editor announces the save in place.
     return jsonify({"status": "success"})

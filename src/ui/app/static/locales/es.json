@@ -2400,15 +2400,14 @@
     "all": "Todos",
     "attach": "Adjuntar a los servicios",
     "attach_help": "Las reglas solo se aplican a los servicios a los que está adjunto el flujo de trabajo.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Clonar flujo de trabajo",
     "clone_help": "Las reglas se copian; los adjuntos de servicio no.",
     "clone_name": "Nombre de la copia",
-    "conditions": "Condiciones",
     "delete": "Eliminar flujo de trabajo",
     "delete_confirm": "Este flujo de trabajo y todas sus reglas se eliminarán permanentemente.",
     "empty_text": "Un flujo de trabajo es una lista ordenada de reglas que adjunta a los servicios: un árbol de condiciones, un umbral de tasa opcional y una acción: desafío, bloqueo o redirección.",
     "empty_title": "No hay flujos de trabajo aún",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Nuevo flujo de trabajo",
     "no_rules": "No hay regla aún. Añada una para empezar a construir esta política.",
     "not_attached": "No adjunto",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Las reglas se evalúan en orden y la primera que coincida gana. Una regla con un umbral de tasa solo coincide una vez que se supera el umbral, por lo que una regla inferior puede captar el tráfico por debajo de ella.",
     "readonly": "La base de datos es de solo lectura. Los flujos de trabajo se pueden inspeccionar pero no modificar.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Reglas",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Buscar nombre o descripción...",
     "threshold": "Solo a una tasa",
     "threshold_count": "Solicitudes",

@@ -2400,15 +2400,14 @@
     "all": "Alle",
     "attach": "An den Diensten befestigen",
     "attach_help": "Die Regeln werden nur auf den Diensten angewendet, an die ein Workflow befestigt ist.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Workflow klonen",
     "clone_help": "Die Regeln werden kopiert, die Dienstbeziehungen nicht.",
     "clone_name": "Name der Kopie",
-    "conditions": "Bedingungen",
     "delete": "Workflow löschen",
     "delete_confirm": "Dieser Workflow und alle seine Regeln werden dauerhaft gelöscht.",
     "empty_text": "Ein Workflow ist eine geordnete Liste von Regeln, die Sie an Dienste anbringen: ein Bedingungenbaum, ein optionaler Grenzwert und eine Aktion — Herausforderung, Blockieren oder Weiterleiten.",
     "empty_title": "Noch keine Workflows",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Neuer Workflow",
     "no_rules": "Noch keine Regel. Fügen Sie eine hinzu, um diese Richtlinie zu erstellen.",
     "not_attached": "Nicht befestigt",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Die Regeln werden in der Reihenfolge ausgewertet und die erste, die übereinstimmt, gewinnt. Eine Regel mit einem Grenzwert stimmt nur dann zu, wenn der Grenzwert überschritten wird, sodass eine niedrigere Regel den Datenverkehr unterhalb davon erfassen kann.",
     "readonly": "Die Datenbank ist schreibgeschützt. Workflows können inspiziert, aber nicht geändert werden.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Regeln",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Suche nach Name oder Beschreibung...",
     "threshold": "Nur bei einem bestimmten Wert",
     "threshold_count": "Anfragen",

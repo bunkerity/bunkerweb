@@ -2400,15 +2400,14 @@
     "all": "Tous",
     "attach": "Attacher aux services",
     "attach_help": "Les règles ne sont appliquées qu'aux services auxquels un flux de travail est attaché.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Cloner le flux de travail",
     "clone_help": "Les règles sont copiées, les attachements aux services ne le sont pas.",
     "clone_name": "Nom de la copie",
-    "conditions": "Conditions",
     "delete": "Supprimer le flux de travail",
     "delete_confirm": "Ce flux de travail et toutes ses règles seront supprimés de manière permanente.",
     "empty_text": "Un flux de travail est une liste ordonnée de règles que vous attachez aux services : un arbre de conditions, un seuil de taux facultatif et une action : défi, blocage ou redirection.",
     "empty_title": "Aucun flux de travail pour le moment",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Nouveau flux de travail",
     "no_rules": "Aucune règle pour le moment. Ajoutez-en une pour commencer à élaborer cette politique.",
     "not_attached": "Non attaché",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Les règles sont évaluées dans l'ordre et la première qui correspond gagne. Une règle avec un seuil de taux ne correspond que lorsque le seuil est dépassé, de sorte qu'une règle inférieure peut intercepter le trafic en dessous.",
     "readonly": "La base de données est en lecture seule. Les flux de travail peuvent être inspectés, mais pas modifiés.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Règles",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Rechercher le nom ou la description...",
     "threshold": "Uniquement au-dessus d'un taux",
     "threshold_count": "Requêtes",

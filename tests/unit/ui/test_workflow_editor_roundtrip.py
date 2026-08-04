@@ -130,3 +130,45 @@ def test_a_not_leaf_survives_as_a_not_group(node, tmp_path):
     assert len(negations) == 2
     for negation in negations:
         assert negation["node"]["op"] == "any"
+
+
+CONVERT_HARNESS = """
+globalThis.window = globalThis;
+globalThis.document = { addEventListener() {} };
+require(process.argv[2]);
+const model = globalThis.window.BW_WORKFLOW_MODEL;
+const cases = JSON.parse(process.argv[3]);
+process.stdout.write(
+  JSON.stringify(cases.map((c) => model.convertLeaf(c.node, c.op))),
+);
+"""
+
+
+def _convert(node, tmp_path, cases):
+    harness = tmp_path / "convert.js"
+    harness.write_text(CONVERT_HARNESS, encoding="utf-8")
+    result = run([node, str(harness), str(EDITOR), dumps(cases)], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    return loads(result.stdout)
+
+
+def test_changing_a_predicate_type_keeps_the_values_it_can(node, tmp_path):
+    """Switching type used to call newLeaf() and drop everything the operator had typed."""
+    forty = [f"203.0.113.{octet}" for octet in range(40)]
+    converted = _convert(
+        node,
+        tmp_path,
+        [
+            {"node": {"op": "ip", "values": forty}, "op": "asn"},
+            {"node": {"op": "country", "values": ["FR", "BE"]}, "op": "method"},
+            # uri holds one string and group holds a reference: neither is a value list, so
+            # nothing carries and the editor announces the loss instead of hiding it.
+            {"node": {"op": "ip", "values": forty}, "op": "uri"},
+            {"node": {"op": "uri", "match": "prefix", "value": "/login"}, "op": "ip"},
+        ],
+    )
+
+    assert converted[0]["op"] == "asn" and converted[0]["values"] == forty
+    assert converted[1]["op"] == "method" and converted[1]["values"] == ["FR", "BE"]
+    assert converted[2]["op"] == "uri" and "values" not in converted[2]
+    assert converted[3]["op"] == "ip" and converted[3]["values"] == []

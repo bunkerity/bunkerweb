@@ -160,23 +160,30 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
             return self._workflow_dict(row[0], row[1], self._workflow_attachments(session, [resource_id])[resource_id], with_definition=True)
 
     @staticmethod
-    def _service_workflows(session) -> Dict[str, List[Dict[str, Any]]]:
+    def _service_workflows(session, *, include_drafts: bool = False) -> Dict[str, List[Dict[str, Any]]]:
         """Session-taking core of :meth:`get_service_workflows`.
 
         Draft services are excluded. They render nothing, and their settings are absent from
         the generated config — so compiling their workflows would check a challenge provider's
         credentials against the (empty) global fallback and abort the whole push for a service
         that was never going to be served.
+
+        ``include_drafts`` is for the budget baseline only. A draft's workflows all reach the
+        compiler at once the moment it is published, so counting them only from that moment
+        means three attaches of 50 rules each each see a baseline of 0, all pass, and the first
+        push after publication aborts for the entire deployment.
         """
         result: Dict[str, List[Dict[str, Any]]] = {}
-        for row in session.execute(
+        query = (
             select(ResourceAttachments.service_id, Resources.id, Resources.name, Workflows.schema_version, Workflows.definition)
             .join(Resources, Resources.id == ResourceAttachments.resource_id)
             .join(Workflows, Workflows.resource_id == Resources.id)
             .join(Services, Services.id == ResourceAttachments.service_id)
-            .where(Services.is_draft.is_(False))
             .order_by(ResourceAttachments.creation_date, Resources.name)
-        ):
+        )
+        if not include_drafts:
+            query = query.where(Services.is_draft.is_(False))
+        for row in session.execute(query):
             result.setdefault(row.service_id, []).append({"id": row.id, "name": row.name, "schema_version": row.schema_version, "definition": row.definition})
         return result
 
@@ -200,7 +207,9 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
         """
         if not service_ids:
             return ""
-        attached = self._service_workflows(session)
+        # Drafts included on purpose: see :meth:`_service_workflows`. The baseline is a
+        # per-service bucket, so this cannot change what a published service counts.
+        attached = self._service_workflows(session, include_drafts=True)
         for service_id in service_ids:
             totals = {"rules": 0, "predicates": 0, "pcre": 0}
             entries = {entry["id"]: entry for entry in attached.get(service_id, [])}
@@ -260,6 +269,19 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
                     if not (value or "").strip():
                         return f"Service {service_id} cannot serve a {provider} challenge: {setting} is not configured"
         return ""
+
+    def _service_errors(self, session, resource_id: str, definition: Optional[Dict[str, Any]], service_ids: List[str]) -> List[Dict[str, str]]:
+        """The service-level refusals, as the ``path``/``code``/``message`` triplets the editor anchors.
+
+        One helper for validate, save and attach: a check only one of them runs is a check the
+        editor reports as passing right up until the operator hits Save. ``path`` is ``rules``
+        because neither budget nor provider belongs to a single node.
+        """
+        if error := self._service_budget_error(session, resource_id, definition, service_ids):
+            return [{"path": "rules", "code": "budget_exceeded", "message": error}]
+        if error := self._provider_prerequisite_error(session, definition, service_ids):
+            return [{"path": "rules", "code": "provider_missing", "message": error}]
+        return []
 
     def _check_name(self, session, name: str, resource_id: str = "") -> Tuple[str, str]:
         normalized = name.strip()
@@ -358,10 +380,8 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
                 # is still under the cap, both commit, and the sum blows it — which the
                 # fail-closed compiler then turns into a deployment-wide push failure.
                 session.execute(select(Services.id).where(Services.id.in_(attached)).with_for_update())
-            if error := self._service_budget_error(session, resource_id, canonical, attached):
-                return error, []
-            if error := self._provider_prerequisite_error(session, canonical, attached):
-                return error, []
+            if service_errors := self._service_errors(session, resource_id, canonical, attached):
+                return service_errors[0]["message"], service_errors
 
             workflow.schema_version = SCHEMA_VERSION
             workflow.definition = canonical_json(canonical)
@@ -379,21 +399,21 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
 
     def validate_workflow_definition(
         self, definition: Any, *, resource_id: str = "", service_ids: Optional[List[str]] = None
-    ) -> Tuple[Optional[Dict[str, Any]], List[Dict[str, str]], str]:
-        """Check a draft definition without storing it. Returns ``(canonical, errors, budget_error)``.
+    ) -> Tuple[Optional[Dict[str, Any]], List[Dict[str, str]]]:
+        """Check a draft definition without storing it. Returns ``(canonical, errors)``.
 
-        What the editor calls on every change: same validator, same live group index and
-        same aggregate budgets as :meth:`save_workflow_definition`, so "it validates" here
+        What the editor calls on every change: same validator, same live group index and the
+        same service-level refusals as :meth:`save_workflow_definition`, so "it validates" here
         means "it will save" — and, because the compiler shares the validator, "it will
-        compile" too. ``service_ids`` projects the budgets onto the services the operator
-        intends to attach, which is the only check a not-yet-attached draft cannot infer.
+        compile" too. ``service_ids`` projects the checks onto the services the operator
+        intends to attach, which is the only one a not-yet-attached draft cannot infer.
         """
         with self._db_session() as session:
             canonical, errors = validate_definition(definition, group_index=self._get_resource_group_index(session, by="id"))
             if canonical is None:
-                return None, errors, ""
+                return None, errors
             targets = list(service_ids) if service_ids is not None else self._attached_service_ids(session, resource_id)
-            return canonical, [], self._service_budget_error(session, resource_id, canonical, targets)
+            return canonical, self._service_errors(session, resource_id, canonical, targets)
 
     def clone_workflow(self, resource_id: str, *, name: str) -> Tuple[str, str]:
         """Copy a workflow's rules under a new name. Attachments are not copied."""
@@ -461,10 +481,8 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
                 return ""  # already attached: idempotent, and nothing changed to signal
 
             definition = self._load_definition(workflow.definition)
-            if error := self._service_budget_error(session, resource_id, definition, [service_id]):
-                return error
-            if error := self._provider_prerequisite_error(session, definition, [service_id]):
-                return error
+            if errors := self._service_errors(session, resource_id, definition, [service_id]):
+                return errors[0]["message"]
 
             # is_primary stays False and match_path stays "": every attached workflow is
             # evaluated, in attachment order, for the whole service.

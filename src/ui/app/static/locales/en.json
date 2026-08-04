@@ -2318,15 +2318,14 @@
     "all": "All",
     "attach": "Attach to services",
     "attach_help": "Rules are only enforced on the services a workflow is attached to.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Clone workflow",
     "clone_help": "The rules are copied; the service attachments are not.",
     "clone_name": "Name of the copy",
-    "conditions": "Conditions",
     "delete": "Delete workflow",
     "delete_confirm": "This workflow and all of its rules will be permanently deleted.",
     "empty_text": "A workflow is an ordered list of rules you attach to services: a condition tree, an optional rate threshold, and one action — challenge, block or redirect.",
     "empty_title": "No workflows yet",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2351,8 +2350,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2362,6 +2362,8 @@
     "new": "New workflow",
     "no_rules": "No rule yet. Add one to start building this policy.",
     "not_attached": "Not attached",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Rules are evaluated in order and the first one that matches wins. A rule with a rate threshold only matches once the threshold is exceeded, so a lower rule can catch the traffic below it.",
     "readonly": "The database is read-only. Workflows can be inspected but not changed.",
     "rule": {
@@ -2372,6 +2374,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Rules",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Search name or description...",
     "threshold": "Only above a rate",
     "threshold_count": "Requests",

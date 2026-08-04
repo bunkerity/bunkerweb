@@ -144,7 +144,7 @@
                 </table>
             </div>
         {% else %}
-            {{ empty_state(title="No redirects yet", title_key="redirects.empty_title", text="A redirect is a named rule you attach to one or more services. Inline REDIRECT_* settings keep working alongside it.", text_key="redirects.empty_text", icon="bx-git-branch") }}
+            {{ empty_state(title="No redirects yet", title_key="redirects.empty_title", message="A redirect is a named rule you attach to one or more services. Inline REDIRECT_* settings keep working alongside it.", message_key="redirects.empty_text", icon="bx-git-branch") }}
         {% endif %}
     {% endcall %}
 

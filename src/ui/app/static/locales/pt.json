@@ -2400,15 +2400,14 @@
     "all": "Todos",
     "attach": "Anexar a serviços",
     "attach_help": "As regras são apenas aplicadas aos serviços aos quais o fluxo de trabalho está anexado.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Clonar fluxo de trabalho",
     "clone_help": "As regras são copiadas; os anexos aos serviços não.",
     "clone_name": "Nome da cópia",
-    "conditions": "Condições",
     "delete": "Eliminar fluxo de trabalho",
     "delete_confirm": "Este fluxo de trabalho e todas as suas regras serão eliminados permanentemente.",
     "empty_text": "Um fluxo de trabalho é uma lista ordenada de regras que anexamos a serviços: uma árvore de condições, um limite de taxa opcional e uma ação — desafio, bloqueio ou redirecionamento.",
     "empty_title": "Nenhum fluxo de trabalho ainda",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Novo fluxo de trabalho",
     "no_rules": "Nenhuma regra ainda. Adicione uma para começar a construir esta política.",
     "not_attached": "Não anexado",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "As regras são avaliadas em ordem e a primeira que corresponde vence. Uma regra com um limite de taxa só corresponde quando o limite é excedido, por isso uma regra inferior pode capturar o tráfego abaixo dela.",
     "readonly": "O banco de dados é de apenas leitura. Os fluxos de trabalho podem ser inspecionados, mas não podem ser alterados.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Regras",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Pesquisar nome ou descrição...",
     "threshold": "Apenas acima de uma taxa",
     "threshold_count": "Solicitações",

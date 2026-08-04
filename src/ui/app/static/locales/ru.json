@@ -2400,15 +2400,14 @@
     "all": "Все",
     "attach": "Прикрепить к сервисам",
     "attach_help": "Правила применяются только к тем сервисам, к которым прикреплен рабочий процесс.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Клонировать рабочий процесс",
     "clone_help": "Правила копируются, а прикрепления к сервисам — нет.",
     "clone_name": "Название копии",
-    "conditions": "Условия",
     "delete": "Удалить рабочий процесс",
     "delete_confirm": "Этот рабочий процесс и все его правила будут навсегда удалены.",
     "empty_text": "Рабочий процесс — это упорядоченный список правил, которые вы прикрепляете к сервисам: дерево условий, необязательный порог скорости и одно действие — запрос, блокировка или перенаправление.",
     "empty_title": "Рабочих процессов пока нет",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Новый рабочий процесс",
     "no_rules": "Правила пока нет. Добавьте одно, чтобы начать создавать эту политику.",
     "not_attached": "Не прикреплено",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Правила оцениваются в порядке, и первое, которое совпадает, выигрывает. Правило с порогом скорости срабатывает только после превышения порога, поэтому более низкое правило может перехватывать трафик ниже него.",
     "readonly": "База данных только для чтения. Рабочие процессы можно просматривать, но не изменять.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Правила",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Поиск по имени или описанию...",
     "threshold": "Только при превышении скорости",
     "threshold_count": "Запросы",

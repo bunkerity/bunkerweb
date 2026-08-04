@@ -209,7 +209,7 @@
                 </table>
             </div>
         {% else %}
-            {{ empty_state(title="No upstreams yet", title_key="upstreams.empty_title", text="An upstream is a named pool of backends you attach to one or more services at a reverse proxy path. Inline REVERSE_PROXY_HOST settings keep working alongside it.", text_key="upstreams.empty_text", icon="bx-server") }}
+            {{ empty_state(title="No upstreams yet", title_key="upstreams.empty_title", message="An upstream is a named pool of backends you attach to one or more services at a reverse proxy path. Inline REVERSE_PROXY_HOST settings keep working alongside it.", message_key="upstreams.empty_text", icon="bx-server") }}
         {% endif %}
     {% endcall %}
 

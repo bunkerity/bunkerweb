@@ -12,6 +12,7 @@ local ngx = ngx
 local ERR = ngx.ERR
 local re_find = ngx.re.find
 local open = io.open
+local sort = table.sort
 local sub = string.sub
 local tonumber = tonumber
 local decode = cjson.decode
@@ -224,8 +225,19 @@ function workflows:init()
 	local state = new_state(self.logger, budget)
 	local groups = artefact.groups or {}
 
+	-- Compiled in sorted id order, never in pairs() order. The regex budget above is spent as
+	-- this loop walks, so an unspecified order means two instances loading a byte-identical
+	-- artefact can exhaust it against different rules and end up with a different set degraded
+	-- to UNKNOWN — and a rule that can never match is a security control that is silently off.
+	local workflow_ids = {}
+	for workflow_id in pairs(artefact.workflows or {}) do
+		workflow_ids[#workflow_ids + 1] = workflow_id
+	end
+	sort(workflow_ids)
+
 	local count = 0
-	for workflow_id, workflow in pairs(artefact.workflows or {}) do
+	for _, workflow_id in ipairs(workflow_ids) do
+		local workflow = artefact.workflows[workflow_id]
 		local rules = {}
 		for index, rule in ipairs(workflow.rules or {}) do
 			rules[index] = {

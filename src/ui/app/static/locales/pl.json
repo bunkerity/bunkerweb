@@ -2400,15 +2400,14 @@
     "all": "Wszystkie",
     "attach": "Dołącz do usług",
     "attach_help": "Reguły są egzekwowane tylko w usługach, do których przypisany jest przepływ pracy.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "Klonuj przepływ pracy",
     "clone_help": "Reguły są kopiowane, a przyłącza do usług nie.",
     "clone_name": "Nazwa klonu",
-    "conditions": "Warunki",
     "delete": "Usuń przepływ pracy",
     "delete_confirm": "Ten przepływ pracy i wszystkie jego reguły zostaną trwale usunięte.",
     "empty_text": "Przepływ pracy to uporządkowana lista reguł, które przypisujesz do usług: drzewo warunków, opcjonalny próg, oraz jedna akcja — wyzwanie, blokada lub przekierowanie.",
     "empty_title": "Brak przepływów pracy",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Nowy przepływ pracy",
     "no_rules": "Brak reguły. Dodaj jedną, aby rozpocząć tworzenie tej polityki.",
     "not_attached": "Nie przypisane",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Reguły są oceniane w kolejności i pierwsza, która pasuje, wygrywa. Reguła z progiem nie pasuje, dopóki próg nie zostanie przekroczony, więc niższa reguła może przechwycić ruch poniżej niej.",
     "readonly": "Baza danych jest tylko do odczytu. Przepływy pracy można przeglądać, ale nie można ich modyfikować.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Reguły",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Wyszukaj nazwę lub opis...",
     "threshold": "Tylko powyżej progu",
     "threshold_count": "Żądania",

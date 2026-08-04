@@ -2400,15 +2400,14 @@
     "all": "सभी",
     "attach": "सेवाओं से जोड़ें",
     "attach_help": "नियम केवल उन सेवाओं पर लागू होते हैं जिनसे वर्कफ़्लो जुड़ा हुआ है।",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "वर्कफ़्लो की प्रतिलिपि बनाएँ",
     "clone_help": "नियम कॉपी किए जाते हैं, लेकिन सेवा के अटैचमेंट नहीं।",
     "clone_name": "प्रतिलिपि का नाम",
-    "conditions": "शर्तें",
     "delete": "वर्कफ़्लो हटाएं",
     "delete_confirm": "यह वर्कफ़्लो और उसके सभी नियम स्थायी रूप से हटा दिए जाएंगे।",
     "empty_text": "एक वर्कफ़्लो सेवाओं से जुड़े नियमों की एक क्रमबद्ध सूची है: एक शर्त ट्री, एक वैकल्पिक दर सीमा, और एक क्रिया - चुनौती, ब्लॉक या पुनर्निर्देश।",
     "empty_title": "अभी कोई वर्कफ़्लो नहीं",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "नया वर्कफ़्लो",
     "no_rules": "अभी कोई नियम नहीं। इस नीति को बनाने के लिए एक जोड़ें।",
     "not_attached": "जोड़ा नहीं गया",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "नियमों का मूल्यांकन क्रम में किया जाता है और पहला जो मेल खाता है, वह जीत जाता है। एक दर सीमा वाले नियम केवल तभी मेल खाते हैं जब सीमा पार हो जाती है, इसलिए एक निचला नियम नीचे की ट्रैफ़िक को पकड़ सकता है।",
     "readonly": "डेटाबेस केवल पढ़ने के लिए है। वर्कफ़्लो देखे जा सकते हैं लेकिन नहीं बदले जा सकते।",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "नियम",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "नाम या विवरण खोजें...",
     "threshold": "केवल एक दर से ऊपर",
     "threshold_count": "अनुरोध",

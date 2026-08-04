@@ -181,6 +181,8 @@ def test_the_editor_page_is_reachable_from_the_menu_and_the_locale():
     locale = json.loads((ROOT / "src" / "ui" / "app" / "static" / "locales" / "en.json").read_text(encoding="utf-8"))
     assert locale["navigation"]["workflows"] == "Workflows"
     # The editor's inline errors are rendered from the API's messages, but the static labels
-    # around them are translated like every other page.
-    for key in ("conditions", "action", "threshold", "order_help", "no_rules"):
+    # around them are translated like every other page. "conditions" was one of them until the
+    # rule-ladder rework deleted the <template> that carried it, so "add_rule" stands in: a
+    # label the page still emits, which is the only kind worth asserting on.
+    for key in ("add_rule", "action", "threshold", "order_help", "no_rules"):
         assert key in locale["workflows"]

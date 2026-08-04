@@ -26,6 +26,19 @@
 
     {{ alert(message="Rules are evaluated in order and the first one that matches wins. A rule with a rate threshold only matches once the threshold is exceeded, so a lower rule can catch the traffic below it.", message_key="workflows.order_help", variant="info", icon="bx-info-circle", classes="mb-4") }}
 
+    {# Blast radius. Saving pushes to every attached service, and the editor said nothing about
+       how many that was. The unattached case is the one that matters most: it tells an operator
+       that the ladder they are carefully building is currently enforced nowhere. #}
+    {% if workflow.services %}
+        {% call alert(variant="secondary", icon="bx-broadcast", classes="mb-4") %}
+            <span data-i18n="workflows.attached_notice"
+                  data-i18n-options='{{ {"count": workflow.services | length} | tojson }}'>Saving applies these rules to {{ workflow.services | length }} attached service(s).</span>
+            <span class="d-block small text-muted">{{ workflow.services | join(", ") }}</span>
+        {% endcall %}
+    {% else %}
+        {{ alert(message="This workflow is not attached to any service, so these rules are not enforced anywhere yet.", message_key="workflows.not_attached_notice", variant="warning", icon="bx-unlink", classes="mb-4") }}
+    {% endif %}
+
     {# Validation summary. Every entry jumps to the node its path addresses. #}
     <div id="wf-validation" class="mb-4"></div>
 

@@ -442,3 +442,80 @@ def test_a_service_cannot_be_pushed_past_the_aggregate_rule_budget(db):
     assert "active workflow rules" in error and str(MAX_ACTIVE_RULES_PER_SERVICE) in error
     with session(db) as s:
         assert s.query(ResourceAttachments).filter_by(resource_id=extra).count() == 0
+
+
+def test_a_draft_service_counts_towards_its_own_budget(db):
+    """Its baseline was 0 until publication — then the fail-closed compiler aborted the push for
+    the whole deployment, over a service nobody had touched since.
+
+    Draft attachments are invisible to the compiler on purpose, but they all reach it at once
+    the moment the service is published, so the budget has to count them from the start.
+    """
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    add_service(db, "draft.example.com", is_draft=True)
+    for index in range(MAX_ACTIVE_RULES_PER_SERVICE // MAX_RULES_PER_WORKFLOW):
+        resource_id = _create(db, name=f"draft-bulk-{index}")
+        rules = [_rule(f"{resource_id}-{number}") for number in range(MAX_RULES_PER_WORKFLOW)]
+        assert db.save_workflow_definition(resource_id, _definition(*rules))[0] == ""
+        assert db.attach_workflow(resource_id, "draft.example.com") == ""
+
+    extra = _create(db, name="draft-one-too-many")
+    assert db.save_workflow_definition(extra, _definition(_rule()))[0] == ""
+    error = db.attach_workflow(extra, "draft.example.com")
+    assert "active workflow rules" in error and str(MAX_ACTIVE_RULES_PER_SERVICE) in error
+    with session(db) as s:
+        assert s.query(ResourceAttachments).filter_by(resource_id=extra).count() == 0
+
+    # The compiler's view is unchanged: drafts stay out of it.
+    assert "draft.example.com" not in db.get_service_workflows()
+
+
+def test_a_published_service_budget_is_unaffected_by_drafts(db):
+    """The baseline is a per-service bucket, so counting drafts cannot leak into a live service."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    add_service(db, "draft.example.com", is_draft=True)
+    bulky = _create(db, name="bulky")
+    rules = [_rule(f"r-{number}") for number in range(MAX_RULES_PER_WORKFLOW)]
+    assert db.save_workflow_definition(bulky, _definition(*rules))[0] == ""
+    assert db.attach_workflow(bulky, "draft.example.com") == ""
+
+    other = _create(db, name="on-the-live-one")
+    assert db.save_workflow_definition(other, _definition(_rule()))[0] == ""
+    assert db.attach_workflow(other, "app1.example.com") == ""
+
+
+def test_validate_refuses_what_save_would_refuse(db):
+    """The editor validates on every change; a check only save runs is a 400 nobody saw coming."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    _seed_antibot_settings(db, sitekey="", secret="")
+    resource_id = _create(db)
+    assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+    canonical, errors = db.validate_workflow_definition(_definition(_challenge_rule()), resource_id=resource_id)
+    assert canonical is not None
+    assert errors and errors[0]["code"] == "provider_missing" and errors[0]["path"] == "rules"
+
+    # The same triplet on the way out of save, so the editor anchors both the same way.
+    error, field_errors = db.save_workflow_definition(resource_id, _definition(_challenge_rule()))
+    assert error == errors[0]["message"]
+    assert field_errors == errors
+
+
+def test_a_budget_refusal_is_anchored_for_the_editor(db):
+    """Budget errors used to come back with an empty errors array, so nothing could point at them."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    for index in range(MAX_ACTIVE_RULES_PER_SERVICE // MAX_RULES_PER_WORKFLOW):
+        resource_id = _create(db, name=f"bulk-{index}")
+        rules = [_rule(f"{resource_id}-{number}") for number in range(MAX_RULES_PER_WORKFLOW)]
+        assert db.save_workflow_definition(resource_id, _definition(*rules))[0] == ""
+        assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+    extra = _create(db, name="anchored")
+    assert db.attach_workflow(extra, "app1.example.com") == ""
+    error, field_errors = db.save_workflow_definition(extra, _definition(_rule()))
+    assert "active workflow rules" in error
+    assert field_errors == [{"path": "rules", "code": "budget_exceeded", "message": error}]

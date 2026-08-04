@@ -2400,15 +2400,14 @@
     "all": "Tümü",
     "attach": "Hizmetlere ekle",
     "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "İş akışını kopyala",
     "clone_help": "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz.",
     "clone_name": "Kopyanın adı",
-    "conditions": "Koşullar",
     "delete": "İş akışını sil",
     "delete_confirm": "Bu iş akışı ve tüm kuralları kalıcı olarak silinir.",
     "empty_text": "Bir iş akışı, hizmetlere eklediğiniz kuralların sıralı bir listesidir: bir koşul ağacı, isteğe bağlı bir hız eşiği ve bir eylem — meydan okuma, engelle veya yönlendirme.",
     "empty_title": "Henüz hiç iş akışı yok",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "Yeni iş akışı",
     "no_rules": "Henüz hiç kural yok. Bu politikayı oluşturmaya başlamak için bir tane ekleyin.",
     "not_attached": "Eklendi değil",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir.",
     "readonly": "Veritabanı okumak için yalnızcadır. İş akışları incelenebilir, ancak değiştirilemez.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "Kurallar",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "Ad veya açıklama arayın...",
     "threshold": "Sadece bir hızın üzerinde",
     "threshold_count": "İstekler",

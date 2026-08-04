@@ -151,6 +151,38 @@
     );
   }
 
+  /* Same helper five other pages already carry (groups.js, upstreams.js, redirects.js,
+     certificates.js, service-resources.js). escapeValue is off because every value that ends
+     up in markup has already been through esc() — letting i18next escape it again yields
+     &amp;lt; in a rule name. */
+  function translate(key, fallback, options) {
+    if (typeof i18next === "undefined" || !i18next.isInitialized)
+      return fallback;
+    var settings = {
+      defaultValue: fallback,
+      interpolation: { escapeValue: false },
+    };
+    for (var name in options || {}) {
+      if (Object.prototype.hasOwnProperty.call(options, name))
+        settings[name] = options[name];
+    }
+    return i18next.t(key, settings);
+  }
+
+  /* The ladder is rebuilt from scratch on every mutation, so the global pass that i18n.js
+     runs once at init is undone the moment anything changes. Without re-running it here
+     every data-i18n this file emits renders its English fallback, in all 17 locales. */
+  function runTranslations() {
+    if (
+      typeof window !== "undefined" &&
+      typeof window.applyTranslations === "function"
+    ) {
+      window.applyTranslations();
+    } else if (typeof applyTranslations === "function") {
+      applyTranslations();
+    }
+  }
+
   function say(message) {
     if (liveEl) liveEl.textContent = message;
   }
@@ -234,6 +266,20 @@
     };
   }
 
+  /* The serialised form as the server last confirmed it. Compared against serialize() rather
+     than tracked with a flag so that undoing an edit by hand really does leave the page clean.
+     Seeded AFTER fromSchemaRule normalisation — the NOT rewrite and the injected
+     threshold.key would otherwise make an untouched page look dirty the moment it loads. */
+  var savedJson = null;
+
+  function markSaved() {
+    savedJson = JSON.stringify(serialize());
+  }
+
+  function isDirty() {
+    return savedJson !== null && JSON.stringify(serialize()) !== savedJson;
+  }
+
   function isGroup(node) {
     return node.op === "all" || node.op === "any" || node.op === "not";
   }
@@ -242,7 +288,11 @@
      serialiser is the one thing here that, if it drifts from workflow_schema.py, makes every
      save fail. tests/unit/ui/test_workflow_editor_roundtrip.py runs it through the real
      validator. PRO bundles reuse it to seed rules. */
-  window.BW_WORKFLOW_MODEL = { fromSchema: fromSchema, toSchema: toSchema };
+  window.BW_WORKFLOW_MODEL = {
+    fromSchema: fromSchema,
+    toSchema: toSchema,
+    convertLeaf: convertLeaf,
+  };
 
   /* Walks the whole ladder for one node key and returns it with its parent, so a mutation
      never has to parse a path back into a tree. */
@@ -295,6 +345,23 @@
     if (op === "group")
       return key({ op: "group", kind: "ip", group_id: firstGroupFor("ip") });
     return key({ op: op, values: [] });
+  }
+
+  /* Switching a predicate's type used to replace the node outright, so picking "ASN" on a
+     leaf holding forty typed addresses dropped all forty with no warning and no undo.
+     ip/country/asn/method are all plain value lists, so the list survives the switch; what no
+     longer belongs is flagged by the validator within 400ms — shown, not silently deleted.
+     uri and group are deliberately not bridged: one holds a single string, the other a group
+     reference, and carrying either across produces junk that is invalid on arrival. */
+  function convertLeaf(node, op) {
+    var next = newLeaf(op);
+    if (next.values && node && node.values && node.values.length)
+      next.values = node.values.slice();
+    return next;
+  }
+
+  function carriesValues(node, op) {
+    return !!(node && node.values && node.values.length && newLeaf(op).values);
   }
 
   function newRule() {
@@ -821,7 +888,13 @@
           '<i class="bx ' +
           meta.icon +
           '" aria-hidden="true"></i>' +
-          `<span><b data-i18n="workflows.act_${esc(spec.type)}">` +
+          "<span><b" +
+          // Only the built-in actions have a key. Emitting one for a PRO-registered type
+          // would make i18next replace the label with the literal "workflows.act_<type>".
+          (ACTION_META[spec.type]
+            ? ` data-i18n="workflows.act_${esc(spec.type)}"`
+            : "") +
+          ">" +
           esc(spec.label) +
           "</b>" +
           "<span>" +
@@ -864,7 +937,11 @@
       '<i class="bx ' +
       meta.icon +
       '" aria-hidden="true"></i>' +
-      `<span data-i18n="workflows.act_${esc(rule.action.type)}">` +
+      "<span" +
+      (ACTION_META[rule.action.type]
+        ? ` data-i18n="workflows.act_${esc(rule.action.type)}"`
+        : "") +
+      ">" +
       esc(rule.action.type) +
       "</span>" +
       '<span class="p">' +
@@ -1135,6 +1212,7 @@
     capEl.innerHTML = capHtml();
     var addButton = document.getElementById("wf-add-rule");
     if (addButton && !STATE.readonly) addButton.disabled = count >= MAX_RULES;
+    runTranslations();
     if (focusSelector) {
       var target = document.querySelector(focusSelector);
       if (target) target.focus({ preventScroll: true });
@@ -1217,11 +1295,17 @@
       );
       if (!host) return;
       var summary = STATE.summaries[rule.id];
-      host.textContent = summary || "Not validated yet";
+      // Server summaries are English by design (workflow_schema.summarize_rule); only the
+      // placeholder shown before the first validation is ours to translate.
+      host.textContent =
+        summary || translate("workflows.not_validated", "Not validated yet");
       host.classList.toggle("is-pending", !summary);
     });
 
     panelEl.innerHTML = panelHtml();
+    // paint() writes its own markup too — the error panel and every inline message — so the
+    // translation pass has to cover it, not just render().
+    runTranslations();
   }
 
   /* An error path addresses a schema node; the closest rendered ancestor owns the message
@@ -1430,9 +1514,12 @@
       '<button type="button" role="menuitem" data-wf-act="toggle"><i class="bx ' +
       (rule.enabled ? "bx-pause-circle" : "bx-play-circle") +
       '" aria-hidden="true"></i>' +
-      '<span data-i18n="workflows.menu.toggle">' +
-      (rule.enabled ? "Disable rule" : "Enable rule") +
-      "</span></button>" +
+      // One key for a two-state label would translate a disabled rule's item as "Disable
+      // rule". Pick the key, not just the fallback text.
+      (rule.enabled
+        ? '<span data-i18n="workflows.menu.disable">Disable rule</span>'
+        : '<span data-i18n="workflows.menu.enable">Enable rule</span>') +
+      "</button>" +
       '<button type="button" role="menuitem" data-wf-act="duplicate"' +
       (STATE.rules.length >= MAX_RULES ? " disabled" : "") +
       ">" +
@@ -1614,7 +1701,20 @@
     })
       .then(function (body) {
         if (body.status === "success") {
-          window.location.reload();
+          /* No reload. It only existed to surface a server flash, which an XHR endpoint
+             should not be setting anyway — and it cost the operator their scroll position
+             and every rule's open/closed state on every save. The API re-validates on save,
+             so "success" means the client state IS the stored state. */
+          markSaved();
+          panelEl.innerHTML = "";
+          button.disabled = false;
+          say(
+            translate(
+              "workflows.say.saved",
+              "Rules saved and pushed to the attached services.",
+            ),
+          );
+          validate();
           return;
         }
         panelEl.innerHTML =
@@ -1777,11 +1877,23 @@
         if (!actionRule || actionRule.action.type === action.dataset.wfAction)
           return;
         var type = action.dataset.wfAction;
+        /* Remember what was typed for the action being left, and restore whatever was typed
+           for the one being picked, so redirect -> challenge -> redirect gives the URL back
+           instead of an empty box. Stashed on the RULE, not the action: serialize() spreads
+           rule.action onto the wire, and toSchemaRule/fromSchemaRule (which Duplicate goes
+           through) copy the action too — either would carry this bookkeeping into the API. */
+        actionRule._params = actionRule._params || {};
+        actionRule._params[actionRule.action.type] = actionRule.action;
+        var kept = actionRule._params[type] || {};
         actionRule.action =
           type === "redirect"
-            ? { type: "redirect", url: "", status: 302 }
+            ? {
+                type: "redirect",
+                url: kept.url || "",
+                status: kept.status || 302,
+              }
             : type === "challenge"
-              ? { type: "challenge", provider: "javascript" }
+              ? { type: "challenge", provider: kept.provider || "javascript" }
               : { type: "block" };
         touch();
         say(
@@ -1847,9 +1959,21 @@
       if (target.classList.contains("bw-flow-pred-type-select")) {
         var typeHit = locate(target.closest("[data-wf-key]").dataset.wfKey);
         if (typeHit && typeHit.parent) {
-          var replacement = newLeaf(target.value);
-          typeHit.parent.nodes[typeHit.index] = replacement;
+          var had = (typeHit.node.values || []).length;
+          var kept = carriesValues(typeHit.node, target.value);
+          typeHit.parent.nodes[typeHit.index] = convertLeaf(
+            typeHit.node,
+            target.value,
+          );
           touch();
+          if (had && !kept)
+            say(
+              translate(
+                "workflows.say.valuesDropped",
+                "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+                { type: target.value, count: had },
+              ),
+            );
         }
         return;
       }
@@ -2166,6 +2290,17 @@
       definition = { rules: [] };
     }
     STATE.rules = (definition.rules || []).map(fromSchemaRule);
+    markSaved();
+
+    /* A ladder is a lot of work to lose to a stray click on the breadcrumb. Readonly pages
+       can never be dirty, so they never prompt. */
+    window.addEventListener("beforeunload", function (event) {
+      if (STATE.readonly || !isDirty()) return;
+      event.preventDefault();
+      // Browsers show their own wording; a non-empty returnValue is what triggers the prompt.
+      event.returnValue = "";
+      return "";
+    });
 
     render();
     wireLadder(ladderEl);
@@ -2188,6 +2323,18 @@
     }
     var saveButton = document.getElementById("wf-save");
     if (saveButton) saveButton.addEventListener("click", save);
+
+    /* This file is deferred, so it can render before i18next has fetched its catalogue, and
+       a later language change does not rebuild the ladder on its own. Both events therefore
+       have to repaint, or the editor stays in whatever language it first drew. */
+    if (window.i18next && typeof i18next.on === "function") {
+      var refresh = function () {
+        render();
+        paint();
+      };
+      i18next.on("initialized", refresh);
+      i18next.on("languageChanged", refresh);
+    }
 
     if (STATE.rules.length) validate();
   });

@@ -993,3 +993,54 @@ def test_every_t_call_key_in_reports_js_resolves_in_en_json():
     missing = sorted({(source, key) for source, key in occurrences if not _resolves_in_locale(locale, key)})
 
     assert not missing, "t(...) keys missing from en.json (file: key):\n" + "\n".join(f"{source}: {key}" for source, key in missing)
+
+
+def test_every_empty_state_call_matches_the_macro_signature():
+    """A misnamed kwarg only raises when the empty branch renders — the first-run path no page
+    test exercises and every fresh install takes.
+
+    Three list pages shipped ``text=``/``text_key=`` against a macro that declares
+    ``message=``/``message_key=``, so /workflows, /redirects and /upstreams each answered 500
+    until someone created their first row.
+    """
+    env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
+    accepted = set(env.get_template("components/empty-state.html").module.empty_state.arguments)
+
+    wrong = []
+    for path in sorted(TEMPLATES.rglob("*.html")):
+        # Anchored on "{{" so the {% macro %} definition itself is not scanned.
+        for call in re.findall(r"{{-?\s*empty_state\((.*?)\)\s*-?}}", path.read_text(encoding="utf-8"), re.DOTALL):
+            unknown = [kwarg for kwarg in re.findall(r"(\w+)\s*=", call) if kwarg not in accepted]
+            if unknown:
+                wrong.append(f"{path.relative_to(TEMPLATES)}: {', '.join(unknown)}")
+
+    assert not wrong, "empty_state() called with kwargs the macro does not accept:\n" + "\n".join(wrong)
+
+
+def test_the_workflow_editor_dynamic_i18n_keys_resolve():
+    """The ladder builds some keys from data, so the static scan above cannot see them.
+
+    An unresolved key does not fail quietly: i18next renders the key itself, so the button
+    that should read "Challenge" reads "workflows.act_challenge". That is how a PRO-registered
+    action type used to render, and the only reason nobody saw it is that the editor was not
+    calling applyTranslations() at all.
+    """
+    locale = json.loads((STATIC / "locales" / "en.json").read_text(encoding="utf-8"))
+    editor = (STATIC / "js" / "pages" / "workflow_editor.js").read_text(encoding="utf-8")
+
+    # Combinators: the group pill and the operator menu both key off node.op.
+    for op in ("all", "any", "not"):
+        assert _resolves_in_locale(locale, f"workflows.tree.{op}"), op
+
+    # Terminal actions. The emission is gated on ACTION_META so a PRO type stays unkeyed —
+    # keep the two in step, or the gate silently stops covering a built-in.
+    action_meta = re.search(r"var ACTION_META = \{(.*?)\n  \};", editor, re.DOTALL)
+    assert action_meta, "ACTION_META table not found — the gate below cannot be checked"
+    for action in re.findall(r"(\w+):\s*\{", action_meta.group(1)):
+        assert _resolves_in_locale(locale, f"workflows.act_{action}"), action
+
+    assert 'ACTION_META[spec.type]' in editor, "the PRO-action label gate went missing"
+
+    # Terminals pass their key in as a parameter.
+    for key in ("workflows.entry_title", "workflows.entry_sub", "workflows.exit_title", "workflows.exit_sub"):
+        assert _resolves_in_locale(locale, key), key

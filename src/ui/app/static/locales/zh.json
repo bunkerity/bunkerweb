@@ -2400,15 +2400,14 @@
     "all": "全部",
     "attach": "附加到服务",
     "attach_help": "规则仅在工作流程附加到的服务上执行。",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "克隆工作流程",
     "clone_help": "规则会被复制，但服务附加不会被复制。",
     "clone_name": "副本名称",
-    "conditions": "条件",
     "delete": "删除工作流程",
     "delete_confirm": "此工作流程及其所有规则将被永久删除。",
     "empty_text": "工作流程是一个规则的有序列表，您将其附加到服务上：一个条件树、可选的速率阈值和一个动作——挑战、阻止或重定向。",
     "empty_title": "目前没有工作流程",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "新建工作流程",
     "no_rules": "目前没有规则。添加一个以开始构建此策略。",
     "not_attached": "未附加",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "规则按顺序评估，第一个匹配的规则获胜。具有速率阈值的规则只有在阈值超过时才会匹配，因此较低的规则可以捕获低于它的流量。",
     "readonly": "数据库是只读的。可以查看工作流程，但不能修改。",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "规则",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "搜索名称或描述...",
     "threshold": "仅高于速率",
     "threshold_count": "请求",

@@ -106,7 +106,7 @@
                 </table>
             </div>
         {% else %}
-            {{ empty_state(title="No workflows yet", title_key="workflows.empty_title", text="A workflow is an ordered list of rules you attach to services: a condition tree, an optional rate threshold, and one action — challenge, block or redirect.", text_key="workflows.empty_text", icon="bx-sitemap") }}
+            {{ empty_state(title="No workflows yet", title_key="workflows.empty_title", message="A workflow is an ordered list of rules you attach to services: a condition tree, an optional rate threshold, and one action — challenge, block or redirect.", message_key="workflows.empty_text", icon="bx-sitemap") }}
         {% endif %}
     {% endcall %}
 

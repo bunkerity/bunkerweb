@@ -158,7 +158,7 @@ def test_saving_an_invalid_definition_returns_the_anchored_errors(monkeypatch):
 def test_validate_reports_invalid_without_failing_the_request(monkeypatch):
     db = Mock()
     errors = [{"path": "rules[0].condition", "code": "group_missing", "message": "Resource group ghost does not exist"}]
-    db.validate_workflow_definition.return_value = (None, errors, "")
+    db.validate_workflow_definition.return_value = (None, errors)
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     response = ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition={"schema_version": 1, "rules": []}))
@@ -171,7 +171,7 @@ def test_validate_reports_invalid_without_failing_the_request(monkeypatch):
 
 def test_validate_returns_a_summary_per_rule(monkeypatch):
     db = Mock()
-    db.validate_workflow_definition.return_value = ({"schema_version": 1, "rules": [_rule()]}, [], "")
+    db.validate_workflow_definition.return_value = ({"schema_version": 1, "rules": [_rule()]}, [])
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     response = ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition={"schema_version": 1, "rules": [_rule()]}))
@@ -183,13 +183,30 @@ def test_validate_returns_a_summary_per_rule(monkeypatch):
 
 def test_a_budget_overflow_is_reported_as_a_field_error(monkeypatch):
     db = Mock()
-    db.validate_workflow_definition.return_value = ({"schema_version": 1, "rules": []}, [], "Service a.example.com would hold 101 active workflow rules")
+    # The db layer emits the anchored triplet now, so the router no longer builds one by hand.
+    errors = [{"path": "rules", "code": "budget_exceeded", "message": "Service a.example.com would hold 101 active workflow rules"}]
+    db.validate_workflow_definition.return_value = ({"schema_version": 1, "rules": []}, errors)
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     response = ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition={"schema_version": 1, "rules": []}, service_ids=["a.example.com"]))
 
     body = _json(response)
-    assert body["valid"] is False and body["errors"][0]["code"] == "budget_exceeded"
+    assert body["valid"] is False and body["errors"] == errors
+
+
+def test_a_missing_challenge_credential_fails_validation_not_just_the_save(monkeypatch):
+    """Validate ran fewer checks than save, so the editor said valid and Save answered 400."""
+    db = Mock()
+    message = "Service a.example.com cannot serve a hcaptcha challenge: ANTIBOT_HCAPTCHA_SITEKEY is not configured"
+    errors = [{"path": "rules", "code": "provider_missing", "message": message}]
+    db.validate_workflow_definition.return_value = ({"schema_version": 1, "rules": []}, errors)
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition={"schema_version": 1, "rules": []}, service_ids=["a.example.com"]))
+
+    assert response.status_code == 200
+    body = _json(response)
+    assert body["valid"] is False and body["errors"] == errors
 
 
 def test_missing_workflow_is_a_404(monkeypatch):

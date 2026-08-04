@@ -25,6 +25,9 @@ router = APIRouter(tags=["workflows"])
 
 
 def _error(message: str, default: int = 400, field_errors=None) -> JSONResponse:
+    # The status is inferred from the message text, which only holds because every message
+    # db_methods/workflows.py returns is an English literal built there. Translating those
+    # would silently change these status codes: translate in the UI, never in the mixin.
     if "not found" in message.lower():
         default = 404
     elif "read-only" in message.lower():
@@ -58,15 +61,11 @@ def validate_workflow(payload: WorkflowValidateRequest) -> JSONResponse:
     Writes nothing, so it is a read permission. Returns the canonical form the save would
     store plus a human summary per rule, which is what the editor shows before saving.
     """
-    canonical, errors, budget_error = get_db().validate_workflow_definition(
-        payload.definition, resource_id=payload.workflow_id, service_ids=payload.service_ids
-    )
-    if canonical is None:
+    canonical, errors = get_db().validate_workflow_definition(payload.definition, resource_id=payload.workflow_id, service_ids=payload.service_ids)
+    if canonical is None or errors:
+        # Budget and provider refusals arrive here as anchored triplets too, so what the editor
+        # reports as valid is exactly what the save accepts.
         return JSONResponse(status_code=200, content={"status": "success", "valid": False, "errors": errors})
-    if budget_error:
-        return JSONResponse(
-            status_code=200, content={"status": "success", "valid": False, "errors": [{"path": "rules", "code": "budget_exceeded", "message": budget_error}]}
-        )
     return JSONResponse(
         status_code=200,
         content={

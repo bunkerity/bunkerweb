@@ -2400,15 +2400,14 @@
     "all": "전체",
     "attach": "서비스에 연결",
     "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
+    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
     "clone": "워크플로우 복제",
     "clone_help": "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다.",
     "clone_name": "복제 이름",
-    "conditions": "조건",
     "delete": "워크플로우 삭제",
     "delete_confirm": "이 워크플로우와 모든 규칙이 영구적으로 삭제됩니다.",
     "empty_text": "워크플로우는 서비스에 연결한 규칙의 순서대로 정렬된 목록입니다: 조건 트리, 선택적 속도 임계값, 그리고 하나의 동작 — 도전, 차단 또는 리디렉션.",
     "empty_title": "워크플로우는 아직 없습니다",
-    "enabled": "Enabled",
     "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
     "entry_title": "Every request to an attached service",
     "errors": {
@@ -2433,8 +2432,9 @@
     "menu": {
       "bottom": "Run last",
       "delete": "Delete rule",
+      "disable": "Disable rule",
       "duplicate": "Duplicate below",
-      "toggle": "Disable rule",
+      "enable": "Enable rule",
       "top": "Run first"
     },
     "move": {
@@ -2444,6 +2444,8 @@
     "new": "새 워크플로우",
     "no_rules": "규칙은 아직 없습니다. 이 정책을 만들기 시작하려면 하나를 추가하세요.",
     "not_attached": "연결되지 않음",
+    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
+    "not_validated": "Not validated yet",
     "order_help": "규칙은 순서대로 평가되며, 일치하는 첫 번째 규칙이 승리합니다. 속도 임계값을 가진 규칙은 임계값이 초과될 때만 일치하므로, 낮은 규칙은 그 아래의 트래픽을 포착할 수 있습니다.",
     "readonly": "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다.",
     "rule": {
@@ -2454,6 +2456,10 @@
       "stopTail": ", evaluation stops here — no rule below is reached."
     },
     "rules": "규칙",
+    "say": {
+      "saved": "Rules saved and pushed to the attached services.",
+      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over."
+    },
     "search": "이름 또는 설명을 검색하세요...",
     "threshold": "속도 기준 이상",
     "threshold_count": "요청",
