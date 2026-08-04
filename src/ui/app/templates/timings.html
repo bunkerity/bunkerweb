@@ -1,0 +1,85 @@
+{% extends "dashboard.html" %}
+{% from "components/alert.html" import alert %}
+{% from "components/card.html" import card %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/page-head.html" import page_head %}
+{% from "components/tile.html" import tile %}
+
+{# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
+   legacy breadcrumb row for this page. #}
+{% block page_head %}{% endblock %}
+{% block content %}
+    {{ page_head(title="Timings", title_i18n="breadcrumb.timings",
+                 breadcrumb=[("Operate", "navigation.operate", none),
+                             ("Timings", "breadcrumb.timings", none)]) }}
+    <p class="text-muted mb-4" data-i18n="timings.subtitle">How long each plugin takes in each request phase, read live from every instance and merged.</p>
+
+    {# Not persisted: what is on screen is what the instances hold right now, and it resets
+       with them. Saying so up front stops the page being read as a history. #}
+    {{ alert(message="Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.", message_key="timings.volatile", variant="info", icon="bx-info-circle", classes="mb-4") }}
+
+    {% if partial %}
+        {{ alert(message="Some instances did not answer. The figures below cover the ones that did.", message_key="timings.partial", variant="warning", icon="bx-error", classes="mb-4") }}
+    {% endif %}
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+        <div class="col">
+            {{ tile(title="Reporting instances", value=reporting_count ~ "/" ~ total_instances, title_i18n="timings.reporting_instances", color="", icon="bx-server", icon_color="text-primary") }}
+        </div>
+        <div class="col">
+            {{ tile(title="Requests measured", value=request_total.count if request_total else "—", title_i18n="timings.requests_measured", color="", icon="bx-transfer", icon_color="text-primary") }}
+        </div>
+        <div class="col">
+            {{ tile(title="Mean request", value=duration(request_total.mean) if request_total else "—", title_i18n="timings.mean_request", color="", icon="bx-time-five", icon_color="text-primary") }}
+        </div>
+        <div class="col">
+            {{ tile(title="Slowest request", value=duration(request_total.max) if request_total else "—", title_i18n="timings.max_request", color="", icon="bx-trending-up", icon_color="text-primary") }}
+        </div>
+    </div>
+
+    {% call card(classes="table-responsive p-4", title="Plugin phases", title_key="timings.phases", icon="bx-stopwatch") %}
+        {% if rows %}
+            <p class="text-muted small" data-i18n="timings.share_help">Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.</p>
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" data-i18n="timings.plugin">Plugin</th>
+                        <th scope="col" data-i18n="timings.phase">Phase</th>
+                        <th scope="col" class="text-end" data-i18n="timings.calls">Calls</th>
+                        <th scope="col" class="text-end" data-i18n="timings.mean">Mean</th>
+                        <th scope="col" class="text-end" data-i18n="timings.max">Max</th>
+                        <th scope="col" class="text-end" data-i18n="timings.total">Total</th>
+                        <th scope="col" class="text-end" data-i18n="timings.share">Share</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td><code>{{ row.plugin }}</code></td>
+                            <td><small class="text-muted">{{ row.phase }}</small></td>
+                            <td class="text-end">{{ row.count }}</td>
+                            <td class="text-end">{{ duration(row.mean) }}</td>
+                            <td class="text-end">{{ duration(row.max) }}</td>
+                            <td class="text-end">{{ duration(row.total) }}</td>
+                            <td class="text-end">
+                                {% if row.share is none %}
+                                    <span class="text-muted">—</span>
+                                {% else %}
+                                    {{ "%.1f" | format(row.share) }}%
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% elif not collecting %}
+            {# The one empty state that is not "nothing happened yet": the feature is off, and
+               an operator should be told that rather than left to conclude the fleet is idle. #}
+            {{ empty_state(id="timings-disabled", title="Plugin timings are turned off", title_key="timings.disabled_title", message="Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.", message_key="timings.disabled_help", icon="bx-toggle-left") }}
+        {% elif unreachable %}
+            {{ empty_state(id="timings-unreachable", title="No instance reported timings", title_key="timings.unreachable_title", message="Timings are read from the instances themselves, so none of them answered — or none has served a request yet.", message_key="timings.unreachable_help", icon="bx-server") }}
+        {% else %}
+            {{ empty_state(id="timings-empty", title_key="status.no_data") }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

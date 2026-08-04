@@ -100,6 +100,7 @@
     "bans": "Bans",
     "cache": "Cache",
     "web_cache": "Web Cache",
+    "timings": "Timings",
     "configs": "Configs",
     "extra_pages": "Extra Pages",
     "global_config": "Global config",
@@ -1088,6 +1089,7 @@
     "cache": "Cache",
     "certificates": "Certificates",
     "web_cache": "Web Cache",
+    "timings": "Timings",
     "configs": "Configs",
     "extra_pages": "Extra Pages",
     "global_settings": "Global Settings",
@@ -2663,5 +2665,27 @@
       "title": "Attached resources",
       "unavailable": "Unavailable"
     }
+  },
+  "timings": {
+    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
+    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
+    "partial": "Some instances did not answer. The figures below cover the ones that did.",
+    "reporting_instances": "Reporting instances",
+    "requests_measured": "Requests measured",
+    "mean_request": "Mean request",
+    "max_request": "Slowest request",
+    "phases": "Plugin phases",
+    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
+    "plugin": "Plugin",
+    "phase": "Phase",
+    "calls": "Calls",
+    "mean": "Mean",
+    "max": "Max",
+    "total": "Total",
+    "share": "Share",
+    "disabled_title": "Plugin timings are turned off",
+    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
+    "unreachable_title": "No instance reported timings",
+    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
   }
 }

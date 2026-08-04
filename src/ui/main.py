@@ -67,6 +67,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.certificates import certificates
+from app.routes.timings import timings
 from app.routes.web_cache import web_cache
 from app.routes.configs import configs
 from app.routes.global_settings import global_settings
@@ -110,6 +111,7 @@ BLUEPRINTS = (
     upstreams,
     workflows,
     web_cache,
+    timings,
     logs,
     login,
     configs,

@@ -155,6 +155,56 @@ def test_range_picker_data_i18n_keys_resolve_in_en_json():
         assert _resolves_in_locale(locale, key), key
 
 
+def _route_view_functions():
+    """{blueprint name: {view function names}} for every module in app/routes/.
+
+    Read with ast rather than imported: the route modules pull in the whole UI dependency
+    chain (qrcode, flask_login, the API client), none of which this suite carries.
+    """
+    import ast
+
+    blueprints = {}
+    for path in sorted((TEMPLATES.parent / "routes").glob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        name, functions = None, set()
+        for statement in ast.walk(tree):
+            if (
+                isinstance(statement, ast.Call)
+                and isinstance(statement.func, ast.Name)
+                and statement.func.id == "Blueprint"
+                and statement.args
+                and isinstance(statement.args[0], ast.Constant)
+            ):
+                # The blueprint's registered name, which is what url_for uses -- not the
+                # variable it is bound to (templates.py binds "templates" to templates_bp).
+                name = statement.args[0].value
+            elif isinstance(statement, ast.FunctionDef):
+                functions.add(statement.name)
+        if name:
+            blueprints.setdefault(name, set()).update(functions)
+    return blueprints
+
+
+def test_every_menu_link_points_at_a_view_that_exists():
+    """main.py's custom_url_for swallows BuildError and returns "#", so a menu entry naming a
+    view that does not exist renders as a dead link on every page instead of raising."""
+    menu = (TEMPLATES / "menu.html").read_text(encoding="utf-8")
+    blueprints = _route_view_functions()
+    # Endpoints custom_url_for passes through untouched, none of them blueprint views.
+    passthrough = {"static", "index", "loading", "check", "check_reloading"}
+
+    broken = []
+    for endpoint in re.findall(r"url_for\(['\"]([\w.]+)['\"]", menu):
+        if endpoint in passthrough:
+            continue
+        # Same rewrite custom_url_for applies: a bare name means <name>.<name>_page.
+        blueprint, _, view = endpoint.rpartition(".") if endpoint.endswith("_page") else (endpoint, ".", f"{endpoint}_page")
+        if view not in blueprints.get(blueprint, ()):
+            broken.append(endpoint)
+
+    assert not broken, f"menu.html links to non-existent views: {broken}"
+
+
 def test_menu_active_match_does_not_overlap_web_cache_and_cache():
     source = (TEMPLATES / "menu.html").read_text(encoding="utf-8")
 
@@ -1039,7 +1089,7 @@ def test_the_workflow_editor_dynamic_i18n_keys_resolve():
     for action in re.findall(r"(\w+):\s*\{", action_meta.group(1)):
         assert _resolves_in_locale(locale, f"workflows.act_{action}"), action
 
-    assert 'ACTION_META[spec.type]' in editor, "the PRO-action label gate went missing"
+    assert "ACTION_META[spec.type]" in editor, "the PRO-action label gate went missing"
 
     # Terminals pass their key in as a parameter.
     for key in ("workflows.entry_title", "workflows.entry_sub", "workflows.exit_title", "workflows.exit_sub"):
