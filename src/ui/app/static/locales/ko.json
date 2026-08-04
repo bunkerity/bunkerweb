@@ -2410,10 +2410,12 @@
       "drag": "드래그하여 순서 변경",
       "expand": "펼치기",
       "groupKind": "그룹 유형",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "더 보기",
       "moveDown": "아래로 이동 — 나중에 실행",
       "moveRule": "규칙 이동",
       "moveUp": "위로 이동 — 먼저 실행",
+      "openRule": "Open rule {{n}}",
       "provider": "안티봇 제공자",
       "redirectStatus": "리디렉션 상태 코드",
       "removeCondition": "조건 제거",
@@ -2422,6 +2424,7 @@
       "removeValue": "값 제거",
       "requestCount": "요청 수",
       "resourceGroup": "리소스 그룹",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "규칙 {{n}} 이름",
       "terminalAction": "종료 작업",
       "uriMatch": "URI 일치 모드",
@@ -2431,6 +2434,31 @@
     "attach": "서비스에 연결",
     "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
     "attached_notice": "저장하면 이 규칙이 연결된 서비스 {{count}}개에 적용됩니다.",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "규칙 {{count}}/{{maxRules}}개 · 가장 큰 규칙은 조건식 {{worst}}/{{maxPredicates}}개 사용 · 이 워크플로의 정규식 {{regexes}}개",
     "clone": "워크플로우 복제",
     "clone_help": "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다.",
@@ -2469,9 +2497,11 @@
       "fall": "일치하지 않으면 다음 규칙으로 이동",
       "gate": "요청률 임계값은 일치를 제어하며 작업이 아님",
       "move": "드래그하거나 화살표를 사용하거나 Alt + ↑ / ↓를 눌러 순서 변경",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "일치하면 하나의 작업을 실행하고 중지"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "일치하지 않음"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "규칙이 삭제되었습니다. 규칙 {{count}}개가 남았습니다.",
       "duplicated": "사본이 {{n}}번 위치에 삽입되었습니다. 위의 원본이 활성화된 동안에는 절대 일치할 수 없습니다.",
       "gateAdded": "일치 조건에 요청률 임계값이 추가되었습니다. 임계값 미만에서는 규칙이 일치하지 않고 평가가 계속됩니다.",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "마지막 값이 제거되었습니다. 값을 하나 추가하기 전에는 이 조건을 저장할 수 없습니다.",
       "moved": "{{name}}이(가) {{total}}개 중 {{to}}번 위치로 이동했습니다{{how}}. 이제 {{where}} 실행됩니다.",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "드래그로",
         "keyboard": "키보드로"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "이름 또는 설명을 검색하세요...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "다음 중 하나임",
       "method": "다음과 같음",
       "uri": "다음과 일치"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

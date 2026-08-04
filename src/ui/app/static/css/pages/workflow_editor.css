@@ -1254,3 +1254,751 @@
   outline: 2px solid var(--wf-accent);
   outline-offset: 2px;
 }
+
+/* ============================================================================
+   fc — the canvas view of the same ladder.
+
+   Ported from the design kit (ui_kits/admin/flow-canvas.css), same token
+   mapping as the ladder above. The engine still evaluates an ORDERED LIST, so
+   the board is a single left-to-right chain, not a graph: one edge type
+   labelled "no match", one output per node, and a node's slot in the chain IS
+   its priority. There is no free positioning because no coordinate a rule
+   could occupy would mean anything.
+
+   Two deliberate departures from the kit:
+     • The kit drives the drag with SortableJS. This page already reorders with
+       native HTML5 drag and drop keyed on [data-wf-item], so the canvas reuses
+       it and no dependency is added — the only change is the drop axis.
+     • The kit dims shadowed rules with `:hover ~ .fc-item`. Here trace() already
+       paints .is-dead / .is-above (and carries the tester's verdict on the same
+       classes), so the CSS-only version is dropped rather than run twice.
+   ============================================================================ */
+
+.fc-host {
+  --wf-accent: var(--bs-primary);
+  --fc-line: color-mix(in srgb, var(--wf-accent) 30%, transparent);
+  --fc-dot: color-mix(in srgb, var(--wf-accent) 18%, transparent);
+  --fc-conn: 104px;
+  position: relative;
+  container-type: inline-size;
+  height: 424px;
+}
+[data-bs-theme="dark"] .fc-host {
+  --wf-accent: #82b8db;
+  --fc-line: color-mix(in srgb, var(--wf-accent) 34%, transparent);
+  --fc-dot: color-mix(in srgb, var(--wf-accent) 22%, transparent);
+}
+.fc-vp {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  border-radius: 12px;
+  background: var(--bw-bg-subtle);
+  cursor: grab;
+  overscroll-behavior: contain;
+}
+.fc-vp.is-panning {
+  cursor: grabbing;
+}
+.fc-vp.is-dragging {
+  cursor: default;
+}
+.fc-vp[data-readonly] {
+  cursor: default;
+}
+.fc-board {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 100%;
+  min-height: 100%;
+  padding: 56px 52px;
+  zoom: var(--fc-z, 1);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--fc-dot) 1.4px,
+    transparent 0
+  );
+  background-size: 26px 26px;
+}
+.fc-chain {
+  display: flex;
+  align-items: center;
+}
+
+/* ---------- connector: the single "no match" fall-through ---------- */
+.fc-conn {
+  position: relative;
+  flex: 0 0 var(--fc-conn);
+  width: var(--fc-conn);
+  height: 2px;
+  background: var(--fc-line);
+}
+.fc-conn::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid var(--fc-line);
+  border-right: 2px solid var(--fc-line);
+  transform: translate(1px, -50%) rotate(45deg);
+}
+.fc-conn-lbl {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--bw-fg-3);
+  background: var(--bw-bg-subtle);
+  padding: 0 6px;
+}
+/* The first connector says "every request", the rest say "no match". Doing the
+   swap in CSS keeps it right the instant a node becomes first. */
+.fc-conn-lbl.l-entry {
+  display: none;
+}
+.fc-item:first-child .fc-conn-lbl.l-entry {
+  display: block;
+}
+.fc-item:first-child .fc-conn-lbl.l-fall {
+  display: none;
+}
+.fc-plus {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid var(--fc-line);
+  background: var(--bw-bg-card);
+  color: var(--wf-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.14s,
+    background 0.14s,
+    color 0.14s;
+}
+.fc-plus .bx {
+  font-size: 15px;
+}
+.fc-conn:hover .fc-plus,
+.fc-plus:focus-visible {
+  opacity: 1;
+}
+.fc-plus:hover {
+  background: var(--wf-accent);
+  color: #fff;
+  border-color: var(--wf-accent);
+}
+.fc-plus:focus-visible {
+  outline: 2px solid var(--wf-accent);
+  outline-offset: 2px;
+}
+.fc-vp.is-dragging .fc-plus {
+  display: none;
+}
+
+/* ---------- terminals ---------- */
+.fc-term {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 190px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--wf-accent) 5%, var(--bw-bg-card));
+  border: 1px solid color-mix(in srgb, var(--wf-accent) 16%, transparent);
+}
+.fc-term.is-exit {
+  width: 236px;
+  border-style: dashed;
+  background: var(--bw-bg-card);
+}
+.fc-term-ic {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--wf-accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.fc-term.is-exit .fc-term-ic {
+  background: transparent;
+  color: var(--bw-fg-3);
+  border: 1px dashed var(--bw-border);
+}
+.fc-term-ic .bx {
+  font-size: 17px;
+}
+.fc-term strong {
+  display: block;
+  font-size: 12.5px;
+  color: var(--wf-accent);
+  line-height: 1.25;
+}
+.fc-term small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--bw-fg-3);
+  line-height: 1.35;
+}
+
+/* ---------- node ---------- */
+.fc-item {
+  display: flex;
+  align-items: center;
+}
+.fc-node {
+  position: relative;
+  box-sizing: border-box;
+  width: 276px;
+  height: 124px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bw-bg-card);
+  border: 1px solid color-mix(in srgb, var(--wf-accent) 14%, transparent);
+  border-radius: 13px;
+  box-shadow: var(--bw-shadow-sm);
+  cursor: grab;
+}
+.fc-node:hover {
+  border-color: color-mix(in srgb, var(--wf-accent) 40%, transparent);
+  box-shadow: 0 10px 24px -14px
+    color-mix(in srgb, var(--wf-accent) 70%, transparent);
+}
+.fc-node:focus-visible {
+  outline: 0;
+  border-color: var(--wf-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wf-accent) 20%, transparent);
+}
+.fc-node.is-sel {
+  border-color: var(--wf-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--wf-accent) 30%, transparent);
+}
+.fc-node.is-off {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--bw-fg-4) 7%, var(--bw-bg-card));
+}
+.fc-node.is-err {
+  border-color: var(--bs-danger);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--bs-danger) 18%, transparent);
+}
+.fc-vp[data-readonly] .fc-node {
+  cursor: default;
+}
+.fc-node-hd {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px 0;
+}
+/* The number is real text rather than a CSS counter, so it survives in static
+   output and stays addressable by the move-to-position menu. */
+.fc-order {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--wf-accent);
+  color: #fff;
+  font-family: var(--font-courier-prime);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.fc-order:hover {
+  background: var(--bs-bw-green);
+}
+.fc-order:focus-visible {
+  outline: 2px solid var(--wf-accent);
+  outline-offset: 2px;
+}
+.fc-node.is-off .fc-order {
+  background: transparent;
+  color: var(--bw-fg-3);
+  border: 1.5px dashed var(--bw-border);
+}
+.fc-node-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--wf-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fc-node.is-off .fc-node-name {
+  color: var(--bw-fg-3);
+}
+.fc-node-sum {
+  margin: 7px 12px 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--bw-fg-2);
+  max-height: 34px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.fc-node-sum.is-pending {
+  font-style: italic;
+  color: var(--bw-fg-3);
+}
+.fc-node-ft {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px 10px;
+  overflow: hidden;
+}
+.fc-gate {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  font-family: var(--font-courier-prime);
+  color: var(--bs-secondary);
+  border: 1px solid color-mix(in srgb, var(--bs-secondary) 40%, transparent);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+.fc-gate .bx {
+  font-size: 12px;
+}
+.fc-node-ft .bw-flow-act {
+  margin-left: auto;
+}
+.fc-errchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--bs-danger);
+  border: 1px solid color-mix(in srgb, var(--bs-danger) 40%, transparent);
+  background: color-mix(in srgb, var(--bs-danger) 10%, transparent);
+  border-radius: 999px;
+  padding: 2px 7px;
+  cursor: pointer;
+}
+.fc-errchip .bx {
+  font-size: 12px;
+}
+[data-bs-theme="dark"] .fc-errchip {
+  color: color-mix(in srgb, var(--bs-danger) 58%, #fff);
+}
+
+/* Ports — one in, one out. There is no second output by design: a match is
+   terminal, so there is no true / false fork to draw. */
+.fc-port {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bw-bg-card);
+  border: 2px solid var(--fc-line);
+  transform: translateY(-50%);
+}
+.fc-port.in {
+  left: -5px;
+}
+.fc-port.out {
+  right: -5px;
+}
+.fc-node:hover .fc-port {
+  border-color: var(--wf-accent);
+}
+
+/* ---------- hover toolbar ---------- */
+.fc-tools {
+  position: absolute;
+  top: -32px;
+  right: 0;
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  box-shadow: var(--bw-shadow-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.13s;
+}
+.fc-node:hover .fc-tools,
+.fc-node:focus-within .fc-tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+.fc-vp.is-dragging .fc-tools {
+  display: none;
+}
+.fc-tools button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bw-fg-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.fc-tools button:hover {
+  background: color-mix(in srgb, var(--wf-accent) 10%, transparent);
+  color: var(--wf-accent);
+}
+.fc-tools .bx {
+  font-size: 15px;
+}
+
+/* ---------- drag states (native DnD, same classes the ladder uses) ---------- */
+.fc-item.is-dragging .fc-node {
+  opacity: 0.35;
+}
+.fc-item.is-dragging .fc-conn {
+  visibility: hidden;
+}
+.fc-item.is-dropbefore .fc-node {
+  box-shadow: -3px 0 0 0 var(--wf-accent);
+}
+.fc-item.is-dropafter .fc-node {
+  box-shadow: 3px 0 0 0 var(--wf-accent);
+}
+
+/* ---------- trace: what a rule shadows (painted by trace()) ---------- */
+.fc-board.is-tracing .fc-item.is-dead,
+.fc-board.is-tracing .fc-conn.is-dead,
+.fc-board.is-tracing .fc-item.is-dead ~ .fc-term.is-exit {
+  opacity: 0.34;
+}
+.fc-board.is-tracing .fc-item.is-dead .fc-node {
+  box-shadow: none;
+}
+.fc-item.is-tested .fc-node {
+  outline: 2px solid var(--wf-accent);
+  outline-offset: 2px;
+}
+.fc-item,
+.fc-term,
+.fc-conn {
+  transition: opacity 0.16s;
+}
+
+/* ---------- overlays: anchored to .fc-host, NOT .fc-vp ----------
+   .fc-vp is the scroll container, and an absolutely-positioned descendant of a
+   scroll container is laid out against its scrollable overflow area — it would
+   pan away with the board. .fc-host does not scroll, so these stay pinned. */
+.fc-zoom {
+  position: absolute;
+  z-index: 4;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 9px;
+  box-shadow: var(--bw-shadow-sm);
+}
+.fc-zoom button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bw-fg-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.fc-zoom button:hover {
+  background: color-mix(in srgb, var(--wf-accent) 10%, transparent);
+  color: var(--wf-accent);
+}
+.fc-zoom button .bx {
+  font-size: 16px;
+}
+.fc-zoom .pct {
+  min-width: 42px;
+  text-align: center;
+  font-family: var(--font-courier-prime);
+  font-size: 11px;
+  color: var(--bw-fg-3);
+}
+.fc-hint {
+  position: absolute;
+  z-index: 3;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--bw-fg-3);
+  background: color-mix(in srgb, var(--bw-bg-card) 90%, transparent);
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  padding: 5px 9px;
+  max-width: calc(100% - 180px);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.fc-hint span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fc-hint .bx {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+/* Below this the two bottom pills collide. The hint is a reminder; the zoom
+   controls are the only way to change zoom, so the hint is what goes. */
+@container (max-width: 640px) {
+  .fc-hint {
+    display: none;
+  }
+}
+.fc-drophint {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  font-size: 11.5px;
+  color: var(--wf-accent);
+  background: var(--bw-bg-card);
+  border: 1px solid color-mix(in srgb, var(--wf-accent) 35%, transparent);
+  border-radius: 999px;
+  padding: 4px 12px;
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+.fc-host.is-dragging .fc-drophint {
+  display: flex;
+}
+.fc-host.is-dragging .fc-hint {
+  display: none;
+}
+.fc-empty {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  max-width: 380px;
+}
+.fc-empty h4 {
+  font-size: 14px;
+  color: var(--wf-accent);
+  margin: 0 0 6px;
+}
+.fc-empty p {
+  font-size: 12px;
+  color: var(--bw-fg-3);
+  line-height: 1.5;
+  margin: 0 0 12px;
+  text-wrap: pretty;
+}
+
+/* ---------- inspector drawer ----------
+   On the canvas a node card is a summary and never the editor, so the If / Then
+   editors the list view renders inline live here instead. */
+.wf-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 452px;
+  max-width: 100%;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  background: var(--bw-bg-card);
+  border-left: 1px solid var(--bw-border);
+  border-radius: 0 12px 12px 0;
+  box-shadow: -18px 0 40px -26px
+    color-mix(in srgb, var(--wf-accent) 80%, transparent);
+  animation: wfDrawerIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes wfDrawerIn {
+  from {
+    transform: translateX(18px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.wf-drawer-hd {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--bw-border);
+}
+.wf-drawer-hd .n {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--wf-accent);
+  color: #fff;
+  font-family: var(--font-courier-prime);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.wf-drawer-hd .t {
+  flex: 1;
+  min-width: 0;
+}
+.wf-drawer-hd h3 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--wf-accent);
+}
+.wf-drawer-hd p {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: var(--bw-fg-3);
+}
+.wf-drawer-body {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 0;
+}
+.wf-drawer-ft {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--bw-border);
+  font-size: 11.5px;
+  color: var(--bw-fg-2);
+  background: color-mix(in srgb, var(--wf-accent) 3%, transparent);
+}
+.wf-drawer-ft .bx {
+  font-size: 14px;
+  color: var(--wf-accent);
+  flex-shrink: 0;
+}
+.wf-drawer .bw-flow-clause {
+  grid-template-columns: 46px 1fr;
+}
+
+/* ---------- view toggle (page chrome) ---------- */
+.wf-canvas-hd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.wf-canvas-hd .title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bw-fg-1);
+}
+.wf-canvas-hd .aux {
+  font-size: 11.5px;
+  color: var(--bw-fg-3);
+}
+.wf-canvas-hd .wf-vtoggle {
+  margin-left: auto;
+}
+.wf-vtoggle {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  background: var(--bw-bg-subtle);
+}
+.wf-vbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  color: var(--bw-fg-2);
+  cursor: pointer;
+}
+.wf-vbtn .bx {
+  font-size: 14px;
+}
+.wf-vbtn:hover,
+.wf-vbtn.is-on {
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .wf-vbtn:hover,
+[data-bs-theme="dark"] .wf-vbtn.is-on {
+  color: #82b8db;
+}
+.wf-vbtn.is-on {
+  background: var(--bw-bg-card);
+  font-weight: 600;
+  box-shadow: var(--bw-shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-drawer {
+    animation: none;
+  }
+  .fc-item,
+  .fc-term,
+  .fc-conn,
+  .fc-plus,
+  .fc-tools {
+    transition: none;
+  }
+}

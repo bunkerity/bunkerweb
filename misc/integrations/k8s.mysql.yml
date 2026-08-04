@@ -212,7 +212,7 @@ spec:
             - name: API_USERNAME
               value: "changeme"
             - name: API_PASSWORD
-              value: "changeme"
+              value: "Ch@ngeme1234"
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -2344,11 +2344,39 @@
       "terminalAction": "Terminal action",
       "uriMatch": "URI match mode",
       "uriValue": "URI value",
-      "window": "Window in seconds"
+      "window": "Window in seconds",
+      "insertAt": "Insert a rule at position {{n}}",
+      "openRule": "Open rule {{n}}",
+      "ruleErrors": "{{count}} validation problems in this rule"
     },
     "attach": "Attach to services",
     "attach_help": "Rules are only enforced on the services a workflow is attached to.",
     "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
+    "canvas": {
+      "title": "Rule order",
+      "auxList": "Top to bottom. First match wins.",
+      "auxCanvas": "Left to right. First match wins.",
+      "entry_title": "Every request",
+      "entry_sub": "Rules run left to right.",
+      "exit_title": "No rule matched",
+      "exit_sub": "Continues to the next attached workflow.",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "close": "Close",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "emptyTitle": "No rules yet",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Fit to view"
+    },
     "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
     "clone": "Clone workflow",
     "clone_help": "The rules are copied; the service attachments are not.",
@@ -2387,10 +2415,12 @@
       "fall": "No match falls to the next rule",
       "gate": "A rate threshold gates the match, it is not an action",
       "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "stop": "A match runs one action and stops",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "no match",
+      "entry": "every request"
     },
     "menu": {
       "bottom": "Run last",
@@ -2443,7 +2473,11 @@
       "via": {
         "drag": "drag",
         "keyboard": "keyboard"
-      }
+      },
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "Search name or description...",
     "test": {
@@ -2528,6 +2562,10 @@
       "isOneOf": "is one of",
       "method": "is",
       "uri": "matches"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

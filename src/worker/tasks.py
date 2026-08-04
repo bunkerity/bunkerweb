@@ -66,6 +66,10 @@ def _load_job_config_env(db, logger) -> dict:
     ``DATABASE_URI`` / ``PATH`` / ``PYTHONPATH``.
     """
     if db is None:
+        # Not cosmetic: without the DB the job runs against compiled defaults, so USE_BLACKLIST,
+        # AUTO_LETS_ENCRYPT and every per-service setting silently do not apply. Say so, because
+        # the job itself will look like it succeeded.
+        logger.warning("Worker database is not initialized; running the job with default settings, NOT the stored configuration")
         return {}
     try:
         config = db.get_config(global_only=False, methods=False, with_drafts=False)

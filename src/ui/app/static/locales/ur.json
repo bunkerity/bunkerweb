@@ -2410,10 +2410,12 @@
       "drag": "ترتیب بدلنے کے لیے گھسیٹیں",
       "expand": "پھیلائیں",
       "groupKind": "گروپ کی قسم",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "مزید",
       "moveDown": "نیچے منتقل کریں — بعد میں چلے گا",
       "moveRule": "اصول منتقل کریں",
       "moveUp": "اوپر منتقل کریں — پہلے چلے گا",
+      "openRule": "Open rule {{n}}",
       "provider": "اینٹی بوٹ فراہم کنندہ",
       "redirectStatus": "ری ڈائریکٹ اسٹیٹس",
       "removeCondition": "شرط ہٹائیں",
@@ -2422,6 +2424,7 @@
       "removeValue": "قدر ہٹائیں",
       "requestCount": "درخواستوں کی تعداد",
       "resourceGroup": "وسائل کا گروپ",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "اصول {{n}} کا نام",
       "terminalAction": "اختتامی کارروائی",
       "uriMatch": "URI مماثلت موڈ",
@@ -2431,6 +2434,31 @@
     "attach": "سرویس سے جوڑیں",
     "attach_help": "قوانین صرف ان سروسز پر نافذ ہوتے ہیں جن سے ورک فلو جوڑا گیا ہے۔",
     "attached_notice": "محفوظ کرنے سے یہ اصول {{count}} منسلک سروسز پر لاگو ہوں گے۔",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "{{maxRules}} میں سے {{count}} اصول · سب سے بڑا اصول {{maxPredicates}} میں سے {{worst}} شرائط استعمال کرتا ہے · اس ورک فلو میں {{regexes}} ریجیکس",
     "clone": "ورک فلو کی کاپی کریں",
     "clone_help": "قوانین کاپی کیے جاتے ہیں، سروس کے جوڑ نہیں ہیں۔",
@@ -2469,9 +2497,11 @@
       "fall": "مماثلت نہ ہو تو اگلا اصول",
       "gate": "شرح کی حد مماثلت کو قابو کرتی ہے، یہ کارروائی نہیں ہے",
       "move": "ترتیب بدلنے کے لیے گھسیٹیں، تیروں کا استعمال کریں یا Alt + ↑ / ↓ دبائیں",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "مماثلت ایک کارروائی چلا کر روک دیتی ہے"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "مماثل نہیں"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "اصول حذف ہو گیا۔ {{count}} اصول باقی ہیں۔",
       "duplicated": "نقل مقام {{n}} پر شامل ہوئی۔ اوپر اصل اصول فعال رہنے تک یہ کبھی مماثل نہیں ہو سکتی۔",
       "gateAdded": "مماثلت میں شرح کی حد شامل ہوئی۔ اس سے نیچے اصول مماثل نہیں ہوتا اور جانچ جاری رہتی ہے۔",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "آخری قدر ہٹا دی گئی — کوئی قدر ہونے تک یہ شرط محفوظ نہیں ہو سکتی۔",
       "moved": "{{name}} کو {{total}} میں سے مقام {{to}} پر منتقل کیا گیا{{how}}۔ اب یہ {{where}} چلتا ہے۔",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "گھسیٹ کر",
         "keyboard": "کی بورڈ سے"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "نام یا وضاحت کی تلاش کریں...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "ان میں سے ایک ہے",
       "method": "ہے",
       "uri": "سے مماثل ہے"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

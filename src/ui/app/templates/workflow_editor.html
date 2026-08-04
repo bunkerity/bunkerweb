@@ -47,6 +47,21 @@
     <div id="wf-validation" class="mb-4"></div>
 
     {% call card(classes="p-4 min-vh-70") %}
+        {# Two drawings of the same ordered list. Neither is a fallback for the other: both
+           edit the same rules through the same markup, so the choice is only which axis the
+           operator wants priority laid out on. #}
+        <div class="wf-canvas-hd">
+            <span class="title"><i class="bx bx-git-commit" aria-hidden="true"></i><span data-i18n="workflows.canvas.title">Rule order</span></span>
+            <span class="aux" id="wf-view-aux" data-i18n="workflows.canvas.auxList">Top to bottom. First match wins.</span>
+            <div class="wf-vtoggle" role="group" aria-label="View">
+                <button type="button" class="wf-vbtn" data-wf-view="canvas" aria-pressed="false">
+                    <i class="bx bx-network-chart" aria-hidden="true"></i><span data-i18n="workflows.view.canvas">Canvas</span>
+                </button>
+                <button type="button" class="wf-vbtn is-on" data-wf-view="list" aria-pressed="true">
+                    <i class="bx bx-list-ul" aria-hidden="true"></i><span data-i18n="workflows.view.list">List</span>
+                </button>
+            </div>
+        </div>
         {# The ladder is rendered by workflow_editor.js from the definition below: a rule's
            position in it is its priority, so the markup is built from the ordered list
            rather than cloned per card. #}
@@ -56,11 +71,13 @@
             <span data-i18n="workflows.no_rules">No rule yet. Add one to start building this policy.</span>
         </div>
         <div class="wf-cap" id="wf-cap"></div>
+        {# The two directional lines are rewritten by paintViewToggle() when the view flips —
+           the legend has to describe the axis actually on screen. #}
         <div class="wf-legend">
-            <span><i class="bx bx-down-arrow-alt" aria-hidden="true"></i><span data-i18n="workflows.legend.fall">No match falls to the next rule</span></span>
+            <span><i class="bx bx-down-arrow-alt" id="wf-legend-fall" aria-hidden="true"></i><span data-i18n="workflows.legend.fall">No match falls to the next rule</span></span>
             <span><i class="bx bx-check-circle" aria-hidden="true"></i><span data-i18n="workflows.legend.stop">A match runs one action and stops</span></span>
             <span><i class="bx bx-filter" aria-hidden="true"></i><span data-i18n="workflows.legend.gate">A rate threshold gates the match, it is not an action</span></span>
-            <span><i class="bx bx-move-vertical" aria-hidden="true"></i><span data-i18n="workflows.legend.move">Drag, use the arrows, or press Alt + ↑ / ↓ to reorder</span></span>
+            <span><i class="bx bx-move-vertical" aria-hidden="true"></i><span id="wf-legend-move" data-i18n="workflows.legend.move">Drag, use the arrows, or press Alt + ↑ / ↓ to reorder</span></span>
         </div>
     {% endcall %}
 

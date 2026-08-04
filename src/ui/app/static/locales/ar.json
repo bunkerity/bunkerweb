@@ -2410,10 +2410,12 @@
       "drag": "اسحب لإعادة الترتيب",
       "expand": "توسيع",
       "groupKind": "نوع المجموعة",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "المزيد",
       "moveDown": "نقل لأسفل — يعمل لاحقًا",
       "moveRule": "نقل القاعدة",
       "moveUp": "نقل لأعلى — يعمل مبكرًا",
+      "openRule": "Open rule {{n}}",
       "provider": "موفر مكافحة الروبوتات",
       "redirectStatus": "حالة إعادة التوجيه",
       "removeCondition": "إزالة الشرط",
@@ -2422,6 +2424,7 @@
       "removeValue": "إزالة القيمة",
       "requestCount": "عدد الطلبات",
       "resourceGroup": "مجموعة الموارد",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "اسم القاعدة {{n}}",
       "terminalAction": "الإجراء النهائي",
       "uriMatch": "وضع مطابقة URI",
@@ -2431,6 +2434,31 @@
     "attach": "إرفاق بالخدمات",
     "attach_help": "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها.",
     "attached_notice": "سيؤدي الحفظ إلى تطبيق هذه القواعد على {{count}} من الخدمات المرفقة.",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "{{count}} من {{maxRules}} قاعدة · أكبر قاعدة تستخدم {{worst}} من {{maxPredicates}} شرطًا · {{regexes}} تعبيرًا نمطيًا في سير العمل هذا",
     "clone": "نسخ سير العمل",
     "clone_help": "يتم نسخ القواعد، ولكن ليس إرفاق الخدمات.",
@@ -2469,9 +2497,11 @@
       "fall": "عدم التطابق ينتقل إلى القاعدة التالية",
       "gate": "حد المعدل يضبط المطابقة وليس إجراءً",
       "move": "اسحب أو استخدم الأسهم أو اضغط Alt + ↑ / ↓ لإعادة الترتيب",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "التطابق ينفذ إجراءً واحدًا ثم يتوقف"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "لا تطابق"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "حُذفت القاعدة. تبقت {{count}} قاعدة.",
       "duplicated": "أُدرجت النسخة في الموضع {{n}}. لا يمكن أن تتطابق ما دامت القاعدة الأصلية أعلاها مُمكّنة.",
       "gateAdded": "أُضيف حد معدل إلى المطابقة. تحته لا تتطابق القاعدة ويستمر التقييم.",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "أُزيلت القيمة الأخيرة؛ لا يمكن حفظ هذا الشرط حتى يحتوي على قيمة.",
       "moved": "نُقلت {{name}} إلى الموضع {{to}} من {{total}}{{how}}. وهي تعمل الآن {{where}}.",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "بالسحب",
         "keyboard": "بلوحة المفاتيح"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "ابحث عن الاسم أو الوصف...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "واحد من",
       "method": "هي",
       "uri": "يطابق"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

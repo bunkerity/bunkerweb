@@ -109,6 +109,12 @@
     workflowId: "",
     // Last test result, or null. Pins the ladder's dimming and feeds the verdict chips.
     test: null,
+    // "list" (the ladder) or "canvas" (the same order, drawn as a chain). Both edit the
+    // same rules through the same markup, so neither is a fallback for the other.
+    view: "list",
+    // Canvas only: the rule whose editors the inspector drawer is showing.
+    inspect: null,
+    zoom: 1,
   };
 
   var ladderEl, emptyEl, panelEl, liveEl, capEl;
@@ -1036,6 +1042,21 @@
     );
   }
 
+  /* The If / Then editors. The ladder renders them inline in an expanded card and the
+     canvas renders them in the inspector drawer — same markup, same schema paths, so
+     paint(), locate() and jump() cannot tell the two apart. */
+  function clauses(rule, path) {
+    return (
+      '<div class="bw-flow-clause is-if"><div class="bw-flow-clause-lbl" data-i18n="workflows.rule.if">If</div><div class="bw-flow-clause-main">' +
+      group(rule.condition, path + ".condition", 1) +
+      gate(rule, path) +
+      "</div></div>" +
+      '<div class="bw-flow-clause is-then"><div class="bw-flow-clause-lbl" data-i18n="workflows.action">Then</div><div class="bw-flow-clause-main">' +
+      actionEditor(rule, path) +
+      "</div></div>"
+    );
+  }
+
   function ruleNode(rule, index) {
     var path = "rules[" + index + "]";
     var open = STATE.open.has(rule.id);
@@ -1149,14 +1170,7 @@
       "</div></div>";
 
     var body = open
-      ? '<div class="bw-flow-body">' +
-        '<div class="bw-flow-clause is-if"><div class="bw-flow-clause-lbl" data-i18n="workflows.rule.if">If</div><div class="bw-flow-clause-main">' +
-        group(rule.condition, path + ".condition", 1) +
-        gate(rule, path) +
-        "</div></div>" +
-        '<div class="bw-flow-clause is-then"><div class="bw-flow-clause-lbl" data-i18n="workflows.action">Then</div><div class="bw-flow-clause-main">' +
-        actionEditor(rule, path) +
-        "</div></div></div>"
+      ? '<div class="bw-flow-body">' + clauses(rule, path) + "</div>"
       : "";
 
     var foot = rule.enabled
@@ -1285,6 +1299,445 @@
     return html + "</div>";
   }
 
+  // ---- canvas view -----------------------------------------------------------------
+  /* The same ordered list, drawn left to right. It is a chain and not a graph because the
+     engine has no second output: a match is terminal, so the only edge is the fall-through
+     and a node's slot IS its priority. Node cards are summaries; the editors live in the
+     inspector drawer. */
+
+  var ZOOM_STEPS = [0.5, 0.65, 0.8, 1, 1.2, 1.45];
+
+  /* Counts the errors addressed at one rule. The bracket has to be part of the comparison:
+     a plain "starts with rules[1]" also swallows rules[10] through rules[19], and a workflow
+     holds up to 50 rules. */
+  function errorsInRule(index) {
+    return Object.keys(STATE.errors).filter(function (path) {
+      return ruleIndexOf(path) === index;
+    }).length;
+  }
+
+  function connector(index, only) {
+    // The "insert here" button is not offered at the cap: the rule it would add cannot save.
+    var plus =
+      STATE.readonly || STATE.rules.length >= MAX_RULES
+        ? ""
+        : '<button type="button" class="fc-plus" data-wf-insert="' +
+          index +
+          '" title="' +
+          esc(translate("workflows.canvas.insert", "Insert a rule here")) +
+          '" aria-label="' +
+          esc(
+            translate(
+              "workflows.aria.insertAt",
+              "Insert a rule at position {{n}}",
+              {
+                n: index + 1,
+              },
+            ),
+          ) +
+          '"><i class="bx bx-plus" aria-hidden="true"></i></button>';
+    return (
+      '<div class="fc-conn" data-wf-link="' +
+      index +
+      '">' +
+      '<span class="fc-conn-lbl l-entry" data-i18n="workflows.link.entry">every request</span>' +
+      '<span class="fc-conn-lbl l-fall" data-i18n="workflows.link.noMatch">' +
+      (only ? "every request" : "no match") +
+      "</span>" +
+      plus +
+      "</div>"
+    );
+  }
+
+  function canvasTerminal(kind, title, subtitle, icon, i18n) {
+    return (
+      '<div class="fc-term is-' +
+      kind +
+      '"><span class="fc-term-ic"><i class="bx ' +
+      icon +
+      '" aria-hidden="true"></i></span>' +
+      '<div><strong data-i18n="' +
+      i18n +
+      '">' +
+      title +
+      '</strong><small data-i18n="' +
+      i18n.replace("_title", "_sub") +
+      '">' +
+      subtitle +
+      "</small></div></div>"
+    );
+  }
+
+  function canvasNode(rule, index) {
+    var position = index + 1;
+    var total = STATE.rules.length;
+    var summary = STATE.summaries[rule.id];
+    var classes = ["fc-node"];
+    if (!rule.enabled) classes.push("is-off");
+    if (STATE.inspect === rule.id) classes.push("is-sel");
+
+    var order = STATE.readonly
+      ? '<span class="fc-order" aria-hidden="true">' + position + "</span>"
+      : '<button type="button" class="fc-order" data-wf-pos="' +
+        esc(rule.id) +
+        '" aria-haspopup="menu" title="Position ' +
+        position +
+        " of " +
+        total +
+        ' — click to move" aria-label="Rule ' +
+        position +
+        " of " +
+        total +
+        ', change position">' +
+        position +
+        "</button>";
+
+    var tools = STATE.readonly
+      ? ""
+      : '<div class="fc-tools">' +
+        '<button type="button" data-wf-inspect="' +
+        esc(rule.id) +
+        '" title="' +
+        esc(translate("workflows.canvas.open", "Open rule")) +
+        '" aria-label="' +
+        esc(
+          translate("workflows.aria.openRule", "Open rule {{n}}", {
+            n: position,
+          }),
+        ) +
+        '"><i class="bx bx-edit-alt" aria-hidden="true"></i></button>' +
+        '<button type="button" data-wf-menu="' +
+        esc(rule.id) +
+        '" aria-haspopup="menu" title="' +
+        esc(translate("workflows.aria.more", "More")) +
+        '" aria-label="More actions for rule ' +
+        position +
+        '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button></div>';
+
+    var gateChip = rule.threshold
+      ? '<span class="fc-gate" title="' +
+        esc(
+          translate(
+            "workflows.canvas.gateTip",
+            "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+          ),
+        ) +
+        '"><i class="bx bx-filter" aria-hidden="true"></i>' +
+        esc(rule.threshold.count + "/" + rule.threshold.window + "s") +
+        "</span>"
+      : "";
+
+    // The error count arrives from the API after the render, so paint() fills this — the
+    // same contract as the tester's verdict chip beside it.
+    var errChip = '<span data-wf-errchip="' + esc(rule.id) + '"></span>';
+
+    return (
+      '<article class="' +
+      classes.join(" ") +
+      '" data-wf-rule="' +
+      esc(rule.id) +
+      '" data-wf-node="' +
+      esc("rules[" + index + "]") +
+      '" tabindex="0" aria-label="Rule ' +
+      position +
+      " of " +
+      total +
+      " — " +
+      esc(rule.name || "untitled") +
+      (rule.enabled ? "" : ", disabled") +
+      '">' +
+      '<span class="fc-port in" aria-hidden="true"></span>' +
+      '<span class="fc-port out" aria-hidden="true"></span>' +
+      tools +
+      '<header class="fc-node-hd">' +
+      order +
+      '<span class="fc-node-name">' +
+      (rule.name
+        ? esc(rule.name)
+        : '<span data-i18n="workflows.untitled">Untitled rule</span>') +
+      "</span>" +
+      // Filled by paintTest(), exactly as the ladder's card is.
+      '<span data-wf-verdict="' +
+      esc(rule.id) +
+      '"></span>' +
+      "</header>" +
+      '<p class="fc-node-sum' +
+      (summary ? "" : " is-pending") +
+      '" data-wf-summary="' +
+      esc(rule.id) +
+      '">' +
+      esc(
+        summary || translate("workflows.not_validated", "Not validated yet"),
+      ) +
+      "</p>" +
+      '<footer class="fc-node-ft">' +
+      gateChip +
+      errChip +
+      actionBadge(rule) +
+      "</footer></article>"
+    );
+  }
+
+  function drawerHtml() {
+    var index = STATE.rules.findIndex(function (rule) {
+      return rule.id === STATE.inspect;
+    });
+    if (index === -1) return "";
+    var rule = STATE.rules[index];
+    var total = STATE.rules.length;
+    return (
+      '<aside class="wf-drawer" data-wf-rule="' +
+      esc(rule.id) +
+      '" data-wf-node="' +
+      esc("rules[" + index + "]") +
+      '" role="region" aria-label="Rule ' +
+      (index + 1) +
+      " of " +
+      total +
+      '">' +
+      '<div class="wf-drawer-hd"><span class="n">' +
+      (index + 1) +
+      '</span><div class="t"><h3>' +
+      (rule.name
+        ? esc(rule.name)
+        : '<span data-i18n="workflows.untitled">Untitled rule</span>') +
+      '</h3><p data-i18n="workflows.canvas.drawerSub" data-i18n-options=\'' +
+      esc(JSON.stringify({ n: index + 1, total: total })) +
+      "'>Runs at position " +
+      (index + 1) +
+      " of " +
+      total +
+      "</p></div>" +
+      (STATE.readonly
+        ? ""
+        : '<button type="button" class="bw-flow-iconbtn" data-wf-menu="' +
+          esc(rule.id) +
+          '" aria-haspopup="menu" title="' +
+          esc(translate("workflows.aria.more", "More")) +
+          '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button>') +
+      '<button type="button" class="bw-flow-iconbtn" data-wf-drawerclose="1" title="' +
+      esc(translate("workflows.canvas.close", "Close")) +
+      '" aria-label="' +
+      esc(translate("workflows.canvas.close", "Close")) +
+      '"><i class="bx bx-x" aria-hidden="true"></i></button></div>' +
+      '<div class="wf-drawer-body">' +
+      clauses(rule, "rules[" + index + "]") +
+      "</div>" +
+      '<div class="wf-drawer-ft"><i class="bx ' +
+      (rule.enabled ? "bx-check-circle" : "bx-minus-circle") +
+      '" aria-hidden="true"></i><span>' +
+      (rule.enabled
+        ? '<strong data-i18n="workflows.rule.onMatch">If it matches</strong>' +
+          '<span data-i18n="workflows.canvas.stopTail">, evaluation stops here — no rule after it is reached.</span>'
+        : '<span data-i18n="workflows.canvas.skipped">Disabled — skipped entirely, as if it were not in the chain.</span>') +
+      "</span></div></aside>"
+    );
+  }
+
+  function canvasHtml() {
+    var count = STATE.rules.length;
+    var board =
+      '<div class="fc-board" data-wf-ladder>' +
+      canvasTerminal(
+        "entry",
+        "Every request",
+        "Rules run left to right.",
+        "bx-log-in-circle",
+        "workflows.canvas.entry_title",
+      ) +
+      '<div class="fc-chain">' +
+      STATE.rules
+        .map(function (rule, index) {
+          return (
+            '<div class="fc-item" data-wf-item="' +
+            esc(rule.id) +
+            '" data-wf-index="' +
+            index +
+            '">' +
+            connector(index, false) +
+            canvasNode(rule, index) +
+            "</div>"
+          );
+        })
+        .join("") +
+      "</div>" +
+      connector(count, count === 0) +
+      canvasTerminal(
+        "exit",
+        "No rule matched",
+        "Continues to the next attached workflow.",
+        "bx-log-out-circle",
+        "workflows.canvas.exit_title",
+      ) +
+      "</div>";
+
+    var empty = count
+      ? ""
+      : '<div class="fc-empty"><h4 data-i18n="workflows.canvas.emptyTitle">No rules yet</h4>' +
+        '<p data-i18n="workflows.canvas.emptyBody">A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.</p>' +
+        (STATE.readonly
+          ? ""
+          : '<button class="btn btn-primary btn-sm don-jose" type="button" data-wf-insert="0">' +
+            '<i class="bx bx-plus"></i> <span data-i18n="workflows.canvas.emptyCta">Add the first rule</span></button>') +
+        "</div>";
+
+    var hint = STATE.readonly
+      ? '<i class="bx bx-lock-alt" aria-hidden="true"></i><span data-i18n="workflows.canvas.hintReadonly">Read-only — pan to look around, the order cannot be changed</span>'
+      : '<i class="bx bx-move-horizontal" aria-hidden="true"></i><span data-i18n="workflows.canvas.hint">Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node</span>';
+
+    return (
+      '<div class="fc-host" id="wf-board">' +
+      '<div class="fc-vp"' +
+      (STATE.readonly ? ' data-readonly="1"' : "") +
+      ">" +
+      board +
+      "</div>" +
+      empty +
+      '<div class="fc-drophint"><i class="bx bx-info-circle" aria-hidden="true"></i>' +
+      '<span data-i18n="workflows.canvas.dropHint">Drop to set priority — a rule\'s place in the chain is the only thing it can mean</span></div>' +
+      '<div class="fc-zoom">' +
+      '<button type="button" data-fc-zoom="-1" title="' +
+      esc(translate("workflows.canvas.zoomOut", "Zoom out")) +
+      '" aria-label="' +
+      esc(translate("workflows.canvas.zoomOut", "Zoom out")) +
+      '"><i class="bx bx-minus" aria-hidden="true"></i></button>' +
+      '<span class="pct" data-fc-pct>100%</span>' +
+      '<button type="button" data-fc-zoom="1" title="' +
+      esc(translate("workflows.canvas.zoomIn", "Zoom in")) +
+      '" aria-label="' +
+      esc(translate("workflows.canvas.zoomIn", "Zoom in")) +
+      '"><i class="bx bx-plus" aria-hidden="true"></i></button>' +
+      '<button type="button" data-fc-fit="1" title="' +
+      esc(translate("workflows.canvas.fit", "Fit to view")) +
+      '" aria-label="' +
+      esc(translate("workflows.canvas.fit", "Fit to view")) +
+      '"><i class="bx bx-expand" aria-hidden="true"></i></button></div>' +
+      '<div class="fc-hint">' +
+      hint +
+      "</div>" +
+      drawerHtml() +
+      "</div>"
+    );
+  }
+
+  /* Zoom is `zoom:`, not `transform: scale()`. transform leaves layout at the original size,
+     so every pointer coordinate the drag and pan handlers read would be off by the factor;
+     zoom affects layout, so hit-testing stays honest. */
+  function applyZoom(board) {
+    board.style.setProperty("--fc-z", STATE.zoom);
+    var pct = ladderEl.querySelector("[data-fc-pct]");
+    if (pct) pct.textContent = Math.round(STATE.zoom * 100) + "%";
+  }
+
+  function fitCanvas() {
+    var host = ladderEl.querySelector(".fc-host");
+    var viewport = host && host.querySelector(".fc-vp");
+    var board = host && host.querySelector(".fc-board");
+    if (!board || !viewport) return;
+    // scrollWidth is already zoomed, so divide it back out before testing each step.
+    var natural = board.scrollWidth / Math.max(STATE.zoom, 0.01);
+    var available = viewport.clientWidth;
+    var best = ZOOM_STEPS[0];
+    ZOOM_STEPS.forEach(function (step) {
+      if (natural * step <= available) best = step;
+    });
+    STATE.zoom = best;
+    applyZoom(board);
+  }
+
+  /* Wires the board after each render. No auto-fit: fitting a six-node chain into a card
+     lands near 50%, which is unreadable — the fit button is there for the overview. */
+  function mountCanvas() {
+    var host = ladderEl.querySelector(".fc-host");
+    if (!host) return;
+    var viewport = host.querySelector(".fc-vp");
+    var board = host.querySelector(".fc-board");
+    if (!board) return;
+    applyZoom(board);
+
+    // The viewport is a real scroll container, so the wheel, the scrollbars and the keyboard
+    // already pan it. This is only the grab-the-background affordance on top of that.
+    var pan = null;
+    viewport.addEventListener("pointerdown", function (event) {
+      if (
+        event.button !== 0 ||
+        event.target.closest(".fc-node, .wf-drawer, button, input, select, a")
+      )
+        return;
+      pan = {
+        x: event.clientX,
+        y: event.clientY,
+        left: viewport.scrollLeft,
+        top: viewport.scrollTop,
+      };
+      viewport.classList.add("is-panning");
+      viewport.setPointerCapture(event.pointerId);
+    });
+    viewport.addEventListener("pointermove", function (event) {
+      if (!pan) return;
+      viewport.scrollLeft = pan.left - (event.clientX - pan.x);
+      viewport.scrollTop = pan.top - (event.clientY - pan.y);
+    });
+    var endPan = function () {
+      pan = null;
+      viewport.classList.remove("is-panning");
+    };
+    viewport.addEventListener("pointerup", endPan);
+    viewport.addEventListener("pointercancel", endPan);
+
+    // Keep the inspected node in sight when the drawer opened over it.
+    if (STATE.inspect) scrollNodeIntoView(STATE.inspect);
+  }
+
+  /* A canvas node is a summary card: the offending predicate is not on it, so the count is
+     the whole signal that something inside is wrong, and it doubles as the way in. Driven
+     from paint() rather than the render, because the errors arrive from the API afterwards. */
+  function paintCanvasErrors() {
+    if (STATE.view !== "canvas") return;
+    STATE.rules.forEach(function (rule, index) {
+      var host = ladderEl.querySelector(
+        '[data-wf-errchip="' + CSS.escape(rule.id) + '"]',
+      );
+      if (!host) return;
+      var count = errorsInRule(index);
+      var card = host.closest(".fc-node");
+      if (card) card.classList.toggle("is-err", count > 0);
+      host.innerHTML = count
+        ? '<button type="button" class="fc-errchip" data-wf-inspect="' +
+          esc(rule.id) +
+          '" aria-label="' +
+          esc(
+            translate(
+              "workflows.aria.ruleErrors",
+              "{{count}} validation problems in this rule",
+              { count: count },
+            ),
+          ) +
+          '"><i class="bx bx-error-circle" aria-hidden="true"></i>' +
+          count +
+          "</button>"
+        : "";
+    });
+  }
+
+  function scrollNodeIntoView(id) {
+    var host = ladderEl.querySelector(".fc-host");
+    var viewport = host && host.querySelector(".fc-vp");
+    var node =
+      viewport &&
+      viewport.querySelector('.fc-node[data-wf-rule="' + CSS.escape(id) + '"]');
+    if (!node) return;
+    var drawer = host.querySelector(".wf-drawer");
+    var nodeRect = node.getBoundingClientRect();
+    var viewRect = viewport.getBoundingClientRect();
+    // The drawer covers the right edge, so centre on what is left of the viewport.
+    var usable = viewRect.width - (drawer ? drawer.offsetWidth : 0);
+    viewport.scrollLeft +=
+      nodeRect.left -
+      viewRect.left -
+      Math.max(0, (usable - nodeRect.width) / 2);
+  }
+
   function capHtml() {
     var count = STATE.rules.length;
     if (!count) return "";
@@ -1328,16 +1781,72 @@
 
   function render(focusSelector) {
     var count = STATE.rules.length;
-    ladderEl.innerHTML = count ? ladderHtml() : "";
-    ladderEl.classList.toggle("d-none", !count);
-    emptyEl.classList.toggle("d-none", count > 0);
+    var canvas = STATE.view === "canvas";
+    // The canvas draws its own empty state inside the board, so the shared one below the
+    // card would be a second copy of the same sentence.
+    ladderEl.innerHTML = canvas ? canvasHtml() : count ? ladderHtml() : "";
+    ladderEl.classList.toggle("wf-canvas", !canvas);
+    ladderEl.classList.toggle("d-none", !canvas && !count);
+    emptyEl.classList.toggle("d-none", canvas || count > 0);
     capEl.innerHTML = capHtml();
     var addButton = document.getElementById("wf-add-rule");
     if (addButton && !STATE.readonly) addButton.disabled = count >= MAX_RULES;
+    paintViewToggle();
     runTranslations();
+    if (canvas) mountCanvas();
     if (focusSelector) {
       var target = document.querySelector(focusSelector);
       if (target) target.focus({ preventScroll: true });
+    }
+  }
+
+  function paintViewToggle() {
+    var canvas = STATE.view === "canvas";
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-wf-view]"),
+      function (button) {
+        var on = button.dataset.wfView === STATE.view;
+        button.classList.toggle("is-on", on);
+        button.setAttribute("aria-pressed", on ? "true" : "false");
+      },
+    );
+    var aux = document.getElementById("wf-view-aux");
+    if (aux) {
+      aux.setAttribute(
+        "data-i18n",
+        canvas ? "workflows.canvas.auxCanvas" : "workflows.canvas.auxList",
+      );
+      aux.textContent = canvas
+        ? translate(
+            "workflows.canvas.auxCanvas",
+            "Left to right. First match wins.",
+          )
+        : translate(
+            "workflows.canvas.auxList",
+            "Top to bottom. First match wins.",
+          );
+    }
+    // The legend describes the axis the operator is looking at, so its two directional
+    // lines have to follow the view rather than name one of them permanently.
+    var fall = document.getElementById("wf-legend-fall");
+    if (fall)
+      fall.className =
+        "bx " + (canvas ? "bx-right-arrow-alt" : "bx-down-arrow-alt");
+    var move = document.getElementById("wf-legend-move");
+    if (move) {
+      var key = canvas
+        ? "workflows.legend.moveCanvas"
+        : "workflows.legend.move";
+      move.setAttribute("data-i18n", key);
+      move.textContent = canvas
+        ? translate(
+            "workflows.legend.moveCanvas",
+            "Drag, use the numbered badge, or press Alt + ← / → to reorder",
+          )
+        : translate(
+            "workflows.legend.move",
+            "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
+          );
     }
   }
 
@@ -1430,6 +1939,12 @@
     Object.keys(STATE.errors).forEach(function (path) {
       var target = nodeAt(path);
       if (!target) return;
+      /* nodeAt walks up to the closest rendered ancestor, and on the canvas that is the
+         summary card whenever the offending node is not in the open inspector. The card has
+         no room for a message and is not where the fix happens, so the error count chip
+         paintCanvasErrors() puts on it is the whole signal — the message shows in the
+         drawer, which the chip opens. */
+      if (target.classList.contains("fc-node")) return;
       target.classList.add("bw-flow-invalid");
       target.setAttribute("aria-invalid", "true");
       target.setAttribute("aria-describedby", errId(path));
@@ -1457,6 +1972,7 @@
       host.classList.toggle("is-pending", !summary);
     });
 
+    paintCanvasErrors();
     panelEl.innerHTML = panelHtml();
     // paint() writes its own markup too — the error panel and every inline message — so the
     // translation pass has to cover it, not just render().
@@ -1485,13 +2001,20 @@
     var rule = STATE.rules[parseInt(match[1], 10)];
     if (!rule) return;
     STATE.open.add(rule.id);
-    // A long value list may be hiding the offending chip — reveal it.
-    var valueMatch = /\.values\[(\d+)\]$/.exec(path);
-    if (valueMatch) {
-      var owner = nodeOwnerKey(path.replace(/\.values\[\d+\]$/, ""));
-      if (owner) STATE.shown.add(owner);
-    }
+    // On the canvas the offending node only exists once the inspector is showing that rule,
+    // so opening the drawer is part of getting there — not a separate step for the operator.
+    if (STATE.view === "canvas") STATE.inspect = rule.id;
+    // Render first: the owning node is only in the DOM once the rule is expanded (list) or
+    // the inspector is open (canvas), and nodeOwnerKey reads the DOM.
     render();
+    // A long value list may be hiding the offending chip — reveal it.
+    if (/\.values\[(\d+)\]$/.test(path)) {
+      var owner = nodeOwnerKey(path.replace(/\.values\[\d+\]$/, ""));
+      if (owner && !STATE.shown.has(owner)) {
+        STATE.shown.add(owner);
+        render();
+      }
+    }
     paint();
     // setTimeout, not requestAnimationFrame: rAF never fires while the page is in a hidden
     // or background frame, which would silently drop the landing.
@@ -1575,6 +2098,52 @@
         },
       ),
     );
+  }
+
+  /* Canvas: the "+" on a connector adds a rule at that slot rather than at the end, because
+     on a chain the gap the operator clicked is the priority they mean. */
+  function insertRule(index) {
+    if (STATE.rules.length >= MAX_RULES) return;
+    var rule = newRule();
+    index = Math.max(0, Math.min(STATE.rules.length, index));
+    STATE.rules.splice(index, 0, rule);
+    STATE.open.add(rule.id);
+    STATE.inspect = STATE.view === "canvas" ? rule.id : STATE.inspect;
+    touch('[data-wf-rule="' + CSS.escape(rule.id) + '"]');
+    say(
+      translate(
+        "workflows.say.inserted",
+        "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+        { n: index + 1, total: STATE.rules.length },
+      ),
+    );
+  }
+
+  /* Opening the inspector is a view change, not an edit: it must not mark the page dirty or
+     re-run validation, so it renders directly instead of going through touch(). */
+  function inspect(id) {
+    if (STATE.inspect === id) return;
+    STATE.inspect = id;
+    render();
+    paint();
+    if (!id) return;
+    var drawer = ladderEl.querySelector(".wf-drawer");
+    if (drawer) {
+      var focusable = drawer.querySelector(
+        "input:not([disabled]), select:not([disabled]), button:not([disabled])",
+      );
+      if (focusable) focusable.focus({ preventScroll: true });
+    }
+    var rule = ruleById(id);
+    var index = STATE.rules.indexOf(rule);
+    if (rule)
+      say(
+        translate(
+          "workflows.say.inspecting",
+          "Editing rule {{n}} of {{total}} — {{name}}.",
+          { n: index + 1, total: STATE.rules.length, name: ruleLabel(rule) },
+        ),
+      );
   }
 
   function removeNode(nodeKey) {
@@ -2306,8 +2875,40 @@
         return target.closest(selector);
       };
 
-      var jumpButton = hit("[data-wf-jump]");
-      if (jumpButton) return jump(jumpButton.dataset.wfJump);
+      // ---- canvas-only controls ----
+      var zoomButton = hit("[data-fc-zoom]");
+      if (zoomButton) {
+        var step = ZOOM_STEPS.indexOf(STATE.zoom);
+        if (step < 0) step = ZOOM_STEPS.indexOf(1);
+        step = Math.max(
+          0,
+          Math.min(
+            ZOOM_STEPS.length - 1,
+            step + parseInt(zoomButton.dataset.fcZoom, 10),
+          ),
+        );
+        STATE.zoom = ZOOM_STEPS[step];
+        var board = ladderEl.querySelector(".fc-board");
+        if (board) applyZoom(board);
+        return;
+      }
+      if (hit("[data-fc-fit]")) return fitCanvas();
+
+      var insert = hit("[data-wf-insert]");
+      if (insert && !STATE.readonly)
+        return insertRule(parseInt(insert.dataset.wfInsert, 10));
+
+      if (hit("[data-wf-drawerclose]")) return inspect(null);
+
+      var inspectButton = hit("[data-wf-inspect]");
+      if (inspectButton) return inspect(inspectButton.dataset.wfInspect);
+
+      /* A node card is a summary, never the editor — clicking its body opens the drawer.
+         Guarded on the controls the card carries so the order badge and the toolbar keep
+         doing their own jobs. */
+      var card = hit(".fc-node");
+      if (card && !hit("button, a, input, select"))
+        return inspect(card.dataset.wfRule);
 
       var toggle = hit("[data-wf-toggleopen]");
       if (toggle) {
@@ -2567,19 +3168,31 @@
     // Reordering must not depend on a pointer: the arrows, the numbered marker menu and
     // Alt + ↑ / ↓ all reach the same move, and every move is announced.
     root.addEventListener("keydown", function (event) {
-      if (
-        !event.altKey ||
-        (event.key !== "ArrowUp" && event.key !== "ArrowDown")
-      )
-        return;
       var card = event.target.closest("[data-wf-rule]");
-      if (!card || STATE.readonly) return;
+      if (!card) return;
+      // On the canvas a node card is a button-like summary, so Enter / Space opens it — but
+      // only when the card itself has focus: the badge and toolbar inside it are real
+      // buttons and Space has to keep activating those.
+      if (
+        (event.key === "Enter" || event.key === " ") &&
+        event.target === card &&
+        card.classList.contains("fc-node")
+      ) {
+        event.preventDefault();
+        return inspect(card.dataset.wfRule);
+      }
+      // The axis follows the view: the ladder runs down the page, the chain runs across it.
+      var back = STATE.view === "canvas" ? "ArrowLeft" : "ArrowUp";
+      var forward = STATE.view === "canvas" ? "ArrowRight" : "ArrowDown";
+      if (!event.altKey || (event.key !== back && event.key !== forward))
+        return;
+      if (STATE.readonly) return;
       event.preventDefault();
       var id = card.dataset.wfRule;
       var index = STATE.rules.findIndex(function (rule) {
         return rule.id === id;
       });
-      moveRule(id, event.key === "ArrowUp" ? index - 1 : index + 1, "keyboard");
+      moveRule(id, event.key === back ? index - 1 : index + 1, "keyboard");
     });
 
     // Hovering a rule dims everything it would shadow — first-match-wins, without a graph.
@@ -2602,10 +3215,17 @@
       if (!next || !next.closest("[data-wf-item]")) trace(pinnedTrace());
     });
 
+    /* The ladder arms the drag from its grip. The canvas has no grip: the whole node card is
+       the handle, so any pointer press on the card that is not on one of its controls arms
+       it — and the pan handler ignores .fc-node for the same reason. */
     root.addEventListener("pointerdown", function (event) {
-      var grip = event.target.closest("[data-wf-grip]");
-      if (!grip) return;
-      var item = grip.closest("[data-wf-item]");
+      var handle =
+        event.target.closest("[data-wf-grip]") ||
+        (STATE.view === "canvas" && !STATE.readonly
+          ? event.target.closest(".fc-node")
+          : null);
+      if (!handle || event.target.closest("button, a, input, select")) return;
+      var item = handle.closest("[data-wf-item]");
       if (item) item.setAttribute("draggable", "true");
     });
     root.addEventListener("dragstart", function (event) {
@@ -2613,6 +3233,10 @@
       if (!item) return;
       dragId = item.dataset.wfItem;
       item.classList.add("is-dragging");
+      var host = ladderEl.querySelector(".fc-host");
+      if (host) host.classList.add("is-dragging");
+      var viewport = ladderEl.querySelector(".fc-vp");
+      if (viewport) viewport.classList.add("is-dragging");
       if (event.dataTransfer) {
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("text/plain", dragId);
@@ -2623,7 +3247,11 @@
       if (!dragId || !item || item.dataset.wfItem === dragId) return;
       event.preventDefault();
       var rect = item.getBoundingClientRect();
-      var after = event.clientY > rect.top + rect.height / 2;
+      // Same midpoint test on whichever axis carries priority in this view.
+      var after =
+        STATE.view === "canvas"
+          ? event.clientX > rect.left + rect.width / 2
+          : event.clientY > rect.top + rect.height / 2;
       Array.prototype.forEach.call(
         root.querySelectorAll(".is-dropbefore, .is-dropafter"),
         function (el) {
@@ -2649,7 +3277,9 @@
     });
     root.addEventListener("dragend", function () {
       Array.prototype.forEach.call(
-        root.querySelectorAll(".is-dragging, .is-dropbefore, .is-dropafter"),
+        root.querySelectorAll(
+          ".is-dragging, .is-dropbefore, .is-dropafter, .fc-host, .fc-vp",
+        ),
         function (el) {
           el.classList.remove("is-dragging", "is-dropbefore", "is-dropafter");
         },
@@ -2669,6 +3299,12 @@
   function wireMenus() {
     document.addEventListener("click", function (event) {
       var target = event.target;
+
+      /* On the document, not on the ladder: the validation summary these buttons live in is
+         a sibling of #wf-rules, so a listener scoped to the ladder never saw the click and
+         every entry in the panel was inert. */
+      var jumpButton = target.closest("[data-wf-jump]");
+      if (jumpButton) return jump(jumpButton.dataset.wfJump);
 
       var moveTo = target.closest("[data-wf-moveto]");
       if (moveTo && !moveTo.disabled) {
@@ -2871,9 +3507,56 @@
       return "";
     });
 
+    /* The view is a workspace preference, not part of the workflow, so it is remembered per
+       browser rather than saved with the definition. */
+    try {
+      var saved = window.localStorage.getItem("bw-workflow-view");
+      if (saved === "canvas" || saved === "list") STATE.view = saved;
+    } catch (error) {
+      /* private mode / storage disabled — the default view is fine */
+    }
+
     render();
     wireLadder(ladderEl);
     wireMenus();
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-wf-view]"),
+      function (button) {
+        button.addEventListener("click", function () {
+          var next = button.dataset.wfView;
+          if (next === STATE.view) return;
+          STATE.view = next;
+          // Carry the operator's place across: what the drawer was editing becomes the
+          // expanded card, and vice versa, so switching view never loses the rule.
+          if (next === "list") {
+            if (STATE.inspect) STATE.open.add(STATE.inspect);
+            STATE.inspect = null;
+          } else {
+            var open = Array.from(STATE.open);
+            STATE.inspect = open.length ? open[open.length - 1] : null;
+          }
+          try {
+            window.localStorage.setItem("bw-workflow-view", next);
+          } catch (error) {
+            /* nothing to do — the view still switches for this page load */
+          }
+          render();
+          paint();
+          say(
+            next === "canvas"
+              ? translate(
+                  "workflows.say.viewCanvas",
+                  "Canvas view. Rules run left to right; the first match wins.",
+                )
+              : translate(
+                  "workflows.say.viewList",
+                  "List view. Rules run top to bottom; the first match wins.",
+                ),
+          );
+        });
+      },
+    );
 
     var addButton = document.getElementById("wf-add-rule");
     if (addButton) {

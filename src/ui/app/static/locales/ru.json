@@ -2410,10 +2410,12 @@
       "drag": "Перетащите для изменения порядка",
       "expand": "Развернуть",
       "groupKind": "Тип группы",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "Ещё",
       "moveDown": "Переместить вниз — выполняется позже",
       "moveRule": "Переместить правило",
       "moveUp": "Переместить вверх — выполняется раньше",
+      "openRule": "Open rule {{n}}",
       "provider": "Поставщик антибот-проверки",
       "redirectStatus": "Код перенаправления",
       "removeCondition": "Удалить условие",
@@ -2422,6 +2424,7 @@
       "removeValue": "Удалить значение",
       "requestCount": "Количество запросов",
       "resourceGroup": "Группа ресурсов",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "Название правила {{n}}",
       "terminalAction": "Завершающее действие",
       "uriMatch": "Режим сопоставления URI",
@@ -2431,6 +2434,31 @@
     "attach": "Прикрепить к сервисам",
     "attach_help": "Правила применяются только к тем сервисам, к которым прикреплен рабочий процесс.",
     "attached_notice": "После сохранения эти правила будут применены к {{count}} привязанным службам.",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "Правил: {{count}} из {{maxRules}} · крупнейшее правило использует {{worst}} из {{maxPredicates}} условий · регулярных выражений в процессе: {{regexes}}",
     "clone": "Клонировать рабочий процесс",
     "clone_help": "Правила копируются, а прикрепления к сервисам — нет.",
@@ -2469,9 +2497,11 @@
       "fall": "При несовпадении переход к следующему правилу",
       "gate": "Порог частоты разрешает совпадение, но не является действием",
       "move": "Чтобы изменить порядок, перетащите, используйте стрелки или нажмите Alt + ↑ / ↓",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "Совпадение выполняет одно действие и останавливает проверку"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "нет совпадения"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "Правило удалено. Осталось правил: {{count}}.",
       "duplicated": "Копия вставлена на позицию {{n}}. Она не сможет сработать, пока исходное правило выше включено.",
       "gateAdded": "К совпадению добавлен порог частоты. Ниже него правило не срабатывает, и проверка продолжается.",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "Последнее значение удалено — это условие нельзя сохранить, пока не будет добавлено значение.",
       "moved": "{{name}} перемещено на позицию {{to}} из {{total}}{{how}}. Теперь оно выполняется {{where}}.",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "перетаскиванием",
         "keyboard": "с клавиатуры"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "Поиск по имени или описанию...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "является одним из",
       "method": "равен",
       "uri": "совпадает с"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

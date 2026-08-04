@@ -2410,10 +2410,12 @@
       "drag": "क्रम बदलने के लिए खींचें",
       "expand": "फैलाएँ",
       "groupKind": "समूह का प्रकार",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "और",
       "moveDown": "नीचे ले जाएँ — बाद में चलेगा",
       "moveRule": "नियम ले जाएँ",
       "moveUp": "ऊपर ले जाएँ — पहले चलेगा",
+      "openRule": "Open rule {{n}}",
       "provider": "एंटीबॉट प्रदाता",
       "redirectStatus": "रीडायरेक्ट स्थिति",
       "removeCondition": "शर्त हटाएँ",
@@ -2422,6 +2424,7 @@
       "removeValue": "मान हटाएँ",
       "requestCount": "अनुरोधों की संख्या",
       "resourceGroup": "संसाधन समूह",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "नियम {{n}} का नाम",
       "terminalAction": "अंतिम कार्रवाई",
       "uriMatch": "URI मिलान मोड",
@@ -2431,6 +2434,31 @@
     "attach": "सेवाओं से जोड़ें",
     "attach_help": "नियम केवल उन सेवाओं पर लागू होते हैं जिनसे वर्कफ़्लो जुड़ा हुआ है।",
     "attached_notice": "सहेजने पर ये नियम {{count}} संलग्न सेवाओं पर लागू होंगे।",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "{{maxRules}} में से {{count}} नियम · सबसे बड़ा नियम {{maxPredicates}} में से {{worst}} विधेय उपयोग करता है · इस कार्यप्रवाह में {{regexes}} रेगेक्स",
     "clone": "वर्कफ़्लो की प्रतिलिपि बनाएँ",
     "clone_help": "नियम कॉपी किए जाते हैं, लेकिन सेवा के अटैचमेंट नहीं।",
@@ -2469,9 +2497,11 @@
       "fall": "मेल न होने पर अगला नियम",
       "gate": "दर सीमा मिलान को नियंत्रित करती है, यह कार्रवाई नहीं है",
       "move": "क्रम बदलने के लिए खींचें, तीरों का उपयोग करें या Alt + ↑ / ↓ दबाएँ",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "मिलान एक कार्रवाई चलाकर रोक देता है"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "मेल नहीं"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "नियम हटा दिया गया। {{count}} नियम शेष हैं।",
       "duplicated": "प्रतिलिपि स्थान {{n}} पर डाली गई। ऊपर का मूल नियम सक्षम रहने तक यह कभी मेल नहीं खा सकती।",
       "gateAdded": "मिलान में दर सीमा जोड़ी गई। इसके नीचे नियम मेल नहीं खाता और मूल्यांकन जारी रहता है।",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "अंतिम मान हटाया गया — कोई मान होने तक यह शर्त सहेजी नहीं जा सकती।",
       "moved": "{{name}} को {{total}} में से स्थान {{to}} पर ले जाया गया{{how}}। अब यह {{where}} चलता है।",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "खींचकर",
         "keyboard": "कीबोर्ड से"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "नाम या विवरण खोजें...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "इनमें से एक है",
       "method": "है",
       "uri": "से मेल खाता है"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

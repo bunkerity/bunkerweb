@@ -198,7 +198,7 @@ spec:
             - name: API_USERNAME
               value: "changeme"
             - name: API_PASSWORD
-              value: "changeme"
+              value: "Ch@ngeme1234"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -318,7 +318,7 @@ spec:
             - name: ADMIN_USERNAME
               value: "changeme"
             - name: ADMIN_PASSWORD
-              value: "changeme"
+              value: "Ch@ngeme1234"
             - name: API_URL
               value: "http://svc-bunkerweb-api.default.svc.cluster.local:8888"
             - name: API_TOKEN

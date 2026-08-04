@@ -54,7 +54,7 @@ services:
     environment:
       <<: *env
       API_USERNAME: "changeme"
-      API_PASSWORD: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
     networks:
       - bw-universe
       - bw-db
@@ -84,7 +84,7 @@ services:
     environment:
       <<: *env
       ADMIN_USERNAME: "changeme"
-      ADMIN_PASSWORD: "changeme"
+      ADMIN_PASSWORD: "Ch@ngeme1234"
     labels:
       - "bunkerweb.SERVER_NAME=www.example.com"
       - "bunkerweb.USE_TEMPLATE=ui"

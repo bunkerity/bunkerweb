@@ -2410,10 +2410,12 @@
       "drag": "I-drag para baguhin ang ayos",
       "expand": "I-expand",
       "groupKind": "Uri ng grupo",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "Higit pa",
       "moveDown": "Ilipat pababa — mas huling tatakbo",
       "moveRule": "Ilipat ang patakaran",
       "moveUp": "Ilipat pataas — mas maagang tatakbo",
+      "openRule": "Open rule {{n}}",
       "provider": "Tagapagbigay ng antibot",
       "redirectStatus": "Katayuan ng pag-redirect",
       "removeCondition": "Alisin ang kondisyon",
@@ -2422,6 +2424,7 @@
       "removeValue": "Alisin ang value",
       "requestCount": "Bilang ng mga request",
       "resourceGroup": "Grupo ng resource",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "Pangalan ng patakaran {{n}}",
       "terminalAction": "Pangwakas na aksyon",
       "uriMatch": "Mode ng pagtutugma ng URI",
@@ -2431,6 +2434,31 @@
     "attach": "Idikit sa mga serbisyo",
     "attach_help": "Ang mga panuntunan ay ipinapatupad lamang sa mga serbisyo kung saan nakakabit ang isang daloy ng trabaho.",
     "attached_notice": "Sa pag-save, ilalapat ang mga patakarang ito sa {{count}} nakalakip na serbisyo.",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "{{count}} sa {{maxRules}} patakaran · gumagamit ang pinakamalaking patakaran ng {{worst}} sa {{maxPredicates}} predicate · {{regexes}} regex sa workflow na ito",
     "clone": "Kopyahin ang daloy ng trabaho",
     "clone_help": "Ang mga panuntunan ay kinokopya; ang mga attachment sa serbisyo ay hindi.",
@@ -2469,9 +2497,11 @@
       "fall": "Kapag walang tugma, pumunta sa susunod na patakaran",
       "gate": "Kinokontrol ng rate threshold ang tugma; hindi ito aksyon",
       "move": "I-drag, gamitin ang mga arrow, o pindutin ang Alt + ↑ / ↓ para baguhin ang ayos",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "Kapag may tugma, tatakbo ang isang aksyon at titigil"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "walang tugma"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "Binura ang patakaran. {{count}} patakaran ang natitira.",
       "duplicated": "Ipinasok ang kopya sa puwestong {{n}}. Hindi ito tutugma habang naka-enable ang orihinal sa itaas.",
       "gateAdded": "Nagdagdag ng rate threshold sa tugma. Sa ibaba nito, hindi tutugma ang patakaran at magpapatuloy ang pagsusuri.",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "Inalis ang huling value — hindi mase-save ang kondisyong ito hangga't wala itong value.",
       "moved": "Inilipat ang {{name}} sa puwestong {{to}} sa {{total}}{{how}}. Tumatakbo na ito {{where}}.",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "sa pag-drag",
         "keyboard": "gamit ang keyboard"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "Maghanap ng pangalan o paglalarawan...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "ay isa sa",
       "method": "ay",
       "uri": "tumutugma sa"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

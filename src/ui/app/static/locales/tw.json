@@ -2410,10 +2410,12 @@
       "drag": "拖曳以重新排序",
       "expand": "展開",
       "groupKind": "群組類型",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "更多",
       "moveDown": "下移，稍後執行",
       "moveRule": "移動規則",
       "moveUp": "上移，提早執行",
+      "openRule": "Open rule {{n}}",
       "provider": "反機器人驗證供應商",
       "redirectStatus": "重新導向狀態碼",
       "removeCondition": "移除條件",
@@ -2422,6 +2424,7 @@
       "removeValue": "移除值",
       "requestCount": "請求數",
       "resourceGroup": "資源群組",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "規則 {{n}} 的名稱",
       "terminalAction": "終止動作",
       "uriMatch": "URI 比對模式",
@@ -2431,6 +2434,31 @@
     "attach": "連接到服務",
     "attach_help": "規則僅在工作流程連接到的服務上執行。",
     "attached_notice": "儲存後會將這些規則套用至 {{count}} 個已連結的服務。",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "共 {{maxRules}} 條規則，已使用 {{count}} 條；最大規則使用 {{maxPredicates}} 個述詞中的 {{worst}} 個；此工作流程包含 {{regexes}} 個規則運算式",
     "clone": "複製工作流程",
     "clone_help": "規則會被複製，但服務連接不會。",
@@ -2469,9 +2497,11 @@
       "fall": "不相符時前往下一條規則",
       "gate": "速率門檻控制是否相符，它不是動作",
       "move": "拖曳、使用方向鍵，或按 Alt + ↑ / ↓ 重新排序",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "相符時執行一個動作並停止"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "不相符"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "規則已刪除。還剩 {{count}} 條規則。",
       "duplicated": "副本已插入第 {{n}} 個位置。只要上方的原始規則保持啟用，它就永遠不會相符。",
       "gateAdded": "已為比對加入速率門檻。低於門檻時規則不相符，評估會繼續。",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}：{{message}}",
       "lastValueRemoved": "最後一個值已移除；此條件必須包含一個值才能儲存。",
       "moved": "{{name}} 已移至第 {{to}} 個位置，共 {{total}} 個{{how}}。現在它會在{{where}}執行。",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "透過拖曳",
         "keyboard": "透過鍵盤"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "搜尋名稱或描述...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "是下列其中之一",
       "method": "是",
       "uri": "符合"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

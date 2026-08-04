@@ -2410,10 +2410,12 @@
       "drag": "Trascina per riordinare",
       "expand": "Espandi",
       "groupKind": "Tipo di gruppo",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "Altro",
       "moveDown": "Sposta in basso: viene eseguita dopo",
       "moveRule": "Sposta regola",
       "moveUp": "Sposta in alto: viene eseguita prima",
+      "openRule": "Open rule {{n}}",
       "provider": "Provider Antibot",
       "redirectStatus": "Stato del reindirizzamento",
       "removeCondition": "Rimuovi condizione",
@@ -2422,6 +2424,7 @@
       "removeValue": "Rimuovi valore",
       "requestCount": "Numero di richieste",
       "resourceGroup": "Gruppo di risorse",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "Nome della regola {{n}}",
       "terminalAction": "Azione terminale",
       "uriMatch": "Modalità di corrispondenza URI",
@@ -2431,6 +2434,31 @@
     "attach": "Allega ai servizi",
     "attach_help": "Le regole vengono applicate solo ai servizi a cui è collegato il flusso di lavoro.",
     "attached_notice": "Il salvataggio applica queste regole a {{count}} servizi collegati.",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "{{count}} regole su {{maxRules}} · la regola più grande usa {{worst}} predicati su {{maxPredicates}} · {{regexes}} espressioni regolari in questo flusso di lavoro",
     "clone": "Clona flusso di lavoro",
     "clone_help": "Le regole vengono copiate; gli allegamenti ai servizi non.",
@@ -2469,9 +2497,11 @@
       "fall": "Nessuna corrispondenza passa alla regola successiva",
       "gate": "Una soglia di frequenza condiziona la corrispondenza; non è un’azione",
       "move": "Trascina, usa le frecce o premi Alt + ↑ / ↓ per riordinare",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "Una corrispondenza esegue un’azione e si arresta"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "nessuna corrispondenza"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "Regola eliminata. Restano {{count}} regole.",
       "duplicated": "Copia inserita alla posizione {{n}}. Non può mai corrispondere finché l’originale sopra è attivo.",
       "gateAdded": "Soglia di frequenza aggiunta alla corrispondenza. Sotto di essa la regola non corrisponde e la valutazione continua.",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "Ultimo valore rimosso: questa condizione non può essere salvata finché non ne contiene uno.",
       "moved": "{{name}} spostata alla posizione {{to}} di {{total}}{{how}}. Ora viene eseguita {{where}}.",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "tramite trascinamento",
         "keyboard": "tramite tastiera"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "Cerca nome o descrizione...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "è uno di",
       "method": "è",
       "uri": "corrisponde a"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

@@ -2410,10 +2410,12 @@
       "drag": "Zum Neuordnen ziehen",
       "expand": "Ausklappen",
       "groupKind": "Gruppentyp",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "Mehr",
       "moveDown": "Nach unten verschieben – wird später ausgeführt",
       "moveRule": "Regel verschieben",
       "moveUp": "Nach oben verschieben – wird früher ausgeführt",
+      "openRule": "Open rule {{n}}",
       "provider": "Antibot-Anbieter",
       "redirectStatus": "Weiterleitungsstatus",
       "removeCondition": "Bedingung entfernen",
@@ -2422,6 +2424,7 @@
       "removeValue": "Wert entfernen",
       "requestCount": "Anzahl der Anfragen",
       "resourceGroup": "Ressourcengruppe",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "Name der Regel {{n}}",
       "terminalAction": "Abschließende Aktion",
       "uriMatch": "URI-Abgleichsmodus",
@@ -2431,6 +2434,31 @@
     "attach": "An den Diensten befestigen",
     "attach_help": "Die Regeln werden nur auf den Diensten angewendet, an die ein Workflow befestigt ist.",
     "attached_notice": "Beim Speichern werden diese Regeln auf {{count}} verknüpfte(n) Dienst(e) angewendet.",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "{{count}} von {{maxRules}} Regeln · größte Regel verwendet {{worst}} von {{maxPredicates}} Prädikaten · {{regexes}} reguläre Ausdrücke in diesem Workflow",
     "clone": "Workflow klonen",
     "clone_help": "Die Regeln werden kopiert, die Dienstbeziehungen nicht.",
@@ -2469,9 +2497,11 @@
       "fall": "Keine Übereinstimmung führt zur nächsten Regel",
       "gate": "Ein Ratenschwellenwert steuert den Abgleich; er ist keine Aktion",
       "move": "Zum Neuordnen ziehen, die Pfeile verwenden oder Alt + ↑ / ↓ drücken",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "Eine Übereinstimmung führt eine Aktion aus und beendet die Auswertung"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "keine Übereinstimmung"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "Regel gelöscht. {{count}} Regel(n) verbleiben.",
       "duplicated": "Kopie an Position {{n}} eingefügt. Sie kann niemals übereinstimmen, solange das darüberliegende Original aktiviert ist.",
       "gateAdded": "Ratenschwellenwert zum Abgleich hinzugefügt. Darunter stimmt die Regel nicht überein und die Auswertung wird fortgesetzt.",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "Letzten Wert entfernt – diese Bedingung kann erst gespeichert werden, wenn sie wieder einen Wert enthält.",
       "moved": "{{name}} an Position {{to}} von {{total}}{{how}} verschoben. Sie wird jetzt {{where}} ausgeführt.",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "durch Ziehen",
         "keyboard": "per Tastatur"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "Suche nach Name oder Beschreibung...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "ist eines von",
       "method": "ist",
       "uri": "stimmt überein mit"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

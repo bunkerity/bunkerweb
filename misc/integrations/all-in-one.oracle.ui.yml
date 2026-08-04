@@ -23,7 +23,7 @@ services:
 
       # UI
       ADMIN_USERNAME: "changeme"
-      ADMIN_PASSWORD: "changeme"
+      ADMIN_PASSWORD: "Ch@ngeme1234"
     networks:
       - bw-services
       - bw-db

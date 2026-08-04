@@ -2410,10 +2410,12 @@
       "drag": "ক্রম বদলাতে টেনে আনুন",
       "expand": "প্রসারিত করুন",
       "groupKind": "গ্রুপের ধরন",
+      "insertAt": "Insert a rule at position {{n}}",
       "more": "আরও",
       "moveDown": "নিচে সরান — পরে চলবে",
       "moveRule": "নিয়ম সরান",
       "moveUp": "উপরে সরান — আগে চলবে",
+      "openRule": "Open rule {{n}}",
       "provider": "অ্যান্টিবট প্রদানকারী",
       "redirectStatus": "রিডাইরেক্ট স্ট্যাটাস",
       "removeCondition": "শর্ত সরান",
@@ -2422,6 +2424,7 @@
       "removeValue": "মান সরান",
       "requestCount": "অনুরোধের সংখ্যা",
       "resourceGroup": "রিসোর্স গ্রুপ",
+      "ruleErrors": "{{count}} validation problems in this rule",
       "ruleName": "নিয়ম {{n}}-এর নাম",
       "terminalAction": "চূড়ান্ত কাজ",
       "uriMatch": "URI মিলের মোড",
@@ -2431,6 +2434,31 @@
     "attach": "পরিষেবার সাথে যুক্ত করুন",
     "attach_help": "নিয়মগুলি শুধুমাত্র সেই পরিষেবাগুলিতে প্রয়োগ করা হয় যেগুলিতে একটি ওয়ার্কফ্লো যুক্ত করা হয়েছে।",
     "attached_notice": "সংরক্ষণ করলে এই নিয়মগুলো {{count}}টি সংযুক্ত পরিষেবায় প্রয়োগ হবে।",
+    "canvas": {
+      "auxCanvas": "Left to right. First match wins.",
+      "auxList": "Top to bottom. First match wins.",
+      "close": "Close",
+      "drawerSub": "Runs at position {{n}} of {{total}}",
+      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
+      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
+      "emptyCta": "Add the first rule",
+      "emptyTitle": "No rules yet",
+      "entry_sub": "Rules run left to right.",
+      "entry_title": "Every request",
+      "exit_sub": "Continues to the next attached workflow.",
+      "exit_title": "No rule matched",
+      "fit": "Fit to view",
+      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
+      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
+      "insert": "Insert a rule here",
+      "open": "Open rule",
+      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
+      "stopTail": ", evaluation stops here — no rule after it is reached.",
+      "title": "Rule order",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "capacity": "{{maxRules}}টির মধ্যে {{count}}টি নিয়ম · সবচেয়ে বড় নিয়ম {{maxPredicates}}টির মধ্যে {{worst}}টি শর্ত ব্যবহার করে · এই ওয়ার্কফ্লোতে {{regexes}}টি রেগেক্স",
     "clone": "ওয়ার্কফ্লো ক্লোন করুন",
     "clone_help": "নিয়মগুলি কপি করা হয়েছে; পরিষেবাগুলির সংযুক্তি কপি করা হয়নি।",
@@ -2469,9 +2497,11 @@
       "fall": "না মিললে পরের নিয়মে যায়",
       "gate": "হারের সীমা মিল নিয়ন্ত্রণ করে, এটি কোনো কাজ নয়",
       "move": "ক্রম বদলাতে টানুন, তীর ব্যবহার করুন বা Alt + ↑ / ↓ চাপুন",
+      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
       "stop": "মিললে একটি কাজ চালিয়ে থেমে যায়"
     },
     "link": {
+      "entry": "every request",
       "noMatch": "মেলেনি"
     },
     "menu": {
@@ -2509,6 +2539,8 @@
       "deleted": "নিয়ম মুছে ফেলা হয়েছে। {{count}}টি নিয়ম বাকি।",
       "duplicated": "অনুলিপিটি {{n}} নম্বর স্থানে ঢোকানো হয়েছে। ওপরের মূল নিয়ম সক্রিয় থাকা পর্যন্ত এটি কখনো মিলবে না।",
       "gateAdded": "মিলে হারের সীমা যোগ হয়েছে। এর নিচে নিয়ম মেলে না এবং মূল্যায়ন চলতে থাকে।",
+      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
+      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "শেষ মান সরানো হয়েছে — একটি মান না থাকা পর্যন্ত এই শর্ত সংরক্ষণ করা যাবে না।",
       "moved": "{{name}}-কে {{total}}টির মধ্যে {{to}} নম্বর স্থানে সরানো হয়েছে{{how}}। এখন এটি {{where}} চলে।",
@@ -2525,7 +2557,9 @@
       "via": {
         "drag": "টেনে",
         "keyboard": "কীবোর্ড দিয়ে"
-      }
+      },
+      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
+      "viewList": "List view. Rules run top to bottom; the first match wins."
     },
     "search": "নাম বা বর্ণনা অনুসন্ধান করুন...",
     "test": {
@@ -2610,6 +2644,10 @@
       "isOneOf": "এগুলোর একটি",
       "method": "হয়",
       "uri": "এর সঙ্গে মেলে"
+    },
+    "view": {
+      "canvas": "Canvas",
+      "list": "List"
     }
   },
   "request_path": {

@@ -1,4 +1,9 @@
 x-env: &env
+  # Spelled out even though it is the default everywhere else: the worker is the one component
+  # that reads an unset DATABASE_URI as "no database at all" (worker/app.py::init_worker_db)
+  # rather than falling back to this path. Left blank, its jobs record no run and, worse, see
+  # compiled defaults instead of the configuration below.
+  DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
   API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
   API_URL: "http://bw-api:8888"
   API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
@@ -43,7 +48,7 @@ services:
     environment:
       <<: *env
       API_USERNAME: "changeme"
-      API_PASSWORD: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
     networks:
       - bw-universe
 

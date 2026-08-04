@@ -47,7 +47,7 @@ services:
     environment:
       <<: *env
       API_USERNAME: "changeme"
-      API_PASSWORD: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
     networks:
       - bw-universe
       - bw-db
@@ -75,7 +75,7 @@ services:
     environment:
       <<: *env
       ADMIN_USERNAME: "changeme"
-      ADMIN_PASSWORD: "changeme"
+      ADMIN_PASSWORD: "Ch@ngeme1234"
     networks:
       - bw-universe
       - bw-db
