@@ -1,0 +1,373 @@
+{
+  "_comment": [
+    "Shared corpus for test_workflow_tester_parity.py. The top level IS the artefact shape the",
+    "compiler emits, so one document feeds the Python evaluator and the real workflows.lua with",
+    "no translation. Cases carry the raw `bw` table rather than the tester's form fields: the",
+    "contract under test starts where workflows.lua starts.",
+    "",
+    "Two things are deliberately OUT of this differential, because neither engine implements",
+    "them itself and pinning them here would test somebody else's library:",
+    "  * CIDR arithmetic — resty.ipmatcher on one side, Python's ipaddress on the other. Use",
+    "    exact addresses in `values` so both do plain membership.",
+    "  * PCRE dialect — the Lua harness stubs ngx.re.find with string.find (Lua patterns), so",
+    "    every regex here must also be a valid Lua pattern with the same meaning. A guard test",
+    "    enforces it. What IS covered is regex *semantics*: uncompilable -> UNKNOWN, and",
+    "    match/no-match.",
+    "",
+    "Add a case by appending one object to `cases`. No fixture, no factory."
+  ],
+  "groups": {
+    "office": {
+      "ip": ["198.51.100.4"],
+      "country": [],
+      "asn": []
+    },
+    "empty": {
+      "ip": [],
+      "country": [],
+      "asn": []
+    }
+  },
+  "services": {
+    "app.example.com": ["wf-edge", "wf-main"]
+  },
+  "workflows": {
+    "wf-edge": {
+      "name": "Edge policy",
+      "rules": [
+        {
+          "id": "edge-1",
+          "counter": "wf-edge/edge-1",
+          "condition": {
+            "op": "ip",
+            "values": ["192.0.2.1"]
+          },
+          "threshold": null,
+          "action": {
+            "type": "block",
+            "status": 429
+          }
+        }
+      ]
+    },
+    "wf-main": {
+      "name": "Login protection",
+      "rules": [
+        {
+          "id": "all-true",
+          "counter": "wf-main/all-true",
+          "condition": {
+            "op": "all",
+            "nodes": [
+              {
+                "op": "uri",
+                "match": "prefix",
+                "value": "/login"
+              },
+              {
+                "op": "country",
+                "values": ["FR", "BE"]
+              },
+              {
+                "op": "method",
+                "values": ["POST"]
+              }
+            ]
+          },
+          "threshold": null,
+          "action": {
+            "type": "challenge",
+            "provider": "hcaptcha"
+          }
+        },
+        {
+          "id": "any-with-unknown",
+          "counter": "wf-main/any-with-unknown",
+          "condition": {
+            "op": "any",
+            "nodes": [
+              {
+                "op": "asn",
+                "values": [64500]
+              },
+              {
+                "op": "uri",
+                "match": "exact",
+                "value": "/admin"
+              }
+            ]
+          },
+          "threshold": null,
+          "action": {
+            "type": "redirect",
+            "url": "/denied",
+            "status": 302
+          }
+        },
+        {
+          "id": "not-group",
+          "counter": "wf-main/not-group",
+          "condition": {
+            "op": "not",
+            "node": {
+              "op": "group",
+              "kind": "ip",
+              "group_id": "office"
+            }
+          },
+          "threshold": null,
+          "action": {
+            "type": "block",
+            "status": 429
+          }
+        },
+        {
+          "id": "gated",
+          "counter": "wf-main/gated",
+          "condition": {
+            "op": "uri",
+            "match": "regex",
+            "value": "^/api/v[0-9]+/"
+          },
+          "threshold": {
+            "count": 10,
+            "window": 60,
+            "key": "ip"
+          },
+          "action": {
+            "type": "block",
+            "status": 429
+          }
+        },
+        {
+          "id": "dead-group",
+          "counter": "wf-main/dead-group",
+          "condition": {
+            "op": "group",
+            "kind": "ip",
+            "group_id": "empty"
+          },
+          "threshold": null,
+          "action": {
+            "type": "block",
+            "status": 429
+          }
+        },
+        {
+          "id": "broken-regex",
+          "counter": "wf-main/broken-regex",
+          "condition": {
+            "op": "uri",
+            "match": "regex",
+            "value": "(("
+          },
+          "threshold": null,
+          "action": {
+            "type": "block",
+            "status": 429
+          }
+        },
+        {
+          "id": "not-asn",
+          "counter": "wf-main/not-asn",
+          "condition": {
+            "op": "all",
+            "nodes": [
+              {
+                "op": "uri",
+                "match": "exact",
+                "value": "/asn-probe"
+              },
+              {
+                "op": "not",
+                "node": {
+                  "op": "asn",
+                  "values": [64500]
+                }
+              }
+            ]
+          },
+          "threshold": null,
+          "action": {
+            "type": "block",
+            "status": 429
+          }
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "name": "first workflow in the order wins over the second",
+      "bw": {
+        "remote_addr": "192.0.2.1",
+        "uri": "/login",
+        "request_method": "POST",
+        "country": "FR"
+      },
+      "request_number": 1,
+      "expect": "match wf-edge edge-1 block"
+    },
+    {
+      "name": "all-of matches and stops before the rules below",
+      "bw": {
+        "remote_addr": "203.0.113.7",
+        "uri": "/login",
+        "request_method": "POST",
+        "country": "FR"
+      },
+      "request_number": 1,
+      "expect": "match wf-main all-true challenge"
+    },
+    {
+      "name": "a false leaf settles the all-of even when a sibling is unknown",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/login",
+        "request_method": "GET",
+        "country": "FR",
+        "country_ok": false
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "any-of is unknown when its only other branch is false",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/other",
+        "request_method": "GET",
+        "country": "DE",
+        "asn_ok": false
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "any-of settles true on the second branch",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/admin",
+        "request_method": "GET",
+        "country": "DE",
+        "asn_ok": false
+      },
+      "request_number": 1,
+      "expect": "match wf-main any-with-unknown redirect"
+    },
+    {
+      "name": "not over a group that holds the address is false",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/other",
+        "request_method": "GET",
+        "country": "DE"
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "not over a group that does not hold the address matches",
+      "bw": {
+        "remote_addr": "203.0.113.9",
+        "uri": "/other",
+        "request_method": "GET",
+        "country": "DE"
+      },
+      "request_number": 1,
+      "expect": "match wf-main not-group block"
+    },
+    {
+      "name": "a private address has no asn, which is false and not unknown",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/other",
+        "request_method": "GET",
+        "country": "local",
+        "asn_number": null
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "the rate gate is closed at the threshold",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/api/v2/users",
+        "request_method": "GET",
+        "country": "DE"
+      },
+      "request_number": 10,
+      "expect": "no match"
+    },
+    {
+      "name": "the rate gate opens strictly above the threshold",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/api/v2/users",
+        "request_method": "GET",
+        "country": "DE"
+      },
+      "request_number": 11,
+      "expect": "match wf-main gated block"
+    },
+    {
+      "name": "an empty group reference can never match",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/nothing",
+        "request_method": "GET",
+        "country": "DE"
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "an uncompilable pattern never matches",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "((",
+        "request_method": "GET",
+        "country": "DE"
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "a whitelisted client skips the whole ladder",
+      "bw": {
+        "remote_addr": "192.0.2.1",
+        "uri": "/login",
+        "request_method": "POST",
+        "country": "FR",
+        "whitelisted": true
+      },
+      "request_number": 1,
+      "expect": "whitelisted"
+    },
+    {
+      "name": "not over an asn leaf distinguishes no-asn from unknown-asn",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/asn-probe",
+        "request_method": "GET",
+        "country": "local",
+        "asn_number": null
+      },
+      "request_number": 1,
+      "expect": "match wf-main not-asn block"
+    },
+    {
+      "name": "not over an asn leaf stays unknown when the lookup failed",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/asn-probe",
+        "request_method": "GET",
+        "country": "DE",
+        "asn_ok": false
+      },
+      "request_number": 1,
+      "expect": "no match"
+    }
+  ]
+}
