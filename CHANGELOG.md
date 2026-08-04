@@ -2,6 +2,7 @@
 
 ## v1.6.14~rc3 - 2026/07/??
 
+- [SECURITY] `db`: the database password is no longer written to the logs. A malformed `DATABASE_URI` was logged in full before exiting, so the credential ended up in any log an operator shared. Connection failures now name the masked target and the reason. (Refs #3361)
 - [SECURITY] `api`: a configuration or plugin push no longer empties the target directory on a live instance while it copies the new content in, which made every request to every service fail for the duration of the copy. Entries are now swapped one at a time with a rename, and a push whose content is unchanged is skipped entirely instead of rewriting an identical tree on every Scheduler start.
 - [SECURITY] `ui`: a TOTP code can no longer be used more than once. The replay guard never persisted the last accepted time step, leaving a captured code valid for the rest of its 30 second window.
 - [SECURITY] `ui`: removed the year-long "remember me" token, which survived logout, password changes and *Wipe other sessions* and bypassed IP/User-Agent pinning and the absolute session cap. "Remember me" now marks the session cookie permanent, so it still survives a browser restart but is a normal revocable session; raise both `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS` to stay logged in longer. Existing tokens are rejected and deleted on the next request.
