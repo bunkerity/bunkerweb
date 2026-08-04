@@ -5,7 +5,7 @@
     "license_title": "许可证",
     "socials": "社交媒体",
     "tagline": "强大保护，化繁为简",
-    "title": "About BunkerWeb",
+    "title": "关于 BunkerWeb",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
@@ -78,20 +78,20 @@
     "subtitle": "在您的 BunkerWeb 实例中禁用的 IP 地址 — 添加、删除或调整禁用的时长。",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "已启用。",
+        "body_before": "此处创建的封禁会在实例重启时失效，除非",
+        "title": "未持久保存的编辑。"
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "按原因统计封禁"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "有效封禁",
+        "active_caption": "IP + CIDR",
+        "countries": "国家/地区",
+        "expiring": "≤ 1 小时后失效",
+        "expiring_caption": "自动轮换",
+        "permanent": "永久封禁"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "封禁",
     "cache": "缓存",
     "web_cache": "Web 缓存",
-    "timings": "Timings",
+    "timings": "执行时间",
     "configs": "配置",
     "extra_pages": "附加页面",
     "global_settings": "全局设置",
-    "global_config": "Global config",
+    "global_config": "全局配置",
     "home": "主页",
     "instances": "实例",
     "jobs": "任务",
@@ -163,7 +163,7 @@
     "filters_suffix": " 过滤器",
     "follow": "跟随",
     "force_check": "强制检查",
-    "force_update": "Force update",
+    "force_update": "强制更新",
     "github_stars": "星标",
     "go_back": "返回",
     "hide": "隐藏",
@@ -183,7 +183,7 @@
     "ping": "Ping",
     "plugin_page": "插件页面",
     "proceed": "继续",
-    "refresh": "Refresh",
+    "refresh": "刷新",
     "refresh_recovery_codes": "刷新恢复代码",
     "reload": "重新加载",
     "reset": "重置",
@@ -216,20 +216,20 @@
     "view_details": "查看详情",
     "view_raw_data": "查看原始数据",
     "wipe_other_sessions": "清除其他会话",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "封禁所有匹配报告",
+    "filtered_actions": "筛选后的操作",
+    "unban_all_filtered": "解除所有匹配的封禁",
+    "update_duration_all_filtered": "更新所有匹配封禁的时长",
+    "use_template": "使用模板",
+    "edit": "编辑",
     "verify": "验证",
-    "view": "View"
+    "view": "查看"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "文件",
+    "kpi_per_service": "按服务",
     "subtitle": "由计划任务生成的缓存文件（黑名单、GeoIP 数据库等） — 针对每个服务和插件进行检查、下载或删除。",
-    "title": "Cache files"
+    "title": "缓存文件"
   },
   "configs": {
     "subtitle": "针对您服务的自定义 NGINX 配置片段 — 创建、编辑和管理 HTTP、ModSecurity 和流级别覆盖。"
@@ -533,7 +533,7 @@
         "title": "上游"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "主要拦截原因"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "前 10 名被阻止的 IP"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "已拦截",
+        "title": "一段时间内的已拦截请求（所选范围）"
       }
     },
     "map": {
@@ -571,13 +571,13 @@
       "title": "仪表板窗口"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "有效封禁",
+      "jobs": "计划任务",
+      "trend": "已拦截请求趋势"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "欢迎回来，{{user}}",
+      "greeting": "欢迎回来，"
     },
     "mini": {
       "across_countries": "在 {{count}} 国家",
@@ -594,12 +594,12 @@
       "vs_prev": "与前次比较"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "所选范围",
+      "top_ips_sub": "按请求数",
+      "status_sub": "HTTP 响应码",
+      "reasons_sub": "按触发规则",
+      "map_sub": "悬停查看详情",
+      "blocking_sub": "已拦截与已允许"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "升级？",
     "use_authenticator_code": "使用身份验证码",
     "use_recovery_code": "使用恢复码",
-    "get_support": "Get support"
+    "get_support": "获取支持"
   },
   "login": {
     "title": "登录",
@@ -945,25 +945,25 @@
     "showing_some": "显示 {{shown}} / {{total}}",
     "select_file_prompt": "选择一个日志文件以查看其内容",
     "trimmed_notice": "--- 为提高性能，已删除 {{count}} 条较早的日志行 ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "所有来源（实时）",
+    "collapse": "折叠",
+    "expand": "展开",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "所有日志",
+    "level_errors_only": "仅错误",
+    "level_security_only": "仅安全日志",
+    "live_title": "实时日志",
+    "pause": "暂停",
+    "resume": "继续",
+    "tailing_sources": "正在跟踪 · {{count}} 个来源",
+    "taller": "增高"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "将您的插件存档拖放到此处或单击以选择文件。",
       "confirm_cache_deletion_alert": "您确定要删除选定的缓存文件吗？",
       "confirm_cache_deletion_alert_plural": "您确定要删除选定的缓存文件吗？",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "确定要转换所选的自定义配置吗？",
       "confirm_configs_conversion_to": "确定将选定的自定义配置转换为 {{state}} 吗？",
       "confirm_configs_deletion_alert": "您确定要删除选定的自定义配置吗？",
       "confirm_configs_deletion_alert_plural": "您确定要删除选定的自定义配置吗？",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
       "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？",
       "update_duration_alert": "请为选定的封禁选择新的期限：",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "要封禁所有 {{count}} 个匹配报告中的 IP 吗？重复目标只会应用一次。",
+      "unban_filtered_confirmation": "确定要解除所有 {{count}} 个匹配的封禁吗？",
+      "update_filtered_duration_alert": "为所有 {{count}} 个匹配的封禁选择新时长："
     },
     "button": {
       "fetch_global_settings_confirm": "应用全局设置",
@@ -1065,7 +1065,7 @@
     "cache": "缓存",
     "certificates": "证书",
     "web_cache": "Web 缓存",
-    "timings": "Timings",
+    "timings": "执行时间",
     "configs": "配置",
     "extra_pages": "附加页面",
     "global_settings": "全局设置",
@@ -1088,11 +1088,11 @@
     "services": "服务",
     "support": "支持",
     "templates": "模板",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "概览",
+    "configure": "配置",
+    "operate": "运维",
+    "system": "系统",
+    "edition_community": "社区版",
     "redirects": "重定向",
     "upstreams": "上游",
     "workflows": "工作流程",
@@ -1141,17 +1141,17 @@
       "show_less": "显示较少"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "有效",
+      "always_on": "核心/始终启用",
+      "disabled": "已禁用",
+      "enabled": "已启用",
+      "inactive": "未启用",
+      "no_match": "没有插件符合筛选条件",
+      "search": "搜索插件...",
+      "tab_all": "全部",
+      "tab_community": "社区版",
+      "tab_disabled": "已禁用",
+      "tab_enabled": "已启用"
     }
   },
   "pro": {
@@ -1172,12 +1172,12 @@
       "unknown": "未知的到期日期"
     },
     "force_check": {
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
-      "title": "Force check"
+      "description": "强制重新检查 PRO 插件。如果有新版本，将重新下载插件。",
+      "title": "强制检查"
     },
     "force_update": {
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
-      "title": "Force update"
+      "description": "跳过检查并强制下载 PRO 插件。如果无法强制执行，则保留当前状态。",
+      "title": "强制更新"
     },
     "key": {
       "title": {
@@ -1199,7 +1199,7 @@
       "suspended": "已暂停",
       "title": "状态"
     },
-    "title": "Pro license"
+    "title": "Pro 许可证"
   },
   "profile": {
     "2fa": {
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "下载调试日志，提取您的配置，并向 BunkerWeb 团队寻求帮助。",
-    "title": "Support"
+    "title": "支持"
   },
   "tab": {
     "custom_certificate": "自定义证书",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "可重用配置模板，用于您的服务：捆绑设置、步骤和自定义配置，然后创建、克隆或删除它们。",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "删除所选项",
+      "empty_message": "创建首个模板，将设置、步骤和自定义配置组合起来以便复用。",
+      "empty_title": "暂无模板",
+      "select": "选择",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "高安全性",
+      "low": "低安全性",
+      "medium": "中等安全性",
+      "ui": "Web 界面"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "自定义配置：{{name}}",
+      "feature": "内置功能：{{name}}",
+      "plugin": "插件：{{name}}"
     },
-    "title": "Service templates"
+    "title": "服务模板"
   },
   "theme": {
     "dark": "深色",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
     "button": {
       "ban_ip": "封禁此 IP 地址",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "将配置 {{name}} 转为草稿",
+      "convert_config_to_online": "将配置 {{name}} 转为上线",
       "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
       "convert_service_to_online": "将服务 {{name}} 转换为在线",
       "delete_config": "删除自定义配置 {{name}}",
@@ -2216,7 +2216,7 @@
     "kinds": "类型",
     "loading_references": "正在加载引用...",
     "max_entries": "一个资源组不能包含超过 {{max}} 条条目。",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} 种类型 · {{values}} 个值 · {{usages}} 次使用",
     "new": "新建组",
     "new_alias": "新建别名",
     "no_entries": "没有条目",
@@ -2389,227 +2389,227 @@
     "truncated": "仅显示前 500 个上游。通过 API 缩小列表以获得完整结果。"
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "阻止",
+    "act_challenge": "质询",
+    "act_code": "状态码",
+    "act_denyDefault": "实例的拒绝状态码",
+    "act_denyShort": "拒绝状态码",
+    "act_provider": "反机器人验证提供商",
+    "act_redirect": "重定向",
+    "act_status": "拒绝状态码",
+    "act_terminal": "每条规则只能执行一个操作，并会结束评估，不会从规则产生真/假分支。",
+    "act_url": "目标 URL",
     "action": "然后",
     "add_rule": "添加规则",
     "all": "全部",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "折叠",
+      "combinator": "更改组合方式，当前为",
+      "conditionType": "条件类型",
+      "denyStatus": "拒绝状态码",
+      "drag": "拖动以重新排序",
+      "expand": "展开",
+      "groupKind": "组类型",
+      "more": "更多",
+      "moveDown": "下移，稍后运行",
+      "moveRule": "移动规则",
+      "moveUp": "上移，提前运行",
+      "provider": "反机器人验证提供商",
+      "redirectStatus": "重定向状态码",
+      "removeCondition": "删除条件",
+      "removeThreshold": "删除阈值",
+      "removeThresholdLong": "删除速率阈值",
+      "removeValue": "删除值",
+      "requestCount": "请求数",
+      "resourceGroup": "资源组",
+      "ruleName": "规则 {{n}} 的名称",
+      "terminalAction": "终止操作",
+      "uriMatch": "URI 匹配模式",
+      "uriValue": "URI 值",
+      "window": "时间窗口（秒）"
     },
     "attach": "附加到服务",
     "attach_help": "规则仅在工作流程附加到的服务上执行。",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "保存后会将这些规则应用到 {{count}} 个已关联服务。",
+    "capacity": "共 {{maxRules}} 条规则，已有 {{count}} 条；最大规则使用 {{maxPredicates}} 个谓词中的 {{worst}} 个；此工作流中有 {{regexes}} 个正则表达式",
     "clone": "克隆工作流程",
     "clone_help": "规则会被复制，但服务附加不会被复制。",
     "clone_name": "副本名称",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "删除此规则？其下的所有规则都将上移一位。"
     },
-    "copySuffix": " (copy)",
+    "copySuffix": "（副本）",
     "delete": "删除工作流程",
     "delete_confirm": "此工作流程及其所有规则将被永久删除。",
     "empty_text": "工作流程是一个规则的有序列表，您将其附加到服务上：一个条件树、可选的速率阈值和一个动作——挑战、阻止或重定向。",
     "empty_title": "目前没有工作流程",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "工作流按关联顺序运行；其中的规则从上到下运行。",
+    "entry_title": "对已关联服务的每个请求",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "无法保存",
+      "saveUnreachable": "无法访问保存端点",
+      "validate": "无法验证",
+      "validateUnreachable": "无法访问验证端点"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "未应用任何内容，运行中的策略保持不变。",
+      "count": "有 {{count}} 个问题阻止保存。",
+      "rule": "规则 {{n}}",
+      "ruleNamed": "规则 {{n}} — {{name}}",
+      "whole": "此工作流"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "请求将继续进入下一个已关联工作流，然后进入安全栈的其余部分。",
+    "exit_title": "没有规则匹配",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "并且仅当同一客户端 IP 的请求数超过",
+      "chip": "匹配门槛",
+      "help": "按客户端 IP 计数。低于阈值时，此规则完全不匹配，评估将继续到下一条规则；它本身不会执行速率限制。"
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "不匹配时转到下一条规则",
+      "gate": "速率阈值控制是否匹配，它不是操作",
+      "move": "拖动、使用箭头或按 Alt + ↑ / ↓ 重新排序",
+      "stop": "匹配后执行一个操作并停止"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "不匹配"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "最后运行",
+      "delete": "删除规则",
+      "disable": "禁用规则",
+      "duplicate": "在下方复制",
+      "enable": "启用规则",
+      "top": "最先运行"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "最先运行",
+      "last": "最后运行"
     },
     "new": "新建工作流程",
     "no_rules": "目前没有规则。添加一个以开始构建此策略。",
     "not_attached": "未附加",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "此工作流未关联到任何服务，因此这些规则尚未在任何位置生效。",
+    "not_validated": "尚未验证",
     "order_help": "规则按顺序评估，第一个匹配的规则获胜。具有速率阈值的规则只有在阈值超过时才会匹配，因此较低的规则可以捕获低于它的流量。",
     "readonly": "数据库是只读的。可以查看工作流程，但不能修改。",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "已禁用",
+      "if": "如果",
+      "namePlaceholder": "规则名称",
+      "noun": "规则",
+      "onMatch": "如果匹配",
+      "skipped": "已禁用，完全跳过，就像它不在列表中一样。",
+      "stopTail": "，评估在此停止，不会到达下方的规则。"
     },
     "rules": "规则",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
-      "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "actionChanged": "操作已更改为 {{type}}。它仍是唯一操作，并仍会停止评估。",
+      "added": "规则已添加到第 {{n}} 位，即最后一位，因此会先检查其上方的所有规则。",
+      "deleted": "规则已删除。还剩 {{count}} 条规则。",
+      "duplicated": "副本已插入第 {{n}} 位。只要上方的原规则处于启用状态，它就永远无法匹配。",
+      "gateAdded": "已向匹配添加速率阈值。低于阈值时规则不匹配，评估继续。",
+      "jumped": "{{where}}：{{message}}",
+      "lastValueRemoved": "最后一个值已删除；此条件必须包含一个值才能保存。",
+      "moved": "{{name}} 已移至第 {{to}} 位，共 {{total}} 位{{how}}。现在它在{{where}}运行。",
+      "predicateCap": "此规则已有 {{max}} 个条件，已达到上限。",
+      "ruleAbove": "上方规则之后",
+      "ruleDisabled": "{{name}} 已禁用，将被完全跳过，下方规则现在会处理这些请求。",
+      "ruleEnabled": "{{name}} 已启用，将再次在第 {{n}} 位接受评估。",
+      "runsAfter": "{{name}} 之后",
+      "runsFirst": "最先",
+      "runsLast": "最后",
+      "saved": "规则已保存并推送到已关联服务。",
+      "theRule": "该规则",
+      "valuesDropped": "条件已更改为 {{type}}；原有的 {{count}} 个值无法保留。",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "通过拖动",
+        "keyboard": "通过键盘"
       }
     },
     "search": "搜索名称或描述...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "留空可模拟 ASN 查询失败。",
+      "asn_invalid": "ASN 必须是数字",
+      "assume_not_whitelisted": "假定客户端不在白名单中。",
+      "assume_rate_counter": "请求编号 {{request_number}} 是输入值，不是测量结果。",
+      "assume_regex_budget": "假定实例的正则表达式预算尚未耗尽。",
+      "assumptions": "假设条件",
+      "country": "国家/地区",
+      "detail_challenge": "质询将接管处理；安全栈的其余部分仍会运行。",
+      "detail_detect": "此服务处于检测模式，因此不会实际执行任何操作。",
+      "detail_status": "客户端会看到 {{status}}。",
+      "failed": "无法运行测试",
+      "geo": "GeoIP 查询",
+      "geo_help": "不可用时，国家/地区和 ASN 规则会变为“未知”，因此永远无法匹配。",
+      "geo_local": "本地/私有地址",
+      "geo_resolved": "已解析",
+      "geo_unavailable": "数据库不可用",
+      "intro": "严格按照实例的处理方式，依次评估关联到此服务的每个工作流。",
+      "invalid": "请先修复上述问题再测试。",
+      "ip": "客户端 IP",
+      "method": "方法",
+      "number": "请求编号",
+      "number_help": "此客户端在时间窗口内的第 N 个请求。这是您提供的假设值，不是测量结果。",
+      "open": "测试请求",
+      "other_matched": "在此匹配",
+      "other_no_match": "没有规则匹配",
+      "other_unreached": "未到达",
+      "other_workflows": "此服务上的其他工作流",
+      "out_draft": "此服务是草稿，尚未为其编译工作流。",
+      "out_match": "{{workflow}} · {{rule}} 已匹配，并对请求执行了{{action}}。",
+      "out_no_match": "没有规则匹配。请求将继续进入安全栈的其余部分。",
+      "out_not_attached": "此工作流未关联到任何服务，因此没有可评估的规则链。",
+      "out_whitelisted": "已列入白名单；将跳过整个工作流，不评估任何规则。",
+      "run": "运行测试",
+      "service": "服务",
+      "title": "测试请求",
+      "unreachable": "无法访问测试端点",
+      "uri": "URI 路径",
+      "uri_help": "仅限路径；$uri 从不包含查询字符串。",
+      "v_gate": "条件匹配；门槛在 {{n}}/{{count}} 时关闭",
+      "v_match": "已匹配",
+      "v_unknown": "未知",
+      "v_unknown_help": "无法确定此规则所需的信息，因此规则永远无法匹配。",
+      "whitelisted": "此客户端在白名单中"
     },
     "threshold": "仅高于速率",
     "threshold_count": "请求",
     "threshold_window": "每（秒）",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "条件",
+      "addGroup": "组",
+      "all": "全部满足",
+      "allMeta": "{{count}} 个条件，必须全部为真",
+      "and": "且",
+      "any": "任一满足",
+      "anyMeta": "{{count}} 个条件，至少一个必须为真",
+      "empty": "空组；请添加条件，当前状态无法保存。",
+      "noGroupHolds": "没有组包含 {{kind}} 个条目",
+      "noneMeta": "这些条件均不为真时匹配",
+      "not": "全部不满足",
+      "or": "或",
+      "removeGroup": "删除组"
     },
     "truncated": "仅显示前500个工作流程。通过API获取完整结果。",
-    "untitled": "Untitled rule",
+    "untitled": "未命名规则",
     "value": {
-      "add": "Value"
+      "add": "值"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "收起",
+      "more": "另外 {{n}} 个"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "是",
+      "country": "是",
+      "group": "属于组",
+      "ip": "属于",
+      "isIn": "属于",
+      "isOneOf": "是以下值之一",
+      "method": "是",
+      "uri": "匹配"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "在 1+ 台主机上安装 BunkerWeb",
+      "mfa": "启用 MFA",
+      "pro": "启用 BunkerWeb PRO",
+      "service": "注册首个服务"
     },
     "pro_tips": "PRO 提示",
-    "title": "Getting started"
+    "title": "开始使用"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "每个插件在各请求阶段所需的时间，从所有实例实时读取并合并。",
+    "volatile": "执行时间保存在各实例的共享内存中并按需读取；不会持久存储，实例重启时会重置。",
+    "partial": "部分实例没有响应。以下数据仅涵盖已响应的实例。",
+    "reporting_instances": "报告实例",
+    "requests_measured": "已测量请求",
+    "mean_request": "平均请求时间",
+    "max_request": "最慢请求",
+    "phases": "插件阶段",
+    "share_help": "占比是插件总时间相对于请求总时间的比例。并非每个请求执行一次的阶段（worker 启动、后台计时器和内部 API）没有占比，并显示短横线。",
+    "plugin": "插件",
+    "phase": "阶段",
+    "calls": "调用次数",
+    "mean": "平均",
+    "max": "最大",
+    "total": "总计",
+    "share": "占比",
+    "disabled_title": "插件计时已关闭",
+    "disabled_help": "将 METRICS_COLLECT_TIMINGS 设为 yes 以测量每个插件所需的时间。无论如何都会收集完整请求时长。",
+    "unreachable_title": "没有实例报告执行时间",
+    "unreachable_help": "执行时间从实例本身读取，因此没有实例响应，或尚未有实例处理请求。"
   }
 }

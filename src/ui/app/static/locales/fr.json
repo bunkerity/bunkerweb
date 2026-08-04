@@ -5,7 +5,7 @@
     "license_title": "Licence",
     "socials": "Réseaux Sociaux",
     "tagline": "Protection Puissante, Simplifiée",
-    "title": "About BunkerWeb",
+    "title": "À propos de BunkerWeb",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
@@ -78,20 +78,20 @@
     "subtitle": "Adresses IP bloquées sur vos instances BunkerWeb — ajoutez, supprimez ou ajustez les durées de blocage.",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "est activé.",
+        "body_before": "Les bannissements créés ici expirent au redémarrage de l’instance, sauf si",
+        "title": "Modifications non persistantes."
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "Bannissements par motif"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "Bannissements actifs",
+        "active_caption": "IP + CIDR",
+        "countries": "Pays",
+        "expiring": "Expiration ≤ 1 h",
+        "expiring_caption": "Rotation automatique",
+        "permanent": "Bannissements permanents"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "Bannissements",
     "cache": "Cache",
     "web_cache": "Cache web",
-    "timings": "Timings",
+    "timings": "Temps d’exécution",
     "configs": "Configurations",
     "extra_pages": "Pages Supplémentaires",
     "global_settings": "Paramètres globaux",
-    "global_config": "Global config",
+    "global_config": "Configuration globale",
     "home": "Accueil",
     "instances": "Instances",
     "jobs": "Tâches",
@@ -120,7 +120,7 @@
     "reports": "Rapports",
     "groups": "Groupes de ressources",
     "services": "Services",
-    "support": "Support",
+    "support": "Assistance",
     "templates": "Modèles"
   },
   "button": {
@@ -183,7 +183,7 @@
     "ping": "Ping",
     "plugin_page": "Page du Plugin",
     "proceed": "Continuer",
-    "refresh": "Refresh",
+    "refresh": "Actualiser",
     "refresh_recovery_codes": "Rafraîchir les Codes de Récupération",
     "reload": "Recharger",
     "reset": "Réinitialiser",
@@ -216,20 +216,20 @@
     "view_details": "Voir les détails",
     "view_raw_data": "Voir les données brutes",
     "wipe_other_sessions": "Effacer les Autres Sessions",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "Bannir tous les signalements correspondants",
+    "filtered_actions": "Actions filtrées",
+    "unban_all_filtered": "Lever tous les bannissements correspondants",
+    "update_duration_all_filtered": "Modifier la durée de tous les bannissements correspondants",
+    "use_template": "Utiliser le modèle",
+    "edit": "Modifier",
     "verify": "Vérifier",
-    "view": "View"
+    "view": "Afficher"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "Fichiers",
+    "kpi_per_service": "Par service",
     "subtitle": "Fichiers de cache générés par les tâches planifiées (listes noires, bases de données GeoIP, etc.) — inspectez, téléchargez ou supprimez-les par service et plugin.",
-    "title": "Cache files"
+    "title": "Fichiers en cache"
   },
   "configs": {
     "subtitle": "Extraits de configuration NGINX personnalisés pour vos services — créez, modifiez et gérez les surcharges HTTP, ModSecurity et au niveau du flux."
@@ -533,7 +533,7 @@
         "title": "Sources"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "Principaux motifs de blocage"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "Top 10 des IP Bloquées"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "Bloquées",
+        "title": "Requêtes bloquées au fil du temps (plage sélectionnée)"
       }
     },
     "map": {
@@ -571,13 +571,13 @@
       "title": "Fenêtre du tableau de bord"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "Bannissements actifs",
+      "jobs": "Tâches planifiées",
+      "trend": "Évolution des requêtes bloquées"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "Bon retour, {{user}}",
+      "greeting": "Bon retour,"
     },
     "mini": {
       "across_countries": "dans les pays de {{count}}",
@@ -594,12 +594,12 @@
       "vs_prev": "vs précédent"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "Plage sélectionnée",
+      "top_ips_sub": "Par nombre de requêtes",
+      "status_sub": "Codes de réponse HTTP",
+      "reasons_sub": "Par règle déclenchée",
+      "map_sub": "Survolez pour afficher les détails",
+      "blocking_sub": "Bloquées et autorisées"
     }
   },
   "datatable": {
@@ -753,7 +753,7 @@
     "license": "Licence",
     "made_by": "créé par",
     "privacy": "Confidentialité",
-    "support": "Support"
+    "support": "Assistance"
   },
   "form": {
     "checkbox": {
@@ -916,7 +916,7 @@
     "upgrade": "Mettre à niveau ?",
     "use_authenticator_code": "Utiliser un code d'authentification",
     "use_recovery_code": "Utiliser un code de récupération",
-    "get_support": "Get support"
+    "get_support": "Obtenir de l’aide"
   },
   "login": {
     "title": "Se connecter",
@@ -945,25 +945,25 @@
     "showing_some": "{{shown}} sur {{total}} affichées",
     "select_file_prompt": "Sélectionnez un fichier journal pour afficher son contenu",
     "trimmed_notice": "--- {{count}} anciennes lignes de log ont été supprimées pour les performances ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "Toutes les sources (en direct)",
+    "collapse": "Réduire",
+    "expand": "Développer",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "Tous les journaux",
+    "level_errors_only": "Erreurs uniquement",
+    "level_security_only": "Sécurité uniquement",
+    "live_title": "Journaux en direct",
+    "pause": "Mettre en pause",
+    "resume": "Reprendre",
+    "tailing_sources": "Suivi · {{count}} sources",
+    "taller": "Agrandir"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "Glissez-déposez votre archive de plugin ici ou cliquez pour sélectionner des fichiers.",
       "confirm_cache_deletion_alert": "Êtes-vous sûr de vouloir supprimer le fichier cache sélectionné ?",
       "confirm_cache_deletion_alert_plural": "Êtes-vous sûr de vouloir supprimer les fichiers cache sélectionnés ?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "Voulez-vous vraiment convertir les configurations personnalisées sélectionnées ?",
       "confirm_configs_conversion_to": "Êtes-vous sûr de vouloir convertir les configurations personnalisées sélectionnées en {{state}} ?",
       "confirm_configs_deletion_alert": "Êtes-vous sûr de vouloir supprimer la configuration personnalisée sélectionnée ?",
       "confirm_configs_deletion_alert_plural": "Êtes-vous sûr de vouloir supprimer les configurations personnalisées sélectionnées ?",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "Êtes-vous sûr de vouloir débannir l'adresse IP sélectionnée ?",
       "unban_confirmation_alert_plural": "Êtes-vous sûr de vouloir débannir les adresses IP sélectionnées ?",
       "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "Bannir les IP de chacun des {{count}} signalements correspondants ? Les cibles en double ne seront appliquées qu’une fois.",
+      "unban_filtered_confirmation": "Voulez-vous vraiment lever les {{count}} bannissements correspondants ?",
+      "update_filtered_duration_alert": "Sélectionnez une nouvelle durée pour les {{count}} bannissements correspondants :"
     },
     "button": {
       "fetch_global_settings_confirm": "Appliquer les paramètres globaux",
@@ -1065,7 +1065,7 @@
     "cache": "Cache",
     "certificates": "Certificats",
     "web_cache": "Cache web",
-    "timings": "Timings",
+    "timings": "Temps d’exécution",
     "configs": "Configurations",
     "extra_pages": "Pages Supplémentaires",
     "global_settings": "Paramètres globaux",
@@ -1086,13 +1086,13 @@
     "pro": "Pro",
     "reports": "Rapports",
     "services": "Services",
-    "support": "Support",
+    "support": "Assistance",
     "templates": "Modèles",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "Vue d’ensemble",
+    "configure": "Configurer",
+    "operate": "Exploiter",
+    "system": "Système",
+    "edition_community": "Communauté",
     "redirects": "Redirige",
     "upstreams": "Sources",
     "workflows": "Flux de travail",
@@ -1141,17 +1141,17 @@
       "show_less": "Afficher moins"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "Actif",
+      "always_on": "Noyau / toujours actif",
+      "disabled": "Désactivé",
+      "enabled": "Activé",
+      "inactive": "Inactif",
+      "no_match": "Aucune extension ne correspond à vos filtres",
+      "search": "Rechercher des extensions...",
+      "tab_all": "Tous",
+      "tab_community": "Communauté",
+      "tab_disabled": "Désactivé",
+      "tab_enabled": "Activé"
     }
   },
   "pro": {
@@ -1199,7 +1199,7 @@
       "suspended": "SUSPENDU",
       "title": "Statut"
     },
-    "title": "Pro license"
+    "title": "Licence Pro"
   },
   "profile": {
     "2fa": {
@@ -1318,7 +1318,7 @@
       "asns": "ASNs des principaux attaquants",
       "blocked": "Requêtes bloquées",
       "blocked_rate": "Évolution par rapport à la période précédente",
-      "bot": "Bot / scraper",
+      "bot": "Robot / extracteur",
       "countries": "Pays des principaux attaquants",
       "peak_hour": "Heure de pointe",
       "rce": "RCE / commande",
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "Télécharger les journaux de débogage, extraire votre configuration et obtenir de l'aide de l'équipe BunkerWeb.",
-    "title": "Support"
+    "title": "Assistance"
   },
   "tab": {
     "custom_certificate": "Certificat Personnalisé",
@@ -1561,8 +1561,8 @@
       "actions": "Actions",
       "active": "Actif",
       "async": "Asynchrone",
-      "checksum": "Checksum",
-      "configs": "Configs",
+      "checksum": "Somme de contrôle",
+      "configs": "Configurations",
       "country": "Pays",
       "created": "Créé le",
       "current_time_left": "Temps Restant Actuel",
@@ -1595,7 +1595,7 @@
       "status": "Statut",
       "status_code": "Code d'État",
       "steps": "Étapes",
-      "stream": "Stream",
+      "stream": "Flux",
       "template": "Modèle",
       "templates": "Modèles",
       "time_left": "Temps Restant",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "Modèles de configuration réutilisables pour vos services : regrouper les paramètres, les étapes et les configurations personnalisées, puis les créer, les cloner ou les supprimer.",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "Supprimer la sélection",
+      "empty_message": "Créez votre premier modèle pour regrouper les paramètres, les étapes et les configurations personnalisées afin de les réutiliser.",
+      "empty_title": "Aucun modèle pour le moment",
+      "select": "Sélectionner",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "Sécurité élevée",
+      "low": "Sécurité faible",
+      "medium": "Sécurité moyenne",
+      "ui": "Interface Web"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "Configuration personnalisée : {{name}}",
+      "feature": "Fonctionnalité intégrée : {{name}}",
+      "plugin": "Extension : {{name}}"
     },
-    "title": "Service templates"
+    "title": "Modèles de service"
   },
   "theme": {
     "dark": "Sombre",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "Indique s'il faut demander automatiquement un certificat Let's Encrypt.",
     "button": {
       "ban_ip": "Bannir cette adresse IP",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "Convertir la configuration {{name}} en brouillon",
+      "convert_config_to_online": "Mettre la configuration {{name}} en ligne",
       "convert_service_to_draft": "Convertir le Service {{name}} en Brouillon",
       "convert_service_to_online": "Convertir le Service {{name}} en En Ligne",
       "delete_config": "Supprimer la Config Perso {{name}}",
@@ -2146,7 +2146,7 @@
     "orphan_title": "Compte ACME manquant",
     "pem_certificate": "Certificat ou chaîne PEM",
     "pem_drop": "Déposez le certificat ou la chaîne PEM public ici",
-    "pem_limit": "Maximum 1 MiB",
+    "pem_limit": "Maximum : 1 Mio",
     "pem_private_key": "Clé privée PEM",
     "primary": "Affectation principale",
     "primary_help": "Marquer comme l'affectation principale pour les services sélectionnés",
@@ -2216,7 +2216,7 @@
     "kinds": "Types",
     "loading_references": "Chargement des références...",
     "max_entries": "Un groupe de ressources ne peut contenir plus de {{max}} entrées.",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} types · {{values}} valeurs · {{usages}} utilisations",
     "new": "Nouveau groupe",
     "new_alias": "Nouvelle alias",
     "no_entries": "Aucune entrée",
@@ -2389,234 +2389,234 @@
     "truncated": "Seuls les 500 premiers upstream sont affichés. Affinez la liste à l'aide de API pour obtenir le résultat complet."
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "Bloquer",
+    "act_challenge": "Défi",
+    "act_code": "État",
+    "act_denyDefault": "Le code de refus de l’instance",
+    "act_denyShort": "code de refus",
+    "act_provider": "Fournisseur Antibot",
+    "act_redirect": "Rediriger",
+    "act_status": "Code de refus",
+    "act_terminal": "Une seule action par règle, et elle met fin à l’évaluation : aucune branche vrai/faux ne sort d’une règle.",
+    "act_url": "URL de destination",
     "action": "Ensuite",
     "add_rule": "Ajouter une règle",
     "all": "Tous",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "Réduire",
+      "combinator": "Changer le combinateur, actuellement",
+      "conditionType": "Type de condition",
+      "denyStatus": "Code de refus",
+      "drag": "Faire glisser pour réorganiser",
+      "expand": "Développer",
+      "groupKind": "Type de groupe",
+      "more": "Plus",
+      "moveDown": "Descendre : exécutée plus tard",
+      "moveRule": "Déplacer la règle",
+      "moveUp": "Monter : exécutée plus tôt",
+      "provider": "Fournisseur Antibot",
+      "redirectStatus": "Code de redirection",
+      "removeCondition": "Supprimer la condition",
+      "removeThreshold": "Supprimer le seuil",
+      "removeThresholdLong": "Supprimer le seuil de fréquence",
+      "removeValue": "Supprimer la valeur",
+      "requestCount": "Nombre de requêtes",
+      "resourceGroup": "Groupe de ressources",
+      "ruleName": "Nom de la règle {{n}}",
+      "terminalAction": "Action terminale",
+      "uriMatch": "Mode de correspondance URI",
+      "uriValue": "Valeur URI",
+      "window": "Fenêtre en secondes"
     },
     "attach": "Attacher aux services",
     "attach_help": "Les règles ne sont appliquées qu'aux services auxquels un flux de travail est attaché.",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "L’enregistrement applique ces règles à {{count}} service(s) attaché(s).",
+    "capacity": "{{count}} règle(s) sur {{maxRules}} · la plus grande utilise {{worst}} prédicat(s) sur {{maxPredicates}} · {{regexes}} expression(s) régulière(s) dans ce flux de travail",
     "clone": "Cloner le flux de travail",
     "clone_help": "Les règles sont copiées, les attachements aux services ne le sont pas.",
     "clone_name": "Nom de la copie",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "Supprimer cette règle ? Toutes celles qui la suivent remonteront d’une position."
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (copie)",
     "delete": "Supprimer le flux de travail",
     "delete_confirm": "Ce flux de travail et toutes ses règles seront supprimés de manière permanente.",
     "empty_text": "Un flux de travail est une liste ordonnée de règles que vous attachez aux services : un arbre de conditions, un seuil de taux facultatif et une action : défi, blocage ou redirection.",
     "empty_title": "Aucun flux de travail pour le moment",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "Les flux de travail s’exécutent dans l’ordre d’attachement ; les règles de celui-ci s’exécutent de haut en bas.",
+    "entry_title": "Chaque requête vers un service attaché",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "Impossible d’enregistrer",
+      "saveUnreachable": "Impossible de joindre le point de terminaison d’enregistrement",
+      "validate": "Impossible de valider",
+      "validateUnreachable": "Impossible de joindre le point de terminaison de validation"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "Rien n’est appliqué : la politique en cours reste inchangée.",
+      "count": "{{count}} problème(s) bloque(nt) l’enregistrement.",
+      "rule": "Règle {{n}}",
+      "ruleNamed": "Règle {{n}} : {{name}}",
+      "whole": "Ce flux de travail"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "La requête passe au flux de travail attaché suivant, puis au reste de la pile de sécurité.",
+    "exit_title": "Aucune règle ne correspond",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "et seulement après que la même IP cliente a effectué plus de",
+      "chip": "seuil de correspondance",
+      "help": "Compté par IP cliente. Sous le seuil, cette règle ne correspond pas et l’évaluation passe à la règle suivante ; elle ne limite jamais le débit à elle seule."
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "L’absence de correspondance passe à la règle suivante",
+      "gate": "Un seuil de fréquence conditionne la correspondance ; ce n’est pas une action",
+      "move": "Faites glisser, utilisez les flèches ou appuyez sur Alt + ↑ / ↓ pour réorganiser",
+      "stop": "Une correspondance exécute une action puis s’arrête"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "aucune correspondance"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "Exécuter en dernier",
+      "delete": "Supprimer la règle",
+      "disable": "Désactiver la règle",
+      "duplicate": "Dupliquer en dessous",
+      "enable": "Activer la règle",
+      "top": "Exécuter en premier"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "Exécuter en premier",
+      "last": "Exécuter en dernier"
     },
     "new": "Nouveau flux de travail",
     "no_rules": "Aucune règle pour le moment. Ajoutez-en une pour commencer à élaborer cette politique.",
     "not_attached": "Non attaché",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "Ce flux de travail n’est attaché à aucun service ; ces règles ne sont donc encore appliquées nulle part.",
+    "not_validated": "Pas encore validé",
     "order_help": "Les règles sont évaluées dans l'ordre et la première qui correspond gagne. Une règle avec un seuil de taux ne correspond que lorsque le seuil est dépassé, de sorte qu'une règle inférieure peut intercepter le trafic en dessous.",
     "readonly": "La base de données est en lecture seule. Les flux de travail peuvent être inspectés, mais pas modifiés.",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "Désactivée",
+      "if": "Si",
+      "namePlaceholder": "Nom de la règle",
+      "noun": "Règle",
+      "onMatch": "Si elle correspond",
+      "skipped": "Désactivée : entièrement ignorée, comme si elle ne figurait pas dans la liste.",
+      "stopTail": ", l’évaluation s’arrête ici : aucune règle suivante n’est atteinte."
     },
     "rules": "Règles",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
-      "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "actionChanged": "Action remplacée par {{type}}. Elle reste l’unique action et arrête toujours l’évaluation.",
+      "added": "Règle ajoutée en position {{n}}, en dernier ; toutes les règles précédentes sont donc vérifiées avant.",
+      "deleted": "Règle supprimée. Il reste {{count}} règle(s).",
+      "duplicated": "Copie insérée en position {{n}}. Elle ne peut jamais correspondre tant que l’original au-dessus est activé.",
+      "gateAdded": "Seuil de fréquence ajouté à la correspondance. Sous ce seuil, la règle ne correspond pas et l’évaluation continue.",
+      "jumped": "{{where}} : {{message}}",
+      "lastValueRemoved": "Dernière valeur supprimée : cette condition ne peut pas être enregistrée tant qu’elle n’en contient pas une.",
+      "moved": "{{name}} déplacée en position {{to}} sur {{total}}{{how}}. Elle s’exécute maintenant {{where}}.",
+      "predicateCap": "Cette règle contient déjà le maximum de {{max}} conditions.",
+      "ruleAbove": "la règle précédente",
+      "ruleDisabled": "{{name}} désactivée : elle est entièrement ignorée et les règles suivantes voient désormais ces requêtes.",
+      "ruleEnabled": "{{name}} activée : elle est de nouveau évaluée en position {{n}}.",
+      "runsAfter": "après {{name}}",
+      "runsFirst": "en premier",
+      "runsLast": "en dernier",
+      "saved": "Règles enregistrées et envoyées aux services attachés.",
+      "theRule": "La règle",
+      "valuesDropped": "Condition remplacée par {{type}} : ses {{count}} valeur(s) n’ont pas pu être conservées.",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "par glisser-déposer",
+        "keyboard": "au clavier"
       }
     },
     "search": "Rechercher le nom ou la description...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
+      "asn_help": "Laissez vide pour simuler l’échec d’une recherche ASN.",
+      "asn_invalid": "L’ASN doit être un nombre",
+      "assume_not_whitelisted": "Suppose que le client n’est pas sur liste blanche.",
+      "assume_rate_counter": "Le numéro de requête {{request_number}} est votre saisie, pas une mesure.",
+      "assume_regex_budget": "Suppose que le budget d’expressions régulières de l’instance n’est pas épuisé.",
+      "assumptions": "Hypothèses",
+      "country": "Pays",
+      "detail_challenge": "Le défi prend le relais ; le reste de la pile de sécurité continue de s’exécuter.",
+      "detail_detect": "Ce service est en mode détection ; rien n’est donc réellement appliqué.",
+      "detail_status": "Le client reçoit {{status}}.",
+      "failed": "Impossible d’exécuter le test",
+      "geo": "Recherche GeoIP",
+      "geo_help": "Indisponible rend les règles de pays et d’ASN INCONNUES ; elles ne peuvent donc jamais correspondre.",
+      "geo_local": "Adresse locale / privée",
+      "geo_resolved": "Résolu",
+      "geo_unavailable": "Base de données indisponible",
+      "intro": "Évalue chaque flux de travail attaché au service, dans l’ordre, exactement comme le ferait l’instance.",
+      "invalid": "Corrigez les problèmes ci-dessus avant de tester.",
+      "ip": "IP cliente",
+      "method": "Méthode",
+      "number": "Numéro de requête",
+      "number_help": "Nième requête de ce client dans la fenêtre. Une hypothèse que vous fournissez, pas une mesure.",
+      "open": "Tester une requête",
+      "other_matched": "correspond ici",
+      "other_no_match": "aucune règle ne correspond",
+      "other_unreached": "non atteint",
+      "other_workflows": "Autres flux de travail de ce service",
+      "out_draft": "Ce service est un brouillon : aucun flux de travail n’est encore compilé pour lui.",
+      "out_match": "{{workflow}} · {{rule}} correspond et {{action}} la requête.",
+      "out_no_match": "Aucune règle ne correspond. La requête passe au reste de la pile de sécurité.",
+      "out_not_attached": "Ce flux de travail n’est attaché à aucun service ; aucune chaîne de règles ne peut donc être évaluée.",
+      "out_whitelisted": "Sur liste blanche : tout le flux de travail est ignoré et aucune règle n’est évaluée.",
+      "run": "Exécuter le test",
       "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "title": "Tester une requête",
+      "unreachable": "Impossible de joindre le point de terminaison de test",
+      "uri": "Chemin URI",
+      "uri_help": "Chemin uniquement : $uri ne contient jamais de chaîne de requête.",
+      "v_gate": "conditions satisfaites · seuil fermé à {{n}} sur {{count}}",
+      "v_match": "CORRESPONDANCE",
+      "v_unknown": "INCONNU",
+      "v_unknown_help": "Un fait requis par cette règle n’a pas pu être déterminé ; elle ne peut donc jamais correspondre.",
+      "whitelisted": "Ce client est sur liste blanche"
     },
     "threshold": "Uniquement au-dessus d'un taux",
     "threshold_count": "Requêtes",
     "threshold_window": "Par (secondes)",
     "tree": {
       "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addGroup": "Groupe",
+      "all": "Toutes",
+      "allMeta": "{{count}} condition(s) : toutes doivent être vraies",
+      "and": "et",
+      "any": "Au moins une",
+      "anyMeta": "{{count}} condition(s) : au moins une doit être vraie",
+      "empty": "Groupe vide : ajoutez une condition, il ne peut pas être enregistré ainsi.",
+      "noGroupHolds": "aucun groupe ne contient d’entrées {{kind}}",
+      "noneMeta": "correspond lorsqu’aucune de ces conditions n’est vraie",
+      "not": "Aucune",
+      "or": "ou",
+      "removeGroup": "Supprimer le groupe"
     },
     "truncated": "Seuls les 500 premiers flux de travail sont affichés. Affinez la liste à l'aide de API pour obtenir le résultat complet.",
-    "untitled": "Untitled rule",
+    "untitled": "Règle sans titre",
     "value": {
-      "add": "Value"
+      "add": "Valeur"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "Afficher moins",
+      "more": "+{{n}} de plus"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "est",
+      "country": "est",
+      "group": "appartient au groupe",
+      "ip": "se trouve dans",
+      "isIn": "se trouve dans",
+      "isOneOf": "est l’un de",
+      "method": "est",
+      "uri": "correspond à"
     }
   },
   "request_path": {
     "client": "Client",
     "source": "Ordre d'exécution des plugins pour la phase {{phase}}, à partir de {{setting}} : un ordre d'affichage, et non un suivi par requête.",
     "terminal": {
-      "inline": "Backend",
+      "inline": "Serveur d’origine",
       "none": "Aucune requête traitée",
       "pool": "Piscine upstream",
       "root": "Fichiers locaux"
@@ -2639,7 +2639,7 @@
         "certificate": "Certificats",
         "redirect": "Redirige",
         "template": "Modèle",
-        "upstream": "Upstreams",
+        "upstream": "Serveurs d’origine",
         "workflow": "Flux de travail"
       },
       "match_path": "Chemin",
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "Installer BunkerWeb sur 1+ hôte",
+      "mfa": "Activer la MFA",
+      "pro": "Activer BunkerWeb PRO",
+      "service": "Enregistrer votre premier service"
     },
     "pro_tips": "Conseils PRO",
-    "title": "Getting started"
+    "title": "Bien démarrer"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
+    "subtitle": "Durée de chaque extension à chaque phase de la requête, lue en direct sur toutes les instances puis fusionnée.",
+    "volatile": "Les temps résident dans la mémoire partagée de chaque instance et sont lus à la demande — ils ne sont pas stockés et sont réinitialisés au redémarrage d’une instance.",
+    "partial": "Certaines instances n’ont pas répondu. Les chiffres ci-dessous couvrent celles qui ont répondu.",
+    "reporting_instances": "Instances répondantes",
+    "requests_measured": "Requêtes mesurées",
+    "mean_request": "Requête moyenne",
+    "max_request": "Requête la plus lente",
+    "phases": "Phases des extensions",
+    "share_help": "La part correspond au temps total de l’extension par rapport au temps total de la requête. Les phases qui ne s’exécutent pas une fois par requête — démarrage du worker, minuteur d’arrière-plan et API interne — n’ont pas de part et affichent un tiret.",
+    "plugin": "Extension",
     "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
+    "calls": "Appels",
+    "mean": "Moyenne",
+    "max": "Maximum",
     "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "share": "Part",
+    "disabled_title": "Les temps des extensions sont désactivés",
+    "disabled_help": "Définissez METRICS_COLLECT_TIMINGS sur yes pour mesurer la durée de chaque extension. La durée totale de la requête est collectée dans tous les cas.",
+    "unreachable_title": "Aucune instance n’a signalé de temps",
+    "unreachable_help": "Les temps sont lus directement sur les instances ; aucune n’a donc répondu — ou aucune n’a encore traité de requête."
   }
 }

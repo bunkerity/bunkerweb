@@ -5,9 +5,9 @@
     "license_title": "لائسنس",
     "socials": "سوشل میڈیا",
     "tagline": "طاقتور تحفظ، آسان بنایا گیا",
-    "title": "About BunkerWeb",
+    "title": "BunkerWeb کے بارے میں",
     "social": {
-      "discord": "ڈسکॉर्ड",
+      "discord": "ڈسکارڈ",
       "instagram": "انسٹాగرام",
       "linkedin": "لینکڈین",
       "reddit": "ریڈٹ"
@@ -78,20 +78,20 @@
     "subtitle": "آپ کے BunkerWeb انسٹینسز میں ممنوعہ IP ایڈریسز - شامل کریں، ہٹائیں، یا پابندی کی مدت کو ایڈجسٹ کریں۔",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "فعال ہے۔",
+        "body_before": "یہاں لگائی گئی پابندیاں انسٹینس دوبارہ شروع ہونے پر ختم ہو جاتی ہیں، سوائے اس کے کہ",
+        "title": "مستقل محفوظ نہ کی گئی تبدیلیاں۔"
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "وجہ کے لحاظ سے پابندیاں"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "فعال پابندیاں",
+        "active_caption": "IP + CIDR",
+        "countries": "ممالک",
+        "expiring": "≤ 1 گھنٹے میں ختم",
+        "expiring_caption": "خودکار تبدیلی",
+        "permanent": "مستقل پابندیاں"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "پابندیاں",
     "cache": "کیشے",
     "web_cache": "ویب کیش",
-    "timings": "Timings",
+    "timings": "اوقات",
     "configs": "کنفیگریشنز",
     "extra_pages": "اضافی صفحات",
     "global_settings": "عالمی سیٹنگز",
-    "global_config": "Global config",
+    "global_config": "عمومی کنفیگریشن",
     "home": "مرکزی صفحہ",
     "instances": "انسٹینسز",
     "jobs": "ٹاسکس",
@@ -132,7 +132,7 @@
     "add_plugins": "پلگ ان شامل کریں",
     "auto_refresh": "آٹو ریفریش",
     "ban": "پابندی لگائیں",
-    "ban_selected": "Ban selected",
+    "ban_selected": "منتخب شدہ پر پابندی لگائیں",
     "cache": "کیشے",
     "cancel": "منسوخ کریں",
     "clear": "صاف کریں",
@@ -162,8 +162,8 @@
     "fetch_global": "عالمی سیٹنگز حاصل کریں",
     "filters_suffix": " فلٹرز",
     "follow": "فالو کریں",
-    "force_check": "Force check",
-    "force_update": "Force update",
+    "force_check": "زبردستی جانچیں",
+    "force_update": "زبردستی اپ ڈیٹ کریں",
     "github_stars": "ستارے",
     "go_back": "پیچھے جائیں",
     "hide": "چھپائیں",
@@ -183,7 +183,7 @@
     "ping": "پنگ کریں",
     "plugin_page": "پلگ ان صفحہ",
     "proceed": "آگے بڑھیں",
-    "refresh": "Refresh",
+    "refresh": "تازہ کریں",
     "refresh_recovery_codes": "ریکوری کوڈز ریفریش کریں",
     "reload": "دوبارہ لوڈ کریں",
     "reset": "ری سیٹ کریں",
@@ -216,20 +216,20 @@
     "view_details": "تفصیلات دیکھیں",
     "view_raw_data": "خام ڈیٹا دیکھیں",
     "wipe_other_sessions": "دیگر سیشنز صاف کریں",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "تمام مماثل رپورٹس پر پابندی لگائیں",
+    "filtered_actions": "فلٹر شدہ کارروائیاں",
+    "unban_all_filtered": "تمام مماثل پابندیاں ہٹائیں",
+    "update_duration_all_filtered": "تمام مماثل پابندیوں کی مدت بدلیں",
+    "use_template": "ٹیمپلیٹ استعمال کریں",
+    "edit": "ترمیم کریں",
     "verify": "تصدیق کریں",
-    "view": "View"
+    "view": "دیکھیں"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "فائلیں",
+    "kpi_per_service": "فی سروس",
     "subtitle": "جداول کے ذریعے بنائے گئے کیش فائلوں (بلوکلیسٹ، جیوآئی پی ڈیٹا بیس، اور دیگر) - ہر سروس اور پگین کے لیے ان کا تفحص، ڈاؤن لوڈ، یا حذف کریں۔",
-    "title": "Cache files"
+    "title": "کیش فائلیں"
   },
   "configs": {
     "subtitle": "آپ کے سروسز کے لیے سفارشی NGINX کنفیگریشن اسنیپس - HTTP، ModSecurity، اور اسٹریم لیول کے لیے بنائیں، ترمیم کریں، اور کاولٹن کریں۔"
@@ -533,7 +533,7 @@
         "title": "اوپر سے"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "بلاک ہونے کی اہم وجوہات"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "سب سے زیادہ روکے گئے 10 IPs"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "بلاک شدہ",
+        "title": "وقت کے ساتھ بلاک شدہ درخواستیں (منتخب حد)"
       }
     },
     "map": {
@@ -567,17 +567,17 @@
       "no_data": "کوئی ڈیٹا نہیں"
     },
     "window": {
-      "last_days": "Last {{days}} days",
-      "title": "Dashboard window"
+      "last_days": "گزشتہ {{days}} دن",
+      "title": "ڈیش بورڈ کا دورانیہ"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "فعال پابندیاں",
+      "jobs": "طے شدہ کام",
+      "trend": "بلاک شدہ درخواستوں کا رجحان"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "واپسی پر خوش آمدید، {{user}}",
+      "greeting": "واپسی پر خوش آمدید،"
     },
     "mini": {
       "across_countries": "{{count}} کے ممالک میں",
@@ -588,18 +588,18 @@
     "status": {
       "blocked_of_total": "{{total}} کے ساتھ مکمل طور پر بلاک",
       "free_plan": "مفت منصوبہ",
-      "renews": "ریнову",
+      "renews": "تجدید ہوتی ہے",
       "services_licensed": "{{count}} خدمات لائسنس کی گئی",
       "trend_vs_prev": "vs پچھلا",
       "vs_prev": "vs پچھلا"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "منتخب حد",
+      "top_ips_sub": "درخواستوں کی تعداد کے لحاظ سے",
+      "status_sub": "HTTP جوابی کوڈ",
+      "reasons_sub": "متحرک کرنے والے اصول کے لحاظ سے",
+      "map_sub": "تفصیل کے لیے کرسر لائیں",
+      "blocking_sub": "بلاک شدہ اور اجازت یافتہ"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "اپ گریڈ کریں؟",
     "use_authenticator_code": "ایک تصدیق کوڈ استعمال کریں",
     "use_recovery_code": "ایک ریکووری کوڈ استعمال کریں",
-    "get_support": "Get support"
+    "get_support": "مدد حاصل کریں"
   },
   "login": {
     "title": "لاگ ان",
@@ -943,27 +943,27 @@
     "new_lines": "نئی لائنیں",
     "showing_all": "{{total}} لائنیں",
     "showing_some": "{{total}} میں سے {{shown}} دکھائی جا رہی ہیں",
-    "select_file_prompt": "لاگ فائل کا انتخاب کریں تاکہ اس کی вміنٹ دیکھو",
+    "select_file_prompt": "اس کا مواد دیکھنے کے لیے لاگ فائل منتخب کریں",
     "trimmed_notice": "--- کارکردگی کے لیے {{count}} پرانی لاگ لائنیں ہٹا دی گئیں ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "تمام ذرائع (براہ راست)",
+    "collapse": "سکیڑیں",
+    "expand": "پھیلائیں",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "تمام لاگز",
+    "level_errors_only": "صرف غلطیاں",
+    "level_security_only": "صرف سکیورٹی",
+    "live_title": "براہ راست لاگز",
+    "pause": "روکیں",
+    "resume": "جاری رکھیں",
+    "tailing_sources": "پیروی جاری · {{count}} ذرائع",
+    "taller": "مزید اونچا"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "اپنا پلگ ان آرکائیو یہاں ڈریگ اور ڈراپ کریں یا فائلیں منتخب کرنے کے لیے کلک کریں۔",
       "confirm_cache_deletion_alert": "کیا آپ واقعی منتخب کردہ کیشے فائل حذف کرنا چاہتے ہیں؟",
       "confirm_cache_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کیشے فائلیں حذف کرنا چاہتے ہیں؟",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "کیا آپ منتخب مخصوص کنفیگریشنز کو تبدیل کرنا چاہتے ہیں؟",
       "confirm_configs_conversion_to": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز کو {{state}} میں تبدیل کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشن حذف کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز حذف کرنا چاہتے ہیں؟",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
       "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
       "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "تمام {{count}} مماثل رپورٹس کے IP پر پابندی لگائیں؟ دہرائے گئے اہداف ایک بار لاگو ہوں گے۔",
+      "unban_filtered_confirmation": "کیا آپ تمام {{count}} مماثل پابندیاں ہٹانا چاہتے ہیں؟",
+      "update_filtered_duration_alert": "تمام {{count}} مماثل پابندیوں کے لیے نئی مدت منتخب کریں:"
     },
     "button": {
       "fetch_global_settings_confirm": "گلوبل سیٹنگز لاگو کریں",
@@ -1065,7 +1065,7 @@
     "cache": "کیشے",
     "certificates": "سفرنامے",
     "web_cache": "ویب کیش",
-    "timings": "Timings",
+    "timings": "اوقات",
     "configs": "کنفیگریشنز",
     "extra_pages": "اضافی صفحات",
     "global_settings": "عالمی سیٹنگز",
@@ -1088,11 +1088,11 @@
     "services": "خدمات",
     "support": "سپورٹ",
     "templates": "ٹیمپلیٹس",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "جائزہ",
+    "configure": "کنفیگر کریں",
+    "operate": "چلائیں",
+    "system": "سسٹم",
+    "edition_community": "کمیونٹی",
     "redirects": "تبدیل کریں",
     "upstreams": "اندرونی",
     "workflows": "کارروائی کی روٹین",
@@ -1141,17 +1141,17 @@
       "show_less": "کم دکھائیں"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "فعال",
+      "always_on": "بنیادی / ہمیشہ فعال",
+      "disabled": "غیر فعال",
+      "enabled": "فعال",
+      "inactive": "فعال نہیں",
+      "no_match": "کوئی پلگ ان آپ کے فلٹرز سے مماثل نہیں",
+      "search": "پلگ ان تلاش کریں...",
+      "tab_all": "سب",
+      "tab_community": "کمیونٹی",
+      "tab_disabled": "غیر فعال",
+      "tab_enabled": "فعال"
     }
   },
   "pro": {
@@ -1172,12 +1172,12 @@
       "unknown": "نامعلوم میعاد ختم ہونے کی تاریخ"
     },
     "force_check": {
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
-      "title": "Force check"
+      "description": "PRO پلگ انز کی نئی جانچ کرائیں۔ نئے ورژن دستیاب ہوں تو پلگ انز دوبارہ ڈاؤن لوڈ ہوں گے۔",
+      "title": "زبردستی جانچیں"
     },
     "force_update": {
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
-      "title": "Force update"
+      "description": "جانچ چھوڑ کر PRO پلگ انز زبردستی ڈاؤن لوڈ کریں۔ ایسا ممکن نہ ہو تو موجودہ حالت برقرار رہے گی۔",
+      "title": "زبردستی اپ ڈیٹ کریں"
     },
     "key": {
       "title": {
@@ -1199,7 +1199,7 @@
       "suspended": "معطل",
       "title": "حالت"
     },
-    "title": "Pro license"
+    "title": "Pro لائسنس"
   },
   "profile": {
     "2fa": {
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "ڈیبگ لاگ ڈاؤن لوڈ کریں، اپنے کنفیگریشن کو استخراج کریں، اور BunkerWeb ٹیم سے مدد حاصل کریں۔",
-    "title": "Support"
+    "title": "مدد"
   },
   "tab": {
     "custom_certificate": "حسب ضرورت سرٹیفکیٹ",
@@ -1620,7 +1620,7 @@
       "delete_step_confirm": "کیا آپ واقعی اس مرحلے کو حذف کرنا چاہتے ہیں؟",
       "details": "ٹیمپلیٹ کی تفصیلات",
       "details_help": "اس ٹیمپلیٹ کے لیے بنیادی معلومات سیٹ کریں۔",
-      "drag_handle": "ترتیب बदलने के लिए खींचें",
+      "drag_handle": "ترتیب بدلنے کے لیے گھسیٹیں",
       "empty_configs": "ابھی تک کوئی کسٹم کنفیگریشنز نہیں ہیں۔",
       "empty_settings": "ابھی تک کوئی سیٹنگز نہیں ہیں۔ اپنی پہلی سیٹنگ شامل کریں۔",
       "empty_steps": "ابھی تک کوئی مراحل نہیں ہیں۔ اپنا پہلا مرحلہ شامل کریں۔",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "اپنے سروسز کے لیے قابل استعمال کنفیگریشن ٹیمپلیٹس - سیٹنگز، اقدامات اور کسٹم کنفیگیشن کو ایک ساتھ پیک کریں، پھر انہیں بنائیں، کلون کریں، یا حذف کریں۔",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "منتخب شدہ حذف کریں",
+      "empty_message": "سیٹنگز، مراحل اور مخصوص کنفیگریشن کو دوبارہ استعمال کے لیے یکجا کرنے والا پہلا ٹیمپلیٹ بنائیں۔",
+      "empty_title": "ابھی کوئی ٹیمپلیٹ نہیں",
+      "select": "منتخب کریں",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "اعلیٰ سکیورٹی",
+      "low": "کم سکیورٹی",
+      "medium": "درمیانی سکیورٹی",
+      "ui": "ویب UI"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "مخصوص کنفیگریشن: {{name}}",
+      "feature": "پہلے سے موجود خصوصیت: {{name}}",
+      "plugin": "پلگ ان: {{name}}"
     },
-    "title": "Service templates"
+    "title": "سروس ٹیمپلیٹس"
   },
   "theme": {
     "dark": "تاریک",
@@ -1822,9 +1822,9 @@
   "tooltip": {
     "auto_lets_encrypt": "کیا خود بخود Let's Encrypt سرٹیفکیٹ کی درخواست کرنی ہے۔",
     "button": {
-      "ban_ip": "Ban this IP address",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "ban_ip": "اس IP پتے پر پابندی لگائیں",
+      "convert_config_to_draft": "کنفیگ {{name}} کو مسودے میں بدلیں",
+      "convert_config_to_online": "کنفیگ {{name}} کو آن لائن میں بدلیں",
       "convert_service_to_draft": "سروس {{name}} کو ڈرافٹ میں تبدیل کریں",
       "convert_service_to_online": "سروس {{name}} کو آن لائن میں تبدیل کریں",
       "delete_config": "کسٹم کنفیگریشن {{name}} حذف کریں",
@@ -1926,7 +1926,7 @@
     "password_requirements": "پاس ورڈ کم از کم 8 حروف کا ہونا چاہیے اور اس میں 1 بڑا حرف، 1 عدد، اور 1 خصوصی حرف شامل ہونا چاہیے۔",
     "pro_feature": "یہ ایک پرو خصوصیت ہے۔",
     "readonly_db_action_disabled": "غیر فعال: ڈیٹا بیس صرف پڑھنے کے موڈ میں ہے۔",
-    "readonly_mode": "یہ عمل ریڈ-آنلی موڈ میں نہیں дозвоل ہے۔",
+    "readonly_mode": "صرف پڑھنے کے موڈ میں اس کارروائی کی اجازت نہیں۔",
     "readonly_user_action_disabled": "غیر فعال: آپ کا اکاؤنٹ صرف پڑھنے کے لیے ہے، عمل '{{action}}' غیر فعال ہے۔",
     "real_ip_from": "قابل اعتماد IPs / نیٹ ورکس کی فہرست، خالی جگہوں سے الگ، جہاں سے پراکسی شدہ درخواستیں آتی ہیں۔",
     "real_ip_from_urls": "قابل اعتماد IPs / نیٹ ورکس پر مشتمل URLs کی فہرست، خالی جگہوں سے الگ، جہاں سے پراکسی شدہ درخواستیں آتی ہیں۔ file:// URLs اور http://user:pass@url اسکیم کا استعمال کرتے ہوئے بنیادی تصدیق کی بھی حمایت کرتا ہے۔",
@@ -2024,7 +2024,7 @@
         "version": "پلگ ان کا ورژن"
       },
       "reports": {
-        "actions": "Actions available for this Report",
+        "actions": "اس رپورٹ کے لیے دستیاب کارروائیاں",
         "country": "رپورٹ کردہ IP ایڈریس سے وابستہ ملک",
         "data": "رپورٹ سے متعلق اضافی ڈیٹا",
         "date": "رپورٹ بنانے کی تاریخ اور وقت",
@@ -2097,7 +2097,7 @@
   "certificates": {
     "acme_help": "ان سروسز کا انتخاب کریں جن کے موجودہ سیٹنگز پہلے سے ہی Let's Encrypt کو فعال اور کنفیگور کر چکے ہیں۔ یہ عمل صرف اس کنفیگریشن کی شمولیت کا انتظام کرتا ہے؛ سرٹیفکیٹ کے تفصیلات اور چیلنج کے کریڈینشل یہاں درج نہیں کیے جائیں۔",
     "active": "نشے سرٹیفکیٹس",
-    "algorithm": "الگورтім",
+    "algorithm": "الگورتھم",
     "all": "سب",
     "assignment_notice": "اسائنمنٹس مرکزی انوینٹری کو منظم کرتے ہیں؛ TLS کی تقسیم ہر سروس کے سرٹیفکیٹ سیٹنگز کے ذریعے کنٹرول میں رہتی ہے۔",
     "assignments": "انوینٹری اسائنمنٹس",
@@ -2148,11 +2148,11 @@
     "pem_drop": "یہاں عام PEM سرٹیفکیٹ یا چین ڈالیں",
     "pem_limit": "زیادہ سے زیادہ 1 MiB",
     "pem_private_key": "PEM پرائیویٹ کی",
-    "primary": "اہم призначення",
+    "primary": "بنیادی تفویض",
     "primary_help": "تصریح کردہ سروسوں کے لیے بنیادی موجودہ کے طور پر نشان زد کریں۔",
     "readonly": "ڈیٹا بیس readonly ہے۔ سرٹیفکیٹ کا جائزہ لیا جا سکتا ہے اور ڈاؤن لوڈ کیا جا سکتا ہے، لیکن ان میں تبدیلی نہیں کی جا سکتی۔",
     "renew_due": " چیک/رینو ڈیو",
-    "sans": "سбніٹ الٹرفینٹ نام",
+    "sans": "موضوع کے متبادل نام",
     "save_metadata": "متادیتا بچائیں",
     "schedule": "جاری کرنے کا شیڈول ترتیب کریں",
     "schedule_acme": "ACME جاری کرنے کا شیڈول ترتیب کریں",
@@ -2216,7 +2216,7 @@
     "kinds": "نوعیں",
     "loading_references": "رجفرینسیں لوڈ ہو رہی ہیں...",
     "max_entries": "ایک ریسورس گروپ میں {{max}} سے زیادہ ایئرنٹس نہیں ہو سکتے۔",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} اقسام · {{values}} قدریں · {{usages}} استعمال",
     "new": "نیا گروپ",
     "new_alias": "نیا آلیاس",
     "no_entries": "کوئی ایئرنٹس نہیں",
@@ -2389,227 +2389,227 @@
     "truncated": "فقط پہلے 500 آپ اسٹریم دکھائے جاتے ہیں۔ مکمل نتائج کے لیے API کے ذریعے فہرست کو محدود کریں۔"
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "بلاک کریں",
+    "act_challenge": "چیلنج",
+    "act_code": "اسٹیٹس کوڈ",
+    "act_denyDefault": "انسٹینس کا انکار اسٹیٹس",
+    "act_denyShort": "انکار اسٹیٹس",
+    "act_provider": "اینٹی بوٹ فراہم کنندہ",
+    "act_redirect": "ری ڈائریکٹ کریں",
+    "act_status": "انکار اسٹیٹس",
+    "act_terminal": "ہر اصول میں ایک کارروائی ہوتی ہے اور وہ جانچ ختم کر دیتی ہے — اصول سے درست / غلط کا کوئی راستہ نہیں نکلتا۔",
+    "act_url": "منزل کا URL",
     "action": "پھر",
     "add_rule": "قواعد کو شامل کریں",
     "all": "سب",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "سکیڑیں",
+      "combinator": "رابطہ تبدیل کریں، فی الحال",
+      "conditionType": "شرط کی قسم",
+      "denyStatus": "انکار اسٹیٹس",
+      "drag": "ترتیب بدلنے کے لیے گھسیٹیں",
+      "expand": "پھیلائیں",
+      "groupKind": "گروپ کی قسم",
+      "more": "مزید",
+      "moveDown": "نیچے منتقل کریں — بعد میں چلے گا",
+      "moveRule": "اصول منتقل کریں",
+      "moveUp": "اوپر منتقل کریں — پہلے چلے گا",
+      "provider": "اینٹی بوٹ فراہم کنندہ",
+      "redirectStatus": "ری ڈائریکٹ اسٹیٹس",
+      "removeCondition": "شرط ہٹائیں",
+      "removeThreshold": "حد ہٹائیں",
+      "removeThresholdLong": "شرح کی حد ہٹائیں",
+      "removeValue": "قدر ہٹائیں",
+      "requestCount": "درخواستوں کی تعداد",
+      "resourceGroup": "وسائل کا گروپ",
+      "ruleName": "اصول {{n}} کا نام",
+      "terminalAction": "اختتامی کارروائی",
+      "uriMatch": "URI مماثلت موڈ",
+      "uriValue": "URI قدر",
+      "window": "سیکنڈ میں دورانیہ"
     },
     "attach": "سرویس سے جوڑیں",
     "attach_help": "قوانین صرف ان سروسز پر نافذ ہوتے ہیں جن سے ورک فلو جوڑا گیا ہے۔",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "محفوظ کرنے سے یہ اصول {{count}} منسلک سروسز پر لاگو ہوں گے۔",
+    "capacity": "{{maxRules}} میں سے {{count}} اصول · سب سے بڑا اصول {{maxPredicates}} میں سے {{worst}} شرائط استعمال کرتا ہے · اس ورک فلو میں {{regexes}} ریجیکس",
     "clone": "ورک فلو کی کاپی کریں",
     "clone_help": "قوانین کاپی کیے جاتے ہیں، سروس کے جوڑ نہیں ہیں۔",
     "clone_name": "کاپی کا نام",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "یہ اصول حذف کریں؟ اس کے نیچے موجود سب اصول ایک درجہ اوپر آ جائیں گے۔"
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (نقل)",
     "delete": "ورک فلو کو حذف کریں",
     "delete_confirm": "یہ ورک فلو اور اس کے تمام قوانین مستقل طور پر حذف ہو جائیں گے۔",
     "empty_text": "ایک ورک فلو سروسز سے منسلک قوانین کا ایک ترتیب ہے: ایک شرط کا درخت، ایک اختیاری ریٹ کا حد، اور ایک عمل - چیلنج، بلاک یا ری ڈائریکٹ۔",
     "empty_title": "اب تک کوئی ورک فلو نہیں",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "ورک فلوز منسلک ہونے کی ترتیب میں چلتے ہیں؛ اس کے اصول اوپر سے نیچے چلتے ہیں۔",
+    "entry_title": "منسلک سروس کی ہر درخواست",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "محفوظ نہیں کیا جا سکا",
+      "saveUnreachable": "محفوظ کرنے کے اینڈ پوائنٹ تک رسائی نہیں ہو سکی",
+      "validate": "توثیق نہیں ہو سکی",
+      "validateUnreachable": "توثیقی اینڈ پوائنٹ تک رسائی نہیں ہو سکی"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "کچھ لاگو نہیں ہوا — چلتی ہوئی پالیسی برقرار ہے۔",
+      "count": "{{count}} مسائل محفوظ کرنے سے روک رہے ہیں۔",
+      "rule": "اصول {{n}}",
+      "ruleNamed": "اصول {{n}} — {{name}}",
+      "whole": "یہ ورک فلو"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "درخواست اگلے منسلک ورک فلو اور پھر باقی سکیورٹی اسٹیک تک جاری رہے گی۔",
+    "exit_title": "کوئی اصول مماثل نہیں ہوا",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "اور صرف جب اسی کلائنٹ IP نے اس سے زیادہ درخواستیں کی ہوں",
+      "chip": "مماثلت گیٹ",
+      "help": "ہر کلائنٹ IP کے لیے الگ شمار ہوتا ہے۔ حد سے نیچے یہ اصول بالکل مماثل نہیں ہوتا اور جانچ اگلے اصول تک جاتی ہے؛ یہ خود شرح محدود نہیں کرتا۔"
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "مماثلت نہ ہو تو اگلا اصول",
+      "gate": "شرح کی حد مماثلت کو قابو کرتی ہے، یہ کارروائی نہیں ہے",
+      "move": "ترتیب بدلنے کے لیے گھسیٹیں، تیروں کا استعمال کریں یا Alt + ↑ / ↓ دبائیں",
+      "stop": "مماثلت ایک کارروائی چلا کر روک دیتی ہے"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "مماثل نہیں"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "آخر میں چلائیں",
+      "delete": "اصول حذف کریں",
+      "disable": "اصول غیر فعال کریں",
+      "duplicate": "نیچے نقل بنائیں",
+      "enable": "اصول فعال کریں",
+      "top": "پہلے چلائیں"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "پہلے چلائیں",
+      "last": "آخر میں چلائیں"
     },
     "new": "نیا ورک فلو",
     "no_rules": "اب تک کوئی قانون نہیں. اس پالیسی بنانے کے لیے ایک شامل کریں.",
     "not_attached": "جوڑا نہیں گیا",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
-    "order_help": "قوانین ترتیب کے مطابق کاٹے جاتے ہیں اور پہلے جو ملا وہ جیتتا ہے۔ ایک ریٹ کا حد کے ساتھ ایک قانون صرف اس وقت ملا جب حد переви ہوتی ہے، اس لیے ایک کم حد ٹریفک کو پکڑ سکتی ہے۔",
+    "not_attached_notice": "یہ ورک فلو کسی سروس سے منسلک نہیں، اس لیے یہ اصول ابھی کہیں نافذ نہیں ہیں۔",
+    "not_validated": "ابھی توثیق نہیں ہوئی",
+    "order_help": "اصولوں کی ترتیب سے جانچ ہوتی ہے اور پہلا مماثل اصول کامیاب ہوتا ہے۔ شرح کی حد والا اصول صرف حد پار ہونے پر مماثل ہوتا ہے، اس لیے نیچے کا اصول حد سے کم ٹریفک کو پکڑ سکتا ہے۔",
     "readonly": "ڈیٹا بیسreadonly ہے۔ ورک فلو کا جائزہ لیا جا سکتا ہے لیکن تبدیل نہیں کیا جا سکتا۔",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "غیر فعال",
+      "if": "اگر",
+      "namePlaceholder": "اصول کا نام",
+      "noun": "اصول",
+      "onMatch": "اگر مماثل ہو",
+      "skipped": "غیر فعال — مکمل طور پر نظرانداز، جیسے فہرست میں موجود ہی نہ ہو۔",
+      "stopTail": "، جانچ یہیں رک جاتی ہے — نیچے کوئی اصول نہیں پہنچتا۔"
     },
     "rules": "قوانین",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "کارروائی {{type}} میں بدل گئی۔ یہ اب بھی واحد کارروائی ہے اور جانچ روک دیتی ہے۔",
+      "added": "اصول مقام {{n}}، یعنی آخر میں شامل ہوا — اس لیے اوپر کے سب اصول پہلے جانچے جاتے ہیں۔",
+      "deleted": "اصول حذف ہو گیا۔ {{count}} اصول باقی ہیں۔",
+      "duplicated": "نقل مقام {{n}} پر شامل ہوئی۔ اوپر اصل اصول فعال رہنے تک یہ کبھی مماثل نہیں ہو سکتی۔",
+      "gateAdded": "مماثلت میں شرح کی حد شامل ہوئی۔ اس سے نیچے اصول مماثل نہیں ہوتا اور جانچ جاری رہتی ہے۔",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "آخری قدر ہٹا دی گئی — کوئی قدر ہونے تک یہ شرط محفوظ نہیں ہو سکتی۔",
+      "moved": "{{name}} کو {{total}} میں سے مقام {{to}} پر منتقل کیا گیا{{how}}۔ اب یہ {{where}} چلتا ہے۔",
+      "predicateCap": "اس اصول میں پہلے ہی زیادہ سے زیادہ {{max}} شرائط ہیں۔",
+      "ruleAbove": "اوپر کے اصول کے بعد",
+      "ruleDisabled": "{{name}} غیر فعال — اسے مکمل طور پر چھوڑا جاتا ہے اور نیچے کے اصول اب وہ درخواستیں دیکھتے ہیں۔",
+      "ruleEnabled": "{{name}} فعال — مقام {{n}} پر اس کی دوبارہ جانچ ہوتی ہے۔",
+      "runsAfter": "{{name}} کے بعد",
+      "runsFirst": "سب سے پہلے",
+      "runsLast": "سب سے آخر میں",
+      "saved": "اصول محفوظ کر کے منسلک سروسز کو بھیج دیے گئے۔",
+      "theRule": "اصول",
+      "valuesDropped": "شرط {{type}} میں بدلی — اس کی {{count}} قدریں منتقل نہیں ہو سکیں۔",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "گھسیٹ کر",
+        "keyboard": "کی بورڈ سے"
       }
     },
     "search": "نام یا وضاحت کی تلاش کریں...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "ناکام ASN تلاش کی نقل کے لیے خالی چھوڑیں۔",
+      "asn_invalid": "ASN ایک عدد ہونا چاہیے",
+      "assume_not_whitelisted": "فرض کرتا ہے کہ کلائنٹ سفید فہرست میں نہیں۔",
+      "assume_rate_counter": "درخواست نمبر {{request_number}} آپ کی دی ہوئی قدر ہے، پیمائش نہیں۔",
+      "assume_regex_budget": "فرض کرتا ہے کہ انسٹینس کا ریجیکس بجٹ ختم نہیں ہوا۔",
+      "assumptions": "مفروضے",
+      "country": "ملک",
+      "detail_challenge": "چیلنج عمل سنبھال لیتا ہے؛ باقی سکیورٹی اسٹیک پھر بھی چلتا ہے۔",
+      "detail_detect": "یہ سروس شناختی موڈ میں ہے، اس لیے حقیقت میں کچھ نافذ نہیں ہوتا۔",
+      "detail_status": "کلائنٹ کو {{status}} نظر آئے گا۔",
+      "failed": "ٹیسٹ نہیں چل سکا",
+      "geo": "GeoIP تلاش",
+      "geo_help": "دستیاب نہ ہونے پر ملک اور ASN اصول نامعلوم ہو جاتے ہیں، اس لیے کبھی مماثل نہیں ہو سکتے۔",
+      "geo_local": "مقامی / نجی پتہ",
+      "geo_resolved": "حل شدہ",
+      "geo_unavailable": "ڈیٹابیس دستیاب نہیں",
+      "intro": "سروس سے منسلک ہر ورک فلو کو ترتیب سے بالکل اسی طرح جانچتا ہے جیسے انسٹینس کرے گا۔",
+      "invalid": "ٹیسٹ سے پہلے اوپر کے مسائل درست کریں۔",
+      "ip": "کلائنٹ IP",
+      "method": "طریقہ",
+      "number": "درخواست نمبر",
+      "number_help": "دورانیے میں اس کلائنٹ کی Nویں درخواست۔ یہ آپ کا دیا ہوا مفروضہ ہے، پیمائش نہیں۔",
+      "open": "درخواست جانچیں",
+      "other_matched": "یہاں مماثل ہوا",
+      "other_no_match": "کوئی اصول مماثل نہیں ہوا",
+      "other_unreached": "نہیں پہنچا",
+      "other_workflows": "اس سروس کے دوسرے ورک فلوز",
+      "out_draft": "یہ سروس مسودہ ہے — اس کے لیے ابھی کوئی ورک فلو کمپائل نہیں ہوا۔",
+      "out_match": "{{workflow}} · {{rule}} مماثل ہوا اور درخواست پر {{action}} کارروائی کی۔",
+      "out_no_match": "کوئی اصول مماثل نہیں ہوا۔ درخواست باقی سکیورٹی اسٹیک تک جاری رہے گی۔",
+      "out_not_attached": "یہ ورک فلو کسی سروس سے منسلک نہیں، اس لیے جانچنے کے لیے اصولوں کی کوئی سیڑھی نہیں۔",
+      "out_whitelisted": "سفید فہرست میں — پورا ورک فلو چھوڑ دیا جاتا ہے اور کوئی اصول نہیں جانچا جاتا۔",
+      "run": "ٹیسٹ چلائیں",
+      "service": "سروس",
+      "title": "درخواست جانچیں",
+      "unreachable": "ٹیسٹ اینڈ پوائنٹ تک رسائی نہیں ہو سکی",
+      "uri": "URI پاتھ",
+      "uri_help": "صرف پاتھ — $uri میں کبھی کوئری اسٹرنگ نہیں ہوتی۔",
+      "v_gate": "شرائط مماثل · {{count}} میں {{n}} پر گیٹ بند",
+      "v_match": "مماثل",
+      "v_unknown": "نامعلوم",
+      "v_unknown_help": "اس اصول کو درکار حقیقت معلوم نہیں ہو سکی، اس لیے یہ کبھی مماثل نہیں ہو سکتا۔",
+      "whitelisted": "یہ کلائنٹ سفید فہرست میں ہے"
     },
     "threshold": "فقط ریٹ کے اوپر",
     "threshold_count": "درخواستیں",
     "threshold_window": "(دקות)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "شرط",
+      "addGroup": "گروپ",
+      "all": "سبھی",
+      "allMeta": "{{count}} شرائط — سب درست ہونی چاہییں",
+      "and": "اور",
+      "any": "کوئی بھی",
+      "anyMeta": "{{count}} شرائط — کم از کم ایک درست ہونی چاہیے",
+      "empty": "خالی گروپ — شرط شامل کریں؛ اسے اس طرح محفوظ نہیں کیا جا سکتا۔",
+      "noGroupHolds": "کسی گروپ میں {{kind}} اندراجات نہیں",
+      "noneMeta": "جب ان میں سے کوئی درست نہ ہو تو مماثل ہوتا ہے",
+      "not": "کوئی نہیں",
+      "or": "یا",
+      "removeGroup": "گروپ ہٹائیں"
     },
     "truncated": "فقط پہلے 500 ورک فلو دکھائے جاتے ہیں۔ مکمل نتیجہ کے لیے API کے ذریعے فہرست کو محدود کریں۔",
-    "untitled": "Untitled rule",
+    "untitled": "بے عنوان اصول",
     "value": {
-      "add": "Value"
+      "add": "قدر"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "کم دکھائیں",
+      "more": "+{{n}} مزید"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "ہے",
+      "country": "ہے",
+      "group": "گروپ میں ہے",
+      "ip": "میں ہے",
+      "isIn": "میں ہے",
+      "isOneOf": "ان میں سے ایک ہے",
+      "method": "ہے",
+      "uri": "سے مماثل ہے"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "1+ ہوسٹ پر BunkerWeb نصب کریں",
+      "mfa": "MFA فعال کریں",
+      "pro": "BunkerWeb PRO فعال کریں",
+      "service": "اپنی پہلی سروس رجسٹر کریں"
     },
     "pro_tips": "PRO کے لیے تجاویز",
-    "title": "Getting started"
+    "title": "شروعات"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "ہر درخواست کے ہر مرحلے میں ہر پلگ ان کا وقت، تمام انسٹینسز سے براہ راست پڑھ کر یکجا کیا جاتا ہے۔",
+    "volatile": "اوقات ہر انسٹینس کی مشترکہ میموری میں رہتے ہیں اور ضرورت پر پڑھے جاتے ہیں — محفوظ نہیں ہوتے اور انسٹینس دوبارہ شروع ہونے پر صفر ہو جاتے ہیں۔",
+    "partial": "کچھ انسٹینسز نے جواب نہیں دیا۔ نیچے کے اعداد جواب دینے والوں کے ہیں۔",
+    "reporting_instances": "رپورٹ کرنے والے انسٹینسز",
+    "requests_measured": "ناپی گئی درخواستیں",
+    "mean_request": "اوسط درخواست",
+    "max_request": "سب سے سست درخواست",
+    "phases": "پلگ ان مراحل",
+    "share_help": "حصہ کل درخواست کے وقت کے مقابلے میں پلگ ان کا کل وقت ہے۔ جو مراحل ہر درخواست پر ایک بار نہیں چلتے — worker کی ابتدا، پس منظر ٹائمر اور اندرونی API — ان کا حصہ نہیں ہوتا اور ڈیش دکھائی جاتی ہے۔",
+    "plugin": "پلگ ان",
+    "phase": "مرحلہ",
+    "calls": "کالز",
+    "mean": "اوسط",
+    "max": "زیادہ سے زیادہ",
+    "total": "کل",
+    "share": "حصہ",
+    "disabled_title": "پلگ ان کے اوقات بند ہیں",
+    "disabled_help": "ہر پلگ ان کا وقت ناپنے کے لیے METRICS_COLLECT_TIMINGS کو yes پر سیٹ کریں۔ پوری درخواست کا دورانیہ ہر حال میں جمع ہوتا ہے۔",
+    "unreachable_title": "کسی انسٹینس نے وقت رپورٹ نہیں کیا",
+    "unreachable_help": "اوقات خود انسٹینسز سے پڑھے جاتے ہیں، اس لیے کسی نے جواب نہیں دیا — یا ابھی کسی نے درخواست مکمل نہیں کی۔"
   }
 }

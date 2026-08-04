@@ -5,7 +5,7 @@
     "license_title": "लाइसेंस",
     "socials": "सोशल मीडिया",
     "tagline": "शक्तिशाली सुरक्षा, सरलीकृत",
-    "title": "About BunkerWeb",
+    "title": "BunkerWeb के बारे में",
     "social": {
       "discord": "डिस्कॉर्ड",
       "instagram": "इंस्टाग्राम",
@@ -78,20 +78,20 @@
     "subtitle": "आपके BunkerWeb इंस्टेंस में अवरुद्ध IP पते — जोड़ें, हटाएं, या प्रतिबंध अवधि समायोजित करें।",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "सक्षम है।",
+        "body_before": "यहाँ लगाए गए प्रतिबंध इंस्टेंस पुनः शुरू होने पर समाप्त हो जाते हैं, जब तक कि",
+        "title": "स्थायी रूप से न सहेजे गए बदलाव।"
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "कारण के अनुसार प्रतिबंध"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "सक्रिय प्रतिबंध",
+        "active_caption": "IP + CIDR",
+        "countries": "देश",
+        "expiring": "≤ 1 घंटे में समाप्त",
+        "expiring_caption": "स्वचालित बदलाव",
+        "permanent": "स्थायी प्रतिबंध"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "प्रतिबंध",
     "cache": "कैश",
     "web_cache": "वेब कैश",
-    "timings": "Timings",
+    "timings": "समय",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
     "global_settings": "ग्लोबल सेटिंग्स",
-    "global_config": "Global config",
+    "global_config": "वैश्विक कॉन्फ़िगरेशन",
     "home": "होम",
     "instances": "इंस्टेंस",
     "jobs": "कार्य",
@@ -162,8 +162,8 @@
     "fetch_global": "ग्लोबल सेटिंग्स लाएँ",
     "filters_suffix": " फ़िल्टर",
     "follow": "अनुसरण करें",
-    "force_check": "Force check",
-    "force_update": "Force update",
+    "force_check": "जबरन जाँचें",
+    "force_update": "जबरन अपडेट करें",
     "github_stars": "स्टार्स",
     "go_back": "वापस जाओ",
     "hide": "छिपाएं",
@@ -183,7 +183,7 @@
     "ping": "पिंग करें",
     "plugin_page": "प्लगइन पृष्ठ",
     "proceed": "आगे बढ़ें",
-    "refresh": "Refresh",
+    "refresh": "रीफ़्रेश",
     "refresh_recovery_codes": "पुनर्प्राप्ति कोड ताज़ा करें",
     "reload": "पुनः लोड करें",
     "reset": "रीसेट करें",
@@ -216,20 +216,20 @@
     "view_details": "विवरण देखें",
     "view_raw_data": "रॉ डेटा देखें",
     "wipe_other_sessions": "अन्य सत्र साफ़ करें",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "सभी मेल खाते रिपोर्ट प्रतिबंधित करें",
+    "filtered_actions": "फ़िल्टर की गई कार्रवाइयाँ",
+    "unban_all_filtered": "सभी मेल खाते प्रतिबंध हटाएँ",
+    "update_duration_all_filtered": "सभी मेल खाते प्रतिबंधों की अवधि बदलें",
+    "use_template": "टेम्पलेट उपयोग करें",
+    "edit": "संपादित करें",
     "verify": "सत्यापित करें",
-    "view": "View"
+    "view": "देखें"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "फ़ाइलें",
+    "kpi_per_service": "प्रति सेवा",
     "subtitle": "अनुसूचित कार्यों द्वारा उत्पन्न कैश फ़ाइलें (ब्लॉकलिस्ट, GeoIP डेटाबेस, और अन्य) — प्रति सेवा और प्लगइन के लिए जांचें, डाउनलोड करें, या हटाएं।",
-    "title": "Cache files"
+    "title": "कैश फ़ाइलें"
   },
   "configs": {
     "subtitle": "अपने सेवाओं के लिए कस्टम NGINX कॉन्फ़िगरेशन स्निपेट — बनाएँ, संपादित करें, और प्रबंधित करें HTTP, ModSecurity, और स्ट्रीम-स्तरीय ओवरराइड।"
@@ -533,7 +533,7 @@
         "title": "ऊपर की ओर"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "ब्लॉक होने के मुख्य कारण"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "शीर्ष 10 अवरुद्ध आईपी"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "ब्लॉक किए गए",
+        "title": "समय के साथ ब्लॉक किए गए अनुरोध (चयनित सीमा)"
       }
     },
     "map": {
@@ -567,17 +567,17 @@
       "no_data": "कोई डेटा नहीं"
     },
     "window": {
-      "last_days": "Last {{days}} days",
-      "title": "Dashboard window"
+      "last_days": "पिछले {{days}} दिन",
+      "title": "डैशबोर्ड समयावधि"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "सक्रिय प्रतिबंध",
+      "jobs": "निर्धारित कार्य",
+      "trend": "ब्लॉक किए गए अनुरोधों की प्रवृत्ति"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "वापसी पर स्वागत है, {{user}}",
+      "greeting": "वापसी पर स्वागत है,"
     },
     "mini": {
       "across_countries": "{{count}} देशों में",
@@ -594,12 +594,12 @@
       "vs_prev": "vs पिछला"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "चयनित सीमा",
+      "top_ips_sub": "अनुरोध संख्या के अनुसार",
+      "status_sub": "HTTP प्रतिक्रिया कोड",
+      "reasons_sub": "ट्रिगर नियम के अनुसार",
+      "map_sub": "विवरण के लिए होवर करें",
+      "blocking_sub": "ब्लॉक किए गए और अनुमत"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "अपग्रेड करें?",
     "use_authenticator_code": "एक प्रमाणीकरण कोड का उपयोग करें",
     "use_recovery_code": "एक रिकवरी कोड का उपयोग करें",
-    "get_support": "Get support"
+    "get_support": "सहायता पाएँ"
   },
   "login": {
     "title": "लॉग इन करें",
@@ -945,25 +945,25 @@
     "showing_some": "{{total}} में से {{shown}} दिखा रहे हैं",
     "select_file_prompt": "एक लॉग फ़ाइल का चयन करें ताकि उसकी सामग्री देखी जा सके",
     "trimmed_notice": "--- प्रदर्शन के लिए {{count}} पुरानी लॉग लाइनें हटा दी गईं ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "सभी स्रोत (लाइव)",
+    "collapse": "समेटें",
+    "expand": "फैलाएँ",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "सभी लॉग",
+    "level_errors_only": "केवल त्रुटियाँ",
+    "level_security_only": "केवल सुरक्षा",
+    "live_title": "लाइव लॉग",
+    "pause": "रोकें",
+    "resume": "जारी रखें",
+    "tailing_sources": "अनुसरण · {{count}} स्रोत",
+    "taller": "और ऊँचा"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।",
       "confirm_cache_deletion_alert": "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?",
       "confirm_cache_deletion_alert_plural": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "क्या आप चयनित कस्टम कॉन्फ़िगरेशन बदलना चाहते हैं?",
       "confirm_configs_conversion_to": "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को {{state}} में रूपांतरित करना चाहते हैं?",
       "confirm_configs_deletion_alert": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_configs_deletion_alert_plural": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
       "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "सभी {{count}} मेल खाते रिपोर्ट के IP प्रतिबंधित करें? दोहराए गए लक्ष्य एक बार लागू होंगे।",
+      "unban_filtered_confirmation": "क्या आप सभी {{count}} मेल खाते प्रतिबंध हटाना चाहते हैं?",
+      "update_filtered_duration_alert": "सभी {{count}} मेल खाते प्रतिबंधों के लिए नई अवधि चुनें:"
     },
     "button": {
       "fetch_global_settings_confirm": "ग्लोबल सेटिंग्स लागू करें",
@@ -1065,7 +1065,7 @@
     "cache": "कैश",
     "certificates": "प्रमाणपत्र",
     "web_cache": "वेब कैश",
-    "timings": "Timings",
+    "timings": "समय",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
     "global_settings": "ग्लोबल सेटिंग्स",
@@ -1088,11 +1088,11 @@
     "services": "सेवाएं",
     "support": "समर्थन",
     "templates": "टेम्पलेट्स",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "अवलोकन",
+    "configure": "कॉन्फ़िगर करें",
+    "operate": "संचालित करें",
+    "system": "सिस्टम",
+    "edition_community": "समुदाय",
     "redirects": "पुन:निर्देशित",
     "upstreams": "ऊपर की ओर",
     "workflows": "कार्यप्रवाह",
@@ -1141,17 +1141,17 @@
       "show_less": "कम दिखाएँ"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "सक्रिय",
+      "always_on": "मूल / हमेशा चालू",
+      "disabled": "अक्षम",
+      "enabled": "सक्षम",
+      "inactive": "निष्क्रिय",
+      "no_match": "कोई प्लगइन आपके फ़िल्टर से मेल नहीं खाता",
+      "search": "प्लगइन खोजें...",
+      "tab_all": "सभी",
+      "tab_community": "समुदाय",
+      "tab_disabled": "अक्षम",
+      "tab_enabled": "सक्षम"
     }
   },
   "pro": {
@@ -1172,12 +1172,12 @@
       "unknown": "अज्ञात समाप्ति तिथि"
     },
     "force_check": {
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
-      "title": "Force check"
+      "description": "PRO प्लगइन की नई जाँच कराएँ। नए संस्करण उपलब्ध होने पर प्लगइन दोबारा डाउनलोड होंगे।",
+      "title": "जबरन जाँचें"
     },
     "force_update": {
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
-      "title": "Force update"
+      "description": "जाँच छोड़कर PRO प्लगइन जबरन डाउनलोड करें। ऐसा संभव न होने पर वर्तमान स्थिति रखी जाएगी।",
+      "title": "जबरन अपडेट करें"
     },
     "key": {
       "title": {
@@ -1199,7 +1199,7 @@
       "suspended": "निलंबित",
       "title": "स्थिति"
     },
-    "title": "Pro license"
+    "title": "Pro लाइसेंस"
   },
   "profile": {
     "2fa": {
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "डीबग लॉग डाउनलोड करें, अपने कॉन्फ़िगरेशन निकालें, और BunkerWeb टीम से सहायता प्राप्त करें।",
-    "title": "Support"
+    "title": "सहायता"
   },
   "tab": {
     "custom_certificate": "कस्टम प्रमाणपत्र",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "अपनी सेवाओं के लिए पुन: प्रयोज्य कॉन्फ़िगरेशन टेम्पलेट — सेटिंग्स, चरणों और कस्टम कॉन्फ़िगरेशन को एक साथ समूहित करें, फिर उन्हें बनाएं, क्लोन करें, या हटाएं।",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "चयनित हटाएँ",
+      "empty_message": "सेटिंग, चरण और कस्टम कॉन्फ़िगरेशन को दोबारा उपयोग के लिए जोड़ने वाला अपना पहला टेम्पलेट बनाएँ।",
+      "empty_title": "अभी कोई टेम्पलेट नहीं",
+      "select": "चुनें",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "उच्च सुरक्षा",
+      "low": "कम सुरक्षा",
+      "medium": "मध्यम सुरक्षा",
+      "ui": "वेब UI"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "कस्टम कॉन्फ़िगरेशन: {{name}}",
+      "feature": "अंतर्निहित सुविधा: {{name}}",
+      "plugin": "प्लगइन: {{name}}"
     },
-    "title": "Service templates"
+    "title": "सेवा टेम्पलेट"
   },
   "theme": {
     "dark": "डार्क",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।",
     "button": {
       "ban_ip": "इस IP पते को प्रतिबंधित करें",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "कॉन्फ़िग {{name}} को ड्राफ्ट में बदलें",
+      "convert_config_to_online": "कॉन्फ़िग {{name}} को ऑनलाइन में बदलें",
       "convert_service_to_draft": "सेवा {{name}} को ड्राफ्ट में बदलें",
       "convert_service_to_online": "सेवा {{name}} को ऑनलाइन में बदलें",
       "delete_config": "कस्टम कॉन्फ़िगरेशन {{name}} हटाएं",
@@ -2216,7 +2216,7 @@
     "kinds": "प्रकारों",
     "loading_references": "संदर्भ लोड हो रहे हैं...",
     "max_entries": "एक संसाधन समूह में अधिकतम {{max}} प्रविष्टियाँ हो सकती हैं।",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} प्रकार · {{values}} मान · {{usages}} उपयोग",
     "new": "नया समूह",
     "new_alias": "नया एलियास",
     "no_entries": "कोई प्रविष्टियाँ नहीं",
@@ -2389,227 +2389,227 @@
     "truncated": "केवल पहले 500 अपस्ट्रीम प्रदर्शित होते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।"
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "ब्लॉक करें",
+    "act_challenge": "चुनौती",
+    "act_code": "स्थिति कोड",
+    "act_denyDefault": "इंस्टेंस की अस्वीकार स्थिति",
+    "act_denyShort": "अस्वीकार स्थिति",
+    "act_provider": "एंटीबॉट प्रदाता",
+    "act_redirect": "रीडायरेक्ट करें",
+    "act_status": "अस्वीकार स्थिति",
+    "act_terminal": "हर नियम में एक ही कार्रवाई होती है और वह मूल्यांकन समाप्त कर देती है — नियम से कोई सही / गलत मार्ग नहीं निकलता।",
+    "act_url": "गंतव्य URL",
     "action": "फिर",
     "add_rule": "नियम जोड़ें",
     "all": "सभी",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "समेटें",
+      "combinator": "संयोजक बदलें, वर्तमान",
+      "conditionType": "शर्त का प्रकार",
+      "denyStatus": "अस्वीकार स्थिति",
+      "drag": "क्रम बदलने के लिए खींचें",
+      "expand": "फैलाएँ",
+      "groupKind": "समूह का प्रकार",
+      "more": "और",
+      "moveDown": "नीचे ले जाएँ — बाद में चलेगा",
+      "moveRule": "नियम ले जाएँ",
+      "moveUp": "ऊपर ले जाएँ — पहले चलेगा",
+      "provider": "एंटीबॉट प्रदाता",
+      "redirectStatus": "रीडायरेक्ट स्थिति",
+      "removeCondition": "शर्त हटाएँ",
+      "removeThreshold": "सीमा हटाएँ",
+      "removeThresholdLong": "दर सीमा हटाएँ",
+      "removeValue": "मान हटाएँ",
+      "requestCount": "अनुरोधों की संख्या",
+      "resourceGroup": "संसाधन समूह",
+      "ruleName": "नियम {{n}} का नाम",
+      "terminalAction": "अंतिम कार्रवाई",
+      "uriMatch": "URI मिलान मोड",
+      "uriValue": "URI मान",
+      "window": "सेकंड में समयावधि"
     },
     "attach": "सेवाओं से जोड़ें",
     "attach_help": "नियम केवल उन सेवाओं पर लागू होते हैं जिनसे वर्कफ़्लो जुड़ा हुआ है।",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "सहेजने पर ये नियम {{count}} संलग्न सेवाओं पर लागू होंगे।",
+    "capacity": "{{maxRules}} में से {{count}} नियम · सबसे बड़ा नियम {{maxPredicates}} में से {{worst}} विधेय उपयोग करता है · इस कार्यप्रवाह में {{regexes}} रेगेक्स",
     "clone": "वर्कफ़्लो की प्रतिलिपि बनाएँ",
     "clone_help": "नियम कॉपी किए जाते हैं, लेकिन सेवा के अटैचमेंट नहीं।",
     "clone_name": "प्रतिलिपि का नाम",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "यह नियम हटाएँ? इसके नीचे के सभी नियम एक स्थान ऊपर चले जाएँगे।"
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (प्रतिलिपि)",
     "delete": "वर्कफ़्लो हटाएं",
     "delete_confirm": "यह वर्कफ़्लो और उसके सभी नियम स्थायी रूप से हटा दिए जाएंगे।",
     "empty_text": "एक वर्कफ़्लो सेवाओं से जुड़े नियमों की एक क्रमबद्ध सूची है: एक शर्त ट्री, एक वैकल्पिक दर सीमा, और एक क्रिया - चुनौती, ब्लॉक या पुनर्निर्देश।",
     "empty_title": "अभी कोई वर्कफ़्लो नहीं",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "कार्यप्रवाह संलग्न क्रम में चलते हैं; इसके भीतर के नियम ऊपर से नीचे चलते हैं।",
+    "entry_title": "संलग्न सेवा का हर अनुरोध",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "सहेजा नहीं जा सका",
+      "saveUnreachable": "सहेजने के एंडपॉइंट तक नहीं पहुँचा जा सका",
+      "validate": "सत्यापित नहीं किया जा सका",
+      "validateUnreachable": "सत्यापन एंडपॉइंट तक नहीं पहुँचा जा सका"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "कुछ लागू नहीं हुआ — चल रही नीति अपरिवर्तित है।",
+      "count": "{{count}} समस्याएँ सहेजने से रोक रही हैं।",
+      "rule": "नियम {{n}}",
+      "ruleNamed": "नियम {{n}} — {{name}}",
+      "whole": "यह कार्यप्रवाह"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "अनुरोध अगली संलग्न कार्यप्रवाह और फिर शेष सुरक्षा स्टैक पर जारी रहेगा।",
+    "exit_title": "कोई नियम मेल नहीं खाया",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "और तभी जब उसी क्लाइंट IP ने इससे अधिक अनुरोध किए हों",
+      "chip": "मिलान द्वार",
+      "help": "हर क्लाइंट IP के लिए अलग गणना होती है। सीमा से नीचे नियम बिल्कुल मेल नहीं खाता और मूल्यांकन अगले नियम पर जाता है; यह अपने आप दर सीमित नहीं करता।"
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "मेल न होने पर अगला नियम",
+      "gate": "दर सीमा मिलान को नियंत्रित करती है, यह कार्रवाई नहीं है",
+      "move": "क्रम बदलने के लिए खींचें, तीरों का उपयोग करें या Alt + ↑ / ↓ दबाएँ",
+      "stop": "मिलान एक कार्रवाई चलाकर रोक देता है"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "मेल नहीं"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "अंत में चलाएँ",
+      "delete": "नियम हटाएँ",
+      "disable": "नियम अक्षम करें",
+      "duplicate": "नीचे प्रतिलिपि बनाएँ",
+      "enable": "नियम सक्षम करें",
+      "top": "पहले चलाएँ"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "पहले चलाएँ",
+      "last": "अंत में चलाएँ"
     },
     "new": "नया वर्कफ़्लो",
     "no_rules": "अभी कोई नियम नहीं। इस नीति को बनाने के लिए एक जोड़ें।",
     "not_attached": "जोड़ा नहीं गया",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "यह कार्यप्रवाह किसी सेवा से संलग्न नहीं है, इसलिए ये नियम अभी कहीं लागू नहीं हैं।",
+    "not_validated": "अभी सत्यापित नहीं",
     "order_help": "नियमों का मूल्यांकन क्रम में किया जाता है और पहला जो मेल खाता है, वह जीत जाता है। एक दर सीमा वाले नियम केवल तभी मेल खाते हैं जब सीमा पार हो जाती है, इसलिए एक निचला नियम नीचे की ट्रैफ़िक को पकड़ सकता है।",
     "readonly": "डेटाबेस केवल पढ़ने के लिए है। वर्कफ़्लो देखे जा सकते हैं लेकिन नहीं बदले जा सकते।",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "अक्षम",
+      "if": "यदि",
+      "namePlaceholder": "नियम का नाम",
+      "noun": "नियम",
+      "onMatch": "यदि मेल खाए",
+      "skipped": "अक्षम — पूरी तरह छोड़ा जाता है, मानो सूची में हो ही नहीं।",
+      "stopTail": ", मूल्यांकन यहीं रुकता है — नीचे का कोई नियम नहीं पहुँचेगा।"
     },
     "rules": "नियम",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "कार्रवाई {{type}} में बदल गई। यह अब भी एकमात्र कार्रवाई है और मूल्यांकन रोकती है।",
+      "added": "नियम स्थान {{n}} पर, सबसे अंत में जोड़ा गया — इसलिए ऊपर के सभी नियम पहले जाँचे जाते हैं।",
+      "deleted": "नियम हटा दिया गया। {{count}} नियम शेष हैं।",
+      "duplicated": "प्रतिलिपि स्थान {{n}} पर डाली गई। ऊपर का मूल नियम सक्षम रहने तक यह कभी मेल नहीं खा सकती।",
+      "gateAdded": "मिलान में दर सीमा जोड़ी गई। इसके नीचे नियम मेल नहीं खाता और मूल्यांकन जारी रहता है।",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "अंतिम मान हटाया गया — कोई मान होने तक यह शर्त सहेजी नहीं जा सकती।",
+      "moved": "{{name}} को {{total}} में से स्थान {{to}} पर ले जाया गया{{how}}। अब यह {{where}} चलता है।",
+      "predicateCap": "इस नियम में पहले से अधिकतम {{max}} शर्तें हैं।",
+      "ruleAbove": "ऊपर के नियम के बाद",
+      "ruleDisabled": "{{name}} अक्षम किया गया — इसे पूरी तरह छोड़ा जाता है और नीचे के नियम अब वे अनुरोध देखते हैं।",
+      "ruleEnabled": "{{name}} सक्षम किया गया — इसका स्थान {{n}} पर फिर मूल्यांकन होता है।",
+      "runsAfter": "{{name}} के बाद",
+      "runsFirst": "सबसे पहले",
+      "runsLast": "सबसे अंत में",
+      "saved": "नियम सहेजकर संलग्न सेवाओं पर भेजे गए।",
+      "theRule": "नियम",
+      "valuesDropped": "शर्त {{type}} में बदली — उसके {{count}} मान आगे नहीं ले जाए जा सके।",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "खींचकर",
+        "keyboard": "कीबोर्ड से"
       }
     },
     "search": "नाम या विवरण खोजें...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "विफल ASN खोज का अनुकरण करने के लिए खाली छोड़ें।",
+      "asn_invalid": "ASN एक संख्या होनी चाहिए",
+      "assume_not_whitelisted": "मानता है कि क्लाइंट श्वेतसूची में नहीं है।",
+      "assume_rate_counter": "अनुरोध संख्या {{request_number}} आपका इनपुट है, माप नहीं।",
+      "assume_regex_budget": "मानता है कि इंस्टेंस का रेगेक्स बजट समाप्त नहीं हुआ है।",
+      "assumptions": "मान्यताएँ",
+      "country": "देश",
+      "detail_challenge": "चुनौती नियंत्रण लेती है; शेष सुरक्षा स्टैक फिर भी चलता है।",
+      "detail_detect": "यह सेवा पहचान मोड में है, इसलिए वास्तव में कुछ लागू नहीं होता।",
+      "detail_status": "क्लाइंट को {{status}} दिखाई देगा।",
+      "failed": "परीक्षण नहीं चलाया जा सका",
+      "geo": "GeoIP खोज",
+      "geo_help": "अनुपलब्ध होने पर देश और ASN नियम अज्ञात हो जाते हैं, इसलिए वे कभी मेल नहीं खा सकते।",
+      "geo_local": "स्थानीय / निजी पता",
+      "geo_resolved": "हल किया गया",
+      "geo_unavailable": "डेटाबेस अनुपलब्ध",
+      "intro": "सेवा से संलग्न हर कार्यप्रवाह का क्रम में ठीक वैसे ही मूल्यांकन करता है जैसे इंस्टेंस करेगा।",
+      "invalid": "परीक्षण से पहले ऊपर की समस्याएँ ठीक करें।",
+      "ip": "क्लाइंट IP",
+      "method": "विधि",
+      "number": "अनुरोध संख्या",
+      "number_help": "समयावधि में इस क्लाइंट का Nवाँ अनुरोध। यह आपके द्वारा दी गई मान्यता है, माप नहीं।",
+      "open": "अनुरोध जाँचें",
+      "other_matched": "यहाँ मेल खाया",
+      "other_no_match": "कोई नियम मेल नहीं खाया",
+      "other_unreached": "नहीं पहुँचा",
+      "other_workflows": "इस सेवा के अन्य कार्यप्रवाह",
+      "out_draft": "यह सेवा ड्राफ्ट है — इसके लिए अभी कोई कार्यप्रवाह संकलित नहीं हुआ।",
+      "out_match": "{{workflow}} · {{rule}} मेल खाया और अनुरोध पर {{action}} कार्रवाई की।",
+      "out_no_match": "कोई नियम मेल नहीं खाया। अनुरोध शेष सुरक्षा स्टैक पर जारी रहेगा।",
+      "out_not_attached": "यह कार्यप्रवाह किसी सेवा से संलग्न नहीं है, इसलिए मूल्यांकन के लिए कोई नियम-श्रृंखला नहीं है।",
+      "out_whitelisted": "श्वेतसूचीबद्ध — पूरा कार्यप्रवाह छोड़ दिया जाता है और कोई नियम नहीं जाँचा जाता।",
+      "run": "परीक्षण चलाएँ",
+      "service": "सेवा",
+      "title": "अनुरोध जाँचें",
+      "unreachable": "परीक्षण एंडपॉइंट तक नहीं पहुँचा जा सका",
+      "uri": "URI पथ",
+      "uri_help": "केवल पथ — $uri में कभी क्वेरी स्ट्रिंग नहीं होती।",
+      "v_gate": "शर्तें मेल खाईं · {{count}} में {{n}} पर द्वार बंद",
+      "v_match": "मेल खाया",
+      "v_unknown": "अज्ञात",
+      "v_unknown_help": "इस नियम के लिए आवश्यक तथ्य निर्धारित नहीं हो सका, इसलिए यह कभी मेल नहीं खा सकता।",
+      "whitelisted": "यह क्लाइंट श्वेतसूची में है"
     },
     "threshold": "केवल एक दर से ऊपर",
     "threshold_count": "अनुरोध",
     "threshold_window": "प्रति (सेकंड)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "शर्त",
+      "addGroup": "समूह",
+      "all": "सभी",
+      "allMeta": "{{count}} शर्तें — सभी सही होनी चाहिए",
+      "and": "और",
+      "any": "कोई भी",
+      "anyMeta": "{{count}} शर्तें — कम से कम एक सही होनी चाहिए",
+      "empty": "खाली समूह — कोई शर्त जोड़ें, इसे ऐसे सहेजा नहीं जा सकता।",
+      "noGroupHolds": "किसी समूह में {{kind}} प्रविष्टियाँ नहीं हैं",
+      "noneMeta": "इनमें से कोई सही न होने पर मेल खाता है",
+      "not": "कोई नहीं",
+      "or": "या",
+      "removeGroup": "समूह हटाएँ"
     },
     "truncated": "केवल पहले 500 वर्कफ़्लो प्रदर्शित किए जाते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।",
-    "untitled": "Untitled rule",
+    "untitled": "बिना शीर्षक का नियम",
     "value": {
-      "add": "Value"
+      "add": "मान"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "कम दिखाएँ",
+      "more": "+{{n}} और"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "है",
+      "country": "है",
+      "group": "समूह में है",
+      "ip": "में है",
+      "isIn": "में है",
+      "isOneOf": "इनमें से एक है",
+      "method": "है",
+      "uri": "से मेल खाता है"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "1+ होस्ट पर BunkerWeb स्थापित करें",
+      "mfa": "MFA सक्रिय करें",
+      "pro": "BunkerWeb PRO सक्रिय करें",
+      "service": "अपनी पहली सेवा पंजीकृत करें"
     },
     "pro_tips": "PRO युक्तियाँ",
-    "title": "Getting started"
+    "title": "शुरुआत"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "हर अनुरोध चरण में प्रत्येक प्लगइन का समय, सभी इंस्टेंस से सीधे पढ़कर एकत्र किया जाता है।",
+    "volatile": "समय प्रत्येक इंस्टेंस की साझा मेमोरी में रहते हैं और माँग पर पढ़े जाते हैं — वे संग्रहीत नहीं होते और इंस्टेंस पुनः शुरू होने पर शून्य हो जाते हैं।",
+    "partial": "कुछ इंस्टेंस ने उत्तर नहीं दिया। नीचे के आँकड़े उत्तर देने वालों के हैं।",
+    "reporting_instances": "रिपोर्ट करने वाले इंस्टेंस",
+    "requests_measured": "मापे गए अनुरोध",
+    "mean_request": "औसत अनुरोध",
+    "max_request": "सबसे धीमा अनुरोध",
+    "phases": "प्लगइन चरण",
+    "share_help": "हिस्सा कुल अनुरोध समय के मुकाबले प्लगइन का कुल समय है। जो चरण हर अनुरोध में एक बार नहीं चलते — वर्कर आरंभ, पृष्ठभूमि टाइमर और आंतरिक API — उनका हिस्सा नहीं होता और डैश दिखता है।",
+    "plugin": "प्लगइन",
+    "phase": "चरण",
+    "calls": "कॉल",
+    "mean": "औसत",
+    "max": "अधिकतम",
+    "total": "कुल",
+    "share": "हिस्सा",
+    "disabled_title": "प्लगइन समय बंद है",
+    "disabled_help": "हर प्लगइन का समय मापने के लिए METRICS_COLLECT_TIMINGS को yes पर सेट करें। पूरे अनुरोध की अवधि हर स्थिति में एकत्र होती है।",
+    "unreachable_title": "किसी इंस्टेंस ने समय रिपोर्ट नहीं किया",
+    "unreachable_help": "समय इंस्टेंस से ही पढ़े जाते हैं, इसलिए किसी ने उत्तर नहीं दिया — या किसी ने अभी अनुरोध पूरा नहीं किया।"
   }
 }

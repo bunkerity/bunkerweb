@@ -5,7 +5,7 @@
     "license_title": "Лицензия",
     "socials": "Социальные сети",
     "tagline": "Мощная защита, упрощенная",
-    "title": "About BunkerWeb",
+    "title": "О BunkerWeb",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
@@ -78,20 +78,20 @@
     "subtitle": "Заблокированные IP-адреса для всех ваших экземпляров BunkerWeb — добавляйте, удаляйте или изменяйте длительность блокировки.",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "включено.",
+        "body_before": "Созданные здесь блокировки истекают при перезапуске экземпляра, если только",
+        "title": "Несохранённые изменения."
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "Блокировки по причине"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "Активные блокировки",
+        "active_caption": "IP + CIDR",
+        "countries": "Страны",
+        "expiring": "Истекают через ≤ 1 ч",
+        "expiring_caption": "Автоматическая ротация",
+        "permanent": "Постоянные блокировки"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "Баны",
     "cache": "Кэш",
     "web_cache": "Веб-кэш",
-    "timings": "Timings",
+    "timings": "Время выполнения",
     "configs": "Конфигурации",
     "extra_pages": "Дополнительные страницы",
     "global_settings": "Глобальные настройки",
-    "global_config": "Global config",
+    "global_config": "Глобальная конфигурация",
     "home": "Главная",
     "instances": "Экземпляры",
     "jobs": "Задачи",
@@ -163,7 +163,7 @@
     "filters_suffix": " Фильтры",
     "follow": "Следить",
     "force_check": "Принудительная проверка",
-    "force_update": "Force update",
+    "force_update": "Принудительно обновить",
     "github_stars": "Звезды",
     "go_back": "Вернуться",
     "hide": "Скрыть",
@@ -183,7 +183,7 @@
     "ping": "Пинг",
     "plugin_page": "Страница плагина",
     "proceed": "Продолжить",
-    "refresh": "Refresh",
+    "refresh": "Обновить",
     "refresh_recovery_codes": "Обновить коды восстановления",
     "reload": "Перезагрузить",
     "reset": "Сбросить",
@@ -216,20 +216,20 @@
     "view_details": "Просмотреть детали",
     "view_raw_data": "Просмотреть необработанные данные",
     "wipe_other_sessions": "Очистить другие сессии",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "Заблокировать все подходящие отчёты",
+    "filtered_actions": "Отфильтрованные действия",
+    "unban_all_filtered": "Снять все подходящие блокировки",
+    "update_duration_all_filtered": "Изменить срок всех подходящих блокировок",
+    "use_template": "Использовать шаблон",
+    "edit": "Изменить",
     "verify": "Проверить",
-    "view": "View"
+    "view": "Просмотреть"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "Файлы",
+    "kpi_per_service": "По службам",
     "subtitle": "Кэшированные файлы, созданные запланированными задачами (блоки, базы данных GeoIP и т.д.) — просматривайте, скачивайте или удаляйте их для каждого сервиса и плагина.",
-    "title": "Cache files"
+    "title": "Файлы кэша"
   },
   "configs": {
     "subtitle": "Пользовательские фрагменты конфигурации NGINX для ваших сервисов — создавайте, редактируйте и управляйте HTTP, ModSecurity и переопределениями на уровне потока."
@@ -533,7 +533,7 @@
         "title": "Верхние уровни"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "Основные причины блокировки"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "Топ 10 заблокированных IP"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "Заблокировано",
+        "title": "Заблокированные запросы во времени (выбранный диапазон)"
       }
     },
     "map": {
@@ -571,13 +571,13 @@
       "title": "Окно дашборда"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "Активные блокировки",
+      "jobs": "Запланированные задания",
+      "trend": "Динамика заблокированных запросов"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "С возвращением, {{user}}",
+      "greeting": "С возвращением,"
     },
     "mini": {
       "across_countries": "в странах {{count}}",
@@ -594,12 +594,12 @@
       "vs_prev": "по сравнению с предыдущим"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "Выбранный диапазон",
+      "top_ips_sub": "По числу запросов",
+      "status_sub": "Коды ответов HTTP",
+      "reasons_sub": "По сработавшему правилу",
+      "map_sub": "Наведите указатель для подробностей",
+      "blocking_sub": "Заблокированные и разрешённые"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "Обновить?",
     "use_authenticator_code": "Используйте код аутентификатора",
     "use_recovery_code": "Используйте код восстановления",
-    "get_support": "Get support"
+    "get_support": "Получить поддержку"
   },
   "login": {
     "title": "Войти",
@@ -945,25 +945,25 @@
     "showing_some": "показано {{shown}} из {{total}}",
     "select_file_prompt": "Выберите файл журнала для просмотра его содержимого",
     "trimmed_notice": "--- {{count}} старых строк лога были удалены для повышения производительности ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "Все источники (в реальном времени)",
+    "collapse": "Свернуть",
+    "expand": "Развернуть",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "Все журналы",
+    "level_errors_only": "Только ошибки",
+    "level_security_only": "Только безопасность",
+    "live_title": "Журналы в реальном времени",
+    "pause": "Приостановить",
+    "resume": "Продолжить",
+    "tailing_sources": "Отслеживание · {{count}} источников",
+    "taller": "Выше"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы.",
       "confirm_cache_deletion_alert": "Вы уверены, что хотите удалить выбранный файл кэша?",
       "confirm_cache_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные файлы кэша?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "Преобразовать выбранные пользовательские конфигурации?",
       "confirm_configs_conversion_to": "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в {{state}}?",
       "confirm_configs_deletion_alert": "Вы уверены, что хотите удалить выбранную пользовательскую конфигурацию?",
       "confirm_configs_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные пользовательские конфигурации?",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
       "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "Заблокировать IP из всех {{count}} подходящих отчётов? Повторяющиеся цели будут применены один раз.",
+      "unban_filtered_confirmation": "Снять все {{count}} подходящих блокировок?",
+      "update_filtered_duration_alert": "Выберите новый срок для всех {{count}} подходящих блокировок:"
     },
     "button": {
       "fetch_global_settings_confirm": "Применить глобальные настройки",
@@ -1065,7 +1065,7 @@
     "cache": "Кэш",
     "certificates": "Сертификаты",
     "web_cache": "Веб-кэш",
-    "timings": "Timings",
+    "timings": "Время выполнения",
     "configs": "Конфигурации",
     "extra_pages": "Дополнительные страницы",
     "global_settings": "Глобальные настройки",
@@ -1088,11 +1088,11 @@
     "services": "Сервисы",
     "support": "Поддержка",
     "templates": "Шаблоны",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "Обзор",
+    "configure": "Настройка",
+    "operate": "Управление",
+    "system": "Система",
+    "edition_community": "Сообщество",
     "redirects": "Перенаправление",
     "upstreams": "Верхние уровни",
     "workflows": "Рабочие процессы",
@@ -1141,17 +1141,17 @@
       "show_less": "Показать меньше"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "Активно",
+      "always_on": "Ядро / всегда включено",
+      "disabled": "Отключено",
+      "enabled": "Включено",
+      "inactive": "Неактивно",
+      "no_match": "Нет плагинов, соответствующих фильтрам",
+      "search": "Поиск плагинов...",
+      "tab_all": "Все",
+      "tab_community": "Сообщество",
+      "tab_disabled": "Отключено",
+      "tab_enabled": "Включено"
     }
   },
   "pro": {
@@ -1172,12 +1172,12 @@
       "unknown": "Неизвестная дата истечения"
     },
     "force_check": {
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
-      "title": "Force check"
+      "description": "Принудительно проверить плагины PRO. При наличии новых версий плагины будут загружены заново.",
+      "title": "Принудительно проверить"
     },
     "force_update": {
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
-      "title": "Force update"
+      "description": "Пропустить проверки и принудительно загрузить плагины PRO. Если это невозможно, текущее состояние будет сохранено.",
+      "title": "Принудительно обновить"
     },
     "key": {
       "title": {
@@ -1199,7 +1199,7 @@
       "suspended": "ПРИОСТАНОВЛЕНО",
       "title": "Статус"
     },
-    "title": "Pro license"
+    "title": "Лицензия Pro"
   },
   "profile": {
     "2fa": {
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "Скачать логи отладки, извлечь конфигурацию и получить помощь от команды BunkerWeb.",
-    "title": "Support"
+    "title": "Поддержка"
   },
   "tab": {
     "custom_certificate": "Пользовательский сертификат",
@@ -1595,7 +1595,7 @@
       "status": "Статус",
       "status_code": "Код состояния",
       "steps": "Шаги",
-      "stream": "Stream",
+      "stream": "Поток",
       "template": "Шаблон",
       "templates": "Шаблоны",
       "time_left": "Оставшееся время",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "Переиспользуемые шаблоны конфигурации для ваших сервисов — объедините настройки, шаги и пользовательские конфигурации, затем создайте, клонируйте или удалите их.",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "Удалить выбранное",
+      "empty_message": "Создайте первый шаблон, чтобы объединить настройки, шаги и пользовательские конфигурации для повторного использования.",
+      "empty_title": "Шаблонов пока нет",
+      "select": "Выбрать",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "Высокая безопасность",
+      "low": "Низкая безопасность",
+      "medium": "Средняя безопасность",
+      "ui": "Веб-интерфейс"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "Пользовательская конфигурация: {{name}}",
+      "feature": "Встроенная функция: {{name}}",
+      "plugin": "Плагин: {{name}}"
     },
-    "title": "Service templates"
+    "title": "Шаблоны служб"
   },
   "theme": {
     "dark": "Темная",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "Автоматически запрашивать сертификат Let's Encrypt.",
     "button": {
       "ban_ip": "Забанить этот IP-адрес",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "Преобразовать конфигурацию {{name}} в черновик",
+      "convert_config_to_online": "Перевести конфигурацию {{name}} в рабочий режим",
       "convert_service_to_draft": "Конвертировать сервис {{name}} в черновик",
       "convert_service_to_online": "Конвертировать сервис {{name}} в онлайн",
       "delete_config": "Удалить кастомную конфигурацию {{name}}",
@@ -2216,7 +2216,7 @@
     "kinds": "Типы",
     "loading_references": "Загрузка ссылок...",
     "max_entries": "Группа ресурсов не может содержать более {{max}} записей.",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "Типы: {{kinds}} · значения: {{values}} · использования: {{usages}}",
     "new": "Новая группа",
     "new_alias": "Новое алиас",
     "no_entries": "Нет записей",
@@ -2389,227 +2389,227 @@
     "truncated": "Отображаются только первые 500 upstreams. Уточните список с помощью API для получения полного результата."
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "Заблокировать",
+    "act_challenge": "Проверка",
+    "act_code": "Код состояния",
+    "act_denyDefault": "Код отказа экземпляра",
+    "act_denyShort": "код отказа",
+    "act_provider": "Поставщик антибот-проверки",
+    "act_redirect": "Перенаправить",
+    "act_status": "Код отказа",
+    "act_terminal": "Одно действие на правило, после которого проверка завершается — у правила нет ветвей «истина» и «ложь».",
+    "act_url": "URL назначения",
     "action": "Затем",
     "add_rule": "Добавить правило",
     "all": "Все",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "Свернуть",
+      "combinator": "Изменить логическую связку, сейчас",
+      "conditionType": "Тип условия",
+      "denyStatus": "Код отказа",
+      "drag": "Перетащите для изменения порядка",
+      "expand": "Развернуть",
+      "groupKind": "Тип группы",
+      "more": "Ещё",
+      "moveDown": "Переместить вниз — выполняется позже",
+      "moveRule": "Переместить правило",
+      "moveUp": "Переместить вверх — выполняется раньше",
+      "provider": "Поставщик антибот-проверки",
+      "redirectStatus": "Код перенаправления",
+      "removeCondition": "Удалить условие",
+      "removeThreshold": "Удалить порог",
+      "removeThresholdLong": "Удалить порог частоты",
+      "removeValue": "Удалить значение",
+      "requestCount": "Количество запросов",
+      "resourceGroup": "Группа ресурсов",
+      "ruleName": "Название правила {{n}}",
+      "terminalAction": "Завершающее действие",
+      "uriMatch": "Режим сопоставления URI",
+      "uriValue": "Значение URI",
+      "window": "Окно в секундах"
     },
     "attach": "Прикрепить к сервисам",
     "attach_help": "Правила применяются только к тем сервисам, к которым прикреплен рабочий процесс.",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "После сохранения эти правила будут применены к {{count}} привязанным службам.",
+    "capacity": "Правил: {{count}} из {{maxRules}} · крупнейшее правило использует {{worst}} из {{maxPredicates}} условий · регулярных выражений в процессе: {{regexes}}",
     "clone": "Клонировать рабочий процесс",
     "clone_help": "Правила копируются, а прикрепления к сервисам — нет.",
     "clone_name": "Название копии",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "Удалить это правило? Все правила ниже поднимутся на одну позицию."
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (копия)",
     "delete": "Удалить рабочий процесс",
     "delete_confirm": "Этот рабочий процесс и все его правила будут навсегда удалены.",
     "empty_text": "Рабочий процесс — это упорядоченный список правил, которые вы прикрепляете к сервисам: дерево условий, необязательный порог скорости и одно действие — запрос, блокировка или перенаправление.",
     "empty_title": "Рабочих процессов пока нет",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "Процессы выполняются в порядке привязки, а правила внутри этого процесса — сверху вниз.",
+    "entry_title": "Каждый запрос к привязанной службе",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "Не удалось сохранить",
+      "saveUnreachable": "Не удалось связаться с конечной точкой сохранения",
+      "validate": "Не удалось проверить",
+      "validateUnreachable": "Не удалось связаться с конечной точкой проверки"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "Ничего не применено — действующая политика не изменилась.",
+      "count": "Сохранению мешают проблемы: {{count}}.",
+      "rule": "Правило {{n}}",
+      "ruleNamed": "Правило {{n}} — {{name}}",
+      "whole": "Этот процесс"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "Запрос перейдёт к следующему привязанному процессу, а затем к остальной части стека безопасности.",
+    "exit_title": "Ни одно правило не сработало",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "и только после того, как один и тот же IP клиента отправит больше",
+      "chip": "порог совпадения",
+      "help": "Счёт ведётся отдельно для каждого IP клиента. Ниже порога правило вообще не срабатывает, и проверка переходит к следующему правилу; само по себе оно не ограничивает частоту."
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "При несовпадении переход к следующему правилу",
+      "gate": "Порог частоты разрешает совпадение, но не является действием",
+      "move": "Чтобы изменить порядок, перетащите, используйте стрелки или нажмите Alt + ↑ / ↓",
+      "stop": "Совпадение выполняет одно действие и останавливает проверку"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "нет совпадения"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "Выполнять последним",
+      "delete": "Удалить правило",
+      "disable": "Отключить правило",
+      "duplicate": "Создать копию ниже",
+      "enable": "Включить правило",
+      "top": "Выполнять первым"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "Выполнять первым",
+      "last": "Выполнять последним"
     },
     "new": "Новый рабочий процесс",
     "no_rules": "Правила пока нет. Добавьте одно, чтобы начать создавать эту политику.",
     "not_attached": "Не прикреплено",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "Этот процесс не привязан ни к одной службе, поэтому его правила пока нигде не применяются.",
+    "not_validated": "Ещё не проверено",
     "order_help": "Правила оцениваются в порядке, и первое, которое совпадает, выигрывает. Правило с порогом скорости срабатывает только после превышения порога, поэтому более низкое правило может перехватывать трафик ниже него.",
     "readonly": "База данных только для чтения. Рабочие процессы можно просматривать, но не изменять.",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "Отключено",
+      "if": "Если",
+      "namePlaceholder": "Название правила",
+      "noun": "Правило",
+      "onMatch": "Если сработало",
+      "skipped": "Отключено — полностью пропускается, как будто правила нет в списке.",
+      "stopTail": ", проверка завершается здесь — правила ниже не будут достигнуты."
     },
     "rules": "Правила",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "Действие изменено на {{type}}. Оно по-прежнему единственное и завершает проверку.",
+      "added": "Правило добавлено на позицию {{n}} — последнюю, поэтому сначала проверяются все правила выше.",
+      "deleted": "Правило удалено. Осталось правил: {{count}}.",
+      "duplicated": "Копия вставлена на позицию {{n}}. Она не сможет сработать, пока исходное правило выше включено.",
+      "gateAdded": "К совпадению добавлен порог частоты. Ниже него правило не срабатывает, и проверка продолжается.",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "Последнее значение удалено — это условие нельзя сохранить, пока не будет добавлено значение.",
+      "moved": "{{name}} перемещено на позицию {{to}} из {{total}}{{how}}. Теперь оно выполняется {{where}}.",
+      "predicateCap": "Это правило уже содержит максимально допустимые {{max}} условий.",
+      "ruleAbove": "после правила выше",
+      "ruleDisabled": "{{name}} отключено — оно полностью пропускается, и запросы теперь видят правила ниже.",
+      "ruleEnabled": "{{name}} включено — оно снова проверяется на позиции {{n}}.",
+      "runsAfter": "после {{name}}",
+      "runsFirst": "первым",
+      "runsLast": "последним",
+      "saved": "Правила сохранены и отправлены привязанным службам.",
+      "theRule": "Правило",
+      "valuesDropped": "Условие изменено на {{type}} — его прежние значения ({{count}}) нельзя перенести.",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "перетаскиванием",
+        "keyboard": "с клавиатуры"
       }
     },
     "search": "Поиск по имени или описанию...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "Оставьте пустым, чтобы имитировать неудачный поиск ASN.",
+      "asn_invalid": "ASN должен быть числом",
+      "assume_not_whitelisted": "Предполагается, что клиент не находится в белом списке.",
+      "assume_rate_counter": "Номер запроса {{request_number}} — введённое значение, а не результат измерения.",
+      "assume_regex_budget": "Предполагается, что лимит регулярных выражений экземпляра не исчерпан.",
+      "assumptions": "Допущения",
+      "country": "Страна",
+      "detail_challenge": "Проверка перехватывает управление; остальная часть стека безопасности продолжает работу.",
+      "detail_detect": "Служба работает в режиме обнаружения, поэтому фактически ничего не применяется.",
+      "detail_status": "Клиент увидит {{status}}.",
+      "failed": "Не удалось запустить тест",
+      "geo": "Поиск GeoIP",
+      "geo_help": "При недоступности правила страны и ASN получают состояние «НЕИЗВЕСТНО» и никогда не срабатывают.",
+      "geo_local": "Локальный/частный адрес",
+      "geo_resolved": "Определено",
+      "geo_unavailable": "База данных недоступна",
+      "intro": "Последовательно проверяет все процессы, привязанные к службе, точно так же, как это сделал бы экземпляр.",
+      "invalid": "Исправьте указанные выше проблемы перед тестированием.",
+      "ip": "IP клиента",
+      "method": "Метод",
+      "number": "Номер запроса",
+      "number_help": "N-й запрос этого клиента в окне. Это заданное вами допущение, а не результат измерения.",
+      "open": "Проверить запрос",
+      "other_matched": "сработало здесь",
+      "other_no_match": "ни одно правило не сработало",
+      "other_unreached": "не достигнуто",
+      "other_workflows": "Другие процессы этой службы",
+      "out_draft": "Эта служба является черновиком — процесс для неё ещё не скомпилирован.",
+      "out_match": "Сработали {{workflow}} · {{rule}}, действие над запросом: {{action}}.",
+      "out_no_match": "Ни одно правило не сработало. Запрос переходит к остальной части стека безопасности.",
+      "out_not_attached": "Этот процесс не привязан ни к одной службе, поэтому проверять нечего.",
+      "out_whitelisted": "Клиент в белом списке — весь процесс пропущен, ни одно правило не проверяется.",
+      "run": "Запустить тест",
+      "service": "Служба",
+      "title": "Проверка запроса",
+      "unreachable": "Не удалось связаться с конечной точкой тестирования",
+      "uri": "Путь URI",
+      "uri_help": "Только путь — $uri никогда не содержит строку запроса.",
+      "v_gate": "условия совпали · порог закрыт на {{n}} из {{count}}",
+      "v_match": "СОВПАДЕНИЕ",
+      "v_unknown": "НЕИЗВЕСТНО",
+      "v_unknown_help": "Не удалось определить необходимый правилу факт, поэтому оно никогда не сработает.",
+      "whitelisted": "Этот клиент находится в белом списке"
     },
     "threshold": "Только при превышении скорости",
     "threshold_count": "Запросы",
     "threshold_window": "На (секунды)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "Условие",
+      "addGroup": "Группа",
+      "all": "Все из",
+      "allMeta": "Условия: {{count}} — все должны быть истинными",
+      "and": "и",
+      "any": "Любое из",
+      "anyMeta": "Условия: {{count}} — хотя бы одно должно быть истинным",
+      "empty": "Пустая группа — добавьте условие, иначе её нельзя сохранить.",
+      "noGroupHolds": "ни одна группа не содержит записи типа {{kind}}",
+      "noneMeta": "срабатывает, когда ни одно из условий не истинно",
+      "not": "Ни одно из",
+      "or": "или",
+      "removeGroup": "Удалить группу"
     },
     "truncated": "Отображаются только первые 500 рабочих процессов. Чтобы получить полный результат, используйте API.",
-    "untitled": "Untitled rule",
+    "untitled": "Правило без названия",
     "value": {
-      "add": "Value"
+      "add": "Значение"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "Показать меньше",
+      "more": "Ещё {{n}}"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "равен",
+      "country": "равна",
+      "group": "входит в группу",
+      "ip": "находится в",
+      "isIn": "находится в",
+      "isOneOf": "является одним из",
+      "method": "равен",
+      "uri": "совпадает с"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "Установите BunkerWeb на 1+ узле",
+      "mfa": "Включите MFA",
+      "pro": "Активируйте BunkerWeb PRO",
+      "service": "Зарегистрируйте первую службу"
     },
     "pro_tips": "Советы PRO",
-    "title": "Getting started"
+    "title": "Начало работы"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "Время работы каждого плагина на каждой фазе запроса, полученное в реальном времени со всех экземпляров и объединённое.",
+    "volatile": "Значения находятся в общей памяти каждого экземпляра и считываются по запросу — они не сохраняются и сбрасываются при перезапуске экземпляра.",
+    "partial": "Некоторые экземпляры не ответили. Ниже учтены только ответившие.",
+    "reporting_instances": "Отчитавшиеся экземпляры",
+    "requests_measured": "Измеренные запросы",
+    "mean_request": "Средний запрос",
+    "max_request": "Самый медленный запрос",
+    "phases": "Фазы плагинов",
+    "share_help": "Доля — это общее время плагина относительно общего времени запроса. Фазы, которые выполняются не один раз на запрос — запуск worker, фоновый таймер и внутренний API — не имеют доли и показывают тире.",
+    "plugin": "Плагин",
+    "phase": "Фаза",
+    "calls": "Вызовы",
+    "mean": "Среднее",
+    "max": "Максимум",
+    "total": "Всего",
+    "share": "Доля",
+    "disabled_title": "Измерение времени плагинов отключено",
+    "disabled_help": "Установите METRICS_COLLECT_TIMINGS в yes, чтобы измерять время каждого плагина. Полная длительность запроса собирается в любом случае.",
+    "unreachable_title": "Ни один экземпляр не сообщил время",
+    "unreachable_help": "Значения считываются с самих экземпляров, поэтому ни один не ответил — либо ещё ни один не обработал запрос."
   }
 }

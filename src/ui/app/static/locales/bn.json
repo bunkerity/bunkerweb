@@ -5,7 +5,7 @@
     "license_title": "লাইসেন্স",
     "socials": "সামাজিক মাধ্যম",
     "tagline": "শক্তিশালী সুরক্ষা, সরলীকৃত",
-    "title": "About BunkerWeb",
+    "title": "BunkerWeb সম্পর্কে",
     "social": {
       "discord": "ডিসকর্ড",
       "instagram": "ইনস্টাগ্রাম",
@@ -78,20 +78,20 @@
     "subtitle": "আপনার BunkerWeb ইনস্ট্যান্স জুড়ে নিষিদ্ধ IP ঠিকানা — যোগ, অপসারণ, অথবা নিষিদ্ধ সময়কাল পরিবর্তন করুন।",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "সক্রিয় আছে।",
+        "body_before": "এখানে করা ব্লকগুলো ইনস্ট্যান্স পুনরায় চালু হলে মেয়াদোত্তীর্ণ হয়, যদি না",
+        "title": "স্থায়ীভাবে সংরক্ষিত নয় এমন পরিবর্তন।"
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "কারণ অনুযায়ী ব্লক"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "সক্রিয় ব্লক",
+        "active_caption": "IP + CIDR",
+        "countries": "দেশসমূহ",
+        "expiring": "≤ 1 ঘণ্টায় মেয়াদ শেষ",
+        "expiring_caption": "স্বয়ংক্রিয় পরিবর্তন",
+        "permanent": "স্থায়ী ব্লক"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "নিষেধাজ্ঞা",
     "cache": "ক্যাশ",
     "web_cache": "ওয়েব ক্যাশে",
-    "timings": "Timings",
+    "timings": "সময় পরিমাপ",
     "configs": "কনফিগারেশন",
     "extra_pages": "অতিরিক্ত পৃষ্ঠা",
     "global_settings": "গ্লোবাল সেটিংস",
-    "global_config": "Global config",
+    "global_config": "সার্বিক কনফিগারেশন",
     "home": "হোম",
     "instances": "ইনস্ট্যান্স",
     "jobs": "কার্য",
@@ -163,7 +163,7 @@
     "filters_suffix": " ফিল্টার",
     "follow": "অনুসরণ করুন",
     "force_check": "চেক করতে বাধ্য করুন",
-    "force_update": "Force update",
+    "force_update": "জোর করে হালনাগাদ",
     "github_stars": "স্টার",
     "go_back": "ফিরে যান",
     "hide": "লুকান",
@@ -183,7 +183,7 @@
     "ping": "পিং",
     "plugin_page": "প্লাগইন পৃষ্ঠা",
     "proceed": "এগিয়ে যান",
-    "refresh": "Refresh",
+    "refresh": "রিফ্রেশ",
     "refresh_recovery_codes": "পুনরুদ্ধার কোড রিফ্রেশ করুন",
     "reload": "পুনরায় লোড করুন",
     "reset": "রিসেট করুন",
@@ -216,20 +216,20 @@
     "view_details": "বিস্তারিত দেখুন",
     "view_raw_data": "কাঁচা ডেটা দেখুন",
     "wipe_other_sessions": "অন্যান্য সেশন মুছুন",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "সব মিলে যাওয়া রিপোর্ট ব্লক করুন",
+    "filtered_actions": "ফিল্টার করা কাজ",
+    "unban_all_filtered": "সব মিলে যাওয়া ব্লক তুলে নিন",
+    "update_duration_all_filtered": "সব মিলে যাওয়া ব্লকের সময়কাল বদলান",
+    "use_template": "টেমপ্লেট ব্যবহার করুন",
+    "edit": "সম্পাদনা",
     "verify": "যাচাই করুন",
-    "view": "View"
+    "view": "দেখুন"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "ফাইল",
+    "kpi_per_service": "প্রতি পরিষেবা",
     "subtitle": "পরিকল্পিত কাজের দ্বারা তৈরি ক্যাশে ফাইল (ব্লকলিস্ট, জিওআইপি ডাটাবেস, এবং আরও) — প্রতিটি পরিষেবার জন্য এবং প্লাগিনের জন্য পরিদর্শন, ডাউনলোড, অথবা মুছে ফেলুন।",
-    "title": "Cache files"
+    "title": "ক্যাশ ফাইল"
   },
   "configs": {
     "subtitle": "আপনার পরিষেবাগুলির জন্য কাস্টম NGINX কনফিগারেশন স্নিপেট — তৈরি, সম্পাদনা, এবং HTTP, ModSecurity, এবং স্ট্রিম-লেভেল ওভাররাইডগুলি পরিচালনা করুন।"
@@ -533,7 +533,7 @@
         "title": "আপস্ট্রিম"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "ব্লকের প্রধান কারণ"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "শীর্ষ ১০ অবরুদ্ধ আইপি"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "ব্লক করা",
+        "title": "সময়ের সাথে ব্লক করা অনুরোধ (নির্বাচিত সীমা)"
       }
     },
     "map": {
@@ -567,17 +567,17 @@
       "no_data": "কোনো ডেটা নেই"
     },
     "window": {
-      "last_days": "Last {{days}} days",
-      "title": "Dashboard window"
+      "last_days": "গত {{days}} দিন",
+      "title": "ড্যাশবোর্ডের সময়সীমা"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "সক্রিয় ব্লক",
+      "jobs": "নির্ধারিত কাজ",
+      "trend": "ব্লক করা অনুরোধের প্রবণতা"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "আবার স্বাগতম, {{user}}",
+      "greeting": "আবার স্বাগতম,"
     },
     "mini": {
       "across_countries": "{{count}} দেশগুলিতে",
@@ -594,12 +594,12 @@
       "vs_prev": "এর আগের"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "নির্বাচিত সীমা",
+      "top_ips_sub": "অনুরোধের সংখ্যা অনুযায়ী",
+      "status_sub": "HTTP প্রতিক্রিয়া কোড",
+      "reasons_sub": "সক্রিয়কারী নিয়ম অনুযায়ী",
+      "map_sub": "বিস্তারিত দেখতে কার্সর রাখুন",
+      "blocking_sub": "ব্লক করা ও অনুমোদিত"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "আপগ্রেড করবেন?",
     "use_authenticator_code": "একটি প্রমাণীকরণ কোড ব্যবহার করুন",
     "use_recovery_code": "একটি পুনরুদ্ধার কোড ব্যবহার করুন",
-    "get_support": "Get support"
+    "get_support": "সহায়তা নিন"
   },
   "login": {
     "title": "লগইন করুন",
@@ -945,25 +945,25 @@
     "showing_some": "{{total}} এর মধ্যে {{shown}} দেখানো হচ্ছে",
     "select_file_prompt": "একটি লগ ফাইল নির্বাচন করে তার বিষয়বস্তু দেখুন",
     "trimmed_notice": "--- {{count}} পুরানো লগ লাইন পারফরম্যান্সের জন্য সরানো হয়েছে ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "সব উৎস (সরাসরি)",
+    "collapse": "সংকুচিত করুন",
+    "expand": "প্রসারিত করুন",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "সব লগ",
+    "level_errors_only": "শুধু ত্রুটি",
+    "level_security_only": "শুধু নিরাপত্তা",
+    "live_title": "সরাসরি লগ",
+    "pause": "বিরতি",
+    "resume": "চালিয়ে যান",
+    "tailing_sources": "অনুসরণ করা হচ্ছে · {{count}}টি উৎস",
+    "taller": "আরও উঁচু"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "আপনার প্লাগইন আর্কাইভটি এখানে টেনে আনুন অথবা ফাইল নির্বাচন করতে ক্লিক করুন।",
       "confirm_cache_deletion_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইল মুছতে চান?",
       "confirm_cache_deletion_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইলগুলি মুছতে চান?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "নির্বাচিত কাস্টম কনফিগারেশনগুলো রূপান্তর করতে চান?",
       "confirm_configs_conversion_to": "আপনি কি নির্বাচিত কাস্টম কনফিগারেশনগুলোকে {{state}} এ রূপান্তর করতে নিশ্চিত?",
       "confirm_configs_deletion_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশন মুছতে চান?",
       "confirm_configs_deletion_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশনগুলি মুছতে চান?",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানা থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
       "unban_confirmation_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানাগুলি থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
       "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "সব {{count}}টি মিলে যাওয়া রিপোর্টের IP ব্লক করবেন? একই লক্ষ্য একবারই প্রয়োগ হবে।",
+      "unban_filtered_confirmation": "সব {{count}}টি মিলে যাওয়া ব্লক তুলে নিতে চান?",
+      "update_filtered_duration_alert": "সব {{count}}টি মিলে যাওয়া ব্লকের জন্য নতুন সময়কাল বাছুন:"
     },
     "button": {
       "fetch_global_settings_confirm": "গ্লোবাল সেটিংস প্রয়োগ করুন",
@@ -1065,7 +1065,7 @@
     "cache": "ক্যাশ",
     "certificates": "সার্টিফিকেট",
     "web_cache": "ওয়েব ক্যাশে",
-    "timings": "Timings",
+    "timings": "সময় পরিমাপ",
     "configs": "কনফিগারেশন",
     "extra_pages": "অতিরিক্ত পৃষ্ঠা",
     "global_settings": "গ্লোবাল সেটিংস",
@@ -1088,11 +1088,11 @@
     "services": "পরিষেবা",
     "support": "সমর্থন",
     "templates": "টেমপ্লেট",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "সারসংক্ষেপ",
+    "configure": "কনফিগার",
+    "operate": "পরিচালনা",
+    "system": "সিস্টেম",
+    "edition_community": "কমিউনিটি",
     "redirects": "নির্দেশিত করুন",
     "upstreams": "আপস্ট্রিম",
     "workflows": "ওয়ার্কফ্লো",
@@ -1141,17 +1141,17 @@
       "show_less": "কম দেখান"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "সক্রিয়",
+      "always_on": "মূল / সবসময় চালু",
+      "disabled": "নিষ্ক্রিয়",
+      "enabled": "সক্রিয়",
+      "inactive": "সক্রিয় নয়",
+      "no_match": "কোনো প্লাগইন আপনার ফিল্টারের সঙ্গে মেলে না",
+      "search": "প্লাগইন খুঁজুন...",
+      "tab_all": "সব",
+      "tab_community": "কমিউনিটি",
+      "tab_disabled": "নিষ্ক্রিয়",
+      "tab_enabled": "সক্রিয়"
     }
   },
   "pro": {
@@ -1172,12 +1172,12 @@
       "unknown": "অজানা মেয়াদ শেষের তারিখ"
     },
     "force_check": {
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
-      "title": "Force check"
+      "description": "PRO প্লাগইন নতুন করে পরীক্ষা করুন। নতুন সংস্করণ থাকলে প্লাগইন আবার ডাউনলোড হবে।",
+      "title": "জোর করে পরীক্ষা"
     },
     "force_update": {
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
-      "title": "Force update"
+      "description": "পরীক্ষা এড়িয়ে PRO প্লাগইন জোর করে ডাউনলোড করুন। তা সম্ভব না হলে বর্তমান অবস্থা রাখা হবে।",
+      "title": "জোর করে হালনাগাদ"
     },
     "key": {
       "title": {
@@ -1199,7 +1199,7 @@
       "suspended": "স্থগিত",
       "title": "অবস্থা"
     },
-    "title": "Pro license"
+    "title": "Pro লাইসেন্স"
   },
   "profile": {
     "2fa": {
@@ -1400,7 +1400,7 @@
   "services": {
     "draft": "নকশা পরিষেবা",
     "online": "অনলাইন",
-    "subtitle": "Manage the multisite services protected by BunkerWeb: create, edit, convert to draft, or delete them.",
+    "subtitle": "BunkerWeb সুরক্ষিত মাল্টিসাইট পরিষেবাগুলো তৈরি, সম্পাদনা, খসড়ায় রূপান্তর বা মুছে পরিচালনা করুন।",
     "total": "মোট পরিষেবা",
     "with_configs": "কাস্টম কনফিগারেশন সহ"
   },
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "ডিবাগ লগ ডাউনলোড করুন, আপনার কনফিগারেশন নিষ্কাশন করুন এবং BunkerWeb টিমের কাছ থেকে সহায়তা নিন।",
-    "title": "Support"
+    "title": "সহায়তা"
   },
   "tab": {
     "custom_certificate": "কাস্টম শংসাপত্র",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "আপনার পরিষেবাগুলির জন্য পুনরায় ব্যবহারযোগ্য কনফিগারেশন টেমপ্লেট — সেটিংস, পদক্ষেপ এবং কাস্টম কনফিগারেশন একত্রিত করুন, তারপর তৈরি করুন, ক্লোন করুন অথবা মুছে ফেলুন।",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "নির্বাচিতগুলো মুছুন",
+      "empty_message": "সেটিংস, ধাপ ও কাস্টম কনফিগ একত্র করে পুনরায় ব্যবহারের জন্য প্রথম টেমপ্লেট তৈরি করুন।",
+      "empty_title": "এখনো কোনো টেমপ্লেট নেই",
+      "select": "নির্বাচন",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "উচ্চ নিরাপত্তা",
+      "low": "নিম্ন নিরাপত্তা",
+      "medium": "মাঝারি নিরাপত্তা",
+      "ui": "ওয়েব UI"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "কাস্টম কনফিগ: {{name}}",
+      "feature": "অন্তর্নির্মিত সুবিধা: {{name}}",
+      "plugin": "প্লাগইন: {{name}}"
     },
-    "title": "Service templates"
+    "title": "পরিষেবার টেমপ্লেট"
   },
   "theme": {
     "dark": "ডার্ক",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "স্বয়ংক্রিয়ভাবে একটি Let's Encrypt শংসাপত্র অনুরোধ করতে হবে কিনা।",
     "button": {
       "ban_ip": "এই IP ঠিকানাটি নিষিদ্ধ করুন",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "কনফিগ {{name}}-কে খসড়ায় রূপান্তর করুন",
+      "convert_config_to_online": "কনফিগ {{name}}-কে অনলাইনে রূপান্তর করুন",
       "convert_service_to_draft": "পরিষেবা {{name}} কে খসড়াতে রূপান্তর করুন",
       "convert_service_to_online": "পরিষেবা {{name}} কে অনলাইনে রূপান্তর করুন",
       "delete_config": "কাস্টম কনফিগারেশন {{name}} মুছুন",
@@ -2117,10 +2117,10 @@
     "create": "শংসাপত্র তৈরি করুন",
     "download_chain": "চেইন ডাউনলোড করুন",
     "download_leaf": "লিফ ডাউনলোড করুন",
-    "edit_help": "This changes inventory metadata only, not certificate material or live TLS settings.",
+    "edit_help": "এটি শুধু ইনভেন্টরির মেটাডেটা বদলায়, সার্টিফিকেটের উপাদান বা সক্রিয় TLS সেটিংস নয়।",
     "edit_metadata": "শংসাপত্রের মেটাডেটা সম্পাদনা করুন",
     "empty": "কোনো সার্টিফিকেট নেই",
-    "empty_help": "Create a self-signed certificate, schedule ACME issuance, or upload an existing PEM certificate and key.",
+    "empty_help": "স্ব-স্বাক্ষরিত সার্টিফিকেট তৈরি করুন, ACME ইস্যু নির্ধারণ করুন, অথবা বিদ্যমান PEM সার্টিফিকেট ও কী আপলোড করুন।",
     "expired_help": "মনোযোগ প্রয়োজন",
     "expires": "মেয়াদ উত্তীর্ণ",
     "expiring_help": "30 দিন বা তার কম",
@@ -2129,7 +2129,7 @@
     "file_selected": "{{name}} ({{size}} KiB)",
     "file_size_limit": "ফাইলটি 1 MiB অতিক্রম করতে পারবে না।",
     "fingerprint": "SHA-256 ফিঙ্গারপ্রিন্ট",
-    "issuer": "সম発行কারী",
+    "issuer": "ইস্যুকারী",
     "issuers": "শীর্ষ ইস্যুকারী",
     "key_drop": "এখানে সংশ্লিষ্ট প্রাইভেট কী ড্রপ করুন",
     "key_limit": "সর্বোচ্চ 1 MiB; বিশ্রামকালীন এনক্রিপ্টেড এবং ডাউনলোড করা যাবে না",
@@ -2141,7 +2141,7 @@
     "none_due": "সার্টিফিকেট ইস্যু করা হয়নি",
     "orphan_account": "অ্যাকাউন্ট",
     "orphan_badge": "ACME অ্যাকাউন্ট অনুপস্থিত",
-    "orphan_help": "This renewal record references an ACME account that is no longer present. Renewal remains blocked until the provider state is repaired.",
+    "orphan_help": "এই নবায়ন রেকর্ড এমন ACME অ্যাকাউন্ট উল্লেখ করে যা আর নেই। প্রদানকারীর অবস্থা ঠিক না হওয়া পর্যন্ত নবায়ন বন্ধ থাকবে।",
     "orphan_server": "ACME সার্ভার",
     "orphan_title": "ACME অ্যাকাউন্ট অনুপস্থিত",
     "pem_certificate": "PEM সার্টিফিকেট অথবা চেইন",
@@ -2150,7 +2150,7 @@
     "pem_private_key": "PEM প্রাইভেট কী",
     "primary": "প্রাথমিক অ্যাসাইনমেন্ট",
     "primary_help": "নির্বাচিত পরিষেবাগুলির জন্য প্রাথমিক ইনভেন্টরি অ্যাসাইনমেন্ট হিসাবে চিহ্নিত করুন",
-    "readonly": "The database is read-only. Certificates can be inspected and downloaded, but not changed.",
+    "readonly": "ডেটাবেস শুধু পাঠযোগ্য। সার্টিফিকেট দেখা ও ডাউনলোড করা যাবে, বদলানো যাবে না।",
     "renew_due": "চেক/রিনিউ ড্যু",
     "sans": "সাবজেক্ট অল্টারনেটিভ নেইম",
     "save_metadata": "মেটাডেটা সংরক্ষণ করুন",
@@ -2176,7 +2176,7 @@
     },
     "subtitle": "কেন্দ্রীয় ইনভেন্টরিতে সার্টিফিকেট ইস্যু, আপলোড, নির্ধারণ, নবায়ন এবং পরিদর্শন করুন।",
     "total": "মোট",
-    "truncated": "Only the first 500 certificates are displayed. Narrow the inventory through the API for the complete result.",
+    "truncated": "শুধু প্রথম 500টি সার্টিফিকেট দেখানো হয়েছে। সম্পূর্ণ ফলের জন্য API দিয়ে ইনভেন্টরি সীমিত করুন।",
     "unassigned": "অনির্ধারিত",
     "upcoming": "আসন্ন নবায়ন",
     "upcoming_help": "মেয়াদ উত্তীর্ণ অথবা 30 দিনের নবায়ন উইন্ডোর মধ্যে",
@@ -2216,18 +2216,18 @@
     "kinds": "প্রকারসমূহ",
     "loading_references": "রেফারেন্স লোড হচ্ছে...",
     "max_entries": "একটি রিসোর্স গ্রুপে {{max}} এর বেশি এন্ট্রি থাকতে পারবে না।",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} ধরন · {{values}} মান · {{usages}} ব্যবহার",
     "new": "নতুন গ্রুপ",
     "new_alias": "নতুন অ্যালাইস",
     "no_entries": "কোন এন্ট্রি নেই",
     "no_entries_help": "এন্ট্রিগুলো আলাদাভাবে যোগ করুন অথবা নিচের বাল্ক ইম্পোর্টার ব্যবহার করুন।",
     "no_references": "কোন রেফারেন্স নেই",
-    "readonly": "The database is read-only. Resource groups can be inspected and exported, but not changed.",
+    "readonly": "ডেটাবেস শুধু পাঠযোগ্য। রিসোর্স গ্রুপ দেখা ও এক্সপোর্ট করা যাবে, বদলানো যাবে না।",
     "references_error": "রেফারেন্স লোড করা যায়নি",
     "save": "গ্রুপ সেভ করুন",
     "search": "অ্যালাইস, বর্ণনা, প্রকার অথবা মান অনুসন্ধান করুন…",
     "showing_count": "{{visible}} টি এর মধ্যে {{total}} গ্রুপ দেখানো হচ্ছে",
-    "subtitle": "Reusable typed aliases for IPs, countries, ASNs, reverse DNS names, user agents, and URIs.",
+    "subtitle": "IP, দেশ, ASN, বিপরীত DNS নাম, ইউজার এজেন্ট ও URI-এর পুনর্ব্যবহারযোগ্য টাইপ করা উপনাম।",
     "template_configuration": "টেমপ্লেট {{template}}",
     "usage": "ব্যবহার",
     "value": "মান",
@@ -2265,11 +2265,11 @@
     "path": "পাথ",
     "purge": "ক্যাশে করা প্রতিক্রিয়া পরিষ্কার করুন",
     "purge_all": "সব",
-    "purge_all_confirm_body": "This deletes every cached response for every service on every reachable instance. This cannot be undone.",
+    "purge_all_confirm_body": "এটি পৌঁছানো যায় এমন প্রতিটি ইনস্ট্যান্সের প্রতিটি পরিষেবার সব ক্যাশ করা প্রতিক্রিয়া মুছে দেয়। এটি ফেরানো যাবে না।",
     "purge_all_confirm_title": "পুরো ক্যাশে পরিষ্কার করবেন?",
-    "purge_help": "Purge actions run immediately on reachable instances. Unreachable instances are skipped and no action is queued.",
+    "purge_help": "পৌঁছানো যায় এমন ইনস্ট্যান্সে মুছে ফেলার কাজ সঙ্গে সঙ্গে চলে। অগম্য ইনস্ট্যান্স বাদ যায় এবং কোনো কাজ সারিতে থাকে না।",
     "purge_key": "কার্যকর ক্যাশে কী",
-    "purge_key_help": "Leave the cache key empty only for the default $scheme$host$request_uri. If the service overrides PROXY_CACHE_KEY, paste its effective value here; unsupported request-only variables are rejected instead of purging a different entry.",
+    "purge_key_help": "শুধু ডিফল্ট $scheme$host$request_uri-এর জন্য ক্যাশ কী খালি রাখুন। পরিষেবা PROXY_CACHE_KEY বদলালে তার কার্যকর মান এখানে দিন; অসমর্থিত request-only ভেরিয়েবল অন্য এন্ট্রি মুছে ফেলার বদলে প্রত্যাখ্যাত হবে।",
     "purge_key_placeholder": "কার্যকর PROXY_CACHE_KEY (ঐচ্ছিক)",
     "purge_url": "URL পরিষ্কার করুন",
     "purge_url_placeholder": "https://www.example.com/asset.js",
@@ -2277,7 +2277,7 @@
     "service": "পরিষেবা",
     "services": "সার্ভিস সক্রিয়করণ",
     "status": "ইনস্ট্যান্স স্টোরেজ",
-    "subtitle": "Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls."
+    "subtitle": "রিভার্স-প্রক্সি ক্যাশের অবস্থা, সম্মিলিত হিট-রেট মেট্রিক ও তাৎক্ষণিক মুছে ফেলার নিয়ন্ত্রণ।"
   },
   "compose": {
     "always_on": "সবসময় চালু",
@@ -2389,227 +2389,227 @@
     "truncated": "শুধুমাত্র প্রথম 500 আপস্ট্রিম প্রদর্শিত। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সরু করুন।"
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "ব্লক করুন",
+    "act_challenge": "চ্যালেঞ্জ",
+    "act_code": "স্ট্যাটাস কোড",
+    "act_denyDefault": "ইনস্ট্যান্সের প্রত্যাখ্যান স্ট্যাটাস",
+    "act_denyShort": "প্রত্যাখ্যান স্ট্যাটাস",
+    "act_provider": "অ্যান্টিবট প্রদানকারী",
+    "act_redirect": "রিডাইরেক্ট করুন",
+    "act_status": "প্রত্যাখ্যান স্ট্যাটাস",
+    "act_terminal": "প্রতি নিয়মে একটি কাজ, এবং সেটিই মূল্যায়ন শেষ করে — নিয়ম থেকে সত্য / মিথ্যা কোনো পথ বের হয় না।",
+    "act_url": "গন্তব্য URL",
     "action": "তারপর",
     "add_rule": "নিয়ম যোগ করুন",
     "all": "সব",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "সংকুচিত করুন",
+      "combinator": "সমন্বয়কারী পরিবর্তন করুন, বর্তমানে",
+      "conditionType": "শর্তের ধরন",
+      "denyStatus": "প্রত্যাখ্যান স্ট্যাটাস",
+      "drag": "ক্রম বদলাতে টেনে আনুন",
+      "expand": "প্রসারিত করুন",
+      "groupKind": "গ্রুপের ধরন",
+      "more": "আরও",
+      "moveDown": "নিচে সরান — পরে চলবে",
+      "moveRule": "নিয়ম সরান",
+      "moveUp": "উপরে সরান — আগে চলবে",
+      "provider": "অ্যান্টিবট প্রদানকারী",
+      "redirectStatus": "রিডাইরেক্ট স্ট্যাটাস",
+      "removeCondition": "শর্ত সরান",
+      "removeThreshold": "সীমা সরান",
+      "removeThresholdLong": "হারের সীমা সরান",
+      "removeValue": "মান সরান",
+      "requestCount": "অনুরোধের সংখ্যা",
+      "resourceGroup": "রিসোর্স গ্রুপ",
+      "ruleName": "নিয়ম {{n}}-এর নাম",
+      "terminalAction": "চূড়ান্ত কাজ",
+      "uriMatch": "URI মিলের মোড",
+      "uriValue": "URI মান",
+      "window": "সেকেন্ডে সময়সীমা"
     },
     "attach": "পরিষেবার সাথে যুক্ত করুন",
     "attach_help": "নিয়মগুলি শুধুমাত্র সেই পরিষেবাগুলিতে প্রয়োগ করা হয় যেগুলিতে একটি ওয়ার্কফ্লো যুক্ত করা হয়েছে।",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "সংরক্ষণ করলে এই নিয়মগুলো {{count}}টি সংযুক্ত পরিষেবায় প্রয়োগ হবে।",
+    "capacity": "{{maxRules}}টির মধ্যে {{count}}টি নিয়ম · সবচেয়ে বড় নিয়ম {{maxPredicates}}টির মধ্যে {{worst}}টি শর্ত ব্যবহার করে · এই ওয়ার্কফ্লোতে {{regexes}}টি রেগেক্স",
     "clone": "ওয়ার্কফ্লো ক্লোন করুন",
     "clone_help": "নিয়মগুলি কপি করা হয়েছে; পরিষেবাগুলির সংযুক্তি কপি করা হয়নি।",
     "clone_name": "কপির নাম",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "এই নিয়মটি মুছবেন? এর নিচের সবকিছু এক ধাপ উপরে উঠবে।"
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (অনুলিপি)",
     "delete": "ওয়ার্কফ্লো মুছুন",
     "delete_confirm": "এই ওয়ার্কফ্লো এবং এর সমস্ত নিয়মগুলি স্থায়ীভাবে মুছে যাবে।",
     "empty_text": "একটি ওয়ার্কফ্লো হল পরিষেবাগুলিতে যুক্ত করা নিয়মগুলির একটি সাজানো তালিকা: একটি শর্ত গাছ, একটি ঐচ্ছিক হার থ্রেশহোল্ড এবং একটি অ্যাকশন - চ্যালেঞ্জ, ব্লক বা রিডাইরেক্ট।",
     "empty_title": "এখন পর্যন্ত কোনো ওয়ার্কফ্লো নেই",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "ওয়ার্কফ্লোগুলো সংযুক্তির ক্রমে চলে; এর ভেতরের নিয়মগুলো ওপর থেকে নিচে চলে।",
+    "entry_title": "সংযুক্ত পরিষেবায় প্রতিটি অনুরোধ",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "সংরক্ষণ করা যায়নি",
+      "saveUnreachable": "সংরক্ষণ এন্ডপয়েন্টে পৌঁছানো যায়নি",
+      "validate": "যাচাই করা যায়নি",
+      "validateUnreachable": "যাচাই এন্ডপয়েন্টে পৌঁছানো যায়নি"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "কিছুই প্রয়োগ হয়নি — চলমান নীতি অপরিবর্তিত আছে।",
+      "count": "{{count}}টি সমস্যা সংরক্ষণে বাধা দিচ্ছে।",
+      "rule": "নিয়ম {{n}}",
+      "ruleNamed": "নিয়ম {{n}} — {{name}}",
+      "whole": "এই ওয়ার্কফ্লো"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "অনুরোধটি পরের সংযুক্ত ওয়ার্কফ্লো, তারপর নিরাপত্তা স্ট্যাকের বাকি অংশে যাবে।",
+    "exit_title": "কোনো নিয়ম মেলেনি",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "এবং শুধু একই ক্লায়েন্ট IP এর চেয়ে বেশি অনুরোধ করলে",
+      "chip": "মিলের গেট",
+      "help": "প্রতি ক্লায়েন্ট IP অনুযায়ী গণনা হয়। সীমার নিচে এই নিয়ম একেবারেই মেলে না এবং মূল্যায়ন পরের নিয়মে যায়; এটি নিজে থেকে হার সীমিত করে না।"
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "না মিললে পরের নিয়মে যায়",
+      "gate": "হারের সীমা মিল নিয়ন্ত্রণ করে, এটি কোনো কাজ নয়",
+      "move": "ক্রম বদলাতে টানুন, তীর ব্যবহার করুন বা Alt + ↑ / ↓ চাপুন",
+      "stop": "মিললে একটি কাজ চালিয়ে থেমে যায়"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "মেলেনি"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "শেষে চালান",
+      "delete": "নিয়ম মুছুন",
+      "disable": "নিয়ম নিষ্ক্রিয় করুন",
+      "duplicate": "নিচে অনুলিপি করুন",
+      "enable": "নিয়ম সক্রিয় করুন",
+      "top": "প্রথমে চালান"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "প্রথমে চালান",
+      "last": "শেষে চালান"
     },
     "new": "নতুন ওয়ার্কফ্লো",
     "no_rules": "এখন কোনো নিয়ম নেই। এই নীতি তৈরি করা শুরু করার জন্য একটি যোগ করুন।",
     "not_attached": "যুক্ত নয়",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "এই ওয়ার্কফ্লো কোনো পরিষেবায় সংযুক্ত নয়, তাই নিয়মগুলো এখনো কোথাও প্রয়োগ হচ্ছে না।",
+    "not_validated": "এখনো যাচাই করা হয়নি",
     "order_help": "নিয়মগুলি ক্রমানুসারে মূল্যায়ন করা হয় এবং প্রথম যেটির সাথে মিলে যায় সেটি কার্যকর হবে। একটি হার থ্রেশহোল্ড সহ একটি নিয়ম শুধুমাত্র তখনই মিলে যায় যখন থ্রেশহোল্ড অতিক্রম করা হয়, তাই একটি নিম্ন নিয়মটি সেই ট্র্যাফিককে ধরতে পারে যা এটির নিচে রয়েছে।",
     "readonly": "ডাটাবেসটি শুধুমাত্র পড়ার জন্য। ওয়ার্কফ্লোগুলি পরিদর্শন করা যেতে পারে কিন্তু পরিবর্তন করা যায় না।",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "নিষ্ক্রিয়",
+      "if": "যদি",
+      "namePlaceholder": "নিয়মের নাম",
+      "noun": "নিয়ম",
+      "onMatch": "মিললে",
+      "skipped": "নিষ্ক্রিয় — তালিকায় না থাকার মতো সম্পূর্ণভাবে এড়িয়ে যাওয়া হয়।",
+      "stopTail": ", মূল্যায়ন এখানেই থামে — নিচের কোনো নিয়মে পৌঁছায় না।"
     },
     "rules": "নিয়ম",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "কাজটি {{type}}-এ বদলেছে। এটি এখনো একমাত্র কাজ এবং মূল্যায়ন থামায়।",
+      "added": "নিয়মটি {{n}} নম্বর, অর্থাৎ শেষ স্থানে যোগ হয়েছে; তাই ওপরের সব নিয়ম আগে পরীক্ষা হবে।",
+      "deleted": "নিয়ম মুছে ফেলা হয়েছে। {{count}}টি নিয়ম বাকি।",
+      "duplicated": "অনুলিপিটি {{n}} নম্বর স্থানে ঢোকানো হয়েছে। ওপরের মূল নিয়ম সক্রিয় থাকা পর্যন্ত এটি কখনো মিলবে না।",
+      "gateAdded": "মিলে হারের সীমা যোগ হয়েছে। এর নিচে নিয়ম মেলে না এবং মূল্যায়ন চলতে থাকে।",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "শেষ মান সরানো হয়েছে — একটি মান না থাকা পর্যন্ত এই শর্ত সংরক্ষণ করা যাবে না।",
+      "moved": "{{name}}-কে {{total}}টির মধ্যে {{to}} নম্বর স্থানে সরানো হয়েছে{{how}}। এখন এটি {{where}} চলে।",
+      "predicateCap": "এই নিয়মে ইতিমধ্যে সর্বোচ্চ {{max}}টি শর্ত আছে।",
+      "ruleAbove": "ওপরের নিয়মের পরে",
+      "ruleDisabled": "{{name}} নিষ্ক্রিয় — এটি পুরোপুরি এড়িয়ে যায় এবং নিচের নিয়মগুলো এখন সেই অনুরোধগুলো দেখে।",
+      "ruleEnabled": "{{name}} সক্রিয় — এটি {{n}} নম্বর স্থানে আবার মূল্যায়িত হয়।",
+      "runsAfter": "{{name}}-এর পরে",
+      "runsFirst": "প্রথমে",
+      "runsLast": "শেষে",
+      "saved": "নিয়মগুলো সংরক্ষণ করে সংযুক্ত পরিষেবায় পাঠানো হয়েছে।",
+      "theRule": "নিয়মটি",
+      "valuesDropped": "শর্তটি {{type}}-এ বদলেছে — এর {{count}}টি মান বহন করা যায়নি।",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "টেনে",
+        "keyboard": "কীবোর্ড দিয়ে"
       }
     },
     "search": "নাম বা বর্ণনা অনুসন্ধান করুন...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "ব্যর্থ ASN অনুসন্ধান অনুকরণ করতে ফাঁকা রাখুন।",
+      "asn_invalid": "ASN একটি সংখ্যা হতে হবে",
+      "assume_not_whitelisted": "ধরে নেয় ক্লায়েন্ট অনুমোদিত তালিকায় নেই।",
+      "assume_rate_counter": "অনুরোধ নম্বর {{request_number}} আপনার ইনপুট, কোনো পরিমাপ নয়।",
+      "assume_regex_budget": "ধরে নেয় ইনস্ট্যান্সের রেগেক্স সীমা শেষ হয়নি।",
+      "assumptions": "অনুমান",
+      "country": "দেশ",
+      "detail_challenge": "চ্যালেঞ্জ নিয়ন্ত্রণ নেয়; নিরাপত্তা স্ট্যাকের বাকি অংশ তবুও চলে।",
+      "detail_detect": "এই পরিষেবাটি শনাক্তকরণ মোডে আছে, তাই বাস্তবে কিছুই প্রয়োগ হয় না।",
+      "detail_status": "ক্লায়েন্ট {{status}} দেখবে।",
+      "failed": "পরীক্ষা চালানো যায়নি",
+      "geo": "GeoIP অনুসন্ধান",
+      "geo_help": "অনুপলভ্য হলে দেশ ও ASN নিয়ম অজানা হয়, তাই কখনো মিলতে পারে না।",
+      "geo_local": "স্থানীয় / ব্যক্তিগত ঠিকানা",
+      "geo_resolved": "সমাধান হয়েছে",
+      "geo_unavailable": "ডেটাবেস অনুপলভ্য",
+      "intro": "ইনস্ট্যান্স যেমন করবে ঠিক তেমনভাবে পরিষেবায় সংযুক্ত প্রতিটি ওয়ার্কফ্লো ক্রমানুসারে মূল্যায়ন করে।",
+      "invalid": "পরীক্ষার আগে ওপরের সমস্যাগুলো ঠিক করুন।",
+      "ip": "ক্লায়েন্ট IP",
+      "method": "পদ্ধতি",
+      "number": "অনুরোধ নম্বর",
+      "number_help": "সময়সীমায় এই ক্লায়েন্টের Nতম অনুরোধ। এটি আপনার দেওয়া অনুমান, পরিমাপ নয়।",
+      "open": "একটি অনুরোধ পরীক্ষা করুন",
+      "other_matched": "এখানে মিলেছে",
+      "other_no_match": "কোনো নিয়ম মেলেনি",
+      "other_unreached": "পৌঁছায়নি",
+      "other_workflows": "এই পরিষেবার অন্যান্য ওয়ার্কফ্লো",
+      "out_draft": "এই পরিষেবাটি খসড়া — এর জন্য এখনো কোনো ওয়ার্কফ্লো কম্পাইল হয়নি।",
+      "out_match": "{{workflow}} · {{rule}} মিলেছে এবং অনুরোধে {{action}} কাজ করেছে।",
+      "out_no_match": "কোনো নিয়ম মেলেনি। অনুরোধ নিরাপত্তা স্ট্যাকের বাকি অংশে যাবে।",
+      "out_not_attached": "এই ওয়ার্কফ্লো কোনো পরিষেবায় সংযুক্ত নয়, তাই মূল্যায়নের কোনো নিয়ম-ধাপ নেই।",
+      "out_whitelisted": "অনুমোদিত তালিকায় — পুরো ওয়ার্কফ্লো এড়িয়ে যায় এবং কোনো নিয়ম মূল্যায়িত হয় না।",
+      "run": "পরীক্ষা চালান",
+      "service": "পরিষেবা",
+      "title": "একটি অনুরোধ পরীক্ষা করুন",
+      "unreachable": "পরীক্ষা এন্ডপয়েন্টে পৌঁছানো যায়নি",
+      "uri": "URI পাথ",
+      "uri_help": "শুধু পাথ — $uri-তে কখনো কোয়েরি স্ট্রিং থাকে না।",
+      "v_gate": "শর্ত মিলেছে · {{count}}টির মধ্যে {{n}}-এ গেট বন্ধ",
+      "v_match": "মিলেছে",
+      "v_unknown": "অজানা",
+      "v_unknown_help": "এই নিয়মের প্রয়োজনীয় তথ্য নির্ধারণ করা যায়নি, তাই এটি কখনো মিলতে পারে না।",
+      "whitelisted": "এই ক্লায়েন্ট অনুমোদিত তালিকায় আছে"
     },
     "threshold": "শুধুমাত্র একটি নির্দিষ্ট হার",
     "threshold_count": "অনুরোধ",
     "threshold_window": "প্রতি (সেকেন্ড)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "শর্ত",
+      "addGroup": "গ্রুপ",
+      "all": "সবগুলো",
+      "allMeta": "{{count}}টি শর্ত — সব সত্য হতে হবে",
+      "and": "এবং",
+      "any": "যেকোনোটি",
+      "anyMeta": "{{count}}টি শর্ত — অন্তত একটি সত্য হতে হবে",
+      "empty": "খালি গ্রুপ — একটি শর্ত যোগ করুন; এভাবে সংরক্ষণ করা যাবে না।",
+      "noGroupHolds": "কোনো গ্রুপে {{kind}} এন্ট্রি নেই",
+      "noneMeta": "এগুলোর কোনোটিই সত্য না হলে মেলে",
+      "not": "কোনোটিই নয়",
+      "or": "অথবা",
+      "removeGroup": "গ্রুপ সরান"
     },
     "truncated": "শুধুমাত্র প্রথম 500 ওয়ার্কফ্লো দেখানো হচ্ছে। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সংকুচিত করুন।",
-    "untitled": "Untitled rule",
+    "untitled": "শিরোনামহীন নিয়ম",
     "value": {
-      "add": "Value"
+      "add": "মান"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "কম দেখান",
+      "more": "+{{n}}টি আরও"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "হয়",
+      "country": "হয়",
+      "group": "গ্রুপে আছে",
+      "ip": "এর মধ্যে আছে",
+      "isIn": "এর মধ্যে আছে",
+      "isOneOf": "এগুলোর একটি",
+      "method": "হয়",
+      "uri": "এর সঙ্গে মেলে"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "1+ হোস্টে BunkerWeb ইনস্টল করুন",
+      "mfa": "MFA সক্রিয় করুন",
+      "pro": "BunkerWeb PRO সক্রিয় করুন",
+      "service": "প্রথম পরিষেবা নিবন্ধন করুন"
     },
     "pro_tips": "PRO টিপস",
-    "title": "Getting started"
+    "title": "শুরু করুন"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "প্রতিটি অনুরোধ পর্যায়ে প্রতিটি প্লাগইনের সময়, সব ইনস্ট্যান্স থেকে সরাসরি পড়ে একত্র করা হয়।",
+    "volatile": "সময়গুলো প্রতিটি ইনস্ট্যান্সের শেয়ার্ড মেমরিতে থাকে এবং চাহিদামতো পড়া হয় — সংরক্ষণ করা হয় না, আর ইনস্ট্যান্স পুনরায় চালু হলে শূন্য হয়।",
+    "partial": "কিছু ইনস্ট্যান্স সাড়া দেয়নি। নিচের পরিসংখ্যানে শুধু সাড়া দেওয়া ইনস্ট্যান্সগুলো আছে।",
+    "reporting_instances": "রিপোর্ট করা ইনস্ট্যান্স",
+    "requests_measured": "পরিমাপ করা অনুরোধ",
+    "mean_request": "গড় অনুরোধ",
+    "max_request": "সবচেয়ে ধীর অনুরোধ",
+    "phases": "প্লাগইন পর্যায়",
+    "share_help": "শেয়ার হলো মোট অনুরোধ সময়ের তুলনায় প্লাগইনের মোট সময়। প্রতি অনুরোধে একবার চলে না এমন পর্যায় — ওয়ার্কার চালু হওয়া, ব্যাকগ্রাউন্ড টাইমার ও অভ্যন্তরীণ API —-এর শেয়ার নেই এবং ড্যাশ দেখায়।",
+    "plugin": "প্লাগইন",
+    "phase": "পর্যায়",
+    "calls": "কল",
+    "mean": "গড়",
+    "max": "সর্বোচ্চ",
+    "total": "মোট",
+    "share": "শেয়ার",
+    "disabled_title": "প্লাগইনের সময় পরিমাপ বন্ধ",
+    "disabled_help": "প্রতিটি প্লাগইনের সময় মাপতে METRICS_COLLECT_TIMINGS-কে yes করুন। সম্পূর্ণ অনুরোধের সময় যেকোনোভাবেই সংগ্রহ করা হয়।",
+    "unreachable_title": "কোনো ইনস্ট্যান্স সময় জানায়নি",
+    "unreachable_help": "সময়গুলো ইনস্ট্যান্স থেকেই পড়া হয়, তাই কোনোটিই সাড়া দেয়নি — অথবা এখনো কোনো অনুরোধ পরিবেশন করেনি।"
   }
 }

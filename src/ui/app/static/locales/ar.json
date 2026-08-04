@@ -5,7 +5,7 @@
     "license_title": "الترخيص",
     "socials": "وسائل التواصل الاجتماعي",
     "tagline": "حماية قوية، مبسطة",
-    "title": "About BunkerWeb",
+    "title": "حول BunkerWeb",
     "social": {
       "discord": "ديسكورد",
       "instagram": "انستغرام",
@@ -78,20 +78,20 @@
     "subtitle": "عناوين IP المحظورة عبر مثيلات BunkerWeb الخاصة بك — أضف، أو احذف، أو اضبط مدة الحظر.",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "مُمكّن.",
+        "body_before": "تنتهي عمليات الحظر التي تُجرى هنا عند إعادة تشغيل المثيل ما لم",
+        "title": "تعديلات غير دائمة."
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "عمليات الحظر حسب السبب"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "عمليات الحظر النشطة",
+        "active_caption": "عناوين IP + نطاقات CIDR",
+        "countries": "البلدان",
+        "expiring": "تنتهي خلال ≤ 1 ساعة",
+        "expiring_caption": "تدوير تلقائي",
+        "permanent": "عمليات الحظر الدائمة"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "الحظر",
     "cache": "الذاكرة المؤقتة",
     "web_cache": "ذاكرة التخزين المؤقت للموقع",
-    "timings": "Timings",
+    "timings": "التوقيتات",
     "configs": "التكوينات",
     "extra_pages": "صفحات إضافية",
     "global_settings": "الإعدادات العامة",
-    "global_config": "Global config",
+    "global_config": "التكوين العام",
     "home": "الرئيسية",
     "instances": "المثيلات",
     "jobs": "المهام",
@@ -183,7 +183,7 @@
     "ping": "Ping",
     "plugin_page": "صفحة الإضافة",
     "proceed": "متابعة",
-    "refresh": "Refresh",
+    "refresh": "تحديث",
     "refresh_recovery_codes": "تحديث رموز الاسترداد",
     "reload": "إعادة تحميل",
     "reset": "إعادة تعيين",
@@ -216,20 +216,20 @@
     "view_details": "عرض التفاصيل",
     "view_raw_data": "عرض البيانات الخام",
     "wipe_other_sessions": "مسح الجلسات الأخرى",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "حظر كل التقارير المطابقة",
+    "filtered_actions": "الإجراءات المصفاة",
+    "unban_all_filtered": "إلغاء كل عمليات الحظر المطابقة",
+    "update_duration_all_filtered": "تحديث مدة كل عمليات الحظر المطابقة",
+    "use_template": "استخدام قالب",
+    "edit": "تعديل",
     "verify": "التحقق",
-    "view": "View"
+    "view": "عرض"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "الملفات",
+    "kpi_per_service": "لكل خدمة",
     "subtitle": "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة.",
-    "title": "Cache files"
+    "title": "ملفات الذاكرة المؤقتة"
   },
   "configs": {
     "subtitle": "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق."
@@ -533,7 +533,7 @@
         "title": "الجهات السابقة"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "أهم أسباب الحظر"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "أعلى 10 IP محظورة"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "محظورة",
+        "title": "الطلبات المحظورة بمرور الوقت (النطاق المحدد)"
       }
     },
     "map": {
@@ -567,17 +567,17 @@
       "no_data": "لا يوجد بيانات"
     },
     "window": {
-      "last_days": "Last {{days}} days",
-      "title": "Dashboard window"
+      "last_days": "آخر {{days}} يومًا",
+      "title": "نطاق لوحة المعلومات"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "عمليات الحظر النشطة",
+      "jobs": "المهام المجدولة",
+      "trend": "اتجاه الطلبات المحظورة"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "مرحبًا بعودتك، {{user}}",
+      "greeting": "مرحبًا بعودتك،"
     },
     "mini": {
       "across_countries": "في جميع أنحاء {{count}}",
@@ -594,12 +594,12 @@
       "vs_prev": "مقارنة مع السابقة"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "النطاق المحدد",
+      "top_ips_sub": "حسب عدد الطلبات",
+      "status_sub": "رموز استجابة HTTP",
+      "reasons_sub": "حسب القاعدة المشغلة",
+      "map_sub": "مرر المؤشر لعرض التفاصيل",
+      "blocking_sub": "المحظورة مقابل المسموح بها"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "ترقية؟",
     "use_authenticator_code": "استخدم رمز المصادقة",
     "use_recovery_code": "استخدم رمز الاسترداد",
-    "get_support": "Get support"
+    "get_support": "الحصول على الدعم"
   },
   "login": {
     "title": "تسجيل الدخول",
@@ -945,25 +945,25 @@
     "showing_some": "عرض {{shown}} من {{total}}",
     "select_file_prompt": "حدد ملف السجل لعرض محتواه",
     "trimmed_notice": "--- تم إزالة {{count}} سطر من السجلات القديمة لتحسين الأداء ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "كل المصادر (مباشر)",
+    "collapse": "طي",
+    "expand": "توسيع",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "كل السجلات",
+    "level_errors_only": "الأخطاء فقط",
+    "level_security_only": "الأمان فقط",
+    "live_title": "السجلات المباشرة",
+    "pause": "إيقاف مؤقت",
+    "resume": "استئناف",
+    "tailing_sources": "متابعة · {{count}} مصادر",
+    "taller": "أطول"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "اسحب وأفلت أرشيف الإضافة الخاص بك هنا أو انقر لتحديد الملفات.",
       "confirm_cache_deletion_alert": "هل أنت متأكد أنك تريد حذف ملف الذاكرة المؤقتة المحدد؟",
       "confirm_cache_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "هل تريد بالتأكيد تحويل التكوينات المخصصة المحددة؟",
       "confirm_configs_conversion_to": "هل أنت متأكد أنك تريد تحويل الإعدادات المخصصة المحددة إلى {{state}}؟",
       "confirm_configs_deletion_alert": "هل أنت متأكد أنك تريد حذف التكوين المخصص المحدد؟",
       "confirm_configs_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
       "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",
       "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "هل تريد حظر عناوين IP من كل التقارير المطابقة وعددها {{count}}؟ ستُطبق الأهداف المكررة مرة واحدة.",
+      "unban_filtered_confirmation": "هل تريد بالتأكيد إلغاء كل عمليات الحظر المطابقة وعددها {{count}}؟",
+      "update_filtered_duration_alert": "حدد مدة جديدة لكل عمليات الحظر المطابقة وعددها {{count}}:"
     },
     "button": {
       "fetch_global_settings_confirm": "تطبيق الإعدادات العامة",
@@ -1065,7 +1065,7 @@
     "cache": "الذاكرة المؤقتة",
     "certificates": "الشهادات",
     "web_cache": "ذاكرة التخزين المؤقت للموقع",
-    "timings": "Timings",
+    "timings": "التوقيتات",
     "configs": "التكوينات",
     "extra_pages": "صفحات إضافية",
     "global_settings": "الإعدادات العامة",
@@ -1088,11 +1088,11 @@
     "services": "الخدمات",
     "support": "الدعم",
     "templates": "القوالب",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "نظرة عامة",
+    "configure": "التكوين",
+    "operate": "التشغيل",
+    "system": "النظام",
+    "edition_community": "المجتمع",
     "redirects": "إعادة التوجيه",
     "upstreams": "المدخلات",
     "workflows": "مسارات العمل",
@@ -1141,17 +1141,17 @@
       "show_less": "إظهار أقل"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "نشط",
+      "always_on": "أساسي / يعمل دائمًا",
+      "disabled": "معطل",
+      "enabled": "مُمكّن",
+      "inactive": "غير نشط",
+      "no_match": "لا توجد إضافات تطابق عوامل التصفية",
+      "search": "البحث عن إضافات...",
+      "tab_all": "الكل",
+      "tab_community": "المجتمع",
+      "tab_disabled": "معطل",
+      "tab_enabled": "مُمكّن"
     }
   },
   "pro": {
@@ -1199,7 +1199,7 @@
       "suspended": "معلق",
       "title": "الحالة"
     },
-    "title": "Pro license"
+    "title": "ترخيص Pro"
   },
   "profile": {
     "2fa": {
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "تنزيل سجلات التصحيح، واستخراج تكوينك، والحصول على المساعدة من فريق BunkerWeb.",
-    "title": "Support"
+    "title": "الدعم"
   },
   "tab": {
     "custom_certificate": "شهادة مخصصة",
@@ -1561,7 +1561,7 @@
       "actions": "الإجراءات",
       "active": "نشط",
       "async": "غير متزامن",
-      "checksum": "Checksum",
+      "checksum": "المجموع الاختباري",
       "configs": "التكوينات",
       "country": "البلد",
       "created": "تاريخ الإنشاء",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "قوالب تكوين قابلة لإعادة الاستخدام لخدماتك — تجميع الإعدادات، والخطوات، والتكوينات المخصصة، ثم إنشاءها أو نسخها أو حذفها.",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "حذف المحدد",
+      "empty_message": "أنشئ قالبك الأول لتجميع الإعدادات والخطوات والتكوينات المخصصة وإعادة استخدامها.",
+      "empty_title": "لا توجد قوالب بعد",
+      "select": "تحديد",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "أمان مرتفع",
+      "low": "أمان منخفض",
+      "medium": "أمان متوسط",
+      "ui": "واجهة الويب"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "تكوين مخصص: {{name}}",
+      "feature": "ميزة مدمجة: {{name}}",
+      "plugin": "الإضافة: {{name}}"
     },
-    "title": "Service templates"
+    "title": "قوالب الخدمات"
   },
   "theme": {
     "dark": "داكن",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "هل يجب طلب شهادة Let's Encrypt تلقائيًا.",
     "button": {
       "ban_ip": "حظر عنوان الـIP هذا",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "تحويل التكوين {{name}} إلى مسودة",
+      "convert_config_to_online": "تحويل التكوين {{name}} إلى متصل",
       "convert_service_to_draft": "تحويل الخدمة {{name}} إلى مسودة",
       "convert_service_to_online": "تحويل الخدمة {{name}} إلى متصل",
       "delete_config": "حذف التكوين المخصص {{name}}",
@@ -2216,7 +2216,7 @@
     "kinds": "أنواع",
     "loading_references": "جاري التحميل...",
     "max_entries": "لا يمكن لمجموعة الموارد أن تحتوي على أكثر من {{max}} إدخال.",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} أنواع · {{values}} قيم · {{usages}} استخدامات",
     "new": "مجموعة جديدة",
     "new_alias": "اسم مستعار جديد",
     "no_entries": "لا توجد إدخالات",
@@ -2389,227 +2389,227 @@
     "truncated": "يتم عرض أول 500 موجه فقط. ضيق القائمة باستخدام API للحصول على النتيجة الكاملة."
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "حظر",
+    "act_challenge": "اختبار تحقق",
+    "act_code": "رمز الحالة",
+    "act_denyDefault": "حالة الرفض الخاصة بالمثيل",
+    "act_denyShort": "حالة الرفض",
+    "act_provider": "موفر مكافحة الروبوتات",
+    "act_redirect": "إعادة توجيه",
+    "act_status": "حالة الرفض",
+    "act_terminal": "إجراء واحد لكل قاعدة، وينهي التقييم؛ فلا يوجد مسار صواب أو خطأ يخرج من القاعدة.",
+    "act_url": "عنوان URL للوجهة",
     "action": "ثم",
     "add_rule": "أضف قاعدة",
     "all": "الكل",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "طي",
+      "combinator": "تغيير عامل الربط، الحالي",
+      "conditionType": "نوع الشرط",
+      "denyStatus": "حالة الرفض",
+      "drag": "اسحب لإعادة الترتيب",
+      "expand": "توسيع",
+      "groupKind": "نوع المجموعة",
+      "more": "المزيد",
+      "moveDown": "نقل لأسفل — يعمل لاحقًا",
+      "moveRule": "نقل القاعدة",
+      "moveUp": "نقل لأعلى — يعمل مبكرًا",
+      "provider": "موفر مكافحة الروبوتات",
+      "redirectStatus": "حالة إعادة التوجيه",
+      "removeCondition": "إزالة الشرط",
+      "removeThreshold": "إزالة الحد",
+      "removeThresholdLong": "إزالة حد المعدل",
+      "removeValue": "إزالة القيمة",
+      "requestCount": "عدد الطلبات",
+      "resourceGroup": "مجموعة الموارد",
+      "ruleName": "اسم القاعدة {{n}}",
+      "terminalAction": "الإجراء النهائي",
+      "uriMatch": "وضع مطابقة URI",
+      "uriValue": "قيمة URI",
+      "window": "النافذة بالثواني"
     },
     "attach": "إرفاق بالخدمات",
     "attach_help": "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها.",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "سيؤدي الحفظ إلى تطبيق هذه القواعد على {{count}} من الخدمات المرفقة.",
+    "capacity": "{{count}} من {{maxRules}} قاعدة · أكبر قاعدة تستخدم {{worst}} من {{maxPredicates}} شرطًا · {{regexes}} تعبيرًا نمطيًا في سير العمل هذا",
     "clone": "نسخ سير العمل",
     "clone_help": "يتم نسخ القواعد، ولكن ليس إرفاق الخدمات.",
     "clone_name": "اسم النسخة",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "هل تريد حذف هذه القاعدة؟ ستتحرك كل القواعد أسفلها موضعًا واحدًا إلى أعلى."
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (نسخة)",
     "delete": "حذف سير العمل",
     "delete_confirm": "سيتم حذف هذا سير العمل وجميع قواعده بشكل دائم.",
     "empty_text": "سير العمل هو قائمة مرتبة من القواعد التي تقوم بإرفاقها بالخدمات: شجرة شروط، وقيمة عتبة اختيارية، وإجراء واحد - تحدي، حظر أو إعادة توجيه.",
     "empty_title": "لا توجد سير عمل حتى الآن",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "تعمل مسارات العمل بترتيب الإرفاق، وتعمل القواعد داخل هذا المسار من أعلى إلى أسفل.",
+    "entry_title": "كل طلب إلى خدمة مرفقة",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "تعذر الحفظ",
+      "saveUnreachable": "تعذر الوصول إلى نقطة نهاية الحفظ",
+      "validate": "تعذر التحقق",
+      "validateUnreachable": "تعذر الوصول إلى نقطة نهاية التحقق"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "لم يُطبّق شيء؛ تظل السياسة الجارية دون تغيير.",
+      "count": "توجد {{count}} مشكلة تمنع الحفظ.",
+      "rule": "القاعدة {{n}}",
+      "ruleNamed": "القاعدة {{n}} — {{name}}",
+      "whole": "سير العمل هذا"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "يتابع الطلب إلى سير العمل المرفق التالي، ثم إلى بقية حزمة الأمان.",
+    "exit_title": "لم تتطابق أي قاعدة",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "وفقط بعد أن يرسل عنوان IP نفسه للعميل أكثر من",
+      "chip": "بوابة المطابقة",
+      "help": "يُحسب لكل عنوان IP عميل. تحت الحد لا تتطابق القاعدة إطلاقًا، ويستمر التقييم إلى القاعدة التالية؛ وهي لا تفرض حدًا للمعدل بمفردها."
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "عدم التطابق ينتقل إلى القاعدة التالية",
+      "gate": "حد المعدل يضبط المطابقة وليس إجراءً",
+      "move": "اسحب أو استخدم الأسهم أو اضغط Alt + ↑ / ↓ لإعادة الترتيب",
+      "stop": "التطابق ينفذ إجراءً واحدًا ثم يتوقف"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "لا تطابق"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "تشغيل أخيرًا",
+      "delete": "حذف القاعدة",
+      "disable": "تعطيل القاعدة",
+      "duplicate": "تكرار أسفلها",
+      "enable": "تمكين القاعدة",
+      "top": "تشغيل أولًا"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "تشغيل أولًا",
+      "last": "تشغيل أخيرًا"
     },
     "new": "سير عمل جديد",
     "no_rules": "لا توجد قاعدة حتى الآن. أضف واحدة لبدء بناء هذه السياسة.",
     "not_attached": "غير مرتبط",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "سير العمل هذا غير مرفق بأي خدمة، لذلك لا تُفرض هذه القواعد في أي مكان بعد.",
+    "not_validated": "لم يتم التحقق بعد",
     "order_help": "يتم تقييم القواعد بالترتيب، والقاعدة الأولى التي تتطابق تفوز. القاعدة التي تحتوي على قيمة عتبة تطابق مرة واحدة فقط بعد تجاوز العتبة، لذا يمكن للقاعدة الأقل أن تلتقط حركة المرور تحتها.",
     "readonly": "قاعدة البيانات للقراءة فقط. يمكن فحص سير العمل، ولكن لا يمكن تعديلها.",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "معطلة",
+      "if": "إذا",
+      "namePlaceholder": "اسم القاعدة",
+      "noun": "قاعدة",
+      "onMatch": "إذا تطابقت",
+      "skipped": "معطلة — يتم تجاوزها بالكامل كما لو لم تكن في القائمة.",
+      "stopTail": "، يتوقف التقييم هنا ولا يتم الوصول إلى أي قاعدة أسفلها."
     },
     "rules": "القواعد",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "تغير الإجراء إلى {{type}}. وما زال الإجراء الوحيد وما زال ينهي التقييم.",
+      "added": "أُضيفت القاعدة في الموضع {{n}}، وهو الأخير، لذلك تُفحص كل القواعد أعلاها أولًا.",
+      "deleted": "حُذفت القاعدة. تبقت {{count}} قاعدة.",
+      "duplicated": "أُدرجت النسخة في الموضع {{n}}. لا يمكن أن تتطابق ما دامت القاعدة الأصلية أعلاها مُمكّنة.",
+      "gateAdded": "أُضيف حد معدل إلى المطابقة. تحته لا تتطابق القاعدة ويستمر التقييم.",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "أُزيلت القيمة الأخيرة؛ لا يمكن حفظ هذا الشرط حتى يحتوي على قيمة.",
+      "moved": "نُقلت {{name}} إلى الموضع {{to}} من {{total}}{{how}}. وهي تعمل الآن {{where}}.",
+      "predicateCap": "تحتوي هذه القاعدة بالفعل على الحد الأقصى، وهو {{max}} شرطًا.",
+      "ruleAbove": "بعد القاعدة أعلاه",
+      "ruleDisabled": "عُطّلت {{name}}؛ يتم تجاوزها بالكامل وترى القواعد أسفلها هذه الطلبات الآن.",
+      "ruleEnabled": "مُكّنت {{name}}؛ يجري تقييمها مجددًا في الموضع {{n}}.",
+      "runsAfter": "بعد {{name}}",
+      "runsFirst": "أولًا",
+      "runsLast": "أخيرًا",
+      "saved": "حُفظت القواعد ودُفعت إلى الخدمات المرفقة.",
+      "theRule": "القاعدة",
+      "valuesDropped": "تغير الشرط إلى {{type}}؛ تعذر نقل القيم البالغ عددها {{count}}.",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "بالسحب",
+        "keyboard": "بلوحة المفاتيح"
       }
     },
     "search": "ابحث عن الاسم أو الوصف...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "اتركه فارغًا لمحاكاة فشل البحث عن ASN.",
+      "asn_invalid": "يجب أن يكون ASN رقمًا",
+      "assume_not_whitelisted": "يفترض أن العميل ليس في القائمة البيضاء.",
+      "assume_rate_counter": "رقم الطلب {{request_number}} قيمة مُدخلة وليس قياسًا.",
+      "assume_regex_budget": "يفترض أن ميزانية التعابير النمطية للمثيل لم تنفد.",
+      "assumptions": "الافتراضات",
+      "country": "البلد",
+      "detail_challenge": "يتولى اختبار التحقق المعالجة، وتستمر بقية حزمة الأمان في العمل.",
+      "detail_detect": "هذه الخدمة في وضع الكشف، لذلك لا يُفرض شيء فعليًا.",
+      "detail_status": "يرى العميل {{status}}.",
+      "failed": "تعذر تشغيل الاختبار",
+      "geo": "بحث GeoIP",
+      "geo_help": "عند عدم توفره تصبح قواعد البلد وASN مجهولة، فلا يمكن أن تتطابق أبدًا.",
+      "geo_local": "عنوان محلي / خاص",
+      "geo_resolved": "تم الحل",
+      "geo_unavailable": "قاعدة البيانات غير متوفرة",
+      "intro": "يقيّم كل سير عمل مرفق بالخدمة بالترتيب، تمامًا كما يفعل المثيل.",
+      "invalid": "أصلح المشكلات أعلاه قبل الاختبار.",
+      "ip": "عنوان IP للعميل",
+      "method": "الطريقة",
+      "number": "رقم الطلب",
+      "number_help": "طلب هذا العميل رقم N في النافذة. افتراض تقدمه أنت وليس قياسًا.",
+      "open": "اختبار طلب",
+      "other_matched": "تطابق هنا",
+      "other_no_match": "لم تتطابق أي قاعدة",
+      "other_unreached": "لم يتم الوصول إليه",
+      "other_workflows": "مسارات العمل الأخرى في هذه الخدمة",
+      "out_draft": "هذه الخدمة مسودة؛ لم يُجمّع لها سير عمل بعد.",
+      "out_match": "تطابق {{workflow}} · {{rule}} ونفّذ {{action}} على الطلب.",
+      "out_no_match": "لم تتطابق أي قاعدة. يتابع الطلب إلى بقية حزمة الأمان.",
+      "out_not_attached": "سير العمل هذا غير مرفق بأي خدمة، لذلك لا توجد سلسلة قواعد لتقييمها.",
+      "out_whitelisted": "في القائمة البيضاء؛ يتم تجاوز سير العمل كله ولا تُقيّم أي قاعدة.",
+      "run": "تشغيل الاختبار",
+      "service": "الخدمة",
+      "title": "اختبار طلب",
+      "unreachable": "تعذر الوصول إلى نقطة نهاية الاختبار",
+      "uri": "مسار URI",
+      "uri_help": "المسار فقط؛ لا يحتوي $uri على سلسلة استعلام أبدًا.",
+      "v_gate": "تطابقت الشروط · البوابة مغلقة عند {{n}} من {{count}}",
+      "v_match": "متطابق",
+      "v_unknown": "مجهول",
+      "v_unknown_help": "تعذر تحديد معلومة تحتاجها هذه القاعدة، لذلك لا يمكن أن تتطابق أبدًا.",
+      "whitelisted": "هذا العميل في القائمة البيضاء"
     },
     "threshold": "فقط فوق قيمة معينة",
     "threshold_count": "طلبات",
     "threshold_window": "لكل (ثانية)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "شرط",
+      "addGroup": "مجموعة",
+      "all": "جميع",
+      "allMeta": "{{count}} شرطًا — يجب أن تكون كلها صحيحة",
+      "and": "و",
+      "any": "أي من",
+      "anyMeta": "{{count}} شرطًا — يجب أن يكون واحد منها على الأقل صحيحًا",
+      "empty": "مجموعة فارغة؛ أضف شرطًا، فلا يمكن حفظها هكذا.",
+      "noGroupHolds": "لا تحتوي أي مجموعة على إدخالات من نوع {{kind}}",
+      "noneMeta": "يتطابق عندما لا يكون أي منها صحيحًا",
+      "not": "لا شيء من",
+      "or": "أو",
+      "removeGroup": "إزالة المجموعة"
     },
     "truncated": "يتم عرض أول 500 سير عمل فقط. لتقليل القائمة، استخدم API للحصول على النتيجة الكاملة.",
-    "untitled": "Untitled rule",
+    "untitled": "قاعدة بلا عنوان",
     "value": {
-      "add": "Value"
+      "add": "قيمة"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "عرض أقل",
+      "more": "+{{n}} أخرى"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "هو",
+      "country": "هو",
+      "group": "ضمن المجموعة",
+      "ip": "ضمن",
+      "isIn": "ضمن",
+      "isOneOf": "واحد من",
+      "method": "هي",
+      "uri": "يطابق"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "ثبّت BunkerWeb على 1+ مضيف",
+      "mfa": "فعّل MFA",
+      "pro": "فعّل BunkerWeb PRO",
+      "service": "سجّل خدمتك الأولى"
     },
     "pro_tips": "نصائح PRO",
-    "title": "Getting started"
+    "title": "بدء الاستخدام"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "المدة التي تستغرقها كل إضافة في كل مرحلة من الطلب، وتُقرأ مباشرة من كل مثيل ثم تُدمج.",
+    "volatile": "توجد التوقيتات في الذاكرة المشتركة لكل مثيل وتُقرأ عند الطلب — ولا تُخزّن، وتُصفّر عند إعادة تشغيل المثيل.",
+    "partial": "لم تستجب بعض المثيلات. تشمل الأرقام أدناه المثيلات التي استجابت.",
+    "reporting_instances": "المثيلات المبلّغة",
+    "requests_measured": "الطلبات المقيسة",
+    "mean_request": "متوسط الطلب",
+    "max_request": "أبطأ طلب",
+    "phases": "مراحل الإضافات",
+    "share_help": "الحصة هي إجمالي وقت الإضافة من إجمالي وقت الطلب. المراحل التي لا تعمل مرة واحدة لكل طلب — بدء العامل والمؤقت في الخلفية وواجهة API الداخلية — لا حصة لها وتعرض شرطة.",
+    "plugin": "الإضافة",
+    "phase": "المرحلة",
+    "calls": "الاستدعاءات",
+    "mean": "المتوسط",
+    "max": "الحد الأقصى",
+    "total": "الإجمالي",
+    "share": "الحصة",
+    "disabled_title": "توقيتات الإضافات معطلة",
+    "disabled_help": "اضبط METRICS_COLLECT_TIMINGS على yes لقياس مدة كل إضافة. تُجمع مدة الطلب كاملة في كل الأحوال.",
+    "unreachable_title": "لم يبلغ أي مثيل عن توقيتات",
+    "unreachable_help": "تُقرأ التوقيتات من المثيلات نفسها، لذلك لم يستجب أي منها — أو لم يعالج أي منها طلبًا بعد."
   }
 }

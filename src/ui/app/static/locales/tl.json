@@ -5,7 +5,7 @@
     "license_title": "Lisensya",
     "socials": "Mga Social Media",
     "tagline": "Malakas na Proteksyon, Simpleng Gamitin",
-    "title": "About BunkerWeb",
+    "title": "Tungkol sa BunkerWeb",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
@@ -78,20 +78,20 @@
     "subtitle": "Mga IP address na binuwag sa iyong mga instance ng BunkerWeb — idagdag, alisin, o ayusin ang tagal ng pagbabawal.",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "ay naka-enable.",
+        "body_before": "Nawawalan ng bisa ang mga ban dito kapag nag-restart ang instance maliban kung",
+        "title": "Mga pagbabagong hindi permanenteng na-save."
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "Mga ban ayon sa dahilan"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "Mga aktibong ban",
+        "active_caption": "Mga IP + CIDR",
+        "countries": "Mga bansa",
+        "expiring": "Mag-e-expire sa ≤ 1 oras",
+        "expiring_caption": "Awtomatikong nagpapalit",
+        "permanent": "Mga permanenteng ban"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "Mga Ban",
     "cache": "Cache",
     "web_cache": "Web Cache",
-    "timings": "Timings",
+    "timings": "Mga oras",
     "configs": "Mga Config",
     "extra_pages": "Karagdagang Mga Pahina",
     "global_settings": "Mga Pandaigdigang Setting",
-    "global_config": "Global config",
+    "global_config": "Pangkalahatang configuration",
     "home": "Tahanan",
     "instances": "Mga Instance",
     "jobs": "Mga Trabaho",
@@ -183,7 +183,7 @@
     "ping": "Ping",
     "plugin_page": "Pahina ng Plugin",
     "proceed": "Magpatuloy",
-    "refresh": "Refresh",
+    "refresh": "I-refresh",
     "refresh_recovery_codes": "I-refresh ang Mga Recovery Code",
     "reload": "I-reload",
     "reset": "I-reset",
@@ -204,7 +204,7 @@
     "set_1w": "Itakda ng 1 Linggo",
     "set_24h": "Itakda ng 24 Oras",
     "set_permanent": "Itakda bilang Permanente",
-    "setup": "Setup",
+    "setup": "Pag-setup",
     "show": "Ipakita",
     "stop": "Itigil",
     "submit": "Isumite",
@@ -216,20 +216,20 @@
     "view_details": "Tingnan ang Mga Detalye",
     "view_raw_data": "Tingnan ang Raw Data",
     "wipe_other_sessions": "Burahin ang Ibang Mga Session",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "I-ban ang lahat ng tumutugmang report",
+    "filtered_actions": "Mga na-filter na aksyon",
+    "unban_all_filtered": "Alisin ang lahat ng tumutugmang ban",
+    "update_duration_all_filtered": "Baguhin ang tagal ng lahat ng tumutugmang ban",
+    "use_template": "Gamitin ang template",
+    "edit": "I-edit",
     "verify": "I-verify",
-    "view": "View"
+    "view": "Tingnan"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "Mga file",
+    "kpi_per_service": "Bawat serbisyo",
     "subtitle": "Mga file ng cache na nabuo ng mga naka-iskedyul na gawain (blocklists, GeoIP databases, at iba pa) — suriin, i-download, o burahin ang mga ito bawat serbisyo at plugin.",
-    "title": "Cache files"
+    "title": "Mga cache file"
   },
   "configs": {
     "subtitle": "Mga snippet ng custom na configuration ng NGINX para sa iyong mga serbisyo — lumikha, i-edit, at pamahalaan ang HTTP, ModSecurity, at mga override sa antas ng stream."
@@ -507,7 +507,7 @@
         "title": "Plano"
       },
       "plugins": {
-        "status": "{{core}} core / {{pro}} PRO / {{external}} external",
+        "status": "{{core}} core / {{pro}} PRO / {{external}} panlabas",
         "title": "Mga Plugin"
       },
       "ram": {
@@ -533,7 +533,7 @@
         "title": "Mga pinagmulan"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "Pangunahing dahilan ng pag-block"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "Nangungunang 10 Na-block na IP"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "Na-block",
+        "title": "Mga na-block na request sa paglipas ng panahon (piniling saklaw)"
       }
     },
     "map": {
@@ -571,13 +571,13 @@
       "title": "Window ng Dashboard"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "Mga aktibong ban",
+      "jobs": "Mga nakaiskedyul na gawain",
+      "trend": "Takbo ng mga na-block na request"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "Maligayang pagbabalik, {{user}}",
+      "greeting": "Maligayang pagbabalik,"
     },
     "mini": {
       "across_countries": "sa mga bansa ng {{count}}",
@@ -594,12 +594,12 @@
       "vs_prev": "kumpara sa nakaraang"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "Piniling saklaw",
+      "top_ips_sub": "Ayon sa bilang ng request",
+      "status_sub": "Mga HTTP response code",
+      "reasons_sub": "Ayon sa nag-trigger na patakaran",
+      "map_sub": "Itapat ang pointer para sa detalye",
+      "blocking_sub": "Na-block at pinayagan"
     }
   },
   "datatable": {
@@ -777,7 +777,7 @@
       "admin_username": "Username ng Admin",
       "auto_lets_encrypt": "Awtomatikong Let's Encrypt",
       "ban_scope": "Saklaw ng Ban",
-      "certificate_authority": "Certificate Authority",
+      "certificate_authority": "Awtoridad ng sertipiko",
       "certificate_priority": "Priyoridad ng Certificate",
       "challenge_type": "Uri ng Challenge",
       "config_type": "Uri ng Config",
@@ -786,25 +786,25 @@
       "current_password": "Kasalukuyang Password",
       "custom_config": "Configuration",
       "custom_end_date": "Pasadyang Petsa ng Pagtatapos",
-      "custom_ssl_certificate": "Custom SSL Certificate",
+      "custom_ssl_certificate": "Custom na SSL certificate",
       "custom_ssl_certificate_data": "Data ng Custom SSL Certificate (Base64/PEM)",
-      "custom_ssl_key": "Custom SSL Key",
+      "custom_ssl_key": "Custom na SSL key",
       "custom_ssl_key_data": "Data ng Custom SSL Key (Base64/PEM)",
       "dns_credential_items": "Mga Kredensyal ng Let's Encrypt DNS",
       "dns_propagation": "Pagkaantala ng DNS Propagation",
-      "dns_provider": "DNS Provider",
+      "dns_provider": "Tagapagbigay ng DNS",
       "email": "Email",
       "email_for_lets_encrypt": "Email para sa Let's Encrypt",
       "end_date": "Petsa ng Pagtatapos",
       "hostname": "Hostname",
       "instance_id": "ID ng Instance",
-      "ip_address": "IP Address",
+      "ip_address": "IP address",
       "keywords": "Mga Keyword",
       "lets_encrypt_custom_profile": "Custom Profile ng Let's Encrypt",
       "lets_encrypt_disable_public_suffixes": "I-disable ang Mga Public Suffix (PSL Blacklist)",
       "lets_encrypt_dns_credential_items": "Mga Kredensyal ng Let's Encrypt DNS",
       "lets_encrypt_profile": "Profile ng Let's Encrypt",
-      "license_key": "License Key",
+      "license_key": "License key",
       "make_permanent": "Gawing Permanente",
       "name": "Pangalan",
       "new_duration": "Bagong Tagal",
@@ -819,7 +819,7 @@
       "real_ip_header": "Header ng tunay na IP",
       "real_ip_recursive": "Recursive na tunay na IP",
       "reason": "Dahilan",
-      "secret_token": "Secret Token",
+      "secret_token": "Lihim na token",
       "server_name": "Pangalan ng Server",
       "service_name": "Pangalan ng Serbisyo",
       "template_id": "ID ng Template",
@@ -848,7 +848,7 @@
       "multivalue_enter_value": "Ipasok ang value...",
       "plugin_search": "Maghanap ng mga plugin...",
       "search": "Maghanap...",
-      "secret_token": "Secret Token",
+      "secret_token": "Lihim na token",
       "select_service": "Pumili ng Serbisyo",
       "username_example": "juandelacruz"
     },
@@ -916,7 +916,7 @@
     "upgrade": "Mag-upgrade?",
     "use_authenticator_code": "Gumamit ng code ng pag-authenticate",
     "use_recovery_code": "Gumamit ng code ng pagbawi",
-    "get_support": "Get support"
+    "get_support": "Humingi ng suporta"
   },
   "login": {
     "title": "Mag-login",
@@ -945,18 +945,18 @@
     "showing_some": "ipinapakita ang {{shown}} sa {{total}}",
     "select_file_prompt": "Piliin ang isang file ng log upang tingnan ang nilalaman nito",
     "trimmed_notice": "--- Inalis ang {{count}} na mas lumang linya ng log para sa pagganap ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "Lahat ng source (live)",
+    "collapse": "I-collapse",
+    "expand": "I-expand",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "Lahat ng log",
+    "level_errors_only": "Mga error lang",
+    "level_security_only": "Seguridad lang",
+    "live_title": "Mga live log",
+    "pause": "I-pause",
+    "resume": "Ipagpatuloy",
+    "tailing_sources": "Sinusubaybayan · {{count}} source",
+    "taller": "Mas mataas"
   },
   "modal": {
     "body": {
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "Sigurado ka bang gusto mong i-unban ang napiling IP address?",
       "unban_confirmation_alert_plural": "Sigurado ka bang gusto mong i-unban ang mga napiling IP address?",
       "update_duration_alert": "Pumili ng bagong tagal para sa mga napiling ban:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "I-ban ang mga IP mula sa lahat ng {{count}} tumutugmang report? Isang beses lang ilalapat ang mga dobleng target.",
+      "unban_filtered_confirmation": "Sigurado ka bang aalisin ang lahat ng {{count}} tumutugmang ban?",
+      "update_filtered_duration_alert": "Pumili ng bagong tagal para sa lahat ng {{count}} tumutugmang ban:"
     },
     "button": {
       "fetch_global_settings_confirm": "Ilapat ang mga pandaigdigang setting",
@@ -1065,7 +1065,7 @@
     "cache": "Cache",
     "certificates": "Mga Sertipiko",
     "web_cache": "Web Cache",
-    "timings": "Timings",
+    "timings": "Mga oras",
     "configs": "Mga Config",
     "extra_pages": "Karagdagang Mga Pahina",
     "global_settings": "Mga Pandaigdigang Setting",
@@ -1088,11 +1088,11 @@
     "services": "Mga Serbisyo",
     "support": "Suporta",
     "templates": "Mga Template",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
+    "overview": "Pangkalahatang-ideya",
+    "configure": "I-configure",
+    "operate": "Pamahalaan",
     "system": "System",
-    "edition_community": "Community",
+    "edition_community": "Komunidad",
     "redirects": "Nagrerefer",
     "upstreams": "Mga upstream",
     "workflows": "Mga daloy ng trabaho",
@@ -1129,7 +1129,7 @@
     "type": {
       "all": "Lahat",
       "core": "Core",
-      "external": "External",
+      "external": "Panlabas",
       "pro": "Pro",
       "ui": "UI"
     }
@@ -1141,17 +1141,17 @@
       "show_less": "Ipakita ang mas kaunti"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "Aktibo",
+      "always_on": "Core / laging naka-on",
+      "disabled": "Naka-disable",
+      "enabled": "Naka-enable",
+      "inactive": "Hindi aktibo",
+      "no_match": "Walang plugin na tumutugma sa mga filter",
+      "search": "Maghanap ng plugin...",
+      "tab_all": "Lahat",
+      "tab_community": "Komunidad",
+      "tab_disabled": "Naka-disable",
+      "tab_enabled": "Naka-enable"
     }
   },
   "pro": {
@@ -1186,7 +1186,7 @@
       }
     },
     "overlay": {
-      "pro_feature": "Pro Feature",
+      "pro_feature": "Feature ng Pro",
       "upgrade_required": "Mag-upgrade sa Pro upang ma-access ang feature na ito"
     },
     "status": {
@@ -1199,7 +1199,7 @@
       "suspended": "NASUSPENDE",
       "title": "Katayuan"
     },
-    "title": "Pro license"
+    "title": "Lisensyang Pro"
   },
   "profile": {
     "2fa": {
@@ -1210,13 +1210,13 @@
       "refresh_recovery_codes": "Ang pag-refresh ng iyong mga recovery code ay magpapawalang-bisa sa mga nakaraang code."
     },
     "badge": {
-      "2fa_disabled": "2FA Disabled",
+      "2fa_disabled": "Naka-disable ang 2FA",
       "2fa_enabled": "Naka-enable ang 2FA"
     },
     "card": {
       "coming_soon": "Malapit na",
       "title": {
-        "2fa": "Two-Factor Authentication (2FA)",
+        "2fa": "Dalawang-salik na pagpapatunay (2FA)",
         "change_password": "Palitan ang Password",
         "change_theme": "Palitan ang Tema",
         "coming_soon": "Malapit na",
@@ -1241,9 +1241,9 @@
       "creation_date": "Petsa ng Paglikha",
       "current_session": "Kasalukuyang Session",
       "device": "Device",
-      "ip_address": "IP Address",
+      "ip_address": "IP address",
       "last_activity": "Huling Aktibidad",
-      "os": "Operating System",
+      "os": "Operating system",
       "title": "Session",
       "wipe_help": "Tapusin ang lahat ng aktibong sesyon sa iyong account. Mananatili kang naka-log in dito."
     },
@@ -1355,7 +1355,7 @@
     "future_30d": "Higit sa 30 araw pa",
     "health": "Kalusugan",
     "interval": "Agwat",
-    "ip_address": "IP Address",
+    "ip_address": "IP address",
     "job_name": "Pangalan ng Trabaho",
     "last_24h": "Nakaraang 24 na oras",
     "last_30d": "Nakaraang 30 araw",
@@ -1381,7 +1381,7 @@
     "show_message": "Ipakita ang Lahat",
     "start_date": "Petsa ng Simula",
     "status": "Katayuan",
-    "status_code": "Status Code",
+    "status_code": "Status code",
     "steps": "Mga Hakbang",
     "stream": "Suporta sa Stream",
     "template": "Template",
@@ -1423,7 +1423,7 @@
     },
     "step1": {
       "subtitle": "Lumikha ng iyong administrator account.",
-      "title": "Admin User"
+      "title": "Admin user"
     },
     "step2": {
       "lets_encrypt": {
@@ -1465,7 +1465,7 @@
       "title": "Pangkalahatang-tanaw"
     },
     "subtitle": "Sundin ang mga hakbang upang makumpleto ang setup wizard.",
-    "title": "Setup Wizard"
+    "title": "Setup wizard"
   },
   "status": {
     "admin_user_exists": "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang.",
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "I-download ang mga log ng debug, i-extract ang iyong configuration, at humingi ng tulong sa team ng BunkerWeb.",
-    "title": "Support"
+    "title": "Suporta"
   },
   "tab": {
     "custom_certificate": "Custom na Certificate",
@@ -1575,7 +1575,7 @@
       "hostname": "Hostname",
       "id": "ID",
       "interval": "Agwat",
-      "ip_address": "IP Address",
+      "ip_address": "IP address",
       "job_name": "Pangalan ng Trabaho",
       "last_run": "Huling Pagpapatakbo",
       "last_seen": "Huling Nakita",
@@ -1593,7 +1593,7 @@
       "service_name": "Pangalan ng Serbisyo",
       "settings": "Mga Setting",
       "status": "Katayuan",
-      "status_code": "Status Code",
+      "status_code": "Status code",
       "steps": "Mga Hakbang",
       "stream": "Stream",
       "template": "Template",
@@ -1630,7 +1630,7 @@
       "heading_edit": "I-edit ang template {{id}}",
       "label_config_data": "Data",
       "label_config_name": "Pangalan",
-      "label_config_order": "Order",
+      "label_config_order": "Ayos",
       "label_config_type": "Uri",
       "label_setting_key": "Key ng setting",
       "label_setting_value": "Default na value",
@@ -1644,7 +1644,7 @@
       "missing_configs_drop_hint": "I-drag at i-drop ang mga config file dito (.conf, .cfg, .txt)",
       "missing_configs_drop_or": "o",
       "missing_configs_hint_body": "Ang mga na-upload na file ay awtomatikong idadagdag sa iyong template. Tiyakin na ang mga pangalan ng file ay tugma sa mga nawawalang config na nakalista sa itaas.",
-      "missing_configs_hint_title": "Tip:",
+      "missing_configs_hint_title": "Payo:",
       "missing_configs_resolved": "Lahat ng nawawalang config ay na-upload na! Matagumpay na na-import ang template.",
       "missing_configs_title": "Mga Nawawalang Custom Config",
       "missing_configs_upload_failed": "Nabigo ang pag-upload ng mga config file",
@@ -1679,13 +1679,13 @@
       "raw_configs_upload": "Mag-upload ng mga config file (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Hindi mabasa ang isa sa mga napiling file.",
       "raw_editor_drop_hint": "Mag-drop ng template JSON file (.json lamang) upang palitan ang kasalukuyang nilalaman.",
-      "raw_editor_aria": "Raw template JSON editor",
+      "raw_editor_aria": "Raw JSON editor ng template",
       "raw_editor_help": "I-edit ang kumpletong kahulugan ng template bilang JSON. Ang pagbabalik sa Easy mode ay nagva-validate at nagre-reload ng visual editor.",
       "raw_editor_import_success": "Matagumpay na na-import ang template JSON.",
       "raw_editor_override_body": "Ang pag-import ng file na ito ay ganap na papalitan ang kasalukuyang template JSON. Ang mga pagbabagong ginawa sa editor ay mawawala. Gusto mo bang magpatuloy?",
       "raw_editor_override_confirm": "Palitan ang template",
       "raw_editor_override_title": "Palitan ang template JSON?",
-      "raw_editor_title": "Raw template JSON",
+      "raw_editor_title": "Raw JSON ng template",
       "raw_editor_upload_empty": "Ang na-upload na file ay walang laman.",
       "raw_editor_upload_failed": "Hindi mabasa ang napiling file.",
       "raw_editor_upload_template": "Mag-upload ng template JSON (.json lamang)",
@@ -1709,7 +1709,7 @@
       "raw_validation_steps_required": "Ang isang template ay dapat naglalaman ng hindi bababa sa isang hakbang.",
       "readonly_db": "Kasalukuyang read-only ang database. Hindi maaaring baguhin ang mga template.",
       "readonly_method": "Ang template na ito ay nilikha ng proseso ng {{method}} at hindi maaaring i-edit mula sa UI.",
-      "readonly_title": "Read-only",
+      "readonly_title": "Basahin lamang",
       "readonly_user": "Mayroon kang read-only na mga pahintulot. Makipag-ugnayan sa isang administrator upang humiling ng write access.",
       "select_config_placeholder": "Pumili ng config",
       "select_config_type_placeholder": "Pumili ng uri",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "Mga reusable na template ng configuration para sa iyong mga serbisyo — i-bundle ang mga setting, hakbang, at custom na configuration, pagkatapos ay lumikha, kopyahin, o tanggalin ang mga ito.",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "Burahin ang napili",
+      "empty_message": "Gawin ang unang template para pagsama-samahin at muling gamitin ang mga setting, hakbang at custom config.",
+      "empty_title": "Wala pang template",
+      "select": "Piliin",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
+      "high": "Mataas na seguridad",
+      "low": "Mababang seguridad",
+      "medium": "Katamtamang seguridad",
       "ui": "Web UI"
     },
     "tag": {
       "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
+      "feature": "Built-in na feature: {{name}}",
       "plugin": "Plugin: {{name}}"
     },
-    "title": "Service templates"
+    "title": "Mga template ng serbisyo"
   },
   "theme": {
     "dark": "Madilim",
@@ -1808,7 +1808,7 @@
       "ping_succeed": "Mga Instance: {{instances}}"
     },
     "copied": "Nakopya!",
-    "disclaimer_title": "Disclaimer",
+    "disclaimer_title": "Paunawa",
     "global_settings_applied_body": "Matagumpay na nakuha at nailapat ang mga pandaigdigang setting sa kasalukuyang form.",
     "global_settings_applied_title": "Nailapat ang mga pandaigdigang setting",
     "global_settings_failed_body": "Naganap ang isang error habang kinukuha ang mga pandaigdigang setting.",
@@ -2146,7 +2146,7 @@
     "orphan_title": "Walang account na ACME",
     "pem_certificate": "Sertipiko o chain na nasa format na PEM",
     "pem_drop": "Ilagay dito ang pampublikong sertipiko o chain na nasa format na PEM",
-    "pem_limit": "Maximum 1 MiB",
+    "pem_limit": "Hanggang 1 MiB",
     "pem_private_key": "Pribadong susi na nasa format na PEM",
     "primary": "Pangunahing pagtatalaga",
     "primary_help": "Markahan bilang pangunahing pagtatalaga para sa napiling mga serbisyo",
@@ -2193,7 +2193,7 @@
     "add_values": "Magdagdag ng mga halaga",
     "alias": "Alias",
     "alias_help": "Mga letra, numero, underscore, at dash. Hindi maaaring palitan ang mga umiiral na alias.",
-    "bulk_import": "Bulk import",
+    "bulk_import": "Maramihang import",
     "clone": "Kopyahin ang resource group",
     "clone_copy": "Lumikha ng isang editable na kopya ng @{{name}}.",
     "comment": "Komento",
@@ -2203,7 +2203,7 @@
     "delete_help": "Ang pagtanggal ay hindi pinapayagan habang may setting na tumutukoy sa alias na ito.",
     "editor_edit": "I-edit ang @{{name}}",
     "editor_new": "Bagong resource group",
-    "editor_title": "Resource group",
+    "editor_title": "Grupo ng resource",
     "empty": "Walang resource groups",
     "empty_help": "Lumikha ng isang reusable alias upang ibahagi ang mga halagang na-type sa iba't ibang compatible na setting.",
     "entries": "Mga entry",
@@ -2216,7 +2216,7 @@
     "kinds": "Mga uri",
     "loading_references": "Naglo-load ng mga sanggunian...",
     "max_entries": "Hindi maaaring maglaman ang isang grupo ng mga mapagkukunan ng higit sa {{max}} na entry.",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} uri · {{values}} value · {{usages}} paggamit",
     "new": "Bagong grupo",
     "new_alias": "Bagong alias",
     "no_entries": "Walang entry",
@@ -2259,7 +2259,7 @@
     "enabled_services": "Mga naka-enable na serbisyo",
     "hit_rate": "Rate ng pag-hit",
     "instance": "Instance",
-    "metrics": "Aggregate hit / miss distribution",
+    "metrics": "Pinagsamang distribusyon ng hit / miss",
     "metrics_scope": "Ang mga counter ay pinagsama-sama sa bawat instance sa lahat ng mga serbisyo na may naka-enable na cache.",
     "not_reporting": "Hindi nag-uulat",
     "path": "Path",
@@ -2281,7 +2281,7 @@
   },
   "compose": {
     "always_on": "Laging naka-on",
-    "count": "{{on}} on · {{total}} available · {{locked}} locked",
+    "count": "{{on}} naka-on · {{total}} available · {{locked}} naka-lock",
     "entries": "{{count}} na-configure",
     "filter": {
       "all": "Lahat",
@@ -2311,7 +2311,7 @@
     "attach_copy": "Idikit ang {{name}} ({{from}} → {{to}}) sa isa o higit pang serbisyo.",
     "code": {
       "301": "301 — Permanently Moved",
-      "302": "302 — Found",
+      "302": "302 — Natagpuan",
       "303": "303 — Tingnan ang iba",
       "307": "307 — Temporary Redirect",
       "308": "308 — Permanent Redirect"
@@ -2357,7 +2357,7 @@
     "empty_title": "Walang upstream pa",
     "keepalive": "Panatilihin ang koneksyon",
     "keepalive_help": "Bilang ng mga koneksyon na pinapanatili ng bawat worker. Tanging HTTP at gRPC; iwanan itong walang laman upang hindi paganahin.",
-    "match_path": "Reverse proxy path",
+    "match_path": "Path ng reverse proxy",
     "match_path_help": "Ang lokasyon kung saan ipinapasa ng mga napiling serbisyo ang trapiko sa pool na ito. Hindi ginagamit para sa isang stream pool, na kumukuha ng buong serbisyo.",
     "method": "Pagbalanse ng trapiko",
     "name_help": "Mga letra, numero, hyphen at underscore lamang. Hindi pinapayagan ang mga tuldok kaya hindi maaaring maging pareho ang pangalan ng pool at isang tunay na host.",
@@ -2389,227 +2389,227 @@
     "truncated": "Ang unang 500 upstream lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "I-block",
+    "act_challenge": "Hamunin",
+    "act_code": "Status code",
+    "act_denyDefault": "Deny status ng instance",
+    "act_denyShort": "katayuan ng pagtanggi",
+    "act_provider": "Tagapagbigay ng antibot",
+    "act_redirect": "I-redirect",
+    "act_status": "Katayuan ng pagtanggi",
+    "act_terminal": "Isang aksyon lang sa bawat patakaran at tinatapos nito ang pagsusuri — walang true / false na landas palabas ng patakaran.",
+    "act_url": "Patutunguhang URL",
     "action": "Pagkatapos",
     "add_rule": "Magdagdag ng panuntunan",
     "all": "Lahat",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "I-collapse",
+      "combinator": "Baguhin ang combinator, kasalukuyang",
+      "conditionType": "Uri ng kondisyon",
+      "denyStatus": "Katayuan ng pagtanggi",
+      "drag": "I-drag para baguhin ang ayos",
+      "expand": "I-expand",
+      "groupKind": "Uri ng grupo",
+      "more": "Higit pa",
+      "moveDown": "Ilipat pababa — mas huling tatakbo",
+      "moveRule": "Ilipat ang patakaran",
+      "moveUp": "Ilipat pataas — mas maagang tatakbo",
+      "provider": "Tagapagbigay ng antibot",
+      "redirectStatus": "Katayuan ng pag-redirect",
+      "removeCondition": "Alisin ang kondisyon",
+      "removeThreshold": "Alisin ang threshold",
+      "removeThresholdLong": "Alisin ang rate threshold",
+      "removeValue": "Alisin ang value",
+      "requestCount": "Bilang ng mga request",
+      "resourceGroup": "Grupo ng resource",
+      "ruleName": "Pangalan ng patakaran {{n}}",
+      "terminalAction": "Pangwakas na aksyon",
+      "uriMatch": "Mode ng pagtutugma ng URI",
+      "uriValue": "Value ng URI",
+      "window": "Window sa segundo"
     },
     "attach": "Idikit sa mga serbisyo",
     "attach_help": "Ang mga panuntunan ay ipinapatupad lamang sa mga serbisyo kung saan nakakabit ang isang daloy ng trabaho.",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "Sa pag-save, ilalapat ang mga patakarang ito sa {{count}} nakalakip na serbisyo.",
+    "capacity": "{{count}} sa {{maxRules}} patakaran · gumagamit ang pinakamalaking patakaran ng {{worst}} sa {{maxPredicates}} predicate · {{regexes}} regex sa workflow na ito",
     "clone": "Kopyahin ang daloy ng trabaho",
     "clone_help": "Ang mga panuntunan ay kinokopya; ang mga attachment sa serbisyo ay hindi.",
     "clone_name": "Pangalan ng kopya",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "Burahin ang patakarang ito? Aakyat nang isang puwesto ang lahat ng nasa ibaba nito."
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (kopya)",
     "delete": "Burahin ang daloy ng trabaho",
     "delete_confirm": "Ang daloy ng trabaho at lahat ng mga panuntunan nito ay permanenteng tatanggalin.",
     "empty_text": "Ang isang daloy ng trabaho ay isang nakaayos na listahan ng mga panuntunan na ikinakabit sa mga serbisyo: isang puno ng kondisyon, isang opsyon na threshold ng rate, at isang aksyon — hamunin, harangan o i-redirect.",
     "empty_title": "Walang daloy ng trabaho pa",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "Tumatakbo ang mga workflow ayon sa pagkakalakip; ang mga patakaran dito ay tumatakbo mula itaas pababa.",
+    "entry_title": "Bawat request sa nakalakip na serbisyo",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "Hindi ma-save",
+      "saveUnreachable": "Hindi maabot ang endpoint ng pag-save",
+      "validate": "Hindi ma-validate",
+      "validateUnreachable": "Hindi maabot ang endpoint ng validation"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "Walang inilapat — hindi nagbago ang kasalukuyang policy.",
+      "count": "May {{count}} problemang pumipigil sa pag-save.",
+      "rule": "Patakaran {{n}}",
+      "ruleNamed": "Patakaran {{n}} — {{name}}",
+      "whole": "Ang workflow na ito"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "Magpapatuloy ang request sa susunod na nakalakip na workflow, at saka sa natitirang bahagi ng security stack.",
+    "exit_title": "Walang tumugmang patakaran",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "at kapag nakagawa na ang parehong client IP ng higit sa",
+      "chip": "tarangkahan ng pagtugma",
+      "help": "Binibilang sa bawat client IP. Sa ibaba ng threshold, hindi talaga tutugma ang patakaran at magpapatuloy ang pagsusuri sa susunod — hindi ito naglilimita ng rate nang mag-isa."
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "Kapag walang tugma, pumunta sa susunod na patakaran",
+      "gate": "Kinokontrol ng rate threshold ang tugma; hindi ito aksyon",
+      "move": "I-drag, gamitin ang mga arrow, o pindutin ang Alt + ↑ / ↓ para baguhin ang ayos",
+      "stop": "Kapag may tugma, tatakbo ang isang aksyon at titigil"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "walang tugma"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "Patakbuhin sa huli",
+      "delete": "Burahin ang patakaran",
+      "disable": "I-disable ang patakaran",
+      "duplicate": "Kopyahin sa ibaba",
+      "enable": "I-enable ang patakaran",
+      "top": "Patakbuhin muna"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "Patakbuhin muna",
+      "last": "Patakbuhin sa huli"
     },
     "new": "Bagong daloy ng trabaho",
     "no_rules": "Walang panuntunan pa. Magdagdag ng isa upang simulan ang pagbuo ng patakarang ito.",
     "not_attached": "Hindi nakakabit",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "Hindi nakalakip ang workflow na ito sa anumang serbisyo, kaya hindi pa ipinapatupad ang mga patakarang ito kahit saan.",
+    "not_validated": "Hindi pa na-validate",
     "order_help": "Ang mga panuntunan ay sinusuri sa pagkakasunod-sunod at ang unang na tumugma ay mananalo. Ang isang panuntunan na may threshold ng rate ay tumutugma lamang kapag ang threshold ay lumampas, kaya ang isang mas mababang panuntunan ay maaaring mahuli ang trapiko sa ibaba nito.",
     "readonly": "Ang database ay hindi mababago. Maaaring suriin ang mga daloy ng trabaho ngunit hindi mababago.",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "Naka-disable",
+      "if": "Kung",
+      "namePlaceholder": "Pangalan ng patakaran",
+      "noun": "Patakaran",
+      "onMatch": "Kung tumugma",
+      "skipped": "Naka-disable — lubos na nilalaktawan, na parang wala sa listahan.",
+      "stopTail": ", dito titigil ang pagsusuri — hindi na maaabot ang patakaran sa ibaba."
     },
     "rules": "Mga panuntunan",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "Binago ang aksyon sa {{type}}. Ito pa rin ang nag-iisang aksyon at itinitigil pa rin nito ang pagsusuri.",
+      "added": "Idinagdag ang patakaran sa puwestong {{n}} — huli, kaya susuriin muna ang lahat ng patakaran sa itaas.",
+      "deleted": "Binura ang patakaran. {{count}} patakaran ang natitira.",
+      "duplicated": "Ipinasok ang kopya sa puwestong {{n}}. Hindi ito tutugma habang naka-enable ang orihinal sa itaas.",
+      "gateAdded": "Nagdagdag ng rate threshold sa tugma. Sa ibaba nito, hindi tutugma ang patakaran at magpapatuloy ang pagsusuri.",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "Inalis ang huling value — hindi mase-save ang kondisyong ito hangga't wala itong value.",
+      "moved": "Inilipat ang {{name}} sa puwestong {{to}} sa {{total}}{{how}}. Tumatakbo na ito {{where}}.",
+      "predicateCap": "Mayroon nang {{max}} kondisyon ang patakarang ito, ang maximum.",
+      "ruleAbove": "pagkatapos ng patakaran sa itaas",
+      "ruleDisabled": "Naka-disable ang {{name}} — lubos itong nilalaktawan at nakikita na ng mga patakaran sa ibaba ang mga request na iyon.",
+      "ruleEnabled": "Naka-enable ang {{name}} — sinusuri ulit ito sa puwestong {{n}}.",
+      "runsAfter": "pagkatapos ng {{name}}",
+      "runsFirst": "una",
+      "runsLast": "huli",
+      "saved": "Na-save ang mga patakaran at ipinadala sa mga nakalakip na serbisyo.",
+      "theRule": "Ang patakaran",
+      "valuesDropped": "Binago ang kondisyon sa {{type}} — hindi mailipat ang {{count}} value na laman nito.",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "sa pag-drag",
+        "keyboard": "gamit ang keyboard"
       }
     },
     "search": "Maghanap ng pangalan o paglalarawan...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "Iwang blangko para gayahin ang nabigong ASN lookup.",
+      "asn_invalid": "Dapat numero ang ASN",
+      "assume_not_whitelisted": "Ipinapalagay na wala sa whitelist ang client.",
+      "assume_rate_counter": "Input mo ang request number {{request_number}}, hindi ito sukat.",
+      "assume_regex_budget": "Ipinapalagay na hindi pa ubos ang regex budget ng instance.",
+      "assumptions": "Mga palagay",
+      "country": "Bansa",
+      "detail_challenge": "Kukunin ng challenge ang kontrol; tatakbo pa rin ang natitirang security stack.",
+      "detail_detect": "Nasa detect mode ang serbisyong ito, kaya walang aktuwal na ipinapatupad.",
+      "detail_status": "Makikita ng client ang {{status}}.",
+      "failed": "Hindi mapatakbo ang test",
+      "geo": "Paghahanap ng GeoIP",
+      "geo_help": "Kapag unavailable, magiging UNKNOWN ang mga patakaran ng bansa at ASN kaya hindi kailanman tutugma.",
+      "geo_local": "Lokal / pribadong address",
+      "geo_resolved": "Naresolba",
+      "geo_unavailable": "Hindi available ang database",
+      "intro": "Sinusuri nang sunod-sunod ang bawat workflow na nakalakip sa serbisyo, gaya mismo ng gagawin ng instance.",
+      "invalid": "Ayusin muna ang mga problema sa itaas bago mag-test.",
+      "ip": "IP ng client",
+      "method": "Paraan",
+      "number": "Bilang ng request",
+      "number_help": "Ika-N request ng client na ito sa window. Palagay na ibinibigay mo, hindi sukat.",
+      "open": "Subukan ang request",
+      "other_matched": "tumugma rito",
+      "other_no_match": "walang tumugmang patakaran",
+      "other_unreached": "hindi naabot",
+      "other_workflows": "Ibang workflow sa serbisyong ito",
+      "out_draft": "Draft ang serbisyong ito — wala pang workflow na na-compile para rito.",
+      "out_match": "Tumugma ang {{workflow}} · {{rule}} at {{action}} ang request.",
+      "out_no_match": "Walang tumugmang patakaran. Magpapatuloy ang request sa natitirang security stack.",
+      "out_not_attached": "Hindi nakalakip ang workflow na ito sa anumang serbisyo, kaya walang hanay na susuriin.",
+      "out_whitelisted": "Nasa whitelist — nilalaktawan ang buong workflow at walang patakarang sinusuri.",
+      "run": "Patakbuhin ang test",
+      "service": "Serbisyo",
+      "title": "Subukan ang request",
+      "unreachable": "Hindi maabot ang test endpoint",
+      "uri": "Path ng URI",
+      "uri_help": "Path lang — hindi kailanman kasama sa $uri ang query string.",
+      "v_gate": "tugma ang mga kondisyon · sarado ang gate sa {{n}} sa {{count}}",
+      "v_match": "TUMUGMA",
+      "v_unknown": "HINDI ALAM",
+      "v_unknown_help": "Hindi matukoy ang fact na kailangan ng patakarang ito, kaya hindi ito kailanman tutugma.",
+      "whitelisted": "Nasa whitelist ang client na ito"
     },
     "threshold": "Lamang sa itaas ng rate",
     "threshold_count": "Mga kahilingan",
     "threshold_window": "Sa (segundo)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "Kondisyon",
+      "addGroup": "Grupo",
+      "all": "Lahat ng",
+      "allMeta": "{{count}} kondisyon — dapat true ang lahat",
+      "and": "at",
+      "any": "Alinman sa",
+      "anyMeta": "{{count}} kondisyon — dapat true ang kahit isa",
+      "empty": "Walang laman ang grupo — magdagdag ng kondisyon; hindi ito mase-save nang ganito.",
+      "noGroupHolds": "walang grupong naglalaman ng {{kind}} entry",
+      "noneMeta": "tutugma kapag walang true sa mga ito",
+      "not": "Wala sa",
+      "or": "o",
+      "removeGroup": "Alisin ang grupo"
     },
     "truncated": "Ang unang 500 daloy ng trabaho lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta.",
-    "untitled": "Untitled rule",
+    "untitled": "Patakarang walang pamagat",
     "value": {
-      "add": "Value"
+      "add": "Halaga"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "Magpakita ng mas kaunti",
+      "more": "+{{n}} pa"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "ay",
+      "country": "ay",
+      "group": "ay nasa grupo",
+      "ip": "ay nasa",
+      "isIn": "ay nasa",
+      "isOneOf": "ay isa sa",
+      "method": "ay",
+      "uri": "tumutugma sa"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "I-install ang BunkerWeb sa 1+ host",
+      "mfa": "I-activate ang MFA",
+      "pro": "I-activate ang BunkerWeb PRO",
+      "service": "Irehistro ang unang serbisyo"
     },
     "pro_tips": "Mga tip para sa PRO",
-    "title": "Getting started"
+    "title": "Pagsisimula"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
+    "subtitle": "Tagal ng bawat plugin sa bawat yugto ng request, binabasa nang live mula sa lahat ng instance at pinagsasama.",
+    "volatile": "Nasa shared memory ng bawat instance ang mga oras at binabasa kapag kailangan — hindi iniimbak at nare-reset kapag nag-restart ang instance.",
+    "partial": "Hindi sumagot ang ilang instance. Ang mga bilang sa ibaba ay para sa mga sumagot.",
+    "reporting_instances": "Mga instance na nag-uulat",
+    "requests_measured": "Mga request na sinukat",
+    "mean_request": "Karaniwang request",
+    "max_request": "Pinakamabagal na request",
+    "phases": "Mga yugto ng plugin",
+    "share_help": "Ang bahagi ay kabuuang oras ng plugin kumpara sa kabuuang oras ng request. Ang mga yugtong hindi tumatakbo nang isang beses bawat request — pagsisimula ng worker, background timer at internal API — ay walang bahagi at nagpapakita ng gitling.",
     "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "phase": "Yugto",
+    "calls": "Mga tawag",
+    "mean": "Karaniwan",
+    "max": "Pinakamataas",
+    "total": "Kabuuan",
+    "share": "Bahagi",
+    "disabled_title": "Naka-off ang pagsukat ng oras ng plugin",
+    "disabled_help": "Itakda ang METRICS_COLLECT_TIMINGS sa yes para sukatin ang tagal ng bawat plugin. Kinokolekta pa rin ang buong tagal ng request.",
+    "unreachable_title": "Walang instance na nag-ulat ng oras",
+    "unreachable_help": "Binabasa ang mga oras mula sa mga instance mismo, kaya walang sumagot — o wala pang nagserbisyo ng request."
   }
 }

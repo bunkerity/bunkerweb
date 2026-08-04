@@ -5,7 +5,7 @@
     "license_title": "授權",
     "socials": "社群媒體",
     "tagline": "強大保護，化繁為簡",
-    "title": "About BunkerWeb",
+    "title": "關於 BunkerWeb",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
@@ -78,20 +78,20 @@
     "subtitle": "跨您所有 BunkerWeb 實例的封鎖 IP 位址 — 建立、移除或調整封鎖期限。",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "已啟用。",
+        "body_before": "除非另有設定，否則在此建立的封鎖會於執行個體重新啟動時失效",
+        "title": "未持久儲存的編輯。"
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "依原因統計封鎖"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "有效封鎖",
+        "active_caption": "IP + CIDR",
+        "countries": "國家/地區",
+        "expiring": "≤ 1 小時後到期",
+        "expiring_caption": "自動輪替",
+        "permanent": "永久封鎖"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "封鎖",
     "cache": "快取",
     "web_cache": "Web 緩存",
-    "timings": "Timings",
+    "timings": "執行時間",
     "configs": "設定",
     "extra_pages": "附加頁面",
     "global_settings": "全域設定",
-    "global_config": "Global config",
+    "global_config": "全域設定",
     "home": "首頁",
     "instances": "執行個體",
     "jobs": "任務",
@@ -163,7 +163,7 @@
     "filters_suffix": " 過濾器",
     "follow": "追蹤",
     "force_check": "強制檢查",
-    "force_update": "Force update",
+    "force_update": "強制更新",
     "github_stars": "星號",
     "go_back": "返回",
     "hide": "隱藏",
@@ -183,7 +183,7 @@
     "ping": "Ping",
     "plugin_page": "外掛程式頁面",
     "proceed": "繼續",
-    "refresh": "Refresh",
+    "refresh": "重新整理",
     "refresh_recovery_codes": "重新整理復原碼",
     "reload": "重新載入",
     "reset": "重設",
@@ -216,20 +216,20 @@
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
     "wipe_other_sessions": "清除其他工作階段",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "封鎖所有相符報告",
+    "filtered_actions": "篩選後的動作",
+    "unban_all_filtered": "解除所有相符的封鎖",
+    "update_duration_all_filtered": "更新所有相符封鎖的時間",
+    "use_template": "使用範本",
+    "edit": "編輯",
     "verify": "驗證",
-    "view": "View"
+    "view": "檢視"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "檔案",
+    "kpi_per_service": "依服務",
     "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。",
-    "title": "Cache files"
+    "title": "快取檔案"
   },
   "configs": {
     "subtitle": "針對您服務的自定義 NGINX 配置片段 — 建立、編輯和管理 HTTP、ModSecurity 和流層過濾。"
@@ -533,7 +533,7 @@
         "title": "上游"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "主要封鎖原因"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "前 10 名被封鎖的 IP"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "已封鎖",
+        "title": "一段時間內的已封鎖請求（所選範圍）"
       }
     },
     "map": {
@@ -571,13 +571,13 @@
       "title": "儀表板視窗"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "有效封鎖",
+      "jobs": "排程工作",
+      "trend": "已封鎖請求趨勢"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "歡迎回來，{{user}}",
+      "greeting": "歡迎回來，"
     },
     "mini": {
       "across_countries": "在 {{count}} 國家/地區",
@@ -594,12 +594,12 @@
       "vs_prev": "與前次比較"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "所選範圍",
+      "top_ips_sub": "依請求數",
+      "status_sub": "HTTP 回應碼",
+      "reasons_sub": "依觸發規則",
+      "map_sub": "將游標移至上方以查看詳細資料",
+      "blocking_sub": "已封鎖與已允許"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "升級？",
     "use_authenticator_code": "使用驗證碼",
     "use_recovery_code": "使用恢復碼",
-    "get_support": "Get support"
+    "get_support": "取得支援"
   },
   "login": {
     "title": "登入",
@@ -945,25 +945,25 @@
     "showing_some": "顯示 {{shown}} / {{total}}",
     "select_file_prompt": "選擇一個記錄檔案以檢視其內容",
     "trimmed_notice": "--- 為了效能，已移除 {{count}} 筆較舊的日誌行 ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "所有來源（即時）",
+    "collapse": "收合",
+    "expand": "展開",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "所有記錄",
+    "level_errors_only": "僅錯誤",
+    "level_security_only": "僅安全性記錄",
+    "live_title": "即時記錄",
+    "pause": "暫停",
+    "resume": "繼續",
+    "tailing_sources": "正在追蹤 · {{count}} 個來源",
+    "taller": "加高"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
       "confirm_cache_deletion_alert": "您確定要刪除選定的快取檔案嗎？",
       "confirm_cache_deletion_alert_plural": "您確定要刪除選定的快取檔案嗎？",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "確定要轉換所選的自訂組態嗎？",
       "confirm_configs_conversion_to": "確定將所選自訂設定轉換為 {{state}} 嗎？",
       "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
       "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
       "update_duration_alert": "請為選定的封鎖選擇新的期限：",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "要封鎖所有 {{count}} 份相符報告中的 IP 嗎？重複的目標只會套用一次。",
+      "unban_filtered_confirmation": "確定要解除所有 {{count}} 個相符的封鎖嗎？",
+      "update_filtered_duration_alert": "為所有 {{count}} 個相符的封鎖選擇新時間："
     },
     "button": {
       "fetch_global_settings_confirm": "套用全域設定",
@@ -1065,7 +1065,7 @@
     "cache": "快取",
     "certificates": "憑證",
     "web_cache": "Web 緩存",
-    "timings": "Timings",
+    "timings": "執行時間",
     "configs": "設定",
     "extra_pages": "附加頁面",
     "global_settings": "全域設定",
@@ -1088,11 +1088,11 @@
     "services": "服務",
     "support": "支援",
     "templates": "範本",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "總覽",
+    "configure": "設定",
+    "operate": "操作",
+    "system": "系統",
+    "edition_community": "社群版",
     "redirects": "重導向",
     "upstreams": "上游",
     "workflows": "工作流程",
@@ -1141,17 +1141,17 @@
       "show_less": "顯示較少"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "有效",
+      "always_on": "核心/永遠啟用",
+      "disabled": "已停用",
+      "enabled": "已啟用",
+      "inactive": "未啟用",
+      "no_match": "沒有外掛程式符合篩選條件",
+      "search": "搜尋外掛程式...",
+      "tab_all": "全部",
+      "tab_community": "社群版",
+      "tab_disabled": "已停用",
+      "tab_enabled": "已啟用"
     }
   },
   "pro": {
@@ -1172,12 +1172,12 @@
       "unknown": "未知的到期日期"
     },
     "force_check": {
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
-      "title": "Force check"
+      "description": "強制重新檢查 PRO 外掛程式。如有新版本，將重新下載外掛程式。",
+      "title": "強制檢查"
     },
     "force_update": {
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
-      "title": "Force update"
+      "description": "略過檢查並強制下載 PRO 外掛程式。若無法強制執行，會保留目前狀態。",
+      "title": "強制更新"
     },
     "key": {
       "title": {
@@ -1199,7 +1199,7 @@
       "suspended": "已暫停",
       "title": "狀態"
     },
-    "title": "Pro license"
+    "title": "Pro 授權"
   },
   "profile": {
     "2fa": {
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "下載偵錯記錄、提取您的設定，並向 BunkerWeb 團隊尋求協助。",
-    "title": "Support"
+    "title": "支援"
   },
   "tab": {
     "custom_certificate": "自訂憑證",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "可重複使用的服務設定範本 — 包含設定、步驟和自訂設定，然後建立、複製或刪除。",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "刪除所選項目",
+      "empty_message": "建立第一個範本，將設定、步驟和自訂組態整合起來以便重複使用。",
+      "empty_title": "目前沒有範本",
+      "select": "選取",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "高安全性",
+      "low": "低安全性",
+      "medium": "中等安全性",
+      "ui": "Web 介面"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "自訂組態：{{name}}",
+      "feature": "內建功能：{{name}}",
+      "plugin": "外掛程式：{{name}}"
     },
-    "title": "Service templates"
+    "title": "服務範本"
   },
   "theme": {
     "dark": "深色",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "是否自動請求 Let's Encrypt 憑證。",
     "button": {
       "ban_ip": "封鎖此 IP 位址",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "將組態 {{name}} 轉為草稿",
+      "convert_config_to_online": "將組態 {{name}} 轉為上線",
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
       "delete_config": "刪除自訂設定 {{name}}",
@@ -2216,7 +2216,7 @@
     "kinds": "種類",
     "loading_references": "正在載入參考資料...",
     "max_entries": "一個資源群組不能包含超過 {{max}} 個項目。",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} 種類型 · {{values}} 個值 · {{usages}} 次使用",
     "new": "建立新群組",
     "new_alias": "建立新別名",
     "no_entries": "沒有項目",
@@ -2389,227 +2389,227 @@
     "truncated": "僅顯示前 500 個上游。 使用 API 縮小列表以獲得完整結果。"
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "封鎖",
+    "act_challenge": "驗證挑戰",
+    "act_code": "狀態碼",
+    "act_denyDefault": "執行個體的拒絕狀態碼",
+    "act_denyShort": "拒絕狀態碼",
+    "act_provider": "反機器人驗證供應商",
+    "act_redirect": "重新導向",
+    "act_status": "拒絕狀態碼",
+    "act_terminal": "每條規則只能執行一個動作，且會結束評估；規則不會產生真/假分支。",
+    "act_url": "目的地 URL",
     "action": "然後",
     "add_rule": "新增規則",
     "all": "全部",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "收合",
+      "combinator": "變更組合方式，目前為",
+      "conditionType": "條件類型",
+      "denyStatus": "拒絕狀態碼",
+      "drag": "拖曳以重新排序",
+      "expand": "展開",
+      "groupKind": "群組類型",
+      "more": "更多",
+      "moveDown": "下移，稍後執行",
+      "moveRule": "移動規則",
+      "moveUp": "上移，提早執行",
+      "provider": "反機器人驗證供應商",
+      "redirectStatus": "重新導向狀態碼",
+      "removeCondition": "移除條件",
+      "removeThreshold": "移除門檻",
+      "removeThresholdLong": "移除速率門檻",
+      "removeValue": "移除值",
+      "requestCount": "請求數",
+      "resourceGroup": "資源群組",
+      "ruleName": "規則 {{n}} 的名稱",
+      "terminalAction": "終止動作",
+      "uriMatch": "URI 比對模式",
+      "uriValue": "URI 值",
+      "window": "時間範圍（秒）"
     },
     "attach": "連接到服務",
     "attach_help": "規則僅在工作流程連接到的服務上執行。",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "儲存後會將這些規則套用至 {{count}} 個已連結的服務。",
+    "capacity": "共 {{maxRules}} 條規則，已使用 {{count}} 條；最大規則使用 {{maxPredicates}} 個述詞中的 {{worst}} 個；此工作流程包含 {{regexes}} 個規則運算式",
     "clone": "複製工作流程",
     "clone_help": "規則會被複製，但服務連接不會。",
     "clone_name": "複製名稱",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "要刪除此規則嗎？其下方的所有規則都會上移一個位置。"
     },
-    "copySuffix": " (copy)",
+    "copySuffix": "（副本）",
     "delete": "刪除工作流程",
     "delete_confirm": "此工作流程及其所有規則將永久刪除。",
     "empty_text": "工作流程是一個規則的有序列表，您將其連接到服務：一個條件樹、一個可選的速率閾值，以及一個動作 — 挑戰、阻止或重定向。",
     "empty_title": "目前沒有工作流程",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "工作流程依連結順序執行；其中的規則由上而下執行。",
+    "entry_title": "送往已連結服務的每個請求",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "無法儲存",
+      "saveUnreachable": "無法連線至儲存端點",
+      "validate": "無法驗證",
+      "validateUnreachable": "無法連線至驗證端點"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "未套用任何變更，執行中的原則維持不變。",
+      "count": "有 {{count}} 個問題阻止儲存。",
+      "rule": "規則 {{n}}",
+      "ruleNamed": "規則 {{n}} — {{name}}",
+      "whole": "此工作流程"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "請求會繼續進入下一個已連結的工作流程，接著進入安全堆疊的其餘部分。",
+    "exit_title": "沒有規則相符",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "且僅在同一用戶端 IP 的請求數超過",
+      "chip": "比對閘門",
+      "help": "依用戶端 IP 計數。低於門檻時，此規則完全不相符，評估會繼續至下一條規則；它本身不會進行速率限制。"
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "不相符時前往下一條規則",
+      "gate": "速率門檻控制是否相符，它不是動作",
+      "move": "拖曳、使用方向鍵，或按 Alt + ↑ / ↓ 重新排序",
+      "stop": "相符時執行一個動作並停止"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "不相符"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "最後執行",
+      "delete": "刪除規則",
+      "disable": "停用規則",
+      "duplicate": "在下方複製",
+      "enable": "啟用規則",
+      "top": "最先執行"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "最先執行",
+      "last": "最後執行"
     },
     "new": "建立新工作流程",
     "no_rules": "目前沒有規則。添加一個以開始建立此策略。",
     "not_attached": "未連接",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "此工作流程未連結至任何服務，因此這些規則目前不會在任何位置生效。",
+    "not_validated": "尚未驗證",
     "order_help": "規則會按順序評估，且第一個匹配的規則會生效。具有速率閾值的規則只有在閾值超過時才會匹配，因此較低的規則可以捕獲閾值以下的流量。",
     "readonly": "資料庫僅供讀取。可以檢視工作流程，但無法修改。",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "已停用",
+      "if": "如果",
+      "namePlaceholder": "規則名稱",
+      "noun": "規則",
+      "onMatch": "若相符",
+      "skipped": "已停用，會完全略過，就像它不在清單中一樣。",
+      "stopTail": "，評估會在此停止，不會到達下方的規則。"
     },
     "rules": "規則",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
-      "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "actionChanged": "動作已變更為 {{type}}。它仍是唯一動作，且仍會停止評估。",
+      "added": "規則已新增至第 {{n}} 個位置，也就是最後一位，因此會先檢查其上方的所有規則。",
+      "deleted": "規則已刪除。還剩 {{count}} 條規則。",
+      "duplicated": "副本已插入第 {{n}} 個位置。只要上方的原始規則保持啟用，它就永遠不會相符。",
+      "gateAdded": "已為比對加入速率門檻。低於門檻時規則不相符，評估會繼續。",
+      "jumped": "{{where}}：{{message}}",
+      "lastValueRemoved": "最後一個值已移除；此條件必須包含一個值才能儲存。",
+      "moved": "{{name}} 已移至第 {{to}} 個位置，共 {{total}} 個{{how}}。現在它會在{{where}}執行。",
+      "predicateCap": "此規則已有 {{max}} 個條件，已達上限。",
+      "ruleAbove": "上方規則之後",
+      "ruleDisabled": "{{name}} 已停用，會被完全略過，下方規則現在會收到這些請求。",
+      "ruleEnabled": "{{name}} 已啟用，會再次於第 {{n}} 個位置接受評估。",
+      "runsAfter": "{{name}} 之後",
+      "runsFirst": "最先",
+      "runsLast": "最後",
+      "saved": "規則已儲存並推送至已連結的服務。",
+      "theRule": "該規則",
+      "valuesDropped": "條件已變更為 {{type}}；原本的 {{count}} 個值無法保留。",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "透過拖曳",
+        "keyboard": "透過鍵盤"
       }
     },
     "search": "搜尋名稱或描述...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "留空以模擬 ASN 查詢失敗。",
+      "asn_invalid": "ASN 必須是數字",
+      "assume_not_whitelisted": "假設用戶端不在允許清單中。",
+      "assume_rate_counter": "請求編號 {{request_number}} 是輸入值，不是量測結果。",
+      "assume_regex_budget": "假設執行個體的規則運算式額度尚未用盡。",
+      "assumptions": "假設條件",
+      "country": "國家/地區",
+      "detail_challenge": "驗證挑戰會接管處理；安全堆疊的其餘部分仍會執行。",
+      "detail_detect": "此服務處於偵測模式，因此不會實際強制執行任何動作。",
+      "detail_status": "用戶端會看到 {{status}}。",
+      "failed": "無法執行測試",
+      "geo": "GeoIP 查詢",
+      "geo_help": "無法使用時，國家/地區與 ASN 規則會變為「未知」，因此永遠不會相符。",
+      "geo_local": "本機/私人位址",
+      "geo_resolved": "已解析",
+      "geo_unavailable": "資料庫無法使用",
+      "intro": "完全依照執行個體的處理方式，依序評估連結至此服務的每個工作流程。",
+      "invalid": "請先修正上方的問題再進行測試。",
+      "ip": "用戶端 IP",
+      "method": "方法",
+      "number": "請求編號",
+      "number_help": "此用戶端在時間範圍內的第 N 個請求。這是您提供的假設值，不是量測結果。",
+      "open": "測試請求",
+      "other_matched": "在此相符",
+      "other_no_match": "沒有規則相符",
+      "other_unreached": "未到達",
+      "other_workflows": "此服務上的其他工作流程",
+      "out_draft": "此服務是草稿，尚未為其編譯工作流程。",
+      "out_match": "{{workflow}} · {{rule}} 相符，並對請求執行了{{action}}。",
+      "out_no_match": "沒有規則相符。請求會繼續進入安全堆疊的其餘部分。",
+      "out_not_attached": "此工作流程未連結至任何服務，因此沒有可評估的規則階梯。",
+      "out_whitelisted": "已列入允許清單；會略過整個工作流程，且不評估任何規則。",
+      "run": "執行測試",
+      "service": "服務",
+      "title": "測試請求",
+      "unreachable": "無法連線至測試端點",
+      "uri": "URI 路徑",
+      "uri_help": "僅限路徑；$uri 絕不包含查詢字串。",
+      "v_gate": "條件相符；閘門在 {{n}}/{{count}} 時關閉",
+      "v_match": "相符",
+      "v_unknown": "未知",
+      "v_unknown_help": "無法判定此規則需要的資訊，因此它永遠不會相符。",
+      "whitelisted": "此用戶端位於允許清單中"
     },
     "threshold": "僅限於特定速率",
     "threshold_count": "請求",
     "threshold_window": "每 (秒)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "條件",
+      "addGroup": "群組",
+      "all": "全部符合",
+      "allMeta": "{{count}} 個條件，必須全部為真",
+      "and": "且",
+      "any": "任一符合",
+      "anyMeta": "{{count}} 個條件，至少一個必須為真",
+      "empty": "空群組；請新增條件，目前狀態無法儲存。",
+      "noGroupHolds": "沒有群組包含 {{kind}} 個項目",
+      "noneMeta": "這些條件全都不為真時相符",
+      "not": "全部不符合",
+      "or": "或",
+      "removeGroup": "移除群組"
     },
     "truncated": "僅顯示前 500 個工作流程。通過 API 獲取完整結果以縮小列表。",
-    "untitled": "Untitled rule",
+    "untitled": "未命名規則",
     "value": {
-      "add": "Value"
+      "add": "值"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "顯示較少",
+      "more": "另有 {{n}} 個"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "是",
+      "country": "是",
+      "group": "位於群組中",
+      "ip": "位於",
+      "isIn": "位於",
+      "isOneOf": "是下列其中之一",
+      "method": "是",
+      "uri": "符合"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "在 1+ 台主機上安裝 BunkerWeb",
+      "mfa": "啟用 MFA",
+      "pro": "啟用 BunkerWeb PRO",
+      "service": "註冊第一個服務"
     },
     "pro_tips": "PRO 提示",
-    "title": "Getting started"
+    "title": "開始使用"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "每個外掛程式在各個請求階段所需的時間，從所有執行個體即時讀取並合併。",
+    "volatile": "執行時間位於各執行個體的共用記憶體中，並視需要讀取；不會儲存，且執行個體重新啟動時會重設。",
+    "partial": "部分執行個體沒有回應。以下數據僅涵蓋有回應的執行個體。",
+    "reporting_instances": "回報的執行個體",
+    "requests_measured": "已量測的請求",
+    "mean_request": "平均請求時間",
+    "max_request": "最慢的請求",
+    "phases": "外掛程式階段",
+    "share_help": "占比是外掛程式總時間相對於請求總時間的比例。不是每個請求執行一次的階段（worker 啟動、背景計時器和內部 API）沒有占比，並顯示破折號。",
+    "plugin": "外掛程式",
+    "phase": "階段",
+    "calls": "呼叫次數",
+    "mean": "平均",
+    "max": "最大",
+    "total": "總計",
+    "share": "占比",
+    "disabled_title": "外掛程式執行時間已關閉",
+    "disabled_help": "將 METRICS_COLLECT_TIMINGS 設為 yes 以量測每個外掛程式所需的時間。無論如何都會收集完整請求時間。",
+    "unreachable_title": "沒有執行個體回報時間",
+    "unreachable_help": "執行時間是從執行個體本身讀取，因此沒有執行個體回應，或尚未有執行個體處理請求。"
   }
 }

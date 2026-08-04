@@ -5,7 +5,7 @@
     "license_title": "Lisans",
     "socials": "Sosyal Medya",
     "tagline": "Güçlü Koruma, Basitlik",
-    "title": "About BunkerWeb",
+    "title": "BunkerWeb hakkında",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
@@ -78,20 +78,20 @@
     "subtitle": "BunkerWeb örneklerinizdeki engellenmiş IP adresleri — engelleme sürelerini ekleyin, kaldırın veya ayarlayın.",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "etkin.",
+        "body_before": "Burada oluşturulan yasaklar, aksi belirtilmedikçe örnek yeniden başlatıldığında sona erer",
+        "title": "Kalıcı olmayan değişiklikler."
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "Nedene göre yasaklar"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "Etkin yasaklar",
+        "active_caption": "IP'ler + CIDR'ler",
+        "countries": "Ülkeler",
+        "expiring": "≤ 1 saatte sona eren",
+        "expiring_caption": "Otomatik dönüşümlü",
+        "permanent": "Kalıcı yasaklar"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "Yasaklamalar",
     "cache": "Önbellek",
     "web_cache": "Web önbelleği",
-    "timings": "Timings",
+    "timings": "Süreler",
     "configs": "Yapılandırmalar",
     "extra_pages": "Ekstra Sayfalar",
     "global_settings": "Genel Ayarlar",
-    "global_config": "Global config",
+    "global_config": "Genel yapılandırma",
     "home": "Ana Sayfa",
     "instances": "Instanceslar",
     "jobs": "İşler",
@@ -163,7 +163,7 @@
     "filters_suffix": " Filtreler",
     "follow": "Takip Et",
     "force_check": "Zorla kontrol et",
-    "force_update": "Force update",
+    "force_update": "Güncellemeyi zorla",
     "github_stars": "Yıldızlar",
     "go_back": "Geri Dön",
     "hide": "Gizle",
@@ -183,7 +183,7 @@
     "ping": "Ping",
     "plugin_page": "Eklenti Sayfası",
     "proceed": "Devam Et",
-    "refresh": "Refresh",
+    "refresh": "Yenile",
     "refresh_recovery_codes": "Kurtarma Kodlarını Yenile",
     "reload": "Yeniden Yükle",
     "reset": "Sıfırla",
@@ -216,20 +216,20 @@
     "view_details": "Detayları Görüntüle",
     "view_raw_data": "Ham Veriyi Görüntüle",
     "wipe_other_sessions": "Diğer Oturumları Sonlandır",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "Eşleşen tüm raporları yasakla",
+    "filtered_actions": "Filtrelenmiş eylemler",
+    "unban_all_filtered": "Eşleşen tüm yasakları kaldır",
+    "update_duration_all_filtered": "Eşleşen tüm yasakların süresini güncelle",
+    "use_template": "Şablon kullan",
+    "edit": "Düzenle",
     "verify": "Doğrula",
-    "view": "View"
+    "view": "Görüntüle"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "Dosyalar",
+    "kpi_per_service": "Hizmet başına",
     "subtitle": "Planlı işler tarafından oluşturulan önbellek dosyaları (blok listeleri, GeoIP veritabanları ve daha fazlası) — hizmet ve eklenti başına inceleyin, indirin veya silin.",
-    "title": "Cache files"
+    "title": "Önbellek dosyaları"
   },
   "configs": {
     "subtitle": "Hizmetleriniz için özel NGINX yapılandırma parçacıkları — HTTP, ModSecurity ve akış düzeyinde geçersiz kılmalar için oluşturun, düzenleyin ve yönetin."
@@ -533,7 +533,7 @@
         "title": "Yukarı akışlar"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "En sık engelleme nedenleri"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "En Çok Engellenen 10 IP"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "Engellendi",
+        "title": "Zaman içinde engellenen istekler (seçili aralık)"
       }
     },
     "map": {
@@ -571,13 +571,13 @@
       "title": "Panel penceresi"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "Etkin yasaklar",
+      "jobs": "Zamanlanmış işler",
+      "trend": "Engellenen istek eğilimi"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "Tekrar hoş geldiniz, {{user}}",
+      "greeting": "Tekrar hoş geldiniz,"
     },
     "mini": {
       "across_countries": "{{count}} ülkelerinde",
@@ -594,12 +594,12 @@
       "vs_prev": "önceki ile karşılaştır"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "Seçili aralık",
+      "top_ips_sub": "İstek sayısına göre",
+      "status_sub": "HTTP yanıt kodları",
+      "reasons_sub": "Tetikleyen kurala göre",
+      "map_sub": "Ayrıntılar için üzerine gelin",
+      "blocking_sub": "Engellenen ve izin verilen"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "Yükselt?",
     "use_authenticator_code": "Bir kimlik doğrulama kodu kullan",
     "use_recovery_code": "Bir kurtarma kodu kullan",
-    "get_support": "Get support"
+    "get_support": "Destek alın"
   },
   "login": {
     "title": "Giriş Yap",
@@ -945,25 +945,25 @@
     "showing_some": "{{total}} içinden {{shown}} gösteriliyor",
     "select_file_prompt": "İçeriğini görüntülemek için bir günlük dosyasını seçin",
     "trimmed_notice": "--- Performans için {{count}} eski günlük satırı kaldırıldı ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "Tüm kaynaklar (canlı)",
+    "collapse": "Daralt",
+    "expand": "Genişlet",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "Tüm günlükler",
+    "level_errors_only": "Yalnızca hatalar",
+    "level_security_only": "Yalnızca güvenlik",
+    "live_title": "Canlı günlükler",
+    "pause": "Duraklat",
+    "resume": "Sürdür",
+    "tailing_sources": "Takip ediliyor · {{count}} kaynak",
+    "taller": "Daha yüksek"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
       "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
       "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion": "Seçili özel yapılandırmaları dönüştürmek istediğinizden emin misiniz?",
       "confirm_configs_conversion_to": "Seçili özel yapılandırmaları {{state}} olarak dönüştürmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
       "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
       "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "Eşleşen {{count}} raporun tüm IP'leri yasaklansın mı? Yinelenen hedefler bir kez uygulanır.",
+      "unban_filtered_confirmation": "Eşleşen {{count}} yasağın tümünü kaldırmak istediğinizden emin misiniz?",
+      "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni süre seçin:"
     },
     "button": {
       "fetch_global_settings_confirm": "Genel ayarları uygula",
@@ -1065,7 +1065,7 @@
     "cache": "Önbellek",
     "certificates": "Sertifikalar",
     "web_cache": "Web önbelleği",
-    "timings": "Timings",
+    "timings": "Süreler",
     "configs": "Yapılandırmalar",
     "extra_pages": "Ekstra Sayfalar",
     "global_settings": "Genel Ayarlar",
@@ -1088,11 +1088,11 @@
     "services": "Servisler",
     "support": "Destek",
     "templates": "Şablonlar",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "Genel bakış",
+    "configure": "Yapılandır",
+    "operate": "İşlet",
+    "system": "Sistem",
+    "edition_community": "Topluluk",
     "redirects": "Yönlendir",
     "upstreams": "Yukarı akışlar",
     "workflows": "İş akışları",
@@ -1141,17 +1141,17 @@
       "show_less": "Daha az göster"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "Etkin",
+      "always_on": "Çekirdek / her zaman açık",
+      "disabled": "Devre dışı",
+      "enabled": "Etkin",
+      "inactive": "Etkin değil",
+      "no_match": "Filtrelerinizle eşleşen eklenti yok",
+      "search": "Eklenti ara...",
+      "tab_all": "Tümü",
+      "tab_community": "Topluluk",
+      "tab_disabled": "Devre dışı",
+      "tab_enabled": "Etkin"
     }
   },
   "pro": {
@@ -1172,12 +1172,12 @@
       "unknown": "Bilinmeyen bitiş tarihi"
     },
     "force_check": {
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
-      "title": "Force check"
+      "description": "PRO eklentilerini yeniden denetlemeye zorlar. Yeni sürümler varsa eklentiler yeniden indirilir.",
+      "title": "Denetimi zorla"
     },
     "force_update": {
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
-      "title": "Force update"
+      "description": "Denetimleri atlayıp PRO eklentilerini indirmeye zorlar. Bu mümkün değilse mevcut durum korunur.",
+      "title": "Güncellemeyi zorla"
     },
     "key": {
       "title": {
@@ -1199,7 +1199,7 @@
       "suspended": "ASKIYA ALINDI",
       "title": "Durum"
     },
-    "title": "Pro license"
+    "title": "Pro lisansı"
   },
   "profile": {
     "2fa": {
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın.",
-    "title": "Support"
+    "title": "Destek"
   },
   "tab": {
     "custom_certificate": "Özel Sertifika",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin.",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "Seçilenleri sil",
+      "empty_message": "Yeniden kullanmak üzere ayarları, adımları ve özel yapılandırmaları bir araya getiren ilk şablonunuzu oluşturun.",
+      "empty_title": "Henüz şablon yok",
+      "select": "Seç",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "Yüksek güvenlik",
+      "low": "Düşük güvenlik",
+      "medium": "Orta güvenlik",
+      "ui": "Web arayüzü"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "Özel yapılandırma: {{name}}",
+      "feature": "Yerleşik özellik: {{name}}",
+      "plugin": "Eklenti: {{name}}"
     },
-    "title": "Service templates"
+    "title": "Hizmet şablonları"
   },
   "theme": {
     "dark": "Koyu",
@@ -1823,8 +1823,8 @@
     "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
     "button": {
       "ban_ip": "Bu IP adresini yasakla",
-      "convert_config_to_draft": "Convert Config {{name}} to Draft",
-      "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_config_to_draft": "{{name}} yapılandırmasını taslağa dönüştür",
+      "convert_config_to_online": "{{name}} yapılandırmasını çevrimiçi yap",
       "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
       "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
@@ -2216,7 +2216,7 @@
     "kinds": "Türler",
     "loading_references": "Referanslar yükleniyor...",
     "max_entries": "Bir kaynak grubu {{max}} girdiden fazla içermemelidir.",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "{{kinds}} tür · {{values}} değer · {{usages}} kullanım",
     "new": "Yeni grup",
     "new_alias": "Yeni kısaltma",
     "no_entries": "Girdiler yok",
@@ -2389,227 +2389,227 @@
     "truncated": "Sadece ilk 500 ana sunucu görüntülenir. Tam sonucu elde etmek için API ile listeyi daraltın."
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "Engelle",
+    "act_challenge": "Doğrulama",
+    "act_code": "Durum",
+    "act_denyDefault": "Örneğin reddetme durumu",
+    "act_denyShort": "reddetme durumu",
+    "act_provider": "Antibot sağlayıcısı",
+    "act_redirect": "Yönlendir",
+    "act_status": "Reddetme durumu",
+    "act_terminal": "Her kuralda tek bir eylem vardır ve bu eylem değerlendirmeyi sonlandırır; kuraldan doğru/yanlış yolu çıkmaz.",
+    "act_url": "Hedef URL",
     "action": "Sonra",
     "add_rule": "Kural ekle",
     "all": "Tümü",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "Daralt",
+      "combinator": "Birleştiriciyi değiştir, şu anda",
+      "conditionType": "Koşul türü",
+      "denyStatus": "Reddetme durumu",
+      "drag": "Yeniden sıralamak için sürükle",
+      "expand": "Genişlet",
+      "groupKind": "Grup türü",
+      "more": "Daha fazla",
+      "moveDown": "Aşağı taşı — daha sonra çalışır",
+      "moveRule": "Kuralı taşı",
+      "moveUp": "Yukarı taşı — daha önce çalışır",
+      "provider": "Antibot sağlayıcısı",
+      "redirectStatus": "Yönlendirme durumu",
+      "removeCondition": "Koşulu kaldır",
+      "removeThreshold": "Eşiği kaldır",
+      "removeThresholdLong": "Hız eşiğini kaldır",
+      "removeValue": "Değeri kaldır",
+      "requestCount": "İstek sayısı",
+      "resourceGroup": "Kaynak grubu",
+      "ruleName": "{{n}} numaralı kuralın adı",
+      "terminalAction": "Sonlandırıcı eylem",
+      "uriMatch": "URI eşleşme modu",
+      "uriValue": "URI değeri",
+      "window": "Saniye cinsinden pencere"
     },
     "attach": "Hizmetlere ekle",
     "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "Kaydetme işlemi bu kuralları bağlı {{count}} hizmete uygular.",
+    "capacity": "{{maxRules}} kuraldan {{count}} tanesi · en büyük kural {{maxPredicates}} yüklemden {{worst}} tanesini kullanıyor · bu iş akışında {{regexes}} düzenli ifade var",
     "clone": "İş akışını kopyala",
     "clone_help": "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz.",
     "clone_name": "Kopyanın adı",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "Bu kural silinsin mi? Altındaki tüm kurallar bir konum yukarı taşınır."
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (kopya)",
     "delete": "İş akışını sil",
     "delete_confirm": "Bu iş akışı ve tüm kuralları kalıcı olarak silinir.",
     "empty_text": "Bir iş akışı, hizmetlere eklediğiniz kuralların sıralı bir listesidir: bir koşul ağacı, isteğe bağlı bir hız eşiği ve bir eylem — meydan okuma, engelle veya yönlendirme.",
     "empty_title": "Henüz hiç iş akışı yok",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "İş akışları bağlanma sırasına göre, içlerindeki kurallar ise yukarıdan aşağıya çalışır.",
+    "entry_title": "Bağlı bir hizmete gelen her istek",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "Kaydedilemedi",
+      "saveUnreachable": "Kaydetme uç noktasına ulaşılamadı",
+      "validate": "Doğrulanamadı",
+      "validateUnreachable": "Doğrulama uç noktasına ulaşılamadı"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "Hiçbir şey uygulanmaz; çalışan politika değişmeden kalır.",
+      "count": "{{count}} sorun kaydetmeyi engelliyor.",
+      "rule": "Kural {{n}}",
+      "ruleNamed": "Kural {{n}} — {{name}}",
+      "whole": "Bu iş akışı"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "İstek bir sonraki bağlı iş akışına, ardından güvenlik yığınının geri kalanına devam eder.",
+    "exit_title": "Hiçbir kural eşleşmedi",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "ve yalnızca aynı istemci IP'si şundan fazla istekte bulunduğunda",
+      "chip": "eşleşme eşiği",
+      "help": "Her istemci IP'si için ayrı sayılır. Eşiğin altında bu kural eşleşmez ve değerlendirme sonraki kuralla devam eder; tek başına hiçbir zaman hız sınırlaması yapmaz."
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "Eşleşme yoksa sonraki kurala geçilir",
+      "gate": "Hız eşiği eşleşmeyi koşullandırır; bir eylem değildir",
+      "move": "Yeniden sıralamak için sürükleyin, okları kullanın veya Alt + ↑ / ↓ tuşlarına basın",
+      "stop": "Eşleşme tek bir eylem çalıştırır ve durur"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "eşleşme yok"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "En son çalıştır",
+      "delete": "Kuralı sil",
+      "disable": "Kuralı devre dışı bırak",
+      "duplicate": "Altına çoğalt",
+      "enable": "Kuralı etkinleştir",
+      "top": "İlk çalıştır"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "İlk çalıştır",
+      "last": "En son çalıştır"
     },
     "new": "Yeni iş akışı",
     "no_rules": "Henüz hiç kural yok. Bu politikayı oluşturmaya başlamak için bir tane ekleyin.",
     "not_attached": "Eklendi değil",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle kuralları henüz hiçbir yerde uygulanmıyor.",
+    "not_validated": "Henüz doğrulanmadı",
     "order_help": "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir.",
     "readonly": "Veritabanı okumak için yalnızcadır. İş akışları incelenebilir, ancak değiştirilemez.",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "Devre dışı",
+      "if": "Eğer",
+      "namePlaceholder": "Kural adı",
+      "noun": "Kural",
+      "onMatch": "Eşleşirse",
+      "skipped": "Devre dışı — listede yokmuş gibi tamamen atlanır.",
+      "stopTail": ", değerlendirme burada durur; altındaki hiçbir kurala ulaşılmaz."
     },
     "rules": "Kurallar",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "Eylem {{type}} olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder.",
+      "added": "Kural {{n}} konumuna, en sona eklendi; bu nedenle üstündeki tüm kurallar önce denetlenir.",
+      "deleted": "Kural silindi. {{count}} kural kaldı.",
+      "duplicated": "Kopya {{n}} konumuna eklendi. Üstündeki özgün kural etkin olduğu sürece hiçbir zaman eşleşemez.",
+      "gateAdded": "Eşleşmeye hız eşiği eklendi. Eşiğin altında kural eşleşmez ve değerlendirme devam eder.",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "Son değer kaldırıldı — bu koşul bir değer içermeden kaydedilemez.",
+      "moved": "{{name}}, {{total}} konumdan {{to}} konumuna taşındı{{how}}. Artık {{where}} çalışır.",
+      "predicateCap": "Bu kural zaten en fazla {{max}} koşul içeriyor.",
+      "ruleAbove": "üstteki kural",
+      "ruleDisabled": "{{name}} devre dışı bırakıldı — tamamen atlanır ve altındaki kurallar artık bu istekleri görür.",
+      "ruleEnabled": "{{name}} etkinleştirildi — {{n}} konumunda yeniden değerlendirilir.",
+      "runsAfter": "{{name}} sonrasında",
+      "runsFirst": "ilk",
+      "runsLast": "son",
+      "saved": "Kurallar kaydedildi ve bağlı hizmetlere gönderildi.",
+      "theRule": "Kural",
+      "valuesDropped": "Koşul {{type}} olarak değiştirildi — içerdiği {{count}} değer aktarılamadı.",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "sürükleyerek",
+        "keyboard": "klavyeyle"
       }
     },
     "search": "Ad veya açıklama arayın...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "Başarısız bir ASN sorgusunu benzetmek için boş bırakın.",
+      "asn_invalid": "ASN bir sayı olmalıdır",
+      "assume_not_whitelisted": "İstemcinin izin listesinde olmadığını varsayar.",
+      "assume_rate_counter": "{{request_number}} istek numarası bir ölçüm değil, sizin girdinizdir.",
+      "assume_regex_budget": "Örneğin düzenli ifade bütçesinin tükenmediğini varsayar.",
+      "assumptions": "Varsayımlar",
+      "country": "Ülke",
+      "detail_challenge": "Doğrulama denetimi devralır; güvenlik yığınının geri kalanı çalışmaya devam eder.",
+      "detail_detect": "Bu hizmet algılama modunda olduğundan gerçekte hiçbir şey uygulanmaz.",
+      "detail_status": "İstemci {{status}} durumunu görür.",
+      "failed": "Test çalıştırılamadı",
+      "geo": "GeoIP sorgusu",
+      "geo_help": "Kullanılamaz durumu, ülke ve ASN kurallarını BİLİNMİYOR yapar; bu yüzden hiçbir zaman eşleşemezler.",
+      "geo_local": "Yerel / özel adres",
+      "geo_resolved": "Çözümlendi",
+      "geo_unavailable": "Veritabanı kullanılamıyor",
+      "intro": "Hizmete bağlı her iş akışını sırayla, örneğin yaptığı biçimde değerlendirir.",
+      "invalid": "Test etmeden önce yukarıdaki sorunları düzeltin.",
+      "ip": "İstemci IP'si",
+      "method": "Yöntem",
+      "number": "İstek numarası",
+      "number_help": "Bu istemcinin penceredeki N'inci isteği. Sizin sağladığınız bir varsayım, ölçüm değil.",
+      "open": "Bir isteği test et",
+      "other_matched": "burada eşleşti",
+      "other_no_match": "hiçbir kural eşleşmedi",
+      "other_unreached": "ulaşılmadı",
+      "other_workflows": "Bu hizmetteki diğer iş akışları",
+      "out_draft": "Bu hizmet taslak durumunda — henüz onun için bir iş akışı derlenmedi.",
+      "out_match": "{{workflow}} · {{rule}} eşleşti ve isteği {{action}}.",
+      "out_no_match": "Hiçbir kural eşleşmedi. İstek güvenlik yığınının geri kalanına devam eder.",
+      "out_not_attached": "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle değerlendirilecek bir kural sırası yok.",
+      "out_whitelisted": "İzin listesinde — tüm iş akışı atlanır ve hiçbir kural değerlendirilmez.",
+      "run": "Testi çalıştır",
+      "service": "Hizmet",
+      "title": "Bir isteği test et",
+      "unreachable": "Test uç noktasına ulaşılamadı",
+      "uri": "URI yolu",
+      "uri_help": "Yalnızca yol — $uri hiçbir zaman sorgu dizesi içermez.",
+      "v_gate": "koşullar eşleşiyor · eşik {{count}} isteğin {{n}} tanesinde kapalı",
+      "v_match": "EŞLEŞTİ",
+      "v_unknown": "BİLİNMİYOR",
+      "v_unknown_help": "Bu kuralın gerektirdiği bir bilgi belirlenemedi; bu nedenle kural hiçbir zaman eşleşemez.",
+      "whitelisted": "Bu istemci izin listesinde"
     },
     "threshold": "Sadece bir hızın üzerinde",
     "threshold_count": "İstekler",
     "threshold_window": "Her (saniye)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "Koşul",
+      "addGroup": "Grup",
+      "all": "Tümü",
+      "allMeta": "{{count}} koşul — tümü doğru olmalıdır",
+      "and": "ve",
+      "any": "Herhangi biri",
+      "anyMeta": "{{count}} koşul — en az biri doğru olmalıdır",
+      "empty": "Boş grup — bir koşul ekleyin; bu hâliyle kaydedilemez.",
+      "noGroupHolds": "hiçbir grup {{kind}} girdisi içermiyor",
+      "noneMeta": "bunların hiçbiri doğru olmadığında eşleşir",
+      "not": "Hiçbiri",
+      "or": "veya",
+      "removeGroup": "Grubu kaldır"
     },
     "truncated": "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için API'i kullanın.",
-    "untitled": "Untitled rule",
+    "untitled": "Adsız kural",
     "value": {
-      "add": "Value"
+      "add": "Değer"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "Daha az göster",
+      "more": "+{{n}} daha"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "şudur",
+      "country": "şudur",
+      "group": "gruptadır",
+      "ip": "şunun içindedir",
+      "isIn": "şunun içindedir",
+      "isOneOf": "şunlardan biridir",
+      "method": "şudur",
+      "uri": "ile eşleşir"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "BunkerWeb'i 1+ ana makineye kurun",
+      "mfa": "MFA'yı etkinleştir",
+      "pro": "BunkerWeb PRO'yu etkinleştir",
+      "service": "İlk hizmetinizi kaydedin"
     },
     "pro_tips": "PRO ipuçları",
-    "title": "Getting started"
+    "title": "Başlarken"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "Her eklentinin her istek aşamasında harcadığı süre, tüm örneklerden canlı okunup birleştirilir.",
+    "volatile": "Süreler her örneğin paylaşımlı belleğinde tutulur ve istek üzerine okunur — saklanmaz ve örnek yeniden başlatıldığında sıfırlanır.",
+    "partial": "Bazı örnekler yanıt vermedi. Aşağıdaki rakamlar yanıt verenleri kapsar.",
+    "reporting_instances": "Raporlayan örnekler",
+    "requests_measured": "Ölçülen istekler",
+    "mean_request": "Ortalama istek",
+    "max_request": "En yavaş istek",
+    "phases": "Eklenti aşamaları",
+    "share_help": "Pay, eklentinin toplam süresinin toplam istek süresine oranıdır. İstek başına bir kez çalışmayan aşamaların — worker başlatma, arka plan zamanlayıcısı ve dahili API — payı yoktur ve çizgi gösterilir.",
+    "plugin": "Eklenti",
+    "phase": "Aşama",
+    "calls": "Çağrılar",
+    "mean": "Ortalama",
+    "max": "En fazla",
+    "total": "Toplam",
+    "share": "Pay",
+    "disabled_title": "Eklenti süreleri kapalı",
+    "disabled_help": "Her eklentinin süresini ölçmek için METRICS_COLLECT_TIMINGS değerini yes yapın. İsteğin toplam süresi her durumda toplanır.",
+    "unreachable_title": "Hiçbir örnek süre bildirmedi",
+    "unreachable_help": "Süreler örneklerin kendisinden okunur; dolayısıyla hiçbiri yanıt vermedi — ya da henüz hiçbiri bir istek sunmadı."
   }
 }

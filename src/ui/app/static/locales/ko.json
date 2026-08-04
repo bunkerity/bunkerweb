@@ -5,7 +5,7 @@
     "license_title": "라이선스",
     "socials": "소셜 미디어",
     "tagline": "단순함 속에 담긴 강력한 보안",
-    "title": "About BunkerWeb",
+    "title": "BunkerWeb 정보",
     "social": {
       "discord": "디스코드",
       "instagram": "인스타그램",
@@ -78,20 +78,20 @@
     "subtitle": "BunkerWeb 인스턴스 전반에 걸쳐 차단된 IP 주소 — 차단 기간을 추가, 제거 또는 조정합니다.",
     "stats": {
       "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
+        "body_after": "활성화되어 있습니다.",
+        "body_before": "여기서 만든 차단은 다음 설정이 없는 한 인스턴스를 다시 시작할 때 만료됩니다",
+        "title": "영구 저장되지 않은 편집."
       },
       "card": {
-        "by_reason": "Bans by reason"
+        "by_reason": "사유별 차단"
       },
       "tile": {
-        "active": "Active bans",
-        "active_caption": "IPs + CIDRs",
-        "countries": "Countries",
-        "expiring": "Expiring ≤ 1 h",
-        "expiring_caption": "Auto-rotating",
-        "permanent": "Permanent bans"
+        "active": "활성 차단",
+        "active_caption": "IP + CIDR",
+        "countries": "국가",
+        "expiring": "≤ 1시간 후 만료",
+        "expiring_caption": "자동 순환",
+        "permanent": "영구 차단"
       }
     }
   },
@@ -100,11 +100,11 @@
     "bans": "차단 목록",
     "cache": "캐시",
     "web_cache": "웹 캐시",
-    "timings": "Timings",
+    "timings": "처리 시간",
     "configs": "설정",
     "extra_pages": "추가 페이지",
     "global_settings": "전역 설정",
-    "global_config": "Global config",
+    "global_config": "전역 구성",
     "home": "홈",
     "instances": "인스턴스",
     "jobs": "작업",
@@ -183,7 +183,7 @@
     "ping": "핑(Ping)",
     "plugin_page": "플러그인 페이지",
     "proceed": "계속",
-    "refresh": "Refresh",
+    "refresh": "새로 고침",
     "refresh_recovery_codes": "복구 코드 갱신",
     "reload": "새로고침",
     "reset": "초기화",
@@ -216,20 +216,20 @@
     "view_details": "상세 보기",
     "view_raw_data": "원본 데이터 보기",
     "wipe_other_sessions": "다른 세션 로그아웃",
-    "ban_all_filtered": "Ban all matching reports",
-    "filtered_actions": "Filtered actions",
-    "unban_all_filtered": "Unban all matching bans",
-    "update_duration_all_filtered": "Update duration for all matching bans",
-    "use_template": "Use template",
-    "edit": "Edit",
+    "ban_all_filtered": "일치하는 모든 보고서 차단",
+    "filtered_actions": "필터링된 작업",
+    "unban_all_filtered": "일치하는 모든 차단 해제",
+    "update_duration_all_filtered": "일치하는 모든 차단 기간 변경",
+    "use_template": "템플릿 사용",
+    "edit": "편집",
     "verify": "확인",
-    "view": "View"
+    "view": "보기"
   },
   "cache": {
-    "kpi_files": "Files",
-    "kpi_per_service": "Per-service",
+    "kpi_files": "파일",
+    "kpi_per_service": "서비스별",
     "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다.",
-    "title": "Cache files"
+    "title": "캐시 파일"
   },
   "configs": {
     "subtitle": "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다."
@@ -533,7 +533,7 @@
         "title": "상위 시스템"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "주요 차단 사유"
       }
     },
     "chart": {
@@ -556,8 +556,8 @@
         "title": "최다 차단 IP Top 10"
       },
       "timeseries": {
-        "series": "Blocked",
-        "title": "Blocked requests over time (selected range)"
+        "series": "차단됨",
+        "title": "시간별 차단 요청(선택 범위)"
       }
     },
     "map": {
@@ -571,13 +571,13 @@
       "title": "대시보드 창"
     },
     "tile": {
-      "bans_active": "Bans active",
-      "jobs": "Scheduled jobs",
-      "trend": "Blocked requests trend"
+      "bans_active": "활성 차단",
+      "jobs": "예약 작업",
+      "trend": "차단 요청 추세"
     },
     "welcome": {
-      "title": "Welcome back, {{user}}",
-      "greeting": "Welcome back,"
+      "title": "다시 오신 것을 환영합니다, {{user}}",
+      "greeting": "다시 오신 것을 환영합니다,"
     },
     "mini": {
       "across_countries": "{{count}} 국가를 통해",
@@ -594,12 +594,12 @@
       "vs_prev": "이전과 비교"
     },
     "panel": {
-      "timeseries_sub": "Selected range",
-      "top_ips_sub": "By request count",
-      "status_sub": "HTTP response codes",
-      "reasons_sub": "By trigger rule",
-      "map_sub": "Hover for details",
-      "blocking_sub": "Blocked vs allowed"
+      "timeseries_sub": "선택 범위",
+      "top_ips_sub": "요청 수 기준",
+      "status_sub": "HTTP 응답 코드",
+      "reasons_sub": "트리거 규칙 기준",
+      "map_sub": "자세한 내용을 보려면 마우스를 올리세요",
+      "blocking_sub": "차단됨과 허용됨"
     }
   },
   "datatable": {
@@ -916,7 +916,7 @@
     "upgrade": "업그레이드하시겠습니까?",
     "use_authenticator_code": "인증 코드 사용",
     "use_recovery_code": "복구 코드 사용",
-    "get_support": "Get support"
+    "get_support": "지원 받기"
   },
   "login": {
     "title": "로그인",
@@ -945,18 +945,18 @@
     "showing_some": "{{total}}개 중 {{shown}}개 표시",
     "select_file_prompt": "로그 파일 선택하여 내용을 보기",
     "trimmed_notice": "--- 성능을 위해 {{count}}개의 오래된 로그 라인을 제거했습니다 ---",
-    "all_sources": "All sources (live)",
-    "collapse": "Collapse",
-    "expand": "Expand",
+    "all_sources": "모든 소스(실시간)",
+    "collapse": "접기",
+    "expand": "펼치기",
     "grep_placeholder": "grep…",
-    "level_all": "All logs",
-    "level_errors_only": "Errors only",
-    "level_security_only": "Security only",
-    "live_title": "Live logs",
-    "pause": "Pause",
-    "resume": "Resume",
-    "tailing_sources": "Tailing · {{count}} sources",
-    "taller": "Taller"
+    "level_all": "모든 로그",
+    "level_errors_only": "오류만",
+    "level_security_only": "보안만",
+    "live_title": "실시간 로그",
+    "pause": "일시 정지",
+    "resume": "재개",
+    "tailing_sources": "추적 중 · 소스 {{count}}개",
+    "taller": "더 높게"
   },
   "modal": {
     "body": {
@@ -1000,9 +1000,9 @@
       "unban_confirmation_alert": "선택한 IP 주소의 차단을 해제하시겠습니까?",
       "unban_confirmation_alert_plural": "선택한 IP 주소들의 차단을 해제하시겠습니까?",
       "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
-      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
-      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "ban_filtered_confirmation": "일치하는 보고서 {{count}}개의 IP를 모두 차단하시겠습니까? 중복 대상은 한 번만 적용됩니다.",
+      "unban_filtered_confirmation": "일치하는 차단 {{count}}개를 모두 해제하시겠습니까?",
+      "update_filtered_duration_alert": "일치하는 차단 {{count}}개의 새 기간을 선택하세요:"
     },
     "button": {
       "fetch_global_settings_confirm": "전역 설정 적용",
@@ -1065,7 +1065,7 @@
     "cache": "캐시",
     "certificates": "인증서",
     "web_cache": "웹 캐시",
-    "timings": "Timings",
+    "timings": "처리 시간",
     "configs": "설정",
     "extra_pages": "추가 페이지",
     "global_settings": "전역 설정",
@@ -1088,11 +1088,11 @@
     "services": "서비스",
     "support": "지원",
     "templates": "템플릿",
-    "overview": "Overview",
-    "configure": "Configure",
-    "operate": "Operate",
-    "system": "System",
-    "edition_community": "Community",
+    "overview": "개요",
+    "configure": "구성",
+    "operate": "운영",
+    "system": "시스템",
+    "edition_community": "커뮤니티",
     "redirects": "리디렉션",
     "upstreams": "업스트림",
     "workflows": "워크플로우",
@@ -1141,17 +1141,17 @@
       "show_less": "덜 표시"
     },
     "marketplace": {
-      "active": "Active",
-      "always_on": "Core / always on",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
-      "inactive": "Inactive",
-      "no_match": "No plugins match your filters",
-      "search": "Search plugins...",
-      "tab_all": "All",
-      "tab_community": "Community",
-      "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "active": "활성",
+      "always_on": "핵심 / 항상 켜짐",
+      "disabled": "비활성화됨",
+      "enabled": "활성화됨",
+      "inactive": "비활성",
+      "no_match": "필터와 일치하는 플러그인이 없음",
+      "search": "플러그인 검색...",
+      "tab_all": "전체",
+      "tab_community": "커뮤니티",
+      "tab_disabled": "비활성화됨",
+      "tab_enabled": "활성화됨"
     }
   },
   "pro": {
@@ -1199,7 +1199,7 @@
       "suspended": "일시 정지됨",
       "title": "상태"
     },
-    "title": "Pro license"
+    "title": "Pro 라이선스"
   },
   "profile": {
     "2fa": {
@@ -1394,8 +1394,8 @@
     "zero": "없음"
   },
   "security_mode": {
-    "block": "Block",
-    "detect": "Detect"
+    "block": "차단",
+    "detect": "탐지"
   },
   "services": {
     "draft": "초안 서비스",
@@ -1550,7 +1550,7 @@
       }
     },
     "subtitle": "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요.",
-    "title": "Support"
+    "title": "지원"
   },
   "tab": {
     "custom_certificate": "사용자 정의 인증서",
@@ -1776,25 +1776,25 @@
   "templates": {
     "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다.",
     "gallery": {
-      "delete_selected": "Delete selected",
-      "empty_message": "Create your first template to bundle settings, steps and custom configs for reuse.",
-      "empty_title": "No templates yet",
-      "select": "Select",
+      "delete_selected": "선택 항목 삭제",
+      "empty_message": "설정, 단계, 사용자 지정 구성을 묶어 재사용할 첫 템플릿을 만드세요.",
+      "empty_title": "아직 템플릿 없음",
+      "select": "선택",
       "svc_suffix": "svc"
     },
     "name": {
       "api": "API",
-      "high": "High security",
-      "low": "Low security",
-      "medium": "Medium security",
-      "ui": "Web UI"
+      "high": "높은 보안",
+      "low": "낮은 보안",
+      "medium": "중간 보안",
+      "ui": "웹 UI"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
-      "feature": "Built-in feature: {{name}}",
-      "plugin": "Plugin: {{name}}"
+      "config": "사용자 지정 구성: {{name}}",
+      "feature": "기본 제공 기능: {{name}}",
+      "plugin": "플러그인: {{name}}"
     },
-    "title": "Service templates"
+    "title": "서비스 템플릿"
   },
   "theme": {
     "dark": "어둡게",
@@ -2048,7 +2048,7 @@
         "last_update": "서비스 마지막 업데이트 날짜 및 시간",
         "method": "서비스 생성 방식 (예: ui, file)",
         "name": "서비스 이름",
-        "security_mode": "The Service's security mode (Block or Detect)",
+        "security_mode": "서비스의 보안 모드(차단 또는 탐지)",
         "select_all": "모든 서비스 선택",
         "template": "서비스에서 사용하는 템플릿",
         "type": "서비스 유형 (온라인/초안)"
@@ -2216,7 +2216,7 @@
     "kinds": "종류",
     "loading_references": "참조 로딩 중...",
     "max_entries": "리소스 그룹은 {{max}}개 항목 이상을 포함할 수 없습니다.",
-    "meta_line": "{{kinds}} kinds · {{values}} values · {{usages}} usages",
+    "meta_line": "유형 {{kinds}}개 · 값 {{values}}개 · 사용 {{usages}}회",
     "new": "새 그룹",
     "new_alias": "새 별칭",
     "no_entries": "항목 없음",
@@ -2389,227 +2389,227 @@
     "truncated": "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다."
   },
   "workflows": {
-    "act_block": "Block",
-    "act_challenge": "Challenge",
-    "act_code": "Status",
-    "act_denyDefault": "The instance's deny status",
-    "act_denyShort": "deny status",
-    "act_provider": "Antibot provider",
-    "act_redirect": "Redirect",
-    "act_status": "Deny status",
-    "act_terminal": "One action per rule, and it ends evaluation — there is no true / false path out of a rule.",
-    "act_url": "Destination URL",
+    "act_block": "차단",
+    "act_challenge": "챌린지",
+    "act_code": "상태 코드",
+    "act_denyDefault": "인스턴스의 거부 상태 코드",
+    "act_denyShort": "거부 상태 코드",
+    "act_provider": "안티봇 제공자",
+    "act_redirect": "리디렉션",
+    "act_status": "거부 상태 코드",
+    "act_terminal": "규칙마다 하나의 작업만 실행하며 평가가 종료됩니다. 규칙에서 참/거짓 경로로 분기하지 않습니다.",
+    "act_url": "대상 URL",
     "action": "그 후",
     "add_rule": "규칙 추가",
     "all": "전체",
     "aria": {
-      "collapse": "Collapse",
-      "combinator": "Change combinator, currently",
-      "conditionType": "Condition type",
-      "denyStatus": "Deny status",
-      "drag": "Drag to reorder",
-      "expand": "Expand",
-      "groupKind": "Group kind",
-      "more": "More",
-      "moveDown": "Move down — runs later",
-      "moveRule": "Move rule",
-      "moveUp": "Move up — runs earlier",
-      "provider": "Antibot provider",
-      "redirectStatus": "Redirect status",
-      "removeCondition": "Remove condition",
-      "removeThreshold": "Remove threshold",
-      "removeThresholdLong": "Remove rate threshold",
-      "removeValue": "Remove value",
-      "requestCount": "Request count",
-      "resourceGroup": "Resource group",
-      "ruleName": "Name of rule {{n}}",
-      "terminalAction": "Terminal action",
-      "uriMatch": "URI match mode",
-      "uriValue": "URI value",
-      "window": "Window in seconds"
+      "collapse": "접기",
+      "combinator": "조합 연산자 변경, 현재",
+      "conditionType": "조건 유형",
+      "denyStatus": "거부 상태 코드",
+      "drag": "드래그하여 순서 변경",
+      "expand": "펼치기",
+      "groupKind": "그룹 유형",
+      "more": "더 보기",
+      "moveDown": "아래로 이동 — 나중에 실행",
+      "moveRule": "규칙 이동",
+      "moveUp": "위로 이동 — 먼저 실행",
+      "provider": "안티봇 제공자",
+      "redirectStatus": "리디렉션 상태 코드",
+      "removeCondition": "조건 제거",
+      "removeThreshold": "임계값 제거",
+      "removeThresholdLong": "요청률 임계값 제거",
+      "removeValue": "값 제거",
+      "requestCount": "요청 수",
+      "resourceGroup": "리소스 그룹",
+      "ruleName": "규칙 {{n}} 이름",
+      "terminalAction": "종료 작업",
+      "uriMatch": "URI 일치 모드",
+      "uriValue": "URI 값",
+      "window": "시간 범위(초)"
     },
     "attach": "서비스에 연결",
     "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "attached_notice": "저장하면 이 규칙이 연결된 서비스 {{count}}개에 적용됩니다.",
+    "capacity": "규칙 {{count}}/{{maxRules}}개 · 가장 큰 규칙은 조건식 {{worst}}/{{maxPredicates}}개 사용 · 이 워크플로의 정규식 {{regexes}}개",
     "clone": "워크플로우 복제",
     "clone_help": "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다.",
     "clone_name": "복제 이름",
     "confirm": {
-      "deleteRule": "Delete this rule? Everything below it moves up one position."
+      "deleteRule": "이 규칙을 삭제하시겠습니까? 아래의 모든 규칙이 한 칸씩 위로 이동합니다."
     },
-    "copySuffix": " (copy)",
+    "copySuffix": " (사본)",
     "delete": "워크플로우 삭제",
     "delete_confirm": "이 워크플로우와 모든 규칙이 영구적으로 삭제됩니다.",
     "empty_text": "워크플로우는 서비스에 연결한 규칙의 순서대로 정렬된 목록입니다: 조건 트리, 선택적 속도 임계값, 그리고 하나의 동작 — 도전, 차단 또는 리디렉션.",
     "empty_title": "워크플로우는 아직 없습니다",
-    "entry_sub": "Workflows run in attachment order; rules inside this one run top to bottom.",
-    "entry_title": "Every request to an attached service",
+    "entry_sub": "워크플로는 연결 순서대로 실행되고, 이 워크플로의 규칙은 위에서 아래로 실행됩니다.",
+    "entry_title": "연결된 서비스로 보내는 모든 요청",
     "err": {
-      "save": "Could not save",
-      "saveUnreachable": "Could not reach the save endpoint",
-      "validate": "Could not validate",
-      "validateUnreachable": "Could not reach the validation endpoint"
+      "save": "저장할 수 없음",
+      "saveUnreachable": "저장 엔드포인트에 연결할 수 없음",
+      "validate": "검증할 수 없음",
+      "validateUnreachable": "검증 엔드포인트에 연결할 수 없음"
     },
     "errors": {
-      "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
-      "rule": "Rule {{n}}",
-      "ruleNamed": "Rule {{n}} — {{name}}",
-      "whole": "This workflow"
+      "body": "아무것도 적용되지 않았습니다. 실행 중인 정책은 변경되지 않았습니다.",
+      "count": "문제 {{count}}개로 인해 저장할 수 없습니다.",
+      "rule": "규칙 {{n}}",
+      "ruleNamed": "규칙 {{n}} — {{name}}",
+      "whole": "이 워크플로"
     },
-    "exit_sub": "The request continues to the next attached workflow, then to the rest of the security stack.",
-    "exit_title": "No rule matched",
+    "exit_sub": "요청은 다음 연결된 워크플로로 이동한 뒤 나머지 보안 스택으로 계속 진행됩니다.",
+    "exit_title": "일치하는 규칙 없음",
     "gate": {
-      "and": "and only once the same client IP has made more than",
-      "chip": "match gate",
-      "help": "Counted per client IP. Below the threshold this rule does not match at all and evaluation carries on to the next rule — it never rate-limits on its own."
+      "and": "또한 동일한 클라이언트 IP의 요청 수가 다음보다 많을 때만",
+      "chip": "일치 게이트",
+      "help": "클라이언트 IP별로 계산합니다. 임계값 미만에서는 이 규칙이 전혀 일치하지 않고 평가가 다음 규칙으로 이어집니다. 이 규칙 자체는 요청률을 제한하지 않습니다."
     },
     "legend": {
-      "fall": "No match falls to the next rule",
-      "gate": "A rate threshold gates the match, it is not an action",
-      "move": "Drag, use the arrows, or press Alt + ↑ / ↓ to reorder",
-      "stop": "A match runs one action and stops"
+      "fall": "일치하지 않으면 다음 규칙으로 이동",
+      "gate": "요청률 임계값은 일치를 제어하며 작업이 아님",
+      "move": "드래그하거나 화살표를 사용하거나 Alt + ↑ / ↓를 눌러 순서 변경",
+      "stop": "일치하면 하나의 작업을 실행하고 중지"
     },
     "link": {
-      "noMatch": "no match"
+      "noMatch": "일치하지 않음"
     },
     "menu": {
-      "bottom": "Run last",
-      "delete": "Delete rule",
-      "disable": "Disable rule",
-      "duplicate": "Duplicate below",
-      "enable": "Enable rule",
-      "top": "Run first"
+      "bottom": "마지막에 실행",
+      "delete": "규칙 삭제",
+      "disable": "규칙 비활성화",
+      "duplicate": "아래에 복제",
+      "enable": "규칙 활성화",
+      "top": "첫 번째로 실행"
     },
     "move": {
-      "first": "Run first",
-      "last": "Run last"
+      "first": "첫 번째로 실행",
+      "last": "마지막에 실행"
     },
     "new": "새 워크플로우",
     "no_rules": "규칙은 아직 없습니다. 이 정책을 만들기 시작하려면 하나를 추가하세요.",
     "not_attached": "연결되지 않음",
-    "not_attached_notice": "This workflow is not attached to any service, so these rules are not enforced anywhere yet.",
-    "not_validated": "Not validated yet",
+    "not_attached_notice": "이 워크플로는 어떤 서비스에도 연결되지 않아 아직 어디에서도 규칙이 적용되지 않습니다.",
+    "not_validated": "아직 검증되지 않음",
     "order_help": "규칙은 순서대로 평가되며, 일치하는 첫 번째 규칙이 승리합니다. 속도 임계값을 가진 규칙은 임계값이 초과될 때만 일치하므로, 낮은 규칙은 그 아래의 트래픽을 포착할 수 있습니다.",
     "readonly": "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다.",
     "rule": {
-      "disabled": "Disabled",
-      "if": "If",
-      "namePlaceholder": "Rule name",
-      "noun": "Rule",
-      "onMatch": "If it matches",
-      "skipped": "Disabled — skipped entirely, as if it were not in the list.",
-      "stopTail": ", evaluation stops here — no rule below is reached."
+      "disabled": "비활성화됨",
+      "if": "조건",
+      "namePlaceholder": "규칙 이름",
+      "noun": "규칙",
+      "onMatch": "일치하는 경우",
+      "skipped": "비활성화됨 — 목록에 없는 것처럼 완전히 건너뜁니다.",
+      "stopTail": ", 여기서 평가가 중지되어 아래 규칙에는 도달하지 않습니다."
     },
     "rules": "규칙",
     "say": {
-      "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-      "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
-      "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
-      "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
+      "actionChanged": "작업이 {{type}}(으)로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다.",
+      "added": "규칙이 마지막인 {{n}}번 위치에 추가되었습니다. 따라서 위의 모든 규칙을 먼저 확인합니다.",
+      "deleted": "규칙이 삭제되었습니다. 규칙 {{count}}개가 남았습니다.",
+      "duplicated": "사본이 {{n}}번 위치에 삽입되었습니다. 위의 원본이 활성화된 동안에는 절대 일치할 수 없습니다.",
+      "gateAdded": "일치 조건에 요청률 임계값이 추가되었습니다. 임계값 미만에서는 규칙이 일치하지 않고 평가가 계속됩니다.",
       "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
-      "moved": "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-      "predicateCap": "This rule already holds {{max}} conditions, the maximum.",
-      "ruleAbove": "the rule above",
-      "ruleDisabled": "{{name}} disabled — it is skipped entirely and rules below it now see those requests.",
-      "ruleEnabled": "{{name}} enabled — it is evaluated again at position {{n}}.",
-      "runsAfter": "after {{name}}",
-      "runsFirst": "first",
-      "runsLast": "last",
-      "saved": "Rules saved and pushed to the attached services.",
-      "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "lastValueRemoved": "마지막 값이 제거되었습니다. 값을 하나 추가하기 전에는 이 조건을 저장할 수 없습니다.",
+      "moved": "{{name}}이(가) {{total}}개 중 {{to}}번 위치로 이동했습니다{{how}}. 이제 {{where}} 실행됩니다.",
+      "predicateCap": "이 규칙에는 이미 최대 개수인 {{max}}개의 조건이 있습니다.",
+      "ruleAbove": "위 규칙 다음",
+      "ruleDisabled": "{{name}}이(가) 비활성화되어 완전히 건너뛰며, 이제 아래 규칙이 해당 요청을 처리합니다.",
+      "ruleEnabled": "{{name}}이(가) 활성화되어 {{n}}번 위치에서 다시 평가됩니다.",
+      "runsAfter": "{{name}} 다음",
+      "runsFirst": "첫 번째",
+      "runsLast": "마지막",
+      "saved": "규칙을 저장하고 연결된 서비스에 배포했습니다.",
+      "theRule": "해당 규칙",
+      "valuesDropped": "조건이 {{type}}(으)로 변경되었습니다. 기존 값 {{count}}개는 이전할 수 없습니다.",
       "via": {
-        "drag": "drag",
-        "keyboard": "keyboard"
+        "drag": "드래그로",
+        "keyboard": "키보드로"
       }
     },
     "search": "이름 또는 설명을 검색하세요...",
     "test": {
       "asn": "ASN",
-      "asn_help": "Leave empty to simulate a failed ASN lookup.",
-      "asn_invalid": "The ASN must be a number",
-      "assume_not_whitelisted": "Assumes the client is not whitelisted.",
-      "assume_rate_counter": "Request number {{request_number}} is your input, not a measurement.",
-      "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
-      "assumptions": "Assumptions",
-      "country": "Country",
-      "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
-      "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
-      "detail_status": "The client sees {{status}}.",
-      "failed": "Could not run the test",
-      "geo": "GeoIP lookup",
-      "geo_help": "Unavailable makes country and ASN rules UNKNOWN, so they can never match.",
-      "geo_local": "Local / private address",
-      "geo_resolved": "Resolved",
-      "geo_unavailable": "Database unavailable",
-      "intro": "Evaluates every workflow attached to the service, in order, exactly as the instance would.",
-      "invalid": "Fix the problems above before testing.",
-      "ip": "Client IP",
-      "method": "Method",
-      "number": "Request number",
-      "number_help": "This client's Nth request in the window. An assumption you supply, not a measurement.",
-      "open": "Test a request",
-      "other_matched": "matched here",
-      "other_no_match": "no rule matched",
-      "other_unreached": "not reached",
-      "other_workflows": "Other workflows on this service",
-      "out_draft": "This service is a draft — no workflow is compiled for it yet.",
-      "out_match": "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      "out_no_match": "No rule matched. The request continues to the rest of the security stack.",
-      "out_not_attached": "This workflow is attached to no service, so there is no ladder to evaluate.",
-      "out_whitelisted": "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
-      "run": "Run test",
-      "service": "Service",
-      "title": "Test a request",
-      "unreachable": "Could not reach the test endpoint",
-      "uri": "URI path",
-      "uri_help": "Path only — $uri never carries a query string.",
-      "v_gate": "conditions match · gate closed at {{n}} of {{count}}",
-      "v_match": "MATCHED",
-      "v_unknown": "UNKNOWN",
-      "v_unknown_help": "A fact this rule needs could not be determined, so it can never match.",
-      "whitelisted": "This client is whitelisted"
+      "asn_help": "ASN 조회 실패를 시뮬레이션하려면 비워 두세요.",
+      "asn_invalid": "ASN은 숫자여야 합니다",
+      "assume_not_whitelisted": "클라이언트가 허용 목록에 없다고 가정합니다.",
+      "assume_rate_counter": "요청 번호 {{request_number}}은(는) 측정값이 아니라 입력값입니다.",
+      "assume_regex_budget": "인스턴스의 정규식 예산이 소진되지 않았다고 가정합니다.",
+      "assumptions": "가정",
+      "country": "국가",
+      "detail_challenge": "챌린지가 처리를 맡고 나머지 보안 스택도 계속 실행됩니다.",
+      "detail_detect": "이 서비스는 탐지 모드이므로 실제로 아무 작업도 적용되지 않습니다.",
+      "detail_status": "클라이언트에 {{status}}이(가) 표시됩니다.",
+      "failed": "테스트를 실행할 수 없음",
+      "geo": "GeoIP 조회",
+      "geo_help": "사용할 수 없으면 국가 및 ASN 규칙이 '알 수 없음'이 되어 절대 일치할 수 없습니다.",
+      "geo_local": "로컬/사설 주소",
+      "geo_resolved": "확인됨",
+      "geo_unavailable": "데이터베이스를 사용할 수 없음",
+      "intro": "인스턴스와 동일한 방식으로 서비스에 연결된 모든 워크플로를 순서대로 평가합니다.",
+      "invalid": "테스트하기 전에 위 문제를 해결하세요.",
+      "ip": "클라이언트 IP",
+      "method": "메서드",
+      "number": "요청 번호",
+      "number_help": "시간 범위 내 이 클라이언트의 N번째 요청입니다. 측정값이 아니라 사용자가 제공하는 가정입니다.",
+      "open": "요청 테스트",
+      "other_matched": "여기서 일치",
+      "other_no_match": "일치하는 규칙 없음",
+      "other_unreached": "도달하지 않음",
+      "other_workflows": "이 서비스의 다른 워크플로",
+      "out_draft": "이 서비스는 초안이므로 아직 워크플로가 컴파일되지 않았습니다.",
+      "out_match": "{{workflow}} · {{rule}}이(가) 일치하여 요청에 {{action}} 작업을 수행했습니다.",
+      "out_no_match": "일치하는 규칙이 없습니다. 요청은 나머지 보안 스택으로 계속 진행됩니다.",
+      "out_not_attached": "이 워크플로는 어떤 서비스에도 연결되지 않아 평가할 규칙 체인이 없습니다.",
+      "out_whitelisted": "허용 목록에 있음 — 전체 워크플로를 건너뛰고 어떤 규칙도 평가하지 않습니다.",
+      "run": "테스트 실행",
+      "service": "서비스",
+      "title": "요청 테스트",
+      "unreachable": "테스트 엔드포인트에 연결할 수 없음",
+      "uri": "URI 경로",
+      "uri_help": "경로만 입력합니다. $uri에는 쿼리 문자열이 포함되지 않습니다.",
+      "v_gate": "조건 일치 · {{count}}개 중 {{n}}에서 게이트 닫힘",
+      "v_match": "일치",
+      "v_unknown": "알 수 없음",
+      "v_unknown_help": "이 규칙에 필요한 정보를 확인할 수 없어 절대 일치할 수 없습니다.",
+      "whitelisted": "이 클라이언트는 허용 목록에 있음"
     },
     "threshold": "속도 기준 이상",
     "threshold_count": "요청",
     "threshold_window": "(초)",
     "tree": {
-      "addCondition": "Condition",
-      "addGroup": "Group",
-      "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
-      "and": "and",
-      "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
-      "empty": "Empty group — add a condition, it cannot be saved like this.",
-      "noGroupHolds": "no group holds {{kind}} entries",
-      "noneMeta": "matches when none of these are true",
-      "not": "None of",
-      "or": "or",
-      "removeGroup": "Remove group"
+      "addCondition": "조건",
+      "addGroup": "그룹",
+      "all": "모두",
+      "allMeta": "조건 {{count}}개 — 모두 참이어야 함",
+      "and": "그리고",
+      "any": "하나 이상",
+      "anyMeta": "조건 {{count}}개 — 하나 이상 참이어야 함",
+      "empty": "빈 그룹입니다. 조건을 추가해야 저장할 수 있습니다.",
+      "noGroupHolds": "어떤 그룹에도 {{kind}} 항목이 없음",
+      "noneMeta": "모두 참이 아닐 때 일치",
+      "not": "모두 아님",
+      "or": "또는",
+      "removeGroup": "그룹 제거"
     },
     "truncated": "총 500개의 워크플로우만 표시됩니다. 완전한 결과를 위해 API를 사용하여 목록을 좁히세요.",
-    "untitled": "Untitled rule",
+    "untitled": "이름 없는 규칙",
     "value": {
-      "add": "Value"
+      "add": "값"
     },
     "values": {
-      "fewer": "Show fewer",
-      "more": "+{{n}} more"
+      "fewer": "간단히 표시",
+      "more": "+{{n}}개 더 보기"
     },
     "verb": {
-      "asn": "is",
-      "country": "is",
-      "group": "is in the group",
-      "ip": "is in",
-      "isIn": "is in",
-      "isOneOf": "is one of",
-      "method": "is",
-      "uri": "matches"
+      "asn": "다음과 같음",
+      "country": "다음과 같음",
+      "group": "그룹에 속함",
+      "ip": "다음에 포함됨",
+      "isIn": "다음에 포함됨",
+      "isOneOf": "다음 중 하나임",
+      "method": "다음과 같음",
+      "uri": "다음과 일치"
     }
   },
   "request_path": {
@@ -2658,34 +2658,34 @@
   },
   "onboarding": {
     "item": {
-      "install": "Install BunkerWeb on 1+ host",
-      "mfa": "Activate MFA",
-      "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "install": "1+개 호스트에 BunkerWeb 설치",
+      "mfa": "MFA 활성화",
+      "pro": "BunkerWeb PRO 활성화",
+      "service": "첫 서비스 등록"
     },
     "pro_tips": "PRO 팁",
-    "title": "Getting started"
+    "title": "시작하기"
   },
   "timings": {
-    "subtitle": "How long each plugin takes in each request phase, read live from every instance and merged.",
-    "volatile": "Timings live in each instance's shared memory and are read on demand — they are not stored, and they reset when an instance restarts.",
-    "partial": "Some instances did not answer. The figures below cover the ones that did.",
-    "reporting_instances": "Reporting instances",
-    "requests_measured": "Requests measured",
-    "mean_request": "Mean request",
-    "max_request": "Slowest request",
-    "phases": "Plugin phases",
-    "share_help": "Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.",
-    "plugin": "Plugin",
-    "phase": "Phase",
-    "calls": "Calls",
-    "mean": "Mean",
-    "max": "Max",
-    "total": "Total",
-    "share": "Share",
-    "disabled_title": "Plugin timings are turned off",
-    "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
-    "unreachable_title": "No instance reported timings",
-    "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+    "subtitle": "각 요청 단계에서 플러그인별 소요 시간을 모든 인스턴스에서 실시간으로 읽어 통합합니다.",
+    "volatile": "처리 시간은 각 인스턴스의 공유 메모리에 있으며 필요할 때 읽습니다. 저장되지 않고 인스턴스를 다시 시작하면 초기화됩니다.",
+    "partial": "일부 인스턴스가 응답하지 않았습니다. 아래 수치는 응답한 인스턴스만 포함합니다.",
+    "reporting_instances": "보고 인스턴스",
+    "requests_measured": "측정한 요청",
+    "mean_request": "평균 요청",
+    "max_request": "가장 느린 요청",
+    "phases": "플러그인 단계",
+    "share_help": "비율은 전체 요청 시간에서 플러그인의 총 시간이 차지하는 비중입니다. 요청마다 한 번 실행되지 않는 단계인 워커 시작, 백그라운드 타이머, 내부 API에는 비율이 없으며 대시가 표시됩니다.",
+    "plugin": "플러그인",
+    "phase": "단계",
+    "calls": "호출",
+    "mean": "평균",
+    "max": "최대",
+    "total": "합계",
+    "share": "비율",
+    "disabled_title": "플러그인 시간 측정이 꺼져 있음",
+    "disabled_help": "각 플러그인의 시간을 측정하려면 METRICS_COLLECT_TIMINGS를 yes로 설정하세요. 전체 요청 시간은 어느 경우든 수집됩니다.",
+    "unreachable_title": "처리 시간을 보고한 인스턴스가 없음",
+    "unreachable_help": "처리 시간은 인스턴스 자체에서 읽으므로 응답한 인스턴스가 없거나 아직 요청을 처리한 인스턴스가 없습니다."
   }
 }
