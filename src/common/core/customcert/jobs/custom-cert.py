@@ -3,10 +3,8 @@
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from base64 import b64decode
-from tempfile import NamedTemporaryFile
 from traceback import format_exc
 from typing import Tuple, Union, Optional, Literal
 
@@ -14,6 +12,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from certificate_validation import validate_certificate_pair  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
@@ -96,29 +95,18 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
                 return False, f"Key file {key_file} is not a valid file, ignoring the custom certificate"
             key_file = key_file.read_bytes()
 
-        # Write to temporary files for OpenSSL validation
-        with NamedTemporaryFile(delete=False) as cert_temp, NamedTemporaryFile(delete=False) as key_temp:
-            try:
-                cert_temp.write(cert_file)
-                key_temp.write(key_file)
-                cert_temp.flush()
-                key_temp.flush()
+        # Validate the pair in-process: the previous check only parsed the certificate and
+        # never looked at the key at all, so a malformed, encrypted or mismatched key was
+        # cached, shipped, and only failed later in Lua, where the service silently falls
+        # back to the default certificate.
+        check = validate_certificate_pair(cert_file, key_file)
+        if not check["ok"]:
+            return False, check["error"]
 
-                # Validate the certificate using OpenSSL
-                result = run(
-                    ["openssl", "x509", "-noout", "-in", cert_temp.name],
-                    stdin=DEVNULL,
-                    stderr=DEVNULL,
-                    check=False,
-                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-                )
-
-                if result.returncode != 0:
-                    return False, "Certificate is invalid."
-            finally:
-                # Clean up temporary files
-                Path(cert_temp.name).unlink(missing_ok=True)
-                Path(key_temp.name).unlink(missing_ok=True)
+        # Expiry never blocks: withdrawing a certificate that is currently being served
+        # would drop the service to the default one, which is worse than serving expired.
+        for warning in check["warnings"]:
+            LOGGER.warning(f"{first_server}: {warning}")
 
         cert_hash = bytes_hash(cert_file)
         old_hash = JOB.cache_hash("cert.pem", service_id=first_server)
