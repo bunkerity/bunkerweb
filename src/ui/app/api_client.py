@@ -354,6 +354,9 @@ class ApiClient(BaseApiClient):
     def save_workflow_definition(self, workflow_id, definition):
         return self._put(f"/workflows/{workflow_id}/definition", json={"definition": definition})
 
+    def test_workflow(self, workflow_id, payload):
+        return self._post(f"/workflows/{workflow_id}/test", json=payload)
+
     def validate_workflow(self, definition, workflow_id="", service_ids=None):
         payload = {"definition": definition, "workflow_id": workflow_id}
         if service_ids is not None:

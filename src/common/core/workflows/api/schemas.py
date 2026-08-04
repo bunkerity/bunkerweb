@@ -40,3 +40,29 @@ class WorkflowValidateRequest(BaseModel):
 
 class WorkflowAttachmentRequest(BaseModel):
     service_id: str = Field(..., min_length=1, max_length=256)
+
+
+class WorkflowTestRequestFacts(BaseModel):
+    """The synthetic request, in the operator's terms rather than the runtime's.
+
+    GeoIP is asked, never derived from the address: the runtime's own private-range table is
+    hand-written Lua that already disagrees with Python's, so deriving it here would invent a
+    divergence the parity corpus structurally cannot catch.
+    """
+
+    remote_addr: str = Field("", max_length=64)
+    uri: str = Field("/", min_length=1, max_length=2048)
+    request_method: str = Field("GET", max_length=16)
+    geo: str = Field("resolved", description="resolved | local | unavailable")
+    country: str = Field("", max_length=8)
+    asn: Optional[int] = Field(None, ge=0)
+    # The runtime's own counter: what ratelimit.incr returns, INCLUDING this request. Named
+    # so the inclusive/exclusive question never has to be asked.
+    request_number: int = Field(1, ge=1, le=100000)
+    whitelisted: bool = False
+
+
+class WorkflowTestRequest(BaseModel):
+    definition: Optional[Dict[str, Any]] = Field(None, description="Unsaved draft to substitute for this workflow; the stored one is used when omitted")
+    service_id: str = Field("", max_length=256, description="Service whose ladder to evaluate; the first attachment when omitted")
+    request: WorkflowTestRequestFacts = Field(default_factory=WorkflowTestRequestFacts)

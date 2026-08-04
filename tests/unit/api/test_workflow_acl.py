@@ -69,3 +69,10 @@ def test_the_router_prefix_matches_the_plugin_id():
     manifest = json.loads((ROOT / "src" / "common" / "core" / "workflows" / "plugin.json").read_text(encoding="utf-8"))
     assert manifest["id"] == "workflows"
     assert manifest["extensions"]["api"]["prefix"] == f"/{manifest['id']}"
+
+
+def test_testing_a_draft_is_a_read_not_a_write():
+    """It evaluates and stores nothing. Left to fall through to the POST line it would demand
+    workflow_create, refusing a read-only operator a question they are entitled to ask."""
+    resolve = _load_resolvers()["_resolve_resource_and_perm"]
+    assert resolve("/workflows/wf-1/test", "POST") == ("workflows", "workflow_read")

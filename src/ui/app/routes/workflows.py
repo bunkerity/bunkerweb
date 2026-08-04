@@ -201,6 +201,20 @@ def workflows_detach():
     return _redirect()
 
 
+@workflows.route("/workflows/<string:workflow_id>/test", methods=["POST"])
+@login_required
+@cors_required
+def workflows_test(workflow_id):
+    """Answers "would this rule fire?" for the editor's drawer. Stores nothing."""
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload.get("request"), dict):
+        return jsonify({"status": "error", "message": "A request object is required"}), 400
+    try:
+        return jsonify(API_CLIENT.test_workflow(workflow_id, payload))
+    except (ApiClientError, ApiUnavailableError) as exc:
+        return jsonify({"status": "error", "message": exc.message}), 502
+
+
 @workflows.route("/workflows/<string:workflow_id>/validate", methods=["POST"])
 @login_required
 @cors_required

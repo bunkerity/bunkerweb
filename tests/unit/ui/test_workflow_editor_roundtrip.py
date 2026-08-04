@@ -182,9 +182,10 @@ RENDER_HARNESS = """
 const store = {};
 function el(id) {
   return store[id] || (store[id] = {
-    id, value: "", innerHTML: "", textContent: "", disabled: false,
+    id, value: "", innerHTML: "", textContent: "", disabled: false, on: {},
     classList: { toggle(){}, add(){}, remove(){}, contains(){return false} },
-    addEventListener(){}, querySelector(){return null},
+    addEventListener(ev, cb){ (this.on[ev] = this.on[ev] || []).push(cb) },
+    querySelector(){return null},
     querySelectorAll(){return []}, closest(){return null},
     setAttribute(){}, removeAttribute(){}, focus(){}, appendChild(){},
     getBoundingClientRect(){return {top:0,bottom:0}},
@@ -261,6 +262,53 @@ def test_the_ladder_renders_well_formed_markup(node, tmp_path):
                 continue
             assert value.strip(), f"empty {name} on <{tag}>"
             assert '" +' not in value and "' +" not in value, f"{name}={value!r}"
+
+
+# Same stub DOM, driven through the run button instead of read for markup. rsplit rather
+# than replace: the render tail contains escaped newlines that do not survive re-quoting.
+TESTER_HARNESS = (
+    RENDER_HARNESS.rsplit("process.stdout.write", 1)[0].replace(
+        "require(process.argv[2]);",
+        """const posts = [];
+globalThis.fetch = function(url, init) {
+  posts.push({ url, body: JSON.parse(init.body) });
+  return Promise.resolve({ json: () => Promise.resolve({ status: "success", valid: true, outcome: { type: "no_match" }, workflows: [] }) });
+};
+require(process.argv[2]);""",
+    )
+    + """
+el("wf-test-url").value = "/workflows/wf-1/test";
+el("wf-test-asn").value = process.argv[4];
+el("wf-test-country").value = "FR";
+el("wf-test-uri").value = "/login";
+(el("wf-test-run").on.click || []).forEach((cb) => cb({ preventDefault(){} }));
+// The editor also validates on its own; only the tester's call is of interest here.
+const posted = posts.filter((post) => /\\/test$/.test(post.url)).pop() || null;
+process.stdout.write(JSON.stringify({ posted, panel: el("wf-test-result").innerHTML }));
+"""
+)
+
+
+def _run_tester(node, tmp_path, asn):
+    harness = tmp_path / "tester.js"
+    harness.write_text(TESTER_HARNESS, encoding="utf-8")
+    result = run([node, str(harness), str(EDITOR), dumps(DEFINITION), asn], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    return loads(result.stdout)
+
+
+def test_a_typed_asn_reaches_the_api_as_a_number(node, tmp_path):
+    payload = _run_tester(node, tmp_path, "64496")
+    assert payload["posted"]["body"]["request"]["asn"] == 64496
+    assert payload["posted"]["url"].endswith("/test")
+
+
+def test_a_non_numeric_asn_is_refused_instead_of_becoming_a_failed_lookup(node, tmp_path):
+    """Number("AS64496") is NaN, which serialises to null — and null means "the lookup
+    failed", so a typo would come back as a confident UNKNOWN rather than an error."""
+    payload = _run_tester(node, tmp_path, "AS64496")
+    assert payload["posted"] is None
+    assert "number" in payload["panel"]
 
 
 def test_the_first_paint_interpolates_its_own_fallbacks(node, tmp_path):

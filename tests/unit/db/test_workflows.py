@@ -519,3 +519,86 @@ def test_a_budget_refusal_is_anchored_for_the_editor(db):
     error, field_errors = db.save_workflow_definition(extra, _definition(_rule()))
     assert "active workflow rules" in error
     assert field_errors == [{"path": "rules", "code": "budget_exceeded", "message": error}]
+
+
+def _tester_rule(rule_id="r1", country="FR", action=None, threshold=None):
+    return _rule(rule_id, country=country, action=action, threshold=threshold)
+
+
+def test_the_tester_sees_the_whole_service_ladder_not_just_this_workflow(db):
+    """ "Is my new rule shadowed?" is usually answered by a rule in a *different* workflow."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    first = _create(db, name="edge")
+    second = _create(db, name="main")
+    for resource_id in (first, second):
+        assert db.save_workflow_definition(resource_id, _definition(_tester_rule()))[0] == ""
+        assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+    context, errors = db.test_workflow_definition(second)
+    assert errors == []
+    assert [entry["id"] for entry in context["workflows"]] == [first, second]
+    assert context["service"]["id"] == "app1.example.com" and context["service"]["attached"] is True
+
+
+def test_the_tester_substitutes_the_unsaved_draft_in_place(db):
+    """Position matters, so the candidate replaces the stored one where it already sits."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    other = _create(db, name="first-in-order")
+    subject = _create(db, name="second-in-order")
+    for resource_id in (other, subject):
+        assert db.save_workflow_definition(resource_id, _definition(_tester_rule()))[0] == ""
+        assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+    draft = _definition(_tester_rule("draft-rule", country="BE"))
+    context, errors = db.test_workflow_definition(subject, definition=draft)
+    assert errors == []
+    entries = {entry["id"]: entry for entry in context["workflows"]}
+    assert entries[subject]["definition"]["rules"][0]["id"] == "draft-rule"
+    # The stored workflow ahead of it is untouched, and still ahead of it.
+    assert [entry["id"] for entry in context["workflows"]] == [other, subject]
+
+
+def test_the_tester_reports_an_invalid_draft_like_validate_does(db):
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    resource_id = _create(db)
+    context, errors = db.test_workflow_definition(resource_id, definition={"schema_version": 1, "rules": [{"id": "r1"}]})
+    assert context is None and errors and errors[0]["path"].startswith("rules[0]")
+
+
+def test_the_tester_reads_the_services_security_mode_and_deny_status(db):
+    """Reporting "blocks with 403" against a service in detect mode is wrong in the worst way."""
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    add_service_setting(db, service_id="app1.example.com", setting_id="SECURITY_MODE", value="detect")
+    add_global_value(db, setting_id="DENY_HTTP_STATUS", value="444")
+    resource_id = _create(db)
+    assert db.save_workflow_definition(resource_id, _definition(_tester_rule()))[0] == ""
+    assert db.attach_workflow(resource_id, "app1.example.com") == ""
+
+    context, _ = db.test_workflow_definition(resource_id)
+    assert context["service"]["security_mode"] == "detect"
+    assert context["service"]["deny_status"] == 444
+
+
+def test_the_tester_says_a_draft_service_compiles_to_nothing(db):
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    add_service(db, "draft.example.com", is_draft=True)
+    resource_id = _create(db)
+    assert db.save_workflow_definition(resource_id, _definition(_tester_rule()))[0] == ""
+    assert db.attach_workflow(resource_id, "draft.example.com") == ""
+
+    context, errors = db.test_workflow_definition(resource_id, service_id="draft.example.com")
+    assert errors == [] and context["service"]["is_draft"] is True
+    assert context["workflows"] == []
+
+
+def test_the_tester_reports_no_service_when_the_workflow_is_attached_nowhere(db):
+    seed_minimal(db)
+    _seed_workflows_plugin(db)
+    resource_id = _create(db)
+    context, errors = db.test_workflow_definition(resource_id)
+    assert errors == [] and context["service"] is None

@@ -10,6 +10,7 @@ from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 
 from app.utils import get_db  # type: ignore
+from workflow_eval import assumptions, evaluate, prepare_ladder, request_from_input  # type: ignore
 from workflow_schema import summarize_rule  # type: ignore
 
 from .schemas import (
@@ -17,6 +18,7 @@ from .schemas import (
     WorkflowCloneRequest,
     WorkflowCreateRequest,
     WorkflowDefinitionRequest,
+    WorkflowTestRequest,
     WorkflowUpdateRequest,
     WorkflowValidateRequest,
 )
@@ -73,6 +75,59 @@ def validate_workflow(payload: WorkflowValidateRequest) -> JSONResponse:
             "valid": True,
             "definition": canonical,
             "summaries": [{"id": rule["id"], "summary": summarize_rule(rule)} for rule in canonical["rules"]],
+        },
+    )
+
+
+@router.post("/{workflow_id}/test")
+def test_workflow(workflow_id: str, payload: WorkflowTestRequest) -> JSONResponse:
+    """Evaluate a candidate against a synthetic request. Writes nothing, so it is a read.
+
+    The whole service ladder is evaluated, not just this workflow: "is my new rule shadowed?"
+    is the question operators actually have, and the rule doing the shadowing is often in a
+    different workflow attached to the same service.
+    """
+    request, error = request_from_input(payload.request.model_dump())
+    if error:
+        return _error(error, field_errors=[{"path": "request", "code": "request_invalid", "message": error}])
+
+    context, errors = get_db().test_workflow_definition(workflow_id, definition=payload.definition, service_id=payload.service_id)
+    if context is None:
+        if errors and errors[0].get("code") == "not_found":
+            return _error(errors[0]["message"])
+        # A draft that does not validate comes back in the same shape /validate uses, so the
+        # editor paints it with the code it already has.
+        return JSONResponse(status_code=200, content={"status": "success", "valid": False, "errors": errors})
+
+    service = context["service"]
+    if service is None:
+        return JSONResponse(
+            status_code=200,
+            content={"status": "success", "valid": True, "outcome": {"type": "not_attached"}, "service": None, "assumptions": [], "workflows": []},
+        )
+    if service["is_draft"]:
+        return JSONResponse(
+            status_code=200,
+            content={"status": "success", "valid": True, "outcome": {"type": "service_draft"}, "service": service, "assumptions": [], "workflows": []},
+        )
+
+    ladder = prepare_ladder(context["workflows"], context["group_index"])
+    outcome, reported = evaluate(ladder, request)
+    if outcome.get("type") == "match":
+        # The rule may carry no status of its own, in which case the instance's deny status is
+        # what the client actually sees.
+        outcome["effective_status"] = outcome["action"].get("status") or service["deny_status"]
+        outcome["enforced"] = service["security_mode"] == "block"
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "success",
+            "valid": True,
+            "service": service,
+            "assumptions": assumptions(request, ladder),
+            "outcome": outcome,
+            "workflows": reported,
         },
     )
 

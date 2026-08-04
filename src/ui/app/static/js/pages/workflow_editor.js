@@ -104,6 +104,11 @@
     summaries: {},
     readonly: false,
     groups: {},
+    // Which workflow this page edits, so a test result can tell this workflow's rules from
+    // the other workflows attached to the same service.
+    workflowId: "",
+    // Last test result, or null. Pins the ladder's dimming and feeds the verdict chips.
+    test: null,
   };
 
   var ladderEl, emptyEl, panelEl, liveEl, capEl;
@@ -1126,6 +1131,10 @@
       (rule.enabled
         ? ""
         : '<span class="bw-flow-chip" data-i18n="workflows.rule.disabled">Disabled</span>') +
+      // Filled by paintTest(); empty until a test has run, so it costs nothing otherwise.
+      '<span data-wf-verdict="' +
+      esc(rule.id) +
+      '"></span>' +
       "</div>" +
       '<div class="bw-flow-head-sum' +
       (summary ? "" : " is-pending") +
@@ -1522,6 +1531,9 @@
   // ---- mutations -------------------------------------------------------------------
 
   function touch(focusSelector) {
+    // A verdict describes the ladder that produced it. The moment a rule changes it is
+    // stale, and a stale verdict on a security rule is worse than none.
+    if (STATE.test) clearTest();
     render(focusSelector);
     paint();
     scheduleValidate();
@@ -1911,6 +1923,347 @@
       });
   }
 
+  // ---- the rule tester ---------------------------------------------------------------
+
+  /* The rule the last test stopped on, so the ladder keeps showing its verdict when the
+     pointer leaves. null when no test has run or the answer reached no rule. */
+  function pinnedTrace() {
+    return STATE.test && typeof STATE.test.ruleIndex === "number"
+      ? STATE.test.ruleIndex
+      : null;
+  }
+
+  function testFacts() {
+    var value = function (id) {
+      var el = document.getElementById(id);
+      return el ? el.value.trim() : "";
+    };
+    return {
+      remote_addr: value("wf-test-ip"),
+      uri: value("wf-test-uri") || "/",
+      request_method: value("wf-test-method") || "GET",
+      geo: value("wf-test-geo") || "resolved",
+      country: value("wf-test-country"),
+      asn: value("wf-test-asn") === "" ? null : Number(value("wf-test-asn")),
+      request_number: Number(value("wf-test-number") || 1),
+      whitelisted: !!(document.getElementById("wf-test-whitelisted") || {})
+        .checked,
+    };
+  }
+
+  function runTest() {
+    var button = document.getElementById("wf-test-run");
+    var out = document.getElementById("wf-test-result");
+    if (!out) return;
+
+    /* Refuse a non-numeric ASN here rather than let Number() turn it into NaN: that reaches
+       the API as null, which means "the lookup failed" — so a typo would come back as a
+       confident UNKNOWN instead of an error. */
+    var asn = (document.getElementById("wf-test-asn") || {}).value || "";
+    if (asn.trim() !== "" && !/^[0-9]+$/.test(asn.trim())) {
+      out.innerHTML =
+        '<div class="alert alert-warning" role="alert">' +
+        esc(
+          translate("workflows.test.asn_invalid", "The ASN must be a number"),
+        ) +
+        "</div>";
+      return;
+    }
+
+    if (button) button.disabled = true;
+    out.innerHTML =
+      '<p class="text-muted small" data-i18n="status.loading">Loading...</p>';
+    runTranslations();
+
+    post(document.getElementById("wf-test-url").value, {
+      definition: serialize(),
+      service_id:
+        (document.getElementById("wf-test-service") || {}).value || "",
+      request: testFacts(),
+    })
+      .then(function (body) {
+        if (button) button.disabled = false;
+        if (body.status !== "success") {
+          out.innerHTML =
+            '<div class="alert alert-danger" role="alert">' +
+            esc(
+              body.message ||
+                translate("workflows.test.failed", "Could not run the test"),
+            ) +
+            "</div>";
+          return;
+        }
+        if (body.valid === false) {
+          // Same error shape /validate returns, so the ladder paints it with what it has.
+          setErrors(body.errors || []);
+          paint();
+          out.innerHTML =
+            '<div class="alert alert-warning" role="alert">' +
+            esc(
+              translate(
+                "workflows.test.invalid",
+                "Fix the problems above before testing.",
+              ),
+            ) +
+            "</div>";
+          return;
+        }
+        applyTest(body);
+      })
+      .catch(function () {
+        if (button) button.disabled = false;
+        out.innerHTML =
+          '<div class="alert alert-danger" role="alert">' +
+          esc(
+            translate(
+              "workflows.test.unreachable",
+              "Could not reach the test endpoint",
+            ),
+          ) +
+          "</div>";
+      });
+  }
+
+  /* The answer lands in two places on purpose: the headline and the assumptions go in the
+     drawer, the per-rule verdicts go on the ladder itself — which is where the operator is
+     actually looking. */
+  function applyTest(body) {
+    var mine = null;
+    (body.workflows || []).forEach(function (workflow) {
+      if (workflow.id === STATE.workflowId) mine = workflow;
+    });
+    var outcome = body.outcome || {};
+    var ruleIndex =
+      outcome.type === "match" &&
+      mine &&
+      outcome.workflow_id === STATE.workflowId
+        ? outcome.rule_index
+        : null;
+
+    STATE.test = { ruleIndex: ruleIndex, byRule: {}, outcome: outcome };
+    (mine ? mine.rules || [] : []).forEach(function (rule) {
+      STATE.test.byRule[rule.id] = rule;
+    });
+
+    document.getElementById("wf-test-result").innerHTML = testResultHtml(body);
+    render();
+    paint();
+    paintTest();
+    runTranslations();
+    say(testHeadline(body));
+  }
+
+  function testHeadline(body) {
+    var outcome = body.outcome || {};
+    if (outcome.type === "whitelisted")
+      return translate(
+        "workflows.test.out_whitelisted",
+        "Whitelisted — the whole workflow is skipped and no rule is evaluated.",
+      );
+    if (outcome.type === "not_attached")
+      return translate(
+        "workflows.test.out_not_attached",
+        "This workflow is attached to no service, so there is no ladder to evaluate.",
+      );
+    if (outcome.type === "service_draft")
+      return translate(
+        "workflows.test.out_draft",
+        "This service is a draft — no workflow is compiled for it yet.",
+      );
+    if (outcome.type !== "match")
+      return translate(
+        "workflows.test.out_no_match",
+        "No rule matched. The request continues to the rest of the security stack.",
+      );
+    return translate(
+      "workflows.test.out_match",
+      "{{workflow}} · {{rule}} matched and {{action}} the request.",
+      {
+        workflow: outcome.workflow_name || "",
+        rule: outcome.rule_name || outcome.rule_id,
+        action: outcome.action ? outcome.action.type : "",
+      },
+    );
+  }
+
+  var ASSUMPTION_TEXT = {
+    rate_counter:
+      "Request number {{request_number}} is your input, not a measurement.",
+    not_whitelisted: "Assumes the client is not whitelisted.",
+    regex_budget: "Assumes the instance's regex budget is not exhausted.",
+  };
+
+  function testResultHtml(body) {
+    var outcome = body.outcome || {};
+    var service = body.service;
+    var matched = outcome.type === "match";
+    var tone = matched ? "alert-primary" : "alert-secondary";
+
+    var detail = "";
+    if (matched) {
+      if (outcome.terminates === false)
+        detail = translate(
+          "workflows.test.detail_challenge",
+          "The challenge takes over; the rest of the security stack still runs.",
+        );
+      else
+        detail = translate(
+          "workflows.test.detail_status",
+          "The client sees {{status}}.",
+          { status: outcome.effective_status },
+        );
+      if (outcome.enforced === false)
+        detail +=
+          " " +
+          translate(
+            "workflows.test.detail_detect",
+            "This service is in detect mode, so nothing is actually enforced.",
+          );
+    }
+
+    var assumptions = (body.assumptions || [])
+      .map(function (item) {
+        var fallback = ASSUMPTION_TEXT[item.code];
+        if (!fallback) return "";
+        return (
+          "<li>" +
+          esc(
+            translate(
+              "workflows.test.assume_" + item.code,
+              fallback,
+              item.detail || {},
+            ),
+          ) +
+          "</li>"
+        );
+      })
+      .join("");
+
+    return (
+      '<div class="alert ' +
+      tone +
+      '" role="alert"><strong>' +
+      esc(testHeadline(body)) +
+      "</strong>" +
+      (detail ? '<div class="small mt-1">' + esc(detail) + "</div>" : "") +
+      "</div>" +
+      (assumptions
+        ? '<p class="wf-test-assume-hd" data-i18n="workflows.test.assumptions">Assumptions</p><ul class="wf-test-assume">' +
+          assumptions +
+          "</ul>"
+        : "") +
+      otherWorkflowsHtml(body, service)
+    );
+  }
+
+  /* The ladder only holds this workflow, so a rule in another one that shadows it would be
+     invisible without this. */
+  function otherWorkflowsHtml(body, service) {
+    var others = (body.workflows || []).filter(function (workflow) {
+      return workflow.id !== STATE.workflowId;
+    });
+    if (!others.length) return "";
+    var rows = others
+      .map(function (workflow) {
+        var matched = workflow.rules.some(function (rule) {
+          return rule.state === "match";
+        });
+        var unreached = workflow.rules.every(function (rule) {
+          return rule.state === "unreached" || rule.state === "disabled";
+        });
+        var note = matched
+          ? translate("workflows.test.other_matched", "matched here")
+          : unreached
+            ? translate("workflows.test.other_unreached", "not reached")
+            : translate("workflows.test.other_no_match", "no rule matched");
+        return (
+          "<li><span>" +
+          esc(workflow.name || workflow.id) +
+          "</span><span>" +
+          esc(note) +
+          "</span></li>"
+        );
+      })
+      .join("");
+    return (
+      '<p class="wf-test-assume-hd" data-i18n="workflows.test.other_workflows">Other workflows on ' +
+      esc(service ? service.id : "") +
+      '</p><ul class="wf-test-others">' +
+      rows +
+      "</ul>"
+    );
+  }
+
+  /* Verdict chips on the ladder, plus the dimming that says "never reached" — reusing the
+     vocabulary the hover trace already taught, rather than a second visual language. */
+  function paintTest() {
+    if (!STATE.test) return;
+    trace(pinnedTrace());
+    STATE.rules.forEach(function (rule) {
+      var verdict = STATE.test.byRule[rule.id];
+      if (!verdict) return;
+      var card = ladderEl.querySelector(
+        '[data-wf-rule="' + CSS.escape(rule.id) + '"]',
+      );
+      if (!card) return;
+      var host = card.querySelector("[data-wf-verdict]");
+      if (!host) return;
+      host.innerHTML = verdictHtml(verdict);
+      var item = card.closest("[data-wf-item]");
+      if (item) item.classList.toggle("is-tested", verdict.state === "match");
+    });
+  }
+
+  function verdictHtml(verdict) {
+    if (verdict.state === "match")
+      return '<span class="wf-verdict is-match" data-i18n="workflows.test.v_match">MATCHED</span>';
+    if (verdict.state === "true_gate_closed") {
+      var gate = verdict.gate || {};
+      return (
+        '<span class="wf-verdict is-gate">' +
+        esc(
+          translate(
+            "workflows.test.v_gate",
+            "conditions match · gate closed at {{n}} of {{count}}",
+            { n: gate.request_number, count: gate.count },
+          ),
+        ) +
+        "</span>"
+      );
+    }
+    if (verdict.state === "unknown")
+      return (
+        '<span class="wf-verdict is-unknown" title="' +
+        esc(
+          translate(
+            "workflows.test.v_unknown_help",
+            "A fact this rule needs could not be determined, so it can never match.",
+          ),
+        ) +
+        '" data-i18n="workflows.test.v_unknown">UNKNOWN</span>'
+      );
+    return "";
+  }
+
+  function clearTest() {
+    STATE.test = null;
+    trace(null);
+    var out = document.getElementById("wf-test-result");
+    if (out) out.innerHTML = "";
+    Array.prototype.forEach.call(
+      ladderEl.querySelectorAll("[data-wf-verdict]"),
+      function (host) {
+        host.innerHTML = "";
+      },
+    );
+    Array.prototype.forEach.call(
+      ladderEl.querySelectorAll(".is-tested"),
+      function (item) {
+        item.classList.remove("is-tested");
+      },
+    );
+  }
+
   // ---- wiring ----------------------------------------------------------------------
 
   function ruleFromEvent(target) {
@@ -2230,16 +2583,23 @@
     });
 
     // Hovering a rule dims everything it would shadow — first-match-wins, without a graph.
+    // Releasing falls back to the pinned test result rather than clearing, so a verdict on
+    // screen survives a stray pointer crossing the ladder.
     root.addEventListener("pointerover", function (event) {
       var item = event.target.closest("[data-wf-item]");
-      trace(item ? parseInt(item.dataset.wfIndex, 10) : null);
+      trace(item ? parseInt(item.dataset.wfIndex, 10) : pinnedTrace());
     });
     root.addEventListener("pointerleave", function () {
-      trace(null);
+      trace(pinnedTrace());
     });
     root.addEventListener("focusin", function (event) {
       var item = event.target.closest("[data-wf-item]");
       if (item) trace(parseInt(item.dataset.wfIndex, 10));
+    });
+    // Without this the dimming stuck on after tabbing out of the ladder.
+    root.addEventListener("focusout", function (event) {
+      var next = event.relatedTarget;
+      if (!next || !next.closest("[data-wf-item]")) trace(pinnedTrace());
     });
 
     root.addEventListener("pointerdown", function (event) {
@@ -2534,6 +2894,37 @@
     }
     var saveButton = document.getElementById("wf-save");
     if (saveButton) saveButton.addEventListener("click", save);
+
+    var testUrl = document.getElementById("wf-test-url");
+    STATE.workflowId = testUrl
+      ? (testUrl.value.match(/workflows\/([^/]+)\/test$/) || ["", ""])[1]
+      : "";
+    var openTest = document.getElementById("wf-test-open");
+    var drawer = document.getElementById("wf-tester");
+    if (openTest && drawer && window.bootstrap && bootstrap.Offcanvas) {
+      openTest.addEventListener("click", function () {
+        bootstrap.Offcanvas.getOrCreateInstance(drawer).show();
+      });
+    }
+    var runButton = document.getElementById("wf-test-run");
+    if (runButton) {
+      runButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        runTest();
+      });
+    }
+    var geoSelect = document.getElementById("wf-test-geo");
+    if (geoSelect) {
+      var syncGeo = function () {
+        var fields = document.getElementById("wf-test-geo-fields");
+        // country/asn are only meaningful when the lookup resolved; local and unavailable
+        // both derive their facts, so showing the inputs would invite a contradiction.
+        if (fields)
+          fields.classList.toggle("d-none", geoSelect.value !== "resolved");
+      };
+      geoSelect.addEventListener("change", syncGeo);
+      syncGeo();
+    }
 
     /* This file is deferred, so it can render before i18next has fetched its catalogue, and
        a later language change does not rebuild the ladder on its own. Both events therefore

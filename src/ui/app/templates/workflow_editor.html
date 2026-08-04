@@ -2,6 +2,7 @@
 {% from "components/alert.html" import alert %}
 {% from "components/button.html" import button %}
 {% from "components/card.html" import card %}
+{% from "components/drawer.html" import drawer %}
 {% from "components/page-head.html" import page_head %}
 {% block head %}
     <link rel="stylesheet"
@@ -16,6 +17,9 @@
     {% call page_head(title=workflow.name, breadcrumb=[("Configure", "navigation.configure", none),
                                                        ("Workflows", "navigation.workflows", workflows_url),
                                                        (workflow.name, none, none)]) %}
+        {# Opened from JS rather than data-bs-toggle: components/button.html takes no arbitrary
+           attributes, and the handler has to seed the form from the current rules anyway. #}
+        {{ button(label="Test a request", i18n_key="workflows.test.open", size="sm", variant="outline-secondary", icon="bx-play-circle", id="wf-test-open") }}
         {{ button(label="Add rule", i18n_key="workflows.add_rule", size="sm", icon="bx-plus", id="wf-add-rule", disabled=readonly) }}
         {{ button(label="Save", i18n_key="button.save", size="sm", icon="bx-save", id="wf-save", disabled=readonly) }}
     {% endcall %}
@@ -72,6 +76,73 @@
     <input type="hidden" id="wf-validate-url" value="{{ workflows_url }}/{{ workflow.id }}/validate" />
     <input type="hidden" id="wf-save-url" value="{{ workflows_url }}/{{ workflow.id }}/save" />
     <input type="hidden" id="wf-csrf" value="{{ csrf_token() }}" />
+    <input type="hidden" id="wf-test-url" value="{{ workflows_url }}/{{ workflow.id }}/test" />
+
+    {# Offcanvas, not a modal: the whole point is watching which rule lights up on the ladder
+       behind it, and backdrop=false keeps that ladder visible and interactive. #}
+    {% call drawer(id="wf-tester", social=false, newsletter=false) %}
+        <div class="offcanvas-body wf-test">
+            <h5 data-i18n="workflows.test.title">Test a request</h5>
+            <p class="text-muted small" data-i18n="workflows.test.intro">
+                Evaluates every workflow attached to the service, in order, exactly as the instance would.
+            </p>
+
+            <form id="wf-test-form" class="wf-test-form">
+                <label for="wf-test-ip" data-i18n="workflows.test.ip">Client IP</label>
+                <input id="wf-test-ip" class="form-control form-control-sm" value="203.0.113.7" spellcheck="false" />
+
+                <label for="wf-test-geo" data-i18n="workflows.test.geo">GeoIP lookup</label>
+                <select id="wf-test-geo" class="form-select form-select-sm">
+                    <option value="resolved" data-i18n="workflows.test.geo_resolved">Resolved</option>
+                    <option value="local" data-i18n="workflows.test.geo_local">Local / private address</option>
+                    <option value="unavailable" data-i18n="workflows.test.geo_unavailable">Database unavailable</option>
+                </select>
+                <p class="wf-test-help" id="wf-test-geo-help" data-i18n="workflows.test.geo_help">
+                    Unavailable makes country and ASN rules UNKNOWN, so they can never match.
+                </p>
+
+                <div id="wf-test-geo-fields">
+                    <label for="wf-test-country" data-i18n="workflows.test.country">Country</label>
+                    <input id="wf-test-country" class="form-control form-control-sm" value="FR" maxlength="8" />
+
+                    <label for="wf-test-asn" data-i18n="workflows.test.asn">ASN</label>
+                    <input id="wf-test-asn" class="form-control form-control-sm" inputmode="numeric" placeholder="64496" />
+                    <p class="wf-test-help" data-i18n="workflows.test.asn_help">Leave empty to simulate a failed ASN lookup.</p>
+                </div>
+
+                <label for="wf-test-method" data-i18n="workflows.test.method">Method</label>
+                <select id="wf-test-method" class="form-select form-select-sm">
+                    {% for verb in ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"] %}
+                        <option value="{{ verb }}">{{ verb }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="wf-test-uri" data-i18n="workflows.test.uri">URI path</label>
+                <input id="wf-test-uri" class="form-control form-control-sm" value="/" spellcheck="false" />
+                <p class="wf-test-help" data-i18n="workflows.test.uri_help">Path only — $uri never carries a query string.</p>
+
+                <label for="wf-test-number" data-i18n="workflows.test.number">Request number</label>
+                <input id="wf-test-number" class="form-control form-control-sm" type="number" min="1" max="100000" value="1" />
+                <p class="wf-test-help" data-i18n="workflows.test.number_help">
+                    This client's Nth request in the window. An assumption you supply, not a measurement.
+                </p>
+
+                <label for="wf-test-service" data-i18n="workflows.test.service">Service</label>
+                <select id="wf-test-service" class="form-select form-select-sm">
+                    {% for service in workflow.services or [] %}<option value="{{ service }}">{{ service }}</option>{% endfor %}
+                </select>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="wf-test-whitelisted" />
+                    <label class="form-check-label" for="wf-test-whitelisted" data-i18n="workflows.test.whitelisted">This client is whitelisted</label>
+                </div>
+
+                {{ button(label="Run test", i18n_key="workflows.test.run", size="sm", icon="bx-play", id="wf-test-run", classes="mt-3 w-100") }}
+            </form>
+
+            <div id="wf-test-result" class="wf-test-result" role="status" aria-live="polite"></div>
+        </div>
+    {% endcall %}
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/pages/workflow_editor.js') }}" nonce="{{ script_nonce }}" defer></script>

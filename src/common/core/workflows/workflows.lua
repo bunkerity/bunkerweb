@@ -278,6 +278,12 @@ function workflows:init()
 end
 
 -- Run the single terminal action of the rule that won.
+--
+-- The three actions below are the whole vocabulary: this dispatch is a closed if-chain with
+-- no registry and no hook, so a PRO plugin cannot add a fourth. That is the ceiling of the
+-- workflows extension contract today — the manifest half (schema, editor, validator) can be
+-- taught new action types, but nothing would execute them here. Closing it means giving the
+-- runtime a dispatch table plugins can register into, which is a separate change.
 function workflows:apply(workflow, rule)
 	local action = rule.action
 	local data = { workflow = workflow.name, rule = rule.id, action = action.type }

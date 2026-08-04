@@ -399,6 +399,11 @@ def _resolve_workflows(path_normalized: str, method_u: str) -> tuple[Optional[st
     # would be accepted, so reading is enough.
     if "validate" in parts:
         return rtype, "workflow_read"
+    # Same for the tester: it evaluates a candidate against a synthetic request and stores
+    # nothing. Both branches must stay ahead of the POST line below, or a read-only operator
+    # is refused a question they are entitled to ask.
+    if "test" in parts:
+        return rtype, "workflow_read"
     if method_u == "POST":
         return rtype, "workflow_create"
     if method_u in {"PUT", "PATCH"}:

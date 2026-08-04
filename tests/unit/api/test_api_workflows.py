@@ -224,3 +224,97 @@ def test_conflicts_map_to_409(monkeypatch):
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     assert ROUTER.delete_workflow("wf-1").status_code == 409
+
+
+def _test_request(**overrides):
+    # A resolved lookup always carries a country, so the form ships one — the bare default
+    # would be refused before the handler ever reaches the db.
+    return SCHEMAS.WorkflowTestRequest(request=SCHEMAS.WorkflowTestRequestFacts(**{"country": "FR", **overrides}))
+
+
+def _context(rules, *, security_mode="block", deny_status=403, is_draft=False, attached=True):
+    return {
+        "service": {"id": "a.example.com", "attached": attached, "is_draft": is_draft, "security_mode": security_mode, "deny_status": deny_status},
+        "workflows": [{"id": "wf-1", "name": "login-protection", "definition": {"schema_version": 1, "rules": rules}}],
+        "group_index": {},
+    }
+
+
+def test_a_match_reports_the_status_the_client_would_actually_see(monkeypatch):
+    """A rule with no status of its own falls back to the instance's DENY_HTTP_STATUS."""
+    db = Mock()
+    db.test_workflow_definition.return_value = (_context([_rule()], deny_status=444), [])
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.test_workflow("wf-1", _test_request(country="FR"))
+
+    body = _json(response)
+    assert response.status_code == 200
+    assert body["outcome"]["type"] == "match" and body["outcome"]["effective_status"] == 444
+    assert body["outcome"]["enforced"] is True
+
+
+def test_a_service_in_detect_mode_matches_but_does_not_enforce(monkeypatch):
+    """The dangerous lie is "blocks with 403" on a service that blocks nothing."""
+    db = Mock()
+    db.test_workflow_definition.return_value = (_context([_rule()], security_mode="detect"), [])
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    body = _json(ROUTER.test_workflow("wf-1", _test_request(country="FR")))
+
+    assert body["outcome"]["type"] == "match" and body["outcome"]["enforced"] is False
+
+
+def test_a_query_string_in_the_test_uri_is_refused_not_silently_stripped(monkeypatch):
+    """$uri carries the normalised path only, so accepting it would answer confidently wrong."""
+    db = Mock()
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.test_workflow("wf-1", _test_request(uri="/login?next=/admin"))
+
+    assert response.status_code == 400
+    body = _json(response)
+    assert body["errors"][0]["path"] == "request" and body["errors"][0]["code"] == "request_invalid"
+    assert not db.test_workflow_definition.called
+
+
+def test_a_draft_service_reports_that_nothing_runs_there_yet(monkeypatch):
+    db = Mock()
+    db.test_workflow_definition.return_value = (_context([_rule()], is_draft=True), [])
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    body = _json(ROUTER.test_workflow("wf-1", _test_request(country="FR")))
+
+    assert body["outcome"] == {"type": "service_draft"}
+
+
+def test_an_unattached_workflow_says_so_instead_of_inventing_a_ladder(monkeypatch):
+    db = Mock()
+    db.test_workflow_definition.return_value = ({"service": None, "workflows": [], "group_index": {}}, [])
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    body = _json(ROUTER.test_workflow("wf-1", _test_request()))
+
+    assert body["outcome"] == {"type": "not_attached"} and body["service"] is None
+
+
+def test_an_invalid_draft_comes_back_in_the_shape_validate_uses(monkeypatch):
+    """Same payload as /validate, so the editor paints it with the code it already has."""
+    db = Mock()
+    errors = [{"path": "rules[0].condition", "code": "ip_invalid", "message": "not an IP"}]
+    db.test_workflow_definition.return_value = (None, errors)
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.test_workflow("wf-1", _test_request())
+
+    assert response.status_code == 200
+    body = _json(response)
+    assert body["valid"] is False and body["errors"] == errors
+
+
+def test_testing_a_workflow_that_does_not_exist_is_a_404(monkeypatch):
+    db = Mock()
+    db.test_workflow_definition.return_value = (None, [{"path": "", "code": "not_found", "message": "Workflow not found"}])
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    assert ROUTER.test_workflow("ghost", _test_request()).status_code == 404

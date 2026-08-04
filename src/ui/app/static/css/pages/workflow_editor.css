@@ -1169,3 +1169,88 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ---- rule tester -------------------------------------------------------------------
+   The drawer is a plain offcanvas; only the form rhythm and the verdict chips are ours.
+   Deliberately NOT restyled: the "never reached" state, which reuses the .is-dead dimming
+   the hover trace already taught. A second visual language for the same idea would be one
+   more thing to learn. */
+.wf-test-form label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 12px 0 4px;
+}
+.wf-test-help {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  color: var(--bw-fg-3);
+}
+.wf-test-result {
+  margin-top: 18px;
+}
+.wf-test-assume-hd {
+  margin: 14px 0 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bw-fg-3);
+}
+.wf-test-assume,
+.wf-test-others {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: var(--bw-fg-2);
+}
+.wf-test-others {
+  list-style: none;
+  padding-left: 0;
+}
+.wf-test-others li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--flow-line, var(--bw-border));
+}
+.wf-test-others li span:last-child {
+  color: var(--bw-fg-3);
+  white-space: nowrap;
+}
+
+.wf-verdict {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.wf-verdict.is-match {
+  background: color-mix(in srgb, var(--wf-accent) 18%, transparent);
+  color: var(--wf-accent);
+}
+.wf-verdict.is-gate {
+  background: color-mix(in srgb, var(--bs-warning) 18%, transparent);
+  color: var(--bs-warning);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+/* Amber, never grey: UNKNOWN is a rule that can never match, which is a state to act on,
+   not an absence. */
+.wf-verdict.is-unknown {
+  background: color-mix(in srgb, var(--bs-warning) 22%, transparent);
+  color: var(--bs-warning);
+  cursor: help;
+}
+.bw-flow-item.is-tested .bw-flow-node {
+  outline: 2px solid var(--wf-accent);
+  outline-offset: 2px;
+}

@@ -143,6 +143,47 @@ def test_validate_refuses_a_payload_without_a_definition(route_app):
     assert not client.validate_workflow.called
 
 
+def test_test_proxies_the_api_and_writes_nothing(route_app):
+    module, client, flash, app = route_app
+    client.test_workflow.return_value = {"status": "success", "valid": True, "outcome": {"type": "no_match"}}
+
+    with app.test_request_context(
+        "/workflows/wf-1/test",
+        method="POST",
+        json={"request": {"uri": "/login", "country": "FR"}},
+        headers={"X-Requested-With": "XMLHttpRequest"},
+    ):
+        response = module.workflows_test.__wrapped__("wf-1")
+
+    assert json.loads(response.get_data())["outcome"]["type"] == "no_match"
+    assert not client.save_workflow_definition.called
+
+
+def test_test_refuses_a_payload_without_a_request(route_app):
+    module, client, flash, app = route_app
+    with app.test_request_context("/workflows/wf-1/test", method="POST", json={}, headers={"X-Requested-With": "XMLHttpRequest"}):
+        response, status = module.workflows_test.__wrapped__("wf-1")
+    assert status == 400
+    assert not client.test_workflow.called
+
+
+def test_test_is_allowed_in_readonly(route_app):
+    """Testing stores nothing, so a read-only database is no reason to refuse it."""
+    module, client, flash, app = route_app
+    client.readonly = True
+    client.test_workflow.return_value = {"status": "success", "valid": True, "outcome": {"type": "no_match"}}
+
+    with app.test_request_context(
+        "/workflows/wf-1/test",
+        method="POST",
+        json={"request": {"uri": "/", "country": "FR"}},
+        headers={"X-Requested-With": "XMLHttpRequest"},
+    ):
+        module.workflows_test.__wrapped__("wf-1")
+
+    assert client.test_workflow.called
+
+
 def test_save_reports_the_api_error_instead_of_pretending_it_worked(route_app):
     module, client, flash, app = route_app
     client.save_workflow_definition.side_effect = ApiClientError("Invalid regular expression", 400)

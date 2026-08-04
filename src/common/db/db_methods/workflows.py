@@ -249,7 +249,9 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
         # Multisite settings fall back to the global value, so both scopes are needed.
         fallback = {
             row.setting_id: row.value
-            for row in session.execute(select(Global_values.setting_id, Global_values.value).where(Global_values.setting_id.in_(required), Global_values.suffix == 0))
+            for row in session.execute(
+                select(Global_values.setting_id, Global_values.value).where(Global_values.setting_id.in_(required), Global_values.suffix == 0)
+            )
         }
         per_service = {
             (row.service_id, row.setting_id): row.value
@@ -282,6 +284,109 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
         if error := self._provider_prerequisite_error(session, definition, service_ids):
             return [{"path": "rules", "code": "provider_missing", "message": error}]
         return []
+
+    @staticmethod
+    def _service_enforcement(session, service_id: str) -> Dict[str, Any]:
+        """How the service would actually apply a match: ``SECURITY_MODE`` and ``DENY_HTTP_STATUS``.
+
+        Read the same way credentials are — per-service first, global as the fallback. Without
+        it the tester says "blocks with 403" against a service in ``detect`` mode, which is
+        wrong in the one direction that matters.
+        """
+        wanted = ("SECURITY_MODE", "DENY_HTTP_STATUS")
+        fallback = {
+            row.setting_id: row.value
+            for row in session.execute(
+                select(Global_values.setting_id, Global_values.value).where(Global_values.setting_id.in_(wanted), Global_values.suffix == 0)
+            )
+        }
+        per_service = {
+            row.setting_id: row.value
+            for row in session.execute(
+                select(Services_settings.setting_id, Services_settings.value).where(
+                    Services_settings.service_id == service_id, Services_settings.setting_id.in_(wanted), Services_settings.suffix == 0
+                )
+            )
+        }
+
+        def _read(setting: str, default: str) -> str:
+            value = per_service.get(setting)
+            if value is None:
+                value = fallback.get(setting)
+            return (value or "").strip() or default
+
+        try:
+            deny_status = int(_read("DENY_HTTP_STATUS", "403"))
+        except ValueError:
+            deny_status = 403
+        return {"security_mode": _read("SECURITY_MODE", "block"), "deny_status": deny_status}
+
+    def test_workflow_definition(
+        self, resource_id: str, *, definition: Optional[Dict[str, Any]] = None, service_id: str = ""
+    ) -> Tuple[Optional[Dict[str, Any]], List[Dict[str, str]]]:
+        """Assemble what the evaluator needs: the service's whole ladder, groups inlined.
+
+        Returns ``(payload, errors)``. ``errors`` carries validator output in the same shape
+        ``/validate`` returns, so a broken draft reuses the editor's existing error painting
+        instead of needing its own.
+
+        The candidate replaces this workflow *in place* in the service's order — position
+        matters, because the question the tester answers is usually "is my new rule shadowed
+        by one above it?", and that includes rules in other workflows.
+        """
+        with self._db_session() as session:
+            workflow = session.get(Workflows, resource_id)
+            if workflow is None:
+                return None, [{"path": "", "code": "not_found", "message": "Workflow not found"}]
+
+            group_index = self._get_resource_group_index(session, by="id")
+            if definition is None:
+                candidate = self._load_definition(workflow.definition)
+            else:
+                candidate, errors = validate_definition(definition, group_index=group_index)
+                if candidate is None:
+                    return None, errors
+
+            attached = self._attached_service_ids(session, resource_id)
+            target = service_id or (attached[0] if attached else "")
+            if not target:
+                # Nothing to evaluate against: the ladder is defined per service.
+                return {"service": None, "workflows": [], "group_index": group_index}, []
+
+            service = session.get(Services, target)
+            if service is None:
+                return None, [{"path": "", "code": "not_found", "message": "Service not found"}]
+
+            # Draft services compile to no ladder at all, so the honest answer is that the
+            # policy is not running there yet rather than a verdict that looks live.
+            ladder = [] if service.is_draft else self._service_workflows(session).get(target, [])
+            workflows = []
+            seen = False
+            for entry in ladder:
+                if entry["id"] == resource_id:
+                    seen = True
+                    workflows.append({"id": entry["id"], "name": entry["name"], "definition": candidate})
+                else:
+                    workflows.append({"id": entry["id"], "name": entry["name"], "definition": self._load_definition(entry["definition"])})
+            if not seen and not service.is_draft:
+                # Testing against a service this workflow is not attached to yet: append it,
+                # which is where an attach would put it (attachment order, newest last).
+                resource = session.get(Resources, resource_id)
+                workflows.append({"id": resource_id, "name": getattr(resource, "name", ""), "definition": candidate})
+
+            return (
+                {
+                    "service": {
+                        "id": target,
+                        "attached": target in attached,
+                        "is_draft": bool(service.is_draft),
+                        **self._service_enforcement(session, target),
+                    },
+                    "workflows": workflows,
+                    "group_index": group_index,
+                },
+                [],
+            )
 
     def _check_name(self, session, name: str, resource_id: str = "") -> Tuple[str, str]:
         normalized = name.strip()
