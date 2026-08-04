@@ -101,6 +101,20 @@ def test_the_placeholder_credential_is_one_value_everywhere():
     assert len(values) == 1, f"shipped manifests disagree on the placeholder credential: {sorted(values)}"
 
 
+@pytest.mark.parametrize("manifest", [path for path in MANIFESTS if not path.name.startswith("k8s.")], ids=lambda path: path.name)
+def test_every_service_comes_back_after_it_dies(manifest):
+    """Compose does not restart a container unless told to, and the scheduler does exit on
+    purpose -- it gives up once its error budget is spent. Without a policy that exit is
+    permanent: no config change is applied and no job is dispatched again, silently, until
+    somebody notices. install-bunkerweb.sh has always set one; these did not."""
+    text = manifest.read_text(encoding="utf-8")
+    services = text.count("\n    image:")
+
+    assert (
+        services and text.count('\n    restart: "unless-stopped"') == services
+    ), f"{manifest.name} leaves some of its {services} services with no restart policy"
+
+
 @pytest.mark.parametrize("manifest", COMPOSE, ids=lambda path: path.name)
 def test_every_stack_states_its_database_rather_than_relying_on_the_default(manifest):
     """The worker is the one component that reads an unset DATABASE_URI as "no database"
@@ -118,5 +132,5 @@ def test_a_file_backed_stack_shares_the_volume_holding_that_file(manifest):
     dsn = DATABASE_URI_VALUE.search(text)
     if not dsn or not dsn.group(1).startswith("sqlite"):
         return
-    assert "bw-worker-storage" not in text, f"{manifest.name} has no DATABASE_URI, so the worker cannot have its own /data"
+    assert "bw-worker-storage" not in text, f"{manifest.name} is SQLite-backed, so the worker cannot have a /data of its own"
     assert text.count("- bw-storage:/data") == 3, f"{manifest.name} must mount bw-storage:/data in the scheduler, the API and the worker"

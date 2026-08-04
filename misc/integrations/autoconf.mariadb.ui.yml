@@ -8,6 +8,7 @@ x-env: &env
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
+    restart: "unless-stopped"
     ports:
       - 80:8080
       - 443:8443
@@ -22,6 +23,7 @@ services:
 
   bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
       - bw-docker
@@ -35,6 +37,7 @@ services:
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
     volumes:
@@ -51,6 +54,7 @@ services:
 
   bw-api:
     image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
     environment:
       <<: *env
       API_USERNAME: "changeme"
@@ -61,6 +65,7 @@ services:
 
   bw-worker:
     image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bw-api
       - bw-jobs-broker
@@ -78,6 +83,7 @@ services:
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.7.0-beta
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-db
@@ -120,6 +126,7 @@ services:
 
   bw-db:
     image: mariadb:11
+    restart: "unless-stopped"
     command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
@@ -133,6 +140,7 @@ services:
 
   bw-docker:
     image: tecnativa/docker-socket-proxy:nightly
+    restart: "unless-stopped"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:

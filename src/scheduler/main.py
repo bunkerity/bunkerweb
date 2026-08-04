@@ -968,6 +968,10 @@ if __name__ == "__main__":
                     }
 
                     if API_CLIENT.readonly and changes == old_changes:
+                        # Reset here too: `continue` leaves the try statement, so the `else`
+                        # below never runs, and on a read-only instance this is the branch the
+                        # loop takes almost every second.
+                        errors = 0
                         continue
 
                     # check if the plugins have changed since last time
@@ -1071,6 +1075,13 @@ if __name__ == "__main__":
                         stop(1)
                     errors += 1
                     sleep(5)
+                else:
+                    # Consecutive failures, not failures ever. Without this the counter only
+                    # goes up for the life of the process, so six unrelated hiccups spread over
+                    # days -- a 429 from the API's own rate limit, a momentary DB lock -- add up
+                    # to a scheduler that exits and, with no restart policy on the shipped
+                    # stacks, never comes back.
+                    errors = 0
 
             if NEED_RELOAD:
                 APPLYING_CHANGES.set()

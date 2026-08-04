@@ -1,6 +1,7 @@
 services:
   bunkerweb-all-in-one:
     image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+    restart: "unless-stopped"
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -18,6 +19,7 @@ services:
 
   bw-db:
     image: mariadb:11
+    restart: "unless-stopped"
     command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"

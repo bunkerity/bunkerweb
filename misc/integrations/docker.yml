@@ -12,6 +12,7 @@ x-env: &env
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
+    restart: "unless-stopped"
     ports:
       - 80:8080
       - 443:8443
@@ -25,6 +26,7 @@ services:
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
     volumes:
@@ -38,6 +40,7 @@ services:
 
   bw-api:
     image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
     volumes:
       # No DATABASE_URI anywhere in this stack, so every component falls back to SQLite at
       # /var/lib/bunkerweb/db.sqlite3 -> /data/lib/db.sqlite3. That file is the database, so the
@@ -54,6 +57,7 @@ services:
 
   bw-worker:
     image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bw-api
       - bw-jobs-broker

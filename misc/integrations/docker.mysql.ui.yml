@@ -7,6 +7,7 @@ x-env: &env
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
+    restart: "unless-stopped"
     ports:
       - 80:8080
       - 443:8443
@@ -21,6 +22,7 @@ services:
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
     volumes:
@@ -45,6 +47,7 @@ services:
 
   bw-api:
     image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
     environment:
       <<: *env
       API_USERNAME: "changeme"
@@ -55,6 +58,7 @@ services:
 
   bw-worker:
     image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bw-api
       - bw-jobs-broker
@@ -73,6 +77,7 @@ services:
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.7.0-beta
+    restart: "unless-stopped"
     environment:
       <<: *env
       ADMIN_USERNAME: "changeme"
@@ -109,6 +114,7 @@ services:
 
   bw-db:
     image: mysql:9
+    restart: "unless-stopped"
     command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
