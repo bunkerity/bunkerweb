@@ -4,7 +4,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from base64 import b64decode
 from traceback import format_exc
 from typing import Tuple, Union, Optional, Literal
 
@@ -12,7 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from certificate_validation import validate_certificate_pair  # type: ignore
+from certificate_validation import normalize_pem, validate_certificate_pair  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
@@ -34,45 +33,12 @@ def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["ce
         if not data:
             return None
 
-        # If the data already looks like PEM, use it directly.
-        text_data = data.encode()
-        if text_data.strip().startswith(b"-----BEGIN"):
-            if data_type == "cert" and not text_data.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
-                LOGGER.error(f"Invalid certificate format for server {server_name}")
-                return None
-            if data_type == "key" and b"PRIVATE KEY" not in text_data:
-                LOGGER.error(f"Invalid key format for server {server_name}")
-                return None
-            return text_data
-
-        # Try strict base64 decode. We remove whitespaces and pad if needed.
-        decoded = b""
-        try:
-            base64_data = "".join(data.split())
-            base64_data += "=" * (-len(base64_data) % 4)
-            decoded = b64decode(base64_data, validate=True)
-            if data_type == "cert" and not decoded.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
-                raise ValueError("decoded certificate data is not PEM")
-            if data_type == "key" and (not decoded.strip().startswith(b"-----BEGIN") or b"PRIVATE KEY" not in decoded):
-                raise ValueError("decoded key data is not PEM")
-            return decoded
-        except BaseException:
-            LOGGER.debug(format_exc())
-            LOGGER.warning(f"Failed to decode {data_type} data as base64 for server {server_name}, trying as plain text")
-
-            # Fallback: validate and use plaintext data.
-            try:
-                if data_type == "cert" and not text_data.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
-                    LOGGER.error(f"Invalid certificate format for server {server_name}")
-                    return None
-                elif data_type == "key" and (not text_data.strip().startswith(b"-----BEGIN") or b"PRIVATE KEY" not in text_data):
-                    LOGGER.error(f"Invalid key format for server {server_name}")
-                    return None
-                return text_data
-            except BaseException:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Error while processing {data_type} data for server {server_name}")
-                return None
+        # Shared with the UI so a value accepted on one side is accepted on the other.
+        pem, error = normalize_pem(data, data_type)
+        if not pem:
+            LOGGER.error(f"{error} for server {server_name}")
+            return None
+        return pem
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Error processing {data_type} for {server_name}: {e}")

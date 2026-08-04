@@ -147,6 +147,7 @@
     "local_time": "Heure locale",
     "collapse_multiline": "Replier",
     "search": "Rechercher",
+    "validate_certificate": "Valider le certificat",
     "wrap": "Retour ligne",
     "select_file": "Choisir Fichier",
     "select_page": "Choisir Page",
@@ -1762,6 +1763,13 @@
     "prompt": "Veuillez entrer votre code TOTP."
   },
   "validation": {
+    "certificate_checking": "Vérification ...",
+    "certificate_expires_in": "expire dans {{days}} jours",
+    "certificate_failed": "La requête de validation a échoué.",
+    "certificate_file_mode": "Seules les données collées ou téléversées peuvent être vérifiées ici. Un chemin de certificat est lu par le planificateur, auquel l'interface web n'a pas accès.",
+    "certificate_missing": "Renseignez d'abord le certificat et la clé.",
+    "certificate_subject": "Sujet :",
+    "certificate_valid": "Le certificat et la clé correspondent.",
     "default_field_name": "Ce champ",
     "invalid_date": "Date invalide",
     "ip_global_duplicate": "Cette adresse IP est déjà bannie globalement.",

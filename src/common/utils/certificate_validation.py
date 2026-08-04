@@ -8,14 +8,52 @@ module makes the pair fail loudly, at the point it is supplied, with the reason.
 
 Imported by:
   - src/common/core/customcert/jobs/custom-cert.py (scheduler)
+  - src/ui/app/routes/services.py (web UI, pre-save validation)
 """
 
+from base64 import b64decode
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from cryptography import x509
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_pem_private_key
 from cryptography.x509.oid import NameOID
+
+
+def normalize_pem(data: str, kind: Literal["cert", "key"]) -> Tuple[Optional[bytes], str]:
+    """Turn a certificate or key setting value into PEM bytes.
+
+    The settings accept PEM text or a base64 wrapper around it, so both the
+    scheduler job and the UI have to agree on what is acceptable. Returns
+    (pem_bytes, error): exactly one of the two is set.
+    """
+    if not data:
+        return None, f"No {'certificate' if kind == 'cert' else 'key'} data supplied"
+
+    bad_format = f"Invalid {'certificate' if kind == 'cert' else 'key'} format"
+
+    def _is_pem(candidate: bytes) -> bool:
+        stripped = candidate.strip()
+        if kind == "cert":
+            return stripped.startswith(b"-----BEGIN CERTIFICATE-----")
+        return stripped.startswith(b"-----BEGIN") and b"PRIVATE KEY" in candidate
+
+    text_data = data.encode()
+
+    # Already PEM: take it as-is rather than trying to decode it as base64.
+    if text_data.strip().startswith(b"-----BEGIN"):
+        return (text_data, "") if _is_pem(text_data) else (None, bad_format)
+
+    try:
+        base64_data = "".join(data.split())
+        base64_data += "=" * (-len(base64_data) % 4)
+        decoded = b64decode(base64_data, validate=True)
+        if not _is_pem(decoded):
+            raise ValueError("decoded data is not PEM")
+        return decoded, ""
+    except BaseException:
+        # Not base64 either, so the value can only be malformed PEM at this point.
+        return None, bad_format
 
 
 def _public_bytes(key) -> bytes:
@@ -111,3 +149,33 @@ def validate_certificate_pair(cert_pem: bytes, key_pem: bytes) -> Dict[str, Any]
 
     result["ok"] = True
     return result
+
+
+def _name_matches(pattern: str, name: str) -> bool:
+    pattern = pattern.lower().rstrip(".")
+    name = name.lower().rstrip(".")
+    if pattern == name:
+        return True
+    if not pattern.startswith("*."):
+        return False
+    # A wildcard covers exactly one label, so "*.example.com" takes "a.example.com"
+    # but neither "example.com" nor "a.b.example.com".
+    suffix = pattern[1:]
+    if not name.endswith(suffix):
+        return False
+    label = name[: -len(suffix)]
+    return bool(label) and "." not in label
+
+
+def uncovered_server_names(cert: Dict[str, Any], server_names: List[str]) -> List[str]:
+    """Return the server names the certificate does not present a name for.
+
+    A mismatch here is not a reason to reject the pair, only to warn: the
+    certificate is still usable and the operator may be serving it on purpose.
+    """
+    # subjectAltName wins whenever it is present; the common name is only a
+    # fallback for certificates old enough to predate it.
+    cert_names = cert.get("sans") or ([cert["subject_cn"]] if cert.get("subject_cn") else [])
+    if not cert_names:
+        return server_names.copy()
+    return [name for name in server_names if not any(_name_matches(pattern, name) for pattern in cert_names)]
