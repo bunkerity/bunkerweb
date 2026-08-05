@@ -283,3 +283,39 @@ def test_extract_provider_google_sidecar_path_finalized(monkeypatch):
     # the env var must point at the deterministic cache path so the INI body is stable
     basename = next(iter(prov.sidecars))
     assert prov.env["GCE_SERVICE_ACCOUNT_FILE"] == LETSENCRYPT_CACHE_PATH.joinpath(basename).as_posix()
+
+
+def test_every_cloudflare_env_name_lego_accepts_satisfies_the_requirement():
+    """lego treats CF_* and CLOUDFLARE_* as the same variable, and CF_ZONE_API_TOKEN is the only
+    way to use a zone-scoped token. Refusing any of them means the service never gets a cert."""
+    for key in ("cf_dns_api_token", "cloudflare_dns_api_token", "cf_zone_api_token", "cloudflare_zone_api_token"):
+        assert P.translate_credentials("cloudflare", "cloudflare", {key: "tok"}) is not None, key
+
+    for pair in (("cf_api_email", "cf_api_key"), ("cloudflare_email", "cloudflare_api_key")):
+        creds = {pair[0]: "admin@example.com", pair[1]: "secret"}
+        assert P.translate_credentials("cloudflare", "cloudflare", creds) is not None, pair
+
+
+def test_cloudflare_still_refuses_a_config_carrying_no_credential():
+    assert P.translate_credentials("cloudflare", "cloudflare", {"unrelated": "x"}) is None
+
+
+def test_a_provider_with_no_registry_env_list_passes_its_keys_through():
+    """`exec` declares neither credentials_env nor additional_env, and the vendored registry lags
+    the pinned lego version. Dropping a key guarantees failure; passing it through does not."""
+    provider = P.translate_credentials("exec", "exec", {"exec_path": "/usr/local/bin/hook.sh"})
+    assert provider is not None
+    assert provider.env["EXEC_PATH"] == "/usr/local/bin/hook.sh"
+
+
+def test_gandi_accepts_the_legacy_api_key_lego_still_supports():
+    """certbot-dns-gandi users carry an api_key, and lego's gandiv5 lists GANDIV5_API_KEY next to
+    the personal access token. Requiring the PAT alone refused every migrating install."""
+    provider = P.translate_credentials("gandiv5", "gandi", {"api_key": "legacy-key"})
+    assert provider is not None
+    assert provider.env["GANDIV5_API_KEY"] == "legacy-key"
+
+    pat = P.translate_credentials("gandiv5", "gandi", {"token": "pat"})
+    assert pat is not None and pat.env["GANDIV5_PERSONAL_ACCESS_TOKEN"] == "pat"
+
+    assert P.translate_credentials("gandiv5", "gandi", {"unrelated": "x"}) is None

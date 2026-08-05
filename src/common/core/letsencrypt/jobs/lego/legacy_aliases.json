@@ -3,7 +3,6 @@
     "note": "Hand-authored backward-compat map: historical BunkerWeb DNS provider names + their legacy credential-item key spellings -> lego provider code + lego env-var names. Source of truth for the key spellings is the pre-1.7 Pydantic classes in letsencrypt_providers.py. Keys in every cred_key_map are lowercased because extract_provider() lowercases credential-item keys before lookup. 'required' lists lego env vars that must be present after translation (early-fail), and 'required_any' lists accepted alternative groups. 'defaults' are applied when absent. 'special' triggers extra handling in translate_credentials(): ionos_combine (prefix.secret -> IONOS_API_KEY), rfc2136_port (fold port into DNSUPDATE_NAMESERVER), google_sa (reassemble a service-account JSON sidecar -> GCE_SERVICE_ACCOUNT_FILE).",
     "lego_version": "v5.2.0"
   },
-
   "bunny": {
     "lego_code": "bunny",
     "cred_key_map": {
@@ -13,7 +12,6 @@
     },
     "required": ["BUNNY_API_KEY"]
   },
-
   "cloudns": {
     "lego_code": "cloudns",
     "cred_key_map": {
@@ -30,7 +28,6 @@
     "required": ["CLOUDNS_AUTH_PASSWORD"],
     "required_any": [["CLOUDNS_AUTH_ID"], ["CLOUDNS_SUB_AUTH_ID"]]
   },
-
   "cloudflare": {
     "lego_code": "cloudflare",
     "cred_key_map": {
@@ -44,9 +41,17 @@
       "cloudflare_api_key": "CF_API_KEY",
       "api_key": "CF_API_KEY"
     },
-    "required_any": [["CF_DNS_API_TOKEN"], ["CF_API_EMAIL", "CF_API_KEY"]]
+    "required_any": [["CF_DNS_API_TOKEN"], ["CF_API_EMAIL", "CF_API_KEY"]],
+    "env_aliases": {
+      "CF_DNS_API_TOKEN": [
+        "CLOUDFLARE_DNS_API_TOKEN",
+        "CF_ZONE_API_TOKEN",
+        "CLOUDFLARE_ZONE_API_TOKEN"
+      ],
+      "CF_API_EMAIL": ["CLOUDFLARE_EMAIL"],
+      "CF_API_KEY": ["CLOUDFLARE_API_KEY"]
+    }
   },
-
   "desec": {
     "lego_code": "desec",
     "cred_key_map": {
@@ -56,7 +61,6 @@
     },
     "required": ["DESEC_TOKEN"]
   },
-
   "digitalocean": {
     "lego_code": "digitalocean",
     "cred_key_map": {
@@ -66,7 +70,6 @@
     },
     "required": ["DO_AUTH_TOKEN"]
   },
-
   "domainoffensive": {
     "lego_code": "dode",
     "cred_key_map": {
@@ -76,7 +79,6 @@
     },
     "required": ["DODE_TOKEN"]
   },
-
   "domeneshop": {
     "lego_code": "domeneshop",
     "cred_key_map": {
@@ -91,7 +93,6 @@
     },
     "required": ["DOMENESHOP_API_TOKEN", "DOMENESHOP_API_SECRET"]
   },
-
   "dnsimple": {
     "lego_code": "dnsimple",
     "cred_key_map": {
@@ -101,7 +102,6 @@
     },
     "required": ["DNSIMPLE_OAUTH_TOKEN"]
   },
-
   "dnsmadeeasy": {
     "lego_code": "dnsmadeeasy",
     "cred_key_map": {
@@ -114,7 +114,6 @@
     },
     "required": ["DNSMADEEASY_API_KEY", "DNSMADEEASY_API_SECRET"]
   },
-
   "duckdns": {
     "lego_code": "duckdns",
     "cred_key_map": {
@@ -124,7 +123,6 @@
     },
     "required": ["DUCKDNS_TOKEN"]
   },
-
   "dynu": {
     "lego_code": "dynu",
     "cred_key_map": {
@@ -134,17 +132,18 @@
     },
     "required": ["DYNU_API_KEY"]
   },
-
   "gandi": {
     "lego_code": "gandiv5",
     "cred_key_map": {
       "dns_gandi_token": "GANDIV5_PERSONAL_ACCESS_TOKEN",
       "gandi_token": "GANDIV5_PERSONAL_ACCESS_TOKEN",
-      "token": "GANDIV5_PERSONAL_ACCESS_TOKEN"
+      "token": "GANDIV5_PERSONAL_ACCESS_TOKEN",
+      "dns_gandi_api_key": "GANDIV5_API_KEY",
+      "gandi_api_key": "GANDIV5_API_KEY",
+      "api_key": "GANDIV5_API_KEY"
     },
-    "required": ["GANDIV5_PERSONAL_ACCESS_TOKEN"]
+    "required_any": [["GANDIV5_PERSONAL_ACCESS_TOKEN"], ["GANDIV5_API_KEY"]]
   },
-
   "gehirn": {
     "lego_code": "gehirn",
     "cred_key_map": {
@@ -157,7 +156,6 @@
     },
     "required": ["GEHIRN_TOKEN_ID", "GEHIRN_TOKEN_SECRET"]
   },
-
   "godaddy": {
     "lego_code": "godaddy",
     "cred_key_map": {
@@ -173,7 +171,6 @@
     },
     "required": ["GODADDY_API_KEY", "GODADDY_API_SECRET"]
   },
-
   "google": {
     "lego_code": "gcloud",
     "special": "google_sa",
@@ -225,7 +222,6 @@
       "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
     }
   },
-
   "hetzner": {
     "lego_code": "hetzner",
     "cred_key_map": {
@@ -235,7 +231,6 @@
     },
     "required": ["HETZNER_API_TOKEN"]
   },
-
   "infomaniak": {
     "lego_code": "infomaniak",
     "cred_key_map": {
@@ -245,7 +240,6 @@
     },
     "required": ["INFOMANIAK_ACCESS_TOKEN"]
   },
-
   "ionos": {
     "lego_code": "ionos",
     "special": "ionos_combine",
@@ -259,7 +253,6 @@
     },
     "required": ["IONOS_API_KEY"]
   },
-
   "linode": {
     "lego_code": "linode",
     "cred_key_map": {
@@ -269,7 +262,6 @@
     },
     "required": ["LINODE_TOKEN"]
   },
-
   "luadns": {
     "lego_code": "luadns",
     "cred_key_map": {
@@ -282,7 +274,6 @@
     },
     "required": ["LUADNS_API_USERNAME", "LUADNS_API_TOKEN"]
   },
-
   "njalla": {
     "lego_code": "njalla",
     "cred_key_map": {
@@ -294,7 +285,6 @@
     },
     "required": ["NJALLA_TOKEN"]
   },
-
   "nsone": {
     "lego_code": "ns1",
     "cred_key_map": {
@@ -304,7 +294,6 @@
     },
     "required": ["NS1_API_KEY"]
   },
-
   "ovh": {
     "lego_code": "ovh",
     "cred_key_map": {
@@ -321,14 +310,15 @@
       "ovh_consumer_key": "OVH_CONSUMER_KEY",
       "consumer_key": "OVH_CONSUMER_KEY"
     },
-    "defaults": { "OVH_ENDPOINT": "ovh-eu" },
+    "defaults": {
+      "OVH_ENDPOINT": "ovh-eu"
+    },
     "required": [
       "OVH_APPLICATION_KEY",
       "OVH_APPLICATION_SECRET",
       "OVH_CONSUMER_KEY"
     ]
   },
-
   "pdns": {
     "lego_code": "pdns",
     "cred_key_map": {
@@ -344,7 +334,6 @@
     },
     "required": ["PDNS_API_URL", "PDNS_API_KEY"]
   },
-
   "rfc2136": {
     "lego_code": "dnsupdate",
     "special": "rfc2136_port",
@@ -367,7 +356,6 @@
     },
     "required": ["DNSUPDATE_NAMESERVER"]
   },
-
   "route53": {
     "lego_code": "route53",
     "cred_key_map": {
@@ -385,7 +373,6 @@
     },
     "required": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]
   },
-
   "sakuracloud": {
     "lego_code": "sakuracloud",
     "cred_key_map": {
@@ -398,7 +385,6 @@
     },
     "required": ["SAKURACLOUD_ACCESS_TOKEN", "SAKURACLOUD_ACCESS_TOKEN_SECRET"]
   },
-
   "scaleway": {
     "lego_code": "scaleway",
     "cred_key_map": {
@@ -408,7 +394,6 @@
     },
     "required": ["SCW_SECRET_KEY"]
   },
-
   "transip": {
     "lego_code": "transip",
     "cred_key_map": {

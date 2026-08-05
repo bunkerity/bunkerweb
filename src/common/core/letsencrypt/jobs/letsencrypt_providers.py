@@ -192,6 +192,7 @@ def translate_credentials(
 
     if spec:
         known = _known_env(lego_code)
+        legacy_prefix = f"{lego_code.upper().replace('-', '_')}_"
         cred_map = spec.get("cred_key_map", {})
         for key, value in credential_items.items():
             if key in cred_map:
@@ -199,6 +200,11 @@ def translate_credentials(
             elif key.upper() in known:
                 # Operators may also use raw lego env-var names with a legacy provider name.
                 env[key.upper()] = value
+            elif f"{legacy_prefix}{key.upper()}" in known:
+                # The unprefixed legacy spelling of a prefixed lego variable — gandi's `api_key`
+                # is GANDI_API_KEY. The direct-provider branch already resolves these; without the
+                # same step here a documented legacy key is dropped with only a warning.
+                env[f"{legacy_prefix}{key.upper()}"] = value
             elif logger is not None:
                 logger.warning(f"Ignoring unsupported credential key '{key}' for DNS provider '{provider_input}'.")
 
@@ -213,14 +219,24 @@ def translate_credentials(
         elif special == "google_sa":
             sidecars = _apply_google_sa(spec, credential_items, env)
 
-        missing = [var for var in spec.get("required", []) if not env.get(var)]
+        # lego accepts several spellings of the same credential (CF_DNS_API_TOKEN and
+        # CLOUDFLARE_DNS_API_TOKEN are one variable to it). The raw-name branch above lets an
+        # operator use any of them, so the requirement check has to treat them as equivalent too —
+        # otherwise a perfectly valid zone-scoped token is refused and the service never gets a
+        # certificate. ``env_aliases`` names the alternates per canonical variable.
+        env_aliases = spec.get("env_aliases", {})
+
+        def _satisfied(var: str) -> bool:
+            return bool(env.get(var)) or any(env.get(alias) for alias in env_aliases.get(var, ()))
+
+        missing = [var for var in spec.get("required", []) if not _satisfied(var)]
         if missing:
             if logger is not None:
                 logger.error(f"Missing required credential(s) for provider '{provider_input}' " f"({provider_display_name(lego_code)}): {', '.join(missing)}.")
             return None
 
         required_any = spec.get("required_any", [])
-        if required_any and not any(all(env.get(var) for var in alternative) for alternative in required_any):
+        if required_any and not any(all(_satisfied(var) for var in alternative) for alternative in required_any):
             if logger is not None:
                 alternatives = " or ".join(" + ".join(group) for group in required_any)
                 logger.error(f"Missing required credential combination for provider '{provider_input}': {alternatives}.")
@@ -235,6 +251,14 @@ def translate_credentials(
                 candidates = [candidate for candidate in known if candidate.endswith(f"_{raw}")]
             if len(candidates) == 1:
                 env[candidates[0]] = value
+            elif not known:
+                # The registry lists no env var at all for this provider (``exec`` is the one such
+                # entry), so there is nothing to match against and dropping the key guarantees no
+                # certificate. Pass it through — lego rejects it if it is wrong. Providers that DO
+                # declare an env list keep the strict behaviour, so a typo is still caught.
+                env[raw] = value
+                if logger is not None:
+                    logger.warning(f"DNS provider '{provider_input}' declares no known credential keys; passing '{key}' through as {raw}.")
             elif logger is not None:
                 logger.warning(f"Ignoring unsupported credential key '{key}' for DNS provider '{provider_input}'.")
 
