@@ -1602,6 +1602,7 @@ x-ui-env: &bw-ui-env
   AUTOCONF_MODE: "yes"
   DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
   API_URL: "http://bw-api:8888"
+  API_TOKEN: "${API_TOKEN}"
   CELERY_BROKER_URL: "redis://redis:6379/1"
 
 services:
@@ -1920,7 +1921,7 @@ services:
       API_WHITELIST_IP: "${API_WHITELIST_IP}"
       API_TOKEN: "${API_TOKEN}"
       API_URL: "http://bw-api:8888"
-  CELERY_BROKER_URL: "redis://redis:6379/1"
+      CELERY_BROKER_URL: "redis://redis:6379/1"
       SERVER_NAME: ""
       MULTISITE: "yes"
       USE_REDIS: "yes"
@@ -1936,6 +1937,7 @@ services:
     environment:
       DATABASE_URI: "${DATABASE_URI}"
       API_TOKEN: "${API_TOKEN}"
+      CELERY_BROKER_URL: "redis://redis:6379/1"
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1949,6 +1951,7 @@ services:
       DATABASE_URI: "${DATABASE_URI}"
       API_TOKEN: "${API_TOKEN}"
       BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
+      CELERY_BROKER_URL: "redis://redis:6379/1"
     volumes:
       # Its own volume: DATABASE_URI points at a real server here, so this /data holds
       # nothing but a scratch tree the worker rebuilds from the database -- no reason to

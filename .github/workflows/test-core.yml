@@ -27,11 +27,17 @@ jobs:
         run: docker pull ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} bunkerweb-tests
       - name: Pull Scheduler image
         run: docker pull ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} scheduler-tests
+      - name: Pull API image
+        run: docker pull ghcr.io/bunkerity/api-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/api-tests:${{ inputs.RELEASE }} api-tests
+      - name: Pull worker image
+        run: docker pull ghcr.io/bunkerity/worker-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/worker-tests:${{ inputs.RELEASE }} worker-tests
       # Run test
       - name: Run test
         run: |
           cd ./tests/core/${{ inputs.TEST }}
           find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb:.*@bunkerweb-tests@" {} \;
           find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" {} \;
+          find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb-api:.*@api-tests@" {} \;
+          find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb-worker:.*@worker-tests@" {} \;
           chmod +x ./test.sh
           ./test.sh "docker" "${{ inputs.TEST }}"

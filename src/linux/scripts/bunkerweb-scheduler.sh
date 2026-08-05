@@ -207,7 +207,7 @@ EOL
                 REVISION=$(find "$MIGRATION_DIR" -maxdepth 1 -type f -name "*_upgrade_to_version_${NORMALIZED_VERSION}.py" -exec basename {} \; | awk -F_ '{print $1}')
 
                 if [ -z "$REVISION" ]; then
-                    log "SYSTEMCTL" "❌" "No migration file found for database version: $current_version"
+                    log "SYSTEMCTL" "❌" "Database version $current_version cannot be used by installed BunkerWeb $installed_version; restore a compatible database backup before starting this version"
                     exit 1
                 fi
 

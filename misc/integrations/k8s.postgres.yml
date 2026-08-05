@@ -87,6 +87,8 @@ spec:
             # 10.0.0.0/8 is the cluster internal subnet
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8"
+            - name: API_TOKEN
+              value: "changeme"
           livenessProbe:
             exec:
               command:
@@ -130,6 +132,8 @@ spec:
               value: "yes"
             - name: "DATABASE_URI"
               value: "postgresql://bunkerweb:changeme@svc-bunkerweb-db:5432/db"
+            - name: API_TOKEN
+              value: "changeme"
 ---
 apiVersion: apps/v1
 kind: Deployment

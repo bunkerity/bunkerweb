@@ -11,7 +11,9 @@ Two ways that has happened, both of them silent until something is actually boot
   scheduler waiting on an API that is never coming.
 """
 
+import json
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -20,6 +22,16 @@ from password_utils import USER_PASSWORD_RX
 
 ROOT = Path(__file__).resolve().parents[3]
 MANIFESTS = sorted((ROOT / "misc" / "integrations").glob("*.yml"))
+KUBERNETES = [path for path in MANIFESTS if path.name.startswith("k8s.")]
+
+INSTALLER_COMPOSE = {
+    match.group("name"): match.group("compose")
+    for match in re.finditer(
+        r'^render_docker_compose_(?P<name>\w+)\(\) \{\n\s+cat > "\$DOCKER_COMPOSE_FILE" <<\'COMPOSE\'\n(?P<compose>.*?)\nCOMPOSE$',
+        (ROOT / "misc" / "install-bunkerweb.sh").read_text(encoding="utf-8"),
+        re.DOTALL | re.MULTILINE,
+    )
+}
 
 # Stacks built on the all-in-one image run the worker and broker inside the single container
 # (supervisor.d/worker.ini + an embedded Redis), so they carry no scheduler image and are not
@@ -46,6 +58,25 @@ CREDENTIALS = (
 DATABASE_URI_VALUE = re.compile(r'^\s*DATABASE_URI:\s*"([^"]*)"', re.MULTILINE)
 
 
+def _compose_config(compose):
+    result = subprocess.run(
+        ["docker", "compose", "-f", "-", "config", "--no-interpolate", "--format", "json"],
+        cwd=ROOT,
+        input=compose,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    return json.loads(result.stdout)
+
+
+def _kubernetes_workload(manifest, image):
+    documents = manifest.read_text(encoding="utf-8").split("\n---\n")
+    matches = [document for document in documents if re.search(rf"^\s+image: {re.escape(image)}:[^\n]+$", document, re.MULTILINE)]
+    assert len(matches) == 1, f"expected one {image} workload in {manifest.name}, got {len(matches)}"
+    return matches[0]
+
+
 def _uid(component):
     dockerfile = (ROOT / "src" / component / "Dockerfile").read_text(encoding="utf-8")
     match = DOCKERFILE_UID.search(dockerfile)
@@ -56,6 +87,60 @@ def _uid(component):
 def test_there_are_manifests_to_check():
     """A glob that silently matches nothing would make every assertion below vacuously true."""
     assert len(CONTROL_PLANE) >= 20
+
+
+def test_all_installer_compose_templates_are_checked():
+    assert set(INSTALLER_COMPOSE) == {"standard", "autoconf", "manager", "worker", "scheduler", "ui", "api"}
+
+
+@pytest.mark.parametrize("name", INSTALLER_COMPOSE)
+def test_installer_compose_template_is_valid(name):
+    _compose_config(INSTALLER_COMPOSE[name])
+
+
+def test_installer_scheduler_stack_can_run_jobs():
+    services = _compose_config(INSTALLER_COMPOSE["scheduler"])["services"]
+    assert {"bw-api", "bw-worker", "redis"} <= services.keys()
+    for service in ("bw-scheduler", "bw-api", "bw-worker"):
+        assert services[service]["environment"]["CELERY_BROKER_URL"] == "redis://redis:6379/1"
+
+
+def test_installer_autoconf_clients_receive_api_token():
+    services = _compose_config(INSTALLER_COMPOSE["autoconf"])["services"]
+    for service in ("bw-autoconf", "bw-ui"):
+        assert services[service]["environment"]["API_TOKEN"] == "${API_TOKEN}"
+
+
+def test_postgres_ui_instance_receives_api_token():
+    manifest = ROOT / "misc" / "integrations" / "docker.postgres.ui.yml"
+    assert _compose_config(manifest.read_text(encoding="utf-8"))["services"]["bunkerweb"]["environment"]["API_TOKEN"] == "changeme"
+
+
+@pytest.mark.parametrize("manifest", KUBERNETES, ids=lambda path: path.name)
+@pytest.mark.parametrize("image", ("bunkerity/bunkerweb", "bunkerity/bunkerweb-autoconf"))
+def test_kubernetes_internal_api_clients_receive_api_token(manifest, image):
+    workload = _kubernetes_workload(manifest, image)
+    assert re.search(r'- name: API_TOKEN\n\s+value: "changeme"', workload)
+
+
+def test_staging_builds_and_loads_every_job_component():
+    staging = (ROOT / ".github" / "workflows" / "staging.yml").read_text(encoding="utf-8")
+    runner = (ROOT / ".github" / "workflows" / "staging-tests.yml").read_text(encoding="utf-8")
+    assert "image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]" in staging
+    assert "dockerfile: src/worker/Dockerfile" in staging
+    assert "bunkerity/bunkerweb-worker:testing" in staging
+    for image in ("api", "worker"):
+        assert f"ghcr.io/bunkerity/{image}-tests:testing" in runner
+        assert f"local/{image}-tests:latest" in runner
+
+
+def test_core_workflow_retags_every_job_component():
+    workflow = (ROOT / ".github" / "workflows" / "test-core.yml").read_text(encoding="utf-8")
+    branch_workflow = (ROOT / ".github" / "workflows" / "1.7-dev.yml").read_text(encoding="utf-8")
+    assert "image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]" in branch_workflow
+    for component, image in (("api", "bunkerweb-api"), ("worker", "bunkerweb-worker")):
+        assert f"ghcr.io/bunkerity/{component}-tests:${{{{ inputs.RELEASE }}}}" in workflow
+        assert f"s@bunkerity/{image}:.*@{component}-tests@" in workflow
 
 
 @pytest.mark.parametrize("manifest", CONTROL_PLANE, ids=lambda path: path.name)

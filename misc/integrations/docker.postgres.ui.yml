@@ -14,6 +14,7 @@ services:
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
+      <<: *env
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     networks:
       - bw-universe

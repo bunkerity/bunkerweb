@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]
         include:
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -32,6 +32,8 @@ jobs:
             dockerfile: src/ui/Dockerfile
           - image: api
             dockerfile: src/api/Dockerfile
+          - image: worker
+            dockerfile: src/worker/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
@@ -131,6 +133,8 @@ jobs:
             to: bunkerweb-ui
           - from: api
             to: bunkerweb-api
+          - from: worker
+            to: bunkerweb-worker
           - from: all-in-one
             to: bunkerweb-all-in-one
     steps:

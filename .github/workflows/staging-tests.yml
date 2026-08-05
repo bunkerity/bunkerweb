@@ -36,6 +36,10 @@ jobs:
         if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
       - run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing local/scheduler-tests:latest
         if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
+      - run: docker pull ghcr.io/bunkerity/api-tests:testing && docker tag ghcr.io/bunkerity/api-tests:testing local/api-tests:latest
+        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
+      - run: docker pull ghcr.io/bunkerity/worker-tests:testing && docker tag ghcr.io/bunkerity/worker-tests:testing local/worker-tests:latest
+        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
       - run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing local/autoconf-tests:latest
         if: contains(fromJSON('["autoconf"]'), inputs.TYPE)
       - name: Install test dependencies

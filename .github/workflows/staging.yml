@@ -15,7 +15,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]
         include:
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -27,6 +27,8 @@ jobs:
             dockerfile: src/ui/Dockerfile
           - image: api
             dockerfile: src/api/Dockerfile
+          - image: worker
+            dockerfile: src/worker/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
@@ -176,6 +178,8 @@ jobs:
         run: docker pull ghcr.io/bunkerity/ui-tests:testing && docker tag ghcr.io/bunkerity/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
       - name: Push API image
         run: docker pull ghcr.io/bunkerity/api-tests:testing && docker tag ghcr.io/bunkerity/api-tests:testing bunkerity/bunkerweb-api:testing && docker push bunkerity/bunkerweb-api:testing && docker tag bunkerity/bunkerweb-api:testing ghcr.io/bunkerity/bunkerweb-api:testing && docker push ghcr.io/bunkerity/bunkerweb-api:testing
+      - name: Push worker image
+        run: docker pull ghcr.io/bunkerity/worker-tests:testing && docker tag ghcr.io/bunkerity/worker-tests:testing bunkerity/bunkerweb-worker:testing && docker push bunkerity/bunkerweb-worker:testing && docker tag bunkerity/bunkerweb-worker:testing ghcr.io/bunkerity/bunkerweb-worker:testing && docker push ghcr.io/bunkerity/bunkerweb-worker:testing
       - name: Push all-in-one image
         run: docker pull ghcr.io/bunkerity/all-in-one-tests:testing && docker tag ghcr.io/bunkerity/all-in-one-tests:testing bunkerity/bunkerweb-all-in-one:testing && docker push bunkerity/bunkerweb-all-in-one:testing && docker tag bunkerity/bunkerweb-all-in-one:testing ghcr.io/bunkerity/bunkerweb-all-in-one:testing && docker push ghcr.io/bunkerity/bunkerweb-all-in-one:testing
 
