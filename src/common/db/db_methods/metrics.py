@@ -352,6 +352,71 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         return facets
 
     @retry_on_transient_db_errors
+    def get_metrics_threatmap(
+        self,
+        *,
+        start: int,
+        end: int,
+        recent_limit: int = 50,
+        facet_limit: int = 25,
+        filters: Optional[Dict[str, List[str]]] = None,
+    ) -> Dict[str, Any]:
+        """Everything the threatmap page paints, for the window ``[start, end)``, in one round trip:
+        ``{count, by_country, by_server, by_reason, recent}``.
+
+        Deliberately not ``get_metrics_facets``: that fires two ``GROUP BY`` per facet field across
+        all 8 fields (16 queries) and ignores the date window entirely. The map reads 3 fields over
+        one day, so this is 3 ``GROUP BY`` + 1 bounded ``SELECT``.
+
+        ``count`` is summed over the *whole* country facet before truncation, so the "TODAY" counter
+        stays correct however few rows the caller asks for. It is not queried separately: one less
+        round trip, and the counter agrees with the map by construction. That matters because
+        ``country`` legitimately holds the non-ISO sentinels ``local`` (private client IP),
+        ``unknown`` (lookup failure) and ``""``: they never join a map polygon, so a separately
+        queried total would silently exceed the sum of the countries drawn. The caller buckets them
+        as "not localised" instead.
+
+        Facets come back as lists sorted by count descending then name ascending — deterministic
+        across engines (no ``ORDER BY`` on a ``GROUP BY`` is unspecified), and directly usable both
+        as the map's fill source and as the top-N panels.
+
+        ``facet_limit`` truncates each list. This is a payload bound, not a display choice: a
+        deployment with 5 000 services (1.7's stated target) would otherwise ship 5 000 server rows
+        on every poll, to every open board, to render five of them. ``distinct`` reports how many
+        values existed before truncation so the caller can say what it is hiding rather than
+        silently showing a partial list. The country facet is exempt: the map needs every country
+        it can colour, and that list is bounded by ~250 anyway.
+
+        Raises ``ValueError`` (a 400 at the API boundary, not a 500) on an epoch the stdlib cannot
+        represent as a datetime.
+        """
+        start_dt = _safe_epoch_to_datetime(start, "start")
+        end_dt = _safe_epoch_to_datetime(end, "end")
+        conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
+
+        def _facet(session, column) -> List[Dict[str, Any]]:
+            rows = session.execute(select(column, func.count()).where(*conditions).group_by(column)).all()
+            return sorted(({"name": name or "", "count": count} for name, count in rows), key=lambda f: (-f["count"], f["name"]))
+
+        limit = max(1, facet_limit)
+        with self._db_session() as session:
+            by_country = _facet(session, Requests.country)
+            by_server = _facet(session, Requests.server_name)
+            by_reason = _facet(session, Requests.reason)
+            recent = session.scalars(select(Requests).where(*conditions).order_by(Requests.date.desc()).limit(max(1, recent_limit))).all()
+
+        return {
+            # Summed before truncation — the counter must not shrink when the caller asks for
+            # fewer facet rows.
+            "count": sum(facet["count"] for facet in by_country),
+            "distinct": {"country": len(by_country), "server": len(by_server), "reason": len(by_reason)},
+            "by_country": by_country,
+            "by_server": by_server[:limit],
+            "by_reason": by_reason[:limit],
+            "recent": [_row_to_dict(row) for row in recent],
+        }
+
+    @retry_on_transient_db_errors
     def get_metrics_timeseries(
         self,
         *,

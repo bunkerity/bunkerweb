@@ -1,0 +1,166 @@
+{% extends "dashboard.html" %}
+{% from "components/alert.html" import alert %}
+{% from "components/card.html" import card %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/page-head.html" import page_head %}
+{% from "components/tile.html" import tile %}
+
+{# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
+   legacy breadcrumb row for this page. #}
+{% block page_head %}{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/threatmap.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+
+{% block content %}
+    {% call page_head(title="Threatmap", title_i18n="breadcrumb.threatmap",
+                      breadcrumb=[("Overview", "navigation.overview", none),
+                                  ("Threatmap", "breadcrumb.threatmap", none)]) %}
+        {% if enabled %}
+            {# This page is built to be left on a screen; fullscreen drops the app chrome so a
+               wall display shows the board and nothing else. Hidden by threatmap.js when the
+               browser has no Fullscreen API. #}
+            <button type="button" id="threatmap-fullscreen" class="btn btn-sm btn-outline-primary">
+                <i class="bx bx-fullscreen me-1" aria-hidden="true"></i><span data-i18n="threatmap.fullscreen">Fullscreen</span>
+            </button>
+        {% endif %}
+    {% endcall %}
+    <p class="text-muted mb-4" data-i18n="threatmap.subtitle">Where the traffic your instances blocked in the last 24 hours came from.</p>
+
+    {% if not enabled %}
+        {# Not "nothing happened yet" but "nothing is being stored" — an operator should be told
+           which one, rather than left to conclude the fleet is idle. #}
+        {% call card(classes="p-4") %}
+            {{ empty_state(id="threatmap-disabled", title="Report persistence is turned off", title_key="threatmap.disabled_title", message="The threatmap reads the same stored reports as the Reports page. Set METRICS_PERSIST_TO_DB to yes to start recording them.", message_key="threatmap.disabled_help", icon="bx-toggle-left") }}
+        {% endcall %}
+    {% else %}
+        {# Freshness is bounded by the once-a-minute scrape job, so calling this "live" would be
+           a lie an operator could act on. Say the real number instead. #}
+        {{ alert(message="Reports reach the database about once a minute, so the map trails real traffic by roughly one to two minutes.", message_key="threatmap.freshness", variant="info", icon="bx-time-five", classes="mb-4") }}
+
+        {# Everything below is what goes fullscreen — the board, without the app chrome. #}
+        <div id="threatmap-board">
+
+        {# A stopped board looks exactly like a quiet night, so it has to say so itself. #}
+        <div id="threatmap-stale" class="d-none mb-3">
+            {{ alert(message="These figures have stopped updating. The metrics service is not answering.", message_key="threatmap.stale", variant="warning", icon="bx-error", classes="mb-0") }}
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+            <div class="col">
+                {{ tile(id="threatmap-tile-count", title="Attacks today", value="—", title_i18n="threatmap.attacks_today", color="", icon="bx-shield-x", icon_color="text-danger") }}
+            </div>
+            <div class="col">
+                {{ tile(id="threatmap-tile-countries", title="Countries of origin", value="—", title_i18n="threatmap.countries", color="", icon="bx-globe", icon_color="text-primary") }}
+            </div>
+            <div class="col">
+                {{ tile(id="threatmap-tile-target", title="Top target", value="—", title_i18n="threatmap.top_target", color="", icon="bx-crosshair", icon_color="text-primary") }}
+            </div>
+            <div class="col">
+                {{ tile(id="threatmap-tile-reason", title="Top reason", value="—", title_i18n="threatmap.top_reason", color="", icon="bx-flag", icon_color="text-primary") }}
+            </div>
+        </div>
+
+        {# Arcs run country-centroid → a symbolic centre. They are an illustration of origin, not a
+           geolocated strike: no coordinates are collected, and a service name has no position. #}
+        {% call card(classes="mb-4", title="Blocked traffic origin", title_key="threatmap.map_title", subtitle="Arcs illustrate country of origin, not a precise location", subtitle_key="threatmap.map_sub", uppercase=true, separator=false) %}
+            <div id="threatmap-map" class="w-100" aria-label="Blocked traffic by country of origin"></div>
+            {# Bands, not a gradient bar: without a key the choropleth only says "this one is
+               darker", and the panels below only cover the top five. #}
+            <div class="threatmap-legend" id="threatmap-legend" aria-hidden="true"></div>
+        {% endcall %}
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-xl-6">
+                {% call card(classes="p-4 h-100", title="Live events", title_key="threatmap.ticker_title", icon="bx-list-ul") %}
+                    {# Filled by threatmap.js, which renders its own "no data" row — the ticker
+                       is the one panel that changes on every poll.
+
+                       Deliberately NOT aria-live: the list is rebuilt wholesale every 30 s, so a
+                       live region would make a screen reader re-read all fifty rows twice a
+                       minute, forever, on a page meant to run for days. The same events are
+                       reachable on the Reports page, which is built for reading. #}
+                    <ul class="threatmap-ticker list-unstyled mb-0" id="threatmap-ticker"></ul>
+                {% endcall %}
+            </div>
+            <div class="col-12 col-xl-6">
+                <div class="row g-3">
+                    <div class="col-12">
+                        {% call card(classes="p-4", title="Top origins", title_key="threatmap.top_origins", icon="bx-world") %}
+                            <ul class="threatmap-top list-unstyled mb-0" id="threatmap-top-country"></ul>
+                        {% endcall %}
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-12">
+                        {% call card(classes="p-4", title="Top targets", title_key="threatmap.top_targets", icon="bx-cube") %}
+                            <ul class="threatmap-top list-unstyled mb-0" id="threatmap-top-server"></ul>
+                        {% endcall %}
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-12">
+                        {% call card(classes="p-4", title="Top reasons", title_key="threatmap.top_reasons", icon="bx-flag") %}
+                            <ul class="threatmap-top list-unstyled mb-0" id="threatmap-top-reason"></ul>
+                        {% endcall %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Swapped in by threatmap.js: nothing recorded yet vs the metrics API not answering. #}
+        <div id="threatmap-empty" class="d-none">
+            {% call card(classes="p-4") %}
+                {{ empty_state(id="threatmap-empty-state", title="Nothing blocked in this window", title_key="threatmap.empty_title", message="Either no request was blocked in the last 24 hours, or reports have not been scraped yet.", message_key="threatmap.empty_help", icon="bx-shield") }}
+            {% endcall %}
+        </div>
+        <div id="threatmap-error" class="d-none">
+            {% call card(classes="p-4") %}
+                {{ empty_state(id="threatmap-error-state", state="error", title="Couldn't reach the metrics service", title_key="threatmap.error_title", message="The map keeps the last figures it managed to load and will retry on the next refresh.", message_key="threatmap.error_help") }}
+            {% endcall %}
+        </div>
+
+        {# The heartbeat. On a screen nobody is actively watching, this is what separates
+           "nothing is happening" from "nothing is arriving". #}
+        <p id="threatmap-updated" class="threatmap-updated text-muted small mb-0">
+            <i class="bx bx-refresh me-1" aria-hidden="true"></i><span data-i18n="threatmap.updated">Updated</span>
+            <span id="threatmap-updated-time">—</span>
+        </p>
+
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {% if enabled %}
+        <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='libs/topojson-client/topojson-client.min.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='js/components/country-flag.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script nonce="{{ script_nonce }}">
+          // No dataUrl here: main.py's custom_url_for shim rewrites any endpoint not ending in
+          // "_page" to "<endpoint>.<endpoint>_page", so url_for('threatmap.threatmap_data')
+          // silently yields "#". threatmap.js derives the path from the page's own location —
+          // the same thing home.html does for /home/metrics, and it keeps working under a
+          // reverse-proxy prefix, which a hardcoded path would not.
+          window.__threatmapConfig = {
+            topojsonUrl: "{{ url_for('static', filename='json/countries.topojson') }}",
+            // BWCountryFlag defaults to "/static/img/flags", but this app serves its static
+            // files from the root, so the default 404s. Same hand-off bans.html and reports.html
+            // do through their #base_flags_url hidden input.
+            flagBase: "{{ url_for('static', filename='img/flags') }}",
+            recentLimit: {{ recent_limit }},
+          };
+        </script>
+        <script src="{{ url_for('static', filename='js/pages/threatmap.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+    {% endif %}
+{% endblock %}

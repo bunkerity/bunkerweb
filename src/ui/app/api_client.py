@@ -70,6 +70,13 @@ class ApiClient(BaseApiClient):
     def get_metrics_top_rules(self, *, start: int, end: int, limit: int = 10):
         return self._get("/metrics/requests/top-rules", params={"start": start, "end": end, "limit": limit})
 
+    def get_threatmap(self, *, start: int, end: int, limit: int = 50, facet_limit: int = 25, search_panes: str = ""):
+        """Map fill, top panels, TODAY count and the ticker feed for ``[start, end)``, in one call."""
+        return self._get(
+            "/metrics/threatmap",
+            params={"start": start, "end": end, "limit": limit, "facet_limit": facet_limit, "search_panes": search_panes},
+        )
+
     def get_metrics_timings(self):
         """Per-plugin, per-phase durations. Not DB-backed: the API fans out to the instances,
         so this answers 503 when none of them reported rather than returning an empty table."""

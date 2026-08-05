@@ -1,0 +1,371 @@
+/* Threatmap page.
+ *
+ * The map rules duplicate a handful of lines from pages/home.css on purpose: those are
+ * id-scoped to #requests-map and still use the legacy .dark-style selector, and the home
+ * page stays deliberately untouched by this chantier. */
+
+/* Arc palette. Kept as tokens so the shot colour can be retuned (or rethemed) in one place
+ * rather than in four rules. */
+:root {
+  --bw-threat-arc: #ff6b4a;
+  --bw-threat-arc-glow: rgba(255, 62, 29, 0.9);
+}
+
+[data-bs-theme="dark"] {
+  --bw-threat-arc: #ff7d5c;
+  --bw-threat-arc-glow: rgba(255, 109, 74, 0.95);
+}
+
+/* A world map needs width far more than height. Holding 620px on a narrow column produced a
+ * 270x620 porthole showing Europe and nothing else, so the height steps down with the viewport
+ * instead of staying fixed. */
+#threatmap-map {
+  min-height: 620px;
+  background: var(--bw-map-ocean, #eef2f5);
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 991.98px) {
+  #threatmap-map {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  #threatmap-map {
+    min-height: 300px;
+  }
+}
+
+#threatmap-map .leaflet-container {
+  background: var(--bw-map-ocean, #eef2f5);
+}
+
+/* The country tooltip -- without it, and without the legend below, a country outside the
+ * top-five list is shaded but unreadable. */
+#threatmap-map .leaflet-tooltip.threatmap-tooltip {
+  background: var(--bw-bg-card, #fff);
+  border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.12));
+  color: var(--bw-fg-1, #384551);
+  box-shadow: var(--bw-shadow-md, 0 2px 8px rgba(0, 0, 0, 0.2));
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+}
+
+#threatmap-map .leaflet-tooltip.threatmap-tooltip::before {
+  display: none;
+}
+
+/* ── legend ───────────────────────────────────────────────────────────── */
+
+.threatmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--bw-fg-3, #8592a3);
+}
+
+.threatmap-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.threatmap-legend__swatch {
+  width: 1.1rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  border: 1px solid var(--bw-map-land-border, #7c8890);
+}
+
+/* ── arcs ─────────────────────────────────────────────────────────────── */
+
+/* Every arc is drawn as a Leaflet polyline, so it reprojects on pan and zoom for free.
+ *
+ * The motion is two layers over the same path, because one stroke cannot both stay visible and
+ * travel: the TRAIL is the whole route, faint, fading out behind the shot; the HEAD is a short
+ * dash whose dash-offset runs the length of that route. `pathLength: 1` normalises every path to
+ * a unit length, so a Beijing→centre arc and a Berlin→centre arc take exactly the same time —
+ * without it the dash offsets would be in wildly different user units and long arcs would crawl
+ * while short ones snapped. */
+.threatmap-arc-trail,
+.threatmap-arc-head {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.threatmap-arc-trail {
+  stroke: var(--bs-danger, #ff3e1d);
+  stroke-width: 1;
+  opacity: 0;
+  animation: threatmap-trail-fade 3.3s ease-out forwards;
+}
+
+@keyframes threatmap-trail-fade {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.28;
+  }
+  70% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.threatmap-arc-head {
+  stroke: var(--bw-threat-arc, #ff6b4a);
+  stroke-width: 2.5;
+  filter: drop-shadow(
+    0 0 3px var(--bw-threat-arc-glow, rgba(255, 62, 29, 0.9))
+  );
+  animation: threatmap-head-travel 2.4s cubic-bezier(0.4, 0, 0.5, 1) forwards;
+}
+
+@keyframes threatmap-head-travel {
+  0% {
+    stroke-dasharray: 0.12 1;
+    stroke-dashoffset: 0.12;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dasharray: 0.12 1;
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
+}
+
+/* A brief flare at the country the shot left from — the other half of "source → destination". */
+.threatmap-origin {
+  fill: var(--bw-threat-arc, #ff6b4a);
+  stroke: none;
+  animation: threatmap-origin-flash 1.4s ease-out forwards;
+}
+
+@keyframes threatmap-origin-flash {
+  0% {
+    fill-opacity: 0;
+  }
+  15% {
+    fill-opacity: 1;
+  }
+  100% {
+    fill-opacity: 0;
+  }
+}
+
+/* The ripple fired when a shot lands on the central node. */
+.threatmap-impact {
+  fill: none;
+  stroke: var(--bw-threat-arc, #ff6b4a);
+  stroke-width: 2;
+  animation: threatmap-impact-ring 0.9s ease-out forwards;
+}
+
+@keyframes threatmap-impact-ring {
+  0% {
+    r: 3;
+    opacity: 0.95;
+    stroke-width: 3;
+  }
+  100% {
+    r: 22;
+    opacity: 0;
+    stroke-width: 0.5;
+  }
+}
+
+.threatmap-core {
+  fill: var(--bs-danger, #ff3e1d);
+  fill-opacity: 0.9;
+  stroke: var(--bw-map-border, #fff);
+  stroke-width: 2;
+  animation: threatmap-core-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes threatmap-core-pulse {
+  0%,
+  100% {
+    fill-opacity: 0.9;
+  }
+  50% {
+    fill-opacity: 0.35;
+  }
+}
+
+/* ── ticker + top panels ──────────────────────────────────────────────── */
+
+.threatmap-ticker {
+  max-height: 22rem;
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+
+/* Wraps rather than clips: five columns do not fit a phone, and a row that overflows loses the
+ * target name silently instead of moving it to a second line. */
+.threatmap-ticker__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--bw-border, rgba(0, 0, 0, 0.08));
+}
+
+.threatmap-ticker__row:last-child {
+  border-bottom: 0;
+}
+
+.threatmap-ticker__time {
+  color: var(--bw-fg-3, #8592a3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The <code> default (#e83e8c) measures 3.58:1 on the card — below the 4.5:1 AA floor at this
+ * size. The body colour keeps the monospace treatment and passes. */
+.threatmap-ticker__ip {
+  font-size: 0.8rem;
+  color: var(--bw-fg-2, #566a7f);
+}
+
+/* margin-inline-start, not margin-left: the UI ships Arabic and Urdu and honours [dir="rtl"]
+ * (see overrides.css), where "push to the far end" is the other side. */
+.threatmap-ticker__target {
+  margin-inline-start: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 12rem;
+}
+
+@media (max-width: 575.98px) {
+  /* Once wrapped, the target owns its own line — an auto margin on a wrapped flex line would
+     shove it off the edge instead. */
+  .threatmap-ticker__target {
+    margin-inline-start: 0;
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+/* The reason badge's bg-label-danger pairing measures 2.84:1 — an AA failure at 11.8px. Outlined
+ * on the card background instead, which keeps the danger hue as the signal and passes. */
+.threatmap-ticker__reason.badge {
+  background: transparent !important;
+  border: 1px solid var(--bs-danger, #ff3e1d);
+  color: var(--bw-fg-1, #384551) !important;
+  font-weight: 500;
+}
+
+.threatmap-top__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+}
+
+.threatmap-top__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.threatmap-top__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Expanded, a panel scrolls rather than pushing the map and the ticker off the screen. */
+.threatmap-top--expanded {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+.threatmap-top__more {
+  padding-top: 0.35rem;
+  margin-top: 0.2rem;
+  border-top: 1px solid var(--bw-border, rgba(0, 0, 0, 0.08));
+}
+
+/* Sticks to the bottom of a scrolled list so the way back out stays reachable. */
+.threatmap-top--expanded .threatmap-top__more {
+  position: sticky;
+  bottom: 0;
+  background: var(--bw-bg-card, #fff);
+}
+
+/* ── KPI tiles ────────────────────────────────────────────────────────── */
+
+/* Two of these four tiles hold free-form data: a server_name is String(256) and a reason is
+ * String(256). The shared tile macro wraps, so a 108-character corporate hostname grew the whole
+ * row from 110px to 346px and turned the two number tiles into voids. One line, ellipsised; the
+ * full value is on the element's title attribute. Scoped to this page — the macro is shared. */
+#threatmap-tile-target .bw-kpi-value,
+#threatmap-tile-reason .bw-kpi-value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* The display face is sized for a 3-digit count; a hostname needs to stay legible instead. */
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+
+/* ── wall-display mode ────────────────────────────────────────────────── */
+
+/* Fullscreen is requested on #threatmap-board rather than the document, so the app chrome
+ * (sidebar, navbar) is left behind instead of merely being scrolled past. */
+#threatmap-board:fullscreen {
+  background: var(--bs-body-bg, #fff);
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+#threatmap-board:fullscreen #threatmap-map {
+  min-height: 60vh;
+}
+
+.threatmap-updated {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The board has stopped receiving data. Loud enough to catch a passing glance, since that is
+ * the only attention a wall display gets. */
+.threatmap-updated--stale {
+  color: var(--bs-warning, #ffab00) !important;
+  font-weight: 600;
+}
+
+/* ── reduced motion ───────────────────────────────────────────────────── */
+
+/* threatmap.js already skips spawning arcs (and their emitter) here; this covers the pulsing
+ * core and anything still on screen if the preference flips mid-session. */
+@media (prefers-reduced-motion: reduce) {
+  .threatmap-arc-trail,
+  .threatmap-arc-head,
+  .threatmap-origin,
+  .threatmap-impact,
+  .threatmap-core {
+    animation: none;
+  }
+
+  .threatmap-arc-head {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}

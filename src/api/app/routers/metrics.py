@@ -157,6 +157,46 @@ def query_metrics_top_offenders(start: int, end: int, limit: int = 10, search_pa
     return JSONResponse(status_code=200, content={"status": "success", "offenders": result})
 
 
+# The threatmap groups three columns over a caller-supplied window, and only `date` is indexed
+# for it (`country` is not) — so the window is the only thing bounding the scan. The page asks for
+# a day; 31 lets an operator widen it without handing an authenticated caller a whole-table scan.
+MAX_THREATMAP_WINDOW_SECONDS = 31 * 86400
+
+
+@router.get("/threatmap", dependencies=[Depends(guard)])
+def query_metrics_threatmap(start: int, end: int, limit: int = 50, facet_limit: int = 25, search_panes: str = "") -> JSONResponse:
+    """Everything the threatmap page paints for ``[start, end)`` in a single call:
+    ``{status, count, distinct, by_country, by_server, by_reason, recent}``.
+
+    The window is caller-supplied epochs rather than a ``window=today`` shortcut on purpose: only
+    the browser knows the operator's timezone, so "today" is resolved client-side and the server
+    never has to guess between a rolling 24 h and a local midnight.
+    """
+    if end <= start:
+        return JSONResponse(status_code=400, content={"status": "error", "message": "end must be greater than start"})
+    if end - start > MAX_THREATMAP_WINDOW_SECONDS:
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": f"requested window too large: {end - start}s exceeds {MAX_THREATMAP_WINDOW_SECONDS}s"},
+        )
+
+    db = get_db()
+    filters = _parse_search_panes(search_panes)
+    try:
+        # Both limits are clamped here rather than trusted: `limit` reaches a LIMIT on a row SELECT,
+        # and `facet_limit` bounds a payload that is otherwise one row per distinct service.
+        result = db.get_metrics_threatmap(
+            start=start,
+            end=end,
+            recent_limit=min(max(1, limit), 200),
+            facet_limit=min(max(1, facet_limit), 100),
+            filters=filters,
+        )
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+    return JSONResponse(status_code=200, content={"status": "success", **result})
+
+
 @router.get("/requests/top-rules", dependencies=[Depends(guard)])
 def query_metrics_top_rules(start: int, end: int, limit: int = 10) -> JSONResponse:
     db = get_db()

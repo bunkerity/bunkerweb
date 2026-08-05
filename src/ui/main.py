@@ -67,6 +67,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.certificates import certificates
+from app.routes.threatmap import threatmap
 from app.routes.timings import timings
 from app.routes.web_cache import web_cache
 from app.routes.configs import configs
@@ -112,6 +113,7 @@ BLUEPRINTS = (
     workflows,
     web_cache,
     timings,
+    threatmap,
     logs,
     login,
     configs,
@@ -1377,8 +1379,19 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # * Permissions-Policy header to prevent unwanted behavior
+    #
+    # Everything is denied outright except two features the threatmap page needs to work as a
+    # wall display, both narrowed to `self` (same-origin only -- an embedded cross-origin frame
+    # still gets nothing):
+    #   * fullscreen        -- the /threatmap "Fullscreen" control. Without it the API is blocked
+    #                          and the button is inert. (F11 is unaffected either way: browser
+    #                          chrome fullscreen is not governed by this header.)
+    #   * screen-wake-lock  -- keeps a monitor left on /threatmap from blanking. Requested only
+    #                          by that page, only while it is visible, and released on hide.
+    # Neither grants access to data, hardware or the user's environment; both are reversible by
+    # putting `fullscreen=()` / `screen-wake-lock=()` back.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
+        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(self), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
     )
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:

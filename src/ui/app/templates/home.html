@@ -224,8 +224,14 @@
         </div>
     </div>
     {# Blocked requests world map (async -- data from /home/metrics). #}
-    <div class="home-async-chart mb-4" id="requests-map-async">
+    <div class="home-async-chart position-relative mb-4" id="requests-map-async">
         {{ geo_map(id="requests-map", title="Blocked Requests by Country", title_key="dashboard.chart.blocked_request_countries.title", subtitle="Hover for details", subtitle_key="dashboard.panel.map_sub", uppercase=true, data=request_countries, card_classes="") }}
+        {# This map is the history view; /threatmap is the same data replayed as it arrives. #}
+        <a href="{{ url_for('threatmap') }}"
+           role="button"
+           class="btn btn-sm btn-outline-primary position-absolute top-0 end-0 m-3 z-1">
+            <i class="bx bx-map-alt me-1" aria-hidden="true"></i><span data-i18n="threatmap.open_live">Live view</span>
+        </a>
         <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden" data-i18n="status.loading">Loading...</span></div></div>
     </div>
     {# Blocking status over time (async -- data from /home/metrics). #}
