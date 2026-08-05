@@ -77,6 +77,8 @@ def challenge_providers(definition: Dict[str, Any], *, enabled_only: bool = True
         if action.get("type") == "challenge" and action.get("provider"):
             providers.add(str(action["provider"]))
     return providers
+
+
 REDIRECT_STATUSES = (301, 302, 303, 307, 308)
 # A block rule normally returns the instance's configured deny status, which is why status
 # is optional. 429 is the single documented override, for a rule whose whole purpose is to

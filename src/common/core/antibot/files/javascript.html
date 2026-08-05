@@ -354,7 +354,7 @@
           t = "",
           s = -1;
         if (a && a.length)
-          for (e = a.length; (s += 1) < e; )
+          for (e = a.length; (s += 1) < e;)
             ((r = a.charCodeAt(s)),
               (n = s + 1 < e ? a.charCodeAt(s + 1) : 0),
               55296 <= r &&
@@ -548,7 +548,7 @@
         return hex(a);
       }
       (async () => {
-        for (var a = 0; ; ) {
+        for (var a = 0; ;) {
           if (
             (await digestMessage("{*random*}" + a.toString())).startsWith(
               "0000",

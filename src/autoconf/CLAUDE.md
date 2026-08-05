@@ -89,18 +89,19 @@ Autoconf communicates exclusively through the FastAPI API via `AutoconfApiClient
 - **Settings validation**: `_api.validate_setting()` validates each setting extracted from labels/annotations via `POST /global_settings/validate`
 
 API endpoints used:
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/plugins` | Fetch plugin settings schemas |
-| POST | `/global_settings/validate` | Validate setting name/value |
-| GET | `/services` | List existing services |
-| GET | `/instances?autoconf=true` | Get instances with health/env |
-| PUT | `/instances/bulk` | Bulk replace autoconf instances |
-| PUT | `/global_settings/config` | Save full config environment |
-| PUT | `/configs/bulk` | Bulk save custom configs |
-| GET | `/metadata` | Check scheduler readiness |
-| PATCH | `/metadata` | Set autoconf_loaded flag |
-| POST | `/system/checked-changes` | Signal changes to scheduler |
+
+| Method | Endpoint                    | Purpose                         |
+| ------ | --------------------------- | ------------------------------- |
+| GET    | `/plugins`                  | Fetch plugin settings schemas   |
+| POST   | `/global_settings/validate` | Validate setting name/value     |
+| GET    | `/services`                 | List existing services          |
+| GET    | `/instances?autoconf=true`  | Get instances with health/env   |
+| PUT    | `/instances/bulk`           | Bulk replace autoconf instances |
+| PUT    | `/global_settings/config`   | Save full config environment    |
+| PUT    | `/configs/bulk`             | Bulk save custom configs        |
+| GET    | `/metadata`                 | Check scheduler readiness       |
+| PATCH  | `/metadata`                 | Set autoconf_loaded flag        |
+| POST   | `/system/checked-changes`   | Signal changes to scheduler     |
 
 ### Threading Model
 
