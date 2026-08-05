@@ -174,9 +174,15 @@ def workflows_attach():
         workflow = API_CLIENT.get_workflow(workflow_id)
         attached = set(workflow.get("services", []))
         selected = set(service_ids)
+        # Detach only within what the picker actually listed. When the page could not fetch the
+        # services the select renders empty, and an unbounded reconcile would read that as
+        # "deselect everything" and silently unprotect every service the workflow covered.
+        offered = set((request.form.get("offered_service_ids") or "").split())
+        if not offered:
+            raise ValueError("The service list could not be read; reopen the page and try again")
         for service_id in sorted(selected - attached):
             API_CLIENT.attach_workflow(workflow_id, service_id)
-        for service_id in sorted(attached - selected):
+        for service_id in sorted((attached - selected) & offered):
             API_CLIENT.detach_workflow(workflow_id, service_id)
         flash(f"Workflow services updated ({len(selected)} attached)")
     except ValueError as exc:

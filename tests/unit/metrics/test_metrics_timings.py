@@ -62,24 +62,20 @@ def _code_of(source: str, marker: str) -> str:
 
 @needs_lua
 def test_a_first_sample_seeds_the_aggregate():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = accumulate_timer(nil, 0.25)
         print(a.count, a.sum, a.max)
-    """
-    )
+    """)
     assert out == "1\t0.25\t0.25"
 
 
 @needs_lua
 def test_samples_fold_into_count_sum_and_max():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = nil
         for _, s in ipairs({0.1, 0.4, 0.2}) do a = accumulate_timer(a, s) end
         print(a.count, string.format("%.10g", a.sum), a.max)
-    """
-    )
+    """)
     # max must be the largest sample, not the last one.
     assert out == "3\t0.7\t0.4"
 
@@ -87,51 +83,43 @@ def test_samples_fold_into_count_sum_and_max():
 @needs_lua
 def test_a_negative_sample_is_dropped_not_clamped():
     """A backwards clock must not manufacture a 0 observation that drags the mean down."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = accumulate_timer(nil, 0.5)
         a = accumulate_timer(a, -1)
         print(a.count, a.sum, a.max)
         print(tostring(accumulate_timer(nil, -1)))
-    """
-    )
+    """)
     assert out == "1\t0.5\t0.5\nnil"
 
 
 @needs_lua
 def test_a_non_number_sample_is_dropped():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = accumulate_timer(nil, 0.5)
         a = accumulate_timer(a, "slow")
         a = accumulate_timer(a, nil)
         print(a.count, a.sum)
-    """
-    )
+    """)
     assert out == "1\t0.5"
 
 
 @needs_lua
 def test_a_nan_sample_is_dropped():
     """NaN would poison sum and max forever — every later comparison against it is false."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = accumulate_timer(nil, 0.5)
         a = accumulate_timer(a, 0/0)
         print(a.count, a.sum, a.max)
-    """
-    )
+    """)
     assert out == "1\t0.5\t0.5"
 
 
 @needs_lua
 def test_zero_is_a_real_observation():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = accumulate_timer(nil, 0)
         print(a.count, a.sum, a.max)
-    """
-    )
+    """)
     assert out == "1\t0\t0"
 
 
@@ -143,39 +131,33 @@ def test_zero_is_a_real_observation():
 
 @needs_lua
 def test_merging_two_workers_adds_counts_and_keeps_the_larger_max():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = merge_timer(nil, {count = 2, sum = 0.6, max = 0.4})
         a = merge_timer(a, {count = 3, sum = 0.9, max = 0.7})
         print(a.count, string.format("%.10g", a.sum), a.max)
-    """
-    )
+    """)
     assert out == "5\t1.5\t0.7"
 
 
 @needs_lua
 def test_merging_keeps_the_running_max_when_the_peer_is_lower():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = merge_timer(nil, {count = 1, sum = 0.9, max = 0.9})
         a = merge_timer(a, {count = 1, sum = 0.1, max = 0.1})
         print(a.max)
-    """
-    )
+    """)
     assert out == "0.9"
 
 
 @needs_lua
 def test_a_corrupt_peer_aggregate_does_not_break_the_merge():
     """A truncated or half-written shm entry must not take the whole endpoint down."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = merge_timer(nil, {count = 2, sum = 0.6, max = 0.4})
         a = merge_timer(a, {})
         a = merge_timer(a, "garbage")
         print(a.count, string.format("%.10g", a.sum), a.max)
-    """
-    )
+    """)
     assert out == "2\t0.6\t0.4"
 
 
@@ -194,34 +176,28 @@ def test_the_api_merges_timer_keys_on_their_own_terms():
 @needs_lua
 def test_sampling_is_disabled_at_rate_zero():
     """The default. Nothing may be recorded until an operator opts in."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(tostring(should_sample(0, 0)), tostring(should_sample(50, 0)),
               tostring(should_sample(99, "0")), tostring(should_sample(1, nil)))
-    """
-    )
+    """)
     assert out == "false\tfalse\tfalse\tfalse"
 
 
 @needs_lua
 def test_the_rate_is_read_from_a_string():
     """Settings arrive from self.variables as strings, never as numbers."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(tostring(should_sample(0, "100")), tostring(should_sample(50, "1")))
-    """
-    )
+    """)
     assert out == "true\tfalse"
 
 
 @needs_lua
 def test_a_full_rate_takes_everything_and_a_negative_rate_takes_nothing():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(tostring(should_sample(0, 100)), tostring(should_sample(999, 150)),
               tostring(should_sample(0, -1)))
-    """
-    )
+    """)
     assert out == "true\ttrue\tfalse"
 
 
@@ -229,36 +205,30 @@ def test_a_full_rate_takes_everything_and_a_negative_rate_takes_nothing():
 def test_sampling_is_deterministic_for_a_given_hash():
     """Same request id must land on the same side every time, or subrequests of one
     request would disagree about whether they are being sampled."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local a = should_sample(12345, 10)
         local b = should_sample(12345, 10)
         print(tostring(a == b), tostring(should_sample(4, 5)), tostring(should_sample(7, 5)))
-    """
-    )
+    """)
     # 4 % 100 = 4 < 5 -> sampled; 7 % 100 = 7 >= 5 -> not sampled.
     assert out == "true\ttrue\tfalse"
 
 
 @needs_lua
 def test_the_sample_rate_is_honoured_across_the_hash_space():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local n = 0
         for h = 0, 9999 do if should_sample(h, 7) then n = n + 1 end end
         print(n)
-    """
-    )
+    """)
     assert out == "700", "7% of 10000 evenly-spread hashes"
 
 
 @needs_lua
 def test_a_missing_hash_is_never_sampled():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(tostring(should_sample(nil, 50)), tostring(should_sample("abc", 50)))
-    """
-    )
+    """)
     assert out == "false\tfalse"
 
 
@@ -266,11 +236,9 @@ def test_a_missing_hash_is_never_sampled():
 def test_a_full_rate_samples_even_without_a_usable_hash():
     """This is what the rate >= 100 short-circuit is for: at 100% a request with no id
     must still be recorded rather than silently dropped."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(tostring(should_sample(nil, 100)), tostring(should_sample("abc", 100)))
-    """
-    )
+    """)
     assert out == "true\ttrue"
 
 
@@ -281,36 +249,30 @@ def test_a_full_rate_samples_even_without_a_usable_hash():
 def test_identifiers_are_collapsed_out_of_the_path():
     """Raw URIs are one distinct value per request — a cardinality bomb and a poor
     feature. The model should learn "/api/user/<n>" is ordinary, not memorise every id."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(template_uri("/api/user/12345/posts"))
         print(template_uri("/o/3f2504e0-4f89-11d3-9a0c-0305e82c3301/edit"))
         print(template_uri("/dl/a1b2c3d4e5f6a7b8c9d0/file"))
-    """
-    )
+    """)
     assert out.split("\n") == ["/api/user/<n>/posts", "/o/<uuid>/edit", "/dl/<hex>/file"]
 
 
 @needs_lua
 def test_an_ordinary_path_survives_untouched():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(template_uri("/login"))
         print(template_uri("/health"))
-    """
-    )
+    """)
     assert out.split("\n") == ["/login", "/health"]
 
 
 @needs_lua
 def test_a_very_long_path_is_truncated():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         local long = "/" .. string.rep("z", 400)
         local t = template_uri(long)
         print(#t, t:sub(-3))
-    """
-    )
+    """)
     assert out == "203\t..."
 
 
@@ -325,12 +287,10 @@ def test_a_missing_uri_yields_nil():
 
 @needs_lua
 def test_a_timing_key_splits_into_plugin_and_phase():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(parse_timer_key("blacklist_timer_access_0"))
         print(parse_timer_key("metrics_timer_request_3"))
-    """
-    )
+    """)
     assert out.split("\n") == ["blacklist\taccess", "metrics\trequest"]
 
 
@@ -345,14 +305,12 @@ def test_a_phase_name_containing_an_underscore_survives():
 @needs_lua
 def test_non_timing_keys_are_ignored():
     """The same shm holds counters, tables and the request buffers."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         print(tostring(parse_timer_key("blacklist_counter_foo_0")))
         print(tostring(parse_timer_key("requests_0")))
         print(tostring(parse_timer_key("baseline_0")))
         print(tostring(parse_timer_key(nil)))
-    """
-    )
+    """)
     assert out.split("\n") == ["nil", "nil", "nil", "nil"]
 
 

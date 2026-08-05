@@ -46,6 +46,19 @@ repos:
         exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)
         args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
 
+  # Lint only: the reformat hook rewrites the deliberate `"{% if %}` no-space idiom these
+  # templates use for conditional attributes, which changes the rendered markup. Prettier
+  # already owns template formatting and is satisfied with the current style.
+  - repo: https://github.com/djlint/djLint
+    rev: 1537d9f347a8312ebaeff95762266a780dd31e02 # frozen: v1.44.0
+    hooks:
+      - id: djlint-jinja
+        name: djLint Jinja Template Linter
+        # The upstream hook is types_or:[jinja]; these templates are .html, which pre-commit
+        # identifies as `html`, so the filter has to be widened or nothing is ever checked.
+        types_or: [html]
+        files: ^src/(ui/app/templates|common/core/[^/]+/ui/.+/templates)/.+\.html$
+
   - repo: https://github.com/pycqa/flake8
     rev: d93590f5be797aabb60e3b09f2f52dddb02f349f # frozen: 7.3.0
     hooks:
@@ -63,7 +76,7 @@ repos:
         additional_dependencies: ["mypy<1.20"]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: 2ccb47ff45ad361a21071a7eedda4c37e6ae8c5a # frozen: v2.4.2
+    rev: 57b21406f092110c18776e39b0bda50d37c945c8 # frozen: v2.4.3
     hooks:
       - id: codespell
         name: Codespell Spell Checker

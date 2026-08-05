@@ -59,7 +59,13 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     return False, "not multiple"
 
                 if value is not None:
-                    options = [option.value or "" for option in (db_setting.selects if db_setting.type == "select" else db_setting.multiselects)]
+                    # Only select/multiselect consume options, and both relationships are lazy —
+                    # loading them for every setting type cost one extra query per validated key.
+                    options: List[str] = []
+                    if db_setting.type == "select":
+                        options = [option.value or "" for option in db_setting.selects]
+                    elif db_setting.type == "multiselect":
+                        options = [option.value or "" for option in db_setting.multiselects]
                     canonical = canonicalize_setting_value(db_setting.type, value, db_setting.separator, options, db_setting.case_insensitive)
                     if canonical is None and db_setting.type in ("size", "duration"):
                         if not self._ignore_regex_check:

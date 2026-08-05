@@ -166,6 +166,9 @@
         <form method="post" action="{{ workflows_url }}/attach">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="workflow_id" id="workflow-attach-id" />
+            {# What the picker actually offered. The reconcile detaches only within this set, so a
+               failed service fetch renders an empty picker instead of reading as "deselect all". #}
+            <input type="hidden" name="offered_service_ids" value="{{ services | map(attribute='id') | join(' ') }}" />
             <div class="modal-body">
                 <label class="form-label" for="workflow-attach-services" data-i18n="table.header.service">Services</label>
                 <select class="form-select" id="workflow-attach-services" name="service_ids" multiple size="8">

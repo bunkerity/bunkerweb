@@ -18,6 +18,36 @@ exclude = '''
 )/
 '''
 
+[tool.djlint]
+profile = "jinja"
+# Wide thresholds keep multi-attribute tags on one line. djlint's defaults (120/70) split them,
+# which changes the rendered markup and breaks the UI tests that assert on exact tag strings.
+# Only relevant if someone runs --reformat by hand; the pre-commit hook is lint-only.
+max_line_length = 200
+max_attribute_length = 200
+# Rules disabled on purpose, with the reason. Everything else is enforced.
+#   H023 entity references  — &nbsp;/&mdash; are deliberate, not defects
+#   H029 lowercase method   — HTML method is case-insensitive; renaming 38 forms buys nothing
+#   T028 spaceless tags     — asks for {%- -%} inside attributes, the exact idiom churn that
+#                             changes rendered markup and broke 9 UI tests
+#   H020 empty tag pair     — false-positives on the client-filled mount points home.js and
+#                             reports.js render into
+#   H025 orphan tag         — false-positives when a Jinja conditional spans an open/close pair
+#   T001 variable spacing   — false-positives on Jinja inside JSON attributes, e.g.
+#                             data-i18n-options='{"percent": {{ blocked_pct }}}' where the third
+#                             brace closes the JSON object, not the expression
+#   T038/T039 unclosed tag  — false-positives on multi-line {% set %} blocks (menu.html,
+#                             plugin_page.html); djlint does not track the assignment across lines
+#   H021 inline styles      — 10 real occurrences. Genuine debt, but moving them to CSS risks
+#                             visual regressions, so it is tracked rather than silently enforced.
+#   H008 attribute quoting  — several are load-bearing: plugin_page.html:133 wraps Jinja that
+#                             itself contains double quotes, e.g.
+#                             class='bx bx-{% if key.startswith("info_") %}...{% endif %}'
+#                             Converting those breaks the template, so the rule cannot apply here.
+#   H019 javascript: href   — 1 occurrence (navbar.html). Replacing it means adding a real URL and
+#                             an event handler, a behaviour change that does not belong in a lint pass.
+ignore = "H023,H029,T028,H020,H025,T001,T038,T039,H021,H008,H019"
+
 [tool.pytest.ini_options]
 minversion = "8.4"
 testpaths = ["tests/unit"]

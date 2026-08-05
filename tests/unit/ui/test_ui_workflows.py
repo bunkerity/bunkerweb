@@ -131,13 +131,44 @@ def test_attach_route_reconciles_the_whole_service_set(route_app):
     with app.test_request_context(
         "/workflows/attach",
         method="POST",
-        data={"workflow_id": "wf-1", "service_ids": ["a.example.com", "c.example.com"]},
+        data={
+            "workflow_id": "wf-1",
+            "service_ids": ["a.example.com", "c.example.com"],
+            "offered_service_ids": "a.example.com b.example.com c.example.com",
+        },
     ):
         module.workflows_attach.__wrapped__()
 
     client.attach_workflow.assert_called_once_with("wf-1", "c.example.com")
     client.detach_workflow.assert_called_once_with("wf-1", "b.example.com")
     assert "2 attached" in flash.call_args.args[0]
+
+
+def test_attach_route_detaches_nothing_when_the_picker_listed_no_services(route_app):
+    """A failed service fetch renders an empty picker; that must not read as "deselect all"."""
+    module, client, flash, app = route_app
+    client.get_workflow.return_value = {"id": "wf-1", "services": ["a.example.com", "b.example.com"]}
+
+    with app.test_request_context("/workflows/attach", method="POST", data={"workflow_id": "wf-1"}):
+        module.workflows_attach.__wrapped__()
+
+    assert not client.detach_workflow.called
+    assert not client.attach_workflow.called
+
+
+def test_attach_route_never_detaches_a_service_the_picker_did_not_offer(route_app):
+    """Only services the operator could actually see get reconciled away."""
+    module, client, flash, app = route_app
+    client.get_workflow.return_value = {"id": "wf-1", "services": ["a.example.com", "hidden.example.com"]}
+
+    with app.test_request_context(
+        "/workflows/attach",
+        method="POST",
+        data={"workflow_id": "wf-1", "service_ids": ["a.example.com"], "offered_service_ids": "a.example.com b.example.com"},
+    ):
+        module.workflows_attach.__wrapped__()
+
+    assert not client.detach_workflow.called
 
 
 def test_readonly_blocks_every_mutation(route_app):

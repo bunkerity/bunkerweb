@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false # keep all legs running so every image uploads its Trivy SARIF even when one gates red
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]
         arch: [linux/amd64, linux/386]
         include:
           - release: beta
@@ -31,6 +31,8 @@ jobs:
             dockerfile: src/ui/Dockerfile
           - image: api
             dockerfile: src/api/Dockerfile
+          - image: worker
+            dockerfile: src/worker/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
           - arch: linux/amd64
@@ -66,7 +68,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]
         arch: [linux/arm64, linux/arm/v7]
         include:
           - release: beta
@@ -82,6 +84,8 @@ jobs:
             dockerfile: src/ui/Dockerfile
           - image: api
             dockerfile: src/api/Dockerfile
+          - image: worker
+            dockerfile: src/worker/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
           - arch: linux/arm64
@@ -191,6 +195,7 @@ jobs:
             bunkerweb-autoconf,
             bunkerweb-ui,
             bunkerweb-api,
+            bunkerweb-worker,
             bunkerweb-all-in-one,
           ]
         include:
@@ -210,6 +215,9 @@ jobs:
           - image: bunkerweb-api
             cache_from: api
             dockerfile: src/api/Dockerfile
+          - image: bunkerweb-worker
+            cache_from: worker
+            dockerfile: src/worker/Dockerfile
           - image: bunkerweb-all-in-one
             cache_from: all-in-one
             dockerfile: src/all-in-one/Dockerfile

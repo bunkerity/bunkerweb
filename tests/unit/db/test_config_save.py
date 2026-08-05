@@ -7,7 +7,7 @@ service-reconciliation path, idempotency and the readonly guard, on every engine
 
 import pytest
 
-from fixtures.seed import make_core_plugin, make_general_settings, session
+from fixtures.seed import add_global_value, make_core_plugin, make_general_settings, session
 from model import ResourceAttachments, Resources, Upstreams
 
 pytestmark = pytest.mark.slow
@@ -152,6 +152,37 @@ class TestSaveConfigNormalization:
         assert config["ALPHA_TXT"] == "  on  "
         assert config["ALPHA_PICK"] == "intermediate"
         assert config["ALPHA_RAW_PICK"] == "On"
+
+    def test_a_case_mismatched_value_for_a_case_sensitive_select_is_refused(self, db):
+        """Documents a deliberate behaviour change: before the save_config validation gate this
+        stored the raw "on" for a ["On", "Off"] select, i.e. a value no consumer could match."""
+        settings = {"ALPHA_RAW_PICK": _select("alpha-raw-pick", "global", ["On", "Off"], default="On")}
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+
+        result = db.save_config({"ALPHA_RAW_PICK": "on"}, "scheduler", skip_service_management=True)
+
+        assert isinstance(result, str) and "ALPHA_RAW_PICK" in result
+        assert db.get_config()["ALPHA_RAW_PICK"] == "On"
+
+    def test_a_preexisting_invalid_row_does_not_block_an_unrelated_save(self, db):
+        """The merged config a caller hands us can carry illegal legacy rows. Validating all of it
+        would let one of them refuse every future save; only the deltas are checked."""
+        settings = {
+            "ALPHA_RAW_PICK": _select("alpha-raw-pick", "global", ["On", "Off"], default="On"),
+            "ALPHA_TXT": _text("alpha-txt", "global"),
+        }
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+        add_global_value(db, setting_id="ALPHA_RAW_PICK", value="on", method="scheduler")
+
+        # Re-saving the merged snapshot carries the bad row along untouched; the real change is elsewhere.
+        merged = db.get_config()
+        merged["ALPHA_TXT"] = "fresh"
+        result = db.save_config(merged, "scheduler", skip_service_management=True)
+
+        assert not isinstance(result, str), result
+        assert db.get_config()["ALPHA_TXT"] == "fresh"
 
     def test_multisite_values_are_canonicalized(self, db):
         settings = {

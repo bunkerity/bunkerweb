@@ -109,11 +109,21 @@ def location_conflict(session, resource_id: str, path: str, service_ids: List[st
     return ""
 
 
-def service_setting(session, service_id: str, setting_id: str, default: str = "") -> Any:
-    """One service's effective value for a setting, falling back to the global one."""
+def stored_service_setting(session, service_id: str, setting_id: str) -> Optional[str]:
+    """The service's OWN stored value, or None when it inherits the global one.
+
+    ``service_setting`` collapses both cases into one value, which is wrong for any caller that
+    has to tell "this service overrides the global" apart from "this service follows it".
+    """
     value = session.execute(
         select(Services_settings.value).where(Services_settings.service_id == service_id, Services_settings.setting_id == setting_id).limit(1)
     ).scalar_one_or_none()
+    return value or None
+
+
+def service_setting(session, service_id: str, setting_id: str, default: str = "") -> Any:
+    """One service's effective value for a setting, falling back to the global one."""
+    value = stored_service_setting(session, service_id, setting_id)
     if value is None:
         value = session.execute(select(Global_values.value).where(Global_values.setting_id == setting_id).limit(1)).scalar_one_or_none()
     return value or default
@@ -131,7 +141,15 @@ def server_type_attachment_conflict(session, config: Dict[str, Any]) -> str:
         service_ids.update(attached_service_ids)
     service_ids.update(service_id for service_id in attached_service_ids if f"{service_id}_SERVER_TYPE" in config)
     for service_id in service_ids:
-        desired = str(config.get(f"{service_id}_SERVER_TYPE", config.get("SERVER_TYPE", service_setting(session, service_id, "SERVER_TYPE", "http"))))
+        # A service that stores its own SERVER_TYPE is untouched by the global key, so the global
+        # default riding along in a whole-config payload must not read as a change to it. Getting
+        # this wrong made every global save fail for any service with a stream upstream attached.
+        explicit = config.get(f"{service_id}_SERVER_TYPE")
+        if explicit is not None:
+            desired = str(explicit)
+        else:
+            stored = stored_service_setting(session, service_id, "SERVER_TYPE")
+            desired = str(stored if stored is not None else config.get("SERVER_TYPE", service_setting(session, service_id, "SERVER_TYPE", "http")))
         for resource_type, protocol in session.execute(
             select(Resources.type, Upstreams.protocol)
             .join(ResourceAttachments, ResourceAttachments.resource_id == Resources.id)

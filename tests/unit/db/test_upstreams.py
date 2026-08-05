@@ -202,6 +202,23 @@ def test_server_type_flip_is_rejected_while_upstream_is_attached(db):
     assert result == "Cannot set app1.example.com_SERVER_TYPE to stream while a http upstream is attached to app1.example.com"
 
 
+def test_global_server_type_default_does_not_flip_a_service_that_stores_its_own(db):
+    """A whole-config save carries the global SERVER_TYPE default. It must not read as a change
+    to a service that overrides it, or every save fails once any upstream is attached."""
+    seed_minimal(db)
+    _seed_reverse_proxy_plugin(db)
+    add_setting(db, "SERVER_TYPE", context="multisite", regex="^(http|stream)$", default="http")
+    add_service_setting(db, service_id="app1.example.com", setting_id="SERVER_TYPE", value="stream")
+    resource_id = _create(db, protocol="stream")
+    assert db.attach_upstream(resource_id, "app1.example.com") == ""
+
+    # The payload never mentions app1's own SERVER_TYPE; only the global default rides along.
+    result = db.save_config({"MULTISITE": "yes", "SERVER_NAME": "app1.example.com", "SERVER_TYPE": "http"}, "ui")
+
+    # save_config returns the changed-plugin set on success and an error string on refusal.
+    assert not isinstance(result, str), result
+
+
 def test_attach_rejects_unknown_service_upstream_and_path(db):
     seed_minimal(db)
     _seed_reverse_proxy_plugin(db)

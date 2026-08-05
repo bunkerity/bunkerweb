@@ -258,13 +258,25 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
             service_ids = set(str(config.get("SERVER_NAME", "")).split())
             service_ids.update(session.scalars(select(Services.id)).all())
+            # Only values this save actually changes. Callers hand us the MERGED config (autoconf
+            # and the scheduler always do), so validating all of it would let one pre-existing
+            # illegal row — and the DB is known to hold some — refuse every future save, forever.
+            # That also contradicts the rule the API routers state verbatim (services.py,
+            # global_settings.py): never validate the merged snapshot. Comparing against what is
+            # actually stored still closes the PUT /global_settings/config bypass, and costs one
+            # config read instead of one validation round trip per key.
+            stored_values = db_config or self.get_non_default_settings(with_drafts=True)
             for key, value in config.items():
                 if key == "DATABASE_URI":
+                    continue
+                normalized = "" if value is None else str(value)
+                previous = stored_values.get(key)
+                if previous is not None and normalized == str(previous):
                     continue
                 is_service_setting = any(key.startswith(f"{service_id}_") for service_id in service_ids)
                 success, error = self.is_valid_setting(
                     key,
-                    value="" if value is None else str(value),
+                    value=normalized,
                     multisite=is_service_setting,
                     session=session,
                     extra_services=list(service_ids),
