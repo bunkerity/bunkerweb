@@ -10,11 +10,33 @@ import time
 from datetime import datetime, timezone
 
 import pytest
+from sqlalchemy import event
 
 from db_methods.metrics import MAX_TIMESERIES_BUCKETS
 
 # fixed epoch for determinism: 2024-01-01T00:00:00Z
 EPOCH = 1704067200
+
+
+class _capture_statements:
+    """Collect the SQL statements matching ``needle`` that the engine issues inside the block."""
+
+    def __init__(self, db, needle: str):
+        self._engine = db.sql_engine
+        self._needle = needle.lower()
+        self.statements: list = []
+
+    def _before(self, conn, cursor, statement, parameters, context, executemany):
+        if self._needle in statement.lower():
+            self.statements.append(statement)
+
+    def __enter__(self):
+        event.listen(self._engine, "before_cursor_execute", self._before)
+        return self
+
+    def __exit__(self, *_):
+        event.remove(self._engine, "before_cursor_execute", self._before)
+        return False
 
 
 def _rec(request_id, *, status=403, security_mode="block", date=EPOCH, **over):
@@ -221,6 +243,41 @@ class TestRetention:
     def test_cleanup_by_count_under_limit_noop(self, db):
         db.batch_upsert_metrics_requests([_rec("r1")], instance_hostname="bw-1")
         assert db.cleanup_metrics_by_count(10) == "Removed 0 metrics requests by count"
+
+    def test_cleanup_by_count_splits_its_delete_across_bounded_statements(self, db, monkeypatch):
+        """An IN clause binds one parameter per id and the delete list is sized by the row count,
+        so unchunked this blows PostgreSQL's 65535-parameter cap on a busy instance. SQLite allows
+        250k, so only counting the statements proves the chunking is actually still there."""
+        import db_methods.metrics as metrics_module
+
+        monkeypatch.setattr(metrics_module, "_IN_CLAUSE_CHUNK", 10)
+        db.batch_upsert_metrics_requests([_rec(f"r{i}", date=EPOCH + i) for i in range(35)], instance_hostname="bw-1")
+
+        deletes = _capture_statements(db, "delete from bw_metrics_requests")
+        with deletes:
+            assert db.cleanup_metrics_by_count(5) == "Removed 30 metrics requests by count"
+
+        assert len(deletes.statements) == 3  # 30 ids at 10 per statement
+        assert db.get_metrics_requests()["total"] == 5
+
+    def test_upsert_splits_its_dedup_lookup_across_bounded_statements(self, db, monkeypatch):
+        """The scrape job sends every record an instance returned, so the same cap applies to the
+        dedup SELECT on the write path."""
+        import db_methods.metrics as metrics_module
+
+        monkeypatch.setattr(metrics_module, "_IN_CLAUSE_CHUNK", 10)
+        records = [_rec(f"r{i}", date=EPOCH + i) for i in range(25)]
+
+        selects = _capture_statements(db, "from bw_metrics_requests")
+        with selects:
+            assert db.batch_upsert_metrics_requests(records, instance_hostname="bw-1") == ""
+
+        assert len([s for s in selects.statements if s.lstrip().lower().startswith("select")]) == 3
+        assert db.get_metrics_requests()["total"] == 25
+
+        # Re-sending the same batch inserts nothing: the chunked lookup saw every existing id.
+        assert db.batch_upsert_metrics_requests(records, instance_hostname="bw-1") == ""
+        assert db.get_metrics_requests()["total"] == 25
 
 
 class TestAsnAttribution:

@@ -11,6 +11,24 @@ from model import Baseline, Requests  # type: ignore
 
 from .common import DatabaseMixinBase, retry_on_transient_db_errors
 
+# An IN clause carries one bind parameter per value, and every engine caps them: PostgreSQL at
+# 65535, SQLite at 32766 (999 on older builds). Both the retention sweep and the scrape upsert
+# build their list from row counts, so at real traffic volumes an unchunked IN raises and takes
+# the whole job with it. 500 is well under every limit and keeps the statement count sane.
+_IN_CLAUSE_CHUNK = 500
+
+
+def _chunked(values: List[Any], size: Optional[int] = None):
+    """Yield slices small enough to pass to an IN clause on every supported engine.
+
+    The size is read at call time, not bound as a default, so the cap stays tunable.
+    """
+    size = size or _IN_CLAUSE_CHUNK
+    for start in range(0, len(values), size):
+        end = start + size
+        yield values[start:end]
+
+
 # Columns the UI/API may sort by; anything else falls back to ``date``.
 _ORDER_COLUMNS = {
     "date": Requests.date,
@@ -260,7 +278,11 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
             # Two attempts: on a concurrent unique-conflict, re-query the stored ids (now including the
             # racing rows) and re-insert only the remainder, so one conflict never drops the whole batch.
             for _attempt in (1, 2):
-                existing = set(session.scalars(select(model.request_id).where(model.instance_hostname == instance_hostname, model.request_id.in_(ids))).all())
+                existing = set()
+                for chunk in _chunked(ids):
+                    existing.update(
+                        session.scalars(select(model.request_id).where(model.instance_hostname == instance_hostname, model.request_id.in_(chunk))).all()
+                    )
                 to_add = [build_row(rid, by_id[rid], instance_hostname, now) for rid in ids if rid not in existing]
                 if not to_add:
                     return ""
@@ -521,9 +543,9 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
                 return "The database is read-only, the changes will not be saved"
             rows_count = session.scalar(select(func.count()).select_from(model)) or 0
             if rows_count > max_rows:
-                ids_to_delete = session.scalars(select(model.id).order_by(model.date.asc()).limit(rows_count - max_rows)).all()
-                if ids_to_delete:
-                    removed = session.execute(delete(model).where(model.id.in_(ids_to_delete)), execution_options={"synchronize_session": False}).rowcount
+                ids_to_delete = list(session.scalars(select(model.id).order_by(model.date.asc()).limit(rows_count - max_rows)).all())
+                for chunk in _chunked(ids_to_delete):
+                    removed += session.execute(delete(model).where(model.id.in_(chunk)), execution_options={"synchronize_session": False}).rowcount
                 try:
                     session.commit()
                 except BaseException as e:

@@ -3,7 +3,24 @@
 from datetime import datetime
 from json import dumps, loads
 from typing import Any, ClassVar, List, Optional
-from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText, false, true
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Identity,
+    Index,
+    Integer,
+    LargeBinary,
+    String,
+    Text,
+    TypeDecorator,
+    UnicodeText,
+    false,
+    true,
+)
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, validates
 from sqlalchemy.schema import UniqueConstraint
@@ -327,14 +344,14 @@ class Baseline(Base):
     uri: Mapped[str] = mapped_column(Text, nullable=False, default="")
     status: Mapped[int] = mapped_column(Integer, nullable=False, default=0, index=True)
     request_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    request_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    body_bytes_sent: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    request_length: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    body_bytes_sent: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     upstream_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    connection_requests: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    connection_requests: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     http_version: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
     scheme: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
     content_type: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
-    content_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    content_length: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     ssl_protocol: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
     ssl_cipher: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     country: Mapped[str] = mapped_column(String(16), nullable=False, default="")
