@@ -16,16 +16,6 @@ class SchedulerApiClient(BaseApiClient):
         """Get all global settings (full=true to include defaults)."""
         return self._get("/global_settings", params={"full": "true"}).get("settings", {})
 
-    def save_config(self, config: dict, method: str, changed: bool = False) -> Union[str, list]:
-        """Save full config dict. Returns error string on failure, or list of changed plugin IDs on success."""
-        try:
-            data = self._put("/global_settings/config", json={"config": config, "method": method, "changed": changed})
-            return data.get("changed_plugins", [])
-        except ApiClientError as e:
-            return e.message
-        except ApiUnavailableError:
-            raise
-
     # ── Instances ───────────────────────────────────────────────────────
 
     def get_instances(self) -> list:
@@ -40,10 +30,11 @@ class SchedulerApiClient(BaseApiClient):
         except (ApiClientError, ApiUnavailableError) as e:
             return e.message
 
-    def update_instances(self, instances: list, method: str, changed: bool = False) -> str:
-        """Bulk replace instances for the given method. Returns empty string on success."""
+    def update_instance_endpoints(self, instances: list, port: int, server_name: str) -> str:
+        """Update global endpoint defaults without replacing instance-owned state."""
         try:
-            self._put("/instances/bulk", json={"instances": instances, "method": method, "changed": changed})
+            for instance in instances:
+                self._patch(f"/instances/{instance['hostname']}", json={"port": port, "server_name": server_name})
             return ""
         except (ApiClientError, ApiUnavailableError) as e:
             return e.message

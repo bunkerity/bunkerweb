@@ -54,10 +54,28 @@ def deployed_services() -> set:
     return {directory.name for directory in JOB.job_path.iterdir() if directory.is_dir()}
 
 
+def attached_services() -> set:
+    """Services whose non-revoked attachment must survive a temporary decrypt failure."""
+    services = set()
+    offset = 0
+    while True:
+        page = JOB.db.get_certificates(offset=offset, limit=500)
+        if not isinstance(page, dict):
+            return services
+        items = page["items"]
+        for certificate in items:
+            if not certificate["revoked"]:
+                services.update(attachment["service_id"] for attachment in certificate["attachments"])
+        offset += len(items)
+        if offset >= page["total"] or not items:
+            return services
+
+
 try:
     renew_due_self_signed()
 
     deployable = JOB.db.get_deployable_certificates()
+    still_attached = attached_services()
     changed = False
 
     for service_id, certificate in deployable.items():
@@ -90,7 +108,7 @@ try:
 
     # A detached, deleted or revoked certificate must stop being served: dropping its files
     # lets the settings-driven providers take the service back over on the next reload.
-    for service_id in deployed_services() - set(deployable):
+    for service_id in deployed_services() - set(deployable) - still_attached:
         LOGGER.info(f"No certificate attached to service {service_id} anymore, removing its deployed material")
         for name in ("cert.pem", "key.pem", "fingerprint"):
             deleted, err = JOB.del_cache(name, service_id=service_id)

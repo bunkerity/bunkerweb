@@ -200,7 +200,7 @@ try:
                 if status == 1:
                     try:
                         token = getenv("API_TOKEN") or None
-                        instances = [i for i in JOB.db.get_instances() if i.get("status") != "down"]
+                        instances = [i for i in JOB.db.get_instances(with_credential=True) if i.get("status") != "down"]
                         if instances:
                             api_caller = ApiCaller([API.from_instance(i, token=token) for i in instances])
                             with le_cache_write_lock():

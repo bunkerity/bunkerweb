@@ -152,3 +152,44 @@ def test_the_worker_exports_the_id_this_job_reads():
 
     assert 'os.environ["BW_JOB_RUN_ID"]' in worker_source
     assert "BW_JOB_RUN_ID" in job_source
+
+
+def test_acknowledgement_never_clears_the_certificate_flag():
+    db = Mock()
+    db.clear_applied_changes.return_value = ""
+    snapshot = {"certificates_changed": True}
+
+    PUSH.acknowledge_changes(db, snapshot, "test")
+
+    db.clear_applied_changes.assert_called_once_with(snapshot, ("custom_configs", "external_plugins", "pro_plugins", "instances"))
+
+
+def test_only_enabled_plugins_are_materialized(tmp_path):
+    disabled = tmp_path / "disabled"
+    disabled.mkdir()
+    db = Mock()
+    db.get_plugins.return_value = []
+
+    PUSH._materialize_plugins(db, tmp_path, pro=True)
+
+    db.get_plugins.assert_called_once_with(_type="pro", with_data=True, only_enabled=True)
+    assert not disabled.exists()
+
+
+def test_each_instance_receives_its_own_api_token(tmp_path, monkeypatch):
+    (tmp_path / "variables.env").write_bytes(b"SERVER_NAME=example.com\nAPI_TOKEN=global\n")
+    seen = []
+    monkeypatch.setattr(PUSH, "_build_api_caller", lambda instances: instances[0]["hostname"])
+    monkeypatch.setattr(PUSH, "_write_atomic", lambda path, data: path.write_bytes(data))
+
+    def capture(caller, source, endpoint):
+        seen.append((caller, endpoint, source.joinpath("variables.env").read_bytes()))
+        return True
+
+    monkeypatch.setattr(PUSH, "_push_one_kind", capture)
+
+    assert PUSH._push_configs([{"hostname": "a", "credential": "token-a"}, {"hostname": "b", "credential": "token-b"}], tmp_path)
+    assert seen == [
+        ("a", "/confs", b"SERVER_NAME=example.com\nAPI_TOKEN=token-a\n"),
+        ("b", "/confs", b"SERVER_NAME=example.com\nAPI_TOKEN=token-b\n"),
+    ]

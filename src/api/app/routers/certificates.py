@@ -73,6 +73,14 @@ def update_certificate(certificate_id: str, payload: CertificateUpdateRequest) -
     return JSONResponse(status_code=200, content={"status": "success", "certificate": get_db().get_certificate_details(certificate_id)})
 
 
+@router.post("/{certificate_id}/revoke", dependencies=[Depends(guard)])
+def revoke_certificate(certificate_id: str) -> JSONResponse:
+    db = get_db()
+    if error := db.revoke_certificate(certificate_id):
+        return _error(error, 409)
+    return JSONResponse(status_code=200, content={"status": "success", "certificate": db.get_certificate_details(certificate_id)})
+
+
 @router.delete("/{certificate_id}", dependencies=[Depends(guard)])
 def delete_certificate(certificate_id: str) -> JSONResponse:
     db = get_db()

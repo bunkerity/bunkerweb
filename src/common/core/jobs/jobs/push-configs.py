@@ -17,6 +17,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import DEVNULL, STDOUT, run as subprocess_run
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
+from tempfile import TemporaryDirectory
 from traceback import format_exc
 from uuid import uuid4
 
@@ -136,7 +137,7 @@ def acknowledge_changes(db: Database, metadata_snapshot, reason: str) -> None:
     change's `last_*_change` watermark, so a change that landed WHILE this run worked has a
     newer watermark, is not acknowledged, and gets picked up on the next poll.
     """
-    error = db.clear_applied_changes(metadata_snapshot)
+    error = db.clear_applied_changes(metadata_snapshot, ("custom_configs", "external_plugins", "pro_plugins", "instances"))
     if error:
         # Not fatal: leaving a flag set costs a redundant push next poll, which is the safe
         # direction. Clearing it wrongly would cost a lost configuration.
@@ -187,7 +188,7 @@ def _materialize_plugins(db: Database, target: Path, *, pro: bool) -> None:
     LOGGER.info(f"Materializing {label} plugins from DB ...")
     target.mkdir(parents=True, exist_ok=True)
 
-    plugins = db.get_plugins(_type="pro" if pro else "external", with_data=True)
+    plugins = db.get_plugins(_type="pro" if pro else "external", with_data=True, only_enabled=True)
     keep_ids = {p["id"] for p in plugins}
 
     for entry in target.iterdir():
@@ -366,10 +367,44 @@ def _push_one_kind(api_caller: ApiCaller, src: Path, endpoint: str) -> bool:
     return bool(api_caller.send_files(src.as_posix(), endpoint, timeout=INSTANCE_PUSH_TIMEOUT))
 
 
-def _push_all(api_caller: ApiCaller) -> bool:
+def _config_with_api_token(data: bytes, token: str) -> bytes:
+    if "\n" in token or "\r" in token:
+        raise ValueError("instance API credential contains a newline")
+    lines = data.splitlines(keepends=True)
+    for index, line in enumerate(lines):
+        if line.startswith(b"API_TOKEN="):
+            ending = b"\r\n" if line.endswith(b"\r\n") else b"\n" if line.endswith(b"\n") else b""
+            lines[index] = f"API_TOKEN={token}".encode() + (ending or b"\n")
+            return b"".join(lines)
+    if data and not data.endswith((b"\n", b"\r")):
+        data += b"\n"
+    return data + f"API_TOKEN={token}\n".encode()
+
+
+def _push_configs(instances, src: Path = CONFIG_PATH) -> bool:
+    if not src.exists():
+        LOGGER.warning(f"Skipping push of {src} → /confs: source does not exist")
+        return True
+
     ok = True
+    for instance in instances:
+        hostname = instance.get("hostname", "unknown")
+        try:
+            with TemporaryDirectory(prefix="bw-push-configs-") as tmp:
+                rendered = Path(tmp, "nginx")
+                copytree(src, rendered, symlinks=True)
+                variables = rendered.joinpath("variables.env")
+                _write_atomic(variables, _config_with_api_token(variables.read_bytes(), instance.get("credential") or getenv("API_TOKEN", "")))
+                ok = _push_one_kind(_build_api_caller([instance]), rendered, "/confs") and ok
+        except (OSError, ValueError) as exc:
+            LOGGER.error(f"Failed to prepare instance-specific configuration for {hostname}: {exc}")
+            ok = False
+    return ok
+
+
+def _push_all(api_caller: ApiCaller, instances) -> bool:
+    ok = _push_configs(instances)
     for src, endpoint in (
-        (CONFIG_PATH, "/confs"),
         (CACHE_PATH, "/cache"),
         (CUSTOM_CONFIGS_PATH, "/custom_configs"),
         (EXTERNAL_PLUGINS_PATH, "/plugins"),
@@ -406,13 +441,13 @@ def _snapshot_failover() -> Path | None:
     return snapshot
 
 
-def _restore_from_snapshot(snapshot: Path, api_caller: ApiCaller) -> bool:
+def _restore_from_snapshot(snapshot: Path, api_caller: ApiCaller, instances) -> bool:
     LOGGER.warning(f"Reload failed; restoring failover snapshot {snapshot.name}")
     nginx_snap = snapshot.joinpath("nginx")
     cache_snap = snapshot.joinpath("cache")
     ok = True
     if nginx_snap.is_dir():
-        ok = bool(api_caller.send_files(nginx_snap.as_posix(), "/confs", timeout=INSTANCE_PUSH_TIMEOUT)) and ok
+        ok = _push_configs(instances, nginx_snap) and ok
     if cache_snap.is_dir():
         ok = bool(api_caller.send_files(cache_snap.as_posix(), "/cache", timeout=INSTANCE_PUSH_TIMEOUT)) and ok
     if not ok:
@@ -505,7 +540,7 @@ try:
 
     api_caller = _build_api_caller(instances)
 
-    push_ok = _push_all(api_caller)
+    push_ok = _push_all(api_caller, instances)
     if not push_ok:
         LOGGER.error("One or more artifact pushes failed (see per-instance logs above)")
 
@@ -522,7 +557,7 @@ try:
             LOGGER.warning("Not acknowledging the changes: at least one artifact push failed, so a re-push is still owed")
     else:
         LOGGER.error("Reload failed on at least one instance")
-        if snapshot is not None and _restore_from_snapshot(snapshot, api_caller):
+        if snapshot is not None and _restore_from_snapshot(snapshot, api_caller, instances):
             LOGGER.warning("Successfully restored previous configuration after reload failure")
         else:
             LOGGER.error("Failover restore failed; marking instances as failover")

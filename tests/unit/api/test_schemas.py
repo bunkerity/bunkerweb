@@ -208,7 +208,7 @@ class TestCertificateRequests:
 
 class TestInstanceTlsValidators:
     def test_tls_mode_normalized(self):
-        assert schemas.InstanceCreateRequest(hostname="bw-1", tls_mode="PINNED").tls_mode == "pinned"
+        assert schemas.InstanceCreateRequest(hostname="bw-1", tls_mode="PINNED", tls_fingerprint="ab" * 32).tls_mode == "pinned"
         assert schemas.InstanceUpdateRequest(tls_mode="off").tls_mode == "off"
 
     def test_tls_mode_invalid(self):
@@ -229,3 +229,14 @@ class TestInstanceTlsValidators:
 
     def test_credential_write_field_accepted(self):
         assert schemas.InstanceCreateRequest(hostname="bw-1", credential="tok").credential == "tok"
+
+    @pytest.mark.parametrize("model", [schemas.InstanceCreateRequest, schemas.InstanceUpdateRequest])
+    def test_pinned_mode_requires_a_fingerprint(self, model):
+        kwargs = {"hostname": "bw-1"} if model is schemas.InstanceCreateRequest else {}
+        with pytest.raises(ValidationError, match="tls_fingerprint is required"):
+            model(**kwargs, tls_mode="pinned")
+
+    def test_an_explicit_empty_fingerprint_remains_distinguishable(self):
+        request = schemas.InstanceUpdateRequest(tls_mode="off", tls_fingerprint="")
+        assert request.tls_fingerprint is None
+        assert "tls_fingerprint" in request.model_fields_set

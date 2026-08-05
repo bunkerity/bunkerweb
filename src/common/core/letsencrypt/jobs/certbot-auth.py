@@ -22,7 +22,7 @@ try:
     validation = getenv("CERTBOT_VALIDATION", "")
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
 
-    instances = db.get_instances()
+    instances = db.get_instances(with_credential=True)
 
     LOGGER.info(f"Sending challenge to {len(instances)} instances")
     for instance in instances:

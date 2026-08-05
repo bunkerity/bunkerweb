@@ -104,7 +104,7 @@ class API:
 
         pinned = self.__tls_mode == "pinned" and bool(self.__tls_fingerprint)
         if self.__tls_mode == "pinned" and not self.__tls_fingerprint:
-            self.__logger.warning(f"Instance {self.__endpoint} is in TLS mode 'pinned' but has no fingerprint; the connection cannot be pinned")
+            return False, "TLS pinning requires a fingerprint", None, None
 
         full_url = f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}"
         try:
@@ -207,7 +207,13 @@ class API:
             https_port=instance.get("https_port"),
         )
         host = instance.get("server_name") or getenv("API_SERVER_NAME", "bwapi")
-        return cls(endpoint, host=host, token=token, tls_mode=instance.get("tls_mode", "off"), tls_fingerprint=instance.get("tls_fingerprint"))
+        return cls(
+            endpoint,
+            host=host,
+            token=instance.get("credential") or token,
+            tls_mode=instance.get("tls_mode", "off"),
+            tls_fingerprint=instance.get("tls_fingerprint"),
+        )
 
     @classmethod
     def from_url_or_parts(

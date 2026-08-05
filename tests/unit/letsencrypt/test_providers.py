@@ -8,6 +8,7 @@ Pydantic classes when BunkerWeb moved from dedicated ``certbot-dns-*`` plugins t
 
 from base64 import b64encode
 from json import loads as json_loads
+from unittest.mock import Mock
 
 import letsencrypt_providers as P
 from letsencrypt_utils import LETSENCRYPT_CACHE_PATH, extract_provider
@@ -147,6 +148,34 @@ def test_new_provider_passthrough_uppercased():
     assert prov.env == {"VERCEL_API_TOKEN": "V"}
 
 
+def test_porkbun_documented_keys_are_prefixed():
+    prov = P.translate_credentials("porkbun", "porkbun", {"api_key": "K", "secret_api_key": "S"})
+    assert prov.env == {"PORKBUN_API_KEY": "K", "PORKBUN_SECRET_API_KEY": "S"}
+
+
+def test_unknown_keys_are_rejected_with_secret_free_diagnostics():
+    logger = Mock()
+    assert P.translate_credentials("cloudflare", "cloudflare", {"dns_cloudflare_apitoken": "SUPERSECRET"}, logger) is None
+    messages = " ".join(str(call) for call in logger.method_calls)
+    assert "dns_cloudflare_apitoken" in messages
+    assert "SUPERSECRET" not in messages
+
+
+def test_direct_provider_unknown_keys_are_not_passed_to_lego():
+    logger = Mock()
+    assert P.translate_credentials("porkbun", "porkbun", {"typo": "SUPERSECRET"}, logger) is None
+    assert "SUPERSECRET" not in " ".join(str(call) for call in logger.method_calls)
+
+
+def test_cloudflare_requires_a_complete_authentication_method():
+    assert P.translate_credentials("cloudflare", "cloudflare", {"email": "a@b.c"}) is None
+
+
+def test_cloudns_requires_an_account_id_and_password():
+    assert P.translate_credentials("cloudns", "cloudns", {"auth_password": "pw"}) is None
+    assert P.translate_credentials("cloudns", "cloudns", {"sub_auth_id": "sub", "auth_password": "pw"}) is not None
+
+
 def test_legacy_provider_missing_required_returns_none():
     # domeneshop needs both token and secret
     assert P.translate_credentials("domeneshop", "domeneshop", {"client_token": "T"}) is None
@@ -181,6 +210,9 @@ def test_legacy_aliases_map_to_real_lego_env_vars():
             assert dst in known, f"{name}: {src} -> {dst} is not a lego env var of {code}"
         for required in spec.get("required", []):
             assert required in known, f"{name}: required {required} not a lego env var of {code}"
+        for alternative in spec.get("required_any", []):
+            for required in alternative:
+                assert required in known, f"{name}: required alternative {required} not a lego env var of {code}"
 
 
 def test_plugin_enum_matches_registry():

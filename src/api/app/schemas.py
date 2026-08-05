@@ -165,6 +165,12 @@ class InstanceCreateRequest(BaseModel):
     def validate_tls_fingerprint(cls, value: Optional[str]) -> Optional[str]:
         return _normalize_tls_fingerprint(value)
 
+    @model_validator(mode="after")
+    def validate_pinned_fingerprint(self):
+        if self.tls_mode == "pinned" and not self.tls_fingerprint:
+            raise ValueError("tls_fingerprint is required when tls_mode=pinned")
+        return self
+
 
 class InstancesDeleteRequest(BaseModel):
     instances: List[str]
@@ -179,7 +185,7 @@ class InstanceUpdateRequest(BaseModel):
     method: Optional[str] = Field(None, description="Source method tag")
     credential: Optional[str] = Field(None, description="Per-instance control-plane API token (write-only); empty string clears it")
     tls_mode: Optional[str] = Field(None, description='Per-instance TLS trust: "off" or "pinned"')
-    tls_fingerprint: Optional[str] = Field(None, description="Peer certificate SHA-256 hex digest; required for tls_mode=pinned")
+    tls_fingerprint: Optional[str] = Field(None, description="Peer certificate SHA-256 hex digest; empty string clears it when tls_mode is off")
 
     @field_validator("tls_mode")
     @classmethod
@@ -190,6 +196,12 @@ class InstanceUpdateRequest(BaseModel):
     @classmethod
     def validate_tls_fingerprint(cls, value: Optional[str]) -> Optional[str]:
         return _normalize_tls_fingerprint(value)
+
+    @model_validator(mode="after")
+    def validate_pinned_fingerprint(self):
+        if self.tls_mode == "pinned" and not self.tls_fingerprint:
+            raise ValueError("tls_fingerprint is required when tls_mode=pinned")
+        return self
 
 
 # Services

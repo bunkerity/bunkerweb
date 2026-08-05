@@ -199,7 +199,8 @@ def translate_credentials(
             elif key.upper() in known:
                 # Operators may also use raw lego env-var names with a legacy provider name.
                 env[key.upper()] = value
-            # Unknown keys for a known legacy provider are ignored (not silently passed to lego).
+            elif logger is not None:
+                logger.warning(f"Ignoring unsupported credential key '{key}' for DNS provider '{provider_input}'.")
 
         for default_key, default_value in spec.get("defaults", {}).items():
             env.setdefault(default_key, default_value)
@@ -217,15 +218,32 @@ def translate_credentials(
             if logger is not None:
                 logger.error(f"Missing required credential(s) for provider '{provider_input}' " f"({provider_display_name(lego_code)}): {', '.join(missing)}.")
             return None
+
+        required_any = spec.get("required_any", [])
+        if required_any and not any(all(env.get(var) for var in alternative) for alternative in required_any):
+            if logger is not None:
+                alternatives = " or ".join(" + ".join(group) for group in required_any)
+                logger.error(f"Missing required credential combination for provider '{provider_input}': {alternatives}.")
+            return None
     else:
-        # New lego provider configured directly: keys are already lego env-var names.
+        known = _known_env(lego_code)
+        prefix = f"{lego_code.upper().replace('-', '_')}_"
         for key, value in credential_items.items():
-            env[key.upper()] = value
+            raw = key.upper()
+            candidates = [candidate for candidate in (raw, f"{prefix}{raw}") if candidate in known]
+            if not candidates:
+                candidates = [candidate for candidate in known if candidate.endswith(f"_{raw}")]
+            if len(candidates) == 1:
+                env[candidates[0]] = value
+            elif logger is not None:
+                logger.warning(f"Ignoring unsupported credential key '{key}' for DNS provider '{provider_input}'.")
 
     # Drop any internal sentinels that a special handler did not consume.
     env = {key: value for key, value in env.items() if not key.startswith("__")}
 
     if not env and not sidecars:
+        if logger is not None:
+            logger.error(f"No supported credentials were provided for DNS provider '{provider_input}'.")
         return None
 
     return DnsMultiProvider(lego_code, env, sidecars)

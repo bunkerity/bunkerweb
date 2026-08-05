@@ -44,7 +44,7 @@ try:
         LOGGER.info("First start of the scheduler, skipping reports persistence...")
         sys_exit(0)
 
-    instances = JOB.db.get_instances()
+    instances = JOB.db.get_instances(with_credential=True)
     if not instances:
         LOGGER.info("No instances registered, nothing to scrape.")
         sys_exit(0)

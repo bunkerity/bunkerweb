@@ -1108,23 +1108,10 @@ if __name__ == "__main__":
                     if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(
                         "API_SERVER_NAME", "bwapi"
                     ):
-                        err = API_CLIENT.update_instances(
-                            [
-                                {
-                                    "hostname": db_instance["hostname"],
-                                    "name": db_instance["name"],
-                                    "env": {
-                                        "API_HTTP_PORT": env.get("API_HTTP_PORT", "5000"),
-                                        "API_SERVER_NAME": env.get("API_SERVER_NAME", "bwapi"),
-                                    },
-                                    "type": db_instance["type"],
-                                    "status": db_instance["status"],
-                                    "method": db_instance["method"],
-                                    "last_seen": db_instance["last_seen"],
-                                }
-                                for db_instance in API_CLIENT.get_instances()
-                            ],
-                            method="scheduler",
+                        err = API_CLIENT.update_instance_endpoints(
+                            API_CLIENT.get_instances(),
+                            int(env.get("API_HTTP_PORT", "5000")),
+                            env.get("API_SERVER_NAME", "bwapi"),
                         )
                         if err:
                             LOGGER.error(f"Couldn't update instances: {err}")

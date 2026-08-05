@@ -20,7 +20,7 @@ try:
     # Get env vars
     token = getenv("CERTBOT_TOKEN", "")
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
-    instances = db.get_instances()
+    instances = db.get_instances(with_credential=True)
 
     LOGGER.info(f"Cleaning challenge from {len(instances)} instances")
     for instance in instances:

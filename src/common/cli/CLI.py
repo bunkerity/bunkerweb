@@ -142,7 +142,7 @@ class CLI(ApiCaller):
             self.__terminal_width = 80  # Default width for non-TTY environments
 
         if self.__db:
-            for db_instance in self.__db.get_instances():
+            for db_instance in self.__db.get_instances(with_credential=True):
                 try:
                     # Centralized builder handles scheme/port/host
                     self.apis.append(API.from_instance(db_instance))

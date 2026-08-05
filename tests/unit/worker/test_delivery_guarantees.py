@@ -121,6 +121,17 @@ LOGGER = Mock()
 BROKER = "redis://broker:6379/0"
 
 
+def test_worker_requests_instance_credentials(monkeypatch):
+    db = Mock()
+    db.get_instances.return_value = [{"hostname": "bw-1", "status": "up", "credential": "instance-token"}]
+    monkeypatch.setattr(TASKS, "get_worker_db", lambda: db)
+
+    caller = TASKS._get_apis()
+
+    db.get_instances.assert_called_once_with(with_credential=True)
+    assert len(caller.apis) == 1
+
+
 class TestAckSettings:
     def test_delivery_is_at_least_once(self):
         """The whole point of the change: nothing may ack a job before it has run."""

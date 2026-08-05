@@ -253,6 +253,14 @@ def update_instance(hostname: str, req: InstanceUpdateRequest) -> JSONResponse:
         req: Update request with new values for name, port, server_name, method
     """
     db = get_db()
+    instance = db.get_instance(hostname)
+    if not instance:
+        return JSONResponse(status_code=404, content={"status": "error", "message": f"Instance {hostname} not found"})
+
+    tls_mode = req.tls_mode if req.tls_mode is not None else instance.get("tls_mode", "off")
+    tls_fingerprint = req.tls_fingerprint if "tls_fingerprint" in req.model_fields_set else instance.get("tls_fingerprint")
+    if tls_mode == "pinned" and not tls_fingerprint:
+        return JSONResponse(status_code=422, content={"status": "error", "message": "tls_fingerprint is required when tls_mode=pinned"})
 
     # Validate optional port if provided
     if req.port is not None:
@@ -270,7 +278,7 @@ def update_instance(hostname: str, req: InstanceUpdateRequest) -> JSONResponse:
         listen_https=bool(req.listen_https) if req.listen_https is not None else None,
         https_port=int(req.https_port) if req.https_port is not None else None,
         tls_mode=req.tls_mode,
-        tls_fingerprint=req.tls_fingerprint,
+        tls_fingerprint="" if "tls_fingerprint" in req.model_fields_set and req.tls_fingerprint is None else req.tls_fingerprint,
     )
     if err:
         code = 400 if ("does not exist" in err or "read-only" in err) else 500

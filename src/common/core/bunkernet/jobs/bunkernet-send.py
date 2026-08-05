@@ -121,7 +121,7 @@ try:
         sys_exit(2)
 
     # Create API instances for each database instance (HTTPS-aware)
-    apis = [API.from_instance(instance) for instance in JOB.db.get_instances()]
+    apis = [API.from_instance(instance) for instance in JOB.db.get_instances(with_credential=True)]
 
     apiCaller = ApiCaller(apis)
 

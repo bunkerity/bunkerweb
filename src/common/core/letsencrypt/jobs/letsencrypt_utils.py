@@ -1,21 +1,13 @@
 from base64 import b64decode
 from json import loads as json_loads
 from os import (
-    O_CREAT,
-    O_NOFOLLOW,
-    O_TRUNC,
-    O_WRONLY,
     W_OK,
     X_OK,
     access,
-    close as os_close,
     environ,
-    fsync as os_fsync,
     getenv,
-    open as os_open,
     sep,
     umask,
-    write as os_write,
 )
 from os.path import join
 from pathlib import Path
@@ -23,7 +15,6 @@ from re import match as re_match
 from traceback import format_exc
 from typing import Dict, List, Mapping, Optional, Union
 
-from common_utils import bytes_hash  # type: ignore
 from letsencrypt_providers import (  # noqa: F401 — is_supported_provider/SUPPORTED_PROVIDER_INPUTS re-exported for the job scripts
     DnsMultiProvider,
     SUPPORTED_PROVIDER_INPUTS,
@@ -126,29 +117,6 @@ def extract_provider(
         for basename, (_content, env_key) in provider.sidecars.items():
             provider.env[env_key] = LETSENCRYPT_CACHE_PATH.joinpath(basename).as_posix()
     return provider
-
-
-def write_provider_credentials_file(provider_instance: DnsMultiProvider, data_path: Union[str, Path] = LETSENCRYPT_CACHE_PATH) -> str:
-    """Serialise a :class:`DnsMultiProvider`'s credentials to disk and return the path.
-
-    Filename is ``credentials_<bytes_hash(body)[:12]>.<ext>`` — identical to the scheme
-    certbot-new.py uses at issuance, so the file written here resolves to the same path
-    certbot already references (no second file accretes). Written with the final ``0o600``
-    perms baked into ``open(2)`` plus ``O_NOFOLLOW`` (no world-readable window, no symlink
-    swap). Idempotent: same credentials -> same path, ``O_TRUNC`` rewrites identical bytes.
-    """
-    formatted = provider_instance.get_formatted_credentials()
-    ext = provider_instance.get_file_type()
-    cred_hash = bytes_hash(formatted, algorithm="sha256")[:12]
-    cred_file = Path(data_path).joinpath(f"credentials_{cred_hash}.{ext}")
-    cred_file.parent.mkdir(parents=True, exist_ok=True)
-    fd = os_open(cred_file.as_posix(), O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW, 0o600)
-    try:
-        os_write(fd, formatted)
-        os_fsync(fd)
-    finally:
-        os_close(fd)
-    return cred_file.as_posix()
 
 
 def certbot_log_backup_flags(env_vars: Optional[Mapping[str, str]] = None) -> List[str]:

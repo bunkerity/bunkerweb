@@ -61,7 +61,7 @@ try:
 
     # Best-effort per-instance connectivity (never fails the job).
     try:
-        instances = JOB.db.get_instances()
+        instances = JOB.db.get_instances(with_credential=True)
         if instances:
             caller = ApiCaller([API.from_instance(instance) for instance in instances])
             _, responses = caller.send_to_apis("POST", "/bunkernet/ping", response=True)

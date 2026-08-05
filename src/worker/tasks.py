@@ -39,7 +39,7 @@ def _get_apis():
     db = get_worker_db()
     if db is not None:
         try:
-            db_instances = [inst for inst in db.get_instances() if inst.get("status") != "down"]
+            db_instances = [inst for inst in db.get_instances(with_credential=True) if inst.get("status") != "down"]
         except Exception:
             db_instances = []
         if db_instances:

@@ -138,6 +138,19 @@ def test_attach_and_delete_guard(monkeypatch):
     db.delete_certificate.assert_not_called()
 
 
+def test_revoke_uses_the_database_contract(monkeypatch):
+    db = Mock()
+    db.revoke_certificate.return_value = ""
+    db.get_certificate_details.return_value = _certificate()
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.revoke_certificate("cert-1")
+
+    assert response.status_code == 200
+    assert _json(response)["certificate"]["id"] == "cert-1"
+    db.revoke_certificate.assert_called_once_with("cert-1")
+
+
 def test_download_returns_public_pem_only(monkeypatch):
     db = Mock()
     db.get_certificate_details.return_value = _certificate()

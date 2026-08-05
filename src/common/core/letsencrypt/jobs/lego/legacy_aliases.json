@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "Hand-authored backward-compat map: historical BunkerWeb DNS provider names + their legacy credential-item key spellings -> lego provider code + lego env-var names. Source of truth for the key spellings is the pre-1.7 Pydantic classes in letsencrypt_providers.py. Keys in every cred_key_map are lowercased because extract_provider() lowercases credential-item keys before lookup. 'required' lists lego env vars that must be present after translation (early-fail). 'defaults' are applied when absent. 'special' triggers extra handling in translate_credentials(): ionos_combine (prefix.secret -> IONOS_API_KEY), rfc2136_port (fold port into DNSUPDATE_NAMESERVER), google_sa (reassemble a service-account JSON sidecar -> GCE_SERVICE_ACCOUNT_FILE).",
+    "note": "Hand-authored backward-compat map: historical BunkerWeb DNS provider names + their legacy credential-item key spellings -> lego provider code + lego env-var names. Source of truth for the key spellings is the pre-1.7 Pydantic classes in letsencrypt_providers.py. Keys in every cred_key_map are lowercased because extract_provider() lowercases credential-item keys before lookup. 'required' lists lego env vars that must be present after translation (early-fail), and 'required_any' lists accepted alternative groups. 'defaults' are applied when absent. 'special' triggers extra handling in translate_credentials(): ionos_combine (prefix.secret -> IONOS_API_KEY), rfc2136_port (fold port into DNSUPDATE_NAMESERVER), google_sa (reassemble a service-account JSON sidecar -> GCE_SERVICE_ACCOUNT_FILE).",
     "lego_version": "v5.2.0"
   },
 
@@ -27,7 +27,8 @@
       "cloudns_auth_password": "CLOUDNS_AUTH_PASSWORD",
       "auth_password": "CLOUDNS_AUTH_PASSWORD"
     },
-    "required": ["CLOUDNS_AUTH_PASSWORD"]
+    "required": ["CLOUDNS_AUTH_PASSWORD"],
+    "required_any": [["CLOUDNS_AUTH_ID"], ["CLOUDNS_SUB_AUTH_ID"]]
   },
 
   "cloudflare": {
@@ -42,7 +43,8 @@
       "dns_cloudflare_api_key": "CF_API_KEY",
       "cloudflare_api_key": "CF_API_KEY",
       "api_key": "CF_API_KEY"
-    }
+    },
+    "required_any": [["CF_DNS_API_TOKEN"], ["CF_API_EMAIL", "CF_API_KEY"]]
   },
 
   "desec": {
