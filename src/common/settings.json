@@ -560,7 +560,7 @@
   },
   "PLUGINS_ORDER_LOG_STREAM": {
     "context": "multisite",
-    "default": "badbehavior bunkernet",
+    "default": "badbehavior bunkernet metrics",
     "help": "Plugins that should run first during the log_stream phase for this site (stream log processing). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-log-stream",
     "label": "Plugins order (log_stream)",

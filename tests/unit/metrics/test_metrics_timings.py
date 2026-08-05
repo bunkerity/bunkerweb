@@ -29,6 +29,11 @@ PLUGIN_JSON = ROOT / "src" / "common" / "core" / "metrics" / "plugin.json"
 LUA = shutil.which("lua") or shutil.which("luajit")
 needs_lua = pytest.mark.skipif(LUA is None, reason="no stand-alone lua/luajit on PATH")
 
+# The guard that opens the baseline branch in metrics:log(). It also carries the subsystem test
+# added with the Stream reporting work — the baseline models HTTP shape and has no meaning for a
+# raw L4 session. Kept as a constant because four tests below slice the function on it.
+BASELINE_GUARD = 'if not reason and subsystem == "http" then'
+
 
 def _extract(name: str) -> str:
     """Return the real source of a pure module-level function from metrics.lua."""
@@ -388,7 +393,7 @@ def test_the_baseline_uses_its_own_buffer_not_the_blocked_one():
     facet HINCRBYs on baseline volume."""
     metrics = METRICS_LUA.read_text(encoding="utf-8")
     log_body = metrics.split("function metrics:log(")[1].split("\nfunction metrics:")[0]
-    baseline = log_body.split("if not reason then")[1].split("\n\t-- Whole-request")[0]
+    baseline = log_body.split(BASELINE_GUARD)[1].split("\n\t-- Whole-request")[0]
     assert 'lru:get("baseline")' in baseline and 'lru:set("baseline"' in baseline
     assert '"requests"' not in baseline
 
@@ -397,7 +402,7 @@ def test_only_non_blocked_requests_join_the_baseline():
     """A blocked request already has a row in bw_metrics_requests; sampling it here would
     both double-count it and poison the notion of 'normal'."""
     log_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:log(")[1].split("\nfunction metrics:")[0]
-    assert "if not reason then" in log_body
+    assert BASELINE_GUARD in log_body
 
 
 def test_sampling_is_deterministic_not_random():
@@ -410,14 +415,14 @@ def test_the_baseline_never_records_the_client_ip():
     """A model of traffic shape does not need identity, and recording every ordinary
     visitor's address is a far larger privacy commitment than recording blocked ones."""
     log_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:log(")[1].split("\nfunction metrics:")[0]
-    baseline = log_body.split("if not reason then")[1].split("\n\t-- Whole-request")[0]
+    baseline = log_body.split(BASELINE_GUARD)[1].split("\n\t-- Whole-request")[0]
     assert "remote_addr" not in baseline
     assert "ip =" not in baseline
 
 
 def test_the_baseline_buffer_is_capped():
     log_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:log(")[1].split("\nfunction metrics:")[0]
-    baseline = log_body.split("if not reason then")[1].split("\n\t-- Whole-request")[0]
+    baseline = log_body.split(BASELINE_GUARD)[1].split("\n\t-- Whole-request")[0]
     assert "METRICS_MAX_BASELINE_REQUESTS" in baseline
     assert "table_remove(baseline, 1)" in baseline, "drop oldest first"
 

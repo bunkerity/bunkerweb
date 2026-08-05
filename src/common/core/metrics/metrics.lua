@@ -1,6 +1,7 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local datastore = require "bunkerweb.datastore"
+local http = require "resty.http"
 local lrucache = require "resty.lrucache"
 local plugin = require "bunkerweb.plugin"
 local utils = require "bunkerweb.utils"
@@ -114,12 +115,14 @@ local shared = ngx.shared
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
+local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
 local worker = ngx.worker
 local worker_id = worker.id
 
 local crc32_short = ngx.crc32_short
 local get_reason = utils.get_reason
 local has_variable = utils.has_variable
+local get_variable = utils.get_variable
 local is_connection_error = utils.is_connection_error
 local is_oom_error = utils.is_oom_error
 local encode = cjson.encode
@@ -406,6 +409,22 @@ function metrics:log(bypass_checks)
 		-- Geo data is resolved once per request by fill_ctx()
 		local country = self.ctx.bw.country or "local"
 		local asn_number, asn_org = self.ctx.bw.asn_number, self.ctx.bw.asn_org
+		-- ngx.status is HTTP-only; stream carries the session status in $status (200/400/403/
+		-- 500/502/503). A denied stream session does not reliably land on a 4xx either --
+		-- get_deny_status() is 444 there, which is not an NGINX stream status at all. Since
+		-- _report_clause() keeps a row only when it is 4xx *or* security_mode = "detect", a
+		-- block recorded with the raw session status would be persisted and then invisible in
+		-- Reports. Pin stream denies to 403; detect rows keep their real status, which is what
+		-- actually happened to the session, and are kept by the detect arm of the clause.
+		local status
+		if subsystem == "http" then
+			status = ngx.status
+		else
+			status = tonumber(ngx.var.status) or 0
+			if security_mode == "block" and not (status >= 400 and status < 500) then
+				status = 403
+			end
+		end
 		local request = {
 			id = self.ctx.bw.request_id,
 			date = self.ctx.bw.start_time or time(),
@@ -413,7 +432,7 @@ function metrics:log(bypass_checks)
 			country = country,
 			method = self.ctx.bw.request_method,
 			url = self.ctx.bw.request_uri,
-			status = ngx.status,
+			status = status,
 			user_agent = self.ctx.bw.http_user_agent or "",
 			reason = reason,
 			server_name = self.ctx.bw.server_name,
@@ -465,7 +484,9 @@ function metrics:log(bypass_checks)
 	-- The client IP is deliberately NOT stored: this is a model of traffic *shape*, not of
 	-- who sent it, and recording every ordinary visitor's address is a far larger privacy
 	-- commitment than recording the ones that got blocked.
-	if not reason then
+	-- HTTP only: nearly every field below is an HTTP notion ($request_time, $body_bytes_sent,
+	-- scheme, content-type...) and none of them exist for a raw L4 session.
+	if not reason and subsystem == "http" then
 		local rate = self.variables["METRICS_BASELINE_SAMPLE_RATE"]
 		local request_id = self.ctx.bw.request_id
 		if request_id and should_sample(crc32_short(request_id), rate) then
@@ -508,7 +529,8 @@ function metrics:log(bypass_checks)
 	-- Whole-request duration, taken from NGINX's own accounting rather than measured in Lua:
 	-- $request_time costs nothing here, needs no update_time(), and is the single most useful
 	-- feature for the anomaly baseline. Unlike the per-plugin timers it is always collected.
-	-- log() has no stream counterpart (metrics defines no log_stream), so this is HTTP-only.
+	-- HTTP-only: the stream equivalent is $session_time, which measures a different thing
+	-- (whole connection lifetime, not request latency) and would skew the aggregate.
 	local request_time = tonumber(ngx.var.request_time)
 	if request_time then
 		lru:set("metrics_timer_request", accumulate_timer(lru:get("metrics_timer_request"), request_time))
@@ -562,6 +584,14 @@ function metrics:log(bypass_checks)
 	return self:ret(true, "success")
 end
 
+-- Stream counterpart of log(). Same report path : the subsystem-specific bits (status source,
+-- baseline sampling, $request_time, $upstream_cache_status) are already branched inside log(),
+-- so there is nothing to duplicate here. Blocked TCP/UDP sessions used to reach no persistent
+-- store at all -- they only produced an INFO line in the NGINX log.
+function metrics:log_stream()
+	return self:log()
+end
+
 function metrics:log_default()
 	local is_needed, err = has_variable("USE_METRICS", "yes")
 	if is_needed == nil then
@@ -571,6 +601,91 @@ function metrics:log_default()
 		return self:log(true)
 	end
 	return self:ret(true, "metrics not used")
+end
+
+-- Stream half of the handover documented on api_ingest_stream_reports(): drain this worker's
+-- buffered reports and POST them to the instance's own API over loopback. Runs from the timer
+-- phase, never from log_stream -- cosockets are forbidden in the log phase, which is the same
+-- reason badbehavior queues its increments instead of banning inline.
+--
+-- The batch is only dropped once the API has acknowledged it. On failure it stays in the LRU
+-- and the next tick retries, bounded by METRICS_MAX_BLOCKED_REQUESTS like every other buffer
+-- here, so an API that is down costs bounded memory rather than an unbounded backlog.
+local function push_stream_reports(max_requests)
+	local requests = lru:get("requests")
+	if not requests or #requests == 0 then
+		return true, "no stream reports to push"
+	end
+
+	if get_variable("API_LISTEN_HTTP", false) ~= "yes" then
+		-- Nothing to talk to: the reports would pile up forever, so drop them rather than
+		-- pretend. An HTTPS-only API is not reachable this way (see the conception note).
+		lru:set("requests", {})
+		return false, "API_LISTEN_HTTP is not enabled, dropping " .. #requests .. " stream reports"
+	end
+
+	-- Take the batch and hand the buffer a fresh table right away. lru:get() returns the stored
+	-- table itself, and log_stream() keeps appending to it while the cosocket below yields --
+	-- so anything logged mid-flight would be appended to the very table being sent, then
+	-- counted as acknowledged and dropped without ever having been transmitted.
+	local batch = requests
+	local count = #batch
+	lru:set("requests", {})
+
+	local function keep_for_next_tick()
+		local pending = lru:get("requests") or {}
+		for index = count, 1, -1 do
+			table_insert(pending, 1, batch[index])
+		end
+		-- Same bound as everywhere else here: an API that stays down costs bounded memory.
+		while #pending > (max_requests or 1000) do
+			table_remove(pending, 1)
+		end
+		lru:set("requests", pending)
+	end
+
+	local port, err = get_variable("API_HTTP_PORT", false)
+	if not port then
+		keep_for_next_tick()
+		return false, "can't get API_HTTP_PORT variable : " .. tostring(err)
+	end
+	local server_name
+	server_name, err = get_variable("API_SERVER_NAME", false)
+	if not server_name then
+		keep_for_next_tick()
+		return false, "can't get API_SERVER_NAME variable : " .. tostring(err)
+	end
+
+	local headers = { ["Content-Type"] = "application/json", ["Host"] = server_name }
+	local token = get_variable("API_TOKEN", false)
+	if token and token ~= "" then
+		headers["Authorization"] = "Bearer " .. token
+	end
+
+	local httpc
+	httpc, err = http.new()
+	if not httpc then
+		keep_for_next_tick()
+		return false, "can't instantiate http client : " .. tostring(err)
+	end
+	httpc:set_timeout(5000)
+
+	local res
+	res, err = httpc:request_uri("http://127.0.0.1:" .. port .. "/metrics/stream-reports", {
+		method = "POST",
+		headers = headers,
+		body = encode({ requests = batch }),
+	})
+	if not res then
+		keep_for_next_tick()
+		return false, "can't push stream reports to the API : " .. tostring(err)
+	end
+	if res.status ~= 200 then
+		keep_for_next_tick()
+		return false, "API refused stream reports with status " .. tostring(res.status)
+	end
+
+	return true, "pushed " .. count .. " stream reports"
 end
 
 function metrics:timer()
@@ -770,6 +885,18 @@ function metrics:timer()
 		self.clusterstore:close()
 	end
 
+	-- Hand this stream worker's reports over to the HTTP subsystem, which owns the only shm the
+	-- scrape job can read. Done after the flush above so the shm copy survives a worker restart.
+	if subsystem == "stream" then
+		local pushed, push_msg =
+			push_stream_reports(parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000)
+		if not pushed then
+			self:log_throttled(ERR, "stream_reports_push", push_msg)
+		else
+			self.logger:log(INFO, push_msg)
+		end
+	end
+
 	-- Flush any end-of-window recaps for errors that stopped repeating.
 	self:flush_log_recaps()
 
@@ -777,13 +904,64 @@ function metrics:timer()
 	return self:ret(ret, ret_err)
 end
 
+-- Receives the reports a stream worker buffered and folds them into this HTTP worker's LRU, so
+-- the existing LRU -> shm flush and the scrape job carry them the rest of the way untouched.
+-- Rows land under whichever HTTP worker served the POST; that is fine, api_requests_query()
+-- already merges every requests_<wid> key. Duplicates are harmless: the scrape deduplicates on
+-- (instance_hostname, request_id).
+function metrics:api_ingest_stream_reports()
+	ngx.req.read_body()
+	local body = ngx.req.get_body_data()
+	if not body then
+		return self:ret(true, "no body", HTTP_BAD_REQUEST)
+	end
+	local ok, decoded = pcall(decode, body)
+	if not ok or type(decoded) ~= "table" or type(decoded.requests) ~= "table" then
+		return self:ret(true, "malformed stream reports payload", HTTP_BAD_REQUEST)
+	end
+
+	local requests = lru:get("requests") or {}
+	local added = 0
+	for _, request in ipairs(decoded.requests) do
+		if type(request) == "table" and request.id then
+			table_insert(requests, request)
+			added = added + 1
+		end
+	end
+
+	-- Same bound as log(): a stream flood must not evict the HTTP reports.
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
+	while #requests > max_requests do
+		table_remove(requests, 1)
+	end
+	lru:set("requests", requests)
+
+	return self:ret(true, { ingested = added }, HTTP_OK)
+end
+
 function metrics:api()
 	-- Match request
-	if not match(self.ctx.bw.uri, "^/metrics/.+$") or self.ctx.bw.request_method ~= "GET" then
+	if not match(self.ctx.bw.uri, "^/metrics/.+$") then
 		return self:ret(false, "success")
 	end
 	-- Extract filter parameter
 	local filter = self.ctx.bw.uri:gsub("^/metrics/", "")
+
+	-- The only write on this plugin's API, and the only one that is not client-facing: the
+	-- stream subsystem hands over its buffered reports here. ngx.shared is built per
+	-- subsystem, so the stream workers' metrics_datastore_stream is unreachable from this
+	-- HTTP server -- without this handover a blocked TCP/UDP session could never reach the
+	-- scrape job, whatever the storage backend.
+	if self.ctx.bw.request_method == "POST" then
+		if filter == "stream-reports" then
+			return self:api_ingest_stream_reports()
+		end
+		return self:ret(false, "success")
+	end
+
+	if self.ctx.bw.request_method ~= "GET" then
+		return self:ret(false, "success")
+	end
 
 	-- Handle special /metrics/requests/query endpoint for optimized queries
 	if filter == "requests/query" then

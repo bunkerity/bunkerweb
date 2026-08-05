@@ -278,6 +278,16 @@
       "type": "file",
       "accept": ".pem,.key,.txt"
     },
+    "REVERSE_PROXY_SEND_PROXY_PROTOCOL": {
+      "context": "multisite",
+      "default": "auto",
+      "help": "Send the PROXY protocol header to the stream upstream. 'auto' follows the global USE_PROXY_PROTOCOL setting, which is what BunkerWeb did before this setting existed; 'yes' and 'no' decide independently of the inbound listener.",
+      "id": "reverse-proxy-send-proxy-protocol",
+      "label": "Send PROXY protocol to upstream",
+      "regex": "^(auto|yes|no)$",
+      "select": ["auto", "yes", "no"],
+      "type": "select"
+    },
     "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
       "context": "multisite",
       "default": "1",

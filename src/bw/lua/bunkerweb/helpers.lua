@@ -23,7 +23,9 @@ local get_variable = utils.get_variable
 local get_country = utils.get_country
 local get_asn = utils.get_asn
 local get_city = utils.get_city
+local rand = utils.rand
 local lower = string.lower
+local upper = string.upper
 local now = ngx.now
 local update_time = ngx.update_time
 
@@ -356,6 +358,20 @@ helpers.fill_ctx = function(no_ref)
 				data.http_version = req.http_version()
 				data.start_time = req.start_time()
 				data.scheme = var.scheme
+			else
+				-- Stream exposes no $request_id, $request_uri or $request_method, yet Reports needs
+				-- all three : request_id is half of the (instance_hostname, request_id) dedup key and
+				-- method/url are NOT NULL in bw_metrics_requests. Synthesize them from what NGINX
+				-- does expose. `uri` is deliberately left nil — several plugins (country, limit)
+				-- branch on it, and filling it would silently change what they match in stream.
+				data.request_id = rand(32)
+				data.start_time = req.start_time()
+				data.request_method = upper(var.protocol or "TCP")
+				data.request_uri = lower(data.request_method)
+					.. "://"
+					.. (var.server_name or "")
+					.. ":"
+					.. (var.server_port or "")
 			end
 			-- IP data : global
 			local ip_global, err = ip_is_global(data.remote_addr)

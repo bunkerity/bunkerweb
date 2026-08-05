@@ -64,7 +64,7 @@
     "dnsbl",
     "reversescan"
   ],
-  "log_stream": ["badbehavior", "bunkernet"],
+  "log_stream": ["badbehavior", "bunkernet", "metrics"],
   "log_default": ["badbehavior", "bunkernet", "misc", "metrics"],
   "timer": ["metrics", "badbehavior", "sessions"],
   "init_workers": []
