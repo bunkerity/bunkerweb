@@ -172,7 +172,12 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 .join(Resources, Resources.id == ResourceAttachments.resource_id)
                 .join(Certificates, Certificates.resource_id == Resources.id)
                 .where(Certificates.revoked.is_(False))
-                .order_by(ResourceAttachments.service_id, ResourceAttachments.is_primary.desc(), ResourceAttachments.creation_date.desc())
+                .order_by(
+                    ResourceAttachments.service_id,
+                    ResourceAttachments.is_primary.desc(),
+                    ResourceAttachments.creation_date.desc(),
+                    ResourceAttachments.id.desc(),
+                )
             ).all()
 
             for service_id, resource_id, name, certificate in rows:

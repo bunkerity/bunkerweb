@@ -5,7 +5,7 @@ from json import dumps, loads
 from typing import Any, ClassVar, List, Optional
 from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Identity, Index, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText, false, true
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, validates
 from sqlalchemy.schema import UniqueConstraint
 
 # Large text type that maps to MEDIUMTEXT on MySQL/MariaDB, TEXT elsewhere
@@ -538,6 +538,12 @@ class Resources(Base):
     upstream: Mapped[Optional["Upstreams"]] = relationship("Upstreams", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     workflow: Mapped[Optional["Workflows"]] = relationship("Workflows", back_populates="resource", cascade="all, delete-orphan", uselist=False)
     attachments: Mapped[List["ResourceAttachments"]] = relationship("ResourceAttachments", back_populates="resource", cascade="all, delete-orphan")
+
+    @validates("type")
+    def validate_type(self, _, value: str) -> str:
+        if value not in CORE_RESOURCE_TYPES:
+            raise ValueError(f"Unsupported resource type: {value}")
+        return value
 
 
 class Certificates(Base):

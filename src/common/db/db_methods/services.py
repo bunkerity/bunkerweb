@@ -3,13 +3,13 @@ from contextlib import suppress
 from datetime import datetime
 from typing import Any, Dict, List
 
-from model import Custom_configs, Jobs_cache, Metadata, Services, Services_settings  # type: ignore
+from model import Metadata, Services, Services_settings  # type: ignore
 
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import aliased
 
-from .common import DatabaseMixinBase, retry_on_transient_db_errors
+from .common import DatabaseMixinBase, delete_service_rows, retry_on_transient_db_errors
 
 
 class DatabaseServicesMixin(DatabaseMixinBase):
@@ -80,10 +80,7 @@ class DatabaseServicesMixin(DatabaseMixinBase):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.execute(delete(Services_settings).where(Services_settings.service_id.in_(service_ids)), execution_options={"synchronize_session": False})
-            session.execute(delete(Custom_configs).where(Custom_configs.service_id.in_(service_ids)), execution_options={"synchronize_session": False})
-            session.execute(delete(Jobs_cache).where(Jobs_cache.service_id.in_(service_ids)), execution_options={"synchronize_session": False})
-            session.execute(delete(Services).where(Services.id.in_(service_ids)), execution_options={"synchronize_session": False})
+            delete_service_rows(session, service_ids)
 
             with suppress(ProgrammingError, OperationalError):
                 metadata = session.get(Metadata, 1)

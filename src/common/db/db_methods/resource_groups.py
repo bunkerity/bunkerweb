@@ -485,6 +485,12 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
                 error, entry_entities = self._prepare_group_entries(entries)
                 if error:
                     return error
+                references = self._get_resource_group_references(session, {group.id: group.name})[group.id]
+                required_kinds = {RESOURCE_LIST_SETTINGS[reference["setting_id"]] for reference in references}
+                available_kinds = {entry["kind"] for entry in entry_entities}
+                if missing_kinds := required_kinds - available_kinds:
+                    kinds = ", ".join(sorted(missing_kinds))
+                    return f"Resource group @{group.name} must keep {kinds} entries while referenced by settings of that type"
 
                 session.execute(delete(ResourceGroup_entries).filter_by(group_id=group_id).execution_options(synchronize_session=False))
                 for entry in entry_entities:

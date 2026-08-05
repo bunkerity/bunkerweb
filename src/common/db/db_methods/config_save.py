@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from model import (  # type: ignore
     Custom_configs,
     Global_values,
-    Jobs_cache,
     Metadata,
     Multiselects,
     Plugins,
@@ -21,21 +20,15 @@ from model import (  # type: ignore
     Template_settings,
 )
 
-from common_utils import (
-    normalize_check_value,
-    normalize_list_value,
-    normalize_select_value,
-    trim_scalar_value,
-)  # type: ignore
 from location_claims import LOCATION_FAMILIES, inline_location_conflict  # type: ignore
 from redirect_resolver import config_servers, scan_prefixes  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
-from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
-from .common import DatabaseMixinBase
+from .common import DatabaseMixinBase, canonicalize_setting_value, delete_service_rows
+from .locations import server_type_attachment_conflict
 
 
 @dataclass
@@ -196,26 +189,8 @@ def _canonicalize_stored_value(
     form -> select/multiselect casefold to declared option casing (when ``case_insensitive``)
     -> multivalue/multiselect trimmed items. Invalid size/duration values are left unchanged
     so the stored value stays whatever was provided. Other types untouched."""
-    value = trim_scalar_value(setting_type, value)
-    if setting_type == "check":
-        return normalize_check_value(value)
-    if setting_type in ("size", "duration"):
-        canonical = normalize_unit(setting_type, value)
-        return canonical if canonical is not None else value
-    if setting_type == "select":
-        return normalize_select_value(value, options or [], case_insensitive=case_insensitive)
-    if setting_type in ("multiselect", "multivalue"):
-        value = normalize_list_value(value, separator or " ")
-        if setting_type == "multiselect":
-            value = normalize_select_value(
-                value,
-                options or [],
-                multi=True,
-                separator=separator or " ",
-                case_insensitive=case_insensitive,
-            )
-        return value
-    return value
+    canonical = canonicalize_setting_value(setting_type, value, separator, options, case_insensitive)
+    return value if canonical is None else canonical
 
 
 class DatabaseConfigSaveMixin(DatabaseMixinBase):
@@ -280,6 +255,25 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 return "The database is read-only, the changes will not be saved"
 
             self.logger.debug(f"Saving config for method {method}")
+
+            service_ids = set(str(config.get("SERVER_NAME", "")).split())
+            service_ids.update(session.scalars(select(Services.id)).all())
+            for key, value in config.items():
+                if key == "DATABASE_URI":
+                    continue
+                is_service_setting = any(key.startswith(f"{service_id}_") for service_id in service_ids)
+                success, error = self.is_valid_setting(
+                    key,
+                    value="" if value is None else str(value),
+                    multisite=is_service_setting,
+                    session=session,
+                    extra_services=list(service_ids),
+                )
+                if not success:
+                    return f"Invalid setting {key}: {error}"
+
+            if error := server_type_attachment_conflict(session, config):
+                return error
 
             if any(isinstance(value, str) and "@" in value and kind_for_key(key) for key, value in config.items()):
                 try:
@@ -814,13 +808,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
                 if hard_delete_ids:
                     self.logger.debug(f"Removing {len(hard_delete_ids)} services that are no longer in the list")
-                    # Remove services that are no longer in the list
-                    session.execute(delete(Services).filter(Services.id.in_(hard_delete_ids)).execution_options(synchronize_session=False))
-                    session.execute(
-                        delete(Services_settings).filter(Services_settings.service_id.in_(hard_delete_ids)).execution_options(synchronize_session=False)
-                    )
-                    session.execute(delete(Custom_configs).filter(Custom_configs.service_id.in_(hard_delete_ids)).execution_options(synchronize_session=False))
-                    session.execute(delete(Jobs_cache).filter(Jobs_cache.service_id.in_(hard_delete_ids)).execution_options(synchronize_session=False))
+                    delete_service_rows(session, hard_delete_ids)
                     session.execute(
                         update(Metadata)
                         .filter_by(id=1)

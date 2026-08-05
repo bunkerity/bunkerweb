@@ -137,6 +137,17 @@ class TestDetailsAndUpdate:
         assert g["name"] == "Office"
         assert [(e["kind"], e["value"]) for e in g["entries"]] == [("country", "DE")]
 
+    def test_update_keeps_kinds_required_by_setting_references(self, db):
+        seed_minimal(db)
+        _add_resource_setting(db)
+        db.create_resource_group("office", name="office", entries=[{"kind": "ip", "value": "192.0.2.1"}, {"kind": "country", "value": "FR"}])
+        add_global_value(db, setting_id="BLACKLIST_IP", value="@office")
+
+        result = db.update_resource_group("office", entries=[{"kind": "country", "value": "DE"}])
+
+        assert result == "Resource group @office must keep ip entries while referenced by settings of that type"
+        assert {entry["kind"] for entry in db.get_resource_groups()["office"]["entries"]} == {"ip", "country"}
+
     def test_alias_cannot_be_renamed(self, db):
         db.create_resource_group("office", name="Office", entries=[])
         assert "cannot be modified" in db.update_resource_group("office", name="HQ")

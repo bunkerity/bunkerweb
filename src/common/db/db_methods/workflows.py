@@ -179,7 +179,7 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
             .join(Resources, Resources.id == ResourceAttachments.resource_id)
             .join(Workflows, Workflows.resource_id == Resources.id)
             .join(Services, Services.id == ResourceAttachments.service_id)
-            .order_by(ResourceAttachments.creation_date, Resources.name)
+            .order_by(ResourceAttachments.creation_date, ResourceAttachments.id)
         )
         if not include_drafts:
             query = query.where(Services.is_draft.is_(False))
@@ -190,7 +190,7 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
     def get_service_workflows(self) -> Dict[str, List[Dict[str, Any]]]:
         """Every attached workflow, keyed by service id, in evaluation order.
 
-        Ordered by attachment date then resource name: the artefact lists workflows per
+        Ordered by attachment date then attachment id: the artefact lists workflows per
         service in this order and the runtime stops at the first effective match, so an
         unstable order would silently change which rule wins between two renders.
         """

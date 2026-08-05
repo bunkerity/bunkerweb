@@ -262,7 +262,7 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
                 )
                 .join(Resources, Resources.id == ResourceAttachments.resource_id)
                 .join(Upstreams, Upstreams.resource_id == Resources.id)
-                .order_by(ResourceAttachments.creation_date, Resources.name)
+                .order_by(ResourceAttachments.creation_date, ResourceAttachments.id)
             )
         )
         if not rows:
@@ -294,7 +294,7 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
     def get_service_upstreams(self) -> Dict[str, List[Dict[str, Any]]]:
         """Every attached pool, keyed by service id, in the order the resolver must inject them.
 
-        Ordered by attachment date then pool name so the suffix an attachment receives is stable
+        Ordered by attachment date then attachment id so the suffix an attachment receives is stable
         across renders: an unstable order would rewrite ``location`` blocks — and so the rendered
         configuration hash — on every generation.
         """
@@ -390,12 +390,15 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
             if not row:
                 return "Upstream not found"
             resource, upstream = row
+            changed = False
 
             if name is not None:
                 normalized, error = self._validate_upstream_name(session, name, resource_id)
                 if error:
                     return error
-                resource.name = normalized
+                if normalized != resource.name:
+                    resource.name = normalized
+                    changed = True
             if description is not None:
                 resource.description = description
 
@@ -414,7 +417,6 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
             if error := self._validate_upstream_fields(effective_method, effective_keepalive, effective_servers, effective_protocol):
                 return error
 
-            changed = False
             if protocol is not None and protocol != upstream.protocol:
                 upstream.protocol = protocol
                 changed = True

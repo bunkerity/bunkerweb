@@ -7,7 +7,8 @@ service-reconciliation path, idempotency and the readonly guard, on every engine
 
 import pytest
 
-from fixtures.seed import make_core_plugin, make_general_settings
+from fixtures.seed import make_core_plugin, make_general_settings, session
+from model import ResourceAttachments, Resources, Upstreams
 
 pytestmark = pytest.mark.slow
 
@@ -136,7 +137,7 @@ class TestSaveConfigNormalization:
                 "ALPHA_NUM": "8080 ",
                 "ALPHA_TXT": "  on  ",
                 "ALPHA_PICK": "INTERMEDIATE",
-                "ALPHA_RAW_PICK": "on",
+                "ALPHA_RAW_PICK": "On",
             },
             "scheduler",
             skip_service_management=True,
@@ -150,7 +151,7 @@ class TestSaveConfigNormalization:
         assert config["ALPHA_NUM"] == "8080"
         assert config["ALPHA_TXT"] == "  on  "
         assert config["ALPHA_PICK"] == "intermediate"
-        assert config["ALPHA_RAW_PICK"] == "on"
+        assert config["ALPHA_RAW_PICK"] == "On"
 
     def test_multisite_values_are_canonicalized(self, db):
         settings = {
@@ -222,6 +223,11 @@ class TestSaveConfigGlobal:
         finally:
             seeded.readonly = False
 
+    def test_invalid_values_are_rejected_before_any_write(self, seeded):
+        result = seeded.save_config({"ALPHA_GLOBAL": "ok", "ALPHA_CHECK": "maybe"}, "scheduler", skip_service_management=True)
+        assert result.startswith("Invalid setting ALPHA_CHECK:")
+        assert seeded.get_config()["ALPHA_GLOBAL"] == "def"
+
 
 class TestSaveConfigResourceGroups:
     @pytest.fixture
@@ -286,3 +292,26 @@ class TestSaveConfigMultisite:
             "app1.example.com",
             "app2.example.com",
         }
+
+    def test_reconciliation_deletes_resource_attachments_before_services(self, seeded):
+        seeded.save_config(
+            {"MULTISITE": "yes", "SERVER_NAME": "old.example.com", "old.example.com_ALPHA_MS": "v1"},
+            "scheduler",
+        )
+        with session(seeded) as db_session:
+            now = db_session.get(Resources, "pool")
+            assert now is None
+            from datetime import datetime, timezone
+
+            timestamp = datetime.now(timezone.utc)
+            db_session.add(Resources(id="pool", type="upstream", name="pool", creation_date=timestamp, last_update=timestamp))
+            db_session.add(Upstreams(resource_id="pool", protocol="http", method="round_robin"))
+            db_session.add(ResourceAttachments(resource_id="pool", service_id="old.example.com", creation_date=timestamp))
+
+        result = seeded.save_config(
+            {"MULTISITE": "yes", "SERVER_NAME": "new.example.com", "new.example.com_ALPHA_MS": "v2"},
+            "scheduler",
+        )
+        assert isinstance(result, set)
+        with session(seeded) as db_session:
+            assert db_session.query(ResourceAttachments).filter_by(service_id="old.example.com").count() == 0

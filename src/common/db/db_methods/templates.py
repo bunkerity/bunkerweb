@@ -17,20 +17,13 @@ from model import (
     Templates,
 )  # type: ignore
 
-from common_utils import (
-    bytes_hash,
-    normalize_check_value,
-    normalize_list_value,
-    normalize_select_value,
-    trim_scalar_value,
-)  # type: ignore
+from common_utils import bytes_hash  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
-from unit_parser import normalize_unit  # type: ignore
 
 from sqlalchemy import case, delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
-from .common import DatabaseMixinBase
+from .common import DatabaseMixinBase, canonicalize_setting_value
 
 
 class DatabaseTemplatesMixin(DatabaseMixinBase):
@@ -358,13 +351,14 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
 
         if base_setting_ids:
             setting_meta = {
-                row[0]: (row[1], row[2], row[3])
+                row[0]: (row[1], row[2], row[3], row[4])
                 for row in session.execute(
                     select(
                         Settings.id,
                         Settings.type,
                         Settings.separator,
                         Settings.case_insensitive,
+                        Settings.context,
                     ).filter(Settings.id.in_(base_setting_ids))
                 )
             }
@@ -386,30 +380,22 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
                 meta = setting_meta.get(entity["setting_id"])
                 if not meta:
                     continue
-                stype, separator, case_insensitive = meta
-                entity["default"] = trim_scalar_value(stype, entity["default"])
-                if stype == "check":
-                    entity["default"] = normalize_check_value(entity["default"])
-                elif stype in ("size", "duration"):
-                    canonical = normalize_unit(stype, entity["default"])
-                    if canonical is not None:
-                        entity["default"] = canonical
-                elif stype == "select":
-                    entity["default"] = normalize_select_value(
-                        entity["default"],
-                        select_options.get(entity["setting_id"], []),
-                        case_insensitive=case_insensitive,
-                    )
-                elif stype in ("multiselect", "multivalue"):
-                    entity["default"] = normalize_list_value(entity["default"], separator or " ")
-                    if stype == "multiselect":
-                        entity["default"] = normalize_select_value(
-                            entity["default"],
-                            select_options.get(entity["setting_id"], []),
-                            multi=True,
-                            separator=separator or " ",
-                            case_insensitive=case_insensitive,
-                        )
+                stype, separator, case_insensitive, context = meta
+                success, err = self.is_valid_setting(
+                    f"{entity['setting_id']}_{entity['suffix']}" if entity["suffix"] else entity["setting_id"],
+                    value=entity["default"],
+                    multisite=context == "multisite",
+                    session=session,
+                )
+                if not success:
+                    return f"Invalid value for setting {entity['setting_id']}: {err}", [], [], []
+                entity["default"] = canonicalize_setting_value(
+                    stype,
+                    entity["default"],
+                    separator,
+                    select_options.get(entity["setting_id"], []),
+                    case_insensitive,
+                )
 
         semantic_config = {
             f"{entity['setting_id']}_{entity['suffix']}" if entity["suffix"] else entity["setting_id"]: entity["default"] for entity in setting_entities

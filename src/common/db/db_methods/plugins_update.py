@@ -106,6 +106,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                         if per_plugin_commit:
                             if local_to_put:
                                 bulk_add_in_fk_order(session, local_to_put)
+                            self._it_validate_template_settings(session)
                             # Commit also captures any .update() / .delete() executed above.
                             session.commit()
                         else:
@@ -124,6 +125,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                     if per_plugin_commit:
                         if local_to_put:
                             bulk_add_in_fk_order(session, local_to_put)
+                        self._it_validate_template_settings(session)
                         # Commit also captures any .update() / .delete() executed above.
                         session.commit()
                     else:
@@ -138,6 +140,8 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
             try:
                 if not per_plugin_commit and to_put:
                     bulk_add_in_fk_order(session, to_put)
+                if not per_plugin_commit:
+                    self._it_validate_template_settings(session)
                 session.commit()
             except BaseException as e:
                 session.rollback()
@@ -718,15 +722,17 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                             steps_configs[step_id] = []
                         steps_configs[step_id].append(config)
 
-                db_template_settings = [
-                    f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                db_template_settings = {
+                    (
+                        f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                    ): template_setting.id
                     for template_setting in session.execute(
                         select(Template_settings.id, Template_settings.setting_id, Template_settings.suffix)
                         .filter_by(template_id=template_id)
                         .order_by(Template_settings.order)
                     )
-                ]
-                missing_ids = [setting for setting in template_data.get("settings", {}) if setting not in db_template_settings]
+                }
+                missing_ids = [setting_id for setting, setting_id in db_template_settings.items() if setting not in template_data.get("settings", {})]
 
                 if missing_ids:
                     changed = True

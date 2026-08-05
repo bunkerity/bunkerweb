@@ -15,12 +15,19 @@ Runs against every selected engine via the ``db`` fixture.
 
 from datetime import datetime, timedelta
 
+import pytest
+
 from fixtures.seed import make_core_plugin, make_general_settings, seed_minimal
 
 
 def _snapshot(db):
     """What a job takes before reading the data it is about to apply."""
     return db.get_metadata()
+
+
+def _require_subsecond_watermarks(db):
+    if db.sql_engine.dialect.name in ("mysql", "mariadb"):
+        pytest.skip("MariaDB needs a DATETIME(6) migration before two writes in one second can be distinguished")
 
 
 class TestAcknowledgingWhatWasApplied:
@@ -71,6 +78,7 @@ class TestChangeArrivingMidRun:
     """The whole point of the compare: a change the run never saw must survive it."""
 
     def test_a_flag_re_raised_after_the_snapshot_is_not_cleared(self, db):
+        _require_subsecond_watermarks(db)
         seed_minimal(db)
         db.checked_changes(["custom_configs"], value=True)
         snapshot = _snapshot(db)
@@ -86,6 +94,7 @@ class TestChangeArrivingMidRun:
 
     def test_the_untouched_flags_still_clear_when_a_sibling_moved(self, db):
         """Per-flag comparison, not all-or-nothing: one moving change must not strand the rest."""
+        _require_subsecond_watermarks(db)
         seed_minimal(db)
         db.checked_changes(["custom_configs", "instances"], value=True)
         snapshot = _snapshot(db)
@@ -126,6 +135,7 @@ class TestPerPluginConfig:
         assert self._plugin_ids(db) == []
 
     def test_a_plugin_whose_config_changed_again_is_not_cleared(self, db):
+        _require_subsecond_watermarks(db)
         seed_minimal(db)
         db.checked_changes([], plugins_changes="all", value=True)
         snapshot = _snapshot(db)
@@ -161,6 +171,7 @@ class TestSettersMoveTheWatermark:
     """
 
     def test_a_config_save_moves_the_plugin_watermark(self, db):
+        _require_subsecond_watermarks(db)
         db.init_tables([make_general_settings(), make_core_plugin("alpha")])
         db.initialize_db("1.7.0", "Docker")
 

@@ -2,11 +2,10 @@
 from datetime import datetime
 from json import JSONDecodeError, loads
 from pathlib import Path
-from re import DOTALL, error as RegexError, search
 from traceback import format_exc
 from typing import List, Tuple
 
-from model import Base, Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Multiselects, Plugin_pages, Plugins, ResourceGroup_entries, ResourceGroups, Selects, Services, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
+from model import Base, Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Multiselects, Plugin_pages, Plugins, ResourceGroup_entries, ResourceGroups, Selects, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
 from common_utils import bytes_hash, create_plugin_tar_gz, resolve_plugin_icon  # type: ignore
 from resource_validation import validate_resource_value  # type: ignore
@@ -14,7 +13,7 @@ from resource_validation import validate_resource_value  # type: ignore
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import SQLAlchemyError
 
-from .common import DatabaseMixinBase, bulk_add_in_fk_order
+from .common import DatabaseMixinBase, bulk_add_in_fk_order, canonicalize_setting_value
 
 
 class DatabaseInitTablesMixin(DatabaseMixinBase):
@@ -1209,92 +1208,33 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                 session.execute(update(Services_settings).filter_by(**update_op["filter"]).values(update_op["data"]))
 
     def _it_validate_template_settings(self, session) -> None:
-        """Delete template settings that fail is_valid_setting validation.
-
-        Replaces the per-row ``self.is_valid_setting`` N+1 (1-3 SELECTs per template
-        setting) with a single prefetch of the Settings columns it reads plus the
-        Services.id list, then validates in pure Python — replicating the exact
-        decision branches that this specific call pattern exercises
-        (setting=key, value=default, multisite=True, session=<this session>,
-        extra_services=None). The original ``is_valid_setting`` itself is untouched.
-        Invalid row ids are collected and removed with a single bulk ``delete(... in_)``.
-        Per-row ``logger.warning`` calls keep the same message strings and order
-        (rows iterated by ``Template_settings.id``, matching the original PK-order scan).
-        """
-        # Prefetch exactly the Settings columns is_valid_setting reads for this call
-        # pattern: id (lookup key), context (multisite check), multiple (multiple check),
-        # regex + type (value regex check). Keyed by id for O(1) lookup.
-        settings_by_id = {row.id: row for row in session.execute(select(Settings.id, Settings.context, Settings.multiple, Settings.regex, Settings.type))}
-        # Services.id list for the service-prefix fallback lookup (deterministic order
-        # is irrelevant: the first matching prefix wins exactly as in the original loop,
-        # but service ids are disjoint prefixes so at most one can match).
-        service_ids = [service.id for service in session.execute(select(Services.id))]
-
+        """Delete invalid template settings and canonicalize valid defaults."""
         invalid_ids = []
-        for template_setting in session.execute(
-            select(
-                Template_settings.id,
-                Template_settings.template_id,
-                Template_settings.setting_id,
-                Template_settings.suffix,
-                Template_settings.default,
-            ).order_by(Template_settings.id)
-        ):
+        for template_setting in session.scalars(select(Template_settings).order_by(Template_settings.id)):
             setting_key = f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
-            success, err = self._it_check_template_setting(setting_key, template_setting.default, settings_by_id, service_ids)
+            setting = session.get(Settings, template_setting.setting_id)
+            success, err = self.is_valid_setting(
+                setting_key,
+                value=template_setting.default,
+                multisite=setting is not None and setting.context == "multisite",
+                session=session,
+            )
 
             if not success:
                 self.logger.warning(
                     f'Template "{template_setting.template_id}"\'s Setting "{template_setting.setting_id}" isn\'t a valid template setting ({err}), deleting it'
                 )
                 invalid_ids.append(template_setting.id)
+                continue
+
+            options = [option.value or "" for option in (setting.selects if setting.type == "select" else setting.multiselects)]
+            template_setting.default = canonicalize_setting_value(
+                setting.type,
+                template_setting.default,
+                setting.separator,
+                options,
+                setting.case_insensitive,
+            )
 
         if invalid_ids:
             session.execute(delete(Template_settings).where(Template_settings.id.in_(invalid_ids)))
-
-    def _it_check_template_setting(self, setting: str, value, settings_by_id: dict, service_ids: List[str]) -> Tuple[bool, str]:
-        """Pure-Python replica of ``is_valid_setting`` for the template-validation call
-        pattern (multisite=True, value=default, extra_services=None). Returns the exact
-        ``(success, err)`` tuple the original would produce, using prefetched data only.
-
-        Branch map (mirrors ``check_setting`` in config_read.py):
-          - SUFFIX_RX → strip suffix, set ``multiple=True``;
-          - lookup by id, else service-prefix fallback (forces multisite=True);
-          - missing → (False, "missing"); context != multisite → (False, "not multisite");
-          - multiple & db.multiple is None → (False, "not multiple");
-          - value regex check (DOTALL for type=="file", honouring _ignore_regex_check).
-        ``multisite`` starts True (the caller always passes multisite=True).
-        """
-        multisite = True
-        multiple = False
-        if self.SUFFIX_RX.search(setting):
-            setting = setting.rsplit("_", 1)[0]
-            multiple = True
-
-        db_setting = settings_by_id.get(setting)
-
-        if db_setting is None:
-            # extra_services is None here, so the original's first fallback loop is empty.
-            for service_id in service_ids:
-                if setting.startswith(f"{service_id}_"):
-                    db_setting = settings_by_id.get(setting.replace(f"{service_id}_", ""))
-                    multisite = True
-                    break
-
-        if db_setting is None:
-            return False, "missing"
-
-        if multisite and db_setting.context != "multisite":
-            return False, "not multisite"
-        elif multiple and db_setting.multiple is None:
-            return False, "not multiple"
-
-        if value is not None:
-            try:
-                regex_flags = DOTALL if db_setting.type == "file" else 0
-                if not self._ignore_regex_check and search(db_setting.regex, value, regex_flags) is None:
-                    return False, f"not matching regex: {db_setting.regex!r}"
-            except RegexError:
-                return False, f"invalid regex: {db_setting.regex!r}"
-
-        return True, ""

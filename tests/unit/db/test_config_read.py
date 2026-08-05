@@ -67,6 +67,14 @@ class TestIsValidSetting:
         assert db.is_valid_setting("MY_TIMEOUT", value="30x")[0] is False
         assert db.is_valid_setting("MY_TIMEOUT", value="30m1h")[0] is False
 
+    def test_empty_unit_values_are_decided_by_the_setting_regex(self, db):
+        seed_minimal(db)
+        add_setting(db, "OPTIONAL_SIZE", type="size", regex=r"^(\d+([kKmMgG])?)?$", default="")
+        add_setting(db, "OPTIONAL_TIMEOUT", type="duration", regex=r"^((\d+(ms|s|m|h|d|w|M|y))+|\d+)?$", default="")
+
+        assert db.is_valid_setting("OPTIONAL_SIZE", value="") == (True, "")
+        assert db.is_valid_setting("OPTIONAL_TIMEOUT", value="") == (True, "")
+
     def test_service_prefixed_global_setting_rejected(self, db):
         seed_minimal(db)
         # A global setting addressed with a known service prefix resolves via the DB
@@ -137,7 +145,7 @@ class TestGetConfigTemplateExpansion:
     """get_config expands USE_TEMPLATE into per-setting defaults, tagging them template=<id>,
     without overriding values that were set explicitly."""
 
-    def _make_template(self, db, *, default="tmpl-default"):
+    def _make_template(self, db, *, default="yes"):
         return db.create_template(
             "low",
             name="Low",
@@ -162,7 +170,7 @@ class TestGetConfigTemplateExpansion:
         self._make_template(db)
         add_service_setting(db, service_id="app2.example.com", setting_id="USE_TEMPLATE", value="low")
         cfg = db.get_config(methods=True)
-        assert cfg["app2.example.com_USE_REVERSE_PROXY"]["value"] == "tmpl-default"
+        assert cfg["app2.example.com_USE_REVERSE_PROXY"]["value"] == "yes"
         assert cfg["app2.example.com_USE_REVERSE_PROXY"]["template"] == "low"
 
     def test_explicit_service_value_beats_template(self, db):
@@ -174,4 +182,4 @@ class TestGetConfigTemplateExpansion:
         add_service_setting(db, service_id="app2.example.com", setting_id="USE_TEMPLATE", value="low")
         cfg = db.get_config(methods=True)
         assert cfg["app1.example.com_USE_REVERSE_PROXY"]["value"] == "yes"  # explicit override survives
-        assert cfg["app2.example.com_USE_REVERSE_PROXY"]["value"] == "tmpl-default"  # template fills the gap
+        assert cfg["app2.example.com_USE_REVERSE_PROXY"]["value"] == "yes"  # template fills the gap

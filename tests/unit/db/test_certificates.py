@@ -6,7 +6,7 @@ from tarfile import REGTYPE, SYMTYPE, TarInfo, open as tar_open
 
 from certificate_utils import generate_self_signed  # type: ignore
 from fixtures.seed import add_service, seed_minimal, session
-from model import Certificates, Jobs, Metadata  # type: ignore
+from model import Certificates, Jobs, Metadata, ResourceAttachments  # type: ignore
 
 
 def _configure_keyring(monkeypatch):
@@ -450,6 +450,20 @@ def test_deployable_resolution_prefers_primary_and_skips_revoked(db, monkeypatch
     # Revoking the primary falls back to the other attachment rather than serving it.
     assert db.revoke_certificate(second) == ""
     assert db.get_deployable_certificates()["app1.example.com"]["resource_id"] == first
+
+
+def test_deployable_resolution_uses_latest_attachment_id_when_timestamps_tie(db, monkeypatch):
+    seed_minimal(db)
+    first, _, _ = _create(db, monkeypatch, name="first", service_ids=["app1.example.com"])
+    second, _, _ = _create(db, monkeypatch, name="second")
+    assert db.attach_certificate(second, "app1.example.com") == ""
+    with session(db) as db_session:
+        attachments = db_session.query(ResourceAttachments).filter_by(service_id="app1.example.com").order_by(ResourceAttachments.id).all()
+        for attachment in attachments:
+            attachment.is_primary = False
+            attachment.creation_date = attachments[0].creation_date
+
+    assert db.get_deployable_certificates()["app1.example.com"]["resource_id"] == second
 
 
 def test_deployable_skips_undecryptable_and_records_the_error(db, monkeypatch):

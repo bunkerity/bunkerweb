@@ -156,6 +156,52 @@ def test_attach_share_and_detach(db):
     assert db.detach_upstream(resource_id, "app1.example.com") == "Upstream attachment not found"
 
 
+def test_service_upstreams_use_attachment_id_when_timestamps_tie(db):
+    seed_minimal(db)
+    _seed_reverse_proxy_plugin(db)
+    first = _create(db, name="zzz_first")
+    second = _create(db, name="aaa_second", servers=[{"host": "10.0.0.3"}])
+    assert db.attach_upstream(first, "app1.example.com", match_path="/first") == ""
+    assert db.attach_upstream(second, "app1.example.com", match_path="/second") == ""
+    with session(db) as db_session:
+        attachments = db_session.query(ResourceAttachments).filter_by(service_id="app1.example.com").order_by(ResourceAttachments.id).all()
+        attachments[1].creation_date = attachments[0].creation_date
+
+    assert [item["name"] for item in db.get_service_upstreams()["app1.example.com"]] == ["zzz_first", "aaa_second"]
+
+
+def test_name_only_update_flags_attached_upstream(db):
+    seed_minimal(db)
+    _seed_reverse_proxy_plugin(db)
+    resource_id = _create(db)
+    assert db.attach_upstream(resource_id, "app1.example.com") == ""
+    with session(db) as db_session:
+        db_session.get(Plugins, "reverseproxy").config_changed = False
+
+    assert db.update_upstream(resource_id, name="renamed_pool") == ""
+    assert db.get_upstream_details(resource_id)["name"] == "renamed_pool"
+    assert _config_changed(db) is True
+
+
+def test_server_type_flip_is_rejected_while_upstream_is_attached(db):
+    seed_minimal(db)
+    _seed_reverse_proxy_plugin(db)
+    add_setting(db, "SERVER_TYPE", context="multisite", regex="^(http|stream)$", default="http")
+    resource_id = _create(db)
+    assert db.attach_upstream(resource_id, "app1.example.com") == ""
+
+    result = db.save_config(
+        {
+            "MULTISITE": "yes",
+            "SERVER_NAME": "app1.example.com",
+            "app1.example.com_SERVER_TYPE": "stream",
+        },
+        "ui",
+    )
+
+    assert result == "Cannot set app1.example.com_SERVER_TYPE to stream while a http upstream is attached to app1.example.com"
+
+
 def test_attach_rejects_unknown_service_upstream_and_path(db):
     seed_minimal(db)
     _seed_reverse_proxy_plugin(db)

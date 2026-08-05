@@ -6,6 +6,7 @@ skipped (page=False) so no real tar extraction is needed. Marked `slow`.
 """
 
 import tempfile
+from json import dumps
 from pathlib import Path
 
 import pytest
@@ -76,6 +77,36 @@ class TestUpdateExternalPlugins:
         db.update_external_plugins([make_external_plugin("e1"), make_external_plugin("e2")], _type="external")
         db.update_external_plugins([make_external_plugin("e1")], _type="external", delete_missing=True)
         assert "e2" not in {p["id"] for p in db.get_plugins(_type="external")}
+
+    def test_disk_template_defaults_are_canonicalized(self, db, monkeypatch, tmp_path):
+        plugin = make_external_plugin("extplug")
+        plugin["settings"] = {
+            "EXTPLUG_FLAG": {
+                "id": "extplug-flag",
+                "context": "multisite",
+                "default": "no",
+                "help": "h",
+                "label": "L",
+                "regex": "^(yes|no)$",
+                "type": "check",
+            }
+        }
+        monkeypatch.setattr(db, "_uep_resolve_plugin_dir", lambda *_: tmp_path)
+        assert db.update_external_plugins([plugin], _type="external") == ""
+        templates = tmp_path / "templates"
+        templates.mkdir()
+        (templates / "flag.json").write_text(
+            dumps(
+                {
+                    "name": "Flag",
+                    "settings": {"EXTPLUG_FLAG": "on"},
+                    "steps": [{"title": "S", "subtitle": "", "settings": ["EXTPLUG_FLAG"]}],
+                }
+            )
+        )
+
+        assert db.update_external_plugins([plugin], _type="external") == ""
+        assert db.get_template_settings("flag") == {"EXTPLUG_FLAG": "yes"}
 
 
 class TestPluginIcon:

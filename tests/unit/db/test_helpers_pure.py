@@ -9,6 +9,7 @@ helpers only read class attributes and recurse on ``self``.
 import pytest
 
 from Database import Database
+from model import Resources
 
 
 @pytest.fixture(scope="module")
@@ -62,6 +63,11 @@ class TestMethodsAreCompatible:
     )
     def test_scheduler_override(self, new, current, allow, expected):
         assert Database._methods_are_compatible(new, current, allow_scheduler_override=allow) is expected
+
+
+def test_resource_type_is_validated_on_orm_write():
+    with pytest.raises(ValueError, match="Unsupported resource type"):
+        Resources(type="plugin-defined")
 
 
 class TestSplitSettingKey:

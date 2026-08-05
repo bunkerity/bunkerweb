@@ -1,12 +1,16 @@
 """DatabaseServicesMixin — multisite service listing and cascading deletion."""
 
+from datetime import datetime, timezone
+
 from fixtures.seed import (
     add_custom_config_row,
     add_jobs_cache_row,
     add_service,
     add_service_setting,
     seed_minimal,
+    session,
 )
+from model import ResourceAttachments, Resources, Upstreams
 
 
 class TestGetServices:
@@ -48,6 +52,11 @@ class TestDeleteServices:
         add_service_setting(db, service_id="app1.example.com", setting_id="USE_REVERSE_PROXY", value="yes")
         add_custom_config_row(db, service_id="app1.example.com", type="server_http", name="snip", data=b"# x")
         add_jobs_cache_row(db, job_name="testjob", service_id="app1.example.com")
+        with session(db) as db_session:
+            now = datetime.now(timezone.utc)
+            db_session.add(Resources(id="pool", type="upstream", name="pool", creation_date=now, last_update=now))
+            db_session.add(Upstreams(resource_id="pool", protocol="http", method="round_robin"))
+            db_session.add(ResourceAttachments(resource_id="pool", service_id="app1.example.com", creation_date=now))
 
         assert db.delete_services(["app1.example.com"]) == ""
         # service + its related rows are gone, and the change flag is set.
@@ -55,3 +64,5 @@ class TestDeleteServices:
         assert db.get_custom_config("server_http", "snip", service_id="app1.example.com") == {}
         assert db.get_job_cache_file("testjob", "cache.txt", service_id="app1.example.com") is None
         assert db.get_metadata()["custom_configs_changed"] is True
+        with session(db) as db_session:
+            assert db_session.query(ResourceAttachments).count() == 0

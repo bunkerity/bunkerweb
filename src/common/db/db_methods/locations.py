@@ -117,3 +117,32 @@ def service_setting(session, service_id: str, setting_id: str, default: str = ""
     if value is None:
         value = session.execute(select(Global_values.value).where(Global_values.setting_id == setting_id).limit(1)).scalar_one_or_none()
     return value or default
+
+
+def server_type_attachment_conflict(session, config: Dict[str, Any]) -> str:
+    """Reject SERVER_TYPE changes that would make an attached resource invalid."""
+    if not any(key == "SERVER_TYPE" or key.endswith("_SERVER_TYPE") for key in config):
+        return ""
+
+    multisite = str(config.get("MULTISITE", "no")) == "yes"
+    service_ids = set(str(config.get("SERVER_NAME", "")).split())
+    attached_service_ids = set(session.scalars(select(ResourceAttachments.service_id).distinct()).all())
+    if "SERVER_TYPE" in config:
+        service_ids.update(attached_service_ids)
+    service_ids.update(service_id for service_id in attached_service_ids if f"{service_id}_SERVER_TYPE" in config)
+    for service_id in service_ids:
+        desired = str(config.get(f"{service_id}_SERVER_TYPE", config.get("SERVER_TYPE", service_setting(session, service_id, "SERVER_TYPE", "http"))))
+        for resource_type, protocol in session.execute(
+            select(Resources.type, Upstreams.protocol)
+            .join(ResourceAttachments, ResourceAttachments.resource_id == Resources.id)
+            .outerjoin(Upstreams, Upstreams.resource_id == Resources.id)
+            .where(ResourceAttachments.service_id == service_id)
+        ):
+            if resource_type == "redirect" and desired != "http":
+                return f"Cannot change {service_id} to stream while a redirect is attached"
+            if resource_type == "upstream":
+                wanted = "stream" if protocol == "stream" else "http"
+                if desired != wanted:
+                    key = f"{service_id}_SERVER_TYPE" if multisite else "SERVER_TYPE"
+                    return f"Cannot set {key} to {desired} while a {protocol} upstream is attached to {service_id}"
+    return ""

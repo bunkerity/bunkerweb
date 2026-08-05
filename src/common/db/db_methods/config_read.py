@@ -5,15 +5,13 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from model import Global_values, Services, Services_settings, Settings, Template_settings  # type: ignore
 
-from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
-from unit_parser import normalize_unit  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 
 from sqlalchemy import join, select
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import scoped_session
 
-from .common import DatabaseMixinBase, retry_on_transient_db_errors
+from .common import DatabaseMixinBase, canonicalize_setting_value, retry_on_transient_db_errors
 
 
 class DatabaseConfigReadMixin(DatabaseMixinBase):
@@ -61,31 +59,13 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     return False, "not multiple"
 
                 if value is not None:
-                    value = trim_scalar_value(db_setting.type, value)
-                    if db_setting.type == "check":
-                        value = normalize_check_value(value)
-                    elif db_setting.type in ("size", "duration"):
-                        # The parser is authoritative for size/duration: the regex cannot
-                        # encode NGINX's unit-order rule, so an unparseable value is invalid.
-                        canonical = normalize_unit(db_setting.type, value)
-                        if canonical is None:
-                            if not self._ignore_regex_check:
-                                return False, f"not a valid {db_setting.type}"
-                        else:
-                            value = canonical
-                    elif db_setting.type == "select":
-                        value = normalize_select_value(value, [s.value or "" for s in db_setting.selects], case_insensitive=db_setting.case_insensitive)
-                    elif db_setting.type in ("multiselect", "multivalue"):
-                        separator = db_setting.separator or " "
-                        value = normalize_list_value(value, separator)
-                        if db_setting.type == "multiselect":
-                            value = normalize_select_value(
-                                value,
-                                [m.value or "" for m in db_setting.multiselects],
-                                multi=True,
-                                separator=separator,
-                                case_insensitive=db_setting.case_insensitive,
-                            )
+                    options = [option.value or "" for option in (db_setting.selects if db_setting.type == "select" else db_setting.multiselects)]
+                    canonical = canonicalize_setting_value(db_setting.type, value, db_setting.separator, options, db_setting.case_insensitive)
+                    if canonical is None and db_setting.type in ("size", "duration"):
+                        if not self._ignore_regex_check:
+                            return False, f"not a valid {db_setting.type}"
+                    else:
+                        value = canonical
                     try:
                         regex_flags = DOTALL if db_setting.type == "file" else 0
                         if not self._ignore_regex_check and search(db_setting.regex, value_for_validation(db_setting.id, value), regex_flags) is None:

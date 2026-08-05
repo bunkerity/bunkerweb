@@ -8,8 +8,8 @@ end-to-end on every engine: create -> idempotent re-run -> update -> prune. Mark
 import pytest
 from sqlalchemy import select
 
-from fixtures.seed import FIXED_DT, make_core_plugin, session
-from model import Jobs_cache, Jobs_runs
+from fixtures.seed import FIXED_DT, add_setting, make_core_plugin, seed_minimal, session
+from model import Jobs_cache, Jobs_runs, Template_settings
 
 pytestmark = pytest.mark.slow
 
@@ -111,3 +111,27 @@ class TestInitTables:
             old = db._it_fetch_old_data(s)
         row = next(r for r in old["bw_settings"] if r.id == "CIPLUG_PICK")
         assert row.case_insensitive is True
+
+    def test_template_validation_reuses_canonical_setting_rules(self, db):
+        seed_minimal(db)
+        add_setting(db, "MEM_SIZE", context="multisite", type="size", regex=r"^\d+([kKmMgG])?$", default="0")
+        add_setting(
+            db,
+            "MY_TIMEOUT",
+            context="multisite",
+            type="duration",
+            regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$",
+            default="0",
+        )
+        add_setting(db, "BLACKLIST_IP", context="multisite", type="multivalue")
+        assert db.create_resource_group("office", name="office", entries=[{"kind": "ip", "value": "192.0.2.1"}]) == ""
+        settings = {"MEM_SIZE": "10m", "MY_TIMEOUT": "30m", "BLACKLIST_IP": "@office"}
+        assert db.create_template("disk", name="Disk", settings=settings, steps=[{"title": "S", "settings": list(settings)}]) == ""
+
+        with session(db) as db_session:
+            rows = {row.setting_id: row for row in db_session.query(Template_settings).filter_by(template_id="disk")}
+            rows["MEM_SIZE"].default = "10 M"
+            rows["MY_TIMEOUT"].default = "30m1h"
+            db._it_validate_template_settings(db_session)
+
+        assert db.get_template_settings("disk") == {"MEM_SIZE": "10m", "BLACKLIST_IP": "@office"}

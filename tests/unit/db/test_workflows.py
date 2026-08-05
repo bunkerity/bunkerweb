@@ -2,7 +2,7 @@
 
 from json import loads
 
-from fixtures.seed import add_global_value, add_service, add_service_setting, seed_minimal, session
+from fixtures.seed import add_global_value, add_service, add_service_setting, add_setting, seed_minimal, session
 from model import Plugins, ResourceAttachments, ResourceGroupUsages, Resources, Settings, Workflows  # type: ignore
 from workflow_schema import MAX_ACTIVE_RULES_PER_SERVICE, MAX_RULES_PER_WORKFLOW, canonical_json  # type: ignore
 
@@ -229,6 +229,9 @@ def test_service_workflows_are_ordered_by_attachment(db):
     assert db.attach_workflow(first, "app1.example.com") == ""
     assert db.attach_workflow(second, "app1.example.com") == ""
     assert db.attach_workflow(second, "app2.example.com") == ""
+    with session(db) as db_session:
+        attachments = db_session.query(ResourceAttachments).filter_by(service_id="app1.example.com").order_by(ResourceAttachments.id).all()
+        attachments[1].creation_date = attachments[0].creation_date
 
     per_service = db.get_service_workflows()
     # Attachment order, not name order: the runtime stops at the first effective match, so
@@ -573,6 +576,7 @@ def test_the_tester_reads_the_services_security_mode_and_deny_status(db):
     seed_minimal(db)
     _seed_workflows_plugin(db)
     add_service_setting(db, service_id="app1.example.com", setting_id="SECURITY_MODE", value="detect")
+    add_setting(db, "DENY_HTTP_STATUS", type="number", regex=r"^\d+$", default="403")
     add_global_value(db, setting_id="DENY_HTTP_STATUS", value="444")
     resource_id = _create(db)
     assert db.save_workflow_definition(resource_id, _definition(_tester_rule()))[0] == ""

@@ -120,6 +120,27 @@ class TestCreateTemplate:
             "SEC_ENGINE": "On",
         }
 
+    def test_invalid_duration_default_is_rejected(self, db):
+        seed_minimal(db)
+        add_setting(
+            db,
+            "MY_TIMEOUT",
+            context="multisite",
+            type="duration",
+            regex=r"^(\d+(ms|s|m|h|d|w|M|y))+$|^\d+$",
+            default="0",
+        )
+
+        message = db.create_template(
+            "bad",
+            name="Bad",
+            settings={"MY_TIMEOUT": "30m1h"},
+            steps=[{"title": "S", "settings": ["MY_TIMEOUT"]}],
+        )
+
+        assert message == "Invalid value for setting MY_TIMEOUT: not a valid duration"
+        assert "bad" not in db.get_templates()
+
     def test_update_template_check_default_canonicalized(self, db):
         seed_minimal(db)
         db.create_template("low", **_minimal_template_args())  # USE_REVERSE_PROXY default "yes"

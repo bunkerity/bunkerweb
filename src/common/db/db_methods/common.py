@@ -20,13 +20,18 @@ from warnings import filterwarnings
 
 from model import (  # type: ignore
     Bw_cli_commands,
+    Custom_configs,
     Jobs,
+    Jobs_cache,
     Multiselects,
     Plugin_pages,
     Plugins,
     ResourceGroup_entries,
     ResourceGroups,
+    ResourceAttachments,
     Selects,
+    Services,
+    Services_settings,
     Settings,
     Template_custom_configs,
     Template_settings,
@@ -34,8 +39,11 @@ from model import (  # type: ignore
     Templates,
 )
 
+from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
+from unit_parser import normalize_unit  # type: ignore
+
 from pymysql import install_as_MySQLdb
-from sqlalchemy import event
+from sqlalchemy import delete, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import DatabaseError, OperationalError, SAWarning
 
@@ -61,13 +69,51 @@ filterwarnings("ignore", category=SAWarning, message="DELETE statement on table 
 T = TypeVar("T")
 
 
-# DATABASE_POOL_* env-var defaults. Exported so callers (e.g. JobScheduler.py) reuse the
-# same fallback values and stay aligned if these change.
+# Shared DATABASE_POOL_* defaults used by Database.py.
 DEFAULT_POOL_SIZE = 40
 DEFAULT_POOL_MAX_OVERFLOW = 20
 DEFAULT_POOL_TIMEOUT = 5
 DEFAULT_POOL_RECYCLE = 1800
 DEFAULT_POOL_PRE_PING = True
+
+
+def canonicalize_setting_value(
+    setting_type: Optional[str],
+    value: Any,
+    separator: Optional[str] = " ",
+    options: Optional[List[str]] = None,
+    case_insensitive: bool = False,
+) -> Any:
+    """Return the canonical stored form for a setting value."""
+    value = trim_scalar_value(setting_type, value)
+    if setting_type == "check":
+        return normalize_check_value(value)
+    if setting_type in ("size", "duration"):
+        if value == "":
+            return value
+        return normalize_unit(setting_type, value)
+    if setting_type == "select":
+        return normalize_select_value(value, options or [], case_insensitive=case_insensitive)
+    if setting_type in ("multiselect", "multivalue"):
+        value = normalize_list_value(value, separator or " ")
+        if setting_type == "multiselect":
+            return normalize_select_value(
+                value,
+                options or [],
+                multi=True,
+                separator=separator or " ",
+                case_insensitive=case_insensitive,
+            )
+    return value
+
+
+def delete_service_rows(session: Any, service_ids: List[str]) -> None:
+    """Delete services and every dependent row, including on SQLite without FK cascades."""
+    if not service_ids:
+        return
+    for model in (ResourceAttachments, Services_settings, Custom_configs, Jobs_cache):
+        session.execute(delete(model).where(model.service_id.in_(service_ids)), execution_options={"synchronize_session": False})
+    session.execute(delete(Services).where(Services.id.in_(service_ids)), execution_options={"synchronize_session": False})
 
 
 def bulk_add_in_fk_order(session: Any, items: List[Any]) -> None:

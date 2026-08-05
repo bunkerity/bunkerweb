@@ -1,5 +1,5 @@
-from fixtures.seed import add_global_value, add_service, add_service_setting, seed_minimal, session
-from model import Plugins, Redirects, Resources, Settings  # type: ignore
+from fixtures.seed import add_global_value, add_service, add_service_setting, add_setting, seed_minimal, session
+from model import Plugins, Redirects, ResourceAttachments, Resources, Settings  # type: ignore
 
 
 def _seed_redirect_plugin(db) -> None:
@@ -140,6 +140,30 @@ def test_attach_share_and_detach(db):
     assert db.detach_redirect(resource_id, "app1.example.com") == ""
     assert db.get_redirect_details(resource_id)["services"] == ["app2.example.com"]
     assert db.detach_redirect(resource_id, "app1.example.com") == "Redirect attachment not found"
+
+
+def test_service_redirects_use_attachment_id_when_timestamps_tie(db):
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+    first = _create(db, name="zzz-first", from_path="/first")
+    second = _create(db, name="aaa-second", from_path="/second")
+    assert db.attach_redirect(first, "app1.example.com") == ""
+    assert db.attach_redirect(second, "app1.example.com") == ""
+    with session(db) as db_session:
+        attachments = db_session.query(ResourceAttachments).filter_by(service_id="app1.example.com").order_by(ResourceAttachments.id).all()
+        attachments[1].creation_date = attachments[0].creation_date
+
+    assert [item["name"] for item in db.get_service_redirects()["app1.example.com"]] == ["zzz-first", "aaa-second"]
+
+
+def test_redirect_cannot_attach_to_stream_service(db):
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+    add_setting(db, "SERVER_TYPE", context="multisite", regex="^(http|stream)$", default="http")
+    add_service_setting(db, service_id="app1.example.com", setting_id="SERVER_TYPE", value="stream")
+    resource_id = _create(db)
+
+    assert db.attach_redirect(resource_id, "app1.example.com") == "Cannot attach a redirect to app1.example.com: redirects require an HTTP service"
 
 
 def test_attach_rejects_unknown_service_and_redirect(db):

@@ -10,7 +10,7 @@ from model import Plugins, Redirects, ResourceAttachments, Resources, Services, 
 from sqlalchemy import delete, or_, select, update
 
 from .common import DatabaseMixinBase
-from .locations import location_conflict
+from .locations import location_conflict, service_setting
 
 # The redirect core plugin owns the schema for these values; a redirect resource is the same
 # rule stored as a first-class object instead of four suffixed settings, so it must accept
@@ -150,7 +150,7 @@ class DatabaseRedirectsMixin(DatabaseMixinBase):
             )
             .join(Resources, Resources.id == ResourceAttachments.resource_id)
             .join(Redirects, Redirects.resource_id == Resources.id)
-            .order_by(ResourceAttachments.creation_date, Resources.name)
+            .order_by(ResourceAttachments.creation_date, ResourceAttachments.id)
         ):
             result.setdefault(row.service_id, []).append(
                 {
@@ -166,7 +166,7 @@ class DatabaseRedirectsMixin(DatabaseMixinBase):
     def get_service_redirects(self) -> Dict[str, List[Dict[str, Any]]]:
         """Every attached rule, keyed by service id, in the order the resolver must inject them.
 
-        Ordered by attachment date then resource name so the suffix a rule receives is stable
+        Ordered by attachment date then attachment id so the suffix a rule receives is stable
         across renders: an unstable order would rewrite ``location`` blocks — and so the
         rendered config hash — on every generation.
         """
@@ -304,6 +304,8 @@ class DatabaseRedirectsMixin(DatabaseMixinBase):
             service = session.execute(select(Services).where(Services.id == service_id).with_for_update()).scalar_one_or_none()
             if service is None:
                 return "Service not found"
+            if service_setting(session, service_id, "SERVER_TYPE", "http") != "http":
+                return f"Cannot attach a redirect to {service_id}: redirects require an HTTP service"
             if session.execute(
                 select(ResourceAttachments.id).where(ResourceAttachments.resource_id == resource_id, ResourceAttachments.service_id == service_id).limit(1)
             ).first():
