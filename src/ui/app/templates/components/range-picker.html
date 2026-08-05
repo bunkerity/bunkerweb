@@ -16,10 +16,9 @@
                   input (flatpickr is already vendored, see bans.js/pro.js).
      classes      extra classes on the wrapper.
 
-   Note: the wrapper's aria-label uses `data-i18n="range_picker.aria_label"`
-   (not `data-i18n-label`) -- i18n.js's applyTranslations() only ever binds
-   `[data-i18n]` elements, and sets `aria-label` when the element already
-   carries one (see components/search.html for the same idiom). #}
+   Note: the wrapper's aria-label uses `data-i18n="range_picker.aria_label"`;
+   i18n.js sets `aria-label` when the element already carries one (see
+   components/search.html for the same idiom). #}
 {% macro range_picker(id, presets=["1h", "24h", "7d", "30d"], active="24h", with_custom=True, classes="") -%}
     <div class="range-picker btn-group{% if classes %} {{ classes }}{% endif %}"
          id="{{ id }}"

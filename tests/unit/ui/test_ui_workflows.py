@@ -1,5 +1,6 @@
 """Workflow UI client and Flask route contracts."""
 
+import ast
 import importlib.util
 import json
 import sys
@@ -108,6 +109,35 @@ def test_a_missing_name_is_refused_before_the_api_is_called(route_app):
         module.workflows_create.__wrapped__()
     assert not client.create_workflow.called
     assert "name is required" in flash.call_args.args[0]
+
+
+def test_update_route_is_reachable_from_the_edit_form(route_app):
+    module, client, flash, app = route_app
+
+    with app.test_request_context(
+        "/workflows/update",
+        method="POST",
+        data={"workflow_id": "wf-1", "name": "Production policy", "description": "Updated"},
+    ):
+        module.workflows_update.__wrapped__()
+
+    client.update_workflow.assert_called_once_with("wf-1", name="Production policy", description="Updated")
+
+
+def test_attach_route_reconciles_the_whole_service_set(route_app):
+    module, client, flash, app = route_app
+    client.get_workflow.return_value = {"id": "wf-1", "services": ["a.example.com", "b.example.com"]}
+
+    with app.test_request_context(
+        "/workflows/attach",
+        method="POST",
+        data={"workflow_id": "wf-1", "service_ids": ["a.example.com", "c.example.com"]},
+    ):
+        module.workflows_attach.__wrapped__()
+
+    client.attach_workflow.assert_called_once_with("wf-1", "c.example.com")
+    client.detach_workflow.assert_called_once_with("wf-1", "b.example.com")
+    assert "2 attached" in flash.call_args.args[0]
 
 
 def test_readonly_blocks_every_mutation(route_app):
@@ -227,3 +257,38 @@ def test_the_editor_page_is_reachable_from_the_menu_and_the_locale():
     # label the page still emits, which is the only kind worth asserting on.
     for key in ("add_rule", "action", "threshold", "order_help", "no_rules"):
         assert key in locale["workflows"]
+
+
+def test_workflow_list_exposes_the_identity_editor_and_resolves_its_ctas():
+    template = (ROOT / "src" / "ui" / "app" / "templates" / "workflows.html").read_text(encoding="utf-8")
+    script = (ROOT / "src" / "ui" / "app" / "static" / "js" / "pages" / "workflows.js").read_text(encoding="utf-8")
+
+    assert 'classes="workflow-edit"' in template
+    assert 'id="workflow-edit-modal"' in template
+    assert 'action="{{ workflows_url }}/update"' in template
+    assert 'i18n_key="button.create"' not in template
+    assert 'i18n_key="button.attach"' not in template
+    assert 'openModal("workflow-edit-modal")' in script
+
+
+def test_every_schema_leaf_operator_appears_in_the_parity_corpus():
+    schema = ast.parse((ROOT / "src" / "common" / "utils" / "workflow_schema.py").read_text(encoding="utf-8"))
+    leaf_ops = next(
+        ast.literal_eval(node.value)
+        for node in schema.body
+        if isinstance(node, ast.Assign) and any(getattr(target, "id", "") == "LEAF_OPS" for target in node.targets)
+    )
+    corpus = json.loads((ROOT / "tests" / "unit" / "common" / "workflow_cases.json").read_text(encoding="utf-8"))
+    corpus_ops = {value["op"] for value in _walk_dicts(corpus) if "op" in value}
+
+    assert set(leaf_ops) <= corpus_ops
+
+
+def _walk_dicts(value):
+    if isinstance(value, dict):
+        yield value
+        for child in value.values():
+            yield from _walk_dicts(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _walk_dicts(child)

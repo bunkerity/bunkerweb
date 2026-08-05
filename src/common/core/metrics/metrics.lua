@@ -321,7 +321,7 @@ local function refresh_request_ttls(self, ttl, wid)
 	self.clusterstore:call("expire", "requests:facets:initialized", ttl)
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
-			if key ~= "setup" and key ~= "requests" then
+			if key ~= "setup" and key ~= "requests" and key ~= "baseline" then
 				self.clusterstore:call("expire", "metrics:" .. key .. ":" .. wid, ttl)
 			end
 		end
@@ -681,7 +681,7 @@ function metrics:timer()
 			-- shm through GET /metrics/<plugin>, which needs no Redis, so skip them here.
 			-- ponytail: no cross-instance timer aggregation. Sync them as a Redis hash if a
 			-- consumer ever needs it.
-			elseif key:match("_timer_") then -- luacheck: ignore 542
+			elseif key == "baseline" or key:match("_timer_") then -- luacheck: ignore 542
 			elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 				-- Sync other metrics (counters and tables) to Redis with optimized data structures
 				local redis_key = "metrics:" .. key .. ":" .. wid
@@ -733,7 +733,18 @@ function metrics:timer()
 		end
 		-- Push to dict (with LRU eviction if needed)
 		local ok
-		ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
+		if key == "baseline" then
+			-- Baseline is best-effort model input. safe_set refuses to evict security reports
+			-- from the shared dict when the sampled buffer does not fit.
+			ok, err = self.metrics_datastore:set(key .. "_" .. wid, value)
+		else
+			ok, err = self.metrics_datastore:set_with_retries(
+				key .. "_" .. wid,
+				value,
+				nil,
+				tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
+			)
+		end
 		if not ok then
 			-- If there isn't enough memory : we fallback to delete everything
 			if err == "no memory" then

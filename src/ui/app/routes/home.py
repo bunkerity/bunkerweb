@@ -122,6 +122,12 @@ def home_page():
     certs_expired = sum(1 for cert in certificates if cert.get("status") == "expired")
     certs_expiring = sum(1 for cert in certificates if cert.get("status") == "expiring_soon")
 
+    try:
+        upstreams_resp = API_CLIENT.get_upstreams(limit=1)
+    except (ApiClientError, ApiUnavailableError):
+        upstreams_resp = {}
+    upstreams_total = upstreams_resp.get("total", len(upstreams_resp.get("upstreams", []))) if isinstance(upstreams_resp, dict) else 0
+
     return render_template(
         "home.html",
         instances=BW_INSTANCES_UTILS.get_instances(),
@@ -137,6 +143,7 @@ def home_page():
         certificates_total=certificates_total,
         certs_expired=certs_expired,
         certs_expiring=certs_expiring,
+        upstreams_total=upstreams_total,
         # Deferred to the async GET /home/metrics fetch (home.js) -- shipped empty so the
         # chart containers + their hidden -data divs exist for the client to populate.
         # `top_reasons` is deliberately NOT here: unlike these, its card renders no server-side

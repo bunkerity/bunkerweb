@@ -96,6 +96,7 @@
                                 </td>
                                 <td class="text-end">
                                     {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label="Edit the rules of " ~ flow.name, classes="workflow-rules", tag="a", href=workflows_url ~ "/" ~ flow.id) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-rename", icon_only=true, aria_label="Edit the name and description of " ~ flow.name, classes="workflow-edit", disabled=readonly) }}
                                     {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label="Attach " ~ flow.name ~ " to a service", classes="workflow-attach", disabled=readonly) }}
                                     {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label="Clone " ~ flow.name, classes="workflow-clone", disabled=readonly) }}
                                     {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete " ~ flow.name, classes="workflow-delete", disabled=readonly) }}
@@ -135,7 +136,28 @@
             </div>
             <div class="modal-footer">
                 {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
-                {{ button(label="Create", i18n_key="button.create", type="submit") }}
+                {{ button(label="Create", i18n_key="workflows.new", type="submit") }}
+            </div>
+        </form>
+    {% endcall %}
+
+    {% call modal(id="workflow-edit-modal", title_key="button.edit", title="Edit workflow", size="lg") %}
+        <form method="post" action="{{ workflows_url }}/update">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="workflow_id" id="workflow-edit-id" />
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="workflow-edit-name" data-i18n="table.header.name">Name</label>
+                    <input class="form-control" id="workflow-edit-name" name="name" maxlength="256" required />
+                </div>
+                <div>
+                    <label class="form-label" for="workflow-edit-description" data-i18n="table.header.description">Description</label>
+                    <textarea class="form-control" id="workflow-edit-description" name="description" maxlength="4000" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
+                {{ button(label="Save", i18n_key="button.save", type="submit") }}
             </div>
         </form>
     {% endcall %}
@@ -152,7 +174,7 @@
             </div>
             <div class="modal-footer">
                 {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
-                {{ button(label="Attach", i18n_key="button.attach", type="submit") }}
+                {{ button(label="Attach", i18n_key="workflows.attach", type="submit") }}
             </div>
         </form>
     {% endcall %}

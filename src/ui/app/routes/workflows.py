@@ -171,11 +171,14 @@ def workflows_attach():
         if not workflow_id:
             raise ValueError("The workflow is required")
         service_ids = _services()
-        if not service_ids:
-            raise ValueError("At least one service is required")
-        for service_id in service_ids:
+        workflow = API_CLIENT.get_workflow(workflow_id)
+        attached = set(workflow.get("services", []))
+        selected = set(service_ids)
+        for service_id in sorted(selected - attached):
             API_CLIENT.attach_workflow(workflow_id, service_id)
-        flash(f"Workflow attached to {len(service_ids)} service(s)")
+        for service_id in sorted(attached - selected):
+            API_CLIENT.detach_workflow(workflow_id, service_id)
+        flash(f"Workflow services updated ({len(selected)} attached)")
     except ValueError as exc:
         flash(str(exc), "error")
     except (ApiClientError, ApiUnavailableError) as exc:

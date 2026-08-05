@@ -150,7 +150,7 @@
                     <select class="form-select" id="compose-template" name="USE_TEMPLATE">
                         <option value="" data-i18n="badge.no_template">No Template</option>
                         {% for template in (templates | default({})) if template != "ui" %}
-                            <option value="{{ template }}" {% if template == "low" %}selected{% endif %}>{{ template | capitalize }}</option>
+                            <option value="{{ template }}" {% if template == (current_template | default("low")) %}selected{% endif %}>{{ template | capitalize }}</option>
                         {% endfor %}
                     </select>
                 </div>

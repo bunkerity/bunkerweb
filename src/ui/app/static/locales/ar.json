@@ -2410,12 +2410,12 @@
       "drag": "اسحب لإعادة الترتيب",
       "expand": "توسيع",
       "groupKind": "نوع المجموعة",
-      "insertAt": "Insert a rule at position {{n}}",
+      "insertAt": "أضف قاعدة في الموضع {{n}}",
       "more": "المزيد",
       "moveDown": "نقل لأسفل — يعمل لاحقًا",
       "moveRule": "نقل القاعدة",
       "moveUp": "نقل لأعلى — يعمل مبكرًا",
-      "openRule": "Open rule {{n}}",
+      "openRule": "افتح القاعدة {{n}}",
       "provider": "موفر مكافحة الروبوتات",
       "redirectStatus": "حالة إعادة التوجيه",
       "removeCondition": "إزالة الشرط",
@@ -2424,7 +2424,7 @@
       "removeValue": "إزالة القيمة",
       "requestCount": "عدد الطلبات",
       "resourceGroup": "مجموعة الموارد",
-      "ruleErrors": "{{count}} validation problems in this rule",
+      "ruleErrors": "مشاكل التحقق من القاعدة {{count}}",
       "ruleName": "اسم القاعدة {{n}}",
       "terminalAction": "الإجراء النهائي",
       "uriMatch": "وضع مطابقة URI",
@@ -2435,29 +2435,29 @@
     "attach_help": "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها.",
     "attached_notice": "سيؤدي الحفظ إلى تطبيق هذه القواعد على {{count}} من الخدمات المرفقة.",
     "canvas": {
-      "auxCanvas": "Left to right. First match wins.",
-      "auxList": "Top to bottom. First match wins.",
-      "close": "Close",
-      "drawerSub": "Runs at position {{n}} of {{total}}",
-      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
-      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
-      "emptyCta": "Add the first rule",
-      "emptyTitle": "No rules yet",
-      "entry_sub": "Rules run left to right.",
-      "entry_title": "Every request",
-      "exit_sub": "Continues to the next attached workflow.",
-      "exit_title": "No rule matched",
-      "fit": "Fit to view",
-      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
-      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
-      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
-      "insert": "Insert a rule here",
-      "open": "Open rule",
-      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
-      "stopTail": ", evaluation stops here — no rule after it is reached.",
-      "title": "Rule order",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out"
+      "auxCanvas": "من اليسار إلى اليمين. القاعدة الأولى هي التي تفوز.",
+      "auxList": "من الأعلى إلى الأسفل. القاعدة الأولى هي التي تفوز.",
+      "close": "إغلاق",
+      "drawerSub": "تنفذ في الموضع {{n}} من {{total}}",
+      "dropHint": "ضع لإعطاء الأولوية — مكان القاعدة في السلسلة هو الشيء الوحيد الذي يمكن أن يعني",
+      "emptyBody": "مسار عمل بدون قواعد لا يغير شيئًا — يمر كل طلب مباشرة إلى المسار العمل التالي المرتبط.",
+      "emptyCta": "أضف القاعدة الأولى",
+      "emptyTitle": "لا توجد قواعد حتى الآن",
+      "entry_sub": "تُنفذ القواعد من اليسار إلى اليمين.",
+      "entry_title": "كل طلب",
+      "exit_sub": "يستمر في المسار التالي المرفق.",
+      "exit_title": "لم يتم العثور على أي قاعدة",
+      "fit": "لتناسب العرض",
+      "gateTip": "بوابة مطابقة، وليست إجراء: إذا كانت القيمة أقل من الحد، فلن تتطابق القاعدة ولا يتم تقييم القاعدة التالية.",
+      "hint": "اسحب العقد لإعادة الترتيب · اسحب اللوحة للتكبير · Alt + ← / → على عقدة مركزة",
+      "hintReadonly": "قراءة فقط — تكبير للبحث، لا يمكن تغيير الترتيب",
+      "insert": "أضف قاعدة هنا",
+      "open": "افتح القاعدة",
+      "skipped": "معطل — يتم تخطيه بالكامل، كما لو لم يكن في السلسلة.",
+      "stopTail": "، يتوقف التقييم هنا — لا توجد قاعدة بعد ذلك.",
+      "title": "ترتيب القواعد",
+      "zoomIn": "تكبير",
+      "zoomOut": "تصغير"
     },
     "capacity": "{{count}} من {{maxRules}} قاعدة · أكبر قاعدة تستخدم {{worst}} من {{maxPredicates}} شرطًا · {{regexes}} تعبيرًا نمطيًا في سير العمل هذا",
     "clone": "نسخ سير العمل",
@@ -2497,11 +2497,11 @@
       "fall": "عدم التطابق ينتقل إلى القاعدة التالية",
       "gate": "حد المعدل يضبط المطابقة وليس إجراءً",
       "move": "اسحب أو استخدم الأسهم أو اضغط Alt + ↑ / ↓ لإعادة الترتيب",
-      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
+      "moveCanvas": "اسحب، استخدم العلامة المرقمة، أو اضغط Alt + ← / → لإعادة الترتيب",
       "stop": "التطابق ينفذ إجراءً واحدًا ثم يتوقف"
     },
     "link": {
-      "entry": "every request",
+      "entry": "كل طلب",
       "noMatch": "لا تطابق"
     },
     "menu": {
@@ -2539,8 +2539,8 @@
       "deleted": "حُذفت القاعدة. تبقت {{count}} قاعدة.",
       "duplicated": "أُدرجت النسخة في الموضع {{n}}. لا يمكن أن تتطابق ما دامت القاعدة الأصلية أعلاها مُمكّنة.",
       "gateAdded": "أُضيف حد معدل إلى المطابقة. تحته لا تتطابق القاعدة ويستمر التقييم.",
-      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
-      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
+      "inserted": "تمت إضافة القاعدة في الموضع {{n}} من {{total}}. يتم التحقق من كل قاعدة قبلها أولاً.",
+      "inspecting": "تعديل القاعدة {{n}} من {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "أُزيلت القيمة الأخيرة؛ لا يمكن حفظ هذا الشرط حتى يحتوي على قيمة.",
       "moved": "نُقلت {{name}} إلى الموضع {{to}} من {{total}}{{how}}. وهي تعمل الآن {{where}}.",
@@ -2558,8 +2558,8 @@
         "drag": "بالسحب",
         "keyboard": "بلوحة المفاتيح"
       },
-      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
-      "viewList": "List view. Rules run top to bottom; the first match wins."
+      "viewCanvas": "عرض اللوحة. تعمل القواعد من اليسار إلى اليمين؛ والفائز الأول يفوز.",
+      "viewList": "عرض القائمة. تعمل القواعد من الأعلى إلى الأسفل؛ والفائز الأول يفوز."
     },
     "search": "ابحث عن الاسم أو الوصف...",
     "test": {
@@ -2646,8 +2646,8 @@
       "uri": "يطابق"
     },
     "view": {
-      "canvas": "Canvas",
-      "list": "List"
+      "canvas": "اللوحة",
+      "list": "القائمة"
     }
   },
   "request_path": {

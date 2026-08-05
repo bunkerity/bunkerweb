@@ -319,8 +319,9 @@ def reports_fetch():
                 "user_agent": escape(str(report.get("user_agent", "N/A"))),
                 "reason": escape(str(report.get("reason", "N/A"))),
                 "server_name": escape(server_name),
-                # Keep payloads light; details are lazy-loaded by request_id.
-                "data": "available" if has_data else "",
+                # The persisted row is the only durable source for report details: Redis and
+                # instance buffers expire sooner than the DB retention window.
+                "data": data_field if has_data else "",
                 "has_data": has_data,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
                 # default ban duration in seconds for quick-ban action

@@ -82,6 +82,7 @@ def render_pane():
         service_method="ui",
         is_draft="no",
         clone=None,
+        current_template="low",
     ):
         rendered = _config(config, global_page)
         if global_page:
@@ -109,6 +110,7 @@ def render_pane():
             service_method=service_method,
             is_draft=is_draft,
             clone=clone,
+            current_template=current_template,
         )
 
     return _render
@@ -246,6 +248,10 @@ def test_new_service_offers_a_template_and_it_wins_over_the_shelf_fallback(rende
     assert "ui" not in [attrs.get("value") for tag, attrs in _form(render_pane(service_id="")).inside if tag == "option"]
 
 
+def test_new_service_honours_the_template_selected_by_the_gallery(render_pane):
+    assert _payload(render_pane(service_id="", current_template="medium"))["USE_TEMPLATE"] == "medium"
+
+
 def test_the_draft_input_is_inside_the_form_and_precedes_the_shelf_fallback(render_pane):
     """`.toggle-draft` mutates `#is-draft` in place (plugins-settings.js:2217). Left outside the
     form the toggle would be a no-op, and `variables.pop("IS_DRAFT", "no")` publishes a draft
@@ -353,7 +359,7 @@ _SET_BY_THE_HOST_PAGE = {"blacklisted_settings", "service_method", "is_draft"}
 # service-only entries; a name that appears here and in neither route is the failure this pair of
 # tests exists to catch.
 REQUIRED_FROM_ROUTE = {"config", "shelf_plugin_scope", "activation_map", "control_keys", "global_page", "service_id"}
-SERVICE_ONLY_FROM_ROUTE = {"templates", "clone", "attachments", "plugin_order"}
+SERVICE_ONLY_FROM_ROUTE = {"templates", "clone", "attachments", "plugin_order", "current_template"}
 
 
 def _locally_bound(tree):

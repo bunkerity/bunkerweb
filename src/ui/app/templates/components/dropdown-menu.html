@@ -75,9 +75,9 @@
                    present on the element in this order: placeholder >
                    title > data-bs-original-title > aria-label -- since the
                    toggle has none of the first three, a plain data-i18n here
-                   correctly retranslates aria-label (do NOT use the
-                   non-functional "data-i18n-aria-label" attribute name seen
-                   in a couple of older pages -- i18n.js never looks for it).
+                   correctly retranslates aria-label. Explicit
+                   data-i18n-aria-label is also supported when one element
+                   needs a different key for its accessible name.
      menu_classes  extra classes on the <ul>, e.g. "nav-pills max-vh-60
                    overflow-auto pt-0" for the long scrollable lists used in
                    config_edit.html/logs.html/support.html/language-selector.html.

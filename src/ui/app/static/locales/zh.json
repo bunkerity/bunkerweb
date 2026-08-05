@@ -2410,12 +2410,12 @@
       "drag": "拖动以重新排序",
       "expand": "展开",
       "groupKind": "组类型",
-      "insertAt": "Insert a rule at position {{n}}",
+      "insertAt": "在 {{n}} 位置插入规则",
       "more": "更多",
       "moveDown": "下移，稍后运行",
       "moveRule": "移动规则",
       "moveUp": "上移，提前运行",
-      "openRule": "Open rule {{n}}",
+      "openRule": "打开规则 {{n}}",
       "provider": "反机器人验证提供商",
       "redirectStatus": "重定向状态码",
       "removeCondition": "删除条件",
@@ -2424,7 +2424,7 @@
       "removeValue": "删除值",
       "requestCount": "请求数",
       "resourceGroup": "资源组",
-      "ruleErrors": "{{count}} validation problems in this rule",
+      "ruleErrors": "{{count}} 规则中的验证问题",
       "ruleName": "规则 {{n}} 的名称",
       "terminalAction": "终止操作",
       "uriMatch": "URI 匹配模式",
@@ -2435,29 +2435,29 @@
     "attach_help": "规则仅在工作流程附加到的服务上执行。",
     "attached_notice": "保存后会将这些规则应用到 {{count}} 个已关联服务。",
     "canvas": {
-      "auxCanvas": "Left to right. First match wins.",
-      "auxList": "Top to bottom. First match wins.",
-      "close": "Close",
-      "drawerSub": "Runs at position {{n}} of {{total}}",
-      "dropHint": "Drop to set priority — a rule's place in the chain is the only thing it can mean",
-      "emptyBody": "A workflow with no rules changes nothing — every request falls straight through to the next attached workflow.",
-      "emptyCta": "Add the first rule",
-      "emptyTitle": "No rules yet",
-      "entry_sub": "Rules run left to right.",
-      "entry_title": "Every request",
-      "exit_sub": "Continues to the next attached workflow.",
-      "exit_title": "No rule matched",
-      "fit": "Fit to view",
-      "gateTip": "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
-      "hint": "Drag a node to reorder · drag the board to pan · Alt + ← / → on a focused node",
-      "hintReadonly": "Read-only — pan to look around, the order cannot be changed",
-      "insert": "Insert a rule here",
-      "open": "Open rule",
-      "skipped": "Disabled — skipped entirely, as if it were not in the chain.",
-      "stopTail": ", evaluation stops here — no rule after it is reached.",
-      "title": "Rule order",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out"
+      "auxCanvas": "从左到右。第一个匹配项获胜。",
+      "auxList": "从上到下。第一个匹配项获胜。",
+      "close": "关闭",
+      "drawerSub": "在 {{total}} 的 {{n}} 位置运行",
+      "dropHint": "通过拖动来设置优先级 — 规则在链中的位置是它唯一可以表示的内容",
+      "emptyBody": "没有规则的工作流程不会改变任何内容 — 所有的请求都直接流向下一个附加的工作流程。",
+      "emptyCta": "添加第一个规则",
+      "emptyTitle": "还没有规则",
+      "entry_sub": "规则从左到右执行。",
+      "entry_title": "每个请求",
+      "exit_sub": "继续到下一个附加的工作流程。",
+      "exit_title": "没有规则匹配",
+      "fit": "适应视图",
+      "gateTip": "一个匹配门，而不是一个动作：低于阈值时，规则不匹配，并且下一个规则将被评估。",
+      "hint": "拖动节点来重新排序 · 拖动面板来浏览 · 在焦点节点上，Alt + ← / →",
+      "hintReadonly": "只读 — 浏览 · 顺序不能更改",
+      "insert": "在此处插入规则",
+      "open": "打开规则",
+      "skipped": "已禁用 — 完全跳过，就像它不在链中一样。",
+      "stopTail": "，评估在此停止 — 没有后续规则被执行",
+      "title": "规则顺序",
+      "zoomIn": "放大",
+      "zoomOut": "缩小"
     },
     "capacity": "共 {{maxRules}} 条规则，已有 {{count}} 条；最大规则使用 {{maxPredicates}} 个谓词中的 {{worst}} 个；此工作流中有 {{regexes}} 个正则表达式",
     "clone": "克隆工作流程",
@@ -2497,11 +2497,11 @@
       "fall": "不匹配时转到下一条规则",
       "gate": "速率阈值控制是否匹配，它不是操作",
       "move": "拖动、使用箭头或按 Alt + ↑ / ↓ 重新排序",
-      "moveCanvas": "Drag, use the numbered badge, or press Alt + ← / → to reorder",
+      "moveCanvas": "通过拖动、使用编号标签或按 Alt + ← / → 来重新排序",
       "stop": "匹配后执行一个操作并停止"
     },
     "link": {
-      "entry": "every request",
+      "entry": "每个请求",
       "noMatch": "不匹配"
     },
     "menu": {
@@ -2539,8 +2539,8 @@
       "deleted": "规则已删除。还剩 {{count}} 条规则。",
       "duplicated": "副本已插入第 {{n}} 位。只要上方的原规则处于启用状态，它就永远无法匹配。",
       "gateAdded": "已向匹配添加速率阈值。低于阈值时规则不匹配，评估继续。",
-      "inserted": "Rule added at position {{n}} of {{total}}. Every rule before it is checked first.",
-      "inspecting": "Editing rule {{n}} of {{total}} — {{name}}.",
+      "inserted": "在 {{total}} 的 {{n}} 位置添加规则。 检查所有之前的规则。",
+      "inspecting": "编辑 {{total}} 的 {{n}} 规则 — {{name}}。",
       "jumped": "{{where}}：{{message}}",
       "lastValueRemoved": "最后一个值已删除；此条件必须包含一个值才能保存。",
       "moved": "{{name}} 已移至第 {{to}} 位，共 {{total}} 位{{how}}。现在它在{{where}}运行。",
@@ -2558,8 +2558,8 @@
         "drag": "通过拖动",
         "keyboard": "通过键盘"
       },
-      "viewCanvas": "Canvas view. Rules run left to right; the first match wins.",
-      "viewList": "List view. Rules run top to bottom; the first match wins."
+      "viewCanvas": "画布视图。 规则从左到右运行；第一个匹配项获胜。",
+      "viewList": "列表视图。 规则从上到下运行；第一个匹配项获胜。"
     },
     "search": "搜索名称或描述...",
     "test": {
@@ -2646,8 +2646,8 @@
       "uri": "匹配"
     },
     "view": {
-      "canvas": "Canvas",
-      "list": "List"
+      "canvas": "画布",
+      "list": "列表"
     }
   },
   "request_path": {

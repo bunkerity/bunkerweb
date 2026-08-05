@@ -468,10 +468,32 @@ def test_timer_aggregates_are_excluded_from_the_redis_list_sync():
     """The list sync iterates table values with ipairs, which yields nothing on a
     {count, sum, max} hash — it would DEL the key and push nothing back."""
     timer_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:timer()")[1]
-    assert 'elseif key:match("_timer_") then' in timer_body
-    sync = timer_body.index('elseif key:match("_timer_") then')
+    assert 'elseif key == "baseline" or key:match("_timer_") then' in timer_body
+    sync = timer_body.index('elseif key == "baseline" or key:match("_timer_") then')
     generic = timer_body.index('METRICS_SAVE_TO_REDIS"] == "yes" then')
     assert sync < generic, "the timer skip must come before the generic list sync"
+
+
+def test_the_baseline_is_never_mirrored_to_redis():
+    timer_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:timer()")[1]
+    skip = timer_body.index('elseif key == "baseline" or key:match("_timer_") then')
+    generic = timer_body.index('METRICS_SAVE_TO_REDIS"] == "yes" then')
+    assert skip < generic
+    assert 'if key ~= "setup" and key ~= "requests" and key ~= "baseline" then' in METRICS_LUA.read_text(encoding="utf-8")
+
+
+def test_baseline_shm_writes_cannot_evict_blocked_reports():
+    timer_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:timer()")[1]
+    shm_write = timer_body.split("-- Push to dict", 1)[1].split("if not ok then", 1)[0]
+    assert 'if key == "baseline" then' in shm_write
+    assert 'self.metrics_datastore:set(key .. "_" .. wid, value)' in shm_write
+
+
+def test_metrics_memory_retry_setting_reaches_the_shared_helper():
+    timer_body = METRICS_LUA.read_text(encoding="utf-8").split("function metrics:timer()")[1]
+    shm_write = timer_body.split("-- Push to dict", 1)[1].split("if not ok then", 1)[0]
+    assert 'tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5' in shm_write
+    assert "set_with_retries(" in shm_write
 
 
 def test_the_baseline_settings_are_declared():
@@ -483,6 +505,7 @@ def test_the_baseline_settings_are_declared():
     assert re.fullmatch(rate["regex"], "100") and re.fullmatch(rate["regex"], "0")
     assert not re.fullmatch(rate["regex"], "101") and not re.fullmatch(rate["regex"], "1000")
     assert plugin["settings"]["METRICS_MAX_BASELINE_REQUESTS"]["context"] == "global"
+    assert "shares METRICS_MEMORY_SIZE" in plugin["settings"]["METRICS_MAX_BASELINE_REQUESTS"]["help"]
 
 
 def test_the_setting_is_declared_as_a_global_check():

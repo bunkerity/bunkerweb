@@ -89,7 +89,7 @@
     "METRICS_MAX_BASELINE_REQUESTS": {
       "context": "global",
       "default": "1k",
-      "help": "Maximum number of sampled baseline records to hold per worker before the oldest are dropped. Accepts a plain integer or `k`/`m` shorthand. A burst that overflows this buffer biases the sample rather than growing memory, so lower the sample rate instead of raising this.",
+      "help": "Maximum number of sampled baseline records to hold per worker before the oldest are dropped. This buffer shares METRICS_MEMORY_SIZE with blocked-request reports and other metrics, but it will be dropped rather than evict them when space runs out. Accepts a plain integer or `k`/`m` shorthand. Lower the sample rate instead of raising this.",
       "id": "metrics-max-baseline-requests",
       "label": "Metrics max baseline requests",
       "regex": "^\\d+[kKmM]?$",

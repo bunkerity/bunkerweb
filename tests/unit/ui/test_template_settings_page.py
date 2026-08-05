@@ -1288,6 +1288,12 @@ def test_widgets_module_carries_no_page_state_and_no_ace():
     assert "save-settings" not in code
 
 
+def test_service_page_drops_hidden_inputs_left_by_the_deleted_monolith():
+    template = (TEMPLATES / "service_settings.html").read_text(encoding="utf-8")
+    for dead_id in ("selected-mode", "used-template", "selected-template"):
+        assert f'id="{dead_id}"' not in template
+
+
 def test_widgets_module_exports_the_helpers_the_page_script_destructures():
     code = _code_only(WIDGETS_JS)
     assert "window.BWSettingsWidgets" in code

@@ -532,14 +532,6 @@
 [data-bs-theme="dark"] .bw-kpi-caption .hl-info {
   color: #9bd5f0;
 }
-/* Muted "planned / not configured" tile state (Upstreams stub). */
-.bw-kpi-tile.is-planned .bw-kpi-value {
-  color: var(--bw-fg-4);
-}
-[data-bs-theme="dark"] .bw-kpi-tile.is-planned .bw-kpi-value {
-  color: var(--bw-fg-4);
-}
-
 /* --- Secondary KPI mini-tiles (kit .mini-tile, app.css:259-322) --- */
 .mini-tile {
   background: var(--bw-bg-card);

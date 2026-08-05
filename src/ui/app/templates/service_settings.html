@@ -7,18 +7,6 @@
     {% set template_method = config.get("USE_TEMPLATE", {"method": "ui"})["method"] %}
     {% set selected_template = config.get("USE_TEMPLATE", {"value": ""})["value"] %}
     <input type="hidden"
-           id="selected-mode"
-           name="selected_mode"
-           value="{{ mode }}">
-    <input type="hidden"
-           id="used-template"
-           name="used_template"
-           {% if current_endpoint == "new" and not clone %}value="low"{% else %}value="{{ config.get('USE_TEMPLATE', {'value': 'low'})['value'] }}"{% endif %}>
-    <input type="hidden"
-           id="selected-template"
-           name="selected_template"
-           value="{{ current_template }}">
-    <input type="hidden"
            id="selected-template-method"
            name="selected_template_method"
            value="{{ template_method }}">

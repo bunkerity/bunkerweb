@@ -80,6 +80,38 @@ def route_app(reports_route):
     return module, client, app
 
 
+def test_fetch_keeps_persisted_report_details_for_the_modal(route_app, monkeypatch):
+    module, client, app = route_app
+    instances_utils = Mock()
+    monkeypatch.setattr(module, "BW_INSTANCES_UTILS", instances_utils)
+    client.get_metrics_requests.return_value = {
+        "total": 1,
+        "filtered": 1,
+        "data": [
+            {
+                "id": "req-1",
+                "date": 1,
+                "server_name": "app.example.com",
+                "data": {"ids": [942100], "msgs": ["blocked"]},
+            }
+        ],
+    }
+
+    with app.test_request_context("/reports/fetch", method="POST", data={"draw": "1", "start": "0", "length": "10"}):
+        response = module.reports_fetch.__wrapped__.__wrapped__()
+
+    row = response.get_json()["data"][0]
+    assert row["has_data"] is True
+    assert row["data"] == {"ids": [942100], "msgs": ["blocked"]}
+
+
+def test_report_modal_uses_durable_row_data_before_the_volatile_fallback():
+    source = (Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "js" / "pages" / "reports.js").read_text(encoding="utf-8")
+    local = source.index('rowData.data !== "available"')
+    fallback = source.index("$.ajax({", local)
+    assert local < fallback
+
+
 def test_api_client_metrics_dashboard_paths(api_client, monkeypatch):
     get = Mock(return_value={})
     monkeypatch.setattr(api_client, "_get", get)

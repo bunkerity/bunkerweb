@@ -151,10 +151,9 @@
             </a>
         </div>
         <div class="col-md-3">
-            {# Upstreams -- reserved for the planned backend-pool feature. No data source
-               exists in the backend yet, so this stays a muted, honest placeholder. #}
-            {% set upstreams_caption %}<span data-i18n="dashboard.card.upstreams.planned">Coming soon</span>{% endset %}
-            {{ tile(title="Upstreams", value="—", title_i18n="dashboard.card.upstreams.title", color="navy", icon="bx-server", caption=upstreams_caption, classes="is-planned") }}
+            <a role="button" href="{{ url_for('upstreams.upstreams_page') }}" class="home-nav-tile d-block h-100">
+                {{ tile(title="Upstreams", value=upstreams_total, title_i18n="dashboard.card.upstreams.title", color="navy", icon="bx-server") }}
+            </a>
         </div>
         <div class="col-md-3">
             {% set certs_caption %}{% if certs_expiring or certs_expired %}{% if certs_expiring %}<span class="hl-warn">{{ certs_expiring }} <span data-i18n="status.expiring">expiring</span></span>{% endif %}{% if certs_expiring and certs_expired %} · {% endif %}{% if certs_expired %}<span class="hl-bad">{{ certs_expired }} <span data-i18n="status.expired">expired</span></span>{% endif %}{% else %}<span class="hl-good" data-i18n="status.all_valid">All valid</span>{% endif %}{% endset %}

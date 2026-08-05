@@ -76,6 +76,17 @@
       var workflowId = row.dataset.workflowId;
       var flow = index[workflowId] || { name: workflowId };
 
+      var edit = row.querySelector(".workflow-edit");
+      if (edit) {
+        edit.addEventListener("click", function () {
+          document.getElementById("workflow-edit-id").value = workflowId;
+          document.getElementById("workflow-edit-name").value = flow.name || "";
+          document.getElementById("workflow-edit-description").value =
+            flow.description || "";
+          openModal("workflow-edit-modal");
+        });
+      }
+
       var attach = row.querySelector(".workflow-attach");
       if (attach) {
         attach.addEventListener("click", function () {

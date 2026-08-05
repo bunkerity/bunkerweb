@@ -1341,7 +1341,9 @@
       index +
       '">' +
       '<span class="fc-conn-lbl l-entry" data-i18n="workflows.link.entry">every request</span>' +
-      '<span class="fc-conn-lbl l-fall" data-i18n="workflows.link.noMatch">' +
+      '<span class="fc-conn-lbl l-fall" data-i18n="' +
+      (only ? "workflows.link.entry" : "workflows.link.noMatch") +
+      '">' +
       (only ? "every request" : "no match") +
       "</span>" +
       plus +

@@ -962,6 +962,70 @@ $(document).ready(function () {
       return;
     }
 
+    function showReportData(rawData) {
+      let reportData = rawData;
+      if (typeof reportData === "string") {
+        try {
+          reportData = JSON.parse(reportData);
+        } catch (e) {
+          reportData = { raw: reportData };
+        }
+      } else if (!reportData || typeof reportData !== "object") {
+        reportData = { raw: String(reportData || "") };
+      }
+
+      $("#dataModal").data("raw-data", reportData);
+
+      let modalTitleHtml = baseTitle;
+      const isModSec =
+        reportData &&
+        (reportData.anomaly_score !== undefined ||
+          reportData.ids ||
+          reportData.msgs);
+      const anomalyScore = reportData ? reportData.anomaly_score : null;
+      if (
+        isModSec &&
+        anomalyScore !== undefined &&
+        anomalyScore !== null &&
+        anomalyScore !== ""
+      ) {
+        modalTitleHtml += `<span class="badge bg-danger ms-2 align-middle">Anomaly Score: <span class="fw-bold">${escapeHtml(
+          anomalyScore,
+        )}</span></span>`;
+      }
+      $("#dataModal-title").html(modalTitleHtml);
+
+      try {
+        const formattedContent = formatSecurityReportData(
+          reportData,
+          reason,
+          currentServerName,
+        );
+        $("#dataContent").html(formattedContent);
+      } catch (formatError) {
+        console.error("Error formatting report data:", formatError);
+        $("#dataContent").html(`
+          <div class="alert alert-warning mb-3">
+            <span class="tf-icons bx bx-error-circle me-1"></span>
+            Unable to format data properly. Showing raw data below:
+          </div>
+          ${createRawDataFallback(reportData)}
+        `);
+      }
+    }
+
+    // DB-backed rows already carry their durable detail blob. Keep the legacy endpoint as
+    // fallback for rows sourced from Redis/instance buffers when persistence is disabled.
+    if (
+      rowData &&
+      rowData.has_data &&
+      rowData.data &&
+      rowData.data !== "available"
+    ) {
+      showReportData(rowData.data);
+      return;
+    }
+
     const requestPayload = {
       csrf_token: $("#csrf_token").val(),
       report_id: reportId,
@@ -993,55 +1057,7 @@ $(document).ready(function () {
           return;
         }
 
-        let reportData = response.data;
-        if (typeof reportData === "string") {
-          try {
-            reportData = JSON.parse(reportData);
-          } catch (e) {
-            reportData = { raw: reportData };
-          }
-        } else if (!reportData || typeof reportData !== "object") {
-          reportData = { raw: String(reportData || "") };
-        }
-
-        $("#dataModal").data("raw-data", reportData);
-
-        let modalTitleHtml = baseTitle;
-        const isModSec =
-          reportData &&
-          (reportData.anomaly_score !== undefined ||
-            reportData.ids ||
-            reportData.msgs);
-        const anomalyScore = reportData ? reportData.anomaly_score : null;
-        if (
-          isModSec &&
-          anomalyScore !== undefined &&
-          anomalyScore !== null &&
-          anomalyScore !== ""
-        ) {
-          modalTitleHtml += `<span class="badge bg-danger ms-2 align-middle">Anomaly Score: <span class="fw-bold">${escapeHtml(
-            anomalyScore,
-          )}</span></span>`;
-        }
-        $("#dataModal-title").html(modalTitleHtml);
-
-        try {
-          const formattedContent = formatSecurityReportData(
-            reportData,
-            reason,
-            currentServerName,
-          );
-          $("#dataContent").html(formattedContent);
-        } catch (formatError) {
-          console.error("Error formatting report data:", formatError);
-          $("#dataContent").html(`
-            <div class="alert alert-warning mb-3">
-              <span class="tf-icons bx bx-error-circle me-1"></span>
-              Unable to format data properly. Showing raw data below:
-            </div>
-            ${createRawDataFallback(reportData)}
-          `);
-        }
+        showReportData(response.data);
       },
       error: function (xhr) {
         let errorMessage = "Failed to load report details.";

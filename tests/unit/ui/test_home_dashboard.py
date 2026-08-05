@@ -136,6 +136,7 @@ def test_home_page_context_happy_path(route_app, monkeypatch):
     client.get_services.return_value = []
     client.get_metadata.return_value = {"is_initialized": True, "first_config_saved": True}
     client.get_jobs.return_value = {"job1": {}, "job2": {}}
+    client.get_upstreams.return_value = {"total": 3, "upstreams": [{"id": "pool-a"}]}
     client.get_metrics_requests.return_value = {
         "pane_counts": {
             "reason": {
@@ -157,6 +158,7 @@ def test_home_page_context_happy_path(route_app, monkeypatch):
     assert captured["mfa_enabled"] is True
     assert captured["jobs_count"] == 2
     assert captured["bans_active"] == 2
+    assert captured["upstreams_total"] == 3
     # The heavy aggregation is NOT part of this context any more: home.py:140-148 ships the
     # chart series empty on purpose so the shell paints before /home/metrics answers. Asserting
     # they are empty is the actual contract -- a non-empty value here would mean the heavy
@@ -196,6 +198,16 @@ def test_home_page_context_defaults_to_empty_state_on_api_failure(route_app, mon
     assert captured["mfa_enabled"] is False
     assert captured["jobs_count"] == 0
     assert captured["bans_active"] == 0
+
+
+def test_upstreams_tile_links_to_the_live_page():
+    template = (Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates" / "home.html").read_text(encoding="utf-8")
+    css = (Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "css" / "pages" / "home.css").read_text(encoding="utf-8")
+
+    assert "url_for('upstreams.upstreams_page')" in template
+    assert "value=upstreams_total" in template
+    assert "is-planned" not in template
+    assert "is-planned" not in css
 
 
 # ── GET /home/metrics -- the heavy aggregation, moved off the first paint ────────────

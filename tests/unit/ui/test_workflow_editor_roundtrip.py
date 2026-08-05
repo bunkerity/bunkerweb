@@ -194,6 +194,7 @@ function el(id) {
 let ready;
 globalThis.window = globalThis;
 globalThis.addEventListener = function(){};
+globalThis.localStorage = { getItem(){ return process.argv[4] || null }, setItem(){} };
 globalThis.CSS = { escape: (s) => String(s) };
 globalThis.document = {
   addEventListener(ev, cb) { if (ev === "DOMContentLoaded") ready = cb; },
@@ -232,10 +233,10 @@ class _Balance(HTMLParser):
             self.stack.pop()
 
 
-def _render(node, tmp_path, definition):
+def _render(node, tmp_path, definition, view=""):
     harness = tmp_path / "render.js"
     harness.write_text(RENDER_HARNESS, encoding="utf-8")
-    result = run([node, str(harness), str(EDITOR), dumps(definition)], capture_output=True, text=True, check=False)
+    result = run([node, str(harness), str(EDITOR), dumps(definition), view], capture_output=True, text=True, check=False)
     assert result.returncode == 0, result.stderr
     return result.stdout.split("\n<!--CAP-->\n")
 
@@ -262,6 +263,12 @@ def test_the_ladder_renders_well_formed_markup(node, tmp_path):
                 continue
             assert value.strip(), f"empty {name} on <{tag}>"
             assert '" +' not in value and "' +" not in value, f"{name}={value!r}"
+
+
+def test_an_empty_workflow_uses_the_entry_connector_label(node, tmp_path):
+    ladder, _ = _render(node, tmp_path, {"schema_version": 1, "rules": []}, "canvas")
+    assert 'class="fc-conn-lbl l-fall" data-i18n="workflows.link.entry"' in ladder
+    assert 'class="fc-conn-lbl l-fall" data-i18n="workflows.link.noMatch"' not in ladder
 
 
 # Same stub DOM, driven through the run button instead of read for markup. rsplit rather

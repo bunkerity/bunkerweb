@@ -3,31 +3,57 @@ function getAlpha2(lang) {
   return lang.split("-")[0].toLowerCase();
 }
 
-// Apply translations to elements with [data-i18n] attribute
+const explicitI18nAttributes = {
+  "data-i18n-aria-label": "aria-label",
+  "data-i18n-title": "title",
+  "data-i18n-placeholder": "placeholder",
+  "data-i18n-empty-text": "data-empty-text",
+};
+
+// Apply translations to text and explicit translatable attributes.
 function applyTranslations() {
-  const elements = $("[data-i18n]");
+  const selector = ["[data-i18n]"]
+    .concat(
+      Object.keys(explicitI18nAttributes).map((attribute) => `[${attribute}]`),
+    )
+    .join(", ");
+  const elements = $(selector);
   elements.each(function () {
     const element = $(this);
-    const key = element.attr("data-i18n");
     let options = {};
     const optionsAttr = element.attr("data-i18n-options");
     if (optionsAttr) {
       try {
         options = JSON.parse(optionsAttr);
       } catch (e) {
-        console.error(
-          `Error parsing data-i18n-options for key "${key}":`,
-          e,
-          optionsAttr,
-        );
+        console.error("Error parsing data-i18n-options:", e, optionsAttr);
       }
     }
+    const translate = (key) =>
+      i18next.t(key, {
+        ...options,
+        interpolation: { escapeValue: false },
+      });
+
+    Object.entries(explicitI18nAttributes).forEach(
+      ([keyAttribute, targetAttribute]) => {
+        const attributeKey = element.attr(keyAttribute);
+        if (attributeKey) {
+          element.attr(targetAttribute, translate(attributeKey));
+        }
+      },
+    );
+
+    const key = element.attr("data-i18n");
+    if (!key) return;
     // Prevent i18next from escaping single quotes to HTML entities
-    const translation = i18next.t(key, {
-      ...options,
-      interpolation: { escapeValue: false },
-    });
-    if (element.is("[placeholder]")) {
+    const translation = translate(key);
+    const explicitTarget = element.attr("data-i18n-attr");
+    if (explicitTarget === "text") {
+      element.text(translation);
+    } else if (explicitTarget) {
+      element.attr(explicitTarget, translation);
+    } else if (element.is("[placeholder]")) {
       element.attr("placeholder", translation);
     } else if (element.is("[title]")) {
       element.attr("title", translation);
