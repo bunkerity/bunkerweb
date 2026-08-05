@@ -1,0 +1,26 @@
+{
+  "name": "ai-user-fetchers",
+  "description": "Declared HTTP User-Agent tokens for AI services fetching content at a user's request. User-Agent values are spoofable and must not be treated as trusted identity.",
+  "entries": [
+    {
+      "kind": "user_agent",
+      "value": "ChatGPT-User",
+      "comment": "OpenAI user-triggered fetcher - https://developers.openai.com/api/docs/bots"
+    },
+    {
+      "kind": "user_agent",
+      "value": "Claude-User",
+      "comment": "Anthropic user-triggered fetcher - https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler"
+    },
+    {
+      "kind": "user_agent",
+      "value": "Perplexity-User",
+      "comment": "Perplexity user-triggered fetcher - https://docs.perplexity.ai/docs/resources/perplexity-crawlers"
+    },
+    {
+      "kind": "user_agent",
+      "value": "Amzn-User",
+      "comment": "Amazon user-triggered fetcher - https://developer.amazon.com/amazonbot"
+    }
+  ]
+}

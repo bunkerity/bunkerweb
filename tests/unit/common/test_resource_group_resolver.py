@@ -4,6 +4,9 @@ No database — exercises src/common/utils/resource_validation.py and
 src/common/utils/resource_group_resolver.py directly.
 """
 
+from json import loads
+from pathlib import Path
+
 from resource_group_resolver import (  # type: ignore
     expand_config_groups,
     expand_resource_group_refs,
@@ -12,6 +15,12 @@ from resource_group_resolver import (  # type: ignore
     value_for_validation,
 )
 from resource_validation import validate_resource_value  # type: ignore
+
+AI_GROUPS = {
+    "ai-training-crawlers": ["GPTBot", "ClaudeBot", "Amazonbot", "CCBot"],
+    "ai-search-crawlers": ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot", "Amzn-SearchBot"],
+    "ai-user-fetchers": ["ChatGPT-User", "Claude-User", "Perplexity-User", "Amzn-User"],
+}
 
 # A group index as produced by build_group_index(): {name: {kind: [values]}}
 INDEX = {
@@ -181,3 +190,28 @@ class TestValidateResourceGroupRefs:
 
     def test_reserved_country_alias_survives_legacy_index(self):
         assert validate_resource_group_refs({"BLACKLIST_COUNTRY": "@EU"}, {}) is None
+
+
+def test_bundled_ai_resource_groups():
+    groups_dir = Path(__file__).resolve().parents[3] / "src/common/core/misc/resource-groups"
+    for group_id, expected_values in AI_GROUPS.items():
+        document = loads((groups_dir / f"{group_id}.json").read_text())
+        assert document["name"] == group_id
+        assert "spoofable" in document["description"].lower()
+
+        values = []
+        for entry in document["entries"]:
+            assert entry["kind"] == "user_agent"
+            assert entry.get("comment")
+            assert validate_resource_value(entry["kind"], entry["value"]) == (True, entry["value"])
+            values.append(entry["value"])
+
+        assert values == expected_values
+        assert len(values) == len(set(values))
+        assert (
+            expand_resource_group_refs(
+                {"BLACKLIST_USER_AGENT": f"@{group_id}"},
+                {group_id: {"user_agent": values}},
+            )["BLACKLIST_USER_AGENT"].split()
+            == expected_values
+        )

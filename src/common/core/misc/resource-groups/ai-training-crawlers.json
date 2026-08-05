@@ -1,0 +1,26 @@
+{
+  "name": "ai-training-crawlers",
+  "description": "Declared HTTP User-Agent tokens for crawlers that collect content for AI model training or reusable datasets. User-Agent values are spoofable and must not be treated as trusted identity.",
+  "entries": [
+    {
+      "kind": "user_agent",
+      "value": "GPTBot",
+      "comment": "OpenAI model-training crawler - https://developers.openai.com/api/docs/bots"
+    },
+    {
+      "kind": "user_agent",
+      "value": "ClaudeBot",
+      "comment": "Anthropic model-training crawler - https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler"
+    },
+    {
+      "kind": "user_agent",
+      "value": "Amazonbot",
+      "comment": "Amazon crawler that may collect content for AI model training - https://developer.amazon.com/amazonbot"
+    },
+    {
+      "kind": "user_agent",
+      "value": "CCBot",
+      "comment": "Common Crawl dataset crawler - https://commoncrawl.org/ccbot"
+    }
+  ]
+}

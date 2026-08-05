@@ -1,0 +1,26 @@
+{
+  "name": "ai-search-crawlers",
+  "description": "Declared HTTP User-Agent tokens for crawlers that index content for AI-assisted search. User-Agent values are spoofable and must not be treated as trusted identity.",
+  "entries": [
+    {
+      "kind": "user_agent",
+      "value": "OAI-SearchBot",
+      "comment": "OpenAI search crawler - https://developers.openai.com/api/docs/bots"
+    },
+    {
+      "kind": "user_agent",
+      "value": "Claude-SearchBot",
+      "comment": "Anthropic search crawler - https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler"
+    },
+    {
+      "kind": "user_agent",
+      "value": "PerplexityBot",
+      "comment": "Perplexity search crawler - https://docs.perplexity.ai/docs/resources/perplexity-crawlers"
+    },
+    {
+      "kind": "user_agent",
+      "value": "Amzn-SearchBot",
+      "comment": "Amazon search crawler - https://developer.amazon.com/amazonbot"
+    }
+  ]
+}
