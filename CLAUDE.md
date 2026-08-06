@@ -191,8 +191,8 @@ python3 tests/main.py kubernetes           # Kubernetes tests
 python3 tests/main.py linux debian         # Linux tests (with distro)
 ```
 
-- Tests scan `examples/*/tests.json` for test scenarios (type: string/status, url, expected results with timeout/delay)
-- Real Docker environments with actual HTTP requests — tests verify observable behavior, not internals
+- Tests scan `examples/*/tests.json` for test scenarios (`string`/`status` use a URL and expected result; `script` uses a non-empty argv string array; manifests set timeout/delay)
+- Real Docker environments with actual network requests — tests verify observable behavior, not internals
 - Test classes: DockerTest, AutoconfTest, SwarmTest, KubernetesTest, LinuxTest
 
 ## Key Conventions

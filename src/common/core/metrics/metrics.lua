@@ -1,9 +1,10 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local datastore = require "bunkerweb.datastore"
-local http = require "resty.http"
+local internal_api = require "bunkerweb.internal_api"
 local lrucache = require "resty.lrucache"
 local plugin = require "bunkerweb.plugin"
+local resty_lock = require "resty.lock"
 local utils = require "bunkerweb.utils"
 
 local metrics = class("metrics", plugin)
@@ -24,6 +25,8 @@ local lru, err_lru = lrucache.new(DEFAULT_MAX_LRU_HISTORY)
 if not lru then
 	require "bunkerweb.logger":new("METRICS"):log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
+-- Security reports have their own bounded queue: they must not compete with metric keys.
+local stream_requests = {}
 
 -- Fold one duration sample (seconds) into a running aggregate. Kept pure and module-level
 -- so the arithmetic can be exercised on its own.
@@ -116,17 +119,23 @@ local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
 local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
+local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
+local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
 local worker = ngx.worker
 local worker_id = worker.id
+local worker_pid = worker.pid
 
 local crc32_short = ngx.crc32_short
 local get_reason = utils.get_reason
 local has_variable = utils.has_variable
-local get_variable = utils.get_variable
 local is_connection_error = utils.is_connection_error
 local is_oom_error = utils.is_oom_error
 local encode = cjson.encode
 local decode = cjson.decode
+
+local function stream_requests_key()
+	return "stream_requests_" .. tostring(worker_pid())
+end
 
 local match = string.match
 local time = os.time
@@ -150,31 +159,57 @@ local CACHE_STATUS_VALUES = {
 	REVALIDATED = true,
 }
 
--- RPUSH is denyoom and first: under OOM nothing is written, so the entry stays
--- unsynced with no partial facets. ARGV[1]=json, ARGV[2..9]=facet values.
+-- Deduplicate at the Redis sink as well as in HTTP memory: a lost ACK can be retried through
+-- another HTTP worker. Any failed write removes the row and ID while the script still owns
+-- the tail. Facet OOM invalidates every derived index for a clean rebuild next cycle; unlike
+-- HINCRBY rollback, DEL/RPOP/SREM are safe while Redis rejects memory-growing commands.
+-- ARGV[1]=json, ARGV[2]=request id, ARGV[3..10]=facet values.
 local PUSH_SCRIPT = [==[
+  if redis.call('GET', 'requests:facets:initialized') ~= '1' then
+    return {err = 'request indexes need rebuild'}
+  end
+  if redis.call('SISMEMBER', KEYS[2], ARGV[2]) == 1 then
+    return 0
+  end
   local pushed = redis.pcall('RPUSH', KEYS[1], ARGV[1])
   if type(pushed) == 'table' and pushed.err then
     return pushed
   end
+  local indexed = redis.pcall('SADD', KEYS[2], ARGV[2])
+  if type(indexed) == 'table' and indexed.err then
+    redis.call('RPOP', KEYS[1])
+    return indexed
+  end
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   for i = 1, #fields do
-    -- never abort after RPUSH: a pushed-but-unsynced entry would duplicate on retry
-    redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], ARGV[1 + i], 1)
+    local facet = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], ARGV[2 + i], 1)
+    if type(facet) == 'table' and facet.err then
+      redis.call('RPOP', KEYS[1])
+      redis.call('SREM', KEYS[2], ARGV[2])
+      redis.call('DEL', 'requests:facets:initialized')
+      for j = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[j]) end
+      return facet
+    end
   end
   return pushed
 ]==]
 
--- OOM probe bails before any destructive op so a popped entry never loses its
--- facet decrement. ARGV[1]=max_requests.
+-- The OOM probe catches the common failure before mutation. If a later decrement still fails,
+-- the absent completion marker forces a rebuild from the unchanged list. ARGV[1]=max_requests.
 local TRIM_SCRIPT = [==[
   local max = tonumber(ARGV[1])
   if not max or max < 0 then max = 0 end
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  local function clear_indexes()
+    redis.call('DEL', 'requests:facets:initialized')
+    redis.call('DEL', KEYS[2])
+    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+  end
   if max == 0 then
     redis.call('DEL', KEYS[1])
-    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
-    redis.call('SET', 'requests:facets:initialized', '1')
+    clear_indexes()
+    local marked = redis.pcall('SET', 'requests:facets:initialized', '1')
+    if type(marked) == 'table' and marked.err then return marked end
     return 0
   end
   local nb = redis.call('LLEN', KEYS[1])
@@ -183,20 +218,51 @@ local TRIM_SCRIPT = [==[
   if type(probe) == 'table' and probe.err then
     return probe
   end
+  redis.call('DEL', 'requests:facets:initialized')
   local to_remove = nb - max
   local items = redis.call('LRANGE', KEYS[1], 0, to_remove - 1)
   for _, raw in ipairs(items) do
     local ok, req = pcall(cjson.decode, raw)
-    if ok and type(req) == 'table' then
-      for i = 1, #fields do
-        local v = req[fields[i]]
-        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-        local n = redis.call('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
-        if n <= 0 then redis.call('HDEL', 'requests:facet:' .. fields[i], v) end
+    if not ok or type(req) ~= 'table' then
+      clear_indexes()
+      local trimmed = redis.pcall('LTRIM', KEYS[1], to_remove, -1)
+      if type(trimmed) == 'table' and trimmed.err then return trimmed end
+      return {err = 'invalid request payload while trimming'}
+    end
+    if req.id ~= nil and req.id ~= cjson.null and req.id ~= '' then
+      local removed = redis.pcall('SREM', KEYS[2], tostring(req.id))
+      if type(removed) == 'table' and removed.err then
+        clear_indexes()
+        return removed
+      end
+    end
+    for i = 1, #fields do
+      local v = req[fields[i]]
+      if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+      local n = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
+      if type(n) == 'table' and n.err then
+        clear_indexes()
+        return n
+      end
+      if n <= 0 then
+        local deleted = redis.pcall('HDEL', 'requests:facet:' .. fields[i], v)
+        if type(deleted) == 'table' and deleted.err then
+          clear_indexes()
+          return deleted
+        end
       end
     end
   end
-  redis.call('LTRIM', KEYS[1], to_remove, -1)
+  local trimmed = redis.pcall('LTRIM', KEYS[1], to_remove, -1)
+  if type(trimmed) == 'table' and trimmed.err then
+    clear_indexes()
+    return trimmed
+  end
+  local marked = redis.pcall('SET', 'requests:facets:initialized', '1')
+  if type(marked) == 'table' and marked.err then
+    clear_indexes()
+    return marked
+  end
   return to_remove
 ]==]
 
@@ -206,24 +272,46 @@ local TRIM_SCRIPT = [==[
 -- rare facet desync, and chunking would break atomicity.
 local REBUILD_SCRIPT = [==[
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  local function clear_indexes()
+    redis.call('DEL', KEYS[2])
+    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+  end
   local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
   if type(probe) == 'table' and probe.err then return probe end
   redis.call('DEL', 'requests:facets:initialized')
-  for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+  clear_indexes()
   local items = redis.call('LRANGE', KEYS[1], 0, -1)
+  local kept = 0
   for _, raw in ipairs(items) do
     local ok, req = pcall(cjson.decode, raw)
-    if ok and type(req) == 'table' then
-      for i = 1, #fields do
-        local v = req[fields[i]]
-        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-        local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
-        if type(r) == 'table' and r.err then return r end
+    local id
+    if ok and type(req) == 'table' then id = req.id end
+    if type(id) ~= 'string' or id == '' then
+      redis.call('LREM', KEYS[1], 1, raw)
+    else
+      local r = redis.pcall('SADD', KEYS[2], tostring(id))
+      if type(r) == 'table' and r.err then
+        clear_indexes()
+        return r
+      end
+      if r == 0 then
+        redis.call('LREM', KEYS[1], 1, raw)
+      else
+        kept = kept + 1
+        for i = 1, #fields do
+          local v = req[fields[i]]
+          if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+          local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
+          if type(r) == 'table' and r.err then
+            clear_indexes()
+            return r
+          end
+        end
       end
     end
   end
   redis.call('SET', 'requests:facets:initialized', '1')
-  return #items
+  return kept
 ]==]
 
 -- Parse a count value with optional SI shorthand suffix: "100", "1k", "10K", "1m", "5M".
@@ -263,31 +351,41 @@ local function enforce_redis_requests_cap(self)
 		-- Unparsable cap must not become 0: cap 0 wipes the list and facets.
 		return
 	end
-	local _, err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", tostring(max_requests))
+	local _, err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", tostring(max_requests))
 	if err then
 		self:log_throttled(ERR, "cap_enforce", "Can't enforce Redis requests cap: " .. err)
 	end
 end
 
--- Read-only probe (never denyoom), so it runs even under OOM. Invariant: every
--- stored request contributes one facet:ip value, so HLEN(facet:ip)==0 with LLEN>0
--- reliably flags a facet/list desync.
+-- Read-only probes (never denyoom), so they run even under OOM. Every stored request contributes
+-- all eight facets (using N/A when absent) and one ID; any missing index triggers a full rebuild.
 local function self_heal_request_facets(self)
 	local nb_raw = self:redis_call("llen", "requests")
 	local nb = tonumber(nb_raw) or 0
 	local marker = self:redis_call("get", "requests:facets:initialized")
 	local marked = marker ~= nil and marker ~= false and marker ~= null and tostring(marker) == "1"
+	local facets_present = false
+	local facets_complete = true
+	for _, field in ipairs(REQUEST_FACET_FIELDS) do
+		local facet_len_raw = self:redis_call("hlen", "requests:facet:" .. field)
+		local facet_len = tonumber(facet_len_raw) or 0
+		if facet_len > 0 then
+			facets_present = true
+		else
+			facets_complete = false
+		end
+	end
+	local ids_len_raw = self:redis_call("scard", "requests:ids")
+	local ids_len = tonumber(ids_len_raw) or 0
 	if nb == 0 then
 		if not marked then
-			local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", "0")
+			local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0")
 			if clear_err then
 				self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 			end
 		else
-			local ip_len_raw = self:redis_call("hlen", "requests:facet:ip")
-			local ip_len = tonumber(ip_len_raw) or 0
-			if ip_len > 0 then
-				local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", "0")
+			if facets_present or ids_len > 0 then
+				local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0")
 				if clear_err then
 					self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 				end
@@ -295,17 +393,10 @@ local function self_heal_request_facets(self)
 		end
 		return
 	end
-	local ip_len_raw = self:redis_call("hlen", "requests:facet:ip")
-	local ip_len = tonumber(ip_len_raw) or 0
-	if ip_len == 0 then
-		local _, err = self:redis_call("eval", REBUILD_SCRIPT, 1, "requests")
+	if not facets_complete or ids_len ~= nb or not marked then
+		local _, err = self:redis_call("eval", REBUILD_SCRIPT, 2, "requests", "requests:ids")
 		if err then
 			self:log_throttled(ERR, "facet_rebuild", "Can't rebuild request facets: " .. err)
-		end
-	elseif not marked then
-		local _, err = self:redis_call("set", "requests:facets:initialized", "1")
-		if err then
-			self:log_throttled(ERR, "facet_mark", "Can't mark request facets as initialized: " .. err)
 		end
 	end
 end
@@ -317,6 +408,7 @@ local function refresh_request_ttls(self, ttl, wid)
 	if not ttl or ttl <= 0 then
 		return
 	end
+	self.clusterstore:call("expire", "requests:ids", ttl)
 	self.clusterstore:call("expire", "requests", ttl)
 	for _, field in ipairs(REQUEST_FACET_FIELDS) do
 		self.clusterstore:call("expire", "requests:facet:" .. field, ttl)
@@ -325,7 +417,9 @@ local function refresh_request_ttls(self, ttl, wid)
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
 			if key ~= "setup" and key ~= "requests" and key ~= "baseline" then
-				self.clusterstore:call("expire", "metrics:" .. key .. ":" .. wid, ttl)
+				if key ~= "stream_requests" then
+					self.clusterstore:call("expire", "metrics:" .. key .. ":" .. wid, ttl)
+				end
 			end
 		end
 	end
@@ -341,6 +435,8 @@ function metrics:initialize(ctx)
 		dict = shared.metrics_datastore_stream
 	end
 	self.metrics_datastore = datastore:new(dict)
+	self.stream_reports_datastore =
+		datastore:new(subsystem == "http" and shared.metrics_stream_reports or shared.metrics_stream_reports_stream)
 end
 
 function metrics:init_worker()
@@ -442,8 +538,7 @@ function metrics:log(bypass_checks)
 			asn_number = asn_number,
 			asn_org = asn_org,
 		}
-		-- Get requests from LRU
-		local requests = lru:get("requests") or {}
+		local requests = subsystem == "stream" and stream_requests or lru:get("requests") or {}
 
 		-- Add to LRU
 		table_insert(requests, request)
@@ -461,8 +556,9 @@ function metrics:log(bypass_checks)
 			end
 		end
 
-		-- Update worker cache
-		lru:set("requests", requests)
+		if subsystem ~= "stream" then
+			lru:set("requests", requests)
+		end
 	end
 	-- Count proxy_cache hit/miss for served requests. Distinct axis from the
 	-- blocked-request facets above (never touches the `requests` list): reads the
@@ -608,32 +704,31 @@ end
 -- phase, never from log_stream -- cosockets are forbidden in the log phase, which is the same
 -- reason badbehavior queues its increments instead of banning inline.
 --
--- The batch is only dropped once the API has acknowledged it. On failure it stays in the LRU
+-- The batch is only dropped once the API has acknowledged it. On failure it stays in memory
 -- and the next tick retries, bounded by METRICS_MAX_BLOCKED_REQUESTS like every other buffer
 -- here, so an API that is down costs bounded memory rather than an unbounded backlog.
 local function push_stream_reports(max_requests)
-	local requests = lru:get("requests")
+	local requests = stream_requests
 	if not requests or #requests == 0 then
 		return true, "no stream reports to push"
 	end
 
-	if get_variable("API_LISTEN_HTTP", false) ~= "yes" then
-		-- Nothing to talk to: the reports would pile up forever, so drop them rather than
-		-- pretend. An HTTPS-only API is not reachable this way (see the conception note).
-		lru:set("requests", {})
-		return false, "API_LISTEN_HTTP is not enabled, dropping " .. #requests .. " stream reports"
+	-- Encode before detaching the queue so even an unexpected cjson failure leaves it intact.
+	local encoded, payload = pcall(encode, { requests = requests })
+	if not encoded then
+		return false, "can't encode stream reports : " .. tostring(payload)
 	end
 
-	-- Take the batch and hand the buffer a fresh table right away. lru:get() returns the stored
-	-- table itself, and log_stream() keeps appending to it while the cosocket below yields --
+	-- Take the batch and hand the buffer a fresh table right away. log_stream() keeps appending
+	-- to it while the cosocket below yields --
 	-- so anything logged mid-flight would be appended to the very table being sent, then
 	-- counted as acknowledged and dropped without ever having been transmitted.
 	local batch = requests
 	local count = #batch
-	lru:set("requests", {})
+	stream_requests = {}
 
 	local function keep_for_next_tick()
-		local pending = lru:get("requests") or {}
+		local pending = stream_requests
 		for index = count, 1, -1 do
 			table_insert(pending, 1, batch[index])
 		end
@@ -641,51 +736,92 @@ local function push_stream_reports(max_requests)
 		while #pending > (max_requests or 1000) do
 			table_remove(pending, 1)
 		end
-		lru:set("requests", pending)
 	end
 
-	local port, err = get_variable("API_HTTP_PORT", false)
-	if not port then
-		keep_for_next_tick()
-		return false, "can't get API_HTTP_PORT variable : " .. tostring(err)
-	end
-	local server_name
-	server_name, err = get_variable("API_SERVER_NAME", false)
-	if not server_name then
-		keep_for_next_tick()
-		return false, "can't get API_SERVER_NAME variable : " .. tostring(err)
-	end
-
-	local headers = { ["Content-Type"] = "application/json", ["Host"] = server_name }
-	local token = get_variable("API_TOKEN", false)
-	if token and token ~= "" then
-		headers["Authorization"] = "Bearer " .. token
-	end
-
-	local httpc
-	httpc, err = http.new()
-	if not httpc then
-		keep_for_next_tick()
-		return false, "can't instantiate http client : " .. tostring(err)
-	end
-	httpc:set_timeout(5000)
-
-	local res
-	res, err = httpc:request_uri("http://127.0.0.1:" .. port .. "/metrics/stream-reports", {
+	local call_ok, res, err = pcall(internal_api.request, "/metrics/stream-reports", {
 		method = "POST",
-		headers = headers,
-		body = encode({ requests = batch }),
+		headers = { ["Content-Type"] = "application/json" },
+		body = payload,
 	})
+	if not call_ok then
+		keep_for_next_tick()
+		return false, "can't push stream reports to the API : " .. tostring(res)
+	end
 	if not res then
 		keep_for_next_tick()
 		return false, "can't push stream reports to the API : " .. tostring(err)
 	end
-	if res.status ~= 200 then
+	if res.status ~= HTTP_OK then
 		keep_for_next_tick()
 		return false, "API refused stream reports with status " .. tostring(res.status)
 	end
+	local ack_ok, ack = pcall(decode, res.body or "")
+	if
+		not ack_ok
+		or type(ack) ~= "table"
+		or ack.status ~= "success"
+		or type(ack.msg) ~= "table"
+		or tonumber(ack.msg.accepted) ~= count
+	then
+		keep_for_next_tick()
+		return false, "API returned an invalid stream reports acknowledgement"
+	end
 
 	return true, "pushed " .. count .. " stream reports"
+end
+
+local function persist_stream_reports(self)
+	local key = stream_requests_key()
+	local encoded, reports = pcall(encode, stream_requests)
+	if not encoded then
+		return false, reports, key
+	end
+	local ok, err = self.stream_reports_datastore:set(key, reports)
+	if ok then
+		self.metrics_datastore:delete(key)
+	end
+	return ok, err, key
+end
+
+local function sync_request_buffer(self, value)
+	local index = 1
+	while index <= #value do
+		local request = value[index]
+		if type(request.id) ~= "string" or request.id == "" then
+			self:log_throttled(ERR, "sync_request", "Can't sync request without a stable id")
+			table_remove(value, index)
+		else
+			if not request.synced then
+				local facets = {}
+				for i, field in ipairs(REQUEST_FACET_FIELDS) do
+					facets[i] = get_request_facet_value(request, field)
+				end
+				local ok, err = self:redis_call(
+					"eval",
+					PUSH_SCRIPT,
+					2,
+					"requests",
+					"requests:ids",
+					encode(request),
+					request.id,
+					facets[1],
+					facets[2],
+					facets[3],
+					facets[4],
+					facets[5],
+					facets[6],
+					facets[7],
+					facets[8]
+				)
+				if not ok then
+					self:log_throttled(ERR, "sync_request", "Can't sync request to Redis: " .. (err or "unknown error"))
+					break
+				end
+				request.synced = true
+			end
+			index = index + 1
+		end
+	end
 end
 
 function metrics:timer()
@@ -708,7 +844,7 @@ function metrics:timer()
 	local setup = lru:get("setup")
 	if not setup then
 		for _, key in ipairs(self.metrics_datastore:keys()) do
-			if key:match("_" .. wid .. "$") then
+			if key:match("_" .. wid .. "$") and key ~= "stream_requests_" .. wid then
 				local value
 				value, err = self.metrics_datastore:get(key)
 				if not value and err ~= "not found" then
@@ -724,6 +860,39 @@ function metrics:timer()
 					lru:set(key:gsub("_" .. wid .. "$", ""), value)
 				end
 			end
+		end
+		local restored_stream_requests = {}
+		local seen = {}
+		local function remember_stream_requests(requests)
+			if type(requests) ~= "table" then
+				return
+			end
+			for _, request in ipairs(requests) do
+				if type(request) == "table" and type(request.id) == "string" and not seen[request.id] then
+					seen[request.id] = true
+					table_insert(restored_stream_requests, request)
+				end
+			end
+		end
+		for _, store in ipairs({ self.metrics_datastore, self.stream_reports_datastore }) do
+			for _, key in ipairs(store:keys()) do
+				if key:match("^stream_requests_[0-9]+$") then
+					local persisted = store:get(key)
+					if persisted then
+						local ok, decoded = pcall(decode, persisted)
+						if ok and type(decoded) == "table" then
+							remember_stream_requests(decoded)
+						end
+					end
+				end
+			end
+		end
+		remember_stream_requests(stream_requests)
+		for index = #stream_requests, 1, -1 do
+			stream_requests[index] = nil
+		end
+		for index, request in ipairs(restored_stream_requests) do
+			stream_requests[index] = request
 		end
 		lru:set("setup", true)
 	end
@@ -754,42 +923,14 @@ function metrics:timer()
 		local value = lru:get(key)
 		if self.redis_ok then
 			if key == "requests" then
-				for _, request in ipairs(value) do
-					if not request.synced then
-						local v = {}
-						for i, field in ipairs(REQUEST_FACET_FIELDS) do
-							v[i] = get_request_facet_value(request, field)
-						end
-						local ok
-						ok, err = self:redis_call(
-							"eval",
-							PUSH_SCRIPT,
-							1,
-							"requests",
-							encode(request),
-							v[1],
-							v[2],
-							v[3],
-							v[4],
-							v[5],
-							v[6],
-							v[7],
-							v[8]
-						)
-						if not ok then
-							self:log_throttled(
-								ERR,
-								"sync_request",
-								"Can't sync request to Redis: " .. (err or "unknown error")
-							)
-							break
-						end
-						request.synced = true
-					end
+				-- Stream workers only hand reports over. The HTTP worker that installs the
+				-- batch is the sole Redis owner, preventing the same report being pushed once
+				-- before handover and again after it.
+				if subsystem == "http" then
+					sync_request_buffer(self, value)
+					-- Update LRU cache
+					lru:set(key, value)
 				end
-
-				-- Update LRU cache
-				lru:set("requests", value)
 			-- Timer aggregates are a {count, sum, max} hash. The list sync below iterates
 			-- table values with ipairs, so it would DEL the key and push nothing, leaving an
 			-- empty Redis key and burning a DEL per timer per tick. They are read from the
@@ -873,6 +1014,22 @@ function metrics:timer()
 		end
 	end
 
+	-- Keep Stream reports outside the capacity-limited metrics LRU, but persist the same
+	-- bounded table before handing it to HTTP so a reload cannot lose it.
+	if self.redis_ok and subsystem == "http" then
+		sync_request_buffer(self, stream_requests)
+	end
+	local stream_ok, stream_err, stream_key = persist_stream_reports(self)
+	if not stream_ok then
+		ret = false
+		ret_err = stream_err
+		self:log_throttled(
+			ERR,
+			"stream_reports_store",
+			"can't set " .. stream_key .. " : " .. tostring(stream_err)
+		)
+	end
+
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
 	end
@@ -895,6 +1052,14 @@ function metrics:timer()
 		else
 			self.logger:log(INFO, push_msg)
 		end
+		-- push_stream_reports() yields: persist the replacement queue so reports logged while
+		-- the POST was in flight survive a reload before the next timer tick.
+		stream_ok, stream_err, stream_key = persist_stream_reports(self)
+		if not stream_ok then
+			ret = false
+			ret_err = stream_err
+			self:log_throttled(ERR, "stream_reports_store", "can't set " .. stream_key .. " : " .. tostring(stream_err))
+		end
 	end
 
 	-- Flush any end-of-window recaps for errors that stopped repeating.
@@ -904,14 +1069,29 @@ function metrics:timer()
 	return self:ret(ret, ret_err)
 end
 
--- Receives the reports a stream worker buffered and folds them into this HTTP worker's LRU, so
--- the existing LRU -> shm flush and the scrape job carry them the rest of the way untouched.
--- Rows land under whichever HTTP worker served the POST; that is fine, api_requests_query()
--- already merges every requests_<wid> key. Duplicates are harmless: the scrape deduplicates on
--- (instance_hostname, request_id).
+-- Receives the reports a stream worker buffered and installs them in an independent HTTP-side
+-- queue. The shared-memory write happens before the 200 response, making an acknowledged batch
+-- visible across workers and durable across a reload; the sender can safely replay a lost ACK.
 function metrics:api_ingest_stream_reports()
+	if self.ctx.bw.remote_addr ~= "unix:" then
+		return self:ret(true, "stream reports ingestion is internal only", HTTP_FORBIDDEN)
+	end
 	ngx.req.read_body()
 	local body = ngx.req.get_body_data()
+	if not body then
+		local body_file = ngx.req.get_body_file()
+		if body_file then
+			local file, file_err = io.open(body_file, "rb")
+			if not file then
+				return self:ret(true, "can't read stream reports body : " .. tostring(file_err), HTTP_BAD_REQUEST)
+			end
+			body, file_err = file:read("*a")
+			file:close()
+			if not body then
+				return self:ret(true, "can't read stream reports body : " .. tostring(file_err), HTTP_BAD_REQUEST)
+			end
+		end
+	end
 	if not body then
 		return self:ret(true, "no body", HTTP_BAD_REQUEST)
 	end
@@ -920,23 +1100,230 @@ function metrics:api_ingest_stream_reports()
 		return self:ret(true, "malformed stream reports payload", HTTP_BAD_REQUEST)
 	end
 
-	local requests = lru:get("requests") or {}
-	local added = 0
-	for _, request in ipairs(decoded.requests) do
-		if type(request) == "table" and request.id then
-			table_insert(requests, request)
-			added = added + 1
+	-- Validate the complete dense array before touching either LRU or shared memory. The query
+	-- path compares status numerically and may sort every report-facing scalar directly.
+	local string_fields = {
+		"ip",
+		"country",
+		"method",
+		"url",
+		"user_agent",
+		"reason",
+		"server_name",
+		"security_mode",
+	}
+	local function is_finite_number(value)
+		return type(value) == "number" and value == value and value ~= math.huge and value ~= -math.huge
+	end
+	local request_count = 0
+	local highest_index = 0
+	for index, request in pairs(decoded.requests) do
+		local valid = not (
+			type(index) ~= "number"
+			or index < 1
+			or index % 1 ~= 0
+			or type(request) ~= "table"
+			or type(request.id) ~= "string"
+			or request.id == ""
+			or not is_finite_number(request.date)
+			or not is_finite_number(request.status)
+			or type(request.synced) ~= "boolean"
+			or (request.asn_number ~= nil and not is_finite_number(request.asn_number))
+			or (request.asn_org ~= nil and type(request.asn_org) ~= "string")
+		)
+		if valid then
+			for _, field in ipairs(string_fields) do
+				if type(request[field]) ~= "string" then
+					valid = false
+					break
+				end
+			end
+		end
+		if not valid then
+			return self:ret(true, "malformed stream reports payload", HTTP_BAD_REQUEST)
+		end
+		request_count = request_count + 1
+		if index > highest_index then
+			highest_index = index
 		end
 	end
-
-	-- Same bound as log(): a stream flood must not evict the HTTP reports.
-	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
-	while #requests > max_requests do
-		table_remove(requests, 1)
+	if request_count ~= highest_index then
+		return self:ret(true, "malformed stream reports payload", HTTP_BAD_REQUEST)
 	end
-	lru:set("requests", requests)
 
-	return self:ret(true, { ingested = added }, HTTP_OK)
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
+	if request_count > max_requests then
+		return self:ret(true, "stream reports payload exceeds the queue limit", HTTP_BAD_REQUEST)
+	end
+
+	-- Serialize the cross-worker scan and install in the dedicated lock zone. Keeping this out
+	-- of metrics_datastore lets an existing queue be replaced even when that SHM is otherwise full.
+	local lock, lock_err = resty_lock:new("worker_lock", { timeout = 0, exptime = 5 })
+	if not lock then
+		return self:ret(
+			true,
+			"can't create stream reports ingest lock : " .. tostring(lock_err),
+			HTTP_SERVICE_UNAVAILABLE
+		)
+	end
+	local elapsed
+	elapsed, lock_err = lock:lock("metrics_stream_reports_ingest")
+	if elapsed == nil then
+		return self:ret(true, "stream reports ingest is busy : " .. tostring(lock_err), HTTP_SERVICE_UNAVAILABLE)
+	end
+
+	local function install_reports()
+		local live_requests = stream_requests
+		local requests = {}
+		local seen = {}
+		local function remember(items, install)
+			if type(items) ~= "table" then
+				return
+			end
+			for _, request in ipairs(items) do
+				if
+					type(request) == "table"
+					and type(request.id) == "string"
+					and request.id ~= ""
+					and not seen[request.id]
+				then
+					seen[request.id] = true
+					if install then
+						table_insert(requests, request)
+					end
+				end
+			end
+		end
+
+		-- Reports already in the regular HTTP queue are not reinstalled, but every Stream
+		-- generation is merged into this PID-scoped queue before stale generations are removed.
+		remember(lru:get("requests"), false)
+		local current_key = stream_requests_key()
+		local stale_keys = {}
+		local function scan_store(store)
+			for _, key in ipairs(store:keys()) do
+				if key:match("^requests_[0-9]+$") or key:match("^stream_requests_[0-9]+$") then
+					local persisted = store:get(key)
+					if persisted then
+						local decoded_ok, items = pcall(decode, persisted)
+						if decoded_ok then
+							if key:match("^stream_requests_[0-9]+$") then
+								remember(items, true)
+								local pid = tonumber(key:match("^stream_requests_([0-9]+)$"))
+								if key ~= current_key and pid and pid < worker_pid() then
+									table_insert(stale_keys, { store = store, key = key })
+								end
+							else
+								remember(items, false)
+							end
+						end
+					end
+				end
+			end
+		end
+		scan_store(self.metrics_datastore)
+		scan_store(self.stream_reports_datastore)
+
+		-- The API can run before timer() has restored this worker's SHM after a reload.
+		remember(live_requests, true)
+
+		while #requests > max_requests do
+			table_remove(requests, 1)
+		end
+		local added = 0
+		for _, request in ipairs(decoded.requests) do
+			if not seen[request.id] then
+				seen[request.id] = true
+				request.synced = not self.use_redis
+				table_insert(requests, request)
+				added = added + 1
+			end
+		end
+
+		-- The incoming batch is at most max_requests, so trimming removes only older Stream rows.
+		while #requests > max_requests do
+			table_remove(requests, 1)
+		end
+
+		local encoded, encoded_requests = pcall(encode, requests)
+		if not encoded then
+			return self:ret(
+				true,
+				"can't encode stream reports : " .. tostring(encoded_requests),
+				HTTP_INTERNAL_SERVER_ERROR
+			)
+		end
+		local installed, install_err = self.stream_reports_datastore:set(current_key, encoded_requests)
+		if not installed then
+			return self:ret(
+				true,
+				"can't install stream reports : " .. tostring(install_err),
+				HTTP_INTERNAL_SERVER_ERROR
+			)
+		end
+		self.metrics_datastore:delete(current_key)
+		for _, stale in ipairs(stale_keys) do
+			stale.store:delete(stale.key)
+		end
+		-- A timer may be paused in Redis while holding this table. Update that same reference so
+		-- it cannot resume after the ACK and overwrite SHM with the pre-install queue.
+		for index = #live_requests, 1, -1 do
+			live_requests[index] = nil
+		end
+		for index, request in ipairs(requests) do
+			live_requests[index] = request
+		end
+
+		return self:ret(true, { accepted = request_count, installed = added }, HTTP_OK)
+	end
+
+	local installed, response = pcall(install_reports)
+	local unlocked, unlock_err = lock:unlock()
+	if not unlocked then
+		return self:ret(
+			true,
+			"can't release stream reports ingest lock : " .. tostring(unlock_err),
+			HTTP_INTERNAL_SERVER_ERROR
+		)
+	end
+	if not installed then
+		return self:ret(true, "can't install stream reports : " .. tostring(response), HTTP_INTERNAL_SERVER_ERROR)
+	end
+	return response
+end
+
+local function collect_buffered_requests(metrics_datastore, stream_reports_datastore)
+	local requests = {}
+	local ids = {}
+	local function collect(store)
+		if not store then
+			return
+		end
+		for _, key in ipairs(store:keys()) do
+			if key:match("^requests_[0-9]+$") or key:match("^stream_requests_[0-9]+$") then
+				local data = store:get(key)
+				if data then
+					local ok, decoded = pcall(decode, data)
+					if ok and type(decoded) == "table" then
+						for _, request in ipairs(decoded) do
+							if
+								type(request) == "table"
+								and type(request.id) == "string"
+								and request.id ~= ""
+								and not ids[request.id]
+							then
+								ids[request.id] = true
+								table_insert(requests, request)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	collect(metrics_datastore)
+	collect(stream_reports_datastore)
+	return requests
 end
 
 function metrics:api()
@@ -973,6 +1360,13 @@ function metrics:api()
 	-- dedicated endpoint returning them nested by plugin and phase.
 	if filter == "timings" then
 		return self:api_timings()
+	end
+	if filter == "requests" then
+		return self:ret(
+			true,
+			{ requests = collect_buffered_requests(self.metrics_datastore, self.stream_reports_datastore) },
+			HTTP_OK
+		)
 	end
 
 	-- Loop on keys
@@ -1074,20 +1468,7 @@ function metrics:api_requests_query()
 	end
 
 	-- Collect all requests from all workers
-	local all_requests = {}
-	for _, key in ipairs(self.metrics_datastore:keys()) do
-		if key:match("^requests_[0-9]+$") then
-			local data, _ = self.metrics_datastore:get(key)
-			if data then
-				local ok, decoded = pcall(decode, data)
-				if ok and type(decoded) == "table" then
-					for _, request in ipairs(decoded) do
-						table_insert(all_requests, request)
-					end
-				end
-			end
-		end
-	end
+	local all_requests = collect_buffered_requests(self.metrics_datastore, self.stream_reports_datastore)
 
 	-- Filter requests
 	local filtered_requests = {}

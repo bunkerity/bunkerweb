@@ -1,15 +1,29 @@
+x-bw-env: &bw-env
+  DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
+  API_LISTEN_HTTP: "yes"
+  API_LISTEN_HTTPS: "yes"
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "stream-integration-token"
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
     container_name: bunkerweb
     ports:
-      - "80:8080" # required to resolve let's encrypt challenges
-      - "10000:10000" # app1 without SSL/TLS
-      - "10001:10001" # app1 with SSL/TLS
-      - "20000:20000" # app2 without SSL/TLS
-      - "20001:20001" # app2 with SSL/TLS
+      - "127.0.0.1:8080:8080/tcp"
+      - "127.0.0.1:5000:5000/tcp"
+      - "127.0.0.1:5443:5443/tcp"
+      - "127.0.0.1:10000:10000/tcp"
+      - "127.0.0.1:10010:10010/tcp"
+      - "127.0.0.1:10011:10011/tcp"
+      - "127.0.0.1:10012:10012/tcp"
+      - "127.0.0.1:10013:10013/tcp"
+      - "127.0.0.1:10014:10014/tcp"
+      - "127.0.0.1:20000:20000/udp"
     environment:
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      <<: *bw-env
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -20,26 +34,140 @@ services:
     container_name: bunkerweb-scheduler
     depends_on:
       - bunkerweb
+      - bw-api
+      - bw-jobs-broker
     volumes:
       - bw-storage:/data
     environment:
-      BUNKERWEB_INSTANCES: "bunkerweb"
-      SERVER_NAME: "app1.example.com app2.example.com" # replace with your domains
+      <<: *bw-env
+      # Keep the management endpoint stable while the runtime test closes only
+      # the optional HTTP listener for its HTTPS-only phases.
+      BUNKERWEB_INSTANCES: "https://bunkerweb:5443"
+      SERVER_NAME: "web.example.com app1.example.com app2.example.com block.example.com allow.example.com ban.example.com peer.example.com auto.example.com"
       MULTISITE: "yes"
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       SERVE_FILES: "no"
-      DISABLE_DEFAULT_SERVER: "yes"
-      AUTO_LETS_ENCRYPT: "yes"
-      USE_CLIENT_CACHE: "yes"
-      USE_GZIP: "yes"
+      DISABLE_DEFAULT_SERVER: "no"
       USE_REVERSE_PROXY: "yes"
-      SERVER_TYPE: "stream"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      BLACKLIST_COMMUNITY_LISTS: ""
+      REDIS_HOST: "bw-redis"
+      METRICS_MAX_BLOCKED_REQUESTS: "100"
+      web.example.com_REVERSE_PROXY_HOST: "http://web-app:8080"
+      web.example.com_USE_WHITELIST: "yes"
+      web.example.com_WHITELIST_IP: "0.0.0.0/0"
+      app1.example.com_SERVER_TYPE: "stream"
       app1.example.com_REVERSE_PROXY_HOST: "app1:9000"
       app1.example.com_LISTEN_STREAM_PORT: "10000"
-      app1.example.com_LISTEN_STREAM_PORT_SSL: "10001"
+      app1.example.com_SECURITY_MODE: "detect"
+      app1.example.com_USE_BLACKLIST: "yes"
+      app1.example.com_BLACKLIST_IP: "0.0.0.0/0"
+      app2.example.com_SERVER_TYPE: "stream"
       app2.example.com_REVERSE_PROXY_HOST: "app2:9000"
       app2.example.com_LISTEN_STREAM_PORT: "20000"
-      app2.example.com_LISTEN_STREAM_PORT_SSL: "20001"
+      app2.example.com_USE_TCP: "no"
+      app2.example.com_USE_UDP: "yes"
+      app2.example.com_SECURITY_MODE: "detect"
+      app2.example.com_USE_BLACKLIST: "yes"
+      app2.example.com_BLACKLIST_IP: "0.0.0.0/0"
+      app2.example.com_CUSTOM_CONF_SERVER_STREAM_test-timeout: |
+        proxy_timeout 2s;
+        proxy_responses 1;
+      block.example.com_SERVER_TYPE: "stream"
+      block.example.com_REVERSE_PROXY_HOST: "app1:9000"
+      block.example.com_LISTEN_STREAM_PORT: "10010"
+      block.example.com_USE_BLACKLIST: "yes"
+      block.example.com_BLACKLIST_IP: "0.0.0.0/0"
+      allow.example.com_SERVER_TYPE: "stream"
+      allow.example.com_REVERSE_PROXY_HOST: "app1:9000"
+      allow.example.com_LISTEN_STREAM_PORT: "10011"
+      allow.example.com_USE_BLACKLIST: "yes"
+      allow.example.com_BLACKLIST_IP: "0.0.0.0/0"
+      allow.example.com_USE_WHITELIST: "yes"
+      allow.example.com_WHITELIST_IP: "0.0.0.0/0"
+      ban.example.com_SERVER_TYPE: "stream"
+      ban.example.com_REVERSE_PROXY_HOST: "app1:9000"
+      ban.example.com_LISTEN_STREAM_PORT: "10012"
+      peer.example.com_SERVER_TYPE: "stream"
+      peer.example.com_REVERSE_PROXY_HOST: "app1:9000"
+      peer.example.com_LISTEN_STREAM_PORT: "10013"
+      auto.example.com_SERVER_TYPE: "stream"
+      auto.example.com_REVERSE_PROXY_HOST: "app1:9000"
+      auto.example.com_LISTEN_STREAM_PORT: "10014"
+      auto.example.com_BAD_BEHAVIOR_STATUS_CODES: "200"
+      auto.example.com_BAD_BEHAVIOR_THRESHOLD: "1"
+      auto.example.com_BAD_BEHAVIOR_COUNT_TIME: "60"
+      auto.example.com_BAD_BEHAVIOR_BAN_TIME: "300"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    ports:
+      - "127.0.0.1:8888:8888/tcp"
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *bw-env
+      API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    depends_on:
+      - bw-api
+      - bw-jobs-broker
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *bw-env
+      BUNKERWEB_INSTANCES: "https://bunkerweb:5443"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    command:
+      - valkey-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - noeviction
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  bw-redis:
+    image: valkey/valkey:8-alpine
+    command:
+      - valkey-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - 64mb
+      - --maxmemory-policy
+      - noeviction
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -51,8 +179,15 @@ services:
       - bw-services
 
   app2:
-    image: istio/tcp-echo-server:1.3
-    command: ["9000", "app2"]
+    image: python:3.13.0-alpine@sha256:c38ead8bcf521573dad837d7ecfdebbc87792202e89953ba8b2b83a9c5a520b6
+    command: ["python3", "/app/stream_test.py", "--udp-server"]
+    volumes:
+      - ./stream_test.py:/app/stream_test.py:ro
+    networks:
+      - bw-services
+
+  web-app:
+    image: bunkerity/bunkerweb-hello:v1.0
     networks:
       - bw-services
 

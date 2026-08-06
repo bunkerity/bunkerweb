@@ -104,13 +104,17 @@ class Test(ABC):
             log("TEST", "ℹ️", f"delay is set, sleeping {self.__delay}s")
             sleep(self.__delay)
         start = time()
-        while time() < start + self._timeout:
+        deadline = start + self._timeout
+        non_retryable_failed = False
+        while time() < deadline:
             all_ok = True
             for test in self.__tests:
-                ok = self.__run_test(test)
+                test_type = test.get("type")
+                ok = self.__run_test(test, max(deadline - time(), 0.1))
                 sleep(1)
                 if not ok:
                     all_ok = False
+                    non_retryable_failed = test_type not in ("string", "status")
                     break
             if all_ok:
                 elapsed = str(int(time() - start))
@@ -120,6 +124,8 @@ class Test(ABC):
                     f"success ({elapsed}/{self._timeout}s)",
                 )
                 return self._cleanup_test()
+            if non_retryable_failed:
+                break
             log("TEST", "⚠️", "tests not ok, retrying in 1s ...")
         self._debug_fail()
         self._cleanup_test()
@@ -127,8 +133,20 @@ class Test(ABC):
         return False
 
     # run a single test
-    def __run_test(self, test):
+    def __run_test(self, test, timeout):
         try:
+            test_type = test.get("type")
+            if test_type == "script":
+                command = test.get("script")
+                if not isinstance(command, list) or not command or not all(isinstance(argument, str) and argument for argument in command):
+                    raise ValueError("script must be a non-empty list of non-empty strings")
+                proc = run(
+                    command,
+                    cwd=f"/tmp/tests/{self._name}",
+                    timeout=timeout,
+                )
+                return proc.returncode == 0
+
             ok = False
             ex_url = test["url"]
             for ex_domain, test_domain in self._domains.items():
@@ -136,12 +154,12 @@ class Test(ABC):
                 if search(escaped_domain, ex_url):
                     ex_url = sub(escaped_domain, test_domain, ex_url)
                     break
-            if test["type"] == "string":
+            if test_type == "string":
                 r = get(ex_url, timeout=10, verify=False)
                 ok = test["string"].casefold() in r.text.casefold()
                 if not ok:
                     log("TEST", "⚠️", f"String not found : {test['string'].casefold()}")
-            elif test["type"] == "status":
+            elif test_type == "status":
                 r = get(ex_url, timeout=10, verify=False)
                 ok = test["status"] == r.status_code
                 if not ok:

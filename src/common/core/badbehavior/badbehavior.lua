@@ -369,7 +369,7 @@ function badbehavior:increase(
 
 	-- Redis case
 	if use_redis then
-		local redis_counter, err = self:redis_increase(ip, count_time, threshold, ban_time, server_name, ban_scope)
+		local redis_counter, err = self:redis_increase(ip, count_time, server_name, ban_scope)
 		if not redis_counter then
 			self:log_throttled(
 				ERR,
@@ -479,13 +479,11 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 	return true, "success"
 end
 
-function badbehavior:redis_increase(ip, count_time, threshold, ban_time, server_name, ban_scope)
+function badbehavior:redis_increase(ip, count_time, server_name, ban_scope)
 	-- Determine key based on ban scope
 	local counter_key = "plugin_bad_behavior_" .. ip
-	local ban_key = "bans_ip_" .. ip
 	if ban_scope == "service" then
 		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
-		ban_key = "bans_service_" .. server_name .. "_ip_" .. ip
 	end
 
 	-- Our LUA script to execute on redis
@@ -500,24 +498,6 @@ function badbehavior:redis_increase(ip, count_time, threshold, ban_time, server_
 			redis.log(redis.LOG_WARNING, "Bad behavior increase EXPIRE error : " .. ret_expire["err"])
 			return ret_expire
 		end
-		local threshold = tonumber(ARGV[2])
-		local ban_time = tonumber(ARGV[3])
-		if ret_incr >= threshold then
-			-- For permanent bans (ban_time = 0), don't set an expiration
-			if ban_time == 0 then
-				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior")
-				if type(ret_set) == "table" and ret_set["err"] ~= nil then
-					redis.log(redis.LOG_WARNING, "Bad behavior increase SET (permanent) error : " .. ret_set["err"])
-					return ret_set
-				end
-			else
-				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior", "EX", ban_time)
-				if type(ret_set) == "table" and ret_set["err"] ~= nil then
-					redis.log(redis.LOG_WARNING, "Bad behavior increase SET error : " .. ret_set["err"])
-					return ret_set
-				end
-			end
-		end
 		return ret_incr
 	]]
 	-- Connect to server
@@ -526,8 +506,7 @@ function badbehavior:redis_increase(ip, count_time, threshold, ban_time, server_
 		return false, err
 	end
 	-- Execute LUA script
-	local counter, err =
-		self.clusterstore:call("eval", redis_script, 2, counter_key, ban_key, count_time, threshold, ban_time)
+	local counter, err = self.clusterstore:call("eval", redis_script, 1, counter_key, count_time)
 	if not counter then
 		self.clusterstore:close()
 		return false, err

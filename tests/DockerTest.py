@@ -47,6 +47,8 @@ class DockerTest(Test):
                 r"bunkerity/bunkerweb-scheduler:.*$",
                 "local/scheduler-tests:latest",
             )
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb-api:.*$", "local/api-tests:latest")
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb-worker:.*$", "local/worker-tests:latest")
             Test.replace_in_file(compose, r"\./bw\-data:/", "/tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")

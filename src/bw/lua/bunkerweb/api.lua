@@ -375,6 +375,13 @@ api.global.POST["^/unban$"] = function(self)
 
 	local ban_scope = ip["ban_scope"] or "global"
 	local service = ip["service"]
+	local not_after
+	if self.ctx.bw.remote_addr == "unix:" and ip["not_after"] ~= nil then
+		not_after = ip["not_after"]
+		if type(not_after) ~= "number" or not_after <= 0 or not_after ~= not_after or not_after == math.huge then
+			return self:response(HTTP_BAD_REQUEST, "error", "not_after must be a finite positive number")
+		end
+	end
 	local response_msg = "ip " .. ip["ip"] .. " unbanned"
 
 	-- Validate ban scope
@@ -395,7 +402,7 @@ api.global.POST["^/unban$"] = function(self)
 	end
 
 	-- Use utils.remove_ban to remove the ban(s)
-	local ok, err = utils.remove_ban(ip["ip"], service, ban_scope)
+	local ok, err = utils.remove_ban(ip["ip"], service, ban_scope, not_after)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "failed to remove ban: " .. err)
 	end
@@ -421,6 +428,13 @@ api.global.POST["^/ban$"] = function(self)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
+	local not_after
+	if self.ctx.bw.remote_addr == "unix:" and ip["not_after"] ~= nil then
+		not_after = ip["not_after"]
+		if type(not_after) ~= "number" or not_after <= 0 or not_after ~= not_after or not_after == math.huge then
+			return self:response(HTTP_BAD_REQUEST, "error", "not_after must be a finite positive number")
+		end
+	end
 	local ban = {
 		ip = "",
 		exp = 86400,
@@ -428,6 +442,7 @@ api.global.POST["^/ban$"] = function(self)
 		service = "unknown",
 		country = "local",
 		ban_scope = "global", -- Default to global for consistency
+		reason_data = {},
 	}
 
 	-- Copy values from request
@@ -443,6 +458,9 @@ api.global.POST["^/ban$"] = function(self)
 	end
 	if ip["ban_scope"] then
 		ban.ban_scope = ip["ban_scope"]
+	end
+	if type(ip["reason_data"]) == "table" then
+		ban.reason_data = ip["reason_data"]
 	end
 
 	-- Validate IP address
@@ -463,7 +481,7 @@ api.global.POST["^/ban$"] = function(self)
 
 	-- Validate service name for service-specific bans
 	if ban.ban_scope == "service" then
-		if RESERVED_SERVICE_NAMES[ban.service] then
+		if not ban.service or RESERVED_SERVICE_NAMES[ban.service] then
 			logger:log(ERR, "Invalid service name: " .. ban.service .. ", defaulting to global ban")
 			ban.ban_scope = "global"
 			ban.service = "unknown"
@@ -478,7 +496,8 @@ api.global.POST["^/ban$"] = function(self)
 	ban.country = country
 
 	-- Use utils.add_ban to ensure ban is applied to datastore and Redis
-	local ok, err = utils.add_ban(ban.ip, ban.reason, ban.exp, ban.service, ban.country, ban.ban_scope)
+	local ok, err =
+		utils.add_ban(ban.ip, ban.reason, ban.exp, ban.service, ban.country, ban.ban_scope, ban.reason_data, not_after)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "failed to add ban: " .. err)
 	end
@@ -490,94 +509,69 @@ api.global.POST["^/ban$"] = function(self)
 end
 
 api.global.GET["^/bans$"] = function(self)
-	local data = {}
-	-- Get system-wide bans
-	for _, k in ipairs(datastore:keys()) do
-		if k:find("^bans_ip_") then
-			local result, err = datastore:get(k)
-			if err then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access " .. k .. " from datastore : " .. result
-				)
-			end
-			local ok, ttl = datastore:ttl(k)
-			if not ok then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access ttl " .. k .. " from datastore : " .. ttl
-				)
-			end
-			local ban_data
-			ok, ban_data = pcall(decode, result)
-			if not ok then
-				ban_data = { reason = result, service = "unknown", date = 0, ban_scope = "global" }
-			end
+	local status, response = utils.with_ban_snapshot_lock(function()
+		local snapshot_time = os.time()
+		-- Every coherent read receives a new epoch. This also orders snapshots
+		-- whose local Redis cache changed through expiry or lazy refresh.
+		local generation_epoch, epoch_err = utils.next_ban_snapshot_epoch()
+		if generation_epoch == nil then
+			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", epoch_err)
+		end
 
-			-- Check for permanent ban flag and override TTL if set
-			if ban_data["permanent"] then
-				ttl = 0
-			end
+		local data = {}
+		for _, key in ipairs(datastore:keys()) do
+			local service, ip = key:match("^bans_service_(.-)_ip_(.+)$")
+			local scope = service and "service" or "global"
+			ip = ip or key:match("^bans_ip_(.+)$")
+			if ip then
+				local result, err = datastore:get(key)
+				if result then
+					local ttl_ok, ttl = datastore:ttl(key)
+					if not ttl_ok then
+						return self:response(
+							HTTP_INTERNAL_SERVER_ERROR,
+							"error",
+							"can't access ttl " .. key .. " : " .. ttl
+						)
+					end
+					local decoded, ban_data = pcall(decode, result)
+					if not decoded or type(ban_data) ~= "table" then
+						ban_data = { reason = result, service = service or "unknown", date = 0 }
+					end
 
-			table.insert(data, {
-				ip = k:sub(9, #k),
-				reason = ban_data["reason"],
-				service = ban_data["service"],
-				date = ban_data["date"],
-				country = ban_data["country"],
-				ban_scope = ban_data["ban_scope"] or "global",
-				exp = math.floor(ttl),
-				permanent = ban_data["permanent"] or false,
-			})
-		elseif k:find("^bans_service_") then
-			-- Service-specific ban (format: bans_service_<servicename>_ip_<ipaddress>)
-			local result, err = datastore:get(k)
-			if err then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access " .. k .. " from datastore : " .. result
-				)
-			end
-			local ok, ttl = datastore:ttl(k)
-			if not ok then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access ttl " .. k .. " from datastore : " .. ttl
-				)
-			end
-
-			-- Extract service and IP from the key
-			local service, ip = k:match("^bans_service_(.-)_ip_(.+)$")
-			if service and ip then
-				local ban_data
-				ok, ban_data = pcall(decode, result)
-				if not ok then
-					ban_data = { reason = result, service = service, date = 0, ban_scope = "service" }
+					local permanent = ban_data.permanent == true
+					local expires_at = 0
+					if not permanent then
+						expires_at = tonumber(ban_data.expires_at) or (snapshot_time + math.floor(ttl))
+					end
+					if permanent or (ttl > 0 and expires_at > snapshot_time) then
+						table.insert(data, {
+							ip = ip,
+							reason = ban_data.reason,
+							service = service or ban_data.service,
+							date = ban_data.date,
+							country = ban_data.country,
+							ban_scope = scope,
+							exp = permanent and 0 or math.max(math.floor(expires_at - snapshot_time), 0),
+							expires_at = expires_at,
+							permanent = permanent,
+							reason_data = type(ban_data.reason_data) == "table" and ban_data.reason_data or {},
+						})
+					end
+				elseif err ~= "not found" then
+					return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't access " .. key .. " : " .. err)
 				end
-
-				-- Check for permanent ban flag and override TTL if set
-				if ban_data["permanent"] then
-					ttl = 0
-				end
-
-				table.insert(data, {
-					ip = ip,
-					reason = ban_data["reason"],
-					service = service,
-					date = ban_data["date"],
-					country = ban_data["country"],
-					ban_scope = "service",
-					exp = math.floor(ttl),
-					permanent = ban_data["permanent"] or false,
-				})
 			end
 		end
+		local snapshot_status, snapshot_response = self:response(HTTP_OK, "success", data)
+		snapshot_response.generation_epoch = generation_epoch
+		snapshot_response.snapshot_time = snapshot_time
+		return snapshot_status, snapshot_response
+	end)
+	if not status then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", response)
 	end
-	return self:response(HTTP_OK, "success", data)
+	return status, response
 end
 
 api.global.GET["^/variables$"] = function(self)
@@ -809,6 +803,11 @@ api.global.GET["^/proxy%-cache/status$"] = function(self)
 end
 
 function api:is_allowed_ip()
+	-- The internal API socket is already confined to /var/run/bunkerweb and
+	-- still passes the server-level Host and bearer-token checks.
+	if self.ctx.bw.remote_addr == "unix:" then
+		return true, "ok"
+	end
 	if is_ip_in_networks(self.ctx.bw.remote_addr, self.ips) then
 		return true, "ok"
 	end

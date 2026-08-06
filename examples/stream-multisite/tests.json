@@ -1,0 +1,11 @@
+{
+  "name": "stream-multisite",
+  "kinds": ["docker"],
+  "timeout": 480,
+  "tests": [
+    {
+      "type": "script",
+      "script": ["python3", "stream_test.py"]
+    }
+  ]
+}
