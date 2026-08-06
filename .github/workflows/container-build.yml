@@ -153,7 +153,7 @@ jobs:
       - name: Upload Trivy SARIF report
         if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
         continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
-        uses: github/codeql-action/upload-sarif@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4.37.4
+        uses: github/codeql-action/upload-sarif@d1ba80a13dd99fba24a470575428917156a28b43 # v4.37.5
         with:
           sarif_file: trivy-results.sarif
           category: trivy-${{ inputs.IMAGE }}-${{ inputs.ARCH }}
