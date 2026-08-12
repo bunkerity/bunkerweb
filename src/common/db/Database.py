@@ -4067,7 +4067,6 @@ class Database:
 
                             if updates:
                                 changes = True
-                                updates[Jobs.last_run] = None
                                 session.query(Jobs_runs).filter(Jobs_runs.job_name == job["name"]).delete()
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
