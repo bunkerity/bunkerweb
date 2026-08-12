@@ -2,13 +2,14 @@ from contextlib import suppress
 from dataclasses import dataclass
 from json import loads
 from operator import itemgetter
-from os import readlink, symlink, walk
+from os import environ, readlink, symlink, walk
 from pathlib import Path
 from shutil import copy2, copyfileobj, copystat, copytree, rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, TimeoutExpired, run
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Set, Tuple
 
+from letsencrypt_consistency import detect_orphan_renewals, usable_accounts_for_server
 from letsencrypt_utils import (
     LETSENCRYPT_PRODUCTION_DIRECTORY,
     LETSENCRYPT_STAGING_DIRECTORY,
@@ -331,6 +332,74 @@ def ensure_accounts(
                 logger.info(f"Let's Encrypt account already exists (staging={staging}, email={'set' if email else 'empty'}), skipping registration.")
                 continue
             logger.error(f"Failed to register Let's Encrypt account (staging={staging}, email={'set' if email else 'empty'}):\n{proc.stdout}")
+
+
+def _configured_letsencrypt_email() -> str:
+    """Contact address to register a recovery account with: the global setting, else any service's."""
+    email = environ.get("EMAIL_LETS_ENCRYPT", "").strip()
+    if email:
+        return email
+    for key, value in environ.items():
+        if key.endswith("_EMAIL_LETS_ENCRYPT") and value.strip():
+            return value.strip()
+    return ""
+
+
+def ensure_accounts_for_orphans(
+    data_path: Path,
+    cmd_env: Dict[str, str],
+    certbot_bin: str,
+    log_level: str,
+    work_dir: str,
+    logs_dir: str,
+    logger,
+) -> None:
+    """Register an account for any CA that orphaned renewal confs name and that has none left.
+
+    Purging an account the CA no longer recognises strands every renewal conf naming it.
+    repoint_orphan_renewals moves those confs onto a surviving account, but when the purged one was
+    the last for that CA there is nothing to move them to, and nothing else registers one: issuance
+    only registers as a side effect of `certbot certonly`, which never runs while every certificate
+    already exists. Without this the tree stays orphaned forever and every renewal keeps failing
+    AccountNotFound. Call it before the repoint so both happen in the same run.
+    """
+    servers = {orphan["server"] for orphan in detect_orphan_renewals(data_path) if orphan["server"]}
+    if not servers:
+        return
+
+    email = _configured_letsencrypt_email()
+    requests: Set[Tuple[bool, str]] = set()
+    attempted: List[str] = []
+    for server in sorted(servers):
+        if usable_accounts_for_server(data_path, server):
+            continue
+        if server == LETSENCRYPT_PRODUCTION_DIRECTORY:
+            requests.add((False, email))
+            attempted.append(server)
+        elif server == LETSENCRYPT_STAGING_DIRECTORY:
+            requests.add((True, email))
+            attempted.append(server)
+        else:
+            # ZeroSSL needs EAB credentials derived from a per-service API key, which the renew job
+            # never builds, so it cannot be registered from here.
+            logger.error(
+                f"Renewal conf(s) reference a missing ACME account for {server} and no usable account is left for it. "
+                "Automatic registration only covers Let's Encrypt; re-issue those certificates to recover."
+            )
+
+    if not requests:
+        return
+
+    logger.warning(f"No usable ACME account left for {len(requests)} Let's Encrypt endpoint(s) named by orphaned renewal conf(s); registering one.")
+    ensure_accounts(requests, cmd_env, certbot_bin, log_level, data_path, work_dir, logs_dir, logger)
+
+    # ponytail: ensure_accounts skips when _account_exists, which only requires regr.json, while
+    # usable_accounts_for_server requires all three files certbot opens. An account directory that
+    # kept regr.json but lost private_key.json or meta.json therefore blocks its own replacement.
+    # Report it rather than deleting a directory we might be misreading; revisit if it shows up.
+    for server in attempted:
+        if not usable_accounts_for_server(data_path, server):
+            logger.error(f"Still no loadable ACME account for {server} after registration; check accounts/ for a partially written account directory.")
 
 
 def ensure_zerossl_accounts(

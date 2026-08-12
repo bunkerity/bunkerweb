@@ -211,6 +211,59 @@ def _usable_accounts_under(accounts_root: Path, subpath: str) -> List[Path]:
     return [entry[2] for entry in sorted(usable, reverse=True)]
 
 
+def quarantine_account(account_dir: Path, logger=None) -> bool:
+    """Move a dead ACME account out of accounts/, keeping it recoverable.
+
+    The account this is called on has been refused by its certificate authority, so its key can no
+    longer sign anything. Move it rather than delete it anyway: it is key material, the only thing
+    that could ever revoke a certificate issued under that account, and if the rejection was ever
+    misread it is the difference between a recoverable mistake and an unrecoverable one. The
+    quarantine reaps itself after 30 days, same as broken lineages.
+    """
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    dest = QUARANTINE_ROOT.joinpath(f"{stamp}-account-{account_dir.name}")
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        move(account_dir.as_posix(), dest.as_posix())
+    except OSError as e:
+        if logger is not None:
+            logger.error(f"Failed to quarantine ACME account {account_dir.name}, removing it instead: {e}")
+        with suppress(OSError):
+            rmtree(account_dir, ignore_errors=True)
+        return True
+    if logger is not None:
+        logger.info(f"Moved the refused ACME account {account_dir.name} to {dest}; it is deleted automatically after 30 days.")
+    return True
+
+
+def usable_accounts_for_server(data_path: Path, server_url: str) -> List[Path]:
+    """Account dirs certbot could load for `server_url`, newest registration first.
+
+    Scoped to the CA the caller names, plus certbot's own v1 reuse fallback, so a production
+    account is never offered for a staging lineage or vice versa. An empty list means that CA has
+    no account left: the repoint has nothing to aim at and one has to be registered first.
+    """
+    subpath = _server_subpath(server_url)
+    if not subpath:
+        return []
+    accounts_root = data_path.joinpath("accounts")
+    candidates = _usable_accounts_under(accounts_root, subpath)
+    if not candidates:
+        fallback = _LE_REUSE_SERVER_PATHS.get(subpath)
+        if fallback:
+            candidates = _usable_accounts_under(accounts_root, fallback)
+    return candidates
+
+
+def _searched_subpaths(server_url: str) -> List[str]:
+    """The accounts/ subpaths usable_accounts_for_server looks under, for logging."""
+    subpath = _server_subpath(server_url)
+    if not subpath:
+        return []
+    fallback = _LE_REUSE_SERVER_PATHS.get(subpath)
+    return [subpath, fallback] if fallback else [subpath]
+
+
 def _rewrite_account_reference(conf: Path, old_account: str, new_account: str) -> bool:
     """Swap the `account` line of a renewal conf, preserving mode. Returns True if rewritten."""
     try:
@@ -259,15 +312,14 @@ def repoint_orphan_renewals(data_path: Path, logger=None) -> List[str]:
     no `server` is left alone rather than guessed at. Returns the cert names rewritten.
     """
     renewal_dir = data_path.joinpath("renewal")
-    accounts_root = data_path.joinpath("accounts")
     repointed: List[str] = []
 
     for orphan in detect_orphan_renewals(data_path):
         cert_name, missing_account, server = orphan["cert_name"], orphan["account"], orphan["server"]
         conf = renewal_dir.joinpath(f"{cert_name}.conf")
 
-        subpath = _server_subpath(server)
-        if not subpath:
+        searched = _searched_subpaths(server)
+        if not searched:
             if logger is not None:
                 logger.warning(
                     f"Renewal conf '{cert_name}' references missing ACME account {missing_account} but names no server; "
@@ -275,12 +327,7 @@ def repoint_orphan_renewals(data_path: Path, logger=None) -> List[str]:
                 )
             continue
 
-        searched = [subpath]
-        candidates = _usable_accounts_under(accounts_root, subpath)
-        fallback = _LE_REUSE_SERVER_PATHS.get(subpath)
-        if not candidates and fallback:
-            searched.append(fallback)
-            candidates = _usable_accounts_under(accounts_root, fallback)
+        candidates = usable_accounts_for_server(data_path, server)
 
         if not candidates:
             if logger is not None:
@@ -651,5 +698,62 @@ if __name__ == "__main__":
         assert renewal.joinpath("good.conf").exists(), "purge_lineage destroyed a healthy conf via '..'"
         assert root.joinpath("live", "good", "fullchain.pem").exists()
         assert not evil.exists(), "the malicious conf itself should still be removed"
+
+    # Repoint: a conf naming a deleted account moves onto a surviving one for the same CA, and a
+    # conf whose CA has no account left is reported but does not block the ones that can move.
+    # The partial case is the regression that matters: withholding the write because of the conf
+    # that cannot move used to discard the repair of every conf that could.
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp, "etc")
+        renewal = root.joinpath("renewal")
+        renewal.mkdir(parents=True, exist_ok=True)
+        prod = "acme-v02.api.letsencrypt.org/directory"
+
+        def _write_account_conf(stem: str, account: str, server: str) -> None:
+            _write_conf(renewal, stem, stem, root)
+            _make_material(root, stem)
+            conf = renewal.joinpath(f"{stem}.conf")
+            conf.write_text(conf.read_text(encoding="utf-8").replace("account = deadbeef", f"account = {account}\nserver = {server}"), encoding="utf-8")
+
+        def _make_account(subpath: str, account_id: str, complete: bool = True) -> None:
+            account_dir = root.joinpath("accounts", *subpath.split("/"), account_id)
+            account_dir.mkdir(parents=True, exist_ok=True)
+            names = _ACCOUNT_REQUIRED_FILES if complete else ("regr.json",)
+            for name in names:
+                account_dir.joinpath(name).write_text("{}", encoding="utf-8")
+
+        _write_account_conf("movable.example.org", "gone", f"https://{prod}")
+        _write_account_conf("stranded.example.org", "gone", "https://acme.zerossl.com/v2/DV90")
+        _make_account(prod, "alive")
+
+        assert [a.name for a in usable_accounts_for_server(root, f"https://{prod}")] == ["alive"]
+        assert not usable_accounts_for_server(root, "https://acme.zerossl.com/v2/DV90")
+        assert not usable_accounts_for_server(root, "")
+
+        repointed = repoint_orphan_renewals(root, logger=None)
+        assert repointed == ["movable.example.org"], repointed
+        assert "account = alive" in renewal.joinpath("movable.example.org.conf").read_text(encoding="utf-8")
+        assert "account = gone" in renewal.joinpath("stranded.example.org.conf").read_text(encoding="utf-8")
+        # The tree is still inconsistent overall because of the ZeroSSL conf, yet the repair of the
+        # Let's Encrypt one is real and must be persisted by the caller rather than thrown away.
+        assert not letsencrypt_cache_consistent(root)[0]
+
+        # An account directory that kept regr.json but lost the other two is not a repoint target:
+        # certbot raises AccountStorageError on it, so offering it would swap one failure for another.
+        _make_account("acme-staging-v02.api.letsencrypt.org/directory", "halfwritten", complete=False)
+        assert not usable_accounts_for_server(root, "https://acme-staging-v02.api.letsencrypt.org/directory")
+
+        # Retiring a refused account keeps its key recoverable instead of destroying it, and takes
+        # it out of accounts/ so the repoint stops offering it.
+        original_quarantine, QUARANTINE_ROOT = QUARANTINE_ROOT, Path(tmp, "quarantine-accounts")
+        try:
+            alive_dir = root.joinpath("accounts", *prod.split("/"), "alive")
+            assert quarantine_account(alive_dir, logger=None)
+            assert not alive_dir.exists(), "the refused account must leave accounts/"
+            moved = list(QUARANTINE_ROOT.glob("*-account-alive/regr.json"))
+            assert moved, f"the account key must survive in quarantine, found {list(QUARANTINE_ROOT.rglob('*'))}"
+            assert not usable_accounts_for_server(root, f"https://{prod}")
+        finally:
+            QUARANTINE_ROOT = original_quarantine
 
     print("letsencrypt_consistency self-check passed")

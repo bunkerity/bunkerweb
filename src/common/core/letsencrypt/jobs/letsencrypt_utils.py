@@ -22,7 +22,7 @@ from os import (
 )
 from os.path import join
 from pathlib import Path
-from re import match as re_match
+from re import match as re_match, search as re_search
 from subprocess import TimeoutExpired
 from threading import Thread
 from traceback import format_exc
@@ -143,12 +143,20 @@ def extract_provider(
         if not env_value or not env_key.startswith(credential_key):
             continue
 
-        if " " not in env_value:
+        # Split on any run of whitespace, not a single literal space, and normalise the key. A
+        # leading space made the key empty and surrounding quotes made it unmatchable; either way
+        # the item was dropped by the model's extra="ignore" and the only report was a validation
+        # error with no field name. A value with no whitespace at all is still a JSON/base64 blob,
+        # which is why the split result is what decides, not the presence of a separator.
+        parts = env_value.strip().split(None, 1)
+        if len(parts) < 2:
             credential_items["json_data"] = env_value
             continue
 
-        key, value = env_value.split(" ", 1)
-        credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+        key, value = parts
+        # `key = value` and `key =value` both reach here with the `=` leading the value.
+        value = value.strip().removeprefix("=")
+        credential_items[key.strip("\"' \t").lower()] = value.replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
 
     # Handle JSON data
     if "json_data" in credential_items:
@@ -533,6 +541,112 @@ def stream_certbot(process, logger_certbot, timeout: float, on_line: Optional[Ca
     return not timed_out
 
 
+STALE_ACCOUNT_MARKERS = ("validate JWS", "acme/acct")
+
+
+def is_stale_account_line(line: str) -> bool:
+    """True when the CA refuses the account itself, so retrying with it can never succeed.
+
+    Two different rejections mean the same thing for us, and they read nothing alike:
+
+        Unable to validate JWS :: Account "https://.../acme/acct/123" not found
+        Unable to validate JWS :: Account is not valid, has status "deactivated"
+
+    Only the first was matched before, so a deactivated account was retried forever. Note that
+    certbot's own `Account at <path> does not exist` is deliberately NOT matched here: that one is
+    a local directory that went missing, which repoint_orphan_renewals repairs without touching
+    the CA, and treating it as a rejection would delete an account the CA still considers valid.
+    """
+    if "Account" not in line or not any(marker in line for marker in STALE_ACCOUNT_MARKERS):
+        return False
+    return "not found" in line or "is not valid" in line
+
+
+def stale_account_uri(line: str) -> str:
+    """The ACME account URI a stale-account rejection names, or an empty string.
+
+    Only the "not found" phrasing carries one; the deactivated phrasing names no account at all,
+    which is why failed_renewal_cert exists as the other way to identify the offender.
+    """
+    match = re_search(r"https?://\S*?/acme/acct/[A-Za-z0-9_-]+", line)
+    return match.group(0) if match else ""
+
+
+def failed_renewal_cert(line: str) -> str:
+    """The lineage named by certbot's per-certificate renewal failure line, or an empty string.
+
+    `certbot renew` reports the lineage and the reason on one line, which is the only reliable way
+    to tell which account a rejection carrying no URI belongs to.
+    """
+    match = re_search(r"Failed to renew certificate (\S+) with error:", line)
+    return match.group(1) if match else ""
+
+
+def account_id_for_cert(data_path: Path, cert_name: str) -> str:
+    """The account id a renewal conf names, or an empty string."""
+    conf = data_path.joinpath("renewal", f"{cert_name}.conf")
+    with suppress(OSError):
+        for line in conf.read_text(encoding="utf-8", errors="replace").splitlines():
+            key, sep_char, value = line.partition("=")
+            if sep_char and key.strip() == "account":
+                account_id = value.strip()
+                return "" if account_id == "None" else account_id
+    return ""
+
+
+def purge_stale_account(data_path: Path, account_id: str, logger) -> bool:
+    """Remove the on-disk ACME account dir whose server-side record was pruned.
+
+    Walks for `<account_id>/regr.json` under accounts/ (CA-agnostic: LE 2-level, ZeroSSL 3-level)
+    and retires its parent. Best-effort: failures are logged, not raised, so a retry still runs.
+
+    Certbot records the account id in every renewal conf it writes and nothing rewrites those here,
+    so removing the directory strands each conf naming it. ensure_accounts_for_orphans registers a
+    replacement and repoint_orphan_renewals moves the confs onto it, both at the start of the next
+    job run. Name the stranded confs here anyway, or the cause and the symptom surface in different
+    runs and read as unrelated problems.
+    """
+    accounts_root = data_path.joinpath("accounts")
+    if not account_id or not accounts_root.is_dir():
+        return False
+    purged = False
+    try:
+        for regr in accounts_root.rglob("regr.json"):
+            if regr.parent.name == account_id:
+                logger.warning(f"Retiring ACME account {account_id} (the certificate authority no longer accepts it) so the next attempt re-registers.")
+                quarantine_account(regr.parent, logger)
+                purged = True
+                stranded = sorted(orphan["cert_name"] for orphan in detect_orphan_renewals(data_path) if orphan["account"] == account_id)
+                if stranded:
+                    logger.warning(
+                        f"Renewal conf(s) {stranded} still reference ACME account {account_id}; they will be repointed at "
+                        "the replacement account on the next Let's Encrypt job run."
+                    )
+    except OSError as e:
+        logger.error(f"Failed to purge stale account {account_id}: {e}")
+    return purged
+
+
+def purge_stale_account_by_uri(data_path: Path, account_uri: str, logger) -> bool:
+    """Purge the account whose regr.json records `account_uri`.
+
+    The renew job runs certbot over every lineage at once and pins no `--account`, so the local id
+    is not known up front. Certbot stores the account URI the CA assigned in regr.json
+    (`{"body": {}, "uri": ...}`), which is exactly what the rejection names, so the two can be
+    matched without guessing.
+    """
+    accounts_root = data_path.joinpath("accounts")
+    if not account_uri or not accounts_root.is_dir():
+        return False
+    with suppress(OSError):
+        for regr in accounts_root.rglob("regr.json"):
+            with suppress(OSError, ValueError):
+                if json_loads(regr.read_text(encoding="utf-8")).get("uri") == account_uri:
+                    return purge_stale_account(data_path, regr.parent.name, logger)
+    logger.error(f"CA rejected ACME account {account_uri} but no local account records that URI; cannot purge it automatically.")
+    return False
+
+
 def get_expected_acme_directory(server: str, staging: bool) -> str:
     if server == "zerossl":
         return ZEROSSL_DIRECTORY
@@ -551,6 +665,7 @@ from letsencrypt_consistency import (  # noqa: E402,F401
     le_cache_write_lock,
     letsencrypt_cache_consistent,
     purge_lineage,
+    quarantine_account,
     repoint_orphan_renewals,
     sanitize_le_cache,
 )
@@ -592,16 +707,11 @@ def sanitize_and_persist(job, data_path: Path, logger) -> List[str]:
     before = _le_cache_checksum(job, file_name)
     repointed = repoint_orphan_renewals(data_path, logger)
     names = sanitize_le_cache(data_path, logger)
-    # A repoint that only half-succeeded (some confs moved, others with no account to move to) is
-    # not worth a write on its own, so check before persisting for that reason alone. Deliberately
-    # not applied when a lineage was quarantined: that write has to happen regardless, or the
-    # quarantine does not survive the next restore and the same lineage is quarantined again every
-    # run, accumulating a timestamped copy each time.
-    if repointed and not names:
-        consistent, reason = letsencrypt_cache_consistent(data_path)
-        if not consistent:
-            logger.error(f"Repointed {len(repointed)} renewal conf(s) but the tree is still inconsistent ({reason}); not persisting yet.")
-            return names
+    # A partial repair is persisted even when the tree is still inconsistent overall. A repoint only
+    # ever rewrites `account` to an id that exists, so it cannot add an orphan: the result is
+    # strictly closer to consistent than the row it replaces. Withholding the write instead threw
+    # away every conf that was repaired because of one that could not be, and since the whole tree
+    # is one blob restored on each job start, that repair was redone and discarded on every run.
     if (names or repointed) and getattr(job, "restore_ok", False):
         try:
             with le_cache_write_lock():
