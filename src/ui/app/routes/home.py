@@ -101,11 +101,10 @@ def home_page():
     except (ApiClientError, ApiUnavailableError):
         jobs = {}
 
-    # "Bans active" mini-tile -- a light per-instance count (BW_INSTANCES_UTILS.get_bans(),
-    # already deduplicated), not the heavier Redis-backed aggregation the bans dashboard
-    # itself uses (that stays in routes/bans.py).
+    # "Bans active" mini-tile -- the durable count from the database, so it does not drop to zero
+    # after an instance restart the way the old per-instance tally did.
     try:
-        bans_active = len(BW_INSTANCES_UTILS.get_bans())
+        bans_active = len(API_CLIENT.get_bans())
     except Exception:
         bans_active = 0
 

@@ -400,9 +400,10 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `DELETE /configs` or `DELETE /configs/{service}/{type}/{name}`: remove API-managed snippets; template-managed entries are skipped.
   - Supported types: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/plugin hooks.
 - **Bans**
-  - `GET /bans`: aggregate active bans from instances.
-  - `POST /bans` or `/bans/ban`: apply one or more bans; payload can be object, array, or stringified JSON.
-  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service.
+  - `GET /bans`: list the active bans from the database (the durable list). **Changed in 1.7** — this used to aggregate the instances' in-memory bans, which under-reports after a restart.
+  - `GET /bans/instances`: the previous behaviour, kept as its own endpoint — what each instance is enforcing right now.
+  - `POST /bans` or `/bans/ban`: apply one or more bans; payload can be object, array, or stringified JSON. The ban is persisted, then sent to the instances.
+  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service. A revoke that cannot be persisted is refused, because an instance that missed it would otherwise re-teach the ban to the fleet.
 - **Plugins (UI plugins)**
   - `GET /plugins`: list plugins; `with_data=true` includes packaged bytes when available.
   - `POST /plugins/upload`: install UI plugins from `.zip`, `.tar.gz`, `.tar.xz`.

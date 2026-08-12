@@ -91,9 +91,10 @@ class BanRequest(BaseModel):
     @field_validator("ip")
     @classmethod
     def validate_ip(cls, v):
-        v = v.strip()
-        ip_address(v)  # Raises ValueError for invalid IPs
-        return v
+        # Normalize, don't just validate: the runtime keys its bans on nginx's $remote_addr, which
+        # is always the compressed form. Storing "2001:0DB8::1" verbatim would create a ban that can
+        # never match the request it was meant to block.
+        return str(ip_address(v.strip()))  # Raises ValueError for invalid IPs
 
     @field_validator("exp")
     @classmethod
@@ -110,9 +111,10 @@ class UnbanRequest(BaseModel):
     @field_validator("ip")
     @classmethod
     def validate_ip(cls, v):
-        v = v.strip()
-        ip_address(v)  # Raises ValueError for invalid IPs
-        return v
+        # Normalize, don't just validate: the runtime keys its bans on nginx's $remote_addr, which
+        # is always the compressed form. Storing "2001:0DB8::1" verbatim would create a ban that can
+        # never match the request it was meant to block.
+        return str(ip_address(v.strip()))  # Raises ValueError for invalid IPs
 
 
 # Instances

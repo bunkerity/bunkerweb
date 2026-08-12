@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Mga IP address na binuwag sa iyong mga instance ng BunkerWeb — idagdag, alisin, o ayusin ang tagal ng pagbabawal.",
     "stats": {
-      "alert": {
-        "body_after": "ay naka-enable.",
-        "body_before": "Nawawalan ng bisa ang mga ban dito kapag nag-restart ang instance maliban kung",
-        "title": "Mga pagbabagong hindi permanenteng na-save."
-      },
       "card": {
         "by_reason": "Mga ban ayon sa dahilan"
       },

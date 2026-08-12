@@ -463,7 +463,9 @@ def test_the_baseline_settings_are_declared():
     plugin = json.loads(PLUGIN_JSON.read_text(encoding="utf-8"))
     rate = plugin["settings"]["METRICS_BASELINE_SAMPLE_RATE"]
     assert rate["context"] == "global"
-    assert rate["default"] == "0", "must ship disabled: there is no consumer yet and the volume is large"
+    # Ships enabled at 1% so the per-service baseline is already populated when the anomaly
+    # detection that consumes it lands; 0 stays available for operators who do not want it.
+    assert rate["default"] == "1"
     # 0-100 only; a typo'd 1000 would sample everything.
     assert re.fullmatch(rate["regex"], "100") and re.fullmatch(rate["regex"], "0")
     assert not re.fullmatch(rate["regex"], "101") and not re.fullmatch(rate["regex"], "1000")

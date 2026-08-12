@@ -382,6 +382,50 @@ class Baseline(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class Bans(Base):
+    """Durable ban records — the source of truth for the ban lifecycle.
+
+    Each instance's ``datastore`` shared dict stays the local enforcement cache and Redis stays an
+    optional distributed projection; neither is authoritative. The ``sync-bans`` job learns from
+    both, writes here, and projects back.
+
+    ``expires_at`` is an absolute instant, never a TTL. ``GET /bans`` reports ``exp = 0`` both for a
+    permanent ban and for one less than a second from expiry (``ngx.shared:ttl()`` cannot tell them
+    apart), while ``POST /ban`` reads ``exp = 0`` as permanent — so a stored TTL would silently
+    promote an almost-expired ban to a permanent one on the next projection.
+
+    Revocation keeps the row and stamps ``revoked_at``. That tombstone is what stops an instance
+    which missed a ``POST /unban`` (its API path was down while NGINX kept serving) from re-teaching
+    the ban on its next scrape.
+    """
+
+    __tablename__ = "bw_bans"
+    __table_args__ = (
+        UniqueConstraint("ip", "ban_scope", "service_id", name="uq_bw_bans_ip_scope_service"),
+        Index("ix_bw_bans_active", "revoked_at", "expires_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    # Normalized through str(ip_address(x)) so it matches the compressed form nginx's $remote_addr
+    # produces — the runtime builds its shm key from that, and an uncompressed "2001:0DB8::1" would
+    # never match.
+    ip: Mapped[str] = mapped_column(String(39), nullable=False, index=True)
+    ban_scope: Mapped[str] = mapped_column(String(8), nullable=False, default="global")
+    # "" for a global ban, never NULL: every supported engine treats NULLs as distinct inside a
+    # UNIQUE constraint, so a nullable column would let one IP hold several global bans. No FK
+    # either — a ban outlives the service it was scoped to.
+    service_id: Mapped[str] = mapped_column(String(256), nullable=False, default="")
+    origin: Mapped[str] = mapped_column(String(64), nullable=False, default="api")
+    reason: Mapped[str] = mapped_column(String(256), nullable=False, default="")
+    reason_data: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    country: Mapped[str] = mapped_column(String(16), nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_by: Mapped[str] = mapped_column(String(256), nullable=False, default="")
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    revoked_by: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+
+
 class Custom_configs(Base):
     __tablename__ = "bw_custom_configs"
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)

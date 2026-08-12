@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Blockierte IP-Adressen für Ihre BunkerWeb-Instanzen — hinzufügen, entfernen oder die Sperrdauer anpassen.",
     "stats": {
-      "alert": {
-        "body_after": "ist aktiviert.",
-        "body_before": "Hier erstellte Sperren verfallen beim Neustart der Instanz, sofern nicht",
-        "title": "Nicht dauerhaft gespeicherte Änderungen."
-      },
       "card": {
         "by_reason": "Sperren nach Grund"
       },

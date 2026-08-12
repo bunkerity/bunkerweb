@@ -1473,7 +1473,13 @@ max_allowed_packet = 64M
 
 ## Persistence of bans and reports {#persistence-of-bans-and-reports}
 
-By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote [Redis](https://redis.io/) or [Valkey](https://valkey.io/) server.
+**Bans are stored in the database.** Every ban and unban — from the web UI, the API, `bwcli` or an automatic decision such as bad behavior — is written to the `bw_bans` table before it is sent to the instances. A background job (`sync-bans`, once a minute) reconciles the fleet with that table: it learns bans it does not know about yet, restores bans to an instance whose shared memory was emptied by a restart, and replays an unban to an instance that was unreachable when the operator issued it. Each instance's Lua datastore is a local enforcement cache, and Redis/Valkey is an optional distributed projection; neither is the source of truth.
+
+!!! warning "Durable, not unlimited"
+
+    The database makes bans survive a restart — it does not raise how many bans an instance can enforce. Enforcement still reads the `datastore` shared memory zone (64 MB by default, shared with every other plugin's state), which fits roughly 100,000 bans. Raise `DATASTORE_MEMORY_SIZE` if you expect more, otherwise the instance stops accepting new entries once the zone is full.
+
+Reports also live in the database when `METRICS_PERSIST_TO_DB` is enabled. Independently of both, you can configure BunkerWeb to use a remote [Redis](https://redis.io/) or [Valkey](https://valkey.io/) server, which lets several instances share ban state (and cache data) without waiting for the next reconciliation pass.
 
 **Why Use Redis/Valkey?**
 

@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "跨您所有 BunkerWeb 實例的封鎖 IP 位址 — 建立、移除或調整封鎖期限。",
     "stats": {
-      "alert": {
-        "body_after": "已啟用。",
-        "body_before": "除非另有設定，否則在此建立的封鎖會於執行個體重新啟動時失效",
-        "title": "未持久儲存的編輯。"
-      },
       "card": {
         "by_reason": "依原因統計封鎖"
       },

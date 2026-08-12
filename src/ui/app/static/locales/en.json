@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Banned IP addresses across your BunkerWeb instances — add, remove, or adjust ban durations.",
     "stats": {
-      "alert": {
-        "body_after": "is enabled.",
-        "body_before": "Bans made here expire on instance restart unless",
-        "title": "Non-persisted edits."
-      },
       "card": {
         "by_reason": "Bans by reason"
       },

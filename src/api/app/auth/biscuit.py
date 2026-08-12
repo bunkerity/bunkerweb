@@ -38,6 +38,7 @@ def _resolve_bans(path_normalized: str, method_u: str) -> tuple[Optional[str], O
 
     Supported endpoints:
     - GET    /bans            -> ban_read
+    - GET    /bans/instances  -> ban_read (via the verb fallback below)
     - POST   /bans            -> ban_created
     - POST   /bans/ban        -> ban_created
     - DELETE /bans            -> ban_delete

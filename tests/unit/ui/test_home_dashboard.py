@@ -132,7 +132,7 @@ def test_api_client_get_jobs(api_client, monkeypatch):
 def test_home_page_context_happy_path(route_app, monkeypatch):
     module, client, instances_utils, app = route_app
     _stub_home_aggregates(instances_utils)
-    instances_utils.get_bans.return_value = [{"ip": "1.2.3.4"}, {"ip": "5.6.7.8"}]
+    client.get_bans.return_value = [{"ip": "1.2.3.4"}, {"ip": "5.6.7.8"}]
     client.get_services.return_value = []
     client.get_metadata.return_value = {"is_initialized": True, "first_config_saved": True}
     client.get_jobs.return_value = {"job1": {}, "job2": {}}
@@ -183,7 +183,7 @@ def test_home_page_context_defaults_to_empty_state_on_api_failure(route_app, mon
     """
     module, client, instances_utils, app = route_app
     _stub_home_aggregates(instances_utils)
-    instances_utils.get_bans.side_effect = Exception("redis unreachable")
+    client.get_bans.side_effect = Exception("bans API down")
     client.get_services.return_value = []
     client.get_metadata.side_effect = module.ApiUnavailableError("metadata down")
     client.get_jobs.side_effect = module.ApiClientError("jobs down")

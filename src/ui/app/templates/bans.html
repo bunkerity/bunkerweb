@@ -72,15 +72,9 @@
             {% call card(title="Bans by reason", title_key="bans.stats.card.by_reason", icon="bx-pie-chart-alt-2") %}
                 <div id="bans-reason-breakdown"></div>
             {% endcall %}
-            {% if config.USE_REDIS.value != 'yes' %}
-                {% call alert(variant="warning", icon="bx-error-circle", title="Non-persisted edits.", title_key="bans.stats.alert.title") %}
-                    <p class="mb-0">
-                        <span data-i18n="bans.stats.alert.body_before">Bans made here expire on instance restart unless</span>
-                        <code>USE_REDIS</code>
-                        <span data-i18n="bans.stats.alert.body_after">is enabled.</span>
-                    </p>
-                {% endcall %}
-            {% endif %}
+            {# The "bans expire on instance restart unless USE_REDIS" warning lived here. Bans are
+               stored in the database now and restored to the instances by the sync-bans job, so it
+               no longer applies whatever USE_REDIS is set to. #}
         </div>
     </div>
     {% if not is_readonly %}

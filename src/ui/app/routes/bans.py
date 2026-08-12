@@ -14,13 +14,13 @@ from flask_login import login_required
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
+from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash
 
 from app.routes.utils import (
     cors_required,
     get_default_ban_time,
-    get_redis_client,
     get_remain,
     handle_error,
     parse_search_panes,
@@ -45,89 +45,21 @@ _BAN_COLUMNS = (
 
 
 def _collect_all_bans():
-    """Pull every ban from Redis (global + service-scoped) and from each
-    BunkerWeb instance, deduplicate them, and enrich with `remain`/`start_date`/
-    `end_date` for display. Returns the raw (unfiltered) list."""
-    redis_client = get_redis_client()
+    """Every ban the operator has decided on, enriched with `remain`/`start_date`/`end_date` for
+    display. Returns the raw (unfiltered) list.
 
-    bans_list = []
-    if redis_client:
-        try:
-            # Collect keys first, then pipeline GET+TTL for all of them. This
-            # turns 2 round-trips per ban (get + ttl) into ~2 round-trips total.
-            # Results come back flat: [data0, ttl0, data1, ttl1, ...].
-            global_keys = list(redis_client.scan_iter("bans_ip_*"))
-            if global_keys:
-                pipe = redis_client.pipeline(transaction=False)
-                for key in global_keys:
-                    pipe.get(key)
-                    pipe.ttl(key)
-                results = pipe.execute()
-                for idx, key in enumerate(global_keys):
-                    data = results[2 * idx]
-                    exp = results[2 * idx + 1]
-                    if not data:
-                        continue
-                    key_str = key.decode("utf-8", "replace")
-                    ip = key_str.replace("bans_ip_", "")
-                    raw_value = data.decode("utf-8", "replace")
-                    try:
-                        ban_data = loads(raw_value)
-                    except (JSONDecodeError, ValueError) as e:
-                        LOGGER.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
-                        ban_data = {"reason": raw_value, "service": "unknown", "date": 0, "country": "unknown", "ban_scope": "global", "permanent": False}
-
-                    ban_data["ban_scope"] = "global"
-                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
-
-                    if ban_data.get("permanent", False):
-                        exp = 0
-
-                    bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
-
-            service_keys = list(redis_client.scan_iter("bans_service_*_ip_*"))
-            if service_keys:
-                pipe = redis_client.pipeline(transaction=False)
-                for key in service_keys:
-                    pipe.get(key)
-                    pipe.ttl(key)
-                results = pipe.execute()
-                for idx, key in enumerate(service_keys):
-                    data = results[2 * idx]
-                    exp = results[2 * idx + 1]
-                    if not data:
-                        continue
-                    key_str = key.decode("utf-8", "replace")
-                    service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
-                    raw_value = data.decode("utf-8", "replace")
-                    try:
-                        ban_data = loads(raw_value)
-                    except (JSONDecodeError, ValueError) as e:
-                        LOGGER.warning(f"Failed to decode ban data for {ip} on service {service}, using raw value as reason: {e}")
-                        ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": "service", "permanent": False}
-
-                    ban_data["ban_scope"] = "service"
-                    ban_data["service"] = service
-                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
-
-                    if ban_data.get("permanent", False):
-                        exp = 0
-
-                    bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
-        except BaseException as e:
-            LOGGER.debug(format_exc())
-            LOGGER.error(f"Couldn't get bans from redis: {e}")
-            bans_list = []
-
-    instance_bans = BW_INSTANCES_UTILS.get_bans()
+    Read from the database through the API. It used to scan Redis and fan out to the instances,
+    dedup the two, and hope one of them still had the ban: a restarted instance enumerates an empty
+    shared dict, and under Redis it only re-materializes a ban when a request from that IP arrives.
+    """
+    try:
+        bans_list = API_CLIENT.get_bans()
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Couldn't get bans from the API: {e}")
+        return []
 
     timestamp_now = time()
-
-    for ban in instance_bans:
-        if "ban_scope" not in ban:
-            ban["ban_scope"] = "global" if ban.get("service", "_") == "_" else "service"
-        if not any(b["ip"] == ban["ip"] and b["ban_scope"] == ban["ban_scope"] and (b.get("service", "_") == ban.get("service", "_")) for b in bans_list):
-            bans_list.append(ban)
 
     for ban in bans_list:
         exp = ban.pop("exp", 0)
@@ -707,6 +639,35 @@ def bans_export_excel():
     )
 
 
+def _api_ban(ip: str, exp, reason: str, service: str, ban_scope: str) -> str:
+    """Ban through the API, which persists the ban before fanning it out to the instances.
+
+    Returns "" on success or the error to surface. The UI never talks to the instances directly:
+    the durable row is what survives a restart, and it is also what lets a later convergence pass
+    re-push a ban to an instance that was unreachable now.
+    """
+    payload = {"ip": ip, "exp": int(exp or 0), "reason": reason}
+    if ban_scope == "service" and service:
+        payload["service"] = service
+    try:
+        API_CLIENT.ban([payload])
+    except (ApiClientError, ApiUnavailableError) as e:
+        return str(e)
+    return ""
+
+
+def _api_unban(ip: str, service, ban_scope: str) -> str:
+    """Unban through the API (durable revoke + fan-out). Returns "" on success."""
+    payload = {"ip": ip}
+    if ban_scope == "service" and service:
+        payload["service"] = service
+    try:
+        API_CLIENT.unban([payload])
+    except (ApiClientError, ApiUnavailableError) as e:
+        return str(e)
+    return ""
+
+
 @bans.route("/bans/ban", methods=["POST"])
 @login_required
 def bans_ban():
@@ -765,13 +726,13 @@ def bans_ban():
                 ban_scope = "global"
                 service = "unknown"
 
-        # Propagate ban to all connected BunkerWeb instances
-        resp = BW_INSTANCES_UTILS.ban(ip, ban_end, reason, service, ban_scope)
+        # Persist the ban and propagate it to the connected BunkerWeb instances
+        resp = _api_ban(ip, ban_end, reason, service, ban_scope)
         if resp:
-            LOGGER.error(f"Failed to ban {ip} on instances: {resp}")
-            flash(f"Failed to ban {ip} on some instances: {resp}", "error")
+            LOGGER.error(f"Failed to ban {ip}: {resp}")
+            flash(f"Failed to ban {ip}: {resp}", "error")
         else:
-            LOGGER.info(f"Banned {ip} on all instances")
+            LOGGER.info(f"Banned {ip}")
             flash(f"Banned {ip} successfully.", "success")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Banning {len(bans)} IP{'s' if len(bans) > 1 else ''}"))
@@ -832,13 +793,13 @@ def bans_unban():
             ban_scope = "global"
             service = None
 
-        # Propagate unban to all connected BunkerWeb instances, now passing ban_scope
-        resp = BW_INSTANCES_UTILS.unban(ip, service, ban_scope)
+        # Revoke the ban durably, then propagate the unban to the instances
+        resp = _api_unban(ip, service, ban_scope)
         if resp:
-            LOGGER.error(f"Failed to unban {ip} on instances: {resp}")
-            flash(f"Failed to unban {ip} on some instances: {resp}", "error")
+            LOGGER.error(f"Failed to unban {ip}: {resp}")
+            flash(f"Failed to unban {ip}: {resp}", "error")
         else:
-            LOGGER.info(f"Unbanned {ip} on all instances")
+            LOGGER.info(f"Unbanned {ip}")
             flash(f"Unbanned {ip} successfully.", "success")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Unbanning {len(unbans)} IP{'s' if len(unbans) > 1 else ''}"))
@@ -881,18 +842,14 @@ def bans_update_duration():
     if not updates:
         return handle_error("No matching bans.", "bans", True)
 
-    # Fetch existing bans from instances to get original reasons
-    instance_bans = BW_INSTANCES_UTILS.get_bans()
-    instance_bans_dict = {}
-    for ban in instance_bans:
-        # Normalize ban scope if missing
-        if "ban_scope" not in ban:
-            if ban.get("service", "_") == "_":
-                ban["ban_scope"] = "global"
-            else:
-                ban["ban_scope"] = "service"
-        ban_key = f"{ban.get('ip')}|{ban.get('ban_scope', 'global')}|{ban.get('service', '_') if ban['ban_scope'] == 'service' else '_'}"
-        instance_bans_dict[ban_key] = ban
+    # Fetch the stored bans to keep each one's original reason across the duration change
+    known_bans = {}
+    try:
+        for ban in API_CLIENT.get_bans():
+            ban_key = f"{ban.get('ip')}|{ban.get('ban_scope', 'global')}|{ban.get('service', '_') if ban.get('ban_scope') == 'service' else '_'}"
+            known_bans[ban_key] = ban
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.error(f"Couldn't read the existing bans, durations will be updated with the default reason: {e}")
 
     for update in updates:
         # Validate update structure
@@ -957,16 +914,16 @@ def bans_update_duration():
         # Fetch existing ban data first to preserve original reason
         original_reason = "ui"  # Default fallback
         ban_key = f"{ip}|{ban_scope}|{service if ban_scope == 'service' else '_'}"
-        if ban_key in instance_bans_dict:
-            original_reason = instance_bans_dict[ban_key].get("reason", "ui")
+        if ban_key in known_bans:
+            original_reason = known_bans[ban_key].get("reason", "ui")
 
-        # Update ban on BunkerWeb instances using original reason
-        ban_resp = BW_INSTANCES_UTILS.ban(ip, new_exp, original_reason, service, ban_scope)
+        # Re-ban with the new expiry, keeping the original reason
+        ban_resp = _api_ban(ip, new_exp, original_reason, service, ban_scope)
         if ban_resp:
-            LOGGER.error(f"Failed to update ban duration for {ip} on instances: {ban_resp}")
-            flash(f"Failed to update ban duration for {ip} on some instances: {ban_resp}", "error")
+            LOGGER.error(f"Failed to update ban duration for {ip}: {ban_resp}")
+            flash(f"Failed to update ban duration for {ip}: {ban_resp}", "error")
         else:
-            LOGGER.info(f"Updated ban duration for {ip} on all instances")
+            LOGGER.info(f"Updated ban duration for {ip}")
             flash(f"Updated ban duration for {ip} successfully.", "success")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Updating duration for {len(updates)} ban{'s' if len(updates) > 1 else ''}"))

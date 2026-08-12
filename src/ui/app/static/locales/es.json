@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Direcciones IP bloqueadas en sus instancias de BunkerWeb — agregue, elimine o ajuste las duraciones de bloqueo.",
     "stats": {
-      "alert": {
-        "body_after": "está activado.",
-        "body_before": "Los bloqueos creados aquí caducan al reiniciar la instancia, salvo que",
-        "title": "Cambios no persistentes."
-      },
       "card": {
         "by_reason": "Bloqueos por motivo"
       },

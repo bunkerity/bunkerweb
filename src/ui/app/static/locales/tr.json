@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "BunkerWeb örneklerinizdeki engellenmiş IP adresleri — engelleme sürelerini ekleyin, kaldırın veya ayarlayın.",
     "stats": {
-      "alert": {
-        "body_after": "etkin.",
-        "body_before": "Burada oluşturulan yasaklar, aksi belirtilmedikçe örnek yeniden başlatıldığında sona erer",
-        "title": "Kalıcı olmayan değişiklikler."
-      },
       "card": {
         "by_reason": "Nedene göre yasaklar"
       },

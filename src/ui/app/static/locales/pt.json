@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Endereços IP bloqueados nas suas instâncias do BunkerWeb — adicione, remova ou ajuste a duração do bloqueio.",
     "stats": {
-      "alert": {
-        "body_after": "está ativado.",
-        "body_before": "Os banimentos efetuados aqui expiram quando a instância reinicia, exceto se",
-        "title": "Alterações não persistidas."
-      },
       "card": {
         "by_reason": "Banimentos por motivo"
       },

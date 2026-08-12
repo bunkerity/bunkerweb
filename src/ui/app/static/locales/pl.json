@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Zablokowane adresy IP w Twoich instancjach BunkerWeb — dodawaj, usuwaj lub dostosowuj okres blokady.",
     "stats": {
-      "alert": {
-        "body_after": "jest włączone.",
-        "body_before": "Blokady utworzone tutaj wygasają po ponownym uruchomieniu instancji, chyba że",
-        "title": "Zmiany nietrwałe."
-      },
       "card": {
         "by_reason": "Blokady według przyczyny"
       },

@@ -563,9 +563,41 @@ api.global.GET["^/bans$"] = function(self)
 				end
 			end
 		end
+		-- Optional ?start=&length= window, modelled on /metrics/requests/query. Without it the
+		-- whole set is returned, which is the pre-1.7 contract (~16 MB of JSON at 100k bans).
+		-- ponytail: this bounds the RESPONSE, not the work — datastore:keys() above still
+		-- materializes every key in the dict and does a get+ttl per ban, blocking, on every call.
+		-- Raising that ceiling means indexing bans outside the shared dict.
+		local total = #data
+		local args = ngx_req.get_uri_args and ngx_req.get_uri_args() or {}
+		local length = tonumber(args.length)
+		if length and length >= 0 then
+			local start_idx = tonumber(args.start) or 0
+			if start_idx < 0 then
+				start_idx = 0
+			end
+			-- dict key order is not stable between calls, so page over a deterministic order or a
+			-- client walking the pages would see the same ban twice and miss another.
+			table.sort(data, function(a, b)
+				if a.ip ~= b.ip then
+					return a.ip < b.ip
+				end
+				if a.ban_scope ~= b.ban_scope then
+					return a.ban_scope < b.ban_scope
+				end
+				return tostring(a.service) < tostring(b.service)
+			end)
+			local page = {}
+			for index = start_idx + 1, math.min(start_idx + length, total) do
+				table.insert(page, data[index])
+			end
+			data = page
+		end
+
 		local snapshot_status, snapshot_response = self:response(HTTP_OK, "success", data)
 		snapshot_response.generation_epoch = generation_epoch
 		snapshot_response.snapshot_time = snapshot_time
+		snapshot_response.total = total
 		return snapshot_status, snapshot_response
 	end)
 	if not status then

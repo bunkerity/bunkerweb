@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Indirizzi IP bloccati su tutti i tuoi istanze di BunkerWeb — aggiungi, rimuovi o modifica la durata del blocco.",
     "stats": {
-      "alert": {
-        "body_after": "è abilitato.",
-        "body_before": "I ban creati qui scadono al riavvio dell’istanza, a meno che",
-        "title": "Modifiche non persistenti."
-      },
       "card": {
         "by_reason": "Ban per motivo"
       },

@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "在您的 BunkerWeb 实例中禁用的 IP 地址 — 添加、删除或调整禁用的时长。",
     "stats": {
-      "alert": {
-        "body_after": "已启用。",
-        "body_before": "此处创建的封禁会在实例重启时失效，除非",
-        "title": "未持久保存的编辑。"
-      },
       "card": {
         "by_reason": "按原因统计封禁"
       },

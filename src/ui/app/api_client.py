@@ -115,8 +115,9 @@ class ApiClient(BaseApiClient):
     # ── Bans ────────────────────────────────────────────────────────────
 
     def get_bans(self):
-        data = self._get("/bans")
-        return data
+        """Durable ban list from the database. ``GET /bans/instances`` is the runtime view of what
+        each instance is enforcing right now — not what the operator decided."""
+        return (self._get("/bans") or {}).get("data", [])
 
     def ban(self, bans: list):
         return self._post("/bans/ban", json=bans)

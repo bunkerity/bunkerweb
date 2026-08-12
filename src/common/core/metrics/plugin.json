@@ -79,8 +79,8 @@
     },
     "METRICS_BASELINE_SAMPLE_RATE": {
       "context": "global",
-      "default": "0",
-      "help": "Percentage of non-blocked requests recorded as a traffic baseline, for anomaly detection to learn what normal looks like (`0` disables it, `1` samples one request in a hundred). Sampling is deterministic on the request id, so the decision is stable across subrequests. The client IP is never stored. Collection adds no work on the request path, but the volume is large: at 1% of 10k req/s this is roughly 8.6 million records a day, so raise it deliberately.",
+      "default": "1",
+      "help": "Percentage of non-blocked requests recorded as a traffic baseline, for anomaly detection to learn what normal looks like (`0` disables it, `1` samples one request in a hundred). Sampling is deterministic on the request id, so the decision is stable across subrequests. The client IP is never stored. Collection adds no work on the request path, but the volume is large: 1% of 10k req/s is roughly 8.6 million records a day, which `METRICS_BASELINE_RETENTION_MAX_ROWS` then trims. Raise it deliberately.",
       "id": "metrics-baseline-sample-rate",
       "label": "Traffic baseline sample rate (%)",
       "regex": "^(100|[0-9]{1,2})$",

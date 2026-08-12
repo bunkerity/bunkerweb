@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from json import JSONDecodeError, loads
 from operator import itemgetter
 from os import environ, get_terminal_size, getenv, sep
@@ -202,6 +202,20 @@ class CLI(ApiCaller):
             data = {"ip": ip, "ban_scope": ban_scope}
             if service:
                 data["service"] = service
+            if self.__db:
+                # A revoke that is not durable is refused: without the tombstone the convergence
+                # job re-learns the ban from an instance that missed this unban and re-pushes it.
+                db_error = self.__db.revoke_ban(ip, ban_scope=ban_scope, service_id=service or "", revoked_by="bwcli")
+                if db_error:
+                    return False, self.__format_error(f"Failed to unban {ip}: {db_error}")
+            else:
+                # No database here (this is the BunkerWeb container, which also means self.apis
+                # only holds the local instance). The unban is local and NOT durable: the next
+                # sync-bans pass will re-learn the ban from the stored row and push it back.
+                self.__logger.warning(
+                    "No database reachable: this unban applies to the local instance only and will be reverted by the next ban sync. "
+                    "Run bwcli from the scheduler, or use the web UI/API, to revoke it for good."
+                )
             if self.send_to_apis("POST", "/unban", data=data):
                 if service:
                     success_msg = (
@@ -244,6 +258,18 @@ class CLI(ApiCaller):
 
         try:
             data = {"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}
+            if self.__db:
+                # Persist first; a failed write is logged, never a reason to leave the IP unblocked.
+                db_error = self.__db.upsert_ban(
+                    ip,
+                    ban_scope=ban_scope,
+                    service_id=service if ban_scope == "service" else "",
+                    reason=reason,
+                    expires_at=None if not exp else datetime.now(timezone.utc) + timedelta(seconds=exp),
+                    origin="bwcli",
+                )
+                if db_error:
+                    self.__logger.error(f"Couldn't persist the ban for {ip}: {db_error}")
             if self.send_to_apis("POST", "/ban", data=data):
                 scope_text = f"{self.GREEN}globally{self.RESET}" if ban_scope == "global" else f"for service {self.CYAN}{service}{self.RESET}"
                 if not exp:
@@ -264,12 +290,23 @@ class CLI(ApiCaller):
         """Get all bans from the system"""
         servers = {}
 
+        # The database first: it is the source of truth, and it is the only source that still
+        # answers when an instance has just restarted (empty shared dict) or is unreachable.
+        if self.__db:
+            try:
+                servers["database"] = self.__db.get_bans()
+            except BaseException as e:
+                self.__logger.error(f"Failed to get bans from the database: {e}")
+
         try:
             ret, resp = self.send_to_apis("GET", "/bans", response=True)
         except BaseException as e:
             return False, self.__format_error(f"Failed to get bans: {e}")
         if not ret:
-            return False, self.__format_error("Failed to retrieve ban information")
+            if servers.get("database"):
+                resp = {}
+            else:
+                return False, self.__format_error("Failed to retrieve ban information")
 
         for k, v in resp.items():
             servers[k] = v.get("data", [])

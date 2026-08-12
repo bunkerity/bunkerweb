@@ -28,6 +28,12 @@ class TestBanRequest:
     def test_strips_ip(self):
         assert schemas.BanRequest(ip="  1.2.3.4  ").ip == "1.2.3.4"
 
+    def test_normalizes_ipv6(self):
+        # The runtime keys its bans on nginx's $remote_addr, always the compressed form: an
+        # uncompressed address stored verbatim bans nothing.
+        assert schemas.BanRequest(ip="2001:0DB8::0001").ip == "2001:db8::1"
+        assert schemas.UnbanRequest(ip="2001:0DB8::0001").ip == "2001:db8::1"
+
     def test_invalid_ip(self):
         with pytest.raises(ValidationError):
             schemas.BanRequest(ip="not-an-ip")

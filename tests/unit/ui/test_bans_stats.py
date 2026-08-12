@@ -223,18 +223,13 @@ def test_bans_page_renders_reason_breakdown_card_mount():
     assert 'data-i18n="bans.stats.card.by_reason"' in html
 
 
-def test_bans_page_alert_shown_when_redis_disabled():
-    html = _render_bans(config={"USE_REDIS": {"value": "no"}})
-
-    assert 'data-i18n="bans.stats.alert.title"' in html
-    assert "<code>USE_REDIS</code>" in html
-
-
-def test_bans_page_alert_hidden_when_redis_enabled():
-    html = _render_bans(config={"USE_REDIS": {"value": "yes"}})
-
-    assert 'data-i18n="bans.stats.alert.title"' not in html
-    assert "<code>USE_REDIS</code>" not in html
+def test_bans_page_never_warns_about_non_persisted_bans():
+    # Bans live in bw_bans and are restored to the instances by the sync-bans job, so the old
+    # "they expire on restart unless USE_REDIS is enabled" warning is now false either way.
+    for use_redis in ("no", "yes"):
+        html = _render_bans(config={"USE_REDIS": {"value": use_redis}})
+        assert 'data-i18n="bans.stats.alert.title"' not in html
+        assert "<code>USE_REDIS</code>" not in html
 
 
 def test_bans_stats_i18n_keys_resolve_in_en_json():
@@ -249,9 +244,6 @@ def test_bans_stats_i18n_keys_resolve_in_en_json():
         "bans.stats.tile.countries",
         "bans.stats.tile.permanent",
         "bans.stats.card.by_reason",
-        "bans.stats.alert.title",
-        "bans.stats.alert.body_before",
-        "bans.stats.alert.body_after",
     ]
     for key in expected_keys:
         assert f'data-i18n="{key}"' in html, key

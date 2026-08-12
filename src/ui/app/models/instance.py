@@ -489,62 +489,13 @@ class InstancesUtils:
             instance.name for instance in instances or self.get_instances() if instance.status == "down" or instance.reload().startswith("Can't reload")
         ] or "Successfully reloaded instances"
 
-    def ban(
-        self, ip: str, exp: float, reason: str, service: str, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None
-    ) -> Union[list[str], str]:
-        # Propagation rule: only healthy ("up") instances receive bans. A
-        # "failover" instance runs a broken/degraded config (its last-known-good
-        # restore failed too), so its ban state is untrustworthy -> excluded.
-        targets = instances or self.get_instances(status="up")
-        if not targets:
-            # Zero targets means the ban reached nothing; report failure instead
-            # of the "" success sentinel so the UI surfaces it (a truthy return).
-            return f"No instances available to ban {ip}"
-        return [instance.name for instance in targets if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")] or ""
+    # ban()/unban() lived here and pushed straight to the "up" instances. They are gone: the UI
+    # now goes through the API, which persists the decision before fanning it out. That also
+    # retires the propagation gap they carried — an instance that was down when the operator acted
+    # used to miss the change for good; the convergence job now reconciles it from the database.
 
-    def unban(self, ip: str, service: Optional[str] = None, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        # Same propagation rule as ban(): only "up" instances, failover excluded.
-        targets = instances or self.get_instances(status="up")
-        if not targets:
-            return f"No instances available to unban {ip}"
-        return [instance.name for instance in targets if instance.unban(ip, service, ban_scope).startswith("Can't unban")] or ""
-
-    def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
-        """Get unique bans from all instances or a specific instance and sort them by expiration date"""
-
-        def get_instance_bans(instance: Instance) -> List[dict[str, Any]]:
-            resp, instance_bans = instance.bans()
-            if resp:
-                return []
-            return instance_bans[instance.hostname].get("data", [])
-
-        bans: List[dict[str, Any]] = []
-        if hostname:
-            instance = Instance.from_hostname(hostname, self.__api_client)
-            if not instance:
-                return []
-            bans = get_instance_bans(instance)
-        else:
-            for instance in instances or self.get_instances(status="up"):
-                bans.extend(get_instance_bans(instance))
-
-        # Improved deduplication that considers IP, scope, and service combination
-        # A unique ban is defined by the combination of IP address, ban scope, and service
-        unique_bans = {}
-        for item in sorted(bans, key=itemgetter("exp")):
-            # Normalize ban scope if not present
-            if "ban_scope" not in item:
-                if item.get("service", "_") == "_":
-                    item["ban_scope"] = "global"
-                else:
-                    item["ban_scope"] = "service"
-
-            # Create a unique key that combines IP, ban scope, and service
-            ban_key = (item["ip"], item["ban_scope"], item.get("service", "_"))
-            if ban_key not in unique_bans:
-                unique_bans[ban_key] = item
-
-        return list(unique_bans.values())
+    # get_bans() lived here too, merging every instance's shared dict. The durable list comes
+    # from the API now (GET /bans); Instance.bans() stays for the per-instance runtime view.
 
     def get_reports(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get reports from all instances or a specific instance and sort them by date"""

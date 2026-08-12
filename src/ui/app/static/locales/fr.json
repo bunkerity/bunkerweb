@@ -77,11 +77,6 @@
   "bans": {
     "subtitle": "Adresses IP bloquées sur vos instances BunkerWeb — ajoutez, supprimez ou ajustez les durées de blocage.",
     "stats": {
-      "alert": {
-        "body_after": "est activé.",
-        "body_before": "Les bannissements créés ici expirent au redémarrage de l’instance, sauf si",
-        "title": "Modifications non persistantes."
-      },
       "card": {
         "by_reason": "Bannissements par motif"
       },
