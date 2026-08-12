@@ -52,7 +52,7 @@
     },
     "REDIS_SSL_VERIFY": {
       "context": "global",
-      "default": "no",
+      "default": "yes",
       "help": "Verify the certificate of Redis server.",
       "id": "redis-ssl-verify",
       "label": "Redis SSL/TLS verify",

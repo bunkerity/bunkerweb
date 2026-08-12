@@ -10,7 +10,11 @@ from job_queues import HEAVY_JOBS, queue_for  # type: ignore # noqa: F401 (HEAVY
 app = Celery("bunkerweb", include=["worker.tasks"])
 
 app.conf.update(
-    broker_url=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
+    # 127.0.0.1 rather than localhost: on a dual-stack host localhost can resolve to ::1
+    # first while Redis/Valkey binds v4 only, which fails the connection outright. The
+    # Linux packaging (src/linux/scripts/bunkerweb-worker.sh) and the all-in-one entrypoint
+    # already default to the literal address -- this keeps every default in step.
+    broker_url=os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0"),
     broker_pool_limit=4,
     broker_transport_options={
         "visibility_timeout": 7200,

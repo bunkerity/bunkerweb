@@ -387,9 +387,21 @@ function _M.connect_to_host(self, host)
     if not ok then
         return nil, err
     else
+        -- BW edit: skip AUTH and SELECT when the socket came back from the keepalive
+        -- pool. A pooled socket is already authenticated as this user and parked on
+        -- this DB: the cosocket pool is keyed by host:port, and every BunkerWeb
+        -- REDIS_* setting is context:global, so one worker only ever speaks one
+        -- logical Redis config. The other consumer of this same pool,
+        -- lua-resty-session's redis backend, guards AUTH the same way and always
+        -- SELECTs the same DB. get_reused_times() returns nil on an uninitialised
+        -- socket, which falls back to authenticating -- the safe direction.
+        -- A REDIS_* change regenerates the NGINX config and reloads, which kills the
+        -- worker and its pools, so pooled sockets cannot outlive their credentials.
+        local reused = r:get_reused_times() or 0
+
         local username = host.username
         local password = host.password
-        if password and password ~= "" then
+        if reused == 0 and password and password ~= "" then
             local res
             -- usernames are supported only on Redis 6+, so use new AUTH form only when absolutely necessary
             if username and username ~= "" and username ~= "default" then
@@ -403,7 +415,7 @@ function _M.connect_to_host(self, host)
         end
 
         -- No support for DBs in proxied Redis.
-        if config.connection_is_proxied ~= true and host.db ~= nil then
+        if reused == 0 and config.connection_is_proxied ~= true and host.db ~= nil then
             local res, err = r:select(host.db)
 
             -- SELECT will fail if we are connected to sentinel:
@@ -424,13 +436,13 @@ end
 
 
 function _M.set_keepalive(self, redis)
-    -- Restore connection to "NORMAL" before putting into keepalive pool,
-    -- ignoring any errors.
-    -- Proxied Redis does not support transactions.
-    if self.config.connection_is_proxied ~= true then
-        redis:discard()
-    end
-
+    -- BW edit: no DISCARD before returning the socket to the pool. It cost a full
+    -- round-trip on every close to send a command Redis answers with
+    -- "-ERR DISCARD without MULTI", because nothing in BunkerWeb opens a
+    -- transaction: clusterstore's multi() was dead code and has been deleted, and
+    -- lua-resty-session uses pipelines, never MULTI. Reinstate this if any caller
+    -- starts issuing MULTI -- a socket parked mid-transaction answers the next
+    -- borrower's commands with +QUEUED instead of data.
     local config = self.config
     return redis:set_keepalive(
         config.keepalive_timeout, config.keepalive_poolsize

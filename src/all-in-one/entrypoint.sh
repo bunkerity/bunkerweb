@@ -249,9 +249,24 @@ if [ "${SERVICE_WORKER}" = "yes" ]; then
 		export USE_REDIS="yes"
 		log "ENTRYPOINT" "ℹ️" "Auto-enabled USE_REDIS (required by worker)"
 	fi
-	export CELERY_BROKER_URL="${CELERY_BROKER_URL:-redis://${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0}"
+	# The password has to go into the URL. The embedded Redis gets `requirepass` from
+	# REDIS_PASSWORD further down, so a derived URL without it produced a worker that
+	# could never authenticate to its own broker -- the operator had to hand-set
+	# CELERY_BROKER_URL to recover. An explicit CELERY_BROKER_URL still wins.
+	# The password is used verbatim, so it must not contain the URL delimiters @ : / #
+	# -- the same rule validate_redis_password() enforces in misc/install-bunkerweb.sh.
+	_broker_credentials=""
+	if [ -n "${REDIS_PASSWORD:-}" ]; then
+		_broker_credentials=":${REDIS_PASSWORD}@"
+	fi
+	export CELERY_BROKER_URL="${CELERY_BROKER_URL:-redis://${_broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0}"
+	unset _broker_credentials
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/worker.ini
-	log "ENTRYPOINT" "✅" "Enabled autorestart for worker service (CELERY_BROKER_URL=${CELERY_BROKER_URL})"
+	# Redact the credentials before logging : the URL can now carry the broker password,
+	# and an operator-supplied CELERY_BROKER_URL could always have carried one.
+	_broker_display="$(printf '%s' "${CELERY_BROKER_URL}" | sed -E 's#://[^@/]*@#://***@#')"
+	log "ENTRYPOINT" "✅" "Enabled autorestart for worker service (CELERY_BROKER_URL=${_broker_display})"
+	unset _broker_display
 else
 	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/worker.ini
 	log "ENTRYPOINT" "ℹ️" "Worker service is disabled, autostart not enabled"

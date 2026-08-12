@@ -38,6 +38,10 @@ local shared = ngx.shared
 local math_ceil = math.ceil
 local math_min = math.min
 local math_max = math.max
+-- LuaJIT keeps unpack as a global; Lua 5.2+ moved it to table.unpack. The Lua unit-test
+-- harness under tests/unit/common runs plain Lua, so accept either. luacheck runs with
+-- --std min (5.1), where table.unpack does not exist -- hence the ignore.
+local unpack = unpack or table.unpack -- luacheck: ignore 143
 local wall_time = ngx.now or os.time
 
 local datastore = cdatastore:new()
@@ -1355,16 +1359,16 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 				local cursor = "0"
 				local seen_cursors = {}
 				while true do
-					local scanned, scan_err = clusterstore:call(
-						"scan",
-						cursor,
-						"MATCH",
-						"bans_service_*_ip_" .. ip,
-						"COUNT",
-						100
-					)
+					local scanned, scan_err =
+						clusterstore:call("scan", cursor, "MATCH", "bans_service_*_ip_" .. ip, "COUNT", 100)
 					local next_cursor = type(scanned) == "table" and tostring(scanned[1]) or nil
-					if not scanned or type(scanned) ~= "table" or type(scanned[2]) ~= "table" or not next_cursor or not next_cursor:match("^%d+$") then
+					if
+						not scanned
+						or type(scanned) ~= "table"
+						or type(scanned[2]) ~= "table"
+						or not next_cursor
+						or not next_cursor:match("^%d+$")
+					then
 						delete_err = "redis SCAN failed : " .. tostring(scan_err)
 						break
 					end
@@ -1382,11 +1386,22 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 					seen_cursors[cursor] = true
 				end
 			end
-			for _, key in ipairs(keys_to_delete) do
-				local deleted, call_err = clusterstore:call("del", key)
-				if not deleted and not delete_err then
-					delete_err = "redis DEL failed for " .. key .. " : " .. tostring(call_err)
+			-- One DEL for the whole key set instead of one round-trip per key. Per-key
+			-- error attribution is lost, but it never worked : DEL on a missing key
+			-- returns 0 and 0 is truthy in Lua, so the old test only ever fired on a
+			-- real failure. Keep `not deleted` rather than `deleted == nil` -- call()
+			-- returns nil on a socket error but `false` on a Redis RESP error, and both
+			-- must be reported.
+			-- ponytail: 512 keys per call, LuaJIT's unpack() argument ceiling is ~8000.
+			local total = #keys_to_delete
+			local first = 1
+			while first <= total and not delete_err do
+				local last = math_min(first + 511, total)
+				local deleted, call_err = clusterstore:call("del", unpack(keys_to_delete, first, last))
+				if not deleted then
+					delete_err = "redis DEL failed : " .. tostring(call_err)
 				end
+				first = last + 1
 			end
 			clusterstore:close()
 			if delete_err then
@@ -1464,9 +1479,19 @@ utils.is_cosocket_available = function()
 	return false
 end
 
+-- A timeout counts as a connection error : the socket is either already dead (a read
+-- timeout self-closes in lua-resty-redis) or has a half-written command in flight (a
+-- send timeout does not), so it must never go back to the keepalive pool for the next
+-- borrower to desync on. Callers use this to flip `healthy` off, which turns the next
+-- close() into a hard close instead of a set_keepalive.
 utils.is_connection_error = function(err)
 	return err
-		and (err:find("closed", 1, true) or err:find("broken pipe", 1, true) or err:find("connection reset", 1, true))
+		and (
+			err:find("closed", 1, true)
+			or err:find("broken pipe", 1, true)
+			or err:find("connection reset", 1, true)
+			or err:find("timeout", 1, true)
+		)
 end
 
 utils.is_oom_error = function(err)

@@ -2,6 +2,24 @@
 
 ## Upgrade from 1.6.X
 
+### Breaking changes
+
+!!! warning "`REDIS_SSL_VERIFY` now defaults to `yes`"
+
+    The Redis/Valkey client used to accept **any** certificate when `REDIS_SSL` was enabled: the
+    documented default for `REDIS_SSL_VERIFY` was `yes`, but the shipped default was `no`, so TLS
+    was negotiated without ever verifying the server. The code now matches the documentation.
+
+    This only affects you if **all** of the following are true: `REDIS_SSL: "yes"`, the Redis or
+    Valkey server presents a self-signed or otherwise untrusted certificate, and you never set
+    `REDIS_SSL_VERIFY` explicitly. In that case the connection now fails after the upgrade.
+
+    Either trust the server's CA, or restore the previous behaviour explicitly:
+
+    ```yaml
+    REDIS_SSL_VERIFY: "no"
+    ```
+
 ### Procedure
 
 === "Docker"

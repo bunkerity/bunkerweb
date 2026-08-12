@@ -180,7 +180,7 @@ def execute_job(self, job_data: dict) -> dict:
     name = job_data.get("name", "unknown")
     plugin = job_data.get("plugin_id", "unknown")
     run_id = job_data.get("run_id", "")
-    broker_url = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    broker_url = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
     start = datetime.now().astimezone()
 
     # Count this delivery before doing anything expensive. A job that OOM-kills its worker gets

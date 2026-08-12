@@ -152,6 +152,11 @@ local function stream_requests_key()
 end
 
 local match = string.match
+local math_min = math.min
+-- LuaJIT keeps unpack as a global; Lua 5.2+ moved it to table.unpack. Accept either so the
+-- module also loads under a plain-Lua test harness. luacheck runs with --std min (5.1),
+-- where table.unpack does not exist -- hence the ignore.
+local unpack = unpack or table.unpack -- luacheck: ignore 143
 local time = os.time
 local tonumber = tonumber
 local tostring = tostring
@@ -418,10 +423,17 @@ end
 -- EXPIRE is denyoom-safe, so it must run under OOM to make these pinning keys
 -- and this worker's metrics keys evictable; it bypasses the redis_ok breaker
 -- (dead socket returns an ignored error).
+-- Pipelined : these EXPIREs are independent, order-insensitive and their results are
+-- all discarded, so buffering them collapses 11+N round-trips into one. Keep this
+-- function free of early returns after init_pipeline -- escaping it would leave the
+-- client buffering for the rest of the cycle.
 local function refresh_request_ttls(self, ttl, wid)
 	if not ttl or ttl <= 0 then
 		return
 	end
+	-- While buffering, every call returns nil with no error, so `healthy` cannot be
+	-- falsely poisoned; only commit_pipeline reports a real socket failure.
+	self.clusterstore:call("init_pipeline")
 	self.clusterstore:call("expire", "requests:ids", ttl)
 	self.clusterstore:call("expire", "requests", ttl)
 	for _, field in ipairs(REQUEST_FACET_FIELDS) do
@@ -437,6 +449,7 @@ local function refresh_request_ttls(self, ttl, wid)
 			end
 		end
 	end
+	self.clusterstore:call("commit_pipeline")
 end
 
 function metrics:initialize(ctx)
@@ -970,17 +983,29 @@ function metrics:timer()
 					-- Use Redis list for table values
 					ok, err = self:redis_call("del", redis_key)
 					if ok then
+						-- One RPUSH per chunk instead of one per item. Per-item error
+						-- attribution is lost, but the only actionable failure was the
+						-- socket one and the chunk result still reports that.
+						-- ponytail: 512 items per call -- LuaJIT's unpack() argument
+						-- ceiling is ~8000 and MAX_LRU_HISTORY accepts values like "1m".
+						local items = {}
 						for _, item in ipairs(value) do
-							local item_value = type(item) == "table" and encode(item) or tostring(item)
-							ok, err = self:redis_call("rpush", redis_key, item_value)
+							items[#items + 1] = type(item) == "table" and encode(item) or tostring(item)
+						end
+						local total = #items
+						local first = 1
+						while first <= total do
+							local last = math_min(first + 511, total)
+							ok, err = self:redis_call("rpush", redis_key, unpack(items, first, last))
 							if not ok then
 								self:log_throttled(
 									ERR,
-									"sync_table_item",
-									"Can't push metric table item " .. key .. " to Redis: " .. err
+									"sync_table_items",
+									"Can't push metric table items " .. key .. " to Redis: " .. err
 								)
 								break
 							end
+							first = last + 1
 						end
 					else
 						self:log_throttled(
@@ -1047,11 +1072,7 @@ function metrics:timer()
 	if not stream_ok then
 		ret = false
 		ret_err = stream_err
-		self:log_throttled(
-			ERR,
-			"stream_reports_store",
-			"can't set " .. stream_key .. " : " .. tostring(stream_err)
-		)
+		self:log_throttled(ERR, "stream_reports_store", "can't set " .. stream_key .. " : " .. tostring(stream_err))
 	end
 
 	if self.redis_ok then
@@ -1586,7 +1607,8 @@ function metrics:api_requests_query()
 		filtered_ids[req.id] = true
 	end
 
-	local pane_fields = { "protocol", "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
+	local pane_fields =
+		{ "protocol", "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 	for _, field in ipairs(pane_fields) do
 		pane_counts[field] = {}
 	end

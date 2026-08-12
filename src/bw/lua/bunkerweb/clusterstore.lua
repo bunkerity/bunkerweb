@@ -17,76 +17,94 @@ local INFO = ngx.INFO
 local tonumber = tonumber
 local tostring = tostring
 
+local REDIS_SETTINGS = {
+	"USE_REDIS",
+	"REDIS_HOST",
+	"REDIS_PORT",
+	"REDIS_DATABASE",
+	"REDIS_SSL",
+	"REDIS_SSL_VERIFY",
+	"REDIS_TIMEOUT",
+	"REDIS_KEEPALIVE_IDLE",
+	"REDIS_KEEPALIVE_POOL",
+	"REDIS_USERNAME",
+	"REDIS_PASSWORD",
+	"REDIS_SENTINEL_HOSTS",
+	"REDIS_SENTINEL_USERNAME",
+	"REDIS_SENTINEL_PASSWORD",
+	"REDIS_SENTINEL_MASTER",
+}
+
+-- Per-worker memo. clusterstore:new() runs at least four times per HTTP request (once
+-- per phase, from fill_ctx) plus once per is_banned / add_ban / remove_ban, and every
+-- call used to re-read fifteen settings and rebuild a connector config. None of those
+-- values can change without a config regeneration and an NGINX reload, which restarts
+-- the worker and takes this memo with it. Keyed by the pool flag -- the only input that
+-- changes the options.
+local cached_variables
+local cached_options = {}
+local cached_connectors = {}
+local cached_timer_log_level
+
 -- Helper function to get timer log level with validation
 local function get_timer_log_level()
-	local level_name = utils.get_variable("TIMERS_LOG_LEVEL", false):upper()
-	if ngx[level_name] then
-		return ngx[level_name]
-	else
-		return INFO -- Default to INFO if invalid
+	if cached_timer_log_level then
+		return cached_timer_log_level
 	end
+	local level_name = utils.get_variable("TIMERS_LOG_LEVEL", false):upper()
+	cached_timer_log_level = ngx[level_name] or INFO -- Default to INFO if invalid
+	return cached_timer_log_level
 end
 
-function clusterstore:initialize(pool)
-	-- Get variables
-	local variables = {
-		["USE_REDIS"] = "",
-		["REDIS_HOST"] = "",
-		["REDIS_PORT"] = "",
-		["REDIS_DATABASE"] = "",
-		["REDIS_SSL"] = "",
-		["REDIS_SSL_VERIFY"] = "",
-		["REDIS_TIMEOUT"] = "",
-		["REDIS_KEEPALIVE_IDLE"] = "",
-		["REDIS_KEEPALIVE_POOL"] = "",
-		["REDIS_USERNAME"] = "",
-		["REDIS_PASSWORD"] = "",
-		["REDIS_SENTINEL_HOSTS"] = "",
-		["REDIS_SENTINEL_USERNAME"] = "",
-		["REDIS_SENTINEL_PASSWORD"] = "",
-		["REDIS_SENTINEL_MASTER"] = "",
-	}
-	-- Set them for later use
-	self.variables = {}
-	for k, _ in pairs(variables) do
+local function read_variables()
+	if cached_variables then
+		return cached_variables
+	end
+	local values = {}
+	local complete = true
+	for _, k in ipairs(REDIS_SETTINGS) do
 		local value, err = get_variable(k, false)
 		if value == nil then
 			logger:log(ERR, err)
+			complete = false
 		end
-		self.variables[k] = value
+		values[k] = value
 	end
-	-- Don't go further if redis is not used
-	if self.variables["USE_REDIS"] ~= "yes" then
-		return
+	-- Only memoize a complete read : a failure in an early phase, before the settings
+	-- have landed in the datastore, must not poison the worker for its whole lifetime.
+	if complete then
+		cached_variables = values
 	end
-	-- Compute options
+	return values
+end
+
+local function build_options(variables, pool)
 	local options = {
-		connect_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		read_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		send_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		keepalive_timeout = tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
-		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
+		connect_timeout = tonumber(variables["REDIS_TIMEOUT"]),
+		read_timeout = tonumber(variables["REDIS_TIMEOUT"]),
+		send_timeout = tonumber(variables["REDIS_TIMEOUT"]),
+		keepalive_timeout = tonumber(variables["REDIS_KEEPALIVE_IDLE"]),
+		keepalive_poolsize = tonumber(variables["REDIS_KEEPALIVE_POOL"]),
 		connection_options = {
-			ssl = self.variables["REDIS_SSL"] == "yes",
-			ssl_verify = self.variables["REDIS_SSL_VERIFY"] == "yes",
+			ssl = variables["REDIS_SSL"] == "yes",
+			ssl_verify = variables["REDIS_SSL_VERIFY"] == "yes",
 		},
-		host = self.variables["REDIS_HOST"],
-		port = tonumber(self.variables["REDIS_PORT"]),
-		db = tonumber(self.variables["REDIS_DATABASE"]),
-		username = self.variables["REDIS_USERNAME"],
-		password = self.variables["REDIS_PASSWORD"],
-		sentinel_username = self.variables["REDIS_SENTINEL_USERNAME"],
-		sentinel_password = self.variables["REDIS_SENTINEL_PASSWORD"],
-		master_name = self.variables["REDIS_SENTINEL_MASTER"],
+		host = variables["REDIS_HOST"],
+		port = tonumber(variables["REDIS_PORT"]),
+		db = tonumber(variables["REDIS_DATABASE"]),
+		username = variables["REDIS_USERNAME"],
+		password = variables["REDIS_PASSWORD"],
+		sentinel_username = variables["REDIS_SENTINEL_USERNAME"],
+		sentinel_password = variables["REDIS_SENTINEL_PASSWORD"],
+		master_name = variables["REDIS_SENTINEL_MASTER"],
 		role = "master",
 		sentinels = {},
 	}
-	self.pool = pool == nil or pool
-	if self.pool then
-		options.connection_options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
+	if pool then
+		options.connection_options.pool_size = tonumber(variables["REDIS_KEEPALIVE_POOL"])
 	end
-	if self.variables["REDIS_SENTINEL_HOSTS"] ~= "" then
-		for sentinel_host in self.variables["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
+	if variables["REDIS_SENTINEL_HOSTS"] ~= "" then
+		for sentinel_host in variables["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
 			local shost, sport = sentinel_host:match("([^:]+):?(%d*)")
 			if sport == "" then
 				sport = 26379
@@ -103,15 +121,51 @@ function clusterstore:initialize(pool)
 			table.insert(options.sentinels, data)
 		end
 	end
-	self.options = options
-	-- Instantiate object
-	if is_cosocket_available() then
-		local redis_connector, err = rc.new(self.options)
-		self.redis_connector = redis_connector
-		if self.redis_connector == nil then
-			logger:log(ERR, "can't instantiate redis object : " .. err)
-			return
+	return options
+end
+
+function clusterstore:initialize(pool)
+	self.pool = pool == nil or pool
+	self.variables = read_variables()
+	-- Don't go further if redis is not used
+	if self.variables["USE_REDIS"] ~= "yes" then
+		return
+	end
+
+	-- Only reuse across instances once the settings read succeeded at least once.
+	local memoize = cached_variables ~= nil
+	local key = self.pool and "pooled" or "direct"
+
+	local options = memoize and cached_options[key] or nil
+	if not options then
+		options = build_options(self.variables, self.pool)
+		if memoize then
+			cached_options[key] = options
 		end
+	end
+	self.options = options
+
+	-- The cosocket gate is a phase guard, not an optimization : in set / header_filter /
+	-- log there are no cosockets, so the connector must stay nil and connect() degrades
+	-- to a clean "connector is not instantiated". Handing those phases a live connector
+	-- would make them attempt a real cosocket connect, which raises rather than returning
+	-- an error -- and badbehavior:log() -> is_banned takes that path on every blocked
+	-- request. The connector itself holds no socket (sockets are created per connect),
+	-- so one instance per worker is safe to share.
+	if is_cosocket_available() then
+		local connector = memoize and cached_connectors[key] or nil
+		if not connector then
+			local redis_connector, err = rc.new(options)
+			if redis_connector == nil then
+				logger:log(ERR, "can't instantiate redis object : " .. err)
+				return
+			end
+			connector = redis_connector
+			if memoize then
+				cached_connectors[key] = connector
+			end
+		end
+		self.redis_connector = connector
 	end
 end
 
@@ -211,34 +265,10 @@ function clusterstore:call(method, ...)
 	return res, err
 end
 
-function clusterstore:multi(calls)
-	-- Check if client is created
-	if not self.redis_client then
-		return false, "client is not instantiated"
-	end
-	-- Start transaction
-	local ok, err = self.redis_client:multi()
-	if not ok then
-		return false, "multi() failed : " .. err
-	end
-	-- Loop on calls
-	for _, call in ipairs(calls) do
-		local method = call[1]
-		local args = unpack(call[2])
-		ok, err = self.redis_client[method](self.redis_client, args)
-		if not ok then
-			return false, method .. "() failed : " .. err
-		end
-	end
-	-- Exec transaction
-	local exec, err = self.redis_client:exec()
-	if not exec then
-		return false, "exec() failed : " .. err
-	end
-	if type(exec) ~= "table" then
-		return false, "exec() result is not a table"
-	end
-	return true, "success", exec
-end
+-- multi() was removed : it had zero callers and was not a pipeline anyway (each
+-- queued command still cost its own round-trip before EXEC). Its absence is what
+-- lets the connector skip the DISCARD on every keepalive return -- nothing can
+-- leave a socket parked inside an open transaction. Batch with
+-- init_pipeline/commit_pipeline instead; reinstate the DISCARD if MULTI comes back.
 
 return clusterstore

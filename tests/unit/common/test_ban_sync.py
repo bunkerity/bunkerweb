@@ -405,8 +405,7 @@ def test_badbehavior_redis_path_only_updates_the_counter():
 
 @needs_lua
 def test_snapshot_publish_preserves_global_service_metadata_and_reason_data():
-    _run_sync(
-        r"""
+    _run_sync(r"""
 response_payload = {
     status = "success",
     generation_epoch = 7,
@@ -434,14 +433,12 @@ local global = assert(record.bans["bans_ip_192.0.2.1"])
 assert(global.permanent and global.reason_data.source == "api" and global.country == "FR")
 local service = assert(record.bans["bans_service_smtp_ip_2001:db8::1"])
 assert(service.expires_at == 140 and service.reason_data.status == "500")
-"""
-    )
+""")
 
 
 @needs_lua
 def test_absolute_expiry_consumes_transport_delay():
-    _run_sync(
-        r"""
+    _run_sync(r"""
 now = 151
 response_payload = {
     status = "success", generation_epoch = 1, snapshot_time = 100,
@@ -462,14 +459,12 @@ assert(ban_sync.reconcile())
 local record = json.decode(assert(sync_store.ban_snapshot))
 assert(record.bans["bans_ip_192.0.2.10"] == nil)
 assert(record.bans["bans_ip_192.0.2.11"] ~= nil)
-"""
-    )
+""")
 
 
 @needs_lua
 def test_older_snapshot_cannot_overwrite_newer_snapshot():
-    _run_sync(
-        r"""
+    _run_sync(r"""
 response_payload = {
     status = "success", generation_epoch = 5, snapshot_time = 90,
     data = {
@@ -501,14 +496,12 @@ response_payload.data[1].permanent = false
 response_payload.data[1].expires_at = 9999
 assert(ban_sync.reconcile())
 assert(sync_store.ban_snapshot == committed)
-"""
-    )
+""")
 
 
 @needs_lua
 def test_malformed_and_duplicate_snapshots_preserve_committed_state():
-    _run_sync(
-        r"""
+    _run_sync(r"""
 response_payload = {
     status = "success", generation_epoch = 1, snapshot_time = 90,
     data = {
@@ -551,14 +544,12 @@ response_payload.data = {
 ok, err = ban_sync.reconcile()
 assert(not ok and err == "invalid absolute ban expiry in /bans response")
 assert(sync_store.ban_snapshot == committed)
-"""
-    )
+""")
 
 
 @needs_lua
 def test_failed_atomic_publish_retains_previous_snapshot():
-    _run_sync(
-        r"""
+    _run_sync(r"""
 response_payload = {
     status = "success", generation_epoch = 1, snapshot_time = 90,
     data = {
@@ -578,14 +569,12 @@ set_error = "no memory"
 local ok, err = ban_sync.reconcile()
 assert(not ok and err:find("without eviction", 1, true))
 assert(sync_store.ban_snapshot == committed)
-"""
-    )
+""")
 
 
 @needs_lua
 def test_snapshot_transport_failure_is_explicit_and_keeps_state():
-    _run_sync(
-        r"""
+    _run_sync(r"""
 response_payload = {
     status = "success", generation_epoch = 1, snapshot_time = 90, data = {},
 }
@@ -602,8 +591,7 @@ request_error = "unavailable"
 ok, err = ban_sync.reconcile()
 assert(not ok and err == "unavailable")
 assert(sync_store.ban_snapshot == committed)
-"""
-    )
+""")
 
 
 @needs_lua
@@ -852,17 +840,23 @@ local ok, err = utils.remove_ban("192.0.2.50", nil, "global", 101)
 assert(ok, err)
 assert(next(main_store) == nil)
 
+-- DEL is batched : one call carries every key it found, instead of one round-trip per
+-- key. Look for each key anywhere in the argument list rather than assuming its position.
 local scan_count, deleted_global, deleted_smtp, deleted_imap = 0, false, false, false
 for _, arguments in ipairs(redis_calls) do
     if arguments[1] == "scan" then
         assert(arguments[4] == "bans_service_*_ip_192.0.2.50")
         scan_count = scan_count + 1
-    elseif arguments[1] == "del" and arguments[2] == "bans_ip_192.0.2.50" then
-        deleted_global = true
-    elseif arguments[1] == "del" and arguments[2] == "bans_service_smtp_ip_192.0.2.50" then
-        deleted_smtp = true
-    elseif arguments[1] == "del" and arguments[2] == "bans_service_imap_ip_192.0.2.50" then
-        deleted_imap = true
+    elseif arguments[1] == "del" then
+        for i = 2, #arguments do
+            if arguments[i] == "bans_ip_192.0.2.50" then
+                deleted_global = true
+            elseif arguments[i] == "bans_service_smtp_ip_192.0.2.50" then
+                deleted_smtp = true
+            elseif arguments[i] == "bans_service_imap_ip_192.0.2.50" then
+                deleted_imap = true
+            end
+        end
     end
 end
 assert(scan_count == 2 and deleted_global and deleted_smtp and deleted_imap)

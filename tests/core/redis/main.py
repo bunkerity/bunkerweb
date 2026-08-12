@@ -122,6 +122,95 @@ try:
         print("❌ Redis is not reachable, exiting ...", flush=True)
         exit(1)
 
+    measure_roundtrips = getenv("MEASURE_ROUNDTRIPS", "no") == "yes"
+
+    if measure_roundtrips:
+        # Connection-overhead bench. What is measured is NOT throughput and NOT the
+        # number of connections opened: the keepalive pool already reuses TCP sockets,
+        # so "connections per request" barely moves and is the wrong metric. What moves
+        # is the number of commands that are pure connection overhead. Before the
+        # connector learned to skip them, every checkout of an already-authenticated,
+        # already-SELECTed pooled socket re-sent AUTH and SELECT, and every return to
+        # the pool sent a DISCARD that Redis answers with "ERR DISCARD without MULTI".
+        # This branch runs after the "tweaked" variant on purpose: a password and a
+        # non-zero database are what make AUTH and SELECT observable at all.
+        WARMUP_REQUESTS = 20
+        MEASURED_REQUESTS = 100
+
+        def command_calls():
+            return {
+                name.removeprefix("cmdstat_"): stats.get("calls", 0) for name, stats in redis_client.info("commandstats").items() if name.startswith("cmdstat_")
+            }
+
+        def hammer(count):
+            for _ in range(count):
+                # Any status is acceptable. A 429 or a 403 walks the same Lua path, it
+                # just issues fewer Redis commands, which can only lower the counters.
+                get("http://www.example.com/", headers={"Host": "www.example.com"})
+
+        print(f"ℹ️ Warming up the connection pool with {WARMUP_REQUESTS} requests ...", flush=True)
+        hammer(WARMUP_REQUESTS)
+        sleep(1)
+
+        # INFO deltas rather than CONFIG RESETSTAT: no extra privilege needed, and the
+        # scheduler shares this Redis so resetting its counters would be rude anyway.
+        before_commands = command_calls()
+        before_connections = redis_client.info("stats")["total_connections_received"]
+
+        print(f"ℹ️ Measuring {MEASURED_REQUESTS} requests ...", flush=True)
+        hammer(MEASURED_REQUESTS)
+        sleep(1)
+
+        after_commands = command_calls()
+        after_connections = redis_client.info("stats")["total_connections_received"]
+
+        def delta(name):
+            return after_commands.get(name, 0) - before_commands.get(name, 0)
+
+        new_connections = after_connections - before_connections
+        # Discount this script's own INFO calls, which land in the same server-wide counters.
+        total_commands = sum(delta(name) for name in set(before_commands) | set(after_commands)) - delta("info")
+
+        auth_calls = delta("auth")
+        select_calls = delta("select")
+        discard_calls = delta("discard")
+
+        print(
+            "ℹ️ Bench results over "
+            + f"{MEASURED_REQUESTS} requests: {total_commands} Redis commands "
+            + f"({total_commands / MEASURED_REQUESTS:.2f} per request), {new_connections} new connections, "
+            + f"AUTH={auth_calls}, SELECT={select_calls}, DISCARD={discard_calls}",
+            flush=True,
+        )
+
+        failures = []
+
+        # Nothing in BunkerWeb opens a MULTI, so the only DISCARD that could ever appear
+        # is the one the connector used to send on every keepalive return.
+        if discard_calls != 0:
+            failures.append(f"DISCARD was sent {discard_calls} times, expected 0")
+
+        # One AUTH and one SELECT per *new* connection is legitimate; more than that means
+        # pooled sockets are being re-authenticated on every checkout.
+        if auth_calls > new_connections:
+            failures.append(f"AUTH was sent {auth_calls} times for {new_connections} new connections")
+
+        if select_calls > new_connections:
+            failures.append(f"SELECT was sent {select_calls} times for {new_connections} new connections")
+
+        # And the pool itself must be doing its job, or the two checks above are vacuous.
+        if new_connections > MEASURED_REQUESTS // 10:
+            failures.append(f"{new_connections} new connections for {MEASURED_REQUESTS} requests, the keepalive pool is not being reused")
+
+        if failures:
+            for failure in failures:
+                print(f"❌ {failure}", flush=True)
+            exit(1)
+
+        print("✅ No per-request AUTH, SELECT or DISCARD overhead, and the connection pool is reused", flush=True)
+
+        exit(0)
+
     use_reverse_scan = getenv("USE_REVERSE_SCAN", "no") == "yes"
 
     if use_reverse_scan:

@@ -179,7 +179,9 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
-tests="activated reverse_scan antibot tweaked ssl"
+# roundtrips runs right after tweaked on purpose : it needs that variant's password and
+# non-zero database, which are what make AUTH and SELECT observable in commandstats.
+tests="activated reverse_scan antibot tweaked roundtrips ssl"
 
 if [ "$integration" == "docker" ] ; then
     tests="$tests sentinel sentinel_tweaked" # TODO sentinel_ssl
@@ -249,9 +251,18 @@ do
             fi
             echo "🧰 Redis started ✅"
         fi
+    elif [ "$test" = "roundtrips" ] ; then
+        echo "🧰 Running tests measuring Redis connection overhead (keeps the tweaked password and database) ..."
+        if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MEASURE_ROUNDTRIPS: "no"@MEASURE_ROUNDTRIPS: "yes"@' {} \;
+        else
+            export MEASURE_ROUNDTRIPS="yes"
+        fi
     elif [ "$test" = "ssl" ] ; then
         echo "🧰 Running tests with redis' ssl activated ..."
         if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MEASURE_ROUNDTRIPS: "yes"@MEASURE_ROUNDTRIPS: "no"@' {} \;
+
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6379"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "1"@REDIS_DATABASE: "0"@' {} \;
@@ -268,6 +279,7 @@ do
             sudo sed -i 's@REDIS_PASSWORD=.*$@REDIS_PASSWORD=@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REDIS_USERNAME=.*$@REDIS_USERNAME=@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REDIS_SSL=.*$@REDIS_SSL=yes@' /etc/bunkerweb/variables.env
+            unset MEASURE_ROUNDTRIPS
             unset REDIS_PORT
             unset REDIS_DATABASE
             unset REDIS_PASSWORD
