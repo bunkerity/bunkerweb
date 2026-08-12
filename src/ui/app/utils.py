@@ -114,7 +114,17 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "11": True,
         "12": True,
         "13": True,
+        # 14 = protocol (shown: it says which vocabulary the row is written in), 15-19 = the
+        # stream-only columns, hidden until an operator with TCP/UDP services wants them,
+        # 20 = actions. Appended rather than inserted: these keys are column indices and are
+        # persisted per user, so renumbering the existing ones would shuffle saved layouts.
         "14": True,
+        "15": False,
+        "16": False,
+        "17": False,
+        "18": False,
+        "19": False,
+        "20": True,
     },
     "services": {
         "3": True,

@@ -240,8 +240,11 @@ local function request(id, date)
         status = 403,
         ip = "127.0.0.1",
         country = "local",
-        method = "TCP",
-        url = "tcp://service",
+        -- Transport fixture: these tests exercise buffering, dedup and merging, not the
+        -- protocol split, so a plain HTTP-shaped record keeps them protocol-agnostic. A real
+        -- stream record carries no method and no url at all.
+        method = "GET",
+        url = "/",
         reason = "test",
         server_name = "service",
         security_mode = "block",
@@ -792,7 +795,7 @@ def test_request_query_and_legacy_get_merge_both_queues_by_id():
             .. query.msg.pane_counts.status["403"].total .. "|" .. #legacy.msg.requests)
     """
     # Both real methods share the same extraction helper, pinning legacy and query parity.
-    source = METHOD_PREAMBLE + _extract("collect_buffered_requests")
+    source = METHOD_PREAMBLE + _extract("is_report") + "\n" + _extract("collect_buffered_requests")
     source += "\n" + _extract_method("api_requests_query") + "\n" + _extract_method("api") + "\n" + body
     result = subprocess.run([LUA, "-"], input=source, capture_output=True, text=True)
     assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
@@ -810,7 +813,7 @@ def test_dedicated_stream_queue_survives_metrics_store_pressure():
         local query = metrics.api_requests_query(SELF)
         print(query.msg.total .. "|" .. #query.msg.data .. "|" .. query.msg.data[1].id)
     """
-    source = METHOD_PREAMBLE + _extract("collect_buffered_requests")
+    source = METHOD_PREAMBLE + _extract("is_report") + "\n" + _extract("collect_buffered_requests")
     source += "\n" + _extract_method("api_requests_query") + "\n" + body
     result = subprocess.run([LUA, "-"], input=source, capture_output=True, text=True)
     assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
@@ -1403,16 +1406,49 @@ def test_the_stream_ingest_route_is_reachable_by_post():
     assert "api_ingest_stream_reports" in body
 
 
-def test_a_stream_block_is_pinned_to_a_4xx_so_the_report_survives_the_read_filter():
-    """_report_clause() and api_requests_query both keep a row only when it is 4xx or detect.
-    get_deny_status() is 444 in stream, which is not an NGINX stream status at all."""
+def test_a_stream_block_keeps_its_real_session_status():
+    """The report filter used to be 4xx-or-detect everywhere, so a stream block had to be pinned
+    to 403 to survive it -- an HTTP code stored for a session that never had one. is_report()
+    admits any non-HTTP row instead, and the raw session status is what gets persisted."""
     source = METRICS_LUA.read_text(encoding="utf-8")
     log_body = re.search(r"^function metrics:log\(bypass_checks\)\n(.*?)^end$", source, re.S | re.M)
     assert log_body
     code = "\n".join(line for line in log_body.group(1).split("\n") if not line.strip().startswith("--"))
     assert 'subsystem == "http"' in code, "status must be resolved per subsystem"
     assert "tonumber(ngx.var.status)" in code, "stream carries its session status in $status"
-    assert "status = 403" in code, "a stream block must not be persisted with a non-4xx status"
+    assert "status = 403" not in code, "the 403 pin is what the protocol discriminator replaced"
+
+
+def test_a_stream_row_is_a_report_whatever_its_status():
+    """The read filter must not depend on a fabricated 4xx any more. Mirrors _report_clause()."""
+    is_report = _extract("is_report")
+    assert 'protocol ~= "http"' in is_report, "a non-HTTP row is a report by construction"
+    assert "request.status >= 400 and request.status < 500" in is_report, "the HTTP arm stays 4xx-or-detect"
+    assert 'request.security_mode == "detect"' in is_report
+
+
+def test_stream_rows_carry_their_l4_dimensions_and_no_http_ones():
+    """method/url/user_agent are HTTP notions; fill_ctx() still synthesizes them for plugins that
+    branch on them in stream, but persisting them put "TCP" in a method column."""
+    source = METRICS_LUA.read_text(encoding="utf-8")
+    log_body = re.search(r"^function metrics:log\(bypass_checks\)\n(.*?)^end$", source, re.S | re.M)
+    assert log_body
+    code = log_body.group(1)
+    for field, var in (
+        ("listen_port", "ngx.var.server_port"),
+        ("client_port", "ngx.var.remote_port"),
+        ("bytes_sent", "ngx.var.bytes_sent"),
+        ("bytes_received", "ngx.var.bytes_received"),
+        ("session_time", "ngx.var.session_time"),
+    ):
+        assert f"request.{field} = tonumber({var})" in code, f"{field} must come from {var}"
+    # The HTTP fields are set in the http branch only -- never in the table literal, which every
+    # row shares.
+    literal = code.split("local request = {")[1].split("}")[0]
+    for field in ("method", "url", "user_agent"):
+        assert field not in literal, f"{field} is HTTP-only and must not be set for every row"
+    assert "request.method = self.ctx.bw.request_method" in code, "HTTP rows keep their method"
+    assert 'protocol = subsystem == "http" and "http"' in code, "every row states its protocol"
 
 
 def test_the_baseline_sampler_stays_http_only():
@@ -1485,8 +1521,10 @@ def test_badbehavior_reads_the_session_status_in_stream():
     assert "tostring(ngx.status)" not in code, "the raw HTTP-only read must be gone"
 
 
-def test_stream_context_carries_what_reports_requires():
-    """method and url are NOT NULL in bw_metrics_requests, and request_id is half the dedup key."""
+def test_stream_context_carries_what_the_plugins_require():
+    """request_id is half the dedup key, so it must exist. method and url are synthesized for the
+    plugins that branch on them in stream (workflows conditions, badbehavior) -- Reports no longer
+    persists either, see test_stream_rows_carry_their_l4_dimensions_and_no_http_ones."""
     source = HELPERS_LUA.read_text(encoding="utf-8")
     stream_branch = source.split("data.scheme = var.scheme")[1].split("-- IP data : global")[0]
     code = "\n".join(line for line in stream_branch.split("\n") if not line.strip().startswith("--"))

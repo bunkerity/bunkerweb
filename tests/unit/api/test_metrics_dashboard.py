@@ -91,6 +91,33 @@ def test_timeseries_endpoint_parses_search_panes(db):
     db.get_metrics_timeseries.assert_called_once_with(start=EPOCH, end=EPOCH + 3600, bucket="day", filters={"ip": ["1.2.3.4", "5.6.7.8"], "country": ["US"]})
 
 
+def test_protocol_reaches_the_db_as_an_ordinary_facet_filter(db):
+    # No endpoint takes a protocol parameter: it is a facet column, so the HTTP/TCP/UDP split
+    # rides the search-panes path every list, timeseries and facet query already speaks.
+    db.get_metrics_requests.return_value = {"total": 0, "filtered": 0, "data": []}
+    db.get_metrics_facets.return_value = {}
+
+    ROUTER.query_metrics_requests(search_panes="protocol:tcp")
+
+    assert db.get_metrics_requests.call_args.kwargs["filters"] == {"protocol": ["tcp"]}
+
+
+def test_protocol_stream_is_an_alias_for_tcp_and_udp(db):
+    db.get_metrics_timeseries.return_value = {"buckets": [], "counts": [], "total": 0, "prev_total": 0, "trend_pct": None}
+
+    ROUTER.query_metrics_timeseries(start=EPOCH, end=EPOCH + 3600, bucket="hour", search_panes="protocol:stream")
+
+    assert db.get_metrics_timeseries.call_args.kwargs["filters"] == {"protocol": ["tcp", "udp"]}
+
+
+def test_protocol_stream_alias_does_not_duplicate_an_explicit_selection(db):
+    db.get_metrics_timeseries.return_value = {"buckets": [], "counts": [], "total": 0, "prev_total": 0, "trend_pct": None}
+
+    ROUTER.query_metrics_timeseries(start=EPOCH, end=EPOCH + 3600, bucket="hour", search_panes="protocol:udp,stream")
+
+    assert db.get_metrics_timeseries.call_args.kwargs["filters"] == {"protocol": ["udp", "tcp"]}
+
+
 def test_timeseries_endpoint_returns_400_not_500_on_oversized_window(db):
     # Regression guard: get_metrics_timeseries raises ValueError for a crafted window that would
     # need too many buckets (authenticated-DoS guard). The endpoint must translate that into a

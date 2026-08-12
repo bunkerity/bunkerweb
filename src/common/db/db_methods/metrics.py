@@ -32,6 +32,7 @@ def _chunked(values: List[Any], size: Optional[int] = None):
 # Columns the UI/API may sort by; anything else falls back to ``date``.
 _ORDER_COLUMNS = {
     "date": Requests.date,
+    "protocol": Requests.protocol,
     "ip": Requests.ip,
     "country": Requests.country,
     "method": Requests.method,
@@ -40,9 +41,17 @@ _ORDER_COLUMNS = {
     "reason": Requests.reason,
     "server_name": Requests.server_name,
     "security_mode": Requests.security_mode,
+    "listen_port": Requests.listen_port,
+    "client_port": Requests.client_port,
+    "bytes_sent": Requests.bytes_sent,
+    "bytes_received": Requests.bytes_received,
+    "session_time": Requests.session_time,
 }
-# Facet / search-pane fields (also the columns a faceted filter may target).
+# Facet / search-pane fields (also the columns a faceted filter may target). ``protocol`` is what
+# makes the HTTP/TCP/UDP split usable: it filters and counts through the same generic path as every
+# other pane, so no endpoint needs a dedicated parameter.
 _FACET_COLUMNS = {
+    "protocol": Requests.protocol,
     "ip": Requests.ip,
     "country": Requests.country,
     "method": Requests.method,
@@ -54,6 +63,7 @@ _FACET_COLUMNS = {
 }
 # Text columns scanned by a free-text search (status is matched numerically).
 _SEARCH_COLUMNS = (
+    Requests.protocol,
     Requests.ip,
     Requests.country,
     Requests.method,
@@ -109,6 +119,7 @@ def _row_to_dict(row: Requests) -> Dict[str, Any]:
         # UTC when the driver drops tzinfo on read-back (SQLite/MySQL/MariaDB return a naive datetime
         # for a UTC wall-clock value; a bare .timestamp() would then apply the local system timezone).
         "date": int(_to_datetime(row.date).timestamp()),
+        "protocol": row.protocol,
         "ip": row.ip,
         "country": row.country,
         "method": row.method,
@@ -121,21 +132,32 @@ def _row_to_dict(row: Requests) -> Dict[str, Any]:
         "asn_number": row.asn_number,
         "asn_org": row.asn_org,
         "security_mode": row.security_mode,
+        # Stream-only; null on an HTTP row. Kept out of the HTTP columns rather than folded into
+        # them so nothing has to guess which vocabulary a value is written in.
+        "listen_port": row.listen_port,
+        "client_port": row.client_port,
+        "bytes_sent": row.bytes_sent,
+        "bytes_received": row.bytes_received,
+        "session_time": row.session_time,
     }
 
 
 def _build_request_row(request_id: str, record: Dict[str, Any], instance_hostname: str, created_at: datetime) -> Requests:
     """Build a ``Requests`` row from a scraped record. ``data`` (the WAF detail blob, a dict in the
-    Lua payload) is stored as JSON text so it round-trips back to a dict on read."""
+    Lua payload) is stored as JSON text so it round-trips back to a dict on read.
+
+    HTTP and L4 fields are stored as sent, empty meaning absent: an instance that predates the
+    protocol split sends neither ``protocol`` nor any L4 field, and its records are HTTP."""
     raw_data = record.get("data")
     return Requests(
         request_id=request_id,
         instance_hostname=instance_hostname,
         date=_to_datetime(record.get("date")),
+        protocol=str(record.get("protocol") or "http").lower()[:8],
         ip=str(record.get("ip") or ""),
         country=str(record.get("country") or ""),
-        method=str(record.get("method") or ""),
-        url=str(record.get("url") or ""),
+        method=_str_or_none(record.get("method"), 16),
+        url=_str_or_none(record.get("url")),
         status=int(record.get("status") or 0),
         user_agent=record.get("user_agent"),
         reason=str(record.get("reason") or ""),
@@ -144,6 +166,11 @@ def _build_request_row(request_id: str, record: Dict[str, Any], instance_hostnam
         asn_number=record.get("asn_number"),
         asn_org=record.get("asn_org"),
         security_mode=str(record.get("security_mode") or ""),
+        listen_port=_int_or_none(record.get("listen_port")),
+        client_port=_int_or_none(record.get("client_port")),
+        bytes_sent=_int_or_none(record.get("bytes_sent")),
+        bytes_received=_int_or_none(record.get("bytes_received")),
+        session_time=_float_or_none(record.get("session_time")),
         created_at=created_at,
     )
 
@@ -167,12 +194,13 @@ def _float_or_none(value: Any) -> Optional[float]:
     return None
 
 
-def _str_or_none(value: Any, limit: int) -> Optional[str]:
-    """Truncate to the column width. A cipher name or content-type longer than its column
-    would abort the whole batch on MySQL/MariaDB rather than lose one field."""
+def _str_or_none(value: Any, limit: Optional[int] = None) -> Optional[str]:
+    """Truncate to the column width (``None`` for an unbounded ``Text`` column). A cipher name or
+    content-type longer than its column would abort the whole batch on MySQL/MariaDB rather than
+    lose one field."""
     if value is None or value == "":
         return None
-    return str(value)[:limit]
+    return str(value)[:limit] if limit else str(value)
 
 
 def _build_baseline_row(request_id: str, record: Dict[str, Any], instance_hostname: str, created_at: datetime) -> Baseline:
@@ -206,8 +234,17 @@ def _build_baseline_row(request_id: str, record: Dict[str, Any], instance_hostna
 
 
 def _report_clause():
-    """A row is a report when it was blocked (4xx) or merely detected (any status)."""
-    return or_(and_(Requests.status >= 400, Requests.status < 500), Requests.security_mode == "detect")
+    """A row is a report when it was blocked (4xx) or merely detected (any status).
+
+    Stream rows are reports by construction — Lua only buffers one when a plugin set a reason, and
+    an NGINX session status is not an HTTP code, so the 4xx test does not apply to it. Before this
+    arm existed, the stream path had to pin every deny to 403 to survive the filter. Mirrored in
+    Lua by ``is_report()`` (``src/common/core/metrics/metrics.lua``)."""
+    return or_(
+        and_(Requests.status >= 400, Requests.status < 500),
+        Requests.security_mode == "detect",
+        Requests.protocol != "http",
+    )
 
 
 def _filter_conditions(search: str = "", filters: Optional[Dict[str, List[str]]] = None) -> list:
@@ -340,14 +377,18 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
           * ``count`` counts the currently-shown set — report clause + ``search`` + **all** panes (a
             field's own selection included, exactly like the Lua ``filtered_ids`` gate). ``total`` keeps
             every value visible while ``count`` reflects the active filter.
+
+        NULL is not a facet value. The HTTP columns are null on a stream session and vice versa, and
+        a pane offering "None" as something to filter by would be offering the absence of a notion,
+        not a value — the protocol pane is where that distinction belongs.
         """
         report_only = _report_clause()
         filtered = _filter_conditions(search, filters)
         facets: Dict[str, Dict[Any, Dict[str, int]]] = {}
         with self._db_session() as session:
             for field, column in _FACET_COLUMNS.items():
-                totals = dict(session.execute(select(column, func.count()).where(report_only).group_by(column)).all())
-                counts = dict(session.execute(select(column, func.count()).where(*filtered).group_by(column)).all())
+                totals = dict(session.execute(select(column, func.count()).where(report_only, column.is_not(None)).group_by(column)).all())
+                counts = dict(session.execute(select(column, func.count()).where(*filtered, column.is_not(None)).group_by(column)).all())
                 facets[field] = {value: {"total": total, "count": counts.get(value, 0)} for value, total in totals.items()}
         return facets
 

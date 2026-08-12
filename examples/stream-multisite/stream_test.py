@@ -227,8 +227,17 @@ def observe_detect_phase(scheme, redis_enabled):
         lambda: fresh_report(scheme, UDP_DETECT[0], started, security_mode="detect", reason="blacklist"),
     )
     report_ids = (tcp_report["id"], udp_report["id"])
-    if tcp_report.get("method") != "TCP" or udp_report.get("method") != "UDP":
-        raise AssertionError(f"unexpected Stream report methods: {tcp_report.get('method')}, {udp_report.get('method')}")
+    # The protocol is a field of its own now. It used to be smuggled into `method` as "TCP"/"UDP",
+    # which put an L4 protocol in a column that only ever means an HTTP verb.
+    if tcp_report.get("protocol") != "tcp" or udp_report.get("protocol") != "udp":
+        raise AssertionError(f"unexpected Stream report protocols: {tcp_report.get('protocol')}, {udp_report.get('protocol')}")
+    for report in (tcp_report, udp_report):
+        for http_only in ("method", "url", "user_agent"):
+            if report.get(http_only) is not None:
+                raise AssertionError(f"Stream report carries the HTTP-only field {http_only}: {report.get(http_only)}")
+        for l4_field in ("listen_port", "client_port", "bytes_sent", "bytes_received", "session_time"):
+            if report.get(l4_field) is None:
+                raise AssertionError(f"Stream report is missing the L4 field {l4_field}")
     if len(set(report_ids)) != 2:
         raise AssertionError(f"TCP and UDP reports reused an ID: {report_ids}")
     eventually(

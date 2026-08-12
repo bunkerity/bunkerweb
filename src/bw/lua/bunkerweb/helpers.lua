@@ -359,11 +359,13 @@ helpers.fill_ctx = function(no_ref)
 				data.start_time = req.start_time()
 				data.scheme = var.scheme
 			else
-				-- Stream exposes no $request_id, $request_uri or $request_method, yet Reports needs
-				-- all three : request_id is half of the (instance_hostname, request_id) dedup key and
-				-- method/url are NOT NULL in bw_metrics_requests. Synthesize them from what NGINX
-				-- does expose. `uri` is deliberately left nil — several plugins (country, limit)
-				-- branch on it, and filling it would silently change what they match in stream.
+				-- Stream exposes no $request_id, $request_uri or $request_method. request_id is half
+				-- of the (instance_hostname, request_id) dedup key, so it must exist; method and url
+				-- are synthesized for the plugins that branch on them in stream (workflows
+				-- conditions, badbehavior), NOT for storage — Reports keeps them null on a stream
+				-- row and records the protocol and the L4 fields instead. `uri` is deliberately left
+				-- nil : several plugins (country, limit) branch on it, and filling it would silently
+				-- change what they match in stream.
 				data.request_id = rand(32)
 				data.start_time = req.start_time()
 				data.request_method = upper(var.protocol or "TCP")

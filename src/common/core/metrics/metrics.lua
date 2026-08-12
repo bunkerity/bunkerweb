@@ -114,6 +114,20 @@ local function merge_timer(acc, other)
 	return acc
 end
 
+-- Does a buffered record belong in Reports? Mirrors _report_clause() in
+-- db_methods/metrics.py, which filters the same records again once persisted -- keep the two
+-- in step.
+-- HTTP: blocked (4xx) or merely detected. A stream record is a report by construction, since
+-- log() only ever buffers one when a plugin set a reason, and NGINX session statuses do not
+-- live in the 4xx range. Records written before `protocol` existed are HTTP.
+local function is_report(request)
+	local protocol = request.protocol
+	if protocol and protocol ~= "http" then
+		return true
+	end
+	return (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect"
+end
+
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
@@ -506,30 +520,26 @@ function metrics:log(bypass_checks)
 		local country = self.ctx.bw.country or "local"
 		local asn_number, asn_org = self.ctx.bw.asn_number, self.ctx.bw.asn_org
 		-- ngx.status is HTTP-only; stream carries the session status in $status (200/400/403/
-		-- 500/502/503). A denied stream session does not reliably land on a 4xx either --
-		-- get_deny_status() is 444 there, which is not an NGINX stream status at all. Since
-		-- _report_clause() keeps a row only when it is 4xx *or* security_mode = "detect", a
-		-- block recorded with the raw session status would be persisted and then invisible in
-		-- Reports. Pin stream denies to 403; detect rows keep their real status, which is what
-		-- actually happened to the session, and are kept by the detect arm of the clause.
+		-- 500/502/503). Both are stored raw and read against `protocol`, which says which
+		-- vocabulary the number belongs to. Stream denies used to be pinned to 403 so that the
+		-- 4xx-or-detect report filter would keep them -- an HTTP code invented for a session
+		-- that never had one. The filter carries a protocol arm now instead, here and in the
+		-- two query paths below, so the real session status survives.
 		local status
 		if subsystem == "http" then
 			status = ngx.status
 		else
 			status = tonumber(ngx.var.status) or 0
-			if security_mode == "block" and not (status >= 400 and status < 500) then
-				status = 403
-			end
 		end
 		local request = {
 			id = self.ctx.bw.request_id,
 			date = self.ctx.bw.start_time or time(),
+			-- "http" covers https too: this column discriminates request from session, and the
+			-- TLS detail is already carried by the baseline's own `scheme`/`ssl_protocol`.
+			protocol = subsystem == "http" and "http" or (self.ctx.bw.protocol or "tcp"),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
-			method = self.ctx.bw.request_method,
-			url = self.ctx.bw.request_uri,
 			status = status,
-			user_agent = self.ctx.bw.http_user_agent or "",
 			reason = reason,
 			server_name = self.ctx.bw.server_name,
 			data = data,
@@ -538,6 +548,20 @@ function metrics:log(bypass_checks)
 			asn_number = asn_number,
 			asn_org = asn_org,
 		}
+		if subsystem == "http" then
+			request.method = self.ctx.bw.request_method
+			request.url = self.ctx.bw.request_uri
+			request.user_agent = self.ctx.bw.http_user_agent or ""
+		else
+			-- L4 dimensions, every one of them a free log-phase variable. method/url/user_agent
+			-- are deliberately left unset: fill_ctx() still synthesizes them because plugins
+			-- branch on them in stream, but nothing fabricated is persisted.
+			request.listen_port = tonumber(ngx.var.server_port)
+			request.client_port = tonumber(ngx.var.remote_port)
+			request.bytes_sent = tonumber(ngx.var.bytes_sent)
+			request.bytes_received = tonumber(ngx.var.bytes_received)
+			request.session_time = tonumber(ngx.var.session_time)
+		end
 		local requests = subsystem == "stream" and stream_requests or lru:get("requests") or {}
 
 		-- Add to LRU
@@ -1473,8 +1497,8 @@ function metrics:api_requests_query()
 	-- Filter requests
 	local filtered_requests = {}
 	for _, request in ipairs(all_requests) do
-		-- Filter: status 400-499 or detect mode
-		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
+		-- Filter: HTTP 4xx / detect, or any stream session (see is_report)
+		if is_report(request) then
 			local matches = true
 
 			-- Apply search filter
@@ -1562,13 +1586,13 @@ function metrics:api_requests_query()
 		filtered_ids[req.id] = true
 	end
 
-	local pane_fields = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
+	local pane_fields = { "protocol", "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 	for _, field in ipairs(pane_fields) do
 		pane_counts[field] = {}
 	end
 
 	for _, request in ipairs(all_requests) do
-		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
+		if is_report(request) then
 			for _, field in ipairs(pane_fields) do
 				local value = tostring(request[field] or "N/A")
 				if not pane_counts[field][value] then

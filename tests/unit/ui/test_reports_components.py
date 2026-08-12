@@ -443,6 +443,67 @@ def test_reports_offenders_render_never_uses_html_sink():
     assert "window.BWCountryFlag.html(" not in source
 
 
+def _js_event_log_columns():
+    """The `data:` key of every event-log DataTables column, in table order.
+
+    The two leading control columns (details-control and select) carry `data: null` and are
+    returned as None, because the Flask side offsets by exactly those two.
+    """
+    source = (STATIC / "js" / "pages" / "reports.js").read_text(encoding="utf-8")
+    block = re.search(r"\n      columns: \[(.*?)\n      \],\n      headerCallback", source, re.S)
+    assert block, "the event-log columns array moved — this guard needs updating"
+    return [None if match.group(1) == "null" else match.group(1).strip('"') for match in re.finditer(r'data: (null|"[^"]+")', block.group(1))]
+
+
+def _flask_event_log_columns():
+    source = (Path(__file__).parents[3] / "src" / "ui" / "app" / "routes" / "reports.py").read_text(encoding="utf-8")
+    block = re.search(r"# Keep this in sync with the frontend DataTables columns\n    columns = \[(.*?)\n    \]", source, re.S)
+    assert block, "the Flask columns list moved — this guard needs updating"
+    return re.findall(r'"([^"]+)"', block.group(1))
+
+
+def test_flask_and_datatables_agree_on_the_event_log_column_order():
+    """`order[0][column]` is an index: reports_fetch() maps it back to a field name purely by
+    position (DataTables index minus the two control columns). A column added on one side only
+    silently sorts by the wrong field — the "keep in sync" comment was the only thing guarding
+    this."""
+    assert _js_event_log_columns()[:2] == [None, None], "the two leading control columns are what the -2 offset assumes"
+    assert _js_event_log_columns()[2:] == _flask_event_log_columns()
+
+
+def test_the_event_log_carries_the_protocol_split_columns():
+    """Protocol says which vocabulary a row speaks; the L4 columns are the stream half of it."""
+    columns = _flask_event_log_columns()
+    for field in ("protocol", "listen_port", "client_port", "bytes_sent", "bytes_received", "session_time"):
+        assert field in columns, f"{field} is missing from the event log"
+    # Appended, not inserted: column visibility is persisted per user by index.
+    assert columns.index("protocol") > columns.index("security_mode")
+    assert columns[-1] == "actions"
+
+
+def test_every_toggleable_event_log_column_has_a_visibility_default():
+    """COLUMNS_PREFERENCES_DEFAULTS is keyed by DataTables index. A new column with no entry
+    silently inherits whatever the previous occupant of that index was set to."""
+    source = (Path(__file__).parents[3] / "src" / "ui" / "app" / "utils.py").read_text(encoding="utf-8")
+    block = re.search(r'"reports": \{(.*?)\n    \}', source, re.S)
+    assert block
+    defaults = {int(index) for index in re.findall(r'"(\d+)":', block.group(1))}
+    # index 2 is the date column, which the toolbar never offers to hide
+    assert defaults == set(range(3, len(_js_event_log_columns())))
+
+
+def test_stream_only_columns_are_hidden_by_default():
+    """An operator with no TCP/UDP service must not gain five empty columns."""
+    source = (Path(__file__).parents[3] / "src" / "ui" / "app" / "utils.py").read_text(encoding="utf-8")
+    block = re.search(r'"reports": \{(.*?)\n    \}', source, re.S)
+    assert block
+    defaults = {int(index): value == "True" for index, value in re.findall(r'"(\d+)": (True|False)', block.group(1))}
+    columns = _js_event_log_columns()
+    for field in ("listen_port", "client_port", "bytes_sent", "bytes_received", "session_time"):
+        assert defaults[columns.index(field)] is False, f"{field} should ship hidden"
+    assert defaults[columns.index("protocol")] is True, "the discriminator itself is not optional"
+
+
 def test_every_t_call_key_in_reports_js_resolves_in_en_json():
     """test_every_data_i18n_key_resolves_in_en_json only catches keys rendered as a
     data-i18n/title_i18n/i18n_key attribute in template/JS source. The reports dashboard's JS

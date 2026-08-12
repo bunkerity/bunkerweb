@@ -40,7 +40,12 @@ def _number(value: Any) -> float:
 
 
 def _parse_search_panes(raw: str) -> Dict[str, List[str]]:
-    """Parse the UI search-panes string ``field1:v1,v2;field2:v3`` into a ``{field: [values]}`` filter dict."""
+    """Parse the UI search-panes string ``field1:v1,v2;field2:v3`` into a ``{field: [values]}`` filter dict.
+
+    ``protocol`` doubles as the HTTP/TCP/UDP filter on every endpoint here — it is an ordinary
+    facet field, so it needs no parameter of its own. ``protocol:stream`` is expanded to the two
+    L4 protocols, which is how a caller asks for "everything that is not HTTP" in one term.
+    """
     filters: Dict[str, List[str]] = {}
     for part in raw.split(";"):
         field, separator, values = part.partition(":")
@@ -48,6 +53,9 @@ def _parse_search_panes(raw: str) -> Dict[str, List[str]]:
             continue
         field = field.strip()
         selected = [value for value in values.split(",") if value]
+        if field == "protocol" and "stream" in selected:
+            selected = [value for value in selected if value != "stream"] + ["tcp", "udp"]
+            selected = list(dict.fromkeys(selected))
         if field and selected:
             filters[field] = selected
     return filters

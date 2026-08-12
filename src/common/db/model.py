@@ -279,11 +279,17 @@ class Jobs_runs(Base):
 
 
 class Requests(Base):
-    """Persisted blocked-request reports (metrics).
+    """Persisted blocked-request reports (metrics), HTTP requests and TCP/UDP sessions alike.
 
-    One row per blocked/detected request, mirroring the per-request record the
+    One row per blocked/detected event, mirroring the per-request record the
     metrics Lua endpoint exposes. Rows are scraped from instances and deduplicated
     on ``(instance_hostname, request_id)``. No FK: instance-agnostic / multi-instance.
+
+    ``protocol`` is the discriminator. An HTTP request fills the HTTP columns
+    (``method``, ``url``, ``user_agent``) and leaves the L4 ones null; a TCP/UDP session does
+    the exact opposite. Both are kept in one table so retention, permissions, API and UI stay
+    single-pathed — but neither is ever described in the other's vocabulary, which is why the
+    HTTP columns are nullable and why a session status is not an HTTP status code.
     """
 
     __tablename__ = "bw_metrics_requests"
@@ -296,10 +302,18 @@ class Requests(Base):
     request_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     instance_hostname: Mapped[str] = mapped_column(String(256), nullable=False, default="", index=True)
     date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    # "http", "tcp" or "udp". Defaulted rather than enumerated: a new L4 protocol must not need a
+    # schema change on four engines, and rows written by an instance that predates this column
+    # land as HTTP, which is what they were.
+    protocol: Mapped[str] = mapped_column(String(8), nullable=False, default="http", server_default="http", index=True)
     ip: Mapped[str] = mapped_column(String(39), nullable=False, index=True)
     country: Mapped[str] = mapped_column(String(16), nullable=False, default="")
-    method: Mapped[str] = mapped_column(String(16), nullable=False)
-    url: Mapped[str] = mapped_column(Text, nullable=False)
+    # HTTP-only, hence nullable: a raw L4 session has no method, no URL and no user agent. They
+    # used to be NOT NULL, which forced the stream path to fabricate "TCP" and "tcp://host:port".
+    method: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
+    url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # HTTP response code for a request, NGINX session status (200/400/403/500/502/503) for a
+    # stream session. Read it against ``protocol``, never as an HTTP code on its own.
     status: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     reason: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
@@ -308,6 +322,13 @@ class Requests(Base):
     security_mode: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
     asn_number: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     asn_org: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    # Stream-only dimensions, all free NGINX log-phase variables ($server_port, $remote_port,
+    # $bytes_sent, $bytes_received, $session_time). Null for HTTP rows.
+    listen_port: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    client_port: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    bytes_sent: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    bytes_received: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    session_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 

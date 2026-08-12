@@ -79,6 +79,14 @@ $(document).ready(function () {
     )}`;
   };
 
+  // Columns that only one protocol fills: the L4 ones are empty on an HTTP request, the HTTP
+  // ones on a TCP/UDP session. Render the gap as an em dash rather than a blank cell, so
+  // "this protocol has no such notion" reads differently from "the value was empty".
+  const renderStreamValue = (data, type) => {
+    if (type !== "display") return data;
+    return data === null || data === undefined || data === "" ? "—" : data;
+  };
+
   const headers = [
     {
       title: "Date",
@@ -141,6 +149,36 @@ $(document).ready(function () {
       i18n: "tooltip.table.reports.security_mode",
     },
     {
+      title: "Protocol",
+      tooltip: "HTTP request, or TCP/UDP stream session",
+      i18n: "tooltip.table.reports.protocol",
+    },
+    {
+      title: "Listen port",
+      tooltip: "Stream only: the port the session came in on",
+      i18n: "tooltip.table.reports.listen_port",
+    },
+    {
+      title: "Client port",
+      tooltip: "Stream only: the client's source port",
+      i18n: "tooltip.table.reports.client_port",
+    },
+    {
+      title: "Bytes sent",
+      tooltip: "Stream only: bytes sent to the client during the session",
+      i18n: "tooltip.table.reports.bytes_sent",
+    },
+    {
+      title: "Bytes received",
+      tooltip: "Stream only: bytes received from the client during the session",
+      i18n: "tooltip.table.reports.bytes_received",
+    },
+    {
+      title: "Session time",
+      tooltip: "Stream only: how long the session lasted, in seconds",
+      i18n: "tooltip.table.reports.session_time",
+    },
+    {
       title: "Actions",
       tooltip: "Actions available for this report",
       i18n: "tooltip.table.reports.actions",
@@ -158,7 +196,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [4, 5, 6, 7, 8, 10, 11, 13],
+        columns: [4, 5, 6, 7, 8, 10, 11, 13, 14],
       },
     },
     topStart: {},
@@ -446,7 +484,7 @@ $(document).ready(function () {
   const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
-    columnVisibilityCondition: (column) => column > 1 && column < 15,
+    columnVisibilityCondition: (column) => column > 1 && column < 21,
     dataTableOptions: {
       columnDefs: [
         { orderable: false, targets: -1 },
@@ -511,6 +549,11 @@ $(document).ready(function () {
           render: function (data, type, row) {
             if (type !== "display") {
               return data;
+            }
+
+            // A stream session has no URL at all -- see renderStreamValue.
+            if (data === null || data === undefined || data === "") {
+              return "—";
             }
 
             // For display, check if URL is too long
@@ -580,6 +623,16 @@ $(document).ready(function () {
           },
           targets: 13,
         },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.protocol", "Protocol"),
+            combiner: "or",
+          },
+          targets: 14,
+        },
+        // HTTP-only fields: a stream session has no method and no user agent.
+        { render: renderStreamValue, targets: [6, 9] },
         // Actions column renderer (last column)
         {
           targets: -1,
@@ -812,6 +865,42 @@ $(document).ready(function () {
           data: "security_mode",
           title:
             "<span data-i18n='table.header.security_mode'>Security mode</span>",
+        },
+        // Protocol and the L4 columns are appended rather than slotted next to the HTTP ones on
+        // purpose: column visibility preferences are stored by index, so inserting mid-table
+        // would silently shift every operator's saved layout.
+        {
+          data: "protocol",
+          title: "<span data-i18n='table.header.protocol'>Protocol</span>",
+        },
+        {
+          data: "listen_port",
+          title:
+            "<span data-i18n='table.header.listen_port'>Listen port</span>",
+          render: renderStreamValue,
+        },
+        {
+          data: "client_port",
+          title:
+            "<span data-i18n='table.header.client_port'>Client port</span>",
+          render: renderStreamValue,
+        },
+        {
+          data: "bytes_sent",
+          title: "<span data-i18n='table.header.bytes_sent'>Bytes sent</span>",
+          render: renderStreamValue,
+        },
+        {
+          data: "bytes_received",
+          title:
+            "<span data-i18n='table.header.bytes_received'>Bytes received</span>",
+          render: renderStreamValue,
+        },
+        {
+          data: "session_time",
+          title:
+            "<span data-i18n='table.header.session_time'>Session time</span>",
+          render: renderStreamValue,
         },
         {
           data: "actions",

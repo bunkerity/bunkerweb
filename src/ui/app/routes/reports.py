@@ -157,6 +157,24 @@ def build_search_panes_options(pane_counts_backend: dict) -> dict:
     return search_panes_options
 
 
+def _export_cell(value, fallback: str = "N/A") -> str:
+    """Stringify a report field for an export, mapping null/empty to ``fallback``.
+
+    A plain ``str(report.get(key, "N/A"))`` prints "None" for the HTTP fields of a stream row and
+    the L4 fields of an HTTP one: the key is there, the value is null."""
+    return str(value) if value is not None and value != "" else fallback
+
+
+def _optional_field(value):
+    """Escape a report field, or hand back ``None`` when the protocol has no such notion.
+
+    ``str(None)`` would print "None" in the cell, and "N/A" would claim the value was missing
+    rather than inapplicable — a TCP session has no method, no URL and no user agent."""
+    if value is None or value == "":
+        return None
+    return escape(str(value))
+
+
 def pane_counts_has_values(pane_counts_backend: dict) -> bool:
     if not isinstance(pane_counts_backend, dict):
         return False
@@ -246,6 +264,14 @@ def reports_fetch():
         "server_name",
         "data",
         "security_mode",
+        # Protocol and its L4 detail are appended, not slotted next to the HTTP columns: column
+        # visibility is persisted by index, so inserting mid-table would shift saved layouts.
+        "protocol",
+        "listen_port",
+        "client_port",
+        "bytes_sent",
+        "bytes_received",
+        "session_time",
         "actions",  # actions column for row buttons
     ]
 
@@ -313,10 +339,12 @@ def reports_fetch():
                 "request_id": request_id,
                 "ip": escape(str(report.get("ip", "N/A"))),
                 "country": escape(str(report.get("country", "N/A"))),
-                "method": escape(str(report.get("method", "N/A"))),
-                "url": escape(str(report.get("url", "N/A"))),
+                # HTTP-only fields are None on a stream session. Passed through as null so the
+                # table can say "not applicable here" instead of printing the string "None".
+                "method": _optional_field(report.get("method")),
+                "url": _optional_field(report.get("url")),
                 "status": escape(str(report.get("status", "N/A"))),
-                "user_agent": escape(str(report.get("user_agent", "N/A"))),
+                "user_agent": _optional_field(report.get("user_agent")),
                 "reason": escape(str(report.get("reason", "N/A"))),
                 "server_name": escape(server_name),
                 # The persisted row is the only durable source for report details: Redis and
@@ -324,6 +352,13 @@ def reports_fetch():
                 "data": data_field if has_data else "",
                 "has_data": has_data,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
+                "protocol": escape(str(report.get("protocol") or "http")),
+                # Stream-only, null on an HTTP request.
+                "listen_port": report.get("listen_port"),
+                "client_port": report.get("client_port"),
+                "bytes_sent": report.get("bytes_sent"),
+                "bytes_received": report.get("bytes_received"),
+                "session_time": report.get("session_time"),
                 # default ban duration in seconds for quick-ban action
                 "ban_default_exp": get_default_ban_time(db_config, server_name),
                 # Placeholder for UI actions column
@@ -347,6 +382,12 @@ def reports_fetch():
                 "data": "",
                 "has_data": False,
                 "security_mode": "N/A",
+                "protocol": "N/A",
+                "listen_port": None,
+                "client_port": None,
+                "bytes_sent": None,
+                "bytes_received": None,
+                "session_time": None,
                 "ban_default_exp": 86400,
                 "actions": "",
             }
@@ -494,6 +535,8 @@ def reports_export_csv():
         writer = csv_writer(output)
 
         # Write header
+        # New columns are appended, never inserted: an existing consumer of this export keeps
+        # reading the same columns in the same positions.
         writer.writerow(
             [
                 "Date",
@@ -508,6 +551,12 @@ def reports_export_csv():
                 "Server Name",
                 "Data",
                 "Security Mode",
+                "Protocol",
+                "Listen Port",
+                "Client Port",
+                "Bytes Sent",
+                "Bytes Received",
+                "Session Time",
             ]
         )
 
@@ -529,14 +578,20 @@ def reports_export_csv():
                     str(report.get("id", "N/A")),
                     str(report.get("ip", "N/A")),
                     str(report.get("country", "N/A")),
-                    str(report.get("method", "N/A")),
-                    str(report.get("url", "N/A")),
+                    _export_cell(report.get("method")),
+                    _export_cell(report.get("url")),
                     str(report.get("status", "N/A")),
-                    str(report.get("user_agent", "N/A")),
+                    _export_cell(report.get("user_agent")),
                     str(report.get("reason", "N/A")),
                     str(report.get("server_name", "N/A")),
                     data_output,
                     str(report.get("security_mode", "N/A")),
+                    _export_cell(report.get("protocol"), "http"),
+                    _export_cell(report.get("listen_port")),
+                    _export_cell(report.get("client_port")),
+                    _export_cell(report.get("bytes_sent")),
+                    _export_cell(report.get("bytes_received")),
+                    _export_cell(report.get("session_time")),
                 ]
             )
 
@@ -600,6 +655,12 @@ def reports_export_excel():
             "Server Name",
             "Data",
             "Security Mode",
+            "Protocol",
+            "Listen Port",
+            "Client Port",
+            "Bytes Sent",
+            "Bytes Received",
+            "Session Time",
         ]
         ws.append(headers)
 
@@ -626,14 +687,20 @@ def reports_export_excel():
                     csv_safe(report.get("id", "N/A")),
                     csv_safe(report.get("ip", "N/A")),
                     csv_safe(report.get("country", "N/A")),
-                    csv_safe(report.get("method", "N/A")),
-                    csv_safe(report.get("url", "N/A")),
+                    csv_safe(_export_cell(report.get("method"))),
+                    csv_safe(_export_cell(report.get("url"))),
                     csv_safe(report.get("status", "N/A")),
-                    csv_safe(report.get("user_agent", "N/A")),
+                    csv_safe(_export_cell(report.get("user_agent"))),
                     csv_safe(report.get("reason", "N/A")),
                     csv_safe(report.get("server_name", "N/A")),
                     csv_safe(data_output),
                     csv_safe(report.get("security_mode", "N/A")),
+                    csv_safe(_export_cell(report.get("protocol"), "http")),
+                    csv_safe(_export_cell(report.get("listen_port"))),
+                    csv_safe(_export_cell(report.get("client_port"))),
+                    csv_safe(_export_cell(report.get("bytes_sent"))),
+                    csv_safe(_export_cell(report.get("bytes_received"))),
+                    csv_safe(_export_cell(report.get("session_time"))),
                 ]
             )
 

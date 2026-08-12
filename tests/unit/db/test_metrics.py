@@ -58,6 +58,30 @@ def _rec(request_id, *, status=403, security_mode="block", date=EPOCH, **over):
     return rec
 
 
+def _stream_rec(request_id, *, protocol="tcp", status=403, **over):
+    """A TCP/UDP session as Lua buffers it: no method, no URL, no user agent, but ports, byte
+    counts and a session duration."""
+    rec = {
+        "id": request_id,
+        "date": EPOCH,
+        "protocol": protocol,
+        "ip": "1.2.3.4",
+        "country": "US",
+        "status": status,
+        "reason": "blacklist",
+        "server_name": "db.example.com",
+        "data": "",
+        "security_mode": "block",
+        "listen_port": 8443,
+        "client_port": 51234,
+        "bytes_sent": 120,
+        "bytes_received": 64,
+        "session_time": 1.5,
+    }
+    rec.update(over)
+    return rec
+
+
 class TestBatchUpsert:
     def test_insert_and_read_back(self, db):
         assert db.batch_upsert_metrics_requests([_rec("r1"), _rec("r2")], instance_hostname="bw-1") == ""
@@ -116,6 +140,66 @@ class TestDedup:
         assert db.batch_upsert_metrics_requests([_rec("r1")], instance_hostname="bw-1") == ""
         assert db.batch_upsert_metrics_requests([_rec("r1")], instance_hostname="bw-2") == ""
         assert db.get_metrics_requests()["total"] == 2
+
+
+class TestProtocolSplit:
+    """HTTP requests and TCP/UDP sessions share the table but never each other's vocabulary."""
+
+    def test_a_record_without_a_protocol_is_http(self, db):
+        # An instance that predates the split sends no protocol field. Its records are HTTP.
+        db.batch_upsert_metrics_requests([_rec("r1")], instance_hostname="bw-1")
+        assert db.get_metrics_requests()["data"][0]["protocol"] == "http"
+
+    def test_a_stream_session_keeps_its_l4_fields_and_no_http_ones(self, db):
+        db.batch_upsert_metrics_requests([_stream_rec("s1")], instance_hostname="bw-1")
+        row = db.get_metrics_requests()["data"][0]
+        assert row["protocol"] == "tcp"
+        assert (row["method"], row["url"], row["user_agent"]) == (None, None, None)
+        assert (row["listen_port"], row["client_port"]) == (8443, 51234)
+        assert (row["bytes_sent"], row["bytes_received"]) == (120, 64)
+        assert row["session_time"] == 1.5
+
+    def test_an_http_row_carries_no_l4_fields(self, db):
+        db.batch_upsert_metrics_requests([_rec("r1")], instance_hostname="bw-1")
+        row = db.get_metrics_requests()["data"][0]
+        assert [row[field] for field in ("listen_port", "client_port", "bytes_sent", "bytes_received", "session_time")] == [None] * 5
+
+    def test_a_stream_block_survives_the_report_filter_without_a_fake_4xx(self, db):
+        # This is the whole point of the discriminator: the stream path used to pin every deny to
+        # 403 because the filter was 4xx-or-detect for everyone.
+        db.batch_upsert_metrics_requests([_stream_rec("s1", status=200)], instance_hostname="bw-1")
+        res = db.get_metrics_requests()
+        assert res["filtered"] == 1
+        assert (res["data"][0]["status"], res["data"][0]["protocol"]) == (200, "tcp")
+
+    def test_protocol_is_a_facet_and_filters_like_any_other_pane(self, db):
+        db.batch_upsert_metrics_requests(
+            [_rec("h1"), _stream_rec("s1"), _stream_rec("s2", protocol="udp")],
+            instance_hostname="bw-1",
+        )
+        facets = db.get_metrics_facets()
+        assert facets["protocol"]["http"]["total"] == 1
+        assert facets["protocol"]["tcp"]["total"] == 1
+        assert facets["protocol"]["udp"]["total"] == 1
+
+        res = db.get_metrics_requests(filters={"protocol": ["tcp", "udp"]})
+        assert res["filtered"] == 2
+        assert {r["request_id"] for r in res["data"]} == {"s1", "s2"}
+
+    def test_a_null_http_field_is_not_offered_as_a_facet_value(self, db):
+        # Otherwise the Method pane offers "None" — the absence of a notion presented as a value
+        # to filter by. Telling HTTP from stream is the protocol pane's job.
+        db.batch_upsert_metrics_requests([_rec("h1"), _stream_rec("s1")], instance_hostname="bw-1")
+        facets = db.get_metrics_facets()
+        assert set(facets["method"]) == {"GET"}
+        assert set(facets["url"]) == {"/admin"}
+        assert set(facets["protocol"]) == {"http", "tcp"}
+
+    def test_empty_http_fields_are_stored_as_null_not_empty_strings(self, db):
+        # "" and NULL both render as a blank cell but only one of them means "no such notion".
+        db.batch_upsert_metrics_requests([_rec("r1", method="", url="")], instance_hostname="bw-1")
+        row = db.get_metrics_requests()["data"][0]
+        assert (row["method"], row["url"]) == (None, None)
 
 
 class TestQueryFilterSearch:
