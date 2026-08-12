@@ -80,9 +80,9 @@ blinker==1.9.0 \
     --hash=sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf \
     --hash=sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc
     # via flask
-cachelib==0.15.0 \
-    --hash=sha256:14a226c9856a48f1666cdb107fc4573171c1c820cb3fd2528a57f81fde8170e5 \
-    --hash=sha256:40a387c42d12e90c8a1a2cb87dedcc34fd9143a5b2c7f2daed3d4c56ebf7bdfc
+cachelib==0.15.4 \
+    --hash=sha256:500f447d6ebf52654bcbb1b7ed1329daf890252227f09933870a01a84798687a \
+    --hash=sha256:66fb75f48f9077713c8a1ce2319f523d08418a1576f2cbdaad8aad15c884afa0
     # via flask-session
 certbot==5.7.0 \
     --hash=sha256:7e5e8f023c5eb4753f4b74f97c26ddd57e43493e82b76eeefb741c120a7d49b6 \
@@ -577,9 +577,9 @@ openpyxl==3.1.5 \
     --hash=sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2 \
     --hash=sha256:cf0e3cf56142039133628b5acffe8ef0c12bc902d2aadd3e0fe5878dc08d1050
     # via -r requirements.in
-packaging==26.2 \
-    --hash=sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e \
-    --hash=sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661
+packaging==26.3 \
+    --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
     # via gunicorn
 parsedatetime==2.6 \
     --hash=sha256:4cb368fbb18a0b7231f4d76119165451c8d2e35951455dfee97c62a87b04d455 \
