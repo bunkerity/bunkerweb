@@ -292,26 +292,26 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 | Ajuste                      | Valor por defecto      | Contexto  | Múltiple | Descripción                                                                                                                                   |
 | --------------------------- | ---------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **Habilitar CrowdSec:** Establezca en `yes` para habilitar el bouncer de CrowdSec.                                                            |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **URL de la API de CrowdSec:** La dirección del servicio de la API Local de CrowdSec.                                                         |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **Clave de API de CrowdSec:** La clave de API para autenticarse con la API de CrowdSec, obtenida usando `cscli bouncers add`.                 |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Modo de Operación:** `live` (consultar la API para cada solicitud) o `stream` (almacenar en caché periódicamente todas las decisiones).     |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Tráfico Interno:** Establezca en `yes` para verificar el tráfico interno contra las decisiones de CrowdSec.                                 |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`.   |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Ubicaciones Excluidas:** Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.                     |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`.                         |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite    | no       | **URL de la API de CrowdSec:** La dirección del servicio de la API Local de CrowdSec.                                                         |
+| `CROWDSEC_API_KEY`          |                        | multisite    | no       | **Clave de API de CrowdSec:** La clave de API para autenticarse con la API de CrowdSec, obtenida usando `cscli bouncers add`.                 |
+| `CROWDSEC_MODE`             | `live`                 | multisite    | no       | **Modo de Operación:** `live` (consultar la API para cada solicitud) o `stream` (almacenar en caché periódicamente todas las decisiones).     |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite    | no       | **Tráfico Interno:** Establezca en `yes` para verificar el tráfico interno contra las decisiones de CrowdSec.                                 |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite    | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`.   |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | no       | **Ubicaciones Excluidas:** Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.                     |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite    | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`.                         |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite    | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. |
 
 #### Ajustes del Componente de Seguridad de Aplicaciones
 
 | Ajuste                            | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                      |
 | --------------------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `CROWDSEC_APPSEC_URL`             |                   | global   | no       | **URL de AppSec:** La URL del Componente de Seguridad de Aplicaciones de CrowdSec. Dejar vacío para deshabilitar AppSec.         |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`     | global   | no       | **Acción en Caso de Falla:** Acción a tomar cuando AppSec devuelve un error. Puede ser `passthrough` o `deny`.                   |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`             | global   | no       | **Tiempo de Espera de Conexión:** El tiempo de espera en milisegundos para conectarse al Componente AppSec.                      |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`             | global   | no       | **Tiempo de Espera de Envío:** El tiempo de espera en milisegundos para enviar datos al Componente AppSec.                       |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`             | global   | no       | **Tiempo de Espera de Procesamiento:** El tiempo de espera en milisegundos para procesar la solicitud en el Componente AppSec.   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | global   | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | global   | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
+| `CROWDSEC_APPSEC_URL`             |                   | multisite   | no       | **URL de AppSec:** La URL del Componente de Seguridad de Aplicaciones de CrowdSec. Dejar vacío para deshabilitar AppSec.         |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`     | multisite   | no       | **Acción en Caso de Falla:** Acción a tomar cuando AppSec devuelve un error. Puede ser `passthrough` o `deny`.                   |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`             | multisite   | no       | **Tiempo de Espera de Conexión:** El tiempo de espera en milisegundos para conectarse al Componente AppSec.                      |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`             | multisite   | no       | **Tiempo de Espera de Envío:** El tiempo de espera en milisegundos para enviar datos al Componente AppSec.                       |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`             | multisite   | no       | **Tiempo de Espera de Procesamiento:** El tiempo de espera en milisegundos para procesar la solicitud en el Componente AppSec.   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | multisite   | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | multisite   | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
 
 !!! info "Sobre los Modos de Operación"
     - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.

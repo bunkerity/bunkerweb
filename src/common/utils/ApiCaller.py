@@ -2,6 +2,7 @@
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
+from gzip import GzipFile
 from io import BytesIO
 from os import sep
 from os.path import join, realpath
@@ -74,12 +75,39 @@ class ApiCaller:
 
         return ret, responses
 
-    def send_files(self, path: str, url: str, timeout=(5, 10), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
-        with BytesIO() as tgz:
-            with tar_open(mode="w:gz", fileobj=tgz, compresslevel=3) as tf:
+    @staticmethod
+    def _build_archive(path: str) -> BytesIO:
+        """Build a gzip tar whose bytes depend only on file names and contents.
+
+        Member metadata and the gzip header timestamp are normalized, so sending an
+        unchanged directory twice produces the same bytes. Instances compare that
+        digest to skip a push that would change nothing, which matters because the
+        scheduler sends these directories on every start whether or not they changed.
+        Mirrors create_plugin_tar_gz, which normalizes for the same reason.
+        """
+
+        def normalize(tarinfo):
+            tarinfo.mtime = 0
+            tarinfo.uid = 0
+            tarinfo.gid = 0
+            tarinfo.uname = "root"
+            tarinfo.gname = "root"
+            return tarinfo
+
+        with BytesIO() as raw:
+            with tar_open(fileobj=raw, mode="w") as tar:
                 # top-level path may itself be a symlink (resolve it); nested symlinks must stay symlinks (no dereference)
-                tf.add(realpath(path), arcname=".")
-            tgz.seek(0, 0)
+                tar.add(realpath(path), arcname=".", filter=normalize)
+            raw_bytes = raw.getvalue()
+
+        result = BytesIO()
+        with GzipFile(fileobj=result, mode="wb", compresslevel=3, mtime=0) as gz:
+            gz.write(raw_bytes)
+        result.seek(0)
+        return result
+
+    def send_files(self, path: str, url: str, timeout=(5, 10), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
+        with self._build_archive(path) as tgz:
             files = {"archive.tar.gz": tgz}
             ret = self.send_to_apis("POST", url, files=files, timeout=timeout, response=response)
             if response:

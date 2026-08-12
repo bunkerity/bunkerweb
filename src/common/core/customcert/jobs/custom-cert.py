@@ -3,10 +3,7 @@
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
-from base64 import b64decode
-from tempfile import NamedTemporaryFile
 from traceback import format_exc
 from typing import Tuple, Union, Optional, Literal
 
@@ -14,6 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from certificate_validation import normalize_pem, validate_certificate_pair  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
@@ -35,45 +33,12 @@ def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["ce
         if not data:
             return None
 
-        # If the data already looks like PEM, use it directly.
-        text_data = data.encode()
-        if text_data.strip().startswith(b"-----BEGIN"):
-            if data_type == "cert" and not text_data.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
-                LOGGER.error(f"Invalid certificate format for server {server_name}")
-                return None
-            if data_type == "key" and b"PRIVATE KEY" not in text_data:
-                LOGGER.error(f"Invalid key format for server {server_name}")
-                return None
-            return text_data
-
-        # Try strict base64 decode. We remove whitespaces and pad if needed.
-        decoded = b""
-        try:
-            base64_data = "".join(data.split())
-            base64_data += "=" * (-len(base64_data) % 4)
-            decoded = b64decode(base64_data, validate=True)
-            if data_type == "cert" and not decoded.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
-                raise ValueError("decoded certificate data is not PEM")
-            if data_type == "key" and (not decoded.strip().startswith(b"-----BEGIN") or b"PRIVATE KEY" not in decoded):
-                raise ValueError("decoded key data is not PEM")
-            return decoded
-        except BaseException:
-            LOGGER.debug(format_exc())
-            LOGGER.warning(f"Failed to decode {data_type} data as base64 for server {server_name}, trying as plain text")
-
-            # Fallback: validate and use plaintext data.
-            try:
-                if data_type == "cert" and not text_data.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
-                    LOGGER.error(f"Invalid certificate format for server {server_name}")
-                    return None
-                elif data_type == "key" and (not text_data.strip().startswith(b"-----BEGIN") or b"PRIVATE KEY" not in text_data):
-                    LOGGER.error(f"Invalid key format for server {server_name}")
-                    return None
-                return text_data
-            except BaseException:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Error while processing {data_type} data for server {server_name}")
-                return None
+        # Shared with the UI so a value accepted on one side is accepted on the other.
+        pem, error = normalize_pem(data, data_type)
+        if not pem:
+            LOGGER.error(f"{error} for server {server_name}")
+            return None
+        return pem
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Error processing {data_type} for {server_name}: {e}")
@@ -96,29 +61,18 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
                 return False, f"Key file {key_file} is not a valid file, ignoring the custom certificate"
             key_file = key_file.read_bytes()
 
-        # Write to temporary files for OpenSSL validation
-        with NamedTemporaryFile(delete=False) as cert_temp, NamedTemporaryFile(delete=False) as key_temp:
-            try:
-                cert_temp.write(cert_file)
-                key_temp.write(key_file)
-                cert_temp.flush()
-                key_temp.flush()
+        # Validate the pair in-process: the previous check only parsed the certificate and
+        # never looked at the key at all, so a malformed, encrypted or mismatched key was
+        # cached, shipped, and only failed later in Lua, where the service silently falls
+        # back to the default certificate.
+        check = validate_certificate_pair(cert_file, key_file)
+        if not check["ok"]:
+            return False, check["error"]
 
-                # Validate the certificate using OpenSSL
-                result = run(
-                    ["openssl", "x509", "-noout", "-in", cert_temp.name],
-                    stdin=DEVNULL,
-                    stderr=DEVNULL,
-                    check=False,
-                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-                )
-
-                if result.returncode != 0:
-                    return False, "Certificate is invalid."
-            finally:
-                # Clean up temporary files
-                Path(cert_temp.name).unlink(missing_ok=True)
-                Path(key_temp.name).unlink(missing_ok=True)
+        # Expiry never blocks: withdrawing a certificate that is currently being served
+        # would drop the service to the default one, which is worse than serving expired.
+        for warning in check["warnings"]:
+            LOGGER.warning(f"{first_server}: {warning}")
 
         cert_hash = bytes_hash(cert_file)
         old_hash = JOB.cache_hash("cert.pem", service_id=first_server)

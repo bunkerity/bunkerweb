@@ -39,9 +39,24 @@ local APPSEC_URI_HEADER = "x-crowdsec-appsec-uri"
 local APPSEC_USER_AGENT_HEADER = "x-crowdsec-appsec-user-agent"
 local REMEDIATION_API_KEY_HEADER = 'x-api-key'
 
+-- BunkerWeb local modification: BunkerWeb loads one private copy of this module per
+-- distinct per-service configuration, and they all share the single crowdsec_cache
+-- shared dict. When those configurations target different Local APIs the caller
+-- passes a short prefix so decisions, stream bookkeeping and captcha state cannot
+-- bleed between them. Deployments with a single Local API pass nothing and keep
+-- upstream's exact keys, so the request path pays no extra concatenation.
+local function namespaced_cache(dict, prefix)
+  return {
+    get = function(_, key) return dict:get(prefix .. key) end,
+    set = function(_, key, value, exptime, flags)
+      return dict:set(prefix .. key, value, exptime or 0, flags or 0)
+    end,
+    delete = function(_, key) return dict:delete(prefix .. key) end,
+  }
+end
 
 -- init function
-function csmod.init(configFile, userAgent)
+function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePrefix
   local conf, err = config.loadConfig(configFile)
   if conf == nil then
     return nil, err
@@ -49,6 +64,9 @@ function csmod.init(configFile, userAgent)
   runtime.conf = conf
   runtime.userAgent = userAgent
   runtime.cache = ngx.shared.crowdsec_cache
+  if cachePrefix and cachePrefix ~= "" then -- BW local mod
+    runtime.cache = namespaced_cache(runtime.cache, cachePrefix)
+  end
   runtime.fallback = runtime.conf["FALLBACK_REMEDIATION"]
 
   if runtime.conf["ENABLED"] == "false" then
@@ -641,7 +659,7 @@ function csmod.Allow(ip)
 
   -- if the ip is now allowed, try to delete its captcha state in cache
   if ok == true then
-    ngx.shared.crowdsec_cache:delete("captcha_" .. ip)
+    runtime.cache:delete("captcha_" .. ip)
   end
 
   -- check with appSec if the remediation component doesn't have decisions for the IP
@@ -678,7 +696,7 @@ function csmod.Allow(ip)
 
   if captcha_ok then -- if captcha can be use (configuration is valid)
     -- we check if the IP need to validate its captcha before checking it against crowdsec local API
-    local previous_uri, flags = ngx.shared.crowdsec_cache:get("captcha_"..ip)
+    local previous_uri, flags = runtime.cache:get("captcha_"..ip)
     local source, state_id, err = flag.GetFlags(flags)
     local body = get_body()
 
@@ -697,9 +715,9 @@ function csmod.Allow(ip)
                 -- we will not propose a captcha until the 'CAPTCHA_EXPIRATION'.
                 -- But for the Application security component, we serve the captcha each time the user trigger it.
                 if source == flag.APPSEC_SOURCE then
-                  ngx.shared.crowdsec_cache:delete("captcha_"..ip)
+                  runtime.cache:delete("captcha_"..ip)
                 else
-                  local succ, err, forcible = ngx.shared.crowdsec_cache:set("captcha_"..ip, previous_uri, runtime.conf["CAPTCHA_EXPIRATION"], bit.bor(flag.VALIDATED_STATE, source) )
+                  local succ, err, forcible = runtime.cache:set("captcha_"..ip, previous_uri, runtime.conf["CAPTCHA_EXPIRATION"], bit.bor(flag.VALIDATED_STATE, source) )
                   if not succ then
                     ngx.log(ngx.ERR, "failed to add key about captcha for ip '" .. ip .. "' in cache: "..err)
                   end
@@ -724,7 +742,7 @@ function csmod.Allow(ip)
       end
       -- if the remediation is a captcha and captcha is well configured
       if remediation == "captcha" and captcha_ok and ngx.var.uri ~= "/favicon.ico" then
-          local previous_uri, flags = ngx.shared.crowdsec_cache:get("captcha_"..ip)
+          local previous_uri, flags = runtime.cache:get("captcha_"..ip)
           local source, state_id, err = flag.GetFlags(flags)
           -- we check if the IP is already in cache for captcha and not yet validated
           if previous_uri == nil or state_id ~= flag.VALIDATED_STATE or remediationSource == flag.APPSEC_SOURCE then
@@ -741,7 +759,7 @@ function csmod.Allow(ip)
                   end
                 end
               end
-              local succ, err, forcible = ngx.shared.crowdsec_cache:set("captcha_"..ip, uri , 60, bit.bor(flag.VERIFY_STATE, remediationSource))
+              local succ, err, forcible = runtime.cache:set("captcha_"..ip, uri , 60, bit.bor(flag.VERIFY_STATE, remediationSource))
               if not succ then
                 ngx.log(ngx.ERR, "failed to add key about captcha for ip '" .. ip .. "' in cache: "..err)
               end

@@ -9,17 +9,16 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from re import MULTILINE, search
-from select import select
-from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
-from time import monotonic, sleep
+from time import sleep
 from threading import Event, Lock, Thread
 from traceback import format_exc
 from typing import Dict, List, Optional, Set, Tuple, Union
 from certbot_concurrency import (
     CertbotPaths,
     ensure_accounts,
+    ensure_accounts_for_orphans,
     ensure_zerossl_accounts,
     finalize_certbot_run,
     prepare_certbot_paths,
@@ -51,12 +50,15 @@ from letsencrypt_utils import (
     build_certbot_env,
     extract_provider,
     get_expected_acme_directory,
+    is_stale_account_line,
     le_cache_write_lock,
     letsencrypt_cache_consistent,
     prepare_logs_dir,
     purge_lineage,
+    purge_stale_account,
     resolve_certbot_entrypoint,
     sanitize_and_persist,
+    stream_certbot,
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
@@ -106,6 +108,10 @@ PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+
+# Set from certbot_new(), which can run in a thread pool, so the recovery below the generation loop
+# knows a purge happened without threading a return value back through the executor.
+STALE_ACCOUNT_PURGED = Event()
 
 
 def normalize_server_names(server_names: str) -> Set[str]:
@@ -484,7 +490,7 @@ def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
             cleaned_labels.append(labels)
 
     if not cleaned_labels:
-        return []
+        return {}
 
     grouped: Dict[str, List[List[str]]] = defaultdict(list)
     for labels in cleaned_labels:
@@ -607,39 +613,11 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
-    deadline = monotonic() + CERTBOT_TIMEOUT
-    while process.poll() is None:
-        if monotonic() > deadline:
-            LOGGER.error(f"certbot delete for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
-            process.kill()
-            process.wait()
-            return 1
-        if process.stderr:
-            rlist, _, _ = select([process.stderr], [], [], 2)
-            if rlist:
-                for line in process.stderr:
-                    LOGGER_CERTBOT.info(line.strip())
-                    break
+    if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT):
+        LOGGER.error(f"certbot delete for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+        return 1
 
     return process.returncode
-
-
-def _purge_stale_account(accounts_root: Path, account_id: str) -> None:
-    """Remove the on-disk ACME account dir whose server-side record was pruned.
-
-    Walks for the `<account_id>/regr.json` under accounts_root (CA-agnostic:
-    LE 2-level, ZeroSSL 3-level) and rmtree's its parent. Best-effort — failures
-    are logged, not raised, so the retry still proceeds.
-    """
-    if not account_id or not accounts_root.is_dir():
-        return
-    try:
-        for regr in accounts_root.rglob("regr.json"):
-            if regr.parent.name == account_id:
-                LOGGER.warning(f"Purging stale ACME account {account_id} (server reports it no longer exists) so the next attempt re-registers.")
-                rmtree(regr.parent, ignore_errors=True)
-    except OSError as e:
-        LOGGER.error(f"Failed to purge stale account {account_id}: {e}")
 
 
 def certbot_new(
@@ -786,29 +764,22 @@ def certbot_new(
     # re-register when `--account` is pinned, so every retry would reuse the dead
     # account and fail identically. Detect it, then drop the stale account dir so
     # the next attempt (select_account_id → None) registers a fresh account.
-    stale_account_detected = False
-    deadline = monotonic() + CERTBOT_TIMEOUT
-    while process.poll() is None:
-        if monotonic() > deadline:
-            LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
-            process.kill()
-            process.wait()
-            return 1
-        if process.stderr:
-            rlist, _, _ = select([process.stderr], [], [], 2)
-            if rlist:
-                for line in process.stderr:
-                    stripped = line.strip()
-                    LOGGER_CERTBOT.info(stripped)
-                    if "Account" in stripped and "not found" in stripped and ("validate JWS" in stripped or "acme/acct" in stripped):
-                        stale_account_detected = True
-                    break
+    stale_account = Event()
 
-    if stale_account_detected and account_id:
+    def watch_stale_account(line: str) -> None:
+        if is_stale_account_line(line):
+            stale_account.set()
+
+    if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT, watch_stale_account):
+        LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+        return 1
+
+    if stale_account.is_set() and account_id:
         # Purge the canonical store, not paths.config_dir: in concurrent mode config_dir is a
         # throwaway scratch (merged only on success), so purging it leaves DATA_PATH untouched
         # and the stale account is restored next run. Non-concurrent: config_dir == DATA_PATH.
-        _purge_stale_account(DATA_PATH.joinpath("accounts"), account_id)
+        if purge_stale_account(DATA_PATH, account_id, LOGGER):
+            STALE_ACCOUNT_PURGED.set()
 
     return process.returncode
 
@@ -898,6 +869,12 @@ try:
     # ? Fetch existing certificates
     cmd_env = build_certbot_env(JOB, DEPS_PATH)
 
+    # Register an account for any CA whose renewal confs are orphaned and that has none left, so
+    # the repoint inside sanitize_and_persist always has somewhere to point. Without it a purged
+    # last account is terminal: issuance only registers as a side effect of `certbot certonly`,
+    # which never runs while every certificate already exists.
+    ensure_accounts_for_orphans(DATA_PATH, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, WORK_DIR, LOGS_DIR, LOGGER)
+
     # Quarantine any renewal conf whose lineage name disagrees with its filename (or that has no
     # cert material) BEFORE calling certbot: a single broken conf makes `certbot certificates`
     # exit non-zero, which would otherwise force_renew every service and never persist the fix.
@@ -948,12 +925,34 @@ try:
             service = certificate_lines[0].split()[0].strip()
             domains = parse_certbot_domains(certificate_block)
 
-            existing_certificates[service] = {"active": False, "server_names": domains, "server_names_set": normalize_server_names(domains)}
+            # Seed every key the comparison loop below reads unconditionally. They are only filled
+            # in from the renewal conf, and a certificate certbot lists whose conf is missing would
+            # otherwise raise KeyError there and end the job for every other service too.
+            existing_certificates[service] = {
+                "active": False,
+                "server_names": domains,
+                "server_names_set": normalize_server_names(domains),
+                "challenge": "",
+                "authenticator": "",
+                "credentials_hash": "",
+                "staging": False,
+                "profile": "",
+                "acme_server_url": "",
+            }
 
             renewal_file = DATA_PATH.joinpath("renewal", f"{service}.conf")
+            renewal_content = ""
             if renewal_file.is_file():
-                renewal_content = renewal_file.read_text()
+                # An unreadable or non-UTF-8 conf leaves the seeded defaults in place rather than
+                # ending the job here, which would take every other service down with it.
+                try:
+                    renewal_content = renewal_file.read_text()
+                except OSError as e:
+                    LOGGER.error(f"Could not read the renewal conf for {service}, treating it as unknown: {e}")
+                except UnicodeDecodeError:
+                    LOGGER.error(f"The renewal conf for {service} is not valid UTF-8, treating it as unknown.")
 
+            if renewal_content:
                 match_profile = search(r"^preferred_profile\s*=\s*(\S+)$", renewal_content, MULTILINE)
                 profile = match_profile.group(1) if match_profile else ""
 
@@ -1110,13 +1109,26 @@ try:
                             status = 2
             else:
                 for service, config in pending_services:
-                    config["exists"] = generate_certificate(service, config, cmd_env)
+                    # Same containment as the concurrent branch above: one service raising must not
+                    # end the run for the ones after it, nor skip the cleanup and persist below.
+                    try:
+                        config["exists"] = generate_certificate(service, config, cmd_env)
+                    except BaseException as e:
+                        LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
+                        config["exists"] = False
                     if config["exists"]:
                         status = 1 if status == 0 else status
                     else:
                         status = 2
         finally:
             stop_progress_monitor()
+
+    # A purge during the loop above strands every renewal conf naming that account, and the persist
+    # at the end refuses an inconsistent tree, so leaving the repair to the next run would never let
+    # the purge reach the DB row: the dead account would come back with every restore.
+    if STALE_ACCOUNT_PURGED.is_set():
+        ensure_accounts_for_orphans(DATA_PATH, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, WORK_DIR, LOGS_DIR, LOGGER)
+        sanitized_lineages = sorted(set(sanitized_lineages) | set(sanitize_and_persist(JOB, DATA_PATH, LOGGER)))
 
     misconfigured_services = list_misconfigured(services)
     if misconfigured_services:
@@ -1207,7 +1219,8 @@ try:
             if not consistent:
                 LOGGER.error(
                     "Skipping db cache update to avoid persisting an inconsistent Let's Encrypt state "
-                    f"({reason}). The DB cache row is left untouched; investigate accounts/ recovery before the next renew."
+                    f"({reason}). The DB cache row is left untouched. Renewals for the affected certificates fail until an "
+                    "account exists for their CA; the next run repoints them automatically once one does."
                 )
                 # If certbot itself succeeded, the fresh certs are already on disk — signal a reload
                 # (ret=1) so nginx picks them up. Persistence failure is logged separately above; do

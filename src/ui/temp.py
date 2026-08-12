@@ -36,7 +36,7 @@ def stop(status):
 def handle_stop(signum, frame):
     LOGGER.info("Caught stop operation")
     LOGGER.info("Stopping web ui ...")
-    stop(0, False)
+    stop(0)
 
 
 signal(SIGINT, handle_stop)

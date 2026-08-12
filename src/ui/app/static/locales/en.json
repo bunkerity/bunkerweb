@@ -149,6 +149,7 @@
     "local_time": "Local time",
     "collapse_multiline": "Collapse",
     "search": "Search",
+    "validate_certificate": "Validate certificate",
     "wrap": "Wrap",
     "select_file": "Select File",
     "select_page": "Select Page",
@@ -1769,6 +1770,13 @@
     "prompt": "Please enter your TOTP code."
   },
   "validation": {
+    "certificate_checking": "Checking ...",
+    "certificate_expires_in": "expires in {{days}} days",
+    "certificate_failed": "The validation request failed.",
+    "certificate_file_mode": "Only pasted or uploaded data can be checked here. A certificate path is read by the scheduler, which the web UI has no access to.",
+    "certificate_missing": "Supply both the certificate and the key first.",
+    "certificate_subject": "Subject:",
+    "certificate_valid": "The certificate and the key match.",
     "default_field_name": "This field",
     "invalid_date": "Invalid date",
     "ip_global_duplicate": "This IP address is already globally banned.",
