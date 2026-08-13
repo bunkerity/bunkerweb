@@ -99,6 +99,19 @@ function example_hook() {
     fi
 }
 
+# Whether the push-configs wait applies to this stack. Linux has no worker container to
+# query, and a Docker example brings its own database on its own terms rather than the one
+# the framework generated; both fall back to the action's own delay.
+function config_wait_applies() {
+    if [ "$integration" == "Linux" ] ; then
+        return 1
+    fi
+    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+        return 1
+    fi
+    return 0
+}
+
 # Bring a compose file up, retrying once through a full "down -v" — the recovery the
 # stack-up steps have always open-coded.
 function compose_up() {

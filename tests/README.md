@@ -57,8 +57,8 @@ actions:
   serves_the_php_app:
     type: string
     url: "https://www.example.com"
+    verify_ssl: false
     string: "Hello World"
-    tls: "www.example.com"
 ```
 
 The example is copied to `/tmp/example-stack` before anything is rewritten, so the
@@ -80,11 +80,22 @@ Which file gets deployed depends on the integration, and so does what it replace
 Linux has no example mode: it installs a package into a systemd container rather than
 deploying a compose file.
 
-Two traps when you move a scenario over from `tests/examples/<name>.json`. The legacy
-harness casefolds both sides of a string assertion, and it used `requests`, which follows
-redirects; this framework does neither by default. Migrated assertions therefore carry
-`ignore_case: true` and `follow_redirects: true`. Write new specs without them: assert the
-case a page actually returns, and let a redirect be a redirect.
+Three traps when you move a scenario over from `tests/examples/<name>.json`. The legacy
+harness casefolds both sides of a string assertion, it used `requests` and followed
+redirects, and it never verified TLS; this framework does none of that by default.
+Migrated assertions therefore carry `ignore_case: true`, `follow_redirects: true` and
+`verify_ssl: false`. The last one is not optional on an example stack: the domains only
+resolve through the framework's dnsmasq, Let's Encrypt can never issue for them, and
+BunkerWeb serves its self-signed fallback. Write new specs without the first two: assert
+the case a page actually returns, and let a redirect be a redirect.
+
+A request that carries a body gets `Content-Type: application/x-www-form-urlencoded`
+unless the spec sets one. `requests` did that; `httpx` does not, and CRS rules 920340 and
+920640 turn a bodied request without the header into a 403 long before it reaches what
+the spec is testing. Set `Content-Type: null` to send it bare on purpose.
+
+Nothing rejects a key a model does not declare — pydantic drops it. A misspelt or
+invented field means the assertion you thought you wrote never runs.
 
 ## Running locally
 
@@ -143,6 +154,11 @@ when 1.7 moved the database clients to the API, and both mount the same `bw-stor
 volume, so the query reaches the same file.
 
 All-in-one is exempt: its entrypoint enables the worker and forces the API on by itself.
+
+That split also means a healthy stack is not a configured one. The scheduler queues
+`push-configs` and returns, so `wait.sh` waits for the worker to report that job done
+before any action runs. Without it a spec asserts against the previous action's
+configuration and fails for reasons that have nothing to do with what it tests.
 
 ## Integrations
 

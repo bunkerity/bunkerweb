@@ -22,7 +22,7 @@ actions:
     config:
       REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
   check_redirection_request_uri:
-    type: url
+    type: path
     url: "http://www.example.com/test"
     follow_redirects: true
     raise_for_status: false

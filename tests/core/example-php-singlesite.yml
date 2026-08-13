@@ -10,8 +10,8 @@ actions:
   serves_the_php_app:
     type: string
     url: "https://www.example.com"
+    verify_ssl: false
     # Exact case on purpose: the legacy harness casefolded both sides, this handler does
     # not, and the page says "Hello World !".
     string: "Hello World"
-    tls: "www.example.com"
     timeout: 120

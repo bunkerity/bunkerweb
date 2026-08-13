@@ -145,6 +145,13 @@ for test in $tests ; do
 
     while $first_try || [ "$retries" -gt 0 ] ; do
         if [ "$restart_stack" -eq 1 ] ; then
+            # Baseline for wait.sh: how many configuration pushes had happened before this
+            # restart. Counting them afterwards alone would accept one the previous action
+            # triggered and let the test run against the configuration it is replacing.
+            if config_wait_applies ; then
+                python3 tests/wait_config.py "$integration" --mark
+            fi
+
             if $first_run || [ "$full_clean" -eq 1 ] ; then
                 ./tests/scripts/start.sh "$integration" "$type"
                 ret=$?

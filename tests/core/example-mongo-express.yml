@@ -11,7 +11,7 @@ actions:
   status_check:
     type: status
     url: "https://www.example.com"
+    verify_ssl: false
     status: 401
-    tls: "www.example.com"
     timeout: 120
     delay: 120

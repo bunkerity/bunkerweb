@@ -30,6 +30,12 @@ def handle(LOGGER: Logger, action: Any) -> None:
         LOGGER.debug(str(ctx.response))
         exit(1)
 
+    if action.status is not None and ctx.response.status_code != action.status:
+        LOGGER.error(f"📤 Expected status {action.status}, got {ctx.response.status_code}, exiting ...")
+        exit(1)
+    elif action.raise_for_status:
+        ctx.response.raise_for_status()
+
     try:
         payload = ctx.response.json()
     except Exception as e:

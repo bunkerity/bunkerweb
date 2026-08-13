@@ -11,18 +11,18 @@ actions:
   string_www_example_com_app1:
     type: string
     url: "https://www.example.com/app1"
+    verify_ssl: false
     string: "hello"
     ignore_case: true
     follow_redirects: true
-    tls: "www.example.com"
     timeout: 120
     delay: 120
   string_www_example_com_app2:
     type: string
     url: "https://www.example.com/app2"
+    verify_ssl: false
     string: "hello"
     ignore_case: true
     follow_redirects: true
-    tls: "www.example.com"
     timeout: 120
     delay: 120

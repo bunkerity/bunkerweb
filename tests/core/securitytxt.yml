@@ -7,12 +7,12 @@ actions:
     status: 301
     restart_stack: false
   default_endpoint:
-    type: url
+    type: path
     url: "http://www.example.com/security.txt"
     path: "/.well-known/security.txt"
     follow_redirects: true
   custom_endpoint:
-    type: url
+    type: path
     url: "http://www.example.com/security.txt"
     path: "/custom/security.txt"
     follow_redirects: true

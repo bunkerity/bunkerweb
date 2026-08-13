@@ -10,8 +10,8 @@ actions:
   string_check:
     type: string
     url: "https://www.example.com"
+    verify_ssl: false
     string: "hello"
     ignore_case: true
     follow_redirects: true
-    tls: "www.example.com"
     timeout: 120

@@ -217,3 +217,16 @@ else
         exit 1
     fi
 fi
+
+# Since 1.7 the scheduler does not push the configuration itself: it queues push-configs on
+# the broker and returns, so a stack whose containers are healthy can still be serving the
+# configuration of the previous action. wait.sh only runs after a start or a restart, which
+# always dispatches one, so wait for the worker to record the run.
+# run.sh marks the count of runs before restarting, so this waits for one that belongs to
+# the restart rather than one the previous action left behind.
+if config_wait_applies ; then
+    log "WAIT" "ℹ️ " "⏳ Waiting for the configuration to be pushed ..."
+    if ! python3 tests/wait_config.py "$integration" --timeout "$timeout" ; then
+        exit 1
+    fi
+fi

@@ -396,7 +396,10 @@ if ARGS.integration not in ("Linux", "All-in-one"):
     jobs_broker_url = (
         "redis://svc-bunkerweb-jobs-broker.bunkerweb.svc.cluster.local:6379/0" if ARGS.integration == "Kubernetes" else "redis://bw-jobs-broker:6379/0"
     )
-    config["api"]["API_TOKEN"] = API_TEST_TOKEN
+    # A spec that exercises authentication sets its own token, so this is a default, not
+    # an override — and the scheduler follows it, or it stops being able to dispatch.
+    config["api"].setdefault("API_TOKEN", API_TEST_TOKEN)
+    config["variables"]["API_TOKEN"] = config["api"]["API_TOKEN"]
     config["api"]["CELERY_BROKER_URL"] = jobs_broker_url
     # Pin the database explicitly rather than letting the images fall back to their own
     # default: on SQLite a mismatch here means the API and the worker quietly read a

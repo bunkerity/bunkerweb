@@ -10,54 +10,54 @@ actions:
   string_app1_example_com_hello:
     type: string
     url: "https://app1.example.com/hello"
+    verify_ssl: false
     string: "hello"
     ignore_case: true
     follow_redirects: true
-    tls: "app1.example.com"
     timeout: 120
     delay: 120
   string_app2_example_com_hello:
     type: string
     url: "https://app2.example.com/hello"
+    verify_ssl: false
     string: "hello"
     ignore_case: true
     follow_redirects: true
-    tls: "app2.example.com"
     timeout: 120
     delay: 120
   string_app3_example_com_hello:
     type: string
     url: "https://app3.example.com/hello"
+    verify_ssl: false
     string: "hello"
     ignore_case: true
     follow_redirects: true
-    tls: "app3.example.com"
     timeout: 120
     delay: 120
   string_app1_example_com_app1:
     type: string
     url: "https://app1.example.com/app1"
+    verify_ssl: false
     string: "app1"
     ignore_case: true
     follow_redirects: true
-    tls: "app1.example.com"
     timeout: 120
     delay: 120
   string_app2_example_com_app2:
     type: string
     url: "https://app2.example.com/app2"
+    verify_ssl: false
     string: "app2"
     ignore_case: true
     follow_redirects: true
-    tls: "app2.example.com"
     timeout: 120
     delay: 120
   string_app3_example_com_app3:
     type: string
     url: "https://app3.example.com/app3"
+    verify_ssl: false
     string: "app3"
     ignore_case: true
     follow_redirects: true
-    tls: "app3.example.com"
     timeout: 120
     delay: 120

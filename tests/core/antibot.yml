@@ -28,13 +28,13 @@ actions:
     status: 405
 
   default_endpoint:
-    type: url
+    type: path
     url: "http://www.example.com"
     path: "/challenge"
     follow_redirects: true
 
   custom_endpoint:
-    type: url
+    type: path
     url: "http://www.example.com"
     path: "/custom"
     follow_redirects: true

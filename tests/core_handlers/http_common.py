@@ -35,6 +35,10 @@ def perform_request(LOGGER: Logger, action: Any) -> HTTPContext:
     LOGGER.debug(f"Allowing redirects: {follow_redirects}")
     LOGGER.debug(f"Verifying SSL: {verify_ssl}")
 
+    # A null value means "send this request without the header", which is an assertion of
+    # its own, so nothing below may add one back.
+    dropped_headers = {key.lower() for key, value in headers.items() if value is None}
+
     for key, value in headers.copy().items():
         if value is None:
             headers.pop(key, None)
@@ -49,6 +53,12 @@ def perform_request(LOGGER: Logger, action: Any) -> HTTPContext:
 
     if headers.get("X-Forwarded-For", "").lower() == "random":
         headers["X-Forwarded-For"] = f"{randint(1, 255)}.{randint(1, 255)}.{randint(1, 255)}.{randint(1, 255)}"
+
+    # httpx sends a raw body with no Content-Type, and CRS rules 920340 and 920640 answer
+    # that with a 403 before the request reaches whatever the spec is testing. A spec that
+    # wants the header missing can still say so with `Content-Type: null`.
+    if (body or body_length) and "content-type" not in dropped_headers and not any(key.lower() == "content-type" for key in headers):
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
 
     response: Union[Response, str]
     try:
