@@ -142,8 +142,13 @@ def acknowledge_changes(db: Database, metadata_snapshot, reason: str) -> None:
     taken before this job reads anything, and the clear is a compare-and-set against each
     change's `last_*_change` watermark, so a change that landed WHILE this run worked has a
     newer watermark, is not acknowledged, and gets picked up on the next poll.
+
+    `plugins_config` belongs in that list: a settings change sets each affected plugin's
+    `config_changed`, and this push is what applies it. Leaving it out stranded the flag —
+    nothing else clears it — and autoconf's readiness gate blocks on it, so every
+    configuration change cost autoconf the full 240s it waits before giving up.
     """
-    error = db.clear_applied_changes(metadata_snapshot, ("custom_configs", "external_plugins", "pro_plugins", "instances"))
+    error = db.clear_applied_changes(metadata_snapshot, ("custom_configs", "external_plugins", "pro_plugins", "instances", "plugins_config"))
     if error:
         # Not fatal: leaving a flag set costs a redundant push next poll, which is the safe
         # direction. Clearing it wrongly would cost a lost configuration.

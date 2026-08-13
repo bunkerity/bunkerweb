@@ -161,7 +161,13 @@ def test_acknowledgement_never_clears_the_certificate_flag():
 
     PUSH.acknowledge_changes(db, snapshot, "test")
 
-    db.clear_applied_changes.assert_called_once_with(snapshot, ("custom_configs", "external_plugins", "pro_plugins", "instances"))
+    (passed_snapshot, keys), _ = db.clear_applied_changes.call_args
+    assert passed_snapshot is snapshot
+    assert "certificates" not in keys
+    # The same call owns the per-plugin flags: this push is what applies a settings change,
+    # and nothing else clears them, so autoconf's readiness gate waits out its 240s ceiling
+    # on every configuration change when they are left set.
+    assert "plugins_config" in keys
 
 
 def test_only_enabled_plugins_are_materialized(tmp_path):
