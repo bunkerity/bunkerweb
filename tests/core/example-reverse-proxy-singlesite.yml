@@ -1,0 +1,26 @@
+# Example-backed spec: the stack under test is examples/reverse-proxy-singlesite itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: reverse-proxy-singlesite
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+
+actions:
+  string_www_example_com_app1:
+    type: string
+    url: "https://www.example.com/app1"
+    string: "hello"
+    ignore_case: true
+    tls: "www.example.com"
+    timeout: 120
+    delay: 120
+  string_www_example_com_app2:
+    type: string
+    url: "https://www.example.com/app2"
+    string: "hello"
+    ignore_case: true
+    tls: "www.example.com"
+    timeout: 120
+    delay: 120

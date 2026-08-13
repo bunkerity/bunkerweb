@@ -1,0 +1,25 @@
+# Example-backed spec: the stack under test is examples/php-multisite itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: php-multisite
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+  # not converted: linux
+
+actions:
+  string_app1_example_com:
+    type: string
+    url: "https://app1.example.com"
+    string: "app1"
+    ignore_case: true
+    tls: "app1.example.com"
+    timeout: 120
+  string_app2_example_com:
+    type: string
+    url: "https://app2.example.com"
+    string: "app2"
+    ignore_case: true
+    tls: "app2.example.com"
+    timeout: 120

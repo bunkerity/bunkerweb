@@ -18,13 +18,17 @@ def handle(LOGGER: Logger, action: Any) -> None:
     if action.raise_for_status:
         response.raise_for_status()
 
+    text = response.text.casefold() if action.ignore_case else response.text
+
     if action.string is not None:
-        if action.string not in response.text:
+        needle = action.string.casefold() if action.ignore_case else action.string
+        if needle not in text:
             LOGGER.error(f"🕸️ String {action.string} not found in response, exiting ...")
             exit(1)
         LOGGER.info(f"🕸️ String {action.string} found in response")
     elif action.not_string is not None:
-        if action.not_string in response.text:
+        needle = action.not_string.casefold() if action.ignore_case else action.not_string
+        if needle in text:
             LOGGER.error(f"🕸️ String {action.not_string} found in response, exiting ...")
             exit(1)
         LOGGER.info(f"🕸️ String {action.not_string} not found in response")

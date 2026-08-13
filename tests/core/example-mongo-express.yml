@@ -1,0 +1,17 @@
+# Example-backed spec: the stack under test is examples/mongo-express itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: mongo-express
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+
+actions:
+  status_check:
+    type: status
+    url: "https://www.example.com"
+    status: 401
+    tls: "www.example.com"
+    timeout: 120
+    delay: 120

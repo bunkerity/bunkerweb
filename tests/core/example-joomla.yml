@@ -1,0 +1,18 @@
+# Example-backed spec: the stack under test is examples/joomla itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: joomla
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+
+actions:
+  string_check:
+    type: string
+    url: "https://www.example.com"
+    string: "joomla"
+    ignore_case: true
+    tls: "www.example.com"
+    timeout: 120
+    delay: 120

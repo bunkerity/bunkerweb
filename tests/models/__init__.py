@@ -6,6 +6,7 @@ from .header import Header  # noqa: F401
 from .limit import Limit  # noqa: F401
 from .url import Url  # noqa: F401
 from .redis import Redis  # noqa: F401
+from .script import Script  # noqa: F401
 from .selenium_action import *  # noqa: F401, F403
 from .ssl import Ssl  # noqa: F401
 from .status import Status  # noqa: F401

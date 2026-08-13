@@ -1,0 +1,17 @@
+# Example-backed spec: the stack under test is examples/passbolt itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: passbolt
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+
+actions:
+  string_check:
+    type: string
+    url: "https://www.example.com"
+    string: "passbolt"
+    ignore_case: true
+    tls: "www.example.com"
+    timeout: 120

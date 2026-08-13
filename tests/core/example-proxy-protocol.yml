@@ -1,0 +1,16 @@
+# Example-backed spec: the stack under test is examples/proxy-protocol itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: proxy-protocol
+
+integrations:
+  - "Docker"
+
+actions:
+  string_check:
+    type: string
+    url: "http://www.example.com"
+    string: "hello"
+    ignore_case: true
+    timeout: 120
+    delay: 30

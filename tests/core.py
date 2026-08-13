@@ -22,6 +22,7 @@ from core_handlers import (
     database_handler,
     bwcli_handler,
     tool_handler,
+    script_handler,
     export_handler,
     http_string_handler,
     http_path_handler,
@@ -157,6 +158,8 @@ for x in range(action.repeat + 1):
         bwcli_handler.handle(LOGGER, ARGS.integration, action)
     elif action.type == "tool":
         tool_handler.handle(LOGGER, action)
+    elif action.type == "script":
+        script_handler.handle(LOGGER, action)
     elif action.type == "export":
         export_handler.handle(LOGGER, action)
     elif action.type == "limit":

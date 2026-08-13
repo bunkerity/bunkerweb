@@ -1,0 +1,16 @@
+# Example-backed spec: the stack under test is examples/stream-multisite itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: stream-multisite
+
+integrations:
+  - "Docker"
+
+actions:
+  stream_probes:
+    # A TCP/UDP stack needs protocol-level probes rather than HTTP assertions, so the
+    # check is the script that ships with the example. It anchors itself on its own
+    # location, so it drives the deployed copy of the stack.
+    type: script
+    script: ["python3", "stream_test.py"]
+    timeout: 480
