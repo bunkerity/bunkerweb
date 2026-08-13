@@ -55,7 +55,8 @@
       "services_dropzone": "Sélectionnez un fichier d'exportation de services ou déposez-le ici",
       "user_avatar": "Icône de l'utilisateur",
       "remove_value": "Supprimer la valeur",
-      "view_selected_items": "Afficher les éléments sélectionnés"
+      "view_selected_items": "Afficher les éléments sélectionnés",
+      "passkey_name": "Nom de la clé d'accès"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "Utiliser le modèle",
     "edit": "Modifier",
     "verify": "Vérifier",
-    "view": "Afficher"
+    "view": "Afficher",
+    "rename": "Renommer",
+    "add_passkey": "Ajouter une clé d'accès",
+    "sign_in_with_passkey": "Se connecter avec une clé d'accès",
+    "use_security_key": "Utiliser une clé de sécurité"
   },
   "cache": {
     "kpi_files": "Fichiers",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "Nouvelles tentatives API ZeroSSL",
       "zerossl_api_retry_delay": "Délai de nouvelle tentative API ZeroSSL",
       "zerossl_api_connect_timeout": "Délai de connexion API ZeroSSL",
-      "zerossl_api_max_time": "Durée maximale API ZeroSSL"
+      "zerossl_api_max_time": "Durée maximale API ZeroSSL",
+      "passkey_name": "Nom de la clé d'accès"
     },
     "placeholder": {
       "2fa_code": "Entrez le code",
       "2fa_or_recovery": "Entrez le code ou code de récupération",
       "config_name": "ma-config-perso",
+      "current_password": "Mot de Passe Actuel",
       "enter_username": "Entrez votre nom d'utilisateur",
       "keywords": "Mots-clés...",
       "multivalue_enter_value": "Entrez une valeur...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "Se connecter",
-    "subtitle": "Connectez-vous à votre compte BunkerWeb"
+    "subtitle": "Connectez-vous à votre compte BunkerWeb",
+    "or_use_password": "ou utilisez votre mot de passe"
   },
   "logs": {
     "annotation_error": "Erreur",
@@ -1218,6 +1226,7 @@
         "change_theme": "Changer le Thème",
         "coming_soon": "Bientôt Disponible",
         "edit_profile": "Modifier le Profil",
+        "passkeys": "Clés d'accès",
         "refresh_recovery_codes": "Rafraîchir les Codes de Récupération",
         "sessions": "Sessions"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "Effacer les autres sessions ?"
       }
+    },
+    "passkey": {
+      "added": "Ajoutée le",
+      "empty": "Aucune clé d'accès enregistrée pour le moment.",
+      "help": "Une clé d'accès vous connecte sans mot de passe, à l'aide du verrouillage d'écran de votre appareil ou d'une clé de sécurité.",
+      "last_used": "dernière utilisation",
+      "never_used": "jamais utilisée",
+      "unsupported": "Ce navigateur ne prend pas en charge les clés d'accès."
     },
     "session": {
       "browser": "Navigateur",
@@ -2131,7 +2148,9 @@
     "signing_in": "Connexion à BunkerWeb",
     "subtitle": "Entrez le code de votre application d'authentification.",
     "title": "Authentification à deux facteurs",
-    "prompt": "Veuillez entrer votre code TOTP."
+    "prompt": "Veuillez entrer votre code TOTP.",
+    "subtitle_security_key": "Confirmez votre identité avec votre clé de sécurité.",
+    "or_use_security_key": "ou utilisez votre clé de sécurité"
   },
   "certificates": {
     "acme_help": "Sélectionner les services dont les paramètres existants activent et configurent déjà Let's Encrypt. Cette action ne planifie que cette configuration ; les détails du certificat et les informations d'authentification ne sont pas saisies ici.",

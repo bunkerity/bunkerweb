@@ -55,7 +55,8 @@
       "services_dropzone": "একটি পরিষেবা এক্সপোর্ট ফাইল নির্বাচন করুন বা এখানে ড্রপ করুন",
       "user_avatar": "ব্যবহারকারীর প্রতিকৃতি",
       "remove_value": "মান সরান",
-      "view_selected_items": "নির্বাচিত আইটেম দেখুন"
+      "view_selected_items": "নির্বাচিত আইটেম দেখুন",
+      "passkey_name": "পাসকির নাম"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "টেমপ্লেট ব্যবহার করুন",
     "edit": "সম্পাদনা",
     "verify": "যাচাই করুন",
-    "view": "দেখুন"
+    "view": "দেখুন",
+    "rename": "নাম পরিবর্তন",
+    "add_passkey": "পাসকি যোগ করুন",
+    "sign_in_with_passkey": "পাসকি দিয়ে সাইন ইন করুন",
+    "use_security_key": "সিকিউরিটি কী ব্যবহার করুন"
   },
   "cache": {
     "kpi_files": "ফাইল",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "ZeroSSL API পুনরায় চেষ্টা",
       "zerossl_api_retry_delay": "ZeroSSL API পুনরায় চেষ্টার বিলম্ব",
       "zerossl_api_connect_timeout": "ZeroSSL API সংযোগ টাইমআউট",
-      "zerossl_api_max_time": "ZeroSSL API সর্বোচ্চ সময়"
+      "zerossl_api_max_time": "ZeroSSL API সর্বোচ্চ সময়",
+      "passkey_name": "পাসকির নাম"
     },
     "placeholder": {
       "2fa_code": "কোড লিখুন",
       "2fa_or_recovery": "কোড বা পুনরুদ্ধার কোড লিখুন",
       "config_name": "আমার-কাস্টম-কনফিগ",
+      "current_password": "বর্তমান পাসওয়ার্ড",
       "enter_username": "আপনার ব্যবহারকারীর নাম লিখুন",
       "keywords": "কীওয়ার্ড...",
       "multivalue_enter_value": "মান প্রবেশ করুন...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "লগইন করুন",
-    "subtitle": "আপনার BunkerWeb অ্যাকাউন্টে সাইন ইন করুন"
+    "subtitle": "আপনার BunkerWeb অ্যাকাউন্টে সাইন ইন করুন",
+    "or_use_password": "অথবা আপনার পাসওয়ার্ড ব্যবহার করুন"
   },
   "logs": {
     "annotation_error": "ত্রুটি",
@@ -1218,6 +1226,7 @@
         "change_theme": "থিম পরিবর্তন করুন",
         "coming_soon": "শীঘ্রই আসছে",
         "edit_profile": "প্রোফাইল সম্পাদনা করুন",
+        "passkeys": "পাসকি",
         "refresh_recovery_codes": "পুনরুদ্ধার কোড রিফ্রেশ করুন",
         "sessions": "সেশন"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "অন্যান্য সেশনগুলি মুছে ফেলুন?"
       }
+    },
+    "passkey": {
+      "added": "যোগ করা হয়েছে",
+      "empty": "এখনও কোনো পাসকি নিবন্ধিত হয়নি।",
+      "help": "পাসকি আপনার ডিভাইসের স্ক্রিন লক বা সিকিউরিটি কী ব্যবহার করে পাসওয়ার্ড ছাড়াই আপনাকে সাইন ইন করায়।",
+      "last_used": "সর্বশেষ ব্যবহার",
+      "never_used": "কখনও ব্যবহার করা হয়নি",
+      "unsupported": "এই ব্রাউজার পাসকি সমর্থন করে না।"
     },
     "session": {
       "browser": "ব্রাউজার",
@@ -2131,7 +2148,9 @@
     "signing_in": "BunkerWeb-এ লগইন করছেন",
     "subtitle": "আপনার প্রমাণীকরণ অ্যাপ থেকে কোডটি প্রবেশ করুন।",
     "title": "দ্বি-স্তর",
-    "prompt": "অনুগ্রহ করে আপনার TOTP কোড লিখুন।"
+    "prompt": "অনুগ্রহ করে আপনার TOTP কোড লিখুন।",
+    "subtitle_security_key": "আপনার সিকিউরিটি কী দিয়ে পরিচয় নিশ্চিত করুন।",
+    "or_use_security_key": "অথবা আপনার সিকিউরিটি কী ব্যবহার করুন"
   },
   "certificates": {
     "acme_help": "এমন পরিষেবাগুলি নির্বাচন করুন যাদের বিদ্যমান সেটিংস ইতিমধ্যে Let's Encrypt সক্রিয় এবং কনফিগার করে। এই কাজটি শুধুমাত্র সেই কনফিগারেশন নির্ধারণ করে; শংসাপত্রের বিবরণ এবং চ্যালেঞ্জের ক্রেডেনশিয়াল এখানে প্রবেশ করানো হবে না।",

@@ -854,11 +854,15 @@ class Users(Base):
     recovery_codes: Mapped[List["UserRecoveryCodes"]] = relationship("UserRecoveryCodes", back_populates="user", cascade="all")
     sessions: Mapped[List["UserSessions"]] = relationship("UserSessions", back_populates="user", cascade="all")
     columns_preferences: Mapped[List["UserColumnsPreferences"]] = relationship("UserColumnsPreferences", back_populates="user", cascade="all")
+    webauthn_credentials: Mapped[List["UserWebauthnCredentials"]] = relationship("UserWebauthnCredentials", back_populates="user", cascade="all")
     # plain (non-ORM) class attributes filled in by the UI layer; ClassVar keeps
     # DeclarativeBase from rejecting them as unmapped annotations
     list_roles: ClassVar[List[str]] = []
     list_permissions: ClassVar[List[str]] = []
     list_recovery_codes: ClassVar[List[str]] = []
+    # number of registered WebAuthn credentials; the UI's 2FA gate reads it to know
+    # whether the user still owes a second factor
+    webauthn_credentials_count: ClassVar[int] = 0
 
 
 class Roles(Base):
@@ -890,6 +894,37 @@ class UserRecoveryCodes(Base):
     code: Mapped[str] = mapped_column(UnicodeText, nullable=False)
 
     user: Mapped["Users"] = relationship("Users", back_populates="recovery_codes")
+
+
+class UserWebauthnCredentials(Base):
+    """A WebAuthn / FIDO2 public key credential (passkey or security key) registered by a UI user.
+
+    Only public material is stored: the private key never leaves the authenticator, and BunkerWeb
+    never sees a PIN or biometric.
+    """
+
+    __tablename__ = "bw_ui_user_webauthn_credentials"
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    user_name: Mapped[str] = mapped_column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    # base64url. ponytail: 512 chars covers every authenticator in the wild (CTAP2 keeps credential
+    # IDs small); the spec allows up to 1023 raw bytes (~1364 chars) -- widen if one ever shows up.
+    credential_id: Mapped[str] = mapped_column(String(512), nullable=False, unique=True, index=True)
+    # Opaque, stable per user. Deliberately NOT the username: usernames are renameable, while the
+    # user handle is baked into the discoverable credential stored on the authenticator.
+    user_handle: Mapped[str] = mapped_column(String(128), nullable=False)
+    public_key: Mapped[str] = mapped_column(Text, nullable=False)  # base64url COSE key
+    sign_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # comma-separated hints from the browser ("usb,nfc"). A plain string, not JSONText: the
+    # vocabulary is 7 fixed tokens and JSONText only round-trips dicts.
+    transports: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    device_type: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)  # single_device / multi_device
+    backed_up: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_used: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    user: Mapped["Users"] = relationship("Users", back_populates="webauthn_credentials")
 
 
 class RolesPermissions(Base):

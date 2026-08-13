@@ -345,6 +345,43 @@
   color: #fff;
 }
 
+/* ---------- Passkey / security key ---------- */
+.sw-btn-outline {
+  background: transparent;
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+}
+.sw-btn-outline:not(:disabled):hover {
+  border-color: var(--bs-bw-green);
+  color: var(--bs-bw-green);
+}
+.passkey-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.passkey-btn {
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+/* "or use your password" rule, drawn with pseudo-element lines so no extra markup is needed */
+.passkey-separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 4px;
+  font-size: 13px;
+  color: var(--bs-secondary-color);
+}
+.passkey-separator::before,
+.passkey-separator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--bs-border-color);
+}
+
 /* ---------- Status line (verify feedback) ---------- */
 .sw-key-status {
   display: flex;

@@ -1,11 +1,12 @@
 from contextlib import suppress
 from datetime import datetime
 from typing import Dict, Generator, Tuple, Union
-from flask import Blueprint, Response, jsonify, redirect, render_template, request, stream_with_context, url_for, session
+from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, stream_with_context, url_for, session
 from flask_login import current_user, login_required
 from user_agents import parse
 
 from app.models.totp import totp as TOTP
+from app.models.webauthn import WebauthnCeremonyError, WebauthnDisabledError, webauthn as WEBAUTHN
 
 from app.dependencies import API_CLIENT, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -14,6 +15,17 @@ from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_p
 from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
 profile = Blueprint("profile", __name__)
+
+
+def _list_credentials() -> list:
+    """The current user's registered WebAuthn credentials, empty when the API is unreachable."""
+    if not WEBAUTHN.enabled:
+        return []
+    try:
+        return API_CLIENT.get_user_webauthn_credentials(current_user.get_id())
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.error(f"Couldn't list the passkeys: {e.message}")
+        return []
 
 
 def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Union[str, bool]], None, None], int]:
@@ -88,6 +100,8 @@ def profile_page():
         totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
         last_sessions=last_sessions,
         total_sessions=total_sessions,
+        webauthn_enabled=WEBAUTHN.enabled,
+        webauthn_credentials=_list_credentials(),
     )
 
 
@@ -175,7 +189,7 @@ def totp_disable():
     except (ApiClientError, ApiUnavailableError) as e:
         return handle_error(f"Couldn't disable the two-factor authentication: {e.message}", "profile")
 
-    session["totp_validated"] = False
+    session["mfa_validated"] = False
 
     flash("The two-factor authentication has been successfully disabled.")
     return redirect(url_for("profile.profile_page") + "#security")
@@ -216,7 +230,7 @@ def totp_enable():
     except (ApiClientError, ApiUnavailableError) as e:
         return handle_error(f"Couldn't enable the two-factor authentication: {e.message}", "profile")
 
-    session["totp_validated"] = True
+    session["mfa_validated"] = True
     session["totp_refreshed"] = True
     session["decrypted_recovery_codes"] = totp_recovery_codes
 
@@ -335,3 +349,113 @@ def wipe_old_sessions():
 
     flash("The other sessions have been successfully wiped.")
     return redirect(url_for("profile.profile_page") + "#sessions")
+
+
+# ── Passkeys and security keys ──────────────────────────────────────
+#
+# Enrollment is gated on the current password, the same inline re-authentication every other
+# sensitive action on this page uses.
+
+
+@profile.route("/profile/webauthn/register/options", methods=["POST"])
+@login_required
+@cors_required
+def webauthn_register_options():
+    if API_CLIENT.readonly:
+        return jsonify({"message": "Database is in read-only mode"}), 403
+
+    password = (request.get_json(silent=True) or {}).get("password", "")
+    if not current_user.check_password(password):
+        return jsonify({"message": "The current password is incorrect."}), 403
+
+    try:
+        options, user_handle = WEBAUTHN.registration_options(current_user.get_id(), _list_credentials())
+    except WebauthnDisabledError:
+        return jsonify({"message": "WebAuthn is not configured"}), 404
+
+    # Kept server-side: the handle must be the one we issued, not one the browser echoes back.
+    session["webauthn_pending_handle"] = user_handle
+
+    return current_app.response_class(options, mimetype="application/json")
+
+
+@profile.route("/profile/webauthn/register/verify", methods=["POST"])
+@login_required
+@cors_required
+def webauthn_register_verify():
+    if API_CLIENT.readonly:
+        return jsonify({"message": "Database is in read-only mode"}), 403
+
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict) or not isinstance(payload.get("credential"), dict):
+        return jsonify({"message": "Malformed registration response"}), 400
+
+    user_handle = session.pop("webauthn_pending_handle", None)
+    if not user_handle:
+        return jsonify({"message": "No pending registration"}), 400
+
+    name = (payload.get("name") or "").strip()[:256] or "Passkey"
+
+    try:
+        verified = WEBAUTHN.verify_registration(payload["credential"])
+    except WebauthnDisabledError:
+        return jsonify({"message": "WebAuthn is not configured"}), 404
+    except WebauthnCeremonyError as e:
+        WEBAUTHN.log_failure(str(e))
+        return jsonify({"message": "Couldn't register this passkey, please try again"}), 400
+
+    transports = (payload["credential"].get("response") or {}).get("transports") or None
+
+    try:
+        API_CLIENT.create_user_webauthn_credential(current_user.get_id(), user_handle=user_handle, name=name, transports=transports, **verified)
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.error(f"Couldn't save the passkey: {e.message}")
+        return jsonify({"message": f"Couldn't save this passkey: {e.message}"}), 400
+
+    # Enrolling from an authenticated session proves the same thing the second factor would.
+    session["mfa_validated"] = True
+
+    LOGGER.info(f"User {current_user.get_id()} registered a new passkey ({name})")
+    flash("The passkey has been successfully registered.")
+    return jsonify({"redirect": url_for("profile.profile_page") + "#security"})
+
+
+@profile.route("/profile/webauthn/rename", methods=["POST"])
+@login_required
+def webauthn_rename():
+    if API_CLIENT.readonly:
+        return handle_error("Database is in read-only mode", "profile")
+
+    verify_data_in_form(data={"credential_id": None, "name": None}, err_message="Missing parameters on /profile/webauthn/rename.", redirect_url="profile")
+
+    name = request.form["name"].strip()[:256]
+    if not name:
+        return handle_error("The passkey name cannot be empty.", "profile")
+
+    try:
+        API_CLIENT.update_user_webauthn_credential(current_user.get_id(), request.form["credential_id"], name=name)
+    except (ApiClientError, ApiUnavailableError) as e:
+        return handle_error(f"Couldn't rename the passkey: {e.message}", "profile")
+
+    flash("The passkey has been successfully renamed.")
+    return redirect(url_for("profile.profile_page") + "#security")
+
+
+@profile.route("/profile/webauthn/delete", methods=["POST"])
+@login_required
+def webauthn_delete():
+    if API_CLIENT.readonly:
+        return handle_error("Database is in read-only mode", "profile")
+
+    verify_data_in_form(data={"credential_id": None, "password": None}, err_message="Missing parameters on /profile/webauthn/delete.", redirect_url="profile")
+
+    if not current_user.check_password(request.form["password"]):
+        return handle_error("The current password is incorrect.", "profile")
+
+    try:
+        API_CLIENT.delete_user_webauthn_credential(current_user.get_id(), request.form["credential_id"])
+    except (ApiClientError, ApiUnavailableError) as e:
+        return handle_error(f"Couldn't delete the passkey: {e.message}", "profile")
+
+    flash("The passkey has been successfully deleted.")
+    return redirect(url_for("profile.profile_page") + "#security")

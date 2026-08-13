@@ -323,6 +323,103 @@
                         {% endcall %}
                         <!-- /Refresh Recovery Codes -->
                     {% endif %}
+                    {% if webauthn_enabled %}
+                        <!-- Passkeys -->
+                        {% call card(classes="mb-4", title="Passkeys", title_key="profile.card.title.passkeys", icon="bx-fingerprint") %}
+                            <p class="text-muted" data-i18n="profile.passkey.help">
+                                A passkey signs you in without a password, using your device's screen lock or a security key.
+                            </p>
+                            {% if webauthn_credentials %}
+                                <ul class="list-group list-group-flush mb-3" id="passkey-list">
+                                    {% for credential in webauthn_credentials %}
+                                        <li class="list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2 px-0">
+                                            <div>
+                                                <div class="fw-semibold">{{ credential.name }}</div>
+                                                <small class="text-muted">
+                                                    <span data-i18n="profile.passkey.added">Added</span> {{ credential.creation_date[:10] }}
+                                                    {% if credential.last_used %}
+                                                        &middot; <span data-i18n="profile.passkey.last_used">last used</span> {{ credential.last_used[:10] }}
+                                                    {% else %}
+                                                        &middot; <span data-i18n="profile.passkey.never_used">never used</span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <form method="POST"
+                                                      action="{{ profile_url }}/webauthn/rename"
+                                                      class="d-flex gap-2 align-items-center"
+                                                      autocomplete="off">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                                    <input type="hidden"
+                                                           name="credential_id"
+                                                           value="{{ credential.credential_id }}" />
+                                                    <input type="text"
+                                                           class="form-control form-control-sm"
+                                                           name="name"
+                                                           value="{{ credential.name }}"
+                                                           maxlength="256"
+                                                           aria-label="Passkey name"
+                                                           data-i18n-aria-label="aria.label.passkey_name"
+                                                           {% if is_readonly %}disabled{% endif %}
+                                                           required />
+                                                    {{ button(type="submit", label="Rename", i18n_key="button.rename", variant="outline-primary", size="sm", disabled=is_readonly) }}
+                                                </form>
+                                                <form method="POST"
+                                                      action="{{ profile_url }}/webauthn/delete"
+                                                      class="d-flex gap-2 align-items-center"
+                                                      autocomplete="off">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                                    <input type="hidden"
+                                                           name="credential_id"
+                                                           value="{{ credential.credential_id }}" />
+                                                    <input type="password"
+                                                           class="form-control form-control-sm"
+                                                           name="password"
+                                                           placeholder="Current password"
+                                                           data-i18n-placeholder="form.placeholder.current_password"
+                                                           autocomplete="current-password"
+                                                           aria-label="Current password"
+                                                           data-i18n-aria-label="form.label.current_password"
+                                                           {% if is_readonly %}disabled{% endif %}
+                                                           required />
+                                                    {{ button(type="submit", label="Delete", i18n_key="button.delete", variant="danger", size="sm", disabled=is_readonly) }}
+                                                </form>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted fst-italic" data-i18n="profile.passkey.empty">No passkey registered yet.</p>
+                            {% endif %}
+                            <!-- Revealed by js/pages/profile.js once the browser confirms WebAuthn support -->
+                            <form id="passkey-register-form"
+                                  class="d-none"
+                                  autocomplete="off"
+                                  onsubmit="return false">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ text(id="passkey-name", name="name", label="Passkey name", label_i18n="form.label.passkey_name", value="", disabled=is_readonly) }}
+                                    </div>
+                                    <div class="col-md-6"
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                        {{ password(id="passkey-password", name="password", label="Current password", label_i18n="form.label.current_password", disabled=is_readonly) }}
+                                    </div>
+                                </div>
+                                <p class="small mt-2 mb-0"
+                                   id="passkey-register-status"
+                                   role="status"
+                                   aria-live="polite"></p>
+                                <div class="mt-3 justify-content-center d-flex">
+                                    {{ button(id="passkey-register", type="button", label="Add a passkey", i18n_key="button.add_passkey", variant="primary", icon="bx-fingerprint", disabled=is_readonly) }}
+                                </div>
+                            </form>
+                            <p class="text-muted fst-italic d-none"
+                               id="passkey-unsupported"
+                               data-i18n="profile.passkey.unsupported">This browser doesn't support passkeys.</p>
+                        {% endcall %}
+                        <!-- /Passkeys -->
+                    {% endif %}
                 </div>
             </div>
         {% endcall %}
@@ -430,4 +527,11 @@
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    {% if webauthn_enabled %}
+        <script src="{{ url_for('static', filename='js/components/webauthn.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/pages/profile-passkeys.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+    {% endif %}
 {% endblock %}

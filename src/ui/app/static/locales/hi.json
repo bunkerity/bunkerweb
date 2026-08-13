@@ -55,7 +55,8 @@
       "services_dropzone": "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
       "user_avatar": "उपयोगकर्ता अवतार",
       "remove_value": "मूल्य हटाएं",
-      "view_selected_items": "चुने गए आइटम देखें"
+      "view_selected_items": "चुने गए आइटम देखें",
+      "passkey_name": "पासकी का नाम"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "टेम्पलेट उपयोग करें",
     "edit": "संपादित करें",
     "verify": "सत्यापित करें",
-    "view": "देखें"
+    "view": "देखें",
+    "rename": "नाम बदलें",
+    "add_passkey": "पासकी जोड़ें",
+    "sign_in_with_passkey": "पासकी से साइन इन करें",
+    "use_security_key": "सुरक्षा कुंजी का उपयोग करें"
   },
   "cache": {
     "kpi_files": "फ़ाइलें",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "ZeroSSL API पुनः प्रयास",
       "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब",
       "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
-      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय"
+      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय",
+      "passkey_name": "पासकी का नाम"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
       "2fa_or_recovery": "कोड या पुनर्प्राप्ति कोड दर्ज करें",
       "config_name": "मेरा-कस्टम-कॉन्फिग",
+      "current_password": "वर्तमान पासवर्ड",
       "enter_username": "अपना उपयोगकर्ता नाम दर्ज करें",
       "keywords": "कीवर्ड...",
       "multivalue_enter_value": "मान दर्ज करें...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "लॉग इन करें",
-    "subtitle": "अपने BunkerWeb खाते में साइन इन करें"
+    "subtitle": "अपने BunkerWeb खाते में साइन इन करें",
+    "or_use_password": "या अपना पासवर्ड उपयोग करें"
   },
   "logs": {
     "annotation_error": "त्रुटि",
@@ -1218,6 +1226,7 @@
         "change_theme": "थीम बदलें",
         "coming_soon": "जल्द आ रहा है",
         "edit_profile": "प्रोफ़ाइल संपादित करें",
+        "passkeys": "पासकी",
         "refresh_recovery_codes": "पुनर्प्राप्ति कोड ताज़ा करें",
         "sessions": "सत्र"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "अन्य सत्रों को साफ़ करें?"
       }
+    },
+    "passkey": {
+      "added": "जोड़ी गई",
+      "empty": "अभी तक कोई पासकी पंजीकृत नहीं है।",
+      "help": "पासकी आपके डिवाइस के स्क्रीन लॉक या सुरक्षा कुंजी का उपयोग करके, बिना पासवर्ड के आपको साइन इन कराती है।",
+      "last_used": "अंतिम उपयोग",
+      "never_used": "कभी उपयोग नहीं की गई",
+      "unsupported": "यह ब्राउज़र पासकी का समर्थन नहीं करता।"
     },
     "session": {
       "browser": "ब्राउज़र",
@@ -2131,7 +2148,9 @@
     "signing_in": "BunkerWeb में लॉग इन करना",
     "subtitle": "अपने प्रमाणीकरण ऐप से कोड दर्ज करें।",
     "title": "दो-कारक",
-    "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
+    "prompt": "कृपया अपना TOTP कोड दर्ज करें।",
+    "subtitle_security_key": "अपनी सुरक्षा कुंजी से अपनी पहचान की पुष्टि करें।",
+    "or_use_security_key": "या अपनी सुरक्षा कुंजी का उपयोग करें"
   },
   "certificates": {
     "acme_help": "उन सेवाओं का चयन करें, जिनके मौजूदा सेटिंग्स पहले से ही Let's Encrypt को सक्षम और कॉन्फ़िगर करती हैं। यह क्रिया केवल उस कॉन्फ़िगरेशन को शेड्यूल करती है; प्रमाणपत्र विवरण और चुनौती क्रेडेंशियल यहां दर्ज नहीं किए जाते हैं।",

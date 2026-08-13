@@ -55,7 +55,8 @@
       "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡",
       "user_avatar": "使用者頭像",
       "remove_value": "移除值",
-      "view_selected_items": "檢視已選取項目"
+      "view_selected_items": "檢視已選取項目",
+      "passkey_name": "密碼金鑰名稱"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "使用範本",
     "edit": "編輯",
     "verify": "驗證",
-    "view": "檢視"
+    "view": "檢視",
+    "rename": "重新命名",
+    "add_passkey": "新增密碼金鑰",
+    "sign_in_with_passkey": "使用密碼金鑰登入",
+    "use_security_key": "使用安全金鑰"
   },
   "cache": {
     "kpi_files": "檔案",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "ZeroSSL API 重試次數",
       "zerossl_api_retry_delay": "ZeroSSL API 重試延遲",
       "zerossl_api_connect_timeout": "ZeroSSL API 連線逾時",
-      "zerossl_api_max_time": "ZeroSSL API 最長時間"
+      "zerossl_api_max_time": "ZeroSSL API 最長時間",
+      "passkey_name": "密碼金鑰名稱"
     },
     "placeholder": {
       "2fa_code": "輸入代碼",
       "2fa_or_recovery": "輸入代碼或恢復碼",
       "config_name": "我的自訂設定",
+      "current_password": "目前密碼",
       "enter_username": "輸入您的使用者名稱",
       "keywords": "關鍵字...",
       "multivalue_enter_value": "輸入值...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "登入",
-    "subtitle": "登入您的 BunkerWeb 帳戶"
+    "subtitle": "登入您的 BunkerWeb 帳戶",
+    "or_use_password": "或使用您的密碼"
   },
   "logs": {
     "annotation_error": "錯誤",
@@ -1218,6 +1226,7 @@
         "change_theme": "變更主題",
         "coming_soon": "即將推出",
         "edit_profile": "編輯個人資料",
+        "passkeys": "密碼金鑰",
         "refresh_recovery_codes": "重新整理恢復碼",
         "sessions": "工作階段"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "清除其他會話？"
       }
+    },
+    "passkey": {
+      "added": "新增於",
+      "empty": "尚未註冊任何密碼金鑰。",
+      "help": "密碼金鑰可讓您免密碼登入，只需使用裝置的螢幕鎖定或安全金鑰。",
+      "last_used": "上次使用",
+      "never_used": "從未使用",
+      "unsupported": "此瀏覽器不支援密碼金鑰。"
     },
     "session": {
       "browser": "瀏覽器",
@@ -2131,7 +2148,9 @@
     "signing_in": "登入 BunkerWeb",
     "subtitle": "請輸入您驗證碼應用程式中的碼。",
     "title": "雙重驗證",
-    "prompt": "請輸入您的 TOTP 代碼。"
+    "prompt": "請輸入您的 TOTP 代碼。",
+    "subtitle_security_key": "請使用安全金鑰確認您的身分。",
+    "or_use_security_key": "或使用您的安全金鑰"
   },
   "certificates": {
     "acme_help": "選擇已啟用且設定 Let's Encrypt 的現有設定的服務。此操作僅排程設定；憑證細節和挑戰憑證在此處不會輸入。",

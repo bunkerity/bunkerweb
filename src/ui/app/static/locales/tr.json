@@ -55,7 +55,8 @@
       "services_dropzone": "Hizmet dışa aktarma dosyası seçin veya buraya bırakın",
       "user_avatar": "Kullanıcı avatarı",
       "remove_value": "Değeri kaldır",
-      "view_selected_items": "Seçilen öğeleri görüntüle"
+      "view_selected_items": "Seçilen öğeleri görüntüle",
+      "passkey_name": "Parola anahtarı adı"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "Şablon kullan",
     "edit": "Düzenle",
     "verify": "Doğrula",
-    "view": "Görüntüle"
+    "view": "Görüntüle",
+    "rename": "Yeniden adlandır",
+    "add_passkey": "Parola anahtarı ekle",
+    "sign_in_with_passkey": "Parola anahtarıyla giriş yap",
+    "use_security_key": "Güvenlik anahtarı kullan"
   },
   "cache": {
     "kpi_files": "Dosyalar",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "ZeroSSL API Yeniden Deneme Sayısı",
       "zerossl_api_retry_delay": "ZeroSSL API Yeniden Deneme Gecikmesi",
       "zerossl_api_connect_timeout": "ZeroSSL API Bağlantı Zaman Aşımı",
-      "zerossl_api_max_time": "ZeroSSL API Azami Süre"
+      "zerossl_api_max_time": "ZeroSSL API Azami Süre",
+      "passkey_name": "Parola anahtarı adı"
     },
     "placeholder": {
       "2fa_code": "Kod girin",
       "2fa_or_recovery": "Kod veya kurtarma kodu girin",
       "config_name": "ozel-konfig-adim",
+      "current_password": "Mevcut Şifre",
       "enter_username": "Kullanıcı adı girin",
       "keywords": "Anahtar Kelimeler",
       "multivalue_enter_value": "Değer girin...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "Giriş Yap",
-    "subtitle": "BunkerWeb hesabınıza giriş yapın"
+    "subtitle": "BunkerWeb hesabınıza giriş yapın",
+    "or_use_password": "veya şifrenizi kullanın"
   },
   "logs": {
     "annotation_error": "Hata",
@@ -1218,6 +1226,7 @@
         "change_theme": "Temayı Değiştir",
         "coming_soon": "Çok Yakında",
         "edit_profile": "Profili Düzenle",
+        "passkeys": "Parola anahtarları",
         "refresh_recovery_codes": "Kurtarma Kodlarını Yenile",
         "sessions": "Oturumlar"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "Diğer oturumları sil?"
       }
+    },
+    "passkey": {
+      "added": "Eklendi",
+      "empty": "Henüz kayıtlı parola anahtarı yok.",
+      "help": "Parola anahtarı, cihazınızın ekran kilidini veya bir güvenlik anahtarını kullanarak şifresiz giriş yapmanızı sağlar.",
+      "last_used": "son kullanım",
+      "never_used": "hiç kullanılmadı",
+      "unsupported": "Bu tarayıcı parola anahtarlarını desteklemiyor."
     },
     "session": {
       "browser": "Tarayıcı",
@@ -2131,7 +2148,9 @@
     "signing_in": "BunkerWeb'e giriş yap",
     "subtitle": "Kimlik doğrulama uygulamasından kodu girin.",
     "title": "İki Faktörlü Kimlik Doğrulama",
-    "prompt": "Lütfen TOTP kodunuzu girin."
+    "prompt": "Lütfen TOTP kodunuzu girin.",
+    "subtitle_security_key": "Güvenlik anahtarınızla kimliğinizi doğrulayın.",
+    "or_use_security_key": "veya güvenlik anahtarınızı kullanın"
   },
   "certificates": {
     "acme_help": "Mevcut ayarlarınız zaten Let's Encrypt'i etkinleştiriyor ve yapılandırıyor olan hizmetleri seçin. Bu işlem yalnızca bu yapılandırmayı planlar; sertifika ayrıntıları ve meydan okuma kimlik bilgileri burada girilmez.",

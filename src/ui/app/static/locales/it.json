@@ -55,7 +55,8 @@
       "services_dropzone": "Seleziona un file di esportazione dei servizi o rilascialo qui",
       "user_avatar": "Avatar utente",
       "remove_value": "Rimuovi valore",
-      "view_selected_items": "Visualizza gli elementi selezionati"
+      "view_selected_items": "Visualizza gli elementi selezionati",
+      "passkey_name": "Nome della passkey"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "Usa modello",
     "edit": "Modifica",
     "verify": "Verifica",
-    "view": "Visualizza"
+    "view": "Visualizza",
+    "rename": "Rinomina",
+    "add_passkey": "Aggiungi una passkey",
+    "sign_in_with_passkey": "Accedi con una passkey",
+    "use_security_key": "Usa una chiave di sicurezza"
   },
   "cache": {
     "kpi_files": "File",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "Tentativi API ZeroSSL",
       "zerossl_api_retry_delay": "Ritardo tentativi API ZeroSSL",
       "zerossl_api_connect_timeout": "Timeout di connessione API ZeroSSL",
-      "zerossl_api_max_time": "Tempo massimo API ZeroSSL"
+      "zerossl_api_max_time": "Tempo massimo API ZeroSSL",
+      "passkey_name": "Nome della passkey"
     },
     "placeholder": {
       "2fa_code": "Inserisci codice",
       "2fa_or_recovery": "Inserisci codice o codice di recupero",
       "config_name": "mia-config-personalizzata",
+      "current_password": "Password Attuale",
       "enter_username": "Inserisci il tuo nome utente",
       "keywords": "Parole chiave...",
       "multivalue_enter_value": "Inserisci valore...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "Accedi",
-    "subtitle": "Accedi al tuo account BunkerWeb"
+    "subtitle": "Accedi al tuo account BunkerWeb",
+    "or_use_password": "oppure usa la password"
   },
   "logs": {
     "annotation_error": "Errore",
@@ -1218,6 +1226,7 @@
         "change_theme": "Cambia Tema",
         "coming_soon": "Prossimamente",
         "edit_profile": "Modifica Profilo",
+        "passkeys": "Passkey",
         "refresh_recovery_codes": "Aggiorna Codici di Recupero",
         "sessions": "Sessioni"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "Termina altre sessioni attive?"
       }
+    },
+    "passkey": {
+      "added": "Aggiunta il",
+      "empty": "Nessuna passkey registrata.",
+      "help": "Una passkey ti fa accedere senza password, usando il blocco schermo del dispositivo o una chiave di sicurezza.",
+      "last_used": "ultimo utilizzo",
+      "never_used": "mai usata",
+      "unsupported": "Questo browser non supporta le passkey."
     },
     "session": {
       "browser": "Browser",
@@ -2131,7 +2148,9 @@
     "signing_in": "Accesso a BunkerWeb",
     "subtitle": "Inserisci il codice dalla tua app di autenticazione.",
     "title": "Autenticazione a due fattori",
-    "prompt": "Inserisci il tuo codice TOTP."
+    "prompt": "Inserisci il tuo codice TOTP.",
+    "subtitle_security_key": "Conferma la tua identità con la chiave di sicurezza.",
+    "or_use_security_key": "oppure usa la chiave di sicurezza"
   },
   "certificates": {
     "acme_help": "Seleziona i servizi i cui impostazioni esistenti abilitano e configurano Let's Encrypt. Questa azione solo pianifica tale configurazione; i dettagli del certificato e le credenziali di sfida non vengono inseriti qui.",

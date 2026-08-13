@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends
@@ -56,6 +57,43 @@ class UpdatePreferencesRequest(BaseModel):
 
 class AccessRequest(BaseModel):
     session_id: int
+
+
+class CreateWebauthnCredentialRequest(BaseModel):
+    credential_id: str
+    user_handle: str
+    public_key: str
+    name: str
+    sign_count: int = 0
+    transports: Optional[List[str]] = None
+    device_type: Optional[str] = None
+    backed_up: bool = False
+
+
+class UpdateWebauthnCredentialRequest(BaseModel):
+    name: Optional[str] = None
+    sign_count: Optional[int] = None
+    last_used: Optional[datetime] = None
+
+
+# ── Helpers ─────────────────────────────────────────────────────────
+
+
+def _error(message: str, default: int = 400) -> JSONResponse:
+    if "not found" in message.lower() or "doesn't exist" in message.lower():
+        default = 404
+    elif "read-only" in message.lower() or "already exists" in message.lower():
+        default = 409
+    return JSONResponse(status_code=default, content={"status": "error", "message": message})
+
+
+def _serialize_webauthn_credential(credential: dict) -> dict:
+    """JSON-safe copy of a credential dict (datetimes -> ISO strings)."""
+    data = dict(credential)
+    for key in ("creation_date", "last_used"):
+        if data.get(key) is not None:
+            data[key] = data[key].isoformat()
+    return data
 
 
 # ── Endpoints ───────────────────────────────────────────────────────
@@ -140,7 +178,9 @@ def update_user(username: str, req: UpdateUserRequest) -> JSONResponse:
     ret = db.update_ui_user(
         username=username,
         password=req.password.encode("utf-8") if req.password else user["password"],
-        totp_secret=req.totp_secret if req.totp_secret is not None else user.get("totp_secret"),
+        # An explicit null means "clear the secret" (that is how the UI disables 2FA); only an
+        # absent field falls back to the stored value.
+        totp_secret=req.totp_secret if "totp_secret" in req.model_fields_set else user.get("totp_secret"),
         theme=req.theme or user.get("theme", "light"),
         old_username=req.old_username,
         email=req.email if req.email is not None else user.get("email"),
@@ -180,8 +220,6 @@ def delete_user_sessions(username: str) -> JSONResponse:
 @router.post("/{username}/login", dependencies=[Depends(guard)])
 def mark_user_login(username: str, req: LoginRequest) -> JSONResponse:
     """Mark a login event and return a session ID."""
-    from datetime import datetime
-
     ret = get_db().mark_ui_user_login(username, datetime.now().astimezone(), req.ip, req.user_agent)
     if isinstance(ret, str):
         return JSONResponse(status_code=500, content={"status": "error", "message": ret})
@@ -204,6 +242,75 @@ def use_recovery_code(username: str, req: RecoveryCodeUseRequest) -> JSONRespons
     if ret:
         code = 400 if "Invalid" in ret or "doesn't exist" in ret else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
+    return JSONResponse(status_code=200, content={"status": "success"})
+
+
+# ── WebAuthn credentials ───────────────────────────────────────────
+#
+# Only public material transits here: credential IDs, COSE public keys and metadata. The private
+# key never leaves the authenticator, and the ceremonies themselves run in the UI.
+
+
+@router.get("/webauthn-credentials/{credential_id}", dependencies=[Depends(guard)])
+def resolve_webauthn_credential(credential_id: str) -> JSONResponse:
+    """Resolve a credential ID to its owner.
+
+    Passwordless login carries a credential ID but no username, so the owner has to be looked up
+    from the credential itself before the assertion can be verified.
+    """
+    credential = get_db().get_ui_user_webauthn_credential(credential_id, as_dict=True)
+    if not credential:
+        return _error("Credential not found", 404)
+    return JSONResponse(status_code=200, content={"status": "success", "credential": _serialize_webauthn_credential(credential)})
+
+
+@router.get("/{username}/webauthn-credentials", dependencies=[Depends(guard)])
+def get_user_webauthn_credentials(username: str) -> JSONResponse:
+    """List the WebAuthn credentials registered by a user."""
+    credentials = get_db().get_ui_user_webauthn_credentials(username, as_dict=True)
+    return JSONResponse(status_code=200, content={"status": "success", "credentials": [_serialize_webauthn_credential(c) for c in credentials]})
+
+
+@router.post("/{username}/webauthn-credentials", dependencies=[Depends(guard)])
+def create_user_webauthn_credential(username: str, req: CreateWebauthnCredentialRequest) -> JSONResponse:
+    """Register a WebAuthn credential the UI has already verified."""
+    ret = get_db().create_ui_user_webauthn_credential(
+        username,
+        credential_id=req.credential_id,
+        user_handle=req.user_handle,
+        public_key=req.public_key,
+        sign_count=req.sign_count,
+        transports=req.transports,
+        device_type=req.device_type,
+        backed_up=req.backed_up,
+        name=req.name,
+    )
+    if ret:
+        return _error(ret)
+    return JSONResponse(status_code=201, content={"status": "success"})
+
+
+@router.patch("/{username}/webauthn-credentials/{credential_id}", dependencies=[Depends(guard)])
+def update_user_webauthn_credential(username: str, credential_id: str, req: UpdateWebauthnCredentialRequest) -> JSONResponse:
+    """Rename a credential, or record the sign count and last use after a successful ceremony."""
+    db = get_db()
+
+    credential = db.get_ui_user_webauthn_credential(credential_id, as_dict=True)
+    if not credential or credential["username"] != username:
+        return _error("Credential not found", 404)
+
+    ret = db.update_ui_user_webauthn_credential(credential_id, name=req.name, sign_count=req.sign_count, last_used=req.last_used)
+    if ret:
+        return _error(ret)
+    return JSONResponse(status_code=200, content={"status": "success"})
+
+
+@router.delete("/{username}/webauthn-credentials/{credential_id}", dependencies=[Depends(guard)])
+def delete_user_webauthn_credential(username: str, credential_id: str) -> JSONResponse:
+    """Delete one of a user's WebAuthn credentials."""
+    ret = get_db().delete_ui_user_webauthn_credential(username, credential_id)
+    if ret:
+        return _error(ret)
     return JSONResponse(status_code=200, content={"status": "success"})
 
 

@@ -5,7 +5,57 @@
 // free-text recovery-code input (also named totp_token — the server tries TOTP
 // then recovery on the same token).
 (function () {
+  // Security key as an alternative to the code. Wired independently of the TOTP
+  // inputs below, which are absent entirely for a user whose only second factor
+  // is a security key.
+  function initSecurityKey() {
+    const button = document.getElementById("security-key-verify");
+    if (!button) return;
+
+    const wrapper = document.getElementById("security-key-block");
+    const status = document.getElementById("security-key-status");
+
+    if (!window.BWWebAuthn || !window.BWWebAuthn.supported()) {
+      if (wrapper) wrapper.remove();
+      return;
+    }
+    if (wrapper) wrapper.classList.remove("d-none");
+
+    button.addEventListener("click", async function () {
+      button.disabled = true;
+      if (status) {
+        status.textContent = "";
+        status.classList.remove("err");
+      }
+
+      const base = window.location.pathname.replace(/\/$/, "");
+      try {
+        const options = await window.BWWebAuthn.postJSONOrThrow(
+          `${base}/webauthn/options`,
+          {},
+        );
+        const assertion = await window.BWWebAuthn.get(options);
+        const result = await window.BWWebAuthn.postJSONOrThrow(
+          `${base}/webauthn/verify`,
+          assertion,
+        );
+        window.location.href = result.redirect;
+      } catch (error) {
+        button.disabled = false;
+        if (window.BWWebAuthn.isCancellation(error)) return;
+        if (status) {
+          status.textContent =
+            error.message ||
+            "Couldn't verify your security key, please try again";
+          status.classList.add("err"); // .sw-key-status.err, see css/pages/login.css
+        }
+      }
+    });
+  }
+
   function init() {
+    initSecurityKey();
+
     const form = document.getElementById("totp-form");
     const wrap = document.getElementById("totpInputs");
     const verify = document.getElementById("totpVerify");

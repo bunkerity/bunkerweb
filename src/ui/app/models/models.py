@@ -26,6 +26,7 @@ class AnonymousUser(AnonymousUserMixin):
     list_roles = []
     list_permissions = []
     list_recovery_codes = []
+    webauthn_credentials_count = 0
 
     def get_id(self):
         return self.username

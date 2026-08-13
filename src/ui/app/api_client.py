@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from base_api_client import ApiClientError, ApiUnavailableError, BaseApiClient  # type: ignore  # noqa: F401
 
 # Re-export for backwards compatibility — other UI modules import these from here
@@ -525,6 +527,29 @@ class ApiClient(BaseApiClient):
 
     def use_recovery_code(self, username, hashed_code):
         return self._post(f"/users/{username}/recovery-codes/use", json={"hashed_code": hashed_code})
+
+    # ── WebAuthn credentials ────────────────────────────────────────────
+
+    def get_user_webauthn_credentials(self, username):
+        return self._get(f"/users/{username}/webauthn-credentials").get("credentials", [])
+
+    def create_user_webauthn_credential(self, username, **kwargs):
+        return self._post(f"/users/{username}/webauthn-credentials", json=kwargs)
+
+    def update_user_webauthn_credential(self, username, credential_id, **kwargs):
+        return self._patch(f"/users/{username}/webauthn-credentials/{quote(credential_id, safe='')}", json=kwargs)
+
+    def delete_user_webauthn_credential(self, username, credential_id):
+        return self._delete(f"/users/{username}/webauthn-credentials/{quote(credential_id, safe='')}")
+
+    def resolve_webauthn_credential(self, credential_id):
+        """Resolve a credential ID to its owner. Returns None when unknown."""
+        try:
+            return self._get(f"/users/webauthn-credentials/{quote(credential_id, safe='')}").get("credential")
+        except ApiClientError as e:
+            if e.status_code == 404:
+                return None
+            raise
 
     # ── User Preferences ────────────────────────────────────────────────
 

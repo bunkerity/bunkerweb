@@ -55,7 +55,8 @@
       "services_dropzone": "خدمات کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں",
       "user_avatar": "کاربر کا آواتار",
       "remove_value": "قيمة کو ہٹائیں",
-      "view_selected_items": " منتخب عناصر دیکھیں"
+      "view_selected_items": " منتخب عناصر دیکھیں",
+      "passkey_name": "پاس کی کا نام"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "ٹیمپلیٹ استعمال کریں",
     "edit": "ترمیم کریں",
     "verify": "تصدیق کریں",
-    "view": "دیکھیں"
+    "view": "دیکھیں",
+    "rename": "نام تبدیل کریں",
+    "add_passkey": "پاس کی شامل کریں",
+    "sign_in_with_passkey": "پاس کی سے سائن ان کریں",
+    "use_security_key": "سیکیورٹی کی استعمال کریں"
   },
   "cache": {
     "kpi_files": "فائلیں",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "ZeroSSL API دوبارہ کوششیں",
       "zerossl_api_retry_delay": "ZeroSSL API دوبارہ کوشش میں تاخیر",
       "zerossl_api_connect_timeout": "ZeroSSL API کنکشن ٹائم آؤٹ",
-      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت"
+      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت",
+      "passkey_name": "پاس کی کا نام"
     },
     "placeholder": {
       "2fa_code": "کوڈ درج کریں",
       "2fa_or_recovery": "کوڈ یا ریکوری کوڈ درج کریں",
       "config_name": "میری-کسٹم-کنفیگ",
+      "current_password": "موجودہ پاس ورڈ",
       "enter_username": "اپنا صارف نام درج کریں",
       "keywords": "کلیدی الفاظ...",
       "multivalue_enter_value": "قدر درج کریں...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "لاگ ان",
-    "subtitle": "اپنے BunkerWeb اکاؤنٹ میں لاگ ان کریں۔"
+    "subtitle": "اپنے BunkerWeb اکاؤنٹ میں لاگ ان کریں۔",
+    "or_use_password": "یا اپنا پاس ورڈ استعمال کریں"
   },
   "logs": {
     "annotation_error": "خرابی",
@@ -1218,6 +1226,7 @@
         "change_theme": "تھیم تبدیل کریں",
         "coming_soon": "جلد آرہا ہے",
         "edit_profile": "پروفائل میں ترمیم کریں",
+        "passkeys": "پاس کیز",
         "refresh_recovery_codes": "ریکوری کوڈز ریفریش کریں",
         "sessions": "سیشنز"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "دوسرے سیشنوں کو حذف کرنا؟"
       }
+    },
+    "passkey": {
+      "added": "شامل کی گئی",
+      "empty": "ابھی تک کوئی پاس کی رجسٹرڈ نہیں ہے۔",
+      "help": "پاس کی آپ کو پاس ورڈ کے بغیر سائن ان کراتی ہے، آپ کے آلے کے اسکرین لاک یا سیکیورٹی کی کے ذریعے۔",
+      "last_used": "آخری استعمال",
+      "never_used": "کبھی استعمال نہیں ہوئی",
+      "unsupported": "یہ براؤزر پاس کیز کو سپورٹ نہیں کرتا۔"
     },
     "session": {
       "browser": "براؤزر",
@@ -2131,7 +2148,9 @@
     "signing_in": "BunkerWeb میں لاگ ان",
     "subtitle": "اپنے تصدیق ایپ سے کوڈ درج کریں۔",
     "title": "دو مرحلے کی تصدیق",
-    "prompt": "براہ کرم اپنا TOTP کوڈ درج کریں۔"
+    "prompt": "براہ کرم اپنا TOTP کوڈ درج کریں۔",
+    "subtitle_security_key": "اپنی سیکیورٹی کی سے اپنی شناخت کی تصدیق کریں۔",
+    "or_use_security_key": "یا اپنی سیکیورٹی کی استعمال کریں"
   },
   "certificates": {
     "acme_help": "ان سروسز کا انتخاب کریں جن کے موجودہ سیٹنگز پہلے سے ہی Let's Encrypt کو فعال اور کنفیگور کر چکے ہیں۔ یہ عمل صرف اس کنفیگریشن کی شمولیت کا انتظام کرتا ہے؛ سرٹیفکیٹ کے تفصیلات اور چیلنج کے کریڈینشل یہاں درج نہیں کیے جائیں۔",

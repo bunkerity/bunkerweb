@@ -55,7 +55,8 @@
       "services_dropzone": "Eine Dienste-Exportdatei auswählen oder hier ablegen",
       "user_avatar": "Benutzeravatar",
       "remove_value": "Wert entfernen",
-      "view_selected_items": "Ausgewählte Elemente anzeigen"
+      "view_selected_items": "Ausgewählte Elemente anzeigen",
+      "passkey_name": "Passkey-Name"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "Vorlage verwenden",
     "edit": "Bearbeiten",
     "verify": "Überprüfen",
-    "view": "Anzeigen"
+    "view": "Anzeigen",
+    "rename": "Umbenennen",
+    "add_passkey": "Passkey hinzufügen",
+    "sign_in_with_passkey": "Mit Passkey anmelden",
+    "use_security_key": "Sicherheitsschlüssel verwenden"
   },
   "cache": {
     "kpi_files": "Dateien",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "ZeroSSL-API-Wiederholungen",
       "zerossl_api_retry_delay": "ZeroSSL-API-Wiederholungsverzögerung",
       "zerossl_api_connect_timeout": "ZeroSSL-API-Verbindungs-Timeout",
-      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit"
+      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit",
+      "passkey_name": "Passkey-Name"
     },
     "placeholder": {
       "2fa_code": "Code eingeben",
       "2fa_or_recovery": "Code oder Wiederherstellungscode eingeben",
       "config_name": "meine-benutzerdefinierte-konfig",
+      "current_password": "Aktuelles Passwort",
       "enter_username": "Benutzernamen eingeben",
       "keywords": "Schlüsselwörter...",
       "multivalue_enter_value": "Wert eingeben...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "Anmelden",
-    "subtitle": "Melden Sie sich bei Ihrem BunkerWeb-Konto an"
+    "subtitle": "Melden Sie sich bei Ihrem BunkerWeb-Konto an",
+    "or_use_password": "oder Passwort verwenden"
   },
   "logs": {
     "annotation_error": "Fehler",
@@ -1218,6 +1226,7 @@
         "change_theme": "Theme ändern",
         "coming_soon": "Demnächst verfügbar",
         "edit_profile": "Profil bearbeiten",
+        "passkeys": "Passkeys",
         "refresh_recovery_codes": "Wiederherstellungscodes aktualisieren",
         "sessions": "Sitzungen"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "Andere Sitzungen löschen?"
       }
+    },
+    "passkey": {
+      "added": "Hinzugefügt",
+      "empty": "Noch kein Passkey registriert.",
+      "help": "Mit einem Passkey melden Sie sich ohne Passwort an – über die Bildschirmsperre Ihres Geräts oder einen Sicherheitsschlüssel.",
+      "last_used": "zuletzt verwendet",
+      "never_used": "nie verwendet",
+      "unsupported": "Dieser Browser unterstützt keine Passkeys."
     },
     "session": {
       "browser": "Browser",
@@ -2131,7 +2148,9 @@
     "signing_in": "Anmelden bei BunkerWeb",
     "subtitle": "Geben Sie den Code aus Ihrer Authenticator-App ein.",
     "title": "Zwei-Faktor",
-    "prompt": "Bitte geben Sie Ihren TOTP-Code ein."
+    "prompt": "Bitte geben Sie Ihren TOTP-Code ein.",
+    "subtitle_security_key": "Bestätigen Sie Ihre Identität mit Ihrem Sicherheitsschlüssel.",
+    "or_use_security_key": "oder Sicherheitsschlüssel verwenden"
   },
   "certificates": {
     "acme_help": "Wählen Sie Dienste aus, deren bestehende Einstellungen bereits Let's Encrypt aktivieren und konfigurieren. Diese Aktion plant lediglich die Konfiguration; Details und Challenge-Anmeldeinformationen werden hier nicht eingegeben.",

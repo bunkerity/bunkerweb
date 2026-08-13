@@ -2,7 +2,16 @@
 from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
-from model import Roles, RolesPermissions, RolesUsers, UserColumnsPreferences, UserRecoveryCodes, UserSessions, Users  # type: ignore
+from model import (  # type: ignore
+    Roles,
+    RolesPermissions,
+    RolesUsers,
+    UserColumnsPreferences,
+    UserRecoveryCodes,
+    UserSessions,
+    Users,
+    UserWebauthnCredentials,
+)
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import joinedload
@@ -95,7 +104,7 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
         with self._db_session() as session:
             query = select(Users)
             query = query.filter_by(username=username) if username else query.filter_by(admin=True)
-            query = query.options(joinedload(Users.roles), joinedload(Users.recovery_codes))
+            query = query.options(joinedload(Users.roles), joinedload(Users.recovery_codes), joinedload(Users.webauthn_credentials))
 
             ui_user = session.scalars(query.limit(1)).unique().first()
             if not ui_user:
@@ -117,6 +126,9 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
                 "update_date": ui_user.update_date.astimezone(),
                 "roles": [role.role_name for role in ui_user.roles],
                 "recovery_codes": [rc.code for rc in ui_user.recovery_codes],
+                # the UI's second-factor gate needs to know whether a passkey exists, without
+                # paying for a second round trip on every request
+                "webauthn_credentials_count": len(ui_user.webauthn_credentials),
             }
 
     def create_ui_user(
@@ -229,6 +241,7 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
                 session.execute(update(UserRecoveryCodes).filter_by(user_name=old_username).values({"user_name": username}))
                 session.execute(update(UserSessions).filter_by(user_name=old_username).values({"user_name": username}))
                 session.execute(update(UserColumnsPreferences).filter_by(user_name=old_username).values({"user_name": username}))
+                session.execute(update(UserWebauthnCredentials).filter_by(user_name=old_username).values({"user_name": username}))
 
             totp_changed = user.totp_secret != totp_secret
 
@@ -412,3 +425,147 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
         """Get ui role permissions."""
         with self._db_session() as session:
             return [permission.permission_name for permission in session.execute(select(RolesPermissions.permission_name).filter_by(role_name=role_name))]
+
+    @staticmethod
+    def _webauthn_credential_to_dict(credential: UserWebauthnCredentials) -> dict:
+        """Serialize a WebAuthn credential row. Only public material, no secrets involved."""
+        return {
+            "username": credential.user_name,
+            "credential_id": credential.credential_id,
+            "user_handle": credential.user_handle,
+            "public_key": credential.public_key,
+            "sign_count": credential.sign_count,
+            "transports": [t for t in (credential.transports or "").split(",") if t],
+            "device_type": credential.device_type,
+            "backed_up": credential.backed_up,
+            "name": credential.name,
+            "creation_date": credential.creation_date.astimezone(),
+            "last_used": credential.last_used.astimezone() if credential.last_used else None,
+        }
+
+    def get_ui_user_webauthn_credentials(self, username: str, *, as_dict: bool = False) -> List[Union[UserWebauthnCredentials, dict]]:
+        """Get every WebAuthn credential registered by a ui user, newest last."""
+        with self._db_session() as session:
+            credentials = session.scalars(select(UserWebauthnCredentials).filter_by(user_name=username).order_by(UserWebauthnCredentials.creation_date)).all()
+            if not as_dict:
+                return list(credentials)
+            return [self._webauthn_credential_to_dict(credential) for credential in credentials]
+
+    def get_ui_user_webauthn_credential(self, credential_id: str, *, as_dict: bool = False) -> Optional[Union[UserWebauthnCredentials, dict]]:
+        """Get a single WebAuthn credential by its credential ID, whatever user owns it.
+
+        This is the passwordless lookup: the assertion carries a credential ID but no username, so
+        the owner has to be resolved from the credential itself.
+        """
+        with self._db_session() as session:
+            credential = session.scalars(select(UserWebauthnCredentials).filter_by(credential_id=credential_id).limit(1)).first()
+            if not credential:
+                return None
+            return self._webauthn_credential_to_dict(credential) if as_dict else credential
+
+    def get_ui_user_webauthn_handle(self, username: str) -> Optional[str]:
+        """Get the user handle already used by this user's credentials, if any.
+
+        Every credential of a given user must share one handle so authenticators recognize a second
+        passkey as belonging to the same account instead of creating a duplicate entry.
+        """
+        with self._db_session() as session:
+            return session.scalars(select(UserWebauthnCredentials.user_handle).filter_by(user_name=username).limit(1)).first()
+
+    def create_ui_user_webauthn_credential(
+        self,
+        username: str,
+        *,
+        credential_id: str,
+        user_handle: str,
+        public_key: str,
+        sign_count: int = 0,
+        transports: Optional[List[str]] = None,
+        device_type: Optional[str] = None,
+        backed_up: bool = False,
+        name: str,
+        creation_date: Optional[datetime] = None,
+    ) -> str:
+        """Register a verified WebAuthn credential for a ui user."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            user = session.scalars(select(Users).filter_by(username=username).limit(1)).first()
+            if not user:
+                return f"User {username} doesn't exist"
+
+            if session.scalars(select(UserWebauthnCredentials).filter_by(credential_id=credential_id).limit(1)).first():
+                return "This credential already exists"
+
+            session.add(
+                UserWebauthnCredentials(
+                    user_name=username,
+                    credential_id=credential_id,
+                    user_handle=user_handle,
+                    public_key=public_key,
+                    sign_count=sign_count,
+                    transports=",".join(transports) if transports else None,
+                    device_type=device_type,
+                    backed_up=backed_up,
+                    name=name,
+                    creation_date=creation_date or datetime.now().astimezone(),
+                )
+            )
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def update_ui_user_webauthn_credential(
+        self,
+        credential_id: str,
+        *,
+        sign_count: Optional[int] = None,
+        last_used: Optional[datetime] = None,
+        name: Optional[str] = None,
+    ) -> str:
+        """Update a WebAuthn credential after a successful ceremony, or rename it."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            credential = session.scalars(select(UserWebauthnCredentials).filter_by(credential_id=credential_id).limit(1)).first()
+            if not credential:
+                return "Credential not found"
+
+            if sign_count is not None:
+                credential.sign_count = sign_count
+            if last_used is not None:
+                credential.last_used = last_used
+            if name is not None:
+                credential.name = name
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def delete_ui_user_webauthn_credential(self, username: str, credential_id: str) -> str:
+        """Delete a WebAuthn credential. Scoped by username so a user can only remove their own."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            credential = session.scalars(select(UserWebauthnCredentials).filter_by(user_name=username, credential_id=credential_id).limit(1)).first()
+            if not credential:
+                return "Credential not found"
+
+            session.delete(credential)
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""

@@ -55,7 +55,8 @@
       "services_dropzone": "Wybierz plik eksportu usług albo upuść go tutaj",
       "user_avatar": "Avatar użytkownika",
       "remove_value": "Usuń wartość",
-      "view_selected_items": "Wyświetl wybrane elementy"
+      "view_selected_items": "Wyświetl wybrane elementy",
+      "passkey_name": "Nazwa klucza dostępu"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "Użyj szablonu",
     "edit": "Edytuj",
     "verify": "Zweryfikuj",
-    "view": "Wyświetl"
+    "view": "Wyświetl",
+    "rename": "Zmień nazwę",
+    "add_passkey": "Dodaj klucz dostępu",
+    "sign_in_with_passkey": "Zaloguj się kluczem dostępu",
+    "use_security_key": "Użyj klucza bezpieczeństwa"
   },
   "cache": {
     "kpi_files": "Pliki",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "Liczba ponowień API ZeroSSL",
       "zerossl_api_retry_delay": "Opóźnienie ponowień API ZeroSSL",
       "zerossl_api_connect_timeout": "Limit czasu połączenia API ZeroSSL",
-      "zerossl_api_max_time": "Maksymalny czas API ZeroSSL"
+      "zerossl_api_max_time": "Maksymalny czas API ZeroSSL",
+      "passkey_name": "Nazwa klucza dostępu"
     },
     "placeholder": {
       "2fa_code": "Wprowadź kod",
       "2fa_or_recovery": "Wprowadź kod lub kod odzyskiwania",
       "config_name": "my-custom-config",
+      "current_password": "Aktualne hasło",
       "enter_username": "Wprowadź nazwę użytkownika",
       "keywords": "Słowa kluczowe",
       "multivalue_enter_value": "Wprowadź wartość...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "Zaloguj się",
-    "subtitle": "Zaloguj się do swojego konta BunkerWeb"
+    "subtitle": "Zaloguj się do swojego konta BunkerWeb",
+    "or_use_password": "lub użyj hasła"
   },
   "logs": {
     "annotation_error": "Błąd",
@@ -1218,6 +1226,7 @@
         "change_theme": "Zmień motyw",
         "coming_soon": "Wkrótce",
         "edit_profile": "Edytuj profil",
+        "passkeys": "Klucze dostępu",
         "refresh_recovery_codes": "Odśwież kody odzyskiwania",
         "sessions": "Sesje"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "Zakończyć pozostałe sesje?"
       }
+    },
+    "passkey": {
+      "added": "Dodano",
+      "empty": "Nie zarejestrowano jeszcze żadnego klucza dostępu.",
+      "help": "Klucz dostępu loguje Cię bez hasła, przy użyciu blokady ekranu urządzenia lub klucza bezpieczeństwa.",
+      "last_used": "ostatnio użyty",
+      "never_used": "nigdy nieużywany",
+      "unsupported": "Ta przeglądarka nie obsługuje kluczy dostępu."
     },
     "session": {
       "browser": "Przeglądarka",
@@ -2131,7 +2148,9 @@
     "signing_in": "Logowanie do BunkerWeb",
     "subtitle": "Wprowadź kod z aplikacji uwierzytelniania.",
     "title": "Dwustopniowa",
-    "prompt": "Wprowadź swój kod TOTP."
+    "prompt": "Wprowadź swój kod TOTP.",
+    "subtitle_security_key": "Potwierdź swoją tożsamość kluczem bezpieczeństwa.",
+    "or_use_security_key": "lub użyj klucza bezpieczeństwa"
   },
   "certificates": {
     "acme_help": "Wybierz usługi, których istniejące ustawienia już umożliwiają i konfigurują Let's Encrypt. Ta akcja tylko planuje tę konfigurację; szczegóły certyfikatu i dane uwierzytelniające nie są wprowadzane tutaj.",

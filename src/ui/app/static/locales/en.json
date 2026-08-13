@@ -55,7 +55,8 @@
       "services_dropzone": "Select a services export file or drop one here",
       "user_avatar": "User avatar",
       "remove_value": "Remove value",
-      "view_selected_items": "View selected items"
+      "view_selected_items": "View selected items",
+      "passkey_name": "Passkey name"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "wipe_other_sessions": "Wipe Other Sessions",
     "use_template": "Use template",
     "edit": "Edit",
-    "view": "View"
+    "view": "View",
+    "rename": "Rename",
+    "add_passkey": "Add a passkey",
+    "sign_in_with_passkey": "Sign in with a passkey",
+    "use_security_key": "Use a security key"
   },
   "cache": {
     "kpi_files": "Files",
@@ -857,12 +862,14 @@
       "zerossl_api_retry": "ZeroSSL API Retries",
       "zerossl_api_retry_delay": "ZeroSSL API Retry Delay",
       "zerossl_api_connect_timeout": "ZeroSSL API Connect Timeout",
-      "zerossl_api_max_time": "ZeroSSL API Max Time"
+      "zerossl_api_max_time": "ZeroSSL API Max Time",
+      "passkey_name": "Passkey name"
     },
     "placeholder": {
       "2fa_code": "Enter code",
       "2fa_or_recovery": "Enter code or recovery code",
       "config_name": "my-custom-config",
+      "current_password": "Current password",
       "enter_username": "Enter username",
       "keywords": "Keywords",
       "multivalue_enter_value": "Enter value...",
@@ -939,6 +946,7 @@
     "get_support": "Get support"
   },
   "login": {
+    "or_use_password": "or use your password",
     "subtitle": "Sign in to your BunkerWeb account",
     "title": "Sign In"
   },
@@ -1252,6 +1260,7 @@
         "change_theme": "Change Theme",
         "coming_soon": "Coming Soon",
         "edit_profile": "Edit Profile",
+        "passkeys": "Passkeys",
         "refresh_recovery_codes": "Refresh Recovery Codes",
         "sessions": "Sessions"
       }
@@ -1266,6 +1275,14 @@
       "title": {
         "wipe_sessions": "Wipe other sessions?"
       }
+    },
+    "passkey": {
+      "added": "Added",
+      "empty": "No passkey registered yet.",
+      "help": "A passkey signs you in without a password, using your device's screen lock or a security key.",
+      "last_used": "last used",
+      "never_used": "never used",
+      "unsupported": "This browser doesn't support passkeys."
     },
     "session": {
       "browser": "Browser",
@@ -2162,9 +2179,11 @@
   },
   "totp": {
     "cant_access": "Can't access your authenticator?",
+    "or_use_security_key": "or use your security key",
     "prompt": "Please enter your TOTP code.",
     "signing_in": "Signing in to BunkerWeb",
     "subtitle": "Enter the code from your authenticator app.",
+    "subtitle_security_key": "Confirm it's you with your security key.",
     "title": "Two-Factor"
   },
   "certificates": {

@@ -21,6 +21,7 @@ The Web UI is the visual control plane for BunkerWeb. It drives services, global
 - Run the UI behind BunkerWeb on an internal network; pick a hard-to-guess `REVERSE_PROXY_URL` and restrict source IPs.
 - Set strong `ADMIN_USERNAME` / `ADMIN_PASSWORD`; enable `OVERRIDE_ADMIN_CREDS=yes` only when you intentionally want to reset credentials.
 - Provide `TOTP_ENCRYPTION_KEYS` and enable TOTP on admin accounts; keep recovery codes safe.
+- Prefer passkeys where you can: set `UI_WEBAUTHN_RP_ID` (or a single `UI_ALLOWED_HOSTS` entry) and register at least two per account, so losing one device doesn't lock you out. Phishing-resistant by construction — a passkey will not sign for the wrong origin.
 - Use TLS (terminate at BunkerWeb or set `UI_SSL_ENABLED=yes` with cert/key paths); set `UI_FORWARDED_ALLOW_IPS` to trusted proxies.
 - Persist secrets: mount `/var/lib/bunkerweb` so `FLASK_SECRET`, Biscuit keys, and TOTP material survive restarts.
 - Keep `CHECK_PRIVATE_IP=yes` (default) to bind sessions to the client IP and `ALWAYS_REMEMBER=no` unless you explicitly want long-lived cookies.
@@ -187,6 +188,9 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
     ```
 
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
+- Passkeys (WebAuthn / FIDO2): once `UI_WEBAUTHN_RP_ID` resolves (see below), the profile page's **Security** tab gains a **Passkeys** card. A registered passkey signs you in from the login page with no username and no password — the authenticator verifies you locally, so no TOTP prompt follows either. Register as many as you like (one per device is common); each is named, and shows its creation date and last use. An older non-discoverable FIDO2 security key cannot open a session on its own, but works as an alternative to TOTP after the password step.
+
+    A passkey is an *alternative* way in, not an extra hurdle: registering one does **not** start demanding it after a password, because passkeys have no recovery codes and a lost device would otherwise lock the account permanently. Password and TOTP keep working exactly as before, and accounts without a passkey see no change at all. Use TOTP (with its recovery codes) when you want to *require* a second factor.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
@@ -245,6 +249,25 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 | `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                                                      | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
+| `UI_WEBAUTHN_RP_ID`                         | WebAuthn Relying Party ID (bare domain, no scheme or port). Defaults to the single non-wildcard `UI_ALLOWED_HOSTS` entry | Domain name              | derived, else disabled    |
+| `UI_WEBAUTHN_ORIGINS`                       | Exact origins accepted during a ceremony                                                                 | Space/comma-separated URLs | `https://<RP ID>`       |
+
+!!! warning "The RP ID is part of the security boundary"
+    WebAuthn credentials are cryptographically bound to the Relying Party ID, so it is never
+    derived from the request `Host` header — an attacker controls that, and a wrong RP ID silently
+    invalidates every passkey. Resolution order:
+
+    1. `UI_WEBAUTHN_RP_ID`, when set;
+    2. the sole entry of `UI_ALLOWED_HOSTS`, when there is exactly one and it is not a wildcard
+       (any `:port` is stripped);
+    3. nothing — passkeys stay off, and the UI logs why at startup.
+
+    **Changing the UI's domain invalidates every enrolled passkey.** Users must register new ones
+    on the new domain; the old credentials cannot be migrated, because the RP ID is baked into
+    them by the authenticator. Keep TOTP or a password fallback in place before any domain move.
+
+    Ceremonies also require a secure context: HTTPS everywhere except `localhost`, which the
+    specification exempts (this is what makes the dev stack on `http://localhost:7000` usable).
 
 ### Certificate manager
 
@@ -342,7 +365,7 @@ log {
 - Create/update/delete services and global settings with validation against plugin schemas.
 - Upload and manage custom configs (NGINX/ModSecurity) and plugins (external or PRO).
 - View logs, search reports, and inspect cached artefacts.
-- Manage UI users, roles, sessions, and TOTP with recovery codes.
+- Manage UI users, roles, sessions, TOTP with recovery codes, and passkeys (WebAuthn / FIDO2) for passwordless sign-in.
 - Upgrade to BunkerWeb PRO and inspect license status from the dedicated page.
 
 ## Upgrade to PRO {#upgrade-to-pro}

@@ -72,6 +72,21 @@
                     <p class="sw-subtitle" data-i18n="login.subtitle">Sign in to your BunkerWeb account</p>
                 </div>
             </div>
+            {% if webauthn_enabled %}
+                <!-- Revealed by js/pages/login.js once the browser confirms WebAuthn support -->
+                <div id="passkey-block" class="passkey-block d-none">
+                    <button class="sw-btn sw-btn-outline passkey-btn"
+                            type="button"
+                            id="passkey-login">
+                        <i class="bx bx-fingerprint" aria-hidden="true"></i>
+                        <span data-i18n="button.sign_in_with_passkey">Sign in with a passkey</span>
+                    </button>
+                    <p class="sw-key-status" id="passkey-status" role="status" aria-live="polite"></p>
+                    <div class="passkey-separator">
+                        <span data-i18n="login.or_use_password">or use your password</span>
+                    </div>
+                </div>
+            {% endif %}
             <form method="POST" id="login-form" class="login-fields">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <input type="hidden"
@@ -132,4 +147,13 @@
             </form>
         </div>
     </div>
+{% endblock %}
+{% block scripts %}
+    {% if webauthn_enabled %}
+        <script src="{{ url_for('static', filename='js/components/webauthn.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        <script src="{{ url_for('static', filename='js/pages/login.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+    {% endif %}
 {% endblock %}

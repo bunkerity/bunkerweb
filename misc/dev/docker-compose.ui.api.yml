@@ -107,6 +107,10 @@ services:
       ADMIN_PASSWORD: "P@ssw0rd"
       CHECK_PRIVATE_IP: "no"
       FLASK_SECRET: "secret"
+      # Passkeys are bound to this exact RP ID. "localhost" is the only origin the WebAuthn spec
+      # exempts from HTTPS, so it is what makes http://localhost:7000 usable here; browsing this
+      # stack through BunkerWeb (www.example.com) instead would need that hostname and TLS.
+      UI_WEBAUTHN_RP_ID: "localhost"
       DEBUG: "1"
       MAX_WORKERS: "1"
       MAX_THREADS: "4"

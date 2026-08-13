@@ -55,7 +55,8 @@
       "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا",
       "user_avatar": "صورة المستخدم",
       "remove_value": "حذف القيمة",
-      "view_selected_items": "عرض العناصر المحددة"
+      "view_selected_items": "عرض العناصر المحددة",
+      "passkey_name": "اسم مفتاح المرور"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "استخدام قالب",
     "edit": "تعديل",
     "verify": "التحقق",
-    "view": "عرض"
+    "view": "عرض",
+    "rename": "إعادة تسمية",
+    "add_passkey": "إضافة مفتاح مرور",
+    "sign_in_with_passkey": "تسجيل الدخول بمفتاح مرور",
+    "use_security_key": "استخدام مفتاح أمان"
   },
   "cache": {
     "kpi_files": "الملفات",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
+      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL",
+      "passkey_name": "اسم مفتاح المرور"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
       "2fa_or_recovery": "أدخل الرمز أو رمز الاسترداد",
       "config_name": "تكوين-مخصص-لي",
+      "current_password": "كلمة المرور الحالية",
       "enter_username": "أدخل اسم المستخدم الخاص بك",
       "keywords": "الكلمات المفتاحية...",
       "multivalue_enter_value": "أدخل قيمة...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "تسجيل الدخول",
-    "subtitle": "تسجيل الدخول إلى حساب BunkerWeb الخاص بك"
+    "subtitle": "تسجيل الدخول إلى حساب BunkerWeb الخاص بك",
+    "or_use_password": "أو استخدم كلمة المرور"
   },
   "logs": {
     "annotation_error": "خطأ",
@@ -1218,6 +1226,7 @@
         "change_theme": "تغيير المظهر",
         "coming_soon": "قريبا",
         "edit_profile": "تعديل الملف الشخصي",
+        "passkeys": "مفاتيح المرور",
         "refresh_recovery_codes": "تحديث رموز الاسترداد",
         "sessions": "الجلسات"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "مسح الجلسات الأخرى؟"
       }
+    },
+    "passkey": {
+      "added": "أُضيف",
+      "empty": "لا يوجد مفتاح مرور مسجّل بعد.",
+      "help": "يتيح لك مفتاح المرور تسجيل الدخول دون كلمة مرور، باستخدام قفل شاشة جهازك أو مفتاح أمان.",
+      "last_used": "آخر استخدام",
+      "never_used": "لم يُستخدم مطلقًا",
+      "unsupported": "هذا المتصفح لا يدعم مفاتيح المرور."
     },
     "session": {
       "browser": "المتصفح",
@@ -2131,7 +2148,9 @@
     "signing_in": "تسجيل الدخول إلى BunkerWeb",
     "subtitle": "أدخل الرمز من تطبيق المصادقة الخاص بك.",
     "title": "مفتاح ثنائي",
-    "prompt": "يرجى إدخال رمز TOTP الخاص بك."
+    "prompt": "يرجى إدخال رمز TOTP الخاص بك.",
+    "subtitle_security_key": "أكّد هويتك باستخدام مفتاح الأمان.",
+    "or_use_security_key": "أو استخدم مفتاح الأمان"
   },
   "certificates": {
     "acme_help": "حدد الخدمات التي تمكينها وإعدادها بالفعل Let's Encrypt. هذه العملية تقوم فقط بجدولة هذا التكوين؛ لا يتم إدخال تفاصيل الشهادة و بيانات التحدي هنا.",

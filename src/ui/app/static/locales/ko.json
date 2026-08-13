@@ -55,7 +55,8 @@
       "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요",
       "user_avatar": "사용자 프로필",
       "remove_value": "값 제거",
-      "view_selected_items": "선택된 항목 보기"
+      "view_selected_items": "선택된 항목 보기",
+      "passkey_name": "패스키 이름"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "템플릿 사용",
     "edit": "편집",
     "verify": "확인",
-    "view": "보기"
+    "view": "보기",
+    "rename": "이름 변경",
+    "add_passkey": "패스키 추가",
+    "sign_in_with_passkey": "패스키로 로그인",
+    "use_security_key": "보안 키 사용"
   },
   "cache": {
     "kpi_files": "파일",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
       "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
       "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
-      "zerossl_api_max_time": "ZeroSSL API 최대 시간"
+      "zerossl_api_max_time": "ZeroSSL API 최대 시간",
+      "passkey_name": "패스키 이름"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
       "2fa_or_recovery": "코드 또는 복구 코드 입력",
       "config_name": "my-custom-config",
+      "current_password": "현재 비밀번호",
       "enter_username": "사용자 이름 입력",
       "keywords": "키워드",
       "multivalue_enter_value": "값 입력...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "로그인",
-    "subtitle": "BunkerWeb 계정에 로그인"
+    "subtitle": "BunkerWeb 계정에 로그인",
+    "or_use_password": "또는 비밀번호 사용"
   },
   "logs": {
     "annotation_error": "오류",
@@ -1218,6 +1226,7 @@
         "change_theme": "테마 변경",
         "coming_soon": "준비 중",
         "edit_profile": "프로필 수정",
+        "passkeys": "패스키",
         "refresh_recovery_codes": "복구 코드 갱신",
         "sessions": "세션"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "다른 세션 삭제?"
       }
+    },
+    "passkey": {
+      "added": "추가일",
+      "empty": "등록된 패스키가 없습니다.",
+      "help": "패스키를 사용하면 기기의 화면 잠금이나 보안 키로 비밀번호 없이 로그인할 수 있습니다.",
+      "last_used": "마지막 사용",
+      "never_used": "사용한 적 없음",
+      "unsupported": "이 브라우저는 패스키를 지원하지 않습니다."
     },
     "session": {
       "browser": "브라우저",
@@ -2131,7 +2148,9 @@
     "signing_in": "BunkerWeb에 로그인",
     "subtitle": "인증 앱에서 코드를 입력하세요.",
     "title": "이중 인증",
-    "prompt": "TOTP 코드를 입력해 주세요."
+    "prompt": "TOTP 코드를 입력해 주세요.",
+    "subtitle_security_key": "보안 키로 본인임을 확인하세요.",
+    "or_use_security_key": "또는 보안 키 사용"
   },
   "certificates": {
     "acme_help": "기존 설정이 Let's Encrypt를 활성화하고 구성하는 서비스 중에서 선택합니다. 이 작업은 해당 설정을 예약하는 것만입니다. 인증서 세부 정보 및 도전 인증 자격 증명은 여기에 입력되지 않습니다.",

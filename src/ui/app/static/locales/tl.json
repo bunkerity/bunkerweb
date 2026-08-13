@@ -55,7 +55,8 @@
       "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito",
       "user_avatar": "Avatar ng gumagamit",
       "remove_value": "Alisin ang halaga",
-      "view_selected_items": "Tingnan ang napiling mga item"
+      "view_selected_items": "Tingnan ang napiling mga item",
+      "passkey_name": "Pangalan ng passkey"
     }
   },
   "badge": {
@@ -219,7 +220,11 @@
     "use_template": "Gamitin ang template",
     "edit": "I-edit",
     "verify": "I-verify",
-    "view": "Tingnan"
+    "view": "Tingnan",
+    "rename": "Palitan ang pangalan",
+    "add_passkey": "Magdagdag ng passkey",
+    "sign_in_with_passkey": "Mag-sign in gamit ang passkey",
+    "use_security_key": "Gumamit ng security key"
   },
   "cache": {
     "kpi_files": "Mga file",
@@ -833,12 +838,14 @@
       "zerossl_api_retry": "Mga Ulit ng ZeroSSL API",
       "zerossl_api_retry_delay": "Pagkaantala ng Ulit ng ZeroSSL API",
       "zerossl_api_connect_timeout": "Connect Timeout ng ZeroSSL API",
-      "zerossl_api_max_time": "Max na Oras ng ZeroSSL API"
+      "zerossl_api_max_time": "Max na Oras ng ZeroSSL API",
+      "passkey_name": "Pangalan ng passkey"
     },
     "placeholder": {
       "2fa_code": "Ipasok ang code",
       "2fa_or_recovery": "Ipasok ang code o recovery code",
       "config_name": "aking-custom-config",
+      "current_password": "Kasalukuyang Password",
       "enter_username": "Ipasok ang username",
       "keywords": "Mga Keyword",
       "multivalue_enter_value": "Ipasok ang value...",
@@ -916,7 +923,8 @@
   },
   "login": {
     "title": "Mag-login",
-    "subtitle": "Mag-log in sa iyong account ng BunkerWeb"
+    "subtitle": "Mag-log in sa iyong account ng BunkerWeb",
+    "or_use_password": "o gamitin ang iyong password"
   },
   "logs": {
     "annotation_error": "Error",
@@ -1218,6 +1226,7 @@
         "change_theme": "Palitan ang Tema",
         "coming_soon": "Malapit na",
         "edit_profile": "I-edit ang Profile",
+        "passkeys": "Mga passkey",
         "refresh_recovery_codes": "I-refresh ang Mga Recovery Code",
         "sessions": "Mga Session"
       }
@@ -1232,6 +1241,14 @@
       "title": {
         "wipe_sessions": "Tanggalin ang ibang sesyon?"
       }
+    },
+    "passkey": {
+      "added": "Naidagdag",
+      "empty": "Wala pang nakarehistrong passkey.",
+      "help": "Ang passkey ay nagpapa-sign in sa iyo nang walang password, gamit ang screen lock ng iyong device o isang security key.",
+      "last_used": "huling ginamit",
+      "never_used": "hindi pa nagagamit",
+      "unsupported": "Hindi sinusuportahan ng browser na ito ang mga passkey."
     },
     "session": {
       "browser": "Browser",
@@ -2131,7 +2148,9 @@
     "signing_in": "Pag-login sa BunkerWeb",
     "subtitle": "Ilagay ang code mula sa iyong app ng authenticator.",
     "title": "Dalawang-Hakbang",
-    "prompt": "Mangyaring ipasok ang iyong TOTP code."
+    "prompt": "Mangyaring ipasok ang iyong TOTP code.",
+    "subtitle_security_key": "Kumpirmahin na ikaw nga gamit ang iyong security key.",
+    "or_use_security_key": "o gamitin ang iyong security key"
   },
   "certificates": {
     "acme_help": "Piliin ang mga serbisyo kung saan ang mga kasalukuyang setting ay nagpapagana at nagko-configure ng Let's Encrypt. Ang aksyong ito ay nagpaplano lamang ng configuration; ang mga detalye ng sertipiko at mga kredensyal ng hamon ay hindi ipinasok dito.",

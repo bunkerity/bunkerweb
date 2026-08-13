@@ -610,6 +610,36 @@ with app.app_context():
     if app.config["ALLOWED_HOSTS"]:
         LOGGER.info(f"UI Host header allowlist enabled: {app.config['ALLOWED_HOSTS']}")
 
+    # WebAuthn Relying Party identity. The RP ID is part of the security boundary: credentials are
+    # cryptographically bound to it, so it must be a stable public domain and it can never be
+    # derived from the (attacker-controllable) Host header. Resolution order:
+    #   1. UI_WEBAUTHN_RP_ID, when the operator wants to be explicit;
+    #   2. the sole entry of UI_ALLOWED_HOSTS, when there is exactly one and it is not a wildcard;
+    #   3. nothing -> the whole passkey feature stays off.
+    app.config["WEBAUTHN_RP_NAME"] = "BunkerWeb UI"
+    _webauthn_rp_id = getenv("UI_WEBAUTHN_RP_ID", "").strip().lower() or None
+    if not _webauthn_rp_id and len(app.config["ALLOWED_HOSTS"]) == 1 and not app.config["ALLOWED_HOSTS"][0].startswith("*."):
+        # Strip any :port -- the RP ID is a bare domain, never a URL or an authority.
+        _webauthn_rp_id = app.config["ALLOWED_HOSTS"][0].strip().lower().rsplit(":", 1)[0] or None
+    app.config["WEBAUTHN_RP_ID"] = _webauthn_rp_id
+
+    _raw_webauthn_origins = getenv("UI_WEBAUTHN_ORIGINS", "").strip()
+    if _raw_webauthn_origins:
+        app.config["WEBAUTHN_ORIGINS"] = [o.rstrip("/") for o in resplit(r"[\s,]+", _raw_webauthn_origins) if o]
+    elif _webauthn_rp_id:
+        app.config["WEBAUTHN_ORIGINS"] = [f"https://{_webauthn_rp_id}"]
+        if _webauthn_rp_id == "localhost":
+            # localhost is the only origin the spec exempts from HTTPS, which is what makes the dev
+            # compose stack (http://localhost:7000) testable without a certificate.
+            app.config["WEBAUTHN_ORIGINS"].append(f"http://localhost:{getenv('UI_LISTEN_PORT', getenv('LISTEN_PORT', '7000'))}")
+    else:
+        app.config["WEBAUTHN_ORIGINS"] = []
+
+    if app.config["WEBAUTHN_RP_ID"]:
+        LOGGER.info(f"WebAuthn enabled (RP ID: {app.config['WEBAUTHN_RP_ID']}, origins: {app.config['WEBAUTHN_ORIGINS']})")
+    else:
+        LOGGER.info("WebAuthn disabled: set UI_WEBAUTHN_RP_ID, or a single non-wildcard UI_ALLOWED_HOSTS entry, to enable passkeys")
+
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -901,12 +931,13 @@ def load_user(username):
 
     ui_user.list_roles = user_data.get("roles", [])
     ui_user.list_recovery_codes = user_data.get("recovery_codes", [])
+    ui_user.webauthn_credentials_count = user_data.get("webauthn_credentials_count", 0)
 
     if ui_user.totp_secret:
         if (
             "totp-disable" not in request.path
             and "totp-refresh" not in request.path
-            and session.get("totp_validated", False)
+            and session.get("mfa_validated", False)
             and not ui_user.list_recovery_codes
         ):
             flask_flash(
@@ -1156,13 +1187,23 @@ def before_request():
                 session["user_agent"] = request.headers.get("User-Agent")
             if "last_rotated_at" not in session:
                 session["last_rotated_at"] = session["creation_date"]
+            if "mfa_validated" not in session and "totp_validated" in session:
+                # Sessions created before passkeys existed carry the old flag name; migrate them in
+                # place so an upgrade doesn't bounce every logged-in user back through /totp.
+                session["mfa_validated"] = session.pop("totp_validated")
 
             # Enforce absolute and rolling session lifetimes (mirrors lua-resty-session)
             if _enforce_session_lifetime():
                 return redirect(url_for("login.login_page"))
 
-            # Case not login page, keep on 2FA before any other access
-            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
+            # Case not login page, keep on 2FA before any other access.
+            #
+            # Deliberately keyed on TOTP alone, not on registered passkeys. A passkey is an
+            # alternative *primary* credential (it replaces the password outright), not a second
+            # factor bolted onto it -- and unlike TOTP it has no recovery codes, so gating password
+            # logins on it would lock a user out for good the day they lose the device. A passkey
+            # holder who has TOTP enabled can still satisfy this gate with their key, on /totp.
+            if not session.get("mfa_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
                 if not request.path.endswith("/login"):
                     raw_next = request.values.get("next")
                     try:
@@ -1380,18 +1421,22 @@ def set_security_headers(response):
 
     # * Permissions-Policy header to prevent unwanted behavior
     #
-    # Everything is denied outright except two features the threatmap page needs to work as a
-    # wall display, both narrowed to `self` (same-origin only -- an embedded cross-origin frame
-    # still gets nothing):
+    # Everything is denied outright except four features, all narrowed to `self` (same-origin only
+    # -- an embedded cross-origin frame still gets nothing):
     #   * fullscreen        -- the /threatmap "Fullscreen" control. Without it the API is blocked
     #                          and the button is inert. (F11 is unaffected either way: browser
     #                          chrome fullscreen is not governed by this header.)
     #   * screen-wake-lock  -- keeps a monitor left on /threatmap from blanking. Requested only
     #                          by that page, only while it is visible, and released on hide.
-    # Neither grants access to data, hardware or the user's environment; both are reversible by
-    # putting `fullscreen=()` / `screen-wake-lock=()` back.
+    #   * publickey-credentials-create / publickey-credentials-get
+    #                       -- WebAuthn enrollment and assertion. Denying either one disables
+    #                          passkey login and security keys outright, with no error the user
+    #                          can act on. The private key never leaves the authenticator, and the
+    #                          browser's own UI gates every ceremony.
+    # None of them grants access to data, hardware or the user's environment; all are reversible by
+    # putting `fullscreen=()` / `screen-wake-lock=()` / `publickey-credentials-*=()` back.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(self), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
+        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(self), publickey-credentials-get=(self), screen-wake-lock=(self), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
     )
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:

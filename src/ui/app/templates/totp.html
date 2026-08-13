@@ -72,7 +72,11 @@
             </div>
             <div class="sw-card-head">
                 <div>
-                    <p class="sw-subtitle" data-i18n="totp.subtitle">Enter the code from your authenticator app.</p>
+                    {% if is_totp %}
+                        <p class="sw-subtitle" data-i18n="totp.subtitle">Enter the code from your authenticator app.</p>
+                    {% else %}
+                        <p class="sw-subtitle" data-i18n="totp.subtitle_security_key">Confirm it's you with your security key.</p>
+                    {% endif %}
                 </div>
             </div>
             <form method="POST" id="totp-form" class="totp-body">
@@ -87,42 +91,69 @@
                         <div class="d" data-i18n="totp.signing_in">Signing in to BunkerWeb</div>
                     </div>
                 </div>
-                <!-- Single real input (name=totp_token) styled as 6 boxes via the
+                {% if is_totp %}
+                    <!-- Single real input (name=totp_token) styled as 6 boxes via the
                      .totp-code-boxes underlay — one field so 1Password / Bitwarden /
                      SMS one-time-code autofill and clipboard paste all work. -->
-                <div class="totp-code-wrap" id="totpInputs">
-                    <div class="totp-code-boxes" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span><span></span><span></span>
+                    <div class="totp-code-wrap" id="totpInputs">
+                        <div class="totp-code-boxes" aria-hidden="true">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <input class="totp-code"
+                               type="text"
+                               name="totp_token"
+                               id="totp_token"
+                               inputmode="numeric"
+                               autocomplete="one-time-code"
+                               maxlength="6"
+                               pattern="\d{6}"
+                               aria-label="6-digit authentication code"
+                               spellcheck="false"
+                               autofocus
+                               required />
                     </div>
-                    <input class="totp-code"
-                           type="text"
-                           name="totp_token"
-                           id="totp_token"
-                           inputmode="numeric"
-                           autocomplete="one-time-code"
-                           maxlength="6"
-                           pattern="\d{6}"
-                           aria-label="6-digit authentication code"
-                           spellcheck="false"
-                           autofocus
-                           required />
-                </div>
-                <div class="sw-key-status" id="totpStatus"></div>
-                <button type="button" class="sw-btn sw-btn-next totp-verify" id="totpVerify" disabled>
-                    <span data-i18n="button.verify">Verify</span> <i class="bx bx-chevron-right" aria-hidden="true"></i>
-                </button>
-                <div class="totp-alt">
-                    <span data-i18n="totp.cant_access">Can't access your authenticator?</span>
-                    <button type="button"
-                            class="totp-link"
-                            id="totpRecovery"
-                            data-i18n="link.use_recovery_code">Use a recovery code</button>
-                </div>
+                    <div class="sw-key-status" id="totpStatus"></div>
+                    <button type="button" class="sw-btn sw-btn-next totp-verify" id="totpVerify" disabled>
+                        <span data-i18n="button.verify">Verify</span> <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                    </button>
+                    <div class="totp-alt">
+                        <span data-i18n="totp.cant_access">Can't access your authenticator?</span>
+                        <button type="button"
+                                class="totp-link"
+                                id="totpRecovery"
+                                data-i18n="link.use_recovery_code">Use a recovery code</button>
+                    </div>
+                {% endif %}
+                {% if webauthn_enabled %}
+                    <!-- Revealed by js/pages/totp.js once the browser confirms WebAuthn support -->
+                    <div id="security-key-block"
+                         class="passkey-block d-none {% if is_totp %}mt-3{% endif %}">
+                        {% if is_totp %}
+                            <div class="passkey-separator">
+                                <span data-i18n="totp.or_use_security_key">or use your security key</span>
+                            </div>
+                        {% endif %}
+                        <button class="sw-btn {% if is_totp %}sw-btn-outline{% else %}sw-btn-next{% endif %} passkey-btn"
+                                type="button"
+                                id="security-key-verify">
+                            <i class="bx bx-key" aria-hidden="true"></i>
+                            <span data-i18n="button.use_security_key">Use a security key</span>
+                        </button>
+                        <p class="sw-key-status"
+                           id="security-key-status"
+                           role="status"
+                           aria-live="polite"></p>
+                    </div>
+                {% endif %}
             </form>
         </div>
     </div>
 {% endblock %}
 {% block scripts %}
+    {% if webauthn_enabled %}
+        <script src="{{ url_for('static', filename='js/components/webauthn.js') }}"
+                nonce="{{ script_nonce }}"></script>
+    {% endif %}
     <script src="{{ url_for('static', filename='js/pages/totp.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
