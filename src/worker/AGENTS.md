@@ -22,7 +22,7 @@ Local agent guide for the BunkerWeb Celery job executor in `src/worker/`.
 
 ```bash
 docker build -f src/worker/Dockerfile -t bunkerweb-worker:dev .
-pip install -r src/worker/requirements.in
+pip install --require-hashes -r src/worker/requirements.txt
 docker compose -f misc/dev/docker-compose.ui.api.yml up -d
 docker compose -f misc/dev/docker-compose.ui.api.yml up -d --force-recreate bw-worker
 pre-commit run --all-files

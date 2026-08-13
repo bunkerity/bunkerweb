@@ -112,7 +112,7 @@ Dev credentials: API `admin`/`P@ssw0rd`, DB `bunkerweb`/`secret`.
 ### Dependencies
 
 ```bash
-pip install -r src/api/requirements.txt  # compiled from requirements.in
+pip install --require-hashes -r src/api/requirements.txt  # compiled from requirements.in
 ```
 
 Key packages: `fastapi==0.137.1`, `uvicorn==0.49.0`, `gunicorn==26.0.0`, `biscuit-python` (pinned to a Git commit, ~0.4.1), `bcrypt==5.0.0`, `slowapi==0.1.10`, `pydantic==2.13.4`, `pydantic-settings==2.14.1`. `celery` is **not** in `requirements.in`; it (with `redis`) is installed into the image from `src/worker/requirements.txt` at build time (the certbot stack is stripped — see `src/api/Dockerfile`). The `jobs` router uses it lazily via `app/celery_app.py` to dispatch to the worker queue.

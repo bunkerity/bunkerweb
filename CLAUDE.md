@@ -74,9 +74,9 @@ The Lua runtime (`src/bw/lua/bunkerweb/`) processes requests through plugin hook
 ### Setup
 
 ```bash
-pip install -r src/scheduler/requirements.txt
-pip install -r src/ui/requirements.txt
-pip install -r src/api/requirements.txt
+pip install --require-hashes -r src/scheduler/requirements.txt
+pip install --require-hashes -r src/ui/requirements.txt
+pip install --require-hashes -r src/api/requirements.txt
 pre-commit install
 ```
 

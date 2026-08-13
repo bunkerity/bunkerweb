@@ -137,7 +137,7 @@ If both sources are empty, `_get_apis` returns `None` and the reload step is sil
 docker build -f src/worker/Dockerfile -t bunkerweb-worker:dev .
 
 # Install Python deps locally for IDE support
-pip install -r src/worker/requirements.in
+pip install --require-hashes -r src/worker/requirements.txt
 ```
 
 The only dev compose that wires the worker is `misc/dev/docker-compose.ui.api.yml`. It brings up `bw-worker` (this image) alongside `bw-jobs-broker` (a Valkey instance acting as the Celery broker). The other compose files in `misc/dev/` do not yet include the worker + broker, so jobs that rely on the Celery path will not run under those stacks.

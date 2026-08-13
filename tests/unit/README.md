@@ -11,7 +11,7 @@ for local unit tests:
 
 ```bash
 python3 -m venv .venv-unit
-.venv-unit/bin/pip install -r tests/unit/requirements.txt
+.venv-unit/bin/pip install --require-hashes -r tests/unit/requirements.txt
 ```
 
 ## Running

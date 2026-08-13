@@ -20,7 +20,7 @@ Local agent guide for the BunkerWeb FastAPI control plane in `src/api/`.
 ## Commands
 
 ```bash
-pip install -r src/api/requirements.txt
+pip install --require-hashes -r src/api/requirements.txt
 docker compose -f misc/dev/docker-compose.api.yml up -d
 docker compose -f misc/dev/docker-compose.api.misc.yml up -d
 docker compose -f misc/dev/docker-compose.ui.api.yml up -d

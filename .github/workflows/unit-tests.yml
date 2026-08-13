@@ -47,7 +47,7 @@ jobs:
           cache: pip
           cache-dependency-path: tests/unit/requirements.txt
       - name: Install unit-test dependencies
-        run: pip install -r tests/unit/requirements.txt
+        run: pip install --require-hashes -r tests/unit/requirements.txt
       # The Lua-layer tests shell out to the interpreter and skip without it, so install it
       # rather than let them silently pass by not running.
       - name: Install the Lua interpreter
@@ -109,7 +109,7 @@ jobs:
           cache: pip
           cache-dependency-path: tests/unit/requirements.txt
       - name: Install unit-test dependencies
-        run: pip install -r tests/unit/requirements.txt
+        run: pip install --require-hashes -r tests/unit/requirements.txt
       # The Lua-layer tests shell out to the interpreter and skip without it, so install it
       # rather than let them silently pass by not running.
       - name: Install the Lua interpreter

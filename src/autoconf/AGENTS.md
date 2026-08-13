@@ -23,7 +23,7 @@ Local agent guide for BunkerWeb Autoconf in `src/autoconf/`.
 docker build -f src/autoconf/Dockerfile -t bunkerweb-autoconf:dev .
 docker compose -f misc/dev/docker-compose.autoconf.yml up -d
 docker compose -f misc/dev/docker-compose.autoconf.yml up -d --force-recreate bw-autoconf
-pip install -r src/autoconf/requirements.txt
+pip install --require-hashes -r src/autoconf/requirements.txt
 pre-commit run --all-files
 ```
 

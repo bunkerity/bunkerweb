@@ -119,7 +119,7 @@ docker build -f src/autoconf/Dockerfile -t bunkerweb-autoconf:dev .
 docker compose -f misc/dev/docker-compose.autoconf.yml up -d
 
 # Install Python deps locally (for IDE support)
-pip install -r src/autoconf/requirements.txt
+pip install --require-hashes -r src/autoconf/requirements.txt
 ```
 
 The Dockerfile is a multi-stage build: builder stage compiles Python deps, final stage runs as `autoconf` user (UID 101). Autoconf has no database dependencies — it communicates exclusively via the API.

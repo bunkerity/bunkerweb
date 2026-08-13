@@ -33,10 +33,10 @@ This is the primary instruction file for AI coding agents in this repository.
 ## Build, Lint, Test
 
 - Lint/format (all): `pre-commit run --all-files`
-- API deps: `pip install -r src/api/requirements.txt`
-- UI deps: `pip install -r src/ui/requirements.txt`
-- Scheduler deps: `pip install -r src/scheduler/requirements.txt`
-- Worker deps: `pip install -r src/worker/requirements.txt`
+- API deps: `pip install --require-hashes -r src/api/requirements.txt`
+- UI deps: `pip install --require-hashes -r src/ui/requirements.txt`
+- Scheduler deps: `pip install --require-hashes -r src/scheduler/requirements.txt`
+- Worker deps: `pip install --require-hashes -r src/worker/requirements.txt`
 - Dev stack (recommended): `docker compose -f misc/dev/docker-compose.ui.api.yml up -d`
 - Integration tests: `python3 tests/main.py docker` (or `autoconf`, `swarm`, `kubernetes`, `linux`)
 
