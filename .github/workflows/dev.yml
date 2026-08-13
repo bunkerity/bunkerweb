@@ -101,77 +101,105 @@ jobs:
       contents: read
       security-events: write
 
-  # UI tests
-  # prepare-tests-ui: # TODO: Uncomment when UI tests are back
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-  #     - id: set-matrix
-  #       run: |
-  #         tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-  #         echo "tests=$tests" >> $GITHUB_OUTPUT
-  #   outputs:
-  #     tests: ${{ steps.set-matrix.outputs.tests }}
-  # tests-ui:
-  #   needs: [prepare-tests-ui, build-containers]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-  #   uses: ./.github/workflows/tests-ui.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
-  # tests-ui-linux:
-  #   needs: [prepare-tests-ui, build-packages]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-  #   uses: ./.github/workflows/tests-ui-linux.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
+  # Integration tests — the framework lives in tests/ since the migration from
+  # bunkerity/bunkerweb-tests, so specs and product are validated at the same SHA.
+  parse-tests-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Set up Python 3.13
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse core tests
+        run: |
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "core" --dev
+          echo "Linux_tests=$(cat /tmp/tests/Linux_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Autoconf_tests=$(cat /tmp/tests/Autoconf_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Kubernetes_tests=$(cat /tmp/tests/Kubernetes_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "All_in_one_tests=$(cat /tmp/tests/All_in_one_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+    outputs:
+      Linux_tests: ${{ steps.parse_tests.outputs.Linux_tests }}
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
+      Autoconf_tests: ${{ steps.parse_tests.outputs.Autoconf_tests }}
+      Kubernetes_tests: ${{ steps.parse_tests.outputs.Kubernetes_tests }}
+      All_in_one_tests: ${{ steps.parse_tests.outputs.All_in_one_tests }}
 
-  # Core tests
-  # prepare-tests-core:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-  #     - id: set-matrix
-  #       run: |
-  #         tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-  #         echo "tests=$tests" >> $GITHUB_OUTPUT
-  #   outputs:
-  #     tests: ${{ steps.set-matrix.outputs.tests }}
-  # tests-core:
-  #   needs: [build-containers, prepare-tests-core]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-  #   uses: ./.github/workflows/test-core.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
-  # tests-core-linux:
-  #   needs: [build-packages, prepare-tests-core]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-  #   uses: ./.github/workflows/test-core-linux.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
-  #   secrets: inherit
+  run-Docker-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-Autoconf-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Autoconf_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-Linux-tests-core:
+    needs: [build-packages, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Linux_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-Kubernetes-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Kubernetes_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-All-in-one-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.All_in_one_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
 
   # Push with dev tag
   push-dev:
-    # needs: [tests-ui, tests-core] # TODO: Uncomment when tests are back
-    needs: [build-containers]
+    needs:
+      [
+        build-containers,
+        run-Docker-tests-core,
+        run-Autoconf-tests-core,
+        run-Linux-tests-core,
+        run-Kubernetes-tests-core,
+        run-All-in-one-tests-core,
+      ]
     runs-on: ubuntu-latest
     permissions:
       contents: read

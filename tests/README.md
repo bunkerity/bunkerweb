@@ -144,9 +144,10 @@ their `-tests` names and the workflow retags them to what the stacks reference.
 
 ## The legacy harness
 
-`tests/main.py` and the `*Test.py` classes predate the migration. They still run the
-example scenarios, and they pin their own dependencies in `legacy-requirements.{in,txt}`;
-`tests/requirements.txt` belongs to the framework.
+`tests/main.py` and the `*Test.py` classes predate the migration. One pipeline still calls
+them, `staging-tests.yml`, which exercises released artifacts on staging infrastructure
+with real domains rather than a stack on a runner. They pin their own dependencies in
+`legacy-requirements.{in,txt}`; `tests/requirements.txt` belongs to the framework.
 
 Scenario descriptors sit in `tests/examples/<name>.json`, one per `examples/<name>/`
 directory, and the `name` field points back at the directory to deploy. They used to live
