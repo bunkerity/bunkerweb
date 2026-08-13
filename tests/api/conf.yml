@@ -1,0 +1,69 @@
+integrations: "all"
+
+actions:
+  no_auth:
+    type: status
+    url: "http://127.0.0.1:8888/auth"
+    headers:
+      Authorization: "Bearer secret"
+    method: POST
+    status: 404
+    restart_stack: false
+
+  docs_url:
+    type: status
+    url: "http://127.0.0.1:8888/docs"
+    status: 200
+    restart_stack: false
+  redocs_url:
+    type: status
+    url: "http://127.0.0.1:8888/redoc"
+    status: 200
+    restart_stack: false
+  openapi_json:
+    type: status
+    url: "http://127.0.0.1:8888/openapi.json"
+    status: 200
+
+  no_docs_url:
+    type: status
+    url: "http://127.0.0.1:8888/docs"
+    status: 404
+    api:
+      API_DOCS_URL: ""
+  no_redoc_url:
+    type: status
+    url: "http://127.0.0.1:8888/redoc"
+    status: 404
+    api:
+      API_REDOC_URL: ""
+  no_openapi_url:
+    type: status
+    url: "http://127.0.0.1:8888/openapi.json"
+    status: 404
+    api:
+      API_OPENAPI_URL: ""
+
+  custom_root_path:
+    type: status
+    url: "http://127.0.0.1:8888/custom/ping"
+    status: 200
+    api:
+      API_ROOT_PATH: "/custom"
+
+  custom_whitelist:
+    type: status
+    url: "http://127.0.0.1:8888/ping"
+    status: 403
+    api:
+      API_WHITELIST_IPS: "127.1.1.1"
+  deactivated_whitelist:
+    type: status
+    url: "http://127.0.0.1:8888/ping"
+    status: 200
+    api:
+      API_WHITELIST_ENABLED: "no"
+      API_WHITELIST_IPS: "127.1.1.1"
+
+api:
+  API_TOKEN: "secret"

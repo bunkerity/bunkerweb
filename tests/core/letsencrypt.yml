@@ -1,0 +1,28 @@
+integrations: "all"
+
+actions:
+  fallback:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_expiration: 3650
+    ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
+  # TODO: Add more actions + add DNS tests
+
+config:
+  AUTO_LETS_ENCRYPT: "yes"
+  USE_LETS_ENCRYPT_STAGING: "yes"
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null

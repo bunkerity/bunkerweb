@@ -1,0 +1,41 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:${BW_VERSION}
+    container_name: bunkerweb
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "443:443/udp"
+      - "127.0.0.1:5001:5000"
+      - "127.0.0.1:5443:5443"
+    volumes:
+      - /var/www/html:/var/www/html
+      - /tmp/output:/tmp/output
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
+        required: true
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+    logging:
+      driver: syslog
+      options:
+        tag: "bunkerweb"
+        syslog-address: "udp://10.20.30.254:514"
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24

@@ -1,0 +1,123 @@
+integrations:
+  - "Docker"
+
+actions:
+  first_request:
+    type: header
+    url: "http://www.example.com/"
+    response_headers:
+      X-Proxy-Cache: "^MISS$"
+    restart_stack: false
+  cached_request:
+    type: header
+    url: "http://www.example.com/"
+    response_headers:
+      X-Proxy-Cache: "^HIT$"
+    restart_stack: false
+
+  reader_token:
+    type: export
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    auth: ["cache-reader", "ReaderPass123!"]
+    exports:
+      CACHE_READER_TOKEN: "token"
+    restart_stack: false
+  reader_status:
+    type: string
+    url: "http://127.0.0.1:8888/web-cache/status"
+    headers:
+      Authorization: "Bearer ${CACHE_READER_TOKEN}"
+    string: '"file_count"'
+    restart_stack: false
+  reader_metrics:
+    type: string
+    url: "http://127.0.0.1:8888/web-cache/metrics"
+    headers:
+      Authorization: "Bearer ${CACHE_READER_TOKEN}"
+    string: "HIT"
+    restart_stack: false
+  reader_cannot_purge:
+    type: status
+    url: "http://127.0.0.1:8888/web-cache/purge"
+    method: POST
+    headers:
+      Authorization: "Bearer ${CACHE_READER_TOKEN}"
+      Content-Type: "application/json"
+    body: '{"scope":"all"}'
+    status: 403
+    restart_stack: false
+
+  purger_token:
+    type: export
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    auth: ["cache-purger", "PurgerPass123!"]
+    exports:
+      CACHE_PURGER_TOKEN: "token"
+    restart_stack: false
+  purger_cannot_read:
+    type: status
+    url: "http://127.0.0.1:8888/web-cache/status"
+    headers:
+      Authorization: "Bearer ${CACHE_PURGER_TOKEN}"
+    status: 403
+    restart_stack: false
+  invalid_url:
+    type: status
+    url: "http://127.0.0.1:8888/web-cache/purge"
+    method: POST
+    headers:
+      Authorization: "Bearer ${CACHE_PURGER_TOKEN}"
+      Content-Type: "application/json"
+    body: '{"scope":"url","urls":[{"url":"/relative"}]}'
+    status: 422
+    restart_stack: false
+  purge_url:
+    type: status
+    url: "http://127.0.0.1:8888/web-cache/purge"
+    method: POST
+    headers:
+      Authorization: "Bearer ${CACHE_PURGER_TOKEN}"
+      Content-Type: "application/json"
+    body: '{"scope":"url","urls":[{"url":"http://www.example.com/"}]}'
+    status: 200
+    restart_stack: false
+  miss_after_url_purge:
+    type: header
+    url: "http://www.example.com/"
+    response_headers:
+      X-Proxy-Cache: "^MISS$"
+    restart_stack: false
+  hit_after_refill:
+    type: header
+    url: "http://www.example.com/"
+    response_headers:
+      X-Proxy-Cache: "^HIT$"
+    restart_stack: false
+  purge_all:
+    type: status
+    url: "http://127.0.0.1:8888/web-cache/purge"
+    method: POST
+    headers:
+      Authorization: "Bearer ${CACHE_PURGER_TOKEN}"
+      Content-Type: "application/json"
+    body: '{"scope":"all"}'
+    status: 200
+    restart_stack: false
+  empty_after_purge_all:
+    type: string
+    url: "http://127.0.0.1:8888/web-cache/status"
+    headers:
+      Authorization: "Bearer ${CACHE_READER_TOKEN}"
+    string: '"file_count":0'
+    full_clean: true
+
+config:
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://app1:8080"
+  USE_PROXY_CACHE: "yes"
+  PROXY_CACHE_MIN_USES: "1"
+
+api:
+  API_ACL_BOOTSTRAP_FILE: "/tmp/output/web-cache-acl.json"

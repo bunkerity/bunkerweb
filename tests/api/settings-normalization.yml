@@ -1,0 +1,38 @@
+integrations:
+  - "Docker"
+
+actions:
+  save_aliases:
+    type: status
+    url: "http://127.0.0.1:8888/global_settings"
+    method: PATCH
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"IS_LOADING":"disabled","WORKER_SHUTDOWN_TIMEOUT":"30 sec","WORKERLOCK_MEMORY_SIZE":"64 M","DNS_RESOLVERS":" 1.1.1.1   8.8.8.8 "}'
+    status: 200
+    restart_stack: false
+  check_boolean:
+    type: string
+    url: "http://127.0.0.1:8888/global_settings?full=true&filtered_settings=IS_LOADING"
+    auth: ["admin", "P@ssw0rd"]
+    string: '"IS_LOADING":"no"'
+    restart_stack: false
+  check_duration:
+    type: string
+    url: "http://127.0.0.1:8888/global_settings?full=true&filtered_settings=WORKER_SHUTDOWN_TIMEOUT"
+    auth: ["admin", "P@ssw0rd"]
+    string: '"WORKER_SHUTDOWN_TIMEOUT":"30s"'
+    restart_stack: false
+  check_size:
+    type: string
+    url: "http://127.0.0.1:8888/global_settings?full=true&filtered_settings=WORKERLOCK_MEMORY_SIZE"
+    auth: ["admin", "P@ssw0rd"]
+    string: '"WORKERLOCK_MEMORY_SIZE":"64m"'
+    restart_stack: false
+  check_list:
+    type: string
+    url: "http://127.0.0.1:8888/global_settings?full=true&filtered_settings=DNS_RESOLVERS"
+    auth: ["admin", "P@ssw0rd"]
+    string: '"DNS_RESOLVERS":"1.1.1.1 8.8.8.8"'
+    full_clean: true

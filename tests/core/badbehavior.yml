@@ -1,0 +1,149 @@
+integrations:
+  - "Linux"
+  - "Docker"
+  - "All-in-one"
+
+actions:
+  blocked_requests:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 10
+    restart_stack: false
+    config:
+      SERVER_NAME: "www.example.com app1.example.com"
+      MULTISITE: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+  banned_service:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+  not_banned_service:
+    type: status
+    url: "http://app1.example.com"
+    status: 200
+    restart_stack: false
+  unbanned:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 20
+
+  blocked_requests_1:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 10
+    restart_stack: false
+    config:
+      SERVER_NAME: "www.example.com app1.example.com"
+      MULTISITE: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+      BAD_BEHAVIOR_BAN_SCOPE: "global"
+  banned_global:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+  banned_global_1:
+    type: status
+    url: "http://app1.example.com"
+    status: 403
+
+  blocked_requests_2:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 5
+    config:
+      BAD_BEHAVIOR_THRESHOLD: "4"
+      BAD_BEHAVIOR_BAN_TIME: "60"
+    restart_stack: false
+  banned_1:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+  still_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 20
+
+  blocked_requests_3:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 10
+    config:
+      BAD_BEHAVIOR_COUNT_TIME: "10"
+    restart_stack: false
+  tweaked_count_time:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 30
+
+  blocked_requests_4:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 10
+    restart_stack: false
+    config:
+      BAD_BEHAVIOR_STATUS_CODES: "400 401 404 405 429 444"
+  tweaked_status_codes:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 10
+
+  good_requests:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 200
+    repeat: 10
+    config:
+      SECURITY_MODE: "detect"
+    restart_stack: false
+  not_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 10
+
+  blocked_requests_permanent:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 10
+    config:
+      BAD_BEHAVIOR_BAN_TIME: "0"
+    restart_stack: false
+  permanently_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+  still_permanently_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 60
+
+config:
+  USE_MODSECURITY: "yes"
+  USE_LIMIT_REQ: "no"
+  USE_BAD_BEHAVIOR: "yes"
+  BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
+  BAD_BEHAVIOR_THRESHOLD: "10"
+  BAD_BEHAVIOR_COUNT_TIME: "60"
+  BAD_BEHAVIOR_BAN_TIME: "20"
+  BAD_BEHAVIOR_BAN_SCOPE: "service"

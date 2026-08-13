@@ -1,0 +1,160 @@
+integrations: "all"
+
+actions:
+  configs:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+
+      access_configs:
+        type: access
+        url: "%BASE_URL%/configs"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "configs"
+        username: "admin"
+        password: "P@ssw0rd"
+
+      create_global_config:
+        type: create
+        item: "config"
+        name: "my_global_config"
+        config_type: "server_http"
+        content: |
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+              ngx.say('world')
+            }
+          }
+      verify_global_config:
+        type: read
+        item: "config"
+        name: "my_global_config"
+        config_type: "server_http"
+        content: |
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+              ngx.say('world')
+            }
+          }
+      access_global_config:
+        type: access
+        url: "http://www.example.com/hello"
+        new_tab: true
+      switch_to_global_config_tab:
+        type: switch_tab
+        tab: 1
+      find_world:
+        type: find
+        by: "js"
+        selector: 'Array.from(document.body.querySelectorAll("*"))
+          .find(el => el.textContent && el.textContent.includes("world"))'
+      close_global_config_tab:
+        type: close_tab
+
+      create_service:
+        type: create
+        item: "service"
+        name: "app1.example.com"
+        mode: "easy"
+        config:
+          USE_REVERSE_PROXY: "yes"
+          REVERSE_PROXY_HOST: "http://192.168.0.254:8080"
+        Kubernetes:
+          config:
+            REVERSE_PROXY_HOST: "http://svc-app1.services.svc.cluster.local"
+      access_global_config_1:
+        type: access
+        url: "http://app1.example.com/hello"
+        new_tab: true
+        sleep: 10.0
+      switch_to_global_config_tab_1:
+        type: switch_tab
+        tab: 1
+      find_world_1:
+        type: find
+        by: "js"
+        selector: 'Array.from(document.body.querySelectorAll("*"))
+          .find(el => el.textContent && el.textContent.includes("world"))'
+      close_global_config_tab_1:
+        type: close_tab
+
+      update_global_config:
+        type: update
+        item: "config"
+        name: "my_global_config"
+        new_service: "app1.example.com"
+        config_type: "server_http"
+        content: |
+          location /hello {
+            default_type 'text/plain';
+            content_by_lua_block {
+              ngx.say('world')
+            }
+          }
+      access_service_config:
+        type: access
+        url: "http://app1.example.com/hello"
+        new_tab: true
+        sleep: 10.0
+      switch_to_service_config_tab:
+        type: switch_tab
+        tab: 1
+      find_world_service:
+        type: find
+        by: "js"
+        selector: 'Array.from(document.body.querySelectorAll("*"))
+          .find(el => el.textContent && el.textContent.includes("world"))'
+      close_global_service_tab:
+        type: close_tab
+      access_service_config_non_existent:
+        type: access
+        url: "http://www.example.com/hello"
+        new_tab: true
+      switch_to_service_config_tab_non_existent:
+        type: switch_tab
+        tab: 1
+      find_world_service_non_existent:
+        type: find
+        selector: '//span[contains(text(), "Not Found")]'
+      close_global_service_tab_non_existent:
+        type: close_tab
+
+      delete_clone_service:
+        type: delete
+        item: "service"
+        name: "app1.example.com"
+
+      access_configs_1:
+        type: access
+        url: "%BASE_URL%/configs"
+        sleep: 10.0
+      check_config_deletion:
+        type: find
+        selector: '//a[@href="/configs/app1.example.com/server_http/my_global_config"]'
+        findable: false
+      check_service_config_deletion:
+        type: access
+        url: "http://app1.example.com/hello"
+        new_tab: true
+      switch_to_service_config_tab_deletion:
+        type: switch_tab
+        tab: 1
+      find_world_service_deletion:
+        type: find
+        selector: "//h3[contains(text(),'Nothing to see here ...')]"
+      close_global_service_tab_deletion:
+        type: close_tab
+
+annotations:
+  bunkerweb.io/SERVER_NAME: "test.example.com"
+# TODO: Also test config deletion
+# TODO: Also test filters and columns hiding
+# TODO: Also test the templates services edit

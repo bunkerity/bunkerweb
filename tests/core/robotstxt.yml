@@ -1,0 +1,111 @@
+integrations: "all"
+
+actions:
+  check_default_ua:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "User-agent: *"
+    restart_stack: false
+  check_default_disallow:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "Disallow: /"
+
+  check_ai-robots-txt_community_list:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "User-agent: GPTBot"
+    config:
+      ROBOTSTXT_COMMUNITY_LISTS: "ai-robots-txt"
+  check_robots-disallowed_community_list:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "wp-login.php"
+    config:
+      ROBOTSTXT_COMMUNITY_LISTS: "robots-disallowed"
+
+  check_custom_rules:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "User-agent: CustomBot"
+    config:
+      ROBOTSTXT_RULE: "User-agent: CustomBot"
+      ROBOTSTXT_RULE_1: "Disallow: /admin"
+      ROBOTSTXT_HEADER: "# Custom robots.txt"
+      ROBOTSTXT_FOOTER: "# End of custom robots.txt"
+      ROBOTSTXT_SITEMAP: "http://www.example.com/sitemap.xml"
+    restart_stack: false
+  check_custom_rules_1:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "Disallow: /admin"
+    restart_stack: false
+  check_custom_header:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "# Custom robots.txt"
+    restart_stack: false
+  check_custom_footer:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "# End of custom robots.txt"
+    restart_stack: false
+  check_custom_sitemap:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "Sitemap: http://www.example.com/sitemap.xml"
+
+  check_custom_header_base64:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "# Custom robots.txt"
+    config:
+      ROBOTSTXT_HEADER: "IyBDdXN0b20gcm9ib3RzLnR4dA=="
+
+  check_custom_footer_base64:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "# End of custom robots.txt"
+    config:
+      ROBOTSTXT_FOOTER: "IyBFbmQgb2YgY3VzdG9tIHJvYm90cy50eHQ="
+
+  check_url:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    string: "User-agent: GoodBot"
+    config:
+      ROBOTSTXT_URLS: "http://custom-api:8000/list/robots"
+    Kubernetes:
+      config:
+        ROBOTSTXT_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/robots"
+
+  check_ignored_rules:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    not_string: "Disallow: /admin"
+    config:
+      ROBOTSTXT_RULE: "User-agent: CustomBot"
+      ROBOTSTXT_RULE_1: "Disallow: /admin"
+      ROBOTSTXT_IGNORE_RULE: "^Disallow: /admin$"
+
+  check_ignored_rules_url:
+    type: string
+    url: "http://www.example.com/robots.txt"
+    not_string: "Disallow: /private"
+    config:
+      ROBOTSTXT_URLS: "http://custom-api:8000/list/robots"
+      ROBOTSTXT_IGNORE_RULE: "^Disallow: /private$"
+    Kubernetes:
+      config:
+        ROBOTSTXT_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/robots"
+
+config:
+  USE_ROBOTSTXT: "yes"
+  ROBOTSTXT_COMMUNITY_LISTS: ""
+  ROBOTSTXT_URLS: ""
+  ROBOTSTXT_RULE: ""
+  ROBOTSTXT_HEADER: ""
+  ROBOTSTXT_FOOTER: ""
+  ROBOTSTXT_IGNORE_RULE: ""
+  ROBOTSTXT_SITEMAP: ""
+# TODO: See if we can test the DarkVisitors feature as well

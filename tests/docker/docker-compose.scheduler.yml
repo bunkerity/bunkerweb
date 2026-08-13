@@ -1,0 +1,27 @@
+services:
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:${BW_VERSION}
+    container_name: bw-scheduler
+    volumes:
+      - bw-storage:/data
+      - /var/www/html:/var/www/html
+      - /tmp/output:/tmp/output
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
+        required: true
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+volumes:
+  bw-storage:
+    name: bw-storage
+
+networks:
+  bw-universe:
+    external: true
+  bw-db:
+    external: true

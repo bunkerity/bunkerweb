@@ -1,0 +1,30 @@
+integrations: "all"
+
+actions:
+  check_ssl:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=www.example.com/"
+    restart_stack: false
+  auto_redirect_https:
+    type: status
+    url: "http://www.example.com"
+    status: 301
+  check_ssl_data:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=www.example.com/"
+    config:
+      CUSTOM_SSL_CERT: ""
+      CUSTOM_SSL_KEY: ""
+      CUSTOM_SSL_CERT_DATA: "${CUSTOM_SSL_CERT_DATA}"
+      CUSTOM_SSL_KEY_DATA: "${CUSTOM_SSL_KEY_DATA}"
+
+config:
+  USE_CUSTOM_SSL: "yes"
+  CUSTOM_SSL_CERT: "/tmp/output/certificate.pem"
+  CUSTOM_SSL_KEY: "/tmp/output/privatekey.key"

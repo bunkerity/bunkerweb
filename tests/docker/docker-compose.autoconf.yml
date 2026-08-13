@@ -1,0 +1,24 @@
+services:
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:${BW_VERSION}
+    container_name: bw-autoconf
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
+        required: true
+    environment:
+      DOCKER_HOST: "tcp://bw-docker:2375"
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-docker
+      - bw-db
+
+networks:
+  bw-universe:
+    external: true
+  bw-db:
+    external: true
+  bw-docker:
+    name: bw-docker

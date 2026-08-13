@@ -1,0 +1,26 @@
+services:
+  php-fpm:
+    image: php:fpm-alpine@sha256:972b47917a0e8de6d3c617660f16ab18d2283daeb0c6304e8b4c7f3106207b6d
+    container_name: php-fpm
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/www/html:/var/www/html
+      - /run/php:/run/php
+      - ../conf/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.40
+        aliases:
+          - php-fpm
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

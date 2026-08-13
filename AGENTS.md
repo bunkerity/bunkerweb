@@ -19,7 +19,7 @@ This is the primary instruction file for AI coding agents in this repository.
 - `src/ui/`: Flask web UI.
 - `src/autoconf/`: Docker/Swarm/Kubernetes event-driven config sync.
 - `src/linux/` and `src/all-in-one/`: packaging and distribution targets.
-- `examples/`: integration scenarios and end-to-end test fixtures.
+- `examples/`: user-facing deployment recipes, also used as e2e fixtures. Their test descriptors live in `tests/examples/<name>.json`, not in the example folder.
 - `tests/`: integration test harness (`tests/main.py`).
 
 ## Critical Architecture Facts

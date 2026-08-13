@@ -1,0 +1,24 @@
+# ? see tests/integrations.yml for more information
+integrations: "all" # "all" or "list" of integrations
+# integrations: # * It has to respect the tests/integrations.yml file format (same name, same order)
+#   - "Linux;amd64;ubuntu/jammy"
+#   - "Docker;arm64"
+
+# ? see tests/models.py for more information
+actions: # * Dictionary of actions to perform, they have to respect the tests/models.py file format (same types)
+  deactivated: # Action name
+    type: string # Action type
+    url: "http://www.example.com" # URL to test (mandatory)
+    integrations: # * It has to respect the tests/integrations.yml file format (only the name)
+      - "Linux"
+      - "Docker"
+    # ? All declared config and labels in a singular action are optional and will override the global ones
+
+config: # Global dictionary of configuration to add to every test
+  "SERVER_NAME": "www.example.com"
+
+labels: # Global dictionary of labels to add to every test (Autoconf only)
+  "bunkerweb.SERVER_NAME": "www.example.com"
+
+annotations: # Global dictionary of annotations to add to every test (Kubernetes Integration only)
+  "bunkerweb.io/SERVER_NAME": "www.example.com"

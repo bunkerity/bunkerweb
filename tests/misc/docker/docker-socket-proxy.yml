@@ -1,0 +1,16 @@
+services:
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly@sha256:644aa26bb824bbc8b393b0acdec78180101fa9f19d73dda18a076192ce4ce76f
+    container_name: bw-docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
+    restart: "unless-stopped"
+    networks:
+      - bw-docker
+
+networks:
+  bw-docker:
+    external: true

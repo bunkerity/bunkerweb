@@ -1,0 +1,124 @@
+integrations: "all"
+
+actions:
+  default_server:
+    type: status
+    url: "http://localhost"
+    status: 200
+    restart_stack: false
+  allowed_methods:
+    type: status
+    url: "http://www.example.com"
+    method: "OPTIONS"
+    status: 405
+  large_body_size:
+    type: status
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com"
+    method: "POST"
+    body_length: 5242881
+    status: 200
+    config:
+      USE_MODSECURITY: "no"
+  allowed_methods_detect:
+    type: status
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com/index.php"
+    method: "OPTIONS"
+    status: 200
+    config:
+      SECURITY_MODE: "detect"
+  default_server_disabled:
+    type: status
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+    url: "http://127.0.0.1"
+    status: 403
+    config:
+      DISABLE_DEFAULT_SERVER: "yes"
+  default_server_disabled_whitelist:
+    type: string
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+    url: "http://127.0.0.1"
+    string: "Nothing to see here ..."
+    config:
+      DISABLE_DEFAULT_SERVER: "yes"
+      WHITELIST_IP: "0.0.0.0/0"
+  tweaked_allowed_methods:
+    type: status
+    url: "http://www.example.com"
+    method: "POST"
+    status: 405
+    config:
+      ALLOWED_METHODS: "GET|HEAD"
+  tweaked_large_body_size:
+    type: status
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com"
+    method: "POST"
+    body_length: 5242881
+    status: 413
+    config:
+      MAX_CLIENT_SIZE: "5m"
+      USE_MODSECURITY: "no"
+  serve_files_deactivated:
+    type: header
+    url: "http://www.example.com/logo.png"
+    response_headers:
+      Content-Type: "^text/html"
+    config:
+      SERVE_FILES: "no"
+  http2_disabled:
+    type: status
+    url: "https://www.example.com"
+    verify_ssl: false
+    http2: true
+    config:
+      HTTP2: "no"
+      GENERATE_SELF_SIGNED_SSL: "yes"
+  listen_http_disabled:
+    type: status
+    url: "http://www.example.com"
+    config:
+      LISTEN_HTTP: "no"
+  tweaked_deny_http_status:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    config:
+      DENY_HTTP_STATUS: "444"
+  # TODO: make open_file_cache tests
+  # TODO: make anonymous reporting tests
+  # TODO: make http3 tests when available (maybe with https://aioquic.readthedocs.io/en/latest/)
+
+config:
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null

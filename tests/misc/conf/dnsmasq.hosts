@@ -1,0 +1,28 @@
+127.0.0.1 localhost
+
+192.168.0.254 app1.bw-services
+
+10.20.30.20 dnsmasq
+10.20.30.30 custom-api
+10.20.30.40 php-fpm
+10.20.30.50 redis
+10.20.30.51 redis-master
+10.20.30.52 redis-slave-1
+10.20.30.53 redis-slave-2
+10.20.30.54 redis-sentinel-1
+10.20.30.55 redis-sentinel-2
+10.20.30.56 redis-sentinel-3
+10.20.30.60 crowdsec
+10.20.30.70 valkey
+10.20.30.254 syslog
+
+10.20.30.25 bw-ui
+10.20.30.26 bw-api
+10.10.10.254 bw-db
+
+127.0.0.1 www.example.com
+127.0.0.1 app1.example.com
+127.0.0.1 app2.example.com
+127.0.0.1 app3.example.com
+
+127.0.0.11 254.254.254.2.example.com

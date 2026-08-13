@@ -1,0 +1,26 @@
+services:
+  bunkerweb-linux:
+    pull_policy: never
+    image: local/bunkerweb-linux
+    # image: local/bunkerweb-linux-rhel-10
+    # image: local/bunkerweb-linux-alma-10
+    container_name: bunkerweb-linux
+    network_mode: host
+    tty: true
+    privileged: true
+    cgroup: host
+    tmpfs:
+      - /tmp
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      #      - /run/php:/run/php
+      #      - /etc/bunkerweb:/etc/bunkerweb
+      #      - /var/www/html:/var/www/html
+      #      - /var/log/bunkerweb:/var/log/bunkerweb
+      #      - /var/lib/bunkerweb:/var/lib/bunkerweb
+      - /tmp/output:/tmp/output
+    labels:
+      - bunkerweb.INSTANCE=yes
+      - bunkerweb.type=scheduler

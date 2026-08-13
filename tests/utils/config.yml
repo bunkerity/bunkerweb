@@ -1,0 +1,40 @@
+variables:
+  BUNKERWEB_INSTANCES: "127.0.0.1"
+  SERVER_NAME: "www.example.com"
+  HTTP_PORT: "80"
+  HTTPS_PORT: "443"
+  DNS_RESOLVERS: "127.0.0.1"
+  API_LISTEN_IP: "127.0.0.1"
+  API_WHITELIST_IP: "127.0.0.0/8"
+  DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
+  LOG_LEVEL: "info"
+  CUSTOM_LOG_LEVEL: "debug"
+  USE_BUNKERNET: "no"
+  USE_BLACKLIST: "no"
+  SEND_ANONYMOUS_REPORT: "no"
+  DISABLE_CONFIGURATION_TESTING: "yes"
+  IGNORE_REGEX_CHECK: "yes"
+  TZ: "Europe/Paris"
+  HEALTHCHECK_INTERVAL: "3600"
+
+ui:
+  CUSTOM_LOG_LEVEL: "debug"
+  CHECK_PRIVATE_IP: "no"
+  MAX_WORKERS: "1"
+  MAX_THREADS: "4"
+
+api:
+  CUSTOM_LOG_LEVEL: "debug"
+  CHECK_PRIVATE_IP: "no"
+
+labels:
+  bunkerweb.SERVER_NAME: "www.example.com"
+
+annotations:
+  bunkerweb.io/SERVER_NAME: "www.example.com"
+
+crowdsec_config:
+  TZ: "Europe/Paris"
+  USE_WAL: "true"
+  DISABLE_ONLINE_API: "true"
+  UNREGISTER_ON_EXIT: "true"

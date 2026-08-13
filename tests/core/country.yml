@@ -1,0 +1,110 @@
+integrations: "all"
+
+actions:
+  blacklist_good:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "84.200.69.80"
+    config:
+      BLACKLIST_COUNTRY: "US"
+    restart_stack: false
+  blacklist_bad:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "US"
+
+  whitelist_good:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "84.200.69.80"
+    config:
+      WHITELIST_COUNTRY: "DE"
+    restart_stack: false
+  whitelist_bad:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      WHITELIST_COUNTRY: "DE"
+
+  ignore_uri_blacklist:
+    type: status
+    url: "http://www.example.com/api"
+    status: 404
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "US"
+      COUNTRY_IGNORE_URI: "^/api"
+    Kubernetes:
+      status: 200
+
+  ignore_uri_blacklist_not_matched:
+    type: status
+    url: "http://www.example.com/other"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "US"
+      COUNTRY_IGNORE_URI: "^/api"
+
+  ignore_uri_query:
+    type: status
+    url: "http://www.example.com/api?a=b&c=d"
+    status: 404
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "US"
+      COUNTRY_IGNORE_URI: "^/api[?]a=b&c=d$"
+    Kubernetes:
+      status: 200
+
+  ignore_uri_query_not_matched:
+    type: status
+    url: "http://www.example.com/api?a=b&c=other"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "US"
+      COUNTRY_IGNORE_URI: "^/api[?]a=b&c=d$"
+
+  ignore_uri_multivalue:
+    type: status
+    url: "http://www.example.com/api?token=ok"
+    status: 404
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "US"
+      COUNTRY_IGNORE_URI: "^/admin$ ^/api[?]token=ok$"
+    Kubernetes:
+      status: 200
+
+  ignore_uri_whitelist:
+    type: status
+    url: "http://www.example.com/api"
+    status: 404
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      WHITELIST_COUNTRY: "DE"
+      COUNTRY_IGNORE_URI: "^/api"
+    Kubernetes:
+      status: 200
+
+config:
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"

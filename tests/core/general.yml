@@ -1,0 +1,27 @@
+integrations: "all"
+
+actions:
+  block:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    log: '[ver "OWASP_CRS/4'
+  detect:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 200
+    config:
+      SECURITY_MODE: "detect"
+  antibot_while_whitelisted:
+    type: xpath
+    url: "http://www.example.com"
+    xpath: "//input[@name='captcha']"
+    config:
+      USE_ANTIBOT: "captcha"
+      USE_WHITELIST: "yes"
+      WHITELIST_IP: "0.0.0.0/0"
+      PLUGINS_ORDER_ACCESS: "ssl antibot whitelist letsencrypt blacklist greylist country dnsbl bunkernet reversescan limit authbasic misc cors securitytxt robotstxt"
+
+config:
+  USE_MODSECURITY: "yes"
+  SECURITY_MODE: "block"

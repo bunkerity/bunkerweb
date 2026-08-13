@@ -1,0 +1,54 @@
+integrations: "all"
+
+actions:
+  deactivated:
+    type: status
+    url: "https://app2.example.com/accept_methods"
+    status: 200
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Referer: "https://app1.example.com/"
+
+  activated:
+    type: status
+    url: "https://app2.example.com/accept_methods"
+    status: 403
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Referer: "https://app1.example.com/"
+    config:
+      USE_CORS: "yes"
+  activated_allowed:
+    type: status
+    url: "https://app2.example.com/accept_methods"
+    status: 200
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Referer: "https://app1.example.com/"
+    config:
+      USE_CORS: "yes"
+      CORS_ALLOW_ORIGIN: "*"
+
+config:
+  SERVER_NAME: "app1.example.com app2.example.com"
+  MULTISITE: "yes"
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://custom-api:8000"
+  USE_CORS: "no"
+  CORS_ALLOW_ORIGIN: "self"
+  CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
+  CORS_ALLOW_HEADERS: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
+  CORS_ALLOW_CREDENTIALS: "no"
+  CORS_EXPOSE_HEADERS: "Content-Length,Content-Range"
+  CROSS_ORIGIN_OPENER_POLICY: "same-origin"
+  CROSS_ORIGIN_EMBEDDER_POLICY: "require-corp"
+  CROSS_ORIGIN_RESOURCE_POLICY: "same-site"
+  CORS_MAX_AGE: "86400"
+  CORS_DENY_REQUEST: "yes"
+
+Kubernetes:
+  config:
+    BLACKLIST_IP_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000"

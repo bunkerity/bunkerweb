@@ -1,0 +1,73 @@
+integrations: "all"
+
+actions:
+  global-config:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+      access_global-config:
+        type: access
+        url: "%BASE_URL%/global-config"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "global-config"
+        username: "admin"
+        password: "P@ssw0rd"
+      update_global-config:
+        type: update
+        item: "global_config"
+        config:
+          USE_REAL_IP: "yes"
+          REAL_IP_FROM: "172.0.0.0/8 10.0.0.0/8"
+          USE_GZIP: "yes"
+          GZIP_COMP_LEVEL: "1"
+          COOKIE_FLAGS: "bw_cookie SameSite=Strict"
+          COOKIE_FLAGS_1: "* HttpOnly SameSite=Lax"
+      check_global-config:
+        type: read
+        item: "global_config"
+        config:
+          USE_REAL_IP: "yes"
+          REAL_IP_FROM: "172.0.0.0/8 10.0.0.0/8"
+          USE_GZIP: "yes"
+          GZIP_COMP_LEVEL: "1"
+          COOKIE_FLAGS: "bw_cookie SameSite=Strict"
+          COOKIE_FLAGS_1: "* HttpOnly SameSite=Lax"
+      update_global-config-1:
+        type: update
+        item: "global_config"
+        config:
+          COOKIE_FLAGS_1: null
+      check_global-config-1:
+        type: read
+        item: "global_config"
+        config:
+          USE_REAL_IP: "yes"
+          REAL_IP_FROM: "172.0.0.0/8 10.0.0.0/8"
+          USE_GZIP: "yes"
+          GZIP_COMP_LEVEL: "1"
+          COOKIE_FLAGS: "bw_cookie SameSite=Strict"
+          COOKIE_FLAGS_1: null
+      update_global-config-raw:
+        type: update
+        item: "global_config"
+        mode: "raw"
+        config:
+          REAL_IP_RECURSIVE: "no"
+      check_global-config-raw:
+        type: read
+        item: "global_config"
+        mode: "raw"
+        config:
+          USE_REAL_IP: "yes"
+          REAL_IP_FROM: "172.0.0.0/8 10.0.0.0/8"
+          REAL_IP_RECURSIVE: "no"
+          USE_GZIP: "yes"
+          GZIP_COMP_LEVEL: "1"
+          COOKIE_FLAGS: "bw_cookie SameSite=Strict"
+          COOKIE_FLAGS_1: null

@@ -1,0 +1,338 @@
+integrations: "all"
+
+actions:
+  check:
+    type: redis
+    query: "PING"
+    result: "True"
+    port: 6479
+    user:
+      - "admin"
+      - "secret"
+    valkey: true
+    restart_stack: false
+  bad_request:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  check_keys:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    port: 6479
+    valkey: true
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    delay: 6
+    restart_stack: false
+  clear_keys:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    port: 6479
+    valkey: true
+    full_clean: true
+
+  check_global:
+    type: redis
+    query: "PING"
+    result: "True"
+    port: 6479
+    user:
+      - "admin"
+      - "secret"
+    valkey: true
+    config:
+      BAD_BEHAVIOR_BAN_SCOPE: "global"
+    restart_stack: false
+  bad_request_global_scope:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  check_keys_global_scope:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_192.168.0.254"
+    port: 6479
+    valkey: true
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    delay: 6
+    restart_stack: false
+  clear_keys_1:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    port: 6479
+    valkey: true
+    full_clean: true
+
+  user_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    port: 6479
+    user:
+      - "admin"
+      - "secret"
+    valkey: true
+    config:
+      REDIS_USERNAME: "admin"
+      REDIS_PASSWORD: "secret"
+    restart_stack: false
+  bad_request_user:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  user:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    port: 6479
+    user:
+      - "admin"
+      - "secret"
+    valkey: true
+    delay: 6
+    restart_stack: false
+  clear_keys_3:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    port: 6479
+    user:
+      - "admin"
+      - "secret"
+    valkey: true
+    full_clean: true
+
+  tls_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    tls: true
+    tls_port: 6480
+    valkey: true
+    config:
+      REDIS_SSL: "yes"
+      REDIS_PORT: "6380"
+    restart_stack: false
+  bad_request_tls:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  tls:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    tls: true
+    tls_port: 6480
+    valkey: true
+    config:
+      REDIS_PORT: "6380"
+    delay: 6
+    restart_stack: false
+  clear_keys_4:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    tls: true
+    tls_port: 6480
+    valkey: true
+    full_clean: true
+    config:
+      REDIS_PORT: "6380"
+
+  # sentinel_check: # TODO
+  #   type: redis
+  #   query: "PING"
+  #   result: "True"
+  #   db: 0
+  #   sentinel: true
+  #   valkey: true
+  #   config:
+  #     REDIS_SENTINEL_HOSTS: "valkey-sentinel-1:26479 valkey-sentinel-2:26479 valkey-sentinel-3:26479"
+  #   Kubernetes:
+  #     config:
+  #       REDIS_SENTINEL_HOSTS: "valkey-sentinel-0.svc-valkey-sentinel-headless.redis.svc.cluster.local:26379 valkey-sentinel-1.svc-valkey-sentinel-headless.redis.svc.cluster.local:26379 valkey-sentinel-2.svc-valkey-sentinel-headless.redis.svc.cluster.local:26379"
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   restart_stack: false
+  # bad_request_sentinel:
+  #   type: status
+  #   url: "http://www.example.com/?id=/etc/passwd"
+  #   status: 403
+  #   headers:
+  #     X-Forwarded-For: "192.168.0.254"
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   restart_stack: false
+  # sentinel:
+  #   type: redis
+  #   query: "keys *"
+  #   keys:
+  #     - "plugin_bad_behavior_www.example.com_192.168.0.254"
+  #   db: 0
+  #   sentinel: true
+  #   valkey: true
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   delay: 6
+  #   restart_stack: false
+  # clear_keys_5:
+  #   type: redis
+  #   query: "FLUSHALL"
+  #   result: "True"
+  #   db: 0
+  #   sentinel: true
+  #   sentinel_type: "master"
+  #   valkey: true
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   full_clean: true
+
+  # sentinel_user_check:
+  #   type: redis
+  #   query: "PING"
+  #   result: "True"
+  #   db: 0
+  #   sentinel: true
+  #   sentinel_user:
+  #     - "admin"
+  #     - "secret"
+  #   valkey: true
+  #   config:
+  #     REDIS_SENTINEL_HOSTS: "valkey-sentinel-1:26479 valkey-sentinel-2:26479 valkey-sentinel-3:26479"
+  #     REDIS_SENTINEL_USERNAME: "admin"
+  #     REDIS_SENTINEL_PASSWORD: "secret"
+  #   Kubernetes:
+  #     config:
+  #       REDIS_SENTINEL_HOSTS: "valkey-sentinel-0.svc-valkey-sentinel-headless.redis.svc.cluster.local:26379 valkey-sentinel-1.svc-valkey-sentinel-headless.redis.svc.cluster.local:26379 valkey-sentinel-2.svc-valkey-sentinel-headless.redis.svc.cluster.local:26379"
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   restart_stack: false
+  # bad_request_sentinel_user:
+  #   type: status
+  #   url: "http://www.example.com/?id=/etc/passwd"
+  #   status: 403
+  #   headers:
+  #     X-Forwarded-For: "192.168.0.254"
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   restart_stack: false
+  # sentinel_user:
+  #   type: redis
+  #   query: "keys *"
+  #   keys:
+  #     - "plugin_bad_behavior_www.example.com_192.168.0.254"
+  #   db: 0
+  #   sentinel: true
+  #   sentinel_user:
+  #     - "admin"
+  #     - "secret"
+  #   valkey: true
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   delay: 6
+  #   restart_stack: false
+  # clear_keys_6:
+  #   type: redis
+  #   query: "FLUSHALL"
+  #   result: "True"
+  #   db: 0
+  #   sentinel: true
+  #   sentinel_user:
+  #     - "admin"
+  #     - "secret"
+  #   sentinel_type: "master"
+  #   valkey: true
+  #   integrations:
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   full_clean: true
+
+config:
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_DNSBL: "no"
+  BAD_BEHAVIOR_BAN_SCOPE: "service"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+  USE_REDIS: "yes"
+  REDIS_HOST: "valkey"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "0"
+  REDIS_SSL: "no"
+  REDIS_SSL_VERIFY: "no"
+  REDIS_TIMEOUT: "1000"
+  REDIS_USERNAME: ""
+  REDIS_PASSWORD: ""
+  REDIS_KEEPALIVE_IDLE: "30000"
+  REDIS_KEEPALIVE_POOL: "10"
+  REDIS_SENTINEL_HOSTS: ""
+  REDIS_SENTINEL_USERNAME: ""
+  REDIS_SENTINEL_PASSWORD: ""
+  REDIS_SENTINEL_MASTER: "valkey-master"
+
+Linux:
+  config:
+    REDIS_PORT: "6479"
+
+Kubernetes:
+  config:
+    REDIS_HOST: "svc-valkey.redis.svc.cluster.local"

@@ -1,0 +1,30 @@
+services:
+  bw-db:
+    image: gvenzl/oracle-free:23-slim-faststart@sha256:d8913e4e4769b6e60197949bef30a4391713afe662b4b4e71a2665c881bdac8b
+    container_name: bw-db
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_RANDOM_PASSWORD: "yes"
+      APP_USER: "bunkerweb"
+      APP_USER_PASSWORD: "secret"
+    volumes:
+      - bw-data:/opt/oracle/oradata
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        ipv4_address: 10.10.10.254
+
+volumes:
+  bw-data:
+    name: bw-data
+
+networks:
+  bw-db:
+    name: bw-db
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24

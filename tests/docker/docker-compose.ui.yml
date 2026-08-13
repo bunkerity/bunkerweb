@@ -1,0 +1,24 @@
+services:
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:${BW_VERSION}
+    container_name: bw-ui
+    ports:
+      - "127.0.0.1:7000:7000"
+    volumes:
+      - /var/log/bunkerweb:/var/log/bunkerweb:ro
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/ui.env
+        required: true
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.25
+      bw-db:
+
+networks:
+  bw-universe:
+    external: true
+  bw-db:
+    external: true

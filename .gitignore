@@ -15,6 +15,7 @@ docs/package-lock.json
 .env
 .venv/
 .venv-unit/
+.venv-tests/
 .coverage
 .coverage.*
 coverage.xml

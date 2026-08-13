@@ -1,0 +1,217 @@
+integrations: "all"
+
+actions:
+  instances:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+      access_instances:
+        type: access
+        url: "%BASE_URL%/instances"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "instances"
+        username: "admin"
+        password: "P@ssw0rd"
+      open_invalid_port_modal:
+        type: click
+        selector: "//button[@aria-controls='instances' and contains(@class, 'btn-bw-green')]"
+      fill_invalid_port_hostname:
+        type: send_keys
+        by: "id"
+        selector: "hostname"
+        value: "worker.example:99999"
+      fill_invalid_port_name:
+        type: send_keys
+        by: "id"
+        selector: "name"
+        value: "Invalid port"
+      submit_invalid_port:
+        type: click
+        selector: '//button[@type="submit" and contains(@data-i18n, "button.create_instance")]'
+        sleep: 2.0
+      check_invalid_port:
+        type: find
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "Port out of range")]'
+      create_instance:
+        type: create
+        item: "instance"
+        hostname: "extra-bunkerweb"
+        name: "Extra BunkerWeb"
+        sleep: 2.0
+        integrations: # ? On autoconf integrations, this is done automatically
+          - "Linux"
+          - "Docker"
+      add_method_column:
+        type: click
+        selector: '//button[@aria-controls="instances" and contains(@class, "buttons-colvis")]'
+      add_method_column_1:
+        type: click
+        selector: '//a[@data-cv-idx="4" and contains(@class, "buttons-columnVisibility")]'
+      add_method_column_2:
+        type: click
+        selector: '//div[contains(@class, "dt-button-background")]'
+        sleep: 2.0
+      verify_instance:
+        type: find
+        selector: '//td[@id="method-bunkerweb" and contains(text(), "manual")]'
+        sleep: 2.0
+        Linux:
+          selector: '//td[@id="method-127.0.0.1" and contains(text(), "manual")]'
+        Autoconf:
+          selector: '//td[@id="method-bunkerweb" and contains(text(), "autoconf")]'
+        Kubernetes:
+          selector: '//td[contains(@id, "method-") and  contains(@id, ".bunkerweb.pod") and contains(text(), "autoconf")]'
+      check_security:
+        type: find
+        selector: '//button[@data-instance="bunkerweb" and contains(@class, "delete-instance disabled")]'
+        Linux:
+          selector: '//button[@data-instance="127.0.0.1" and contains(@class, "delete-instance disabled")]'
+        Kubernetes:
+          selector: '//button[contains(@data-instance, ".bunkerweb.pod") and contains(@class, "delete-instance disabled")]'
+      test_search:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        value: "extra"
+      check_search:
+        type: find
+        selector: '//button[@data-instance="bunkerweb" and contains(@class, "ping-instance")]'
+        findable: false
+        Linux:
+          selector: '//button[@data-instance="127.0.0.1" and contains(@class, "ping-instance")]'
+        Kubernetes:
+          selector: '//button[contains(@data-instance, ".bunkerweb.pod") and contains(@class, "ping-instance")]'
+      clear_search:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        sleep: 2.0
+        value: ""
+        clear: true
+      show_filters:
+        type: click
+        by: "id"
+        selector: "show-filters-instances"
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+      check_filters_panes:
+        type: find
+        selector: '//div[contains(@class, "dtsp-panes dtsp-panesContainer") and @style=""]'
+        sleep: 3.0
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+      test_filters:
+        type: click
+        selector: '//span[@title="ui" and @class="dtsp-name"]'
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+      check_filters:
+        type: find
+        selector: '//button[@data-instance="bunkerweb" and contains(@class, "ping-instance")]'
+        findable: false
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+        Linux:
+          selector: '//button[@data-instance="127.0.0.1" and contains(@class, "ping-instance")]'
+        Kubernetes:
+          selector: '//button[contains(@data-instance, "extra-bunkerweb") and contains(@class, "ping-instance")]'
+      test_filters_1:
+        type: click
+        selector: '//span[@title="ui" and @class="dtsp-name"]'
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+      check_filters_1:
+        type: find
+        selector: '//button[@data-instance="bunkerweb" and contains(@class, "ping-instance")]'
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+        Linux:
+          selector: '//button[@data-instance="127.0.0.1" and contains(@class, "ping-instance")]'
+        Kubernetes:
+          selector: '//button[contains(@data-instance, "extra-bunkerweb") and contains(@class, "ping-instance")]'
+      hide_filters:
+        type: click
+        by: "id"
+        selector: "hide-filters-instances"
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+      check_filters_panes_1:
+        type: find
+        selector: '//div[contains(@class, "dtsp-panes dtsp-panesContainer") and @style="display: none;"]'
+        sleep: 3.0
+        integrations: # ? On autoconf integrations, this is not testable
+          - "Linux"
+          - "Docker"
+      ping_instance:
+        type: click
+        selector: '//button[@data-instance="extra-bunkerweb" and contains(@class, "ping-instance")]'
+        sleep: 2.0
+        Kubernetes:
+          selector: '//button[contains(@data-instance, "extra-bunkerweb") and contains(@class, "ping-instance")]'
+      check_ping:
+        type: find
+        selector: '//div[contains(@class, "toast-header")]//span[contains(text(), "Ping successful")]'
+        sleep: 2.0
+        Linux:
+          selector: '//div[contains(@class, "toast-header")]//span[contains(text(), "Ping failed")]' # ? We test the failure case with the Linux integration
+          sleep: 2.0
+      refresh_page:
+        type: refresh
+      reload_instance:
+        type: click
+        selector: '//button[@data-instance="extra-bunkerweb" and contains(@class, "reload-instance")]'
+        integrations: # ? On linux integrations, this is not possible as the reload button is not available because the instance will be down
+          - "Docker"
+          - "Autoconf"
+          - "Kubernetes"
+        Kubernetes:
+          selector: '//button[contains(@data-instance, "extra-bunkerweb") and contains(@class, "reload-instance")]'
+      check_reload:
+        type: find
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "Reloaded successfully.")]'
+        Linux:
+          selector: '//button[@data-instance="extra-bunkerweb" and contains(@class, "reload-instance disabled")]'
+          sleep: 2.0
+      stop_instance:
+        type: click
+        selector: '//button[@data-instance="extra-bunkerweb" and contains(@class, "stop-instance")]'
+        integrations: # ? On linux integrations, this is not possible as the reload button is not available because the instance will be down
+          - "Docker"
+          - "Autoconf"
+          - "Kubernetes"
+        Kubernetes:
+          selector: '//button[contains(@data-instance, "extra-bunkerweb") and contains(@class, "stop-instance")]'
+      check_stopped:
+        type: find
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "Stopped successfully.")]'
+        Linux:
+          selector: '//button[@data-instance="extra-bunkerweb" and contains(@class, "stop-instance disabled")]'
+          sleep: 0.0
+      delete_instance:
+        type: delete
+        item: "instance"
+        hostname: "extra-bunkerweb"
+        sleep: 2.0
+        integrations: # ? On autoconf integrations, this is not possible
+          - "Linux"
+          - "Docker"
+      check_deletion:
+        type: find
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "Deleted successfully.")]'
+        Autoconf:
+          selector: '//button[@data-instance="extra-bunkerweb" and contains(@class, "delete-instance disabled")]'
+        Kubernetes:
+          selector: '//button[contains(@data-instance, "extra-bunkerweb") and contains(@class, "delete-instance disabled")]'

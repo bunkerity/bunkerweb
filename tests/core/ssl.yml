@@ -1,0 +1,143 @@
+integrations: "all"
+
+actions:
+  default_server_ssl:
+    type: ssl
+    url: "https://localhost"
+    verify_ssl: false
+    ssl_expiration: 3650
+    ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
+    All-in-one:
+      url: "https://localhost/setup"
+  redirect_http_https:
+    type: status
+    url: "http://www.example.com"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    status: 301
+    config:
+      REDIRECT_HTTP_TO_HTTPS: "yes"
+  auto_redirect_http_https:
+    type: status
+    url: "http://www.example.com"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    status: 301
+  auto_redirect_http_https_disabled:
+    type: status
+    url: "http://www.example.com"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    status: 200
+    config:
+      AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+  tweaked_ssl_protocols:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_protocols:
+      - "TLSv1.3"
+    ssl_algorithm: "ec-prime256v1"
+    config:
+      SSL_PROTOCOLS: "TLSv1.3"
+
+  client_ssl_ciphers:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_cipher: "TLS_AES_256_GCM_SHA384"
+    ssl_algorithm: "ec-prime256v1"
+
+  modern_ssl_ciphers:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    client_ssl_cipher: "ECDHE-ECDSA-AES128-GCM-SHA256"
+    ssl_cipher: "ECDHE-ECDSA-AES128-GCM-SHA256"
+    ssl_algorithm: "ec-prime256v1"
+    config:
+      SSL_PROTOCOLS: "TLSv1.2"
+    restart_stack: false
+  modern_unsupported_ssl_ciphers:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    client_ssl_cipher: "DHE-RSA-CHACHA20-POLY1305"
+    ssl_cipher: "DHE-RSA-CHACHA20-POLY1305"
+    ssl_algorithm: "ec-prime256v1"
+    success: false
+
+  intermediate_ssl_ciphers:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    client_ssl_cipher: "DHE-RSA-CHACHA20-POLY1305"
+    ssl_cipher: "DHE-RSA-CHACHA20-POLY1305"
+    ssl_algorithm: "rsa-4096"
+    config:
+      SSL_PROTOCOLS: "TLSv1.2"
+      SSL_CIPHERS_LEVEL: "intermediate"
+      SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
+    restart_stack: false
+  intermediate_unsupported_ssl_ciphers:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    client_ssl_cipher: "ECDHE-ECDSA-AES128-SHA256"
+    ssl_cipher: "ECDHE-ECDSA-AES128-SHA256"
+    ssl_algorithm: "ec-prime256v1"
+    success: false
+
+  old_ssl_ciphers:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    client_ssl_cipher: "ECDHE-ECDSA-AES128-SHA256"
+    ssl_cipher: "ECDHE-ECDSA-AES128-SHA256"
+    ssl_algorithm: "ec-prime256v1"
+    config:
+      SSL_PROTOCOLS: "TLSv1.2"
+      SSL_CIPHERS_LEVEL: "old"
+
+  custom_ssl_ciphers:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    client_ssl_cipher: "ECDHE-RSA-AES128-SHA256"
+    ssl_cipher: "ECDHE-RSA-AES128-SHA256"
+    ssl_algorithm: "rsa-2048"
+    config:
+      SSL_PROTOCOLS: "TLSv1.2"
+      SSL_CIPHERS_CUSTOM: "ECDHE-RSA-AES128-SHA256"
+      SELF_SIGNED_SSL_ALGORITHM: "rsa-2048"
+
+config:
+  GENERATE_SELF_SIGNED_SSL: "yes"
+  REDIRECT_HTTP_TO_HTTPS: "no"
+  AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+  SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+  SSL_CIPHERS_LEVEL: "modern"
+  SSL_CIPHERS_CUSTOM: ""
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null

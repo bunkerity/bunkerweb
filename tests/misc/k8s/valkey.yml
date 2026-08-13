@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valkey
+  namespace: redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: valkey
+  template:
+    metadata:
+      labels:
+        app: valkey
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: valkey
+          image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: valkey-secret
+          volumeMounts:
+            - mountPath: /acl/
+              name: vol-acl
+            - mountPath: /tls/
+              name: vol-tls
+            - mountPath: "/data"
+              name: vol-data
+      volumes:
+        - name: vol-acl
+          hostPath:
+            path: /mnt/valkey-acl/
+        - name: vol-tls
+          hostPath:
+            path: /mnt/valkey-tls/
+        - name: vol-data
+          persistentVolumeClaim:
+            claimName: pvc-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey
+  namespace: redis
+spec:
+  type: ClusterIP
+  selector:
+    app: valkey
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-redis
+  namespace: redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-nodeport
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    app: valkey
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 30479

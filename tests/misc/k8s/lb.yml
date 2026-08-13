@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bw-lb
+  namespace: bunkerweb
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: bunkerweb
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
+      name: https
+    - port: 443
+      targetPort: 8443
+      protocol: UDP
+      name: https-quic
+    - port: 5001
+      targetPort: 5000
+      protocol: TCP
+      name: api-http
+    - port: 5443
+      targetPort: 5443
+      protocol: TCP
+      name: api-https

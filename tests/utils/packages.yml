@@ -1,0 +1,61 @@
+packages_info:
+  ubuntu/noble:
+    name: "ubuntu"
+    separator: "_"
+    suffix: "-1_"
+    package: deb
+  ubuntu/jammy:
+    name: "ubuntu-jammy"
+    separator: "_"
+    suffix: "-1_"
+    package: deb
+  debian/trixie:
+    name: "debian-trixie"
+    separator: "_"
+    suffix: "-1_"
+    package: deb
+  debian/bookworm:
+    name: "debian-bookworm"
+    separator: "_"
+    suffix: "-1_"
+    package: deb
+  el/10:
+    name: "rhel-10"
+    separator: "-"
+    suffix: "-1."
+    package: rpm
+  el/9:
+    name: "rhel-9"
+    separator: "-"
+    suffix: "-1."
+    package: rpm
+  el/8:
+    name: "rhel-8"
+    separator: "-"
+    suffix: "-1."
+    package: rpm
+  fedora/42:
+    name: "fedora-42"
+    separator: "-"
+    suffix: "-1."
+    package: rpm
+  fedora/43:
+    name: "fedora-43"
+    separator: "-"
+    suffix: "-1."
+    package: rpm
+  fedora/44:
+    name: "fedora-44"
+    separator: "-"
+    suffix: "-1."
+    package: rpm
+  freebsd/13:
+    name: "freebsd-13"
+    separator: "-"
+    suffix: "-"
+    package: pkg
+  freebsd/14:
+    name: "freebsd-14"
+    separator: "-"
+    suffix: "-"
+    package: pkg

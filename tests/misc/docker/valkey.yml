@@ -1,0 +1,46 @@
+services:
+  valkey:
+    image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+    container_name: valkey
+    ports:
+      - "127.0.0.1:6479:6379"
+      - "127.0.0.1:6480:6380"
+    volumes:
+      - /tmp/valkey-acl:/acl
+      - /tmp/valkey-tls:/tls
+      - valkey-data:/data
+      - ../scripts/valkey-entrypoint.sh:/usr/local/bin/valkey-entrypoint.sh:ro
+      - ../scripts/valkey-healthcheck.sh:/usr/local/bin/valkey-healthcheck.sh:ro
+    env_file:
+      - path: /tmp/valkey.env
+        required: true
+    entrypoint:
+      - "/usr/local/bin/valkey-entrypoint.sh"
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    healthcheck:
+      test:
+        - "CMD"
+        - "/usr/local/bin/valkey-healthcheck.sh"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.70
+        aliases:
+          - valkey
+
+volumes:
+  valkey-data:
+    name: valkey-data
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

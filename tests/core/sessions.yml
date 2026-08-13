@@ -1,0 +1,30 @@
+integrations: "all"
+
+actions:
+  # TODO: see to test the random values
+  manual_name:
+    type: "cookie"
+    url: "http://www.example.com"
+    cookie_name: "test"
+    cookie_rx: "^.*$"
+    cookie_http_only_flag: true
+    cookie_same_site_flag: "Lax"
+    config:
+      SESSIONS_NAME: "test"
+
+config:
+  USE_ANTIBOT: "cookie"
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null

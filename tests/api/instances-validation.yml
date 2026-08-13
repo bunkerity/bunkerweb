@@ -1,0 +1,116 @@
+integrations:
+  - "Docker"
+
+actions:
+  reject_out_of_range_port:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"worker.example:99999","name":"Invalid port"}'
+    status: 422
+    restart_stack: false
+
+  reject_malformed_port:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"worker.example:not-a-port","name":"Malformed port"}'
+    status: 422
+    restart_stack: false
+
+  reject_path:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"worker.example/path","name":"Invalid path"}'
+    status: 422
+    restart_stack: false
+
+  reject_query:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"worker.example?target=internal","name":"Invalid query"}'
+    status: 422
+    restart_stack: false
+
+  reject_fragment:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"worker.example#internal","name":"Invalid fragment"}'
+    status: 422
+    restart_stack: false
+
+  reject_userinfo:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"trusted.example@127.0.0.1","name":"Invalid userinfo"}'
+    status: 422
+    restart_stack: false
+
+  reject_unsupported_scheme:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"ftp://worker.example","name":"Invalid scheme"}'
+    status: 422
+    restart_stack: false
+
+  accept_trailing_dot:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"worker.example.","name":"Trailing dot"}'
+    status: 201
+    restart_stack: false
+
+  accept_idna:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    method: POST
+    auth: ["admin", "P@ssw0rd"]
+    headers:
+      Content-Type: "application/json"
+    body: '{"hostname":"münich.example","name":"IDNA"}'
+    status: 201
+    restart_stack: false
+
+  check_trailing_dot:
+    type: string
+    url: "http://127.0.0.1:8888/instances"
+    auth: ["admin", "P@ssw0rd"]
+    string: '"hostname":"worker.example."'
+    restart_stack: false
+
+  check_idna:
+    type: string
+    url: "http://127.0.0.1:8888/instances"
+    auth: ["admin", "P@ssw0rd"]
+    string: '"hostname":"xn--mnich-kva.example"'
+    full_clean: true

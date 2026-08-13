@@ -1,0 +1,198 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: valkey-slave
+  namespace: redis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: valkey-slave
+  serviceName: "svc-valkey-slave-headless"
+  template:
+    metadata:
+      labels:
+        app: valkey-slave
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: valkey-slave
+          image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: valkey-slave-secret
+          volumeMounts:
+            - mountPath: /acl/
+              name: vol-acl
+            - mountPath: /tls/
+              name: vol-tls
+      volumes:
+        - name: vol-acl
+          hostPath:
+            path: /mnt/valkey-acl/
+        - name: vol-tls
+          hostPath:
+            path: /mnt/valkey-tls/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-slave-headless
+  namespace: redis
+spec:
+  clusterIP: None
+  selector:
+    app: valkey-slave
+  ports:
+    - name: valkey
+      protocol: TCP
+      port: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-slave-nodeport-0
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: valkey-slave-0
+  ports:
+    - name: valkey
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 30480
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-slave-nodeport-1
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: valkey-slave-1
+  ports:
+    - name: valkey
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 30481
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: valkey-sentinel
+  namespace: redis
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: valkey-sentinel
+  serviceName: "svc-valkey-sentinel-headless"
+  template:
+    metadata:
+      labels:
+        app: valkey-sentinel
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: valkey-sentinel
+          image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+          imagePullPolicy: Always
+          command:
+            [
+              "valkey-sentinel",
+              "/etc/valkey/sentinel.conf",
+              "--port",
+              "26379",
+              "--aclfile",
+              "/acl/sentinel.acl",
+            ]
+          ports:
+            - containerPort: 26379
+          envFrom:
+            - secretRef:
+                name: valkey-sentinel-secret
+          volumeMounts:
+            - mountPath: /acl/
+              name: vol-acl
+            - mountPath: /etc/valkey/
+              name: vol-sentinel-conf
+      volumes:
+        - name: vol-acl
+          hostPath:
+            path: /mnt/valkey-acl/
+        - name: vol-sentinel-conf
+          hostPath:
+            path: /mnt/valkey-sentinel/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-sentinel-headless
+  namespace: redis
+spec:
+  clusterIP: None
+  selector:
+    app: valkey-sentinel
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-sentinel-nodeport-0
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: valkey-sentinel-0
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+      nodePort: 32479
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-sentinel-nodeport-1
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: valkey-sentinel-1
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+      nodePort: 32480
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-valkey-sentinel-nodeport-2
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: valkey-sentinel-2
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+      nodePort: 32481

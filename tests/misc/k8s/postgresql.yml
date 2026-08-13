@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bunkerweb-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-db
+  namespace: bunkerweb-db
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-db
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-db
+      annotations:
+        bunkerweb.io/DB: "yes"
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: bunkerweb-db
+          image: postgres:18-alpine@sha256:1b1689b20d16a014a3d195653381cf2caa75a41a92d93b255a9d6ea29fd353aa
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_DB
+              value: "db"
+            - name: POSTGRES_USER
+              value: "bunkerweb"
+            - name: POSTGRES_PASSWORD
+              value: "secret"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql/data"
+              name: vol-db
+      volumes:
+        - name: vol-db
+          persistentVolumeClaim:
+            claimName: pvc-bunkerweb-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-db
+  namespace: bunkerweb-db
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-db
+  ports:
+    - name: sql
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bunkerweb-db
+  namespace: bunkerweb-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-db-nodeport
+  namespace: bunkerweb-db
+spec:
+  type: NodePort
+  selector:
+    app: bunkerweb-db
+  ports:
+    - name: sql
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+      nodePort: 30432

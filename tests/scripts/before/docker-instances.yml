@@ -1,0 +1,15 @@
+services:
+  extra-bunkerweb:
+    image: bunkerity/bunkerweb:tests
+    pull_policy: never
+    container_name: extra-bunkerweb
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
+        required: true
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+networks:
+  bw-universe:
+    external: true

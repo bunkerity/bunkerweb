@@ -1,0 +1,73 @@
+integrations:
+  - "Linux"
+  - "Docker"
+  - "Autoconf"
+
+actions:
+  dirb:
+    type: tool
+    tool: "dirb"
+    arguments: 'http://127.0.0.1 -H "Host: www.example.com" -H "User-Agent: LegitOne" -f'
+    restart_stack: false
+  blocked_live:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    full_clean: true
+
+  dirb_1:
+    type: tool
+    tool: "dirb"
+    arguments: 'http://127.0.0.1 -H "Host: www.example.com" -H "User-Agent: LegitOne" -f'
+    config:
+      CROWDSEC_MODE: "stream"
+    restart_stack: false
+  not_yet_blocked_stream:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    restart_stack: false
+  blocked_stream:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+
+config:
+  USE_MODSECURITY: "no"
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_CROWDSEC: "yes"
+  CROWDSEC_API: "http://crowdsec:8080"
+  CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y"
+  CROWDSEC_MODE: "live"
+  CROWDSEC_ENABLE_INTERNAL: "no"
+  CROWDSEC_REQUEST_TIMEOUT: "1000"
+  CROWDSEC_EXCLUDE_LOCATION: ""
+  CROWDSEC_CACHE_EXPIRATION: "1"
+  CROWDSEC_UPDATE_FREQUENCY: "10"
+  CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+  CROWDSEC_APPSEC_FAILURE_ACTION: "passthrough"
+  CROWDSEC_APPSEC_CONNECT_TIMEOUT: "100"
+  CROWDSEC_APPSEC_SEND_TIMEOUT: "100"
+  CROWDSEC_APPSEC_PROCESS_TIMEOUT: "100"
+  CROWDSEC_ALWAYS_SEND_TO_APPSEC: "no"
+  CROWDSEC_APPSEC_SSL_VERIFY: "no"
+
+All-in-one:
+  config:
+    CROWDSEC_API: null
+    CROWDSEC_API_KEY: null
+    CROWDSEC_APPSEC_URL: null
+    CROWDSEC_EXTRA_COLLECTIONS: null
+    CROWDSEC_DISABLE_PARSERS: "crowdsecurity/whitelists"
+
+crowdsec_config:
+  BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y"
+  COLLECTIONS: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules bunkerity/bunkerweb"
+  DISABLE_PARSERS: "crowdsecurity/whitelists"
+
+Linux:
+  config:
+    CROWDSEC_API: "http://crowdsec:8888"

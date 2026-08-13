@@ -106,16 +106,139 @@ jobs:
       contents: read
       security-events: write
 
-  test-internalcert:
-    needs: [build-containers]
-    uses: ./.github/workflows/test-core.yml
+  # Integration tests — the framework lives in tests/ since the migration from
+  # bunkerity/bunkerweb-tests, so specs and product are validated at the same SHA.
+  parse-tests-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Set up Python 3.13
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse core tests
+        run: |
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "core" --dev
+          echo "Linux_tests=$(cat /tmp/tests/Linux_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Autoconf_tests=$(cat /tmp/tests/Autoconf_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Kubernetes_tests=$(cat /tmp/tests/Kubernetes_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "All_in_one_tests=$(cat /tmp/tests/All_in_one_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+    outputs:
+      Linux_tests: ${{ steps.parse_tests.outputs.Linux_tests }}
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
+      Autoconf_tests: ${{ steps.parse_tests.outputs.Autoconf_tests }}
+      Kubernetes_tests: ${{ steps.parse_tests.outputs.Kubernetes_tests }}
+      All_in_one_tests: ${{ steps.parse_tests.outputs.All_in_one_tests }}
+
+  parse-tests-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Set up Python 3.13
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse api tests
+        run: |
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "api" --dev
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+    outputs:
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
+
+  run-Docker-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
     with:
-      TEST: internalcert
+      TYPE: core
+      TEST: ${{ matrix.test }}
       RELEASE: 1.7
+
+  run-Autoconf-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Autoconf_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: 1.7
+
+  run-Linux-tests-core:
+    needs: [build-packages, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Linux_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: 1.7
+
+  run-Kubernetes-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Kubernetes_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: 1.7
+
+  run-All-in-one-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.All_in_one_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: 1.7
+
+  run-Docker-tests-api:
+    needs: [build-containers, parse-tests-api]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-api.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: api
+      TEST: ${{ matrix.test }}
+      RELEASE: 1.7
+
+  # UI specs (tests/ui/*.yml) stay off until the Selenium matrix is green on
+  # GitHub-hosted runners — they were commented out upstream too.
 
   # Push with 1.7-dev tag
   push-dev:
-    needs: [build-containers, test-internalcert]
+    needs:
+      [
+        build-containers,
+        run-Docker-tests-core,
+        run-Autoconf-tests-core,
+        run-Linux-tests-core,
+        run-Kubernetes-tests-core,
+        run-All-in-one-tests-core,
+        run-Docker-tests-api,
+      ]
     runs-on: ubuntu-latest
     permissions:
       contents: read

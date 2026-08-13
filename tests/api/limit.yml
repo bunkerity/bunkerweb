@@ -1,0 +1,19 @@
+integrations: "all"
+
+actions:
+  rate_limit_auth:
+    type: limit
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    rate_limit: "10r/m"
+    expect_limited: true
+    rate_exceeded_count: 12
+    cooldown: 0.1
+
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+  API_RATE_LIMIT_ENABLED: "yes"

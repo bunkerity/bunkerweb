@@ -1,0 +1,63 @@
+services:
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:${BW_VERSION}
+    container_name: bw-worker
+    depends_on:
+      bw-jobs-broker:
+        condition: service_healthy
+    volumes:
+      # Shares the scheduler's volume on purpose: on SQLite the database file lives
+      # under /data, so a private volume would hand the worker a different database.
+      - bw-storage:/data
+      - /var/www/html:/var/www/html
+      - /tmp/output:/tmp/output
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/worker.env
+        required: true
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.27
+      bw-db:
+
+  # Job broker only — since 1.7 this is deliberately NOT the WAF datastore Redis
+  # (commit c11a70be4 split the two roles), so tests that assert on datastore keys
+  # keep talking to their own instance.
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    container_name: bw-jobs-broker
+    # AOF, not RDB: a broker restart must not vaporise queued jobs.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.28
+
+volumes:
+  bw-storage:
+    external: true
+
+networks:
+  bw-universe:
+    external: true
+  bw-db:
+    external: true

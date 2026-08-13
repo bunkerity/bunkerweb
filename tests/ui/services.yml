@@ -1,0 +1,209 @@
+integrations: "all"
+
+actions:
+  services:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+
+      access_services:
+        type: access
+        url: "%BASE_URL%/services"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "services"
+        username: "admin"
+        password: "P@ssw0rd"
+
+      create_service:
+        type: create
+        item: "service"
+        name: "app1.example.com"
+        config:
+          USE_REVERSE_PROXY: "yes"
+          REVERSE_PROXY_HOST: "http://192.168.0.254:8080"
+        Kubernetes:
+          config:
+            REVERSE_PROXY_HOST: "http://svc-app1.services.svc.cluster.local"
+      verify_service:
+        type: read
+        item: "service"
+        name: "app1.example.com"
+        config:
+          USE_REVERSE_PROXY: "yes"
+          REVERSE_PROXY_HOST: "http://192.168.0.254:8080"
+        Kubernetes:
+          config:
+            REVERSE_PROXY_HOST: "http://svc-app1.services.svc.cluster.local"
+      access_services_page:
+        type: access
+        page: "services"
+      verify_service_type:
+        type: find
+        selector: '//span[@id="type-app1-example-com" and @data-value="online"]'
+        sleep: 2.0
+      verify_service_method:
+        type: find
+        selector: '//td[@id="method-app1-example-com" and contains(text(), "ui")]'
+      check_service:
+        type: click
+        selector: '//a[@data-i18n="tooltip.link.access_service" and contains(@data-i18n-options, "app1.example.com")]'
+        sleep: 15.0
+      switch_to_service:
+        type: switch_tab
+        tab: 1
+      check_service_1:
+        type: find
+        selector: '//img[contains(@alt, "NGINX")]'
+      close_service_tab:
+        type: close_tab
+
+      clone_service_draft_raw:
+        type: create
+        item: "service"
+        name: "app2.example.com"
+        mode: "raw"
+        draft: true
+        clone: "app1.example.com"
+      verify_clone_service_raw:
+        type: read
+        item: "service"
+        name: "app2.example.com"
+        mode: "raw"
+        draft: true
+        config:
+          USE_REVERSE_PROXY: "yes"
+          REVERSE_PROXY_HOST: "http://192.168.0.254:8080"
+        sleep: 5.0
+        Kubernetes:
+          config:
+            REVERSE_PROXY_HOST: "http://svc-app1.services.svc.cluster.local"
+      access_services_page_1:
+        type: access
+        page: "services"
+      verify_clone_service_type:
+        type: find
+        selector: '//span[@id="type-app2-example-com" and @data-value="draft"]'
+        sleep: 2.0
+      verify_clone_service_method:
+        type: find
+        selector: '//td[@id="method-app2-example-com" and contains(text(), "ui")]'
+      check_clone_service:
+        type: access
+        url: "http://app2.example.com"
+        new_tab: true
+        sleep: 15.0
+      check_clone_service_1:
+        type: find
+        selector: '//img[contains(@alt, "NGINX")]'
+        findable: false
+      close_clone_service_tab:
+        type: close_tab
+      convert_clone_service:
+        type: click
+        selector: '//button[@data-service-id="app2.example.com" and contains(@class, "convert-service")]'
+      convert_clone_service_1:
+        type: click
+        selector: '//div[@id="modal-convert-services"]//button[@type="submit"]'
+      verify_clone_service_type_1:
+        type: find
+        selector: '//span[@id="type-app2-example-com" and @data-value="online"]'
+        sleep: 5.0
+      check_clone_service_2:
+        type: click
+        selector: '//a[@data-i18n="tooltip.link.access_service" and contains(@data-i18n-options, "app2.example.com")]'
+        sleep: 15.0
+      switch_to_clone_service_1:
+        type: switch_tab
+        tab: 1
+      check_clone_service_3:
+        type: find
+        selector: '//img[contains(@alt, "NGINX")]'
+      close_clone_service_tab_1:
+        type: close_tab
+      delete_clone_service:
+        type: delete
+        item: "service"
+        name: "app2.example.com"
+
+      clone_service_draft_easy:
+        type: create
+        item: "service"
+        name: "app2.example.com"
+        mode: "easy"
+        draft: true
+        clone: "app1.example.com"
+      verify_clone_service_easy:
+        type: read
+        item: "service"
+        name: "app2.example.com"
+        mode: "easy"
+        draft: true
+        config:
+          USE_REVERSE_PROXY: "yes"
+          REVERSE_PROXY_HOST: "http://192.168.0.254:8080"
+        sleep: 5.0
+        Kubernetes:
+          config:
+            REVERSE_PROXY_HOST: "http://svc-app1.services.svc.cluster.local"
+      access_services_page_2:
+        type: access
+        page: "services"
+      verify_clone_service_type_2:
+        type: find
+        selector: '//span[@id="type-app2-example-com" and @data-value="draft"]'
+        sleep: 5.0
+
+      select_services:
+        type: click
+        selector: "//thead/tr/th[2]/input"
+      multiple_convert:
+        type: click
+        selector: "//button[contains(@class, 'action-button')]"
+      multiple_convert_1:
+        type: click
+        selector: '//a[contains(@class, "dt-button") and .//span[contains(text(), "draft")]]'
+      multiple_convert_2:
+        type: click
+        selector: '//div[@id="modal-convert-services"]//button[@type="submit"]'
+      verify_multiple_convert:
+        type: find
+        selector: '//span[@id="type-app1-example-com" and @data-value="draft"]'
+        sleep: 5.0
+      verify_multiple_convert_1:
+        type: find
+        selector: '//span[@id="type-www-example-com" and @data-value="online"]'
+
+      select_services_1:
+        type: click
+        selector: "//thead/tr/th[2]/input"
+      multiple_delete:
+        type: click
+        selector: "//button[contains(@class, 'action-button')]"
+      multiple_delete_1:
+        type: click
+        selector: '//a[contains(@class, "dt-button") and .//span[contains(text(), "Delete")]]'
+      multiple_delete_2:
+        type: click
+        selector: '//div[@id="modal-delete-services"]//button[@type="submit"]'
+      verify_multiple_delete:
+        type: find
+        selector: '//span[@id="type-app1-example-com" and @data-value="draft"]'
+        sleep: 5.0
+        findable: false
+      verify_multiple_delete_1:
+        type: find
+        selector: '//span[@id="type-www-example-com" and @data-value="online"]'
+        sleep: 5.0
+
+annotations:
+  bunkerweb.io/SERVER_NAME: "test.example.com"
+# TODO: Also test the "fetch from global config" button in easy mode
+# TODO: Also test the templates custom configurations
+# TODO: Add tests when we update the global configuration
+# TODO: Add tests non template settings when we update a service using a template

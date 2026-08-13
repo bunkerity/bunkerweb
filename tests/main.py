@@ -4,7 +4,7 @@ from pathlib import Path
 from sys import path, argv, exit
 from glob import glob
 from os import _exit, getenv
-from os.path import isfile
+from os.path import basename, isdir, isfile
 from traceback import format_exc
 from json import loads, dumps
 from subprocess import run
@@ -79,11 +79,18 @@ else:  # swarm
         "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
     }
 
-for example in glob("./examples/*"):
-    if isfile(f"{example}/tests.json"):
+# Descriptors live in tests/examples/<name>.json, not inside the example folder:
+# examples/ is documentation our users copy, so it holds only the compose file and the
+# config that goes with it. "name" points back at the directory to deploy.
+for descriptor in glob("./tests/examples/*.json"):
+    example = f"./examples/{basename(descriptor)[:-len('.json')]}"
+    if isfile(descriptor):
         try:
-            with open(f"{example}/tests.json") as f:
+            with open(descriptor) as f:
                 tests = loads(f.read())
+            if not isdir(example):
+                log("TESTS", "❌", f"{descriptor} names an example that does not exist: {example}")
+                exit(1)
             if test_type not in tests["kinds"]:
                 log(
                     "TESTS",

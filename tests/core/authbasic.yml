@@ -1,0 +1,93 @@
+integrations: "all"
+
+actions:
+  status_code:
+    type: status
+    url: "http://www.example.com"
+    status: 401
+    restart_stack: false
+  good_credentials:
+    type: status
+    url: "http://www.example.com"
+    auth:
+      - "bunkerity"
+      - "Secr3tP@ssw0rd"
+    status: 200
+    restart_stack: false
+  bad_credentials:
+    type: status
+    url: "http://bunkerity:secret@www.example.com"
+    status: 401
+
+  custom_location:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    config:
+      AUTH_BASIC_LOCATION: "/auth"
+    restart_stack: false
+  custom_location_status:
+    type: status
+    url: "http://www.example.com/auth"
+    status: 401
+
+  custom_user_good_credentials:
+    type: status
+    url: "http://www.example.com"
+    auth:
+      - "admin"
+      - "Secr3tP@ssw0rd"
+    status: 200
+    config:
+      AUTH_BASIC_USER: "admin"
+    restart_stack: false
+  custom_user_bad_credentials:
+    type: status
+    url: "http://www.example.com"
+    auth:
+      - "bunkerity"
+      - "Secr3tP@ssw0rd"
+    status: 401
+
+  custom_password_good_credentials:
+    type: status
+    url: "http://www.example.com"
+    auth:
+      - "bunkerity"
+      - "secret"
+    status: 200
+    config:
+      AUTH_BASIC_PASSWORD: "secret"
+    restart_stack: false
+  custom_password_bad_credentials:
+    type: status
+    url: "http://www.example.com"
+    auth:
+      - "bunkerity"
+      - "Secr3tP@ssw0rd"
+    status: 401
+
+  multi_user_good_credentials:
+    type: status
+    url: "http://www.example.com"
+    auth:
+      - "bunkerity"
+      - "Secr3tP@ssw0rd"
+    status: 200
+    config:
+      AUTH_BASIC_USER_1: "admin"
+      AUTH_BASIC_PASSWORD_1: "adminpass"
+    restart_stack: false
+  multi_user_good_credentials_1:
+    type: status
+    url: "http://www.example.com"
+    auth:
+      - "admin"
+      - "adminpass"
+    status: 200
+
+config:
+  USE_AUTH_BASIC: "yes"
+  AUTH_BASIC_LOCATION: "sitewide"
+  AUTH_BASIC_USER: "bunkerity"
+  AUTH_BASIC_PASSWORD: "Secr3tP@ssw0rd"

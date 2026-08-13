@@ -1,0 +1,74 @@
+# Runner selection per integration/architecture.
+# Values are JSON (fromJSON() in .github/workflows/integration-tests.yml feeds them
+# straight to runs-on), so they must be valid JSON — single-quoted arrays are not.
+# The monorepo has no self-hosted fleet: everything runs on GitHub-hosted runners.
+staging:
+  Linux:
+    x86_64:
+      el/8: '["ubuntu-latest"]'
+      el/9: '["ubuntu-latest"]'
+      el/10: '["ubuntu-latest"]'
+      fedora/42: '["ubuntu-latest"]'
+      fedora/43: '["ubuntu-latest"]'
+      fedora/44: '["ubuntu-latest"]'
+    amd64:
+      ubuntu/noble: '["ubuntu-latest"]'
+      ubuntu/jammy: '["ubuntu-latest"]'
+      debian/bookworm: '["ubuntu-latest"]'
+      debian/trixie: '["ubuntu-latest"]'
+      freebsd/13: "TODO"
+      freebsd/14: "TODO"
+    aarch64:
+      el/8: "TODO"
+      el/9: "TODO"
+      el/10: "TODO"
+      fedora/42: "TODO"
+      fedora/43: "TODO"
+    arm64:
+      ubuntu/noble: "TODO"
+      ubuntu/jammy: "TODO"
+      debian/bookworm: "TODO"
+      debian/trixie: "TODO"
+  Docker:
+    386: "TODO"
+    amd64: '["ubuntu-latest"]'
+    arm/v7: "TODO"
+    arm64: "TODO"
+  Autoconf:
+    386: "TODO"
+    amd64: '["ubuntu-latest"]'
+    arm/v7: "TODO"
+    arm64: "TODO"
+  # Swarm: port deferred — no stack-up path in start.sh yet, keep it unselectable.
+  Swarm:
+    386: "TODO"
+    amd64: "TODO"
+    arm/v7: "TODO"
+    arm64: "TODO"
+  Kubernetes:
+    386: "TODO"
+    amd64: '["ubuntu-latest"]'
+    arm/v7: "TODO"
+    arm64: "TODO"
+  All_in_one:
+    386: "TODO"
+    amd64: '["ubuntu-latest"]'
+    arm/v7: "TODO"
+    arm64: "TODO"
+
+dev:
+  Linux:
+    amd64:
+      ubuntu/noble: '["ubuntu-latest"]'
+      freebsd/14: "TODO"
+  Docker:
+    amd64: '["ubuntu-latest"]'
+  Autoconf:
+    amd64: '["ubuntu-latest"]'
+  # Swarm: port deferred, see above.
+  Swarm:
+    amd64: "TODO"
+  Kubernetes:
+    amd64: '["ubuntu-latest"]'
+  All_in_one:
+    amd64: '["ubuntu-latest"]'

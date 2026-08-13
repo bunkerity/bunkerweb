@@ -1,0 +1,20 @@
+services:
+  custom-api:
+    build: ../api
+    container_name: custom-api
+    ports:
+      - "8000:8000"
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.30
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

@@ -1,0 +1,54 @@
+services:
+  bunkerweb-all-in-one:
+    image: bunkerity/bunkerweb-all-in-one:${BW_VERSION}
+    container_name: bunkerweb-all-in-one
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "443:443/udp"
+      - "127.0.0.1:5001:5000"
+      - "127.0.0.1:5443:5443"
+      - "127.0.0.1:6383:6379"
+      - "127.0.0.1:8888:8888"
+    volumes:
+      - bw-storage:/data
+      - /var/www/html:/var/www/html
+      - /tmp/output:/tmp/output
+      - ../misc/conf/all-in-one-redis.conf:/etc/redis.conf:ro
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
+        required: true
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+      - bw-db
+      - bw-docker
+
+volumes:
+  bw-storage:
+    name: bw-storage
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+  bw-db:
+    name: bw-db
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24
+  bw-docker:
+    name: bw-docker

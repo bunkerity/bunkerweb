@@ -1,0 +1,17 @@
+integrations: "all"
+
+actions:
+  check_ssl:
+    type: ssl
+    url: "https://127.0.0.1:8888/ping"
+    headers:
+      Host: "www.example.com"
+    verify_ssl: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=www.example.com/"
+
+api:
+  API_TOKEN: "secret"
+  API_SSL_ENABLED: "yes"
+  API_SSL_CERTFILE: "/tmp/output/certificate.pem"
+  API_SSL_KEYFILE: "/tmp/output/privatekey.key"

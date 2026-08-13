@@ -1,0 +1,37 @@
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.7.7@sha256:6ca53ad26196ca59ddd4fa692a586b73d8fcde085046163b9ca2f04887dca563
+    container_name: crowdsec
+    ports:
+      - "8888:8080"
+      - "7422:7422"
+    volumes:
+      - /var/log/bunkerweb:/var/log/bunkerweb:ro
+      - cs-data:/var/lib/crowdsec/data
+      - ../conf/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ../conf/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
+      - ../scripts/healthcheck-crowdsec.sh:/usr/local/bin/healthcheck-crowdsec.sh
+    env_file:
+      - path: /tmp/crowdsec.env
+        required: true
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.60
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/healthcheck-crowdsec.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+volumes:
+  cs-data:
+    name: cs-data
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

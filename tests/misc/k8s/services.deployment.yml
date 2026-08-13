@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  namespace: services
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: app1
+          image: nginxdemos/nginx-hello@sha256:37bc2539e8fcae31ae4a7be0a40454ae3d9077d3bdc9791bb19ee1134b35ad92
+          ports:
+            - containerPort: 8080

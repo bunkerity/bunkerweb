@@ -1,0 +1,392 @@
+integrations: "all"
+
+actions:
+  bad_request:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  check_keys:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    delay: 6
+    restart_stack: false
+    All-in-one:
+      port: 6383
+      db: 0
+  clear_keys:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    full_clean: true
+    All-in-one:
+      port: 6383
+      db: 0
+
+  bad_request_global_scope:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    config:
+      BAD_BEHAVIOR_BAN_SCOPE: "global"
+    restart_stack: false
+  check_keys_global_scope:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_192.168.0.254"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    delay: 6
+    restart_stack: false
+    All-in-one:
+      port: 6383
+      db: 0
+  clear_keys_1:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    full_clean: true
+    All-in-one:
+      port: 6383
+      db: 0
+
+  password_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    port: 6380
+    db: 0
+    password: "secret"
+    config:
+      REDIS_HOST: "redis-master"
+      REDIS_DATABASE: "0"
+      REDIS_PASSWORD: "secret"
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+    Kubernetes:
+      port: 6380
+      config:
+        REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+    restart_stack: false
+  bad_request_password:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  password:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    port: 6380
+    db: 0
+    password: "secret"
+    delay: 6
+    restart_stack: false
+  clear_keys_2:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    port: 6380
+    db: 0
+    password: "secret"
+    full_clean: true
+
+  user_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    port: 6380
+    db: 0
+    user:
+      - "admin"
+      - "secret"
+    config:
+      REDIS_HOST: "redis-master"
+      REDIS_DATABASE: "0"
+      REDIS_USERNAME: "admin"
+      REDIS_PASSWORD: "secret"
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+    Kubernetes:
+      config:
+        REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+    restart_stack: false
+  bad_request_user:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  user:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    port: 6380
+    db: 0
+    user:
+      - "admin"
+      - "secret"
+    delay: 6
+    restart_stack: false
+  clear_keys_3:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    port: 6380
+    db: 0
+    user:
+      - "admin"
+      - "secret"
+    full_clean: true
+
+  tls_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    db: 0
+    tls: true
+    tls_port: 6380
+    config:
+      REDIS_HOST: "redis-master"
+      REDIS_DATABASE: "0"
+      REDIS_SSL: "yes"
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+    Kubernetes:
+      config:
+        REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+    restart_stack: false
+  bad_request_tls:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  tls:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    db: 0
+    tls: true
+    tls_port: 6380
+    delay: 6
+    restart_stack: false
+  clear_keys_4:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    db: 0
+    tls: true
+    tls_port: 6380
+    full_clean: true
+
+  sentinel_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    db: 0
+    sentinel: true
+    config:
+      REDIS_HOST: "redis-master"
+      REDIS_DATABASE: "0"
+      REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26379 redis-sentinel-3:26379"
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26380 redis-sentinel-3:26381"
+    Kubernetes:
+      config:
+        REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-0.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-1.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-2.svc-redis-sentinel-headless.redis.svc.cluster.local:26379"
+    restart_stack: false
+  bad_request_sentinel:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  sentinel:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    db: 0
+    sentinel: true
+    delay: 6
+    restart_stack: false
+  clear_keys_5:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    db: 0
+    sentinel: true
+    sentinel_type: "master"
+    full_clean: true
+
+  sentinel_password_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    db: 0
+    password: "secret"
+    sentinel: true
+    config:
+      REDIS_HOST: "redis-master"
+      REDIS_DATABASE: "0"
+      REDIS_PASSWORD: "secret"
+      REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26379 redis-sentinel-3:26379"
+      REDIS_SENTINEL_PASSWORD: ""
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26380 redis-sentinel-3:26381"
+    Kubernetes:
+      config:
+        REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-0.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-1.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-2.svc-redis-sentinel-headless.redis.svc.cluster.local:26379"
+    restart_stack: false
+  bad_request_sentinel_password:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  sentinel_password:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    db: 0
+    password: "secret"
+    sentinel: true
+    delay: 6
+    restart_stack: false
+  clear_keys_6:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    db: 0
+    password: "secret"
+    sentinel: true
+    sentinel_type: "master"
+    full_clean: true
+
+  sentinel_user_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    db: 0
+    sentinel: true
+    sentinel_user:
+      - "admin"
+      - "secret"
+    config:
+      REDIS_HOST: "redis-master"
+      REDIS_DATABASE: "0"
+      REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26379 redis-sentinel-3:26379"
+      REDIS_SENTINEL_USERNAME: "admin"
+      REDIS_SENTINEL_PASSWORD: "secret"
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26380 redis-sentinel-3:26381"
+    Kubernetes:
+      config:
+        REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-0.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-1.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-2.svc-redis-sentinel-headless.redis.svc.cluster.local:26379"
+    restart_stack: false
+  bad_request_sentinel_user:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    restart_stack: false
+  sentinel_user:
+    type: redis
+    query: "keys *"
+    keys:
+      - "plugin_bad_behavior_www.example.com_192.168.0.254"
+    db: 0
+    sentinel: true
+    sentinel_user:
+      - "admin"
+      - "secret"
+    delay: 6
+    restart_stack: false
+  clear_keys_7:
+    type: redis
+    query: "FLUSHALL"
+    result: "True"
+    db: 0
+    sentinel: true
+    sentinel_user:
+      - "admin"
+      - "secret"
+    sentinel_type: "master"
+    full_clean: true
+
+config:
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_DNSBL: "no"
+  BAD_BEHAVIOR_BAN_SCOPE: "service"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+  USE_REDIS: "yes"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "1"
+  REDIS_SSL: "no"
+  REDIS_SSL_VERIFY: "no"
+  REDIS_TIMEOUT: "1000"
+  REDIS_USERNAME: ""
+  REDIS_PASSWORD: ""
+  REDIS_SENTINEL_HOSTS: ""
+  REDIS_SENTINEL_USERNAME: ""
+  REDIS_SENTINEL_PASSWORD: ""
+  REDIS_SENTINEL_MASTER: "bw-master"
+  REDIS_KEEPALIVE_IDLE: "30000"
+  REDIS_KEEPALIVE_POOL: "10"
+
+All-in-one:
+  config:
+    REDIS_HOST: "127.0.0.1"
+    REDIS_DATABASE: "0"

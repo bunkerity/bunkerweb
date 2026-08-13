@@ -1,0 +1,198 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-slave
+  namespace: redis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis-slave
+  serviceName: "svc-redis-slave-headless"
+  template:
+    metadata:
+      labels:
+        app: redis-slave
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: redis-slave
+          image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+          imagePullPolicy: Always
+          command: ["/scripts/redis-entrypoint.sh"]
+          envFrom:
+            - secretRef:
+                name: redis-slave-secret
+          volumeMounts:
+            - mountPath: /acl/
+              name: vol-acl
+            - mountPath: /tls/
+              name: vol-tls
+            - mountPath: /scripts/
+              name: vol-scripts
+              readOnly: true
+      volumes:
+        - name: vol-acl
+          hostPath:
+            path: /mnt/redis-acl/
+        - name: vol-tls
+          hostPath:
+            path: /mnt/redis-tls/
+        - name: vol-scripts
+          hostPath:
+            path: /mnt/redis-scripts/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis-slave-headless
+  namespace: redis
+spec:
+  clusterIP: None
+  selector:
+    app: redis-slave
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis-slave-nodeport-0
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: redis-slave-0
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 30380
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis-slave-nodeport-1
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: redis-slave-1
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 30381
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-sentinel
+  namespace: redis
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis-sentinel
+  serviceName: "svc-redis-sentinel-headless"
+  template:
+    metadata:
+      labels:
+        app: redis-sentinel
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: redis-sentinel
+          image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+          imagePullPolicy: Always
+          command: ["/scripts/redis-sentinel-entrypoint.sh"]
+          ports:
+            - containerPort: 26379
+          envFrom:
+            - secretRef:
+                name: redis-sentinel-secret
+          volumeMounts:
+            - mountPath: /acl/
+              name: vol-acl
+            - mountPath: /scripts/
+              name: vol-scripts
+              readOnly: true
+      volumes:
+        - name: vol-acl
+          hostPath:
+            path: /mnt/redis-acl/
+        - name: vol-scripts
+          hostPath:
+            path: /mnt/redis-scripts/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis-sentinel-headless
+  namespace: redis
+spec:
+  clusterIP: None
+  selector:
+    app: redis-sentinel
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis-sentinel-nodeport-0
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: redis-sentinel-0
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+      nodePort: 32379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis-sentinel-nodeport-1
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: redis-sentinel-1
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+      nodePort: 32380
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis-sentinel-nodeport-2
+  namespace: redis
+spec:
+  type: NodePort
+  selector:
+    statefulset.kubernetes.io/pod-name: redis-sentinel-2
+  ports:
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+      nodePort: 32381

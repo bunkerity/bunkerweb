@@ -1,0 +1,119 @@
+integrations:
+  - "Linux"
+  - "Docker"
+  - "All-in-one"
+
+actions:
+  rate_limit_basic:
+    type: limit
+    url: "http://www.example.com/test"
+    rate_limit: "2r/s"
+    expect_limited: true
+    rate_exceeded_count: 5
+    cooldown: 0.1
+    config:
+      LIMIT_REQ_URL: "^/test"
+
+  rate_limit_not_triggered:
+    type: limit
+    url: "http://www.example.com/light"
+    rate_limit: "5r/s"
+    expect_limited: false
+    rate_exceeded_count: 3
+    cooldown: 0.1
+    config:
+      LIMIT_REQ_URL: "^/light"
+      LIMIT_REQ_RATE: "5r/s"
+
+  rate_limit_recovery:
+    type: limit
+    url: "http://www.example.com/recovery"
+    rate_limit: "1r/s"
+    expect_limited: true
+    rate_exceeded_count: 3
+    test_recovery: true
+    recovery_delay: 2.0
+    cooldown: 0.1
+    config:
+      LIMIT_REQ_URL: "^/recovery"
+      LIMIT_REQ_RATE: "1r/s"
+
+  connection_limit_no_block:
+    type: limit
+    url: "http://www.example.com/conn-ok"
+    max_connections: 5
+    connection_exceed_count: 5
+    expect_blocked: false
+    connection_hold: 1.0
+    config:
+      USE_LIMIT_REQ: "no" # differs from root
+      USE_LIMIT_CONN: "yes" # differs from root
+      LIMIT_CONN_MAX_HTTP1: "5"
+
+  connection_limit_blocked:
+    type: limit
+    url: "http://www.example.com/conn-block"
+    max_connections: 3
+    connection_exceed_count: 8
+    expect_blocked: true
+    connection_hold: 1.0
+    config:
+      USE_LIMIT_REQ: "no" # differs from root
+      USE_LIMIT_CONN: "yes" # differs from root
+      LIMIT_CONN_MAX_HTTP1: "3"
+
+  global_limit_triggered:
+    # X-Forwarded-For: random gives every request in the burst a distinct source IP,
+    # so only the aggregate/global counter (not the per-IP one) can explain a 429 here.
+    type: limit
+    url: "http://www.example.com/global-test"
+    headers:
+      X-Forwarded-For: "random"
+    rate_limit: "5r/s"
+    expect_limited: true
+    rate_exceeded_count: 8
+    config:
+      USE_LIMIT_REQ: "no" # isolate: per-IP/per-URL limiting must not be the cause
+      USE_LIMIT_REQ_GLOBAL: "yes"
+      LIMIT_REQ_GLOBAL_RATE: "5r/s"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+
+  global_limit_default_off_no_regression:
+    # USE_LIMIT_REQ_GLOBAL is intentionally absent here (root config doesn't set it
+    # either), so it resolves to the plugin default "no" - proves a burst of
+    # distinct-IP traffic is unaffected by this feature when left unconfigured.
+    type: limit
+    url: "http://www.example.com/global-test"
+    headers:
+      X-Forwarded-For: "random"
+    rate_limit: "5r/s"
+    expect_limited: false
+    rate_exceeded_count: 8
+    config:
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+
+  global_limit_recovery:
+    type: limit
+    url: "http://www.example.com/global-test"
+    rate_limit: "1r/s"
+    expect_limited: true
+    test_recovery: true
+    recovery_delay: 2.0
+    config:
+      USE_LIMIT_REQ: "no"
+      USE_LIMIT_REQ_GLOBAL: "yes"
+      LIMIT_REQ_GLOBAL_RATE: "1r/s"
+
+config:
+  USE_LIMIT_REQ: "yes"
+  LIMIT_REQ_URL: "/"
+  LIMIT_REQ_RATE: "2r/s"
+  USE_LIMIT_CONN: "no"
+  LIMIT_CONN_MAX_HTTP1: "10"
+  LIMIT_CONN_MAX_HTTP2: "100"
+  LIMIT_CONN_MAX_HTTP3: "100"
+  LIMIT_CONN_MAX_STREAM: "10"
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://app1.bw-services:8080"

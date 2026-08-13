@@ -1,0 +1,344 @@
+name: Integration tests (REUSABLE)
+
+# Imported from bunkerity/bunkerweb-tests @ 23c77b1 (2026-07-15) — see tests/README.md.
+# Differences from the source workflow, on purpose:
+#   * action pins follow the monorepo (checkout v7, setup-python v6.3, login v4.4, upload-artifact v7)
+#   * images are pulled under their `-tests` names, which is what container-build.yml pushes
+#   * the worker image is pulled too: since 1.7 the scheduler only dispatches, so a stack
+#     without bw-worker runs zero jobs
+#   * dependency install is scoped to tests/requirements.txt (a bare `find tests -name
+#     "requirements*.txt"` would also drag in the unrelated tests/unit pytest set)
+
+on:
+  workflow_call:
+    inputs:
+      TYPE:
+        required: true
+        type: string
+      TEST:
+        required: true
+        type: string
+      RELEASE:
+        required: true
+        type: string
+
+jobs:
+  setup:
+    runs-on: [self-hosted, fireactions]
+    outputs:
+      integration: ${{ steps.setup.outputs.integration }}
+      architecture: ${{ steps.setup.outputs.architecture }}
+      runs_on: ${{ steps.setup.outputs.runs_on }}
+      specs: ${{ steps.setup.outputs.specs }}
+      test: ${{ steps.setup.outputs.test }}
+      linux_name: ${{ steps.setup.outputs.linux_name }}
+      separator: ${{ steps.setup.outputs.separator }}
+      suffix: ${{ steps.setup.outputs.suffix }}
+      package: ${{ steps.setup.outputs.package }}
+      linux_release: ${{ steps.setup.outputs.linux_release }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Set up Python 3.13
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+      - name: Set output variables
+        id: setup
+        env:
+          INPUT_TEST: ${{ inputs.TEST }}
+          INPUT_RELEASE: ${{ inputs.RELEASE }}
+        run: |
+          export INTEGRATION=$(echo "$INPUT_TEST" | cut -d ";" -f 1)
+          echo "integration=${INTEGRATION//_/-}" >> $GITHUB_OUTPUT
+
+          export ARCHITECTURE="$(echo "$INPUT_TEST" | cut -d ";" -f 2)"
+          echo "architecture=$ARCHITECTURE" >> $GITHUB_OUTPUT
+
+          export RUNS_ON="$(echo "$INPUT_TEST" | cut -d ";" -f 3)"
+          export TEST="$(echo "$INPUT_TEST" | cut -d ";" -f 4-)"
+          export SPECS=""
+          if [[ "$TEST" == \[* ]]; then
+            export SPECS="$RUNS_ON"
+            export RUNS_ON="$(echo "$TEST" | cut -d ";" -f 1)"
+            export TEST="$(echo "$TEST" | cut -d ";" -f 2-)"
+          fi
+          echo "runs_on=$RUNS_ON" >> $GITHUB_OUTPUT
+          echo "specs=$SPECS" >> $GITHUB_OUTPUT
+          echo "test=$TEST" >> $GITHUB_OUTPUT
+
+          export LINUX_NAME=""
+          export SEPARATOR=""
+          export SUFFIX=""
+          export PACKAGE=""
+
+          if [[ "$INTEGRATION" == "Linux" ]]; then
+            pip install --require-hashes -r tests/requirements.txt
+            python3 tests/parse_packages.py
+
+            export NEEDRESTART_SUSPEND=1
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt install -y jq
+
+            packages_info=$(cat /tmp/packages/packages_info.json)
+            export LINUX_NAME="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].name')"
+            export SEPARATOR="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].separator')"
+            export SUFFIX="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].suffix')"
+            export PACKAGE="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].package')"
+          fi
+
+          echo "linux_name=$LINUX_NAME" >> $GITHUB_OUTPUT
+          echo "separator=$SEPARATOR" >> $GITHUB_OUTPUT
+          echo "suffix=$SUFFIX" >> $GITHUB_OUTPUT
+          echo "package=$PACKAGE" >> $GITHUB_OUTPUT
+
+          echo "linux_release=$INPUT_RELEASE" >> $GITHUB_OUTPUT
+
+  test:
+    needs: setup
+    runs-on: ${{ fromJSON(needs.setup.outputs.runs_on) }}
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Set up Python 3.13
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+      - name: Install Firefox manually and dependencies
+        run: |
+          export NEEDRESTART_SUSPEND=1
+          export DEBIAN_FRONTEND=noninteractive
+
+          # Import Mozilla Team PPA signing keys into dedicated keyrings (apt-key is
+          # deprecated; fetch each key over HTTPS instead of the flaky HKP protocol).
+          # The PPA dual-signs its release file with an old (2009) and a new (2024)
+          # key while it rotates, so both are required. Keys are pinned by full
+          # 160-bit fingerprint (64-bit IDs are collision-prone), fetched to a file
+          # so curl failures surface instead of being masked by a pipe, and the
+          # dearmored keyring is verified to actually contain the pinned fingerprint
+          # before apt is allowed to trust it.
+          sudo install -d -m 0755 /etc/apt/keyrings
+          signed_by=""
+          for fingerprint in 738BEB9321D1AAEC13EA9391AEBDF4819BE21867 \
+                             0AB215679C571D1C8325275B9BDB3D89CE49EC21; do
+            keyring="/etc/apt/keyrings/mozillateam-${fingerprint}.gpg"
+            attempt=0
+            until curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${fingerprint}&exact=on&options=mr" -o "key-${fingerprint}.asc" \
+                  && [ -s "key-${fingerprint}.asc" ]; do
+              attempt=$((attempt+1))
+              if [ $attempt -ge 5 ]; then
+                echo "::error::Failed to fetch Mozilla Team PPA key ${fingerprint} after $attempt attempts"
+                exit 1
+              fi
+              echo "Retrying key fetch for ${fingerprint} (attempt $attempt)…"
+              sleep 5
+            done
+            sudo gpg --batch --yes --dearmor -o "$keyring" "key-${fingerprint}.asc"
+            rm -f "key-${fingerprint}.asc"
+            if ! gpg --show-keys --with-colons "$keyring" | grep -qF ":${fingerprint}:"; then
+              echo "::error::Fetched key does not match pinned fingerprint ${fingerprint}"
+              exit 1
+            fi
+            signed_by="${signed_by:+${signed_by},}${keyring}"
+          done
+          echo "deb [signed-by=${signed_by}] https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu $(lsb_release -cs) main debug" | sudo tee /etc/apt/sources.list.d/mozillateam-ppa.list
+          echo "deb-src [signed-by=${signed_by}] https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu $(lsb_release -cs) main debug" | sudo tee -a /etc/apt/sources.list.d/mozillateam-ppa.list
+          sudo apt update -y
+
+          sudo apt purge -y firefox
+          echo '
+          Package: *
+          Pin: release o=LP-PPA-mozillateam
+          Pin-Priority: 1001
+
+          Package: firefox
+          Pin: version 1:1snap1-0ubuntu5
+          Pin-Priority: -1
+          ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+
+          sudo -E apt install --no-install-recommends -y \
+            openssl git tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 \
+            libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 unzip firefox sed jq \
+            dnsutils coreutils redis
+
+          GECKODRIVER_VERSION=$(curl -sI https://github.com/mozilla/geckodriver/releases/latest \
+            | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+')
+          wget -O geckodriver.tar.gz \
+            https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
+          sudo tar -xzf geckodriver.tar.gz -C /usr/local/bin
+          sudo chmod +x /usr/local/bin/geckodriver
+          rm -f geckodriver.tar.gz
+      - name: Login to ghcr
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute Minikube resources
+        # `cpus: max` / `memory: max` make minikube claim 100% of the runner's RAM,
+        # leaving no headroom for the host. On the fireactions microVMs this makes
+        # the kic node container fail to provision (minikube exit code 80). Instead,
+        # auto-discover the runner's resources and reserve overhead, so the same
+        # config works on any flavor without hardcoding the VM size.
+        if: needs.setup.outputs.integration == 'Kubernetes'
+        id: mk_resources
+        run: |
+          total_mem_mb=$(free -m | awk '/^Mem:/{print $2}')
+          # Reserve 25% of RAM (min 2048 MB) for the host/microVM OS.
+          reserve=$(( total_mem_mb / 4 ))
+          [ "$reserve" -lt 2048 ] && reserve=2048
+          mk_mem=$(( total_mem_mb - reserve ))
+          # minikube needs ~1800 MB minimum; floor it.
+          [ "$mk_mem" -lt 2200 ] && mk_mem=2200
+          mk_cpus=$(nproc)
+          # Leave one core for the host, but minikube requires at least 2 CPUs.
+          [ "$mk_cpus" -ge 3 ] && mk_cpus=$(( mk_cpus - 1 ))
+          [ "$mk_cpus" -lt 2 ] && mk_cpus=2
+          echo "cpus=${mk_cpus}" >> "$GITHUB_OUTPUT"
+          echo "memory=${mk_mem}mb" >> "$GITHUB_OUTPUT"
+          echo "Computed minikube resources: cpus=${mk_cpus} memory=${mk_mem}mb (total=${total_mem_mb}mb, reserved=${reserve}mb)"
+      - name: Set up Minikube
+        if: needs.setup.outputs.integration == 'Kubernetes'
+        uses: medyagh/setup-minikube@cea33675329b799adccc9526aa5daccc26cd5052 # v0.0.19
+        with:
+          driver: "docker"
+          cpus: "${{ steps.mk_resources.outputs.cpus }}"
+          memory: "${{ steps.mk_resources.outputs.memory }}"
+          wait: "all"
+          addons: "registry,storage-provisioner,default-storageclass"
+          listen-address: "127.0.0.1"
+          insecure-registry: "10.0.0.0/24"
+          start-args: "--embed-certs --disable-metrics --disable-optimizations --ports 127.0.0.1:80:80 --ports 127.0.0.1:443:443 --ports 127.0.0.1:5000:5000 --ports 127.0.0.1:5001:5001 --ports 127.0.0.1:5443:5443 --ports 127.0.0.1:7000:30070 --ports 127.0.0.1:8000:30080 --ports 127.0.0.1:8888:30088 --ports 127.0.0.1:3306:30306 --ports 127.0.0.1:5432:30432 --ports 127.0.0.1:6380:30379 --ports 127.0.0.1:6381:30380 --ports 127.0.0.1:6382:30381 --ports 127.0.0.1:6479:30479 --ports 127.0.0.1:26379:32379 --ports 127.0.0.1:26380:32380 --ports 127.0.0.1:26381:32381"
+      - name: Minikube diagnostics on failure
+        # Logs for failed runs are purged quickly; capture minikube/host state inline
+        # so an exit-80 (or later) failure is diagnosable without re-running.
+        if: failure() && needs.setup.outputs.integration == 'Kubernetes'
+        run: |
+          echo "::group::Host resources"; free -h; nproc; echo "::endgroup::"
+          echo "::group::Minikube logs"; minikube logs --file=- 2>&1 | tail -300 || true; echo "::endgroup::"
+          echo "::group::Docker state"; docker ps -a; echo "::endgroup::"
+      - name: Copy package file to host
+        if: needs.setup.outputs.integration == 'Linux'
+        env:
+          LINUX_NAME: ${{ needs.setup.outputs.linux_name }}
+          RELEASE: ${{ inputs.RELEASE }}
+          SEPARATOR: ${{ needs.setup.outputs.separator }}
+          LINUX_RELEASE: ${{ needs.setup.outputs.linux_release }}
+          SUFFIX: ${{ needs.setup.outputs.suffix }}
+          ARCHITECTURE: ${{ needs.setup.outputs.architecture }}
+          PACKAGE: ${{ needs.setup.outputs.package }}
+        run: |
+          docker pull "ghcr.io/bunkerity/${LINUX_NAME}-tests:${RELEASE}"
+          container_id=$(docker create "ghcr.io/bunkerity/${LINUX_NAME}-tests:${RELEASE}")
+          docker cp "${container_id}:/opt/bunkerweb${SEPARATOR}${LINUX_RELEASE}${SUFFIX}${ARCHITECTURE}.${PACKAGE}" "bunkerweb.${PACKAGE}"
+          docker rm "$container_id"
+          sudo chmod 777 "bunkerweb.${PACKAGE}"
+      - name: Build Linux image
+        if: needs.setup.outputs.integration == 'Linux'
+        env:
+          LINUX_NAME: ${{ needs.setup.outputs.linux_name }}
+        run: docker build -t local/bunkerweb-linux -f "tests/linux/Dockerfile-${LINUX_NAME}" .
+      # Images are published by container-build.yml under their `-tests` names; the
+      # framework's stacks reference bunkerity/<image>:${BW_VERSION}, hence the retag.
+      - name: Pull BW docker image
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        run: docker pull ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb:tests
+      - name: Pull Scheduler docker image
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        run: docker pull ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-scheduler:tests
+      - name: Pull API docker image
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        run: docker pull ghcr.io/bunkerity/api-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/api-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-api:tests
+      - name: Pull Worker docker image
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        run: docker pull ghcr.io/bunkerity/worker-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/worker-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-worker:tests
+      - name: Pull UI docker image
+        if: inputs.TYPE == 'ui' && (needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes')
+        run: docker pull ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-ui:tests
+      - name: Pull Autoconf docker image
+        if: needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        run: docker pull ghcr.io/bunkerity/autoconf-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/autoconf-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-autoconf:tests
+      - name: Pull All-in-one docker image
+        if: needs.setup.outputs.integration == 'All-in-one'
+        run: docker pull ghcr.io/bunkerity/all-in-one-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/all-in-one-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-all-in-one:tests
+      - name: Setup configuration files
+        run: |
+          sudo chmod +x ./tests/scripts/*.sh
+          # Create /etc/bunkerweb directory
+          sudo mkdir -p /etc/bunkerweb /var/www/html
+          sudo chown -R root:101 /etc/bunkerweb
+          sudo cp tests/misc/index.php tests/misc/logo.png /var/www/html/
+          grep '127.0.0.1 .*\.example\.com' "tests/misc/conf/dnsmasq.hosts" | awk '{print $2}' | while read -r hostname; do
+            sudo mkdir -p "/var/www/html/${hostname}"
+            sudo cp tests/misc/index.php tests/misc/logo.png "/var/www/html/${hostname}/"
+          done
+          sudo chown -R 33:101 /var/www/html
+          sudo chmod -R 777 /etc/bunkerweb /var/www/html
+          # Stop redis-server
+          sudo systemctl disable --now redis-server
+      - name: Edit /etc/resolv.conf file
+        if: needs.setup.outputs.integration != 'Kubernetes'
+        run: |
+          sudo systemctl disable --now systemd-resolved
+          echo -e "nameserver 127.0.0.1\nnameserver 9.9.9.9\nnameserver 8.8.8.8\nnameserver 8.8.4.4" | sudo tee /etc/resolv.conf
+      - name: Add hosts to /etc/hosts file
+        if: needs.setup.outputs.integration == 'Kubernetes'
+        run: cat tests/misc/conf/dnsmasq.hosts | sudo tee -a /etc/hosts
+      - name: Run Linux container
+        if: needs.setup.outputs.integration == 'Linux'
+        run: docker compose -f tests/linux/docker-compose.yml up -d
+      - name: Install deb file
+        if: needs.setup.outputs.integration == 'Linux' && (needs.setup.outputs.linux_name == 'ubuntu' || needs.setup.outputs.linux_name == 'ubuntu-noble' || needs.setup.outputs.linux_name == 'ubuntu-jammy' || needs.setup.outputs.linux_name == 'debian-bookworm' || needs.setup.outputs.linux_name == 'debian-trixie')
+        env:
+          PACKAGE: ${{ needs.setup.outputs.package }}
+          TYPE: ${{ inputs.TYPE }}
+        run: |
+          docker cp "bunkerweb.${PACKAGE}" "bunkerweb-linux:/opt/bunkerweb.${PACKAGE}"
+          if [ "$TYPE" != "ui" ]; then
+            docker exec -e UI_WIZARD=no -u 0 bunkerweb-linux apt install -y /opt/bunkerweb.deb
+          else
+            docker exec -u 0 bunkerweb-linux apt install -y /opt/bunkerweb.deb
+          fi
+      - name: Install rpm file
+        if: needs.setup.outputs.integration == 'Linux' && (needs.setup.outputs.linux_name == 'fedora-43' || needs.setup.outputs.linux_name == 'fedora-44' || needs.setup.outputs.linux_name == 'rhel-8' || needs.setup.outputs.linux_name == 'rhel-9' || needs.setup.outputs.linux_name == 'rhel-10' || needs.setup.outputs.linux_name == 'alma-10')
+        env:
+          PACKAGE: ${{ needs.setup.outputs.package }}
+          TYPE: ${{ inputs.TYPE }}
+        run: |
+          docker cp "bunkerweb.${PACKAGE}" "bunkerweb-linux:/opt/bunkerweb.${PACKAGE}"
+          if [ "$TYPE" != "ui" ]; then
+            docker exec -e UI_WIZARD=no -u 0 bunkerweb-linux dnf install -y /opt/bunkerweb.rpm
+          else
+            docker exec -u 0 bunkerweb-linux dnf install -y /opt/bunkerweb.rpm
+          fi
+      - name: Install Python dependencies
+        run: |
+          export MAKEFLAGS="-j $(nproc)"
+          pip install --break-system-packages --no-cache-dir --require-hashes -r tests/requirements.txt
+      - name: Install Tools
+        run: |
+          tools=$(jq -r '.[]' tests/utils/tools.json)
+          for tool in $tools; do
+            echo "Installing $tool..."
+            sudo apt-get install -y $tool
+          done
+      - name: Run test
+        env:
+          INTEGRATION: ${{ needs.setup.outputs.integration }}
+          TYPE: ${{ inputs.TYPE }}
+          RELEASE: ${{ inputs.RELEASE }}
+          TEST: ${{ needs.setup.outputs.test }}
+          IN_CICD: "1"
+        run: |
+          chmod +x ./tests/scripts/*.sh
+          if [ -n "${{ runner.debug }}" ] && [ "${{ runner.debug }}" -eq 1 ] ; then
+            export DEBUG=1
+          fi
+          ./tests/scripts/test.sh "$INTEGRATION" "$TYPE" "$RELEASE" "$TEST"
+      - name: Add error image annotation
+        if: inputs.TYPE == 'ui' && failure() && hashFiles('error.png') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: error-screenshot-${{ inputs.TEST }}
+          path: error.png

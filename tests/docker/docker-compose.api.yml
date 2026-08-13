@@ -1,0 +1,30 @@
+services:
+  bw-api:
+    image: bunkerity/bunkerweb-api:${BW_VERSION}
+    container_name: bw-api
+    ports:
+      - "127.0.0.1:8888:8888"
+    volumes:
+      - bw-storage:/data
+      - /var/log/bunkerweb:/var/log/bunkerweb:ro
+      - /tmp/output:/tmp/output
+    env_file:
+      - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/api.env
+        required: true
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.26
+      bw-db:
+
+volumes:
+  bw-storage:
+    external: true
+
+networks:
+  bw-universe:
+    external: true
+  bw-db:
+    external: true

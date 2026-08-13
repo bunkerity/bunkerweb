@@ -191,7 +191,7 @@ python3 tests/main.py kubernetes           # Kubernetes tests
 python3 tests/main.py linux debian         # Linux tests (with distro)
 ```
 
-- Tests scan `examples/*/tests.json` for test scenarios (`string`/`status` use a URL and expected result; `script` uses a non-empty argv string array; manifests set timeout/delay)
+- Example scenarios are declared in `tests/examples/<name>.json`, one per `examples/<name>/` directory (`string`/`status` use a URL and expected result; `script` uses a non-empty argv string array; manifests set timeout/delay). They live outside `examples/` because that directory is user-facing documentation
 - Real Docker environments with actual network requests — tests verify observable behavior, not internals
 - Test classes: DockerTest, AutoconfTest, SwarmTest, KubernetesTest, LinuxTest
 

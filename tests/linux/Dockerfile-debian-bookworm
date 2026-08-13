@@ -34,7 +34,7 @@ RUN apt update && \
     apt-get update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
 
-COPY ./package-debian-bookworm/*.deb /opt
+RUN echo "force-bad-version" | tee -a /etc/dpkg/dpkg.cfg
 
 VOLUME ["/sys/fs/cgroup"]
 

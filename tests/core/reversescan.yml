@@ -1,0 +1,23 @@
+integrations: "all"
+
+# svc-custom-api.misc.svc.cluster.local
+actions:
+  activated:
+    type: status
+    url: "http://www.example.com"
+    headers:
+      X-Forwarded-For: "${CUSTOM_API_IP}"
+    status: 403
+  tweaked_ports:
+    type: status
+    url: "http://www.example.com"
+    headers:
+      X-Forwarded-For: "${CUSTOM_API_IP}"
+    status: 200
+    config:
+      REVERSE_SCAN_PORTS: "3128"
+
+config:
+  USE_REVERSE_SCAN: "yes"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"

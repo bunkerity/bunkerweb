@@ -1,0 +1,161 @@
+integrations:
+  - "Docker"
+  - "Autoconf"
+  - "All-in-one"
+  - "Kubernetes"
+
+actions:
+  from_latest_stable_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+  to_latest_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    restart_stack: false
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+  verify_1_7_sqlite:
+    type: database
+    query: "SELECT version FROM bw_metadata WHERE id = 1"
+    result: "1.7.0~beta"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    full_clean: true
+
+  from_latest_non_stable_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+  to_latest_1_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+
+  # Upgrade matrix for MariaDB
+  from_latest_stable_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    database: "mariadb"
+  to_latest_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    restart_stack: false
+    database: "mariadb"
+  verify_1_7_mariadb:
+    type: database
+    query: "SHOW COLUMNS FROM bw_api_user_permissions LIKE 'resource_type'"
+    result: "web_cache"
+    database: "mariadb"
+    full_clean: true
+
+  from_latest_non_stable_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    database: "mariadb"
+  to_latest_1_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    database: "mariadb"
+
+  # Upgrade matrix for MySQL
+  from_latest_stable_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    database: "mysql"
+  to_latest_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    restart_stack: false
+    database: "mysql"
+  verify_1_7_mysql:
+    type: database
+    query: "SHOW COLUMNS FROM bw_api_user_permissions LIKE 'resource_type'"
+    result: "web_cache"
+    database: "mysql"
+    full_clean: true
+
+  from_latest_non_stable_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    database: "mysql"
+  to_latest_1_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    database: "mysql"
+
+  # Upgrade matrix for PostgreSQL
+  from_latest_stable_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    database: "postgresql"
+  to_latest_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    restart_stack: false
+    database: "postgresql"
+  verify_1_7_postgresql:
+    type: database
+    query: "SELECT enumlabel FROM pg_enum WHERE enumtypid = 'api_resource_enum'::regtype ORDER BY enumsortorder"
+    result: "web_cache"
+    database: "postgresql"
+    full_clean: true
+
+  from_latest_non_stable_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    database: "postgresql"
+  to_latest_1_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    database: "postgresql"

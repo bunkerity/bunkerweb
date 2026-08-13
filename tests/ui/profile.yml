@@ -1,0 +1,183 @@
+integrations: "all"
+
+actions:
+  profile:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+
+      # Change password
+      access_profile:
+        type: access
+        url: "%BASE_URL%/profile"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "profile"
+        username: "admin"
+        password: "P@ssw0rd"
+      access_security_tab:
+        type: click
+        selector: '//button[@aria-controls="navs-pills-security"]'
+        sleep: 2.0
+      fill_new_password:
+        type: send_keys
+        by: "id"
+        selector: "new_password"
+        value: "P@ssw0rd1"
+      fill_new_password_confirm:
+        type: send_keys
+        by: "id"
+        selector: "new_password_confirm"
+        value: "P@ssw0rd1"
+      fill_current_password:
+        type: send_keys
+        selector: '//form[@autocomplete="off" and @action="/profile/edit"]//input[contains(@aria-describedby, "Current password")]'
+        value: "P@ssw0rd"
+      confirm_change:
+        type: access_page
+        selector: '//form[@autocomplete="off" and @action="/profile/edit"]//button[@type="submit" and contains(text(), "Save Changes")]'
+        page: "login"
+      access_profile_1:
+        type: access
+        url: "%BASE_URL%/profile"
+
+      # Enable TOTP
+      login_with_new_password:
+        type: login
+        next_page: "profile"
+        username: "admin"
+        password: "P@ssw0rd1"
+        sleep: 2.0
+      access_security_tab_1:
+        type: click
+        selector: '//button[@aria-controls="navs-pills-security"]'
+        sleep: 2.0
+      save_totp:
+        type: save_data
+        selector: '//input[@name="secret_token"]'
+        key: "totp_secret"
+        attribute: "value"
+      fill_totp_token:
+        type: send_keys
+        selector: '//input[@name="totp_token"]'
+        value: "%TOTP_TOKEN%"
+      fill_current_password_1:
+        type: send_keys
+        selector: '//form[@action="/profile/totp-enable"]//input[contains(@aria-describedby, "Current password")]'
+        value: "P@ssw0rd1"
+      enable_totp:
+        type: click
+        selector: '//form[@action="/profile/totp-enable"]//button[@type="submit" and contains(text(), "Enable TOTP")]'
+      confirm_totp:
+        type: find
+        selector: '//form[@action="/profile/totp-disable"]'
+        sleep: 5.0
+      save_recovery_code_1:
+        type: save_data
+        selector: '(//div[contains(@class, "recovery-code")])[1]'
+        key: "recovery_code_1"
+        text: true
+      save_recovery_code_2:
+        type: save_data
+        selector: '(//div[contains(@class, "recovery-code")])[2]'
+        key: "recovery_code_2"
+        text: true
+      save_recovery_code_3:
+        type: save_data
+        selector: '(//div[contains(@class, "recovery-code")])[3]'
+        key: "recovery_code_3"
+        text: true
+      save_recovery_code_4:
+        type: save_data
+        selector: '(//div[contains(@class, "recovery-code")])[4]'
+        key: "recovery_code_4"
+        text: true
+      save_recovery_code_5:
+        type: save_data
+        selector: '(//div[contains(@class, "recovery-code")])[5]'
+        key: "recovery_code_5"
+        text: true
+      save_recovery_code_6:
+        type: save_data
+        selector: '(//div[contains(@class, "recovery-code")])[6]'
+        key: "recovery_code_6"
+        text: true
+      logout:
+        type: access
+        url: "%BASE_URL%/logout"
+
+      # Check sessions
+      login_with_new_password_1:
+        type: login
+        username: "admin"
+        password: "P@ssw0rd1"
+        sleep: 2.0
+      access_profile_2:
+        type: access
+        page: "profile"
+      access_sessions_tab:
+        type: click
+        selector: '//button[@aria-controls="navs-pills-sessions"]'
+        sleep: 2.0
+      assert_three_sessions:
+        type: find
+        selector: '(//div[contains(@class, "card-transition")])[position() <= 3 and count(//div[contains(@class, "card-transition")]) = 3]'
+
+      # Use recovery code
+      logout_1:
+        type: access
+        url: "%BASE_URL%/logout"
+      login_with_new_password_2:
+        type: login
+        username: "admin"
+        password: "P@ssw0rd1"
+        totp_code: "%DATA:recovery_code_1%"
+        sleep: 2.0
+      assert_recovery_code_used:
+        type: find
+        selector: '//div[@class="toast-body" and contains(text(), "You have 5 left.")]'
+
+      # Disable TOTP
+      access_profile_3:
+        type: access
+        page: "profile"
+      access_security_tab_2:
+        type: click
+        selector: '//button[@aria-controls="navs-pills-security"]'
+        sleep: 2.0
+      fill_totp_token_1:
+        type: send_keys
+        selector: '//input[@name="totp_token"]'
+        value: "%TOTP_TOKEN%"
+      fill_current_password_2:
+        type: send_keys
+        selector: '//form[@action="/profile/totp-disable"]//input[contains(@aria-describedby, "Current password")]'
+        value: "P@ssw0rd1"
+      disable_totp:
+        type: click
+        selector: '//form[@action="/profile/totp-disable"]//button[@type="submit" and contains(text(), "Disable TOTP")]'
+      confirm_disable_totp:
+        type: find
+        selector: '//form[@action="/profile/totp-enable"]'
+        sleep: 5.0
+      del_totp_secret:
+        type: del_data
+        key: "totp_secret"
+        sleep: 0.0
+      del_totp:
+        type: del_data
+        key: "totp"
+        sleep: 0.0
+      logout_2:
+        type: access
+        url: "%BASE_URL%/logout"
+      login_with_new_password_3:
+        type: login
+        username: "admin"
+        password: "P@ssw0rd1"
+        sleep: 2.0

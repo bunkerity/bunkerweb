@@ -1,0 +1,122 @@
+integrations: "all"
+
+actions:
+  # sentinel_check:
+  #   type: redis
+  #   query: "PING"
+  #   result: "True"
+  #   db: 0
+  #   sentinel: true
+  #   config:
+  #     REDIS_HOST: "redis-master"
+  #     REDIS_DATABASE: "0"
+  #     REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26379 redis-sentinel-3:26379"
+  #   Linux:
+  #     config:
+  #       REDIS_PORT: "6380"
+  #       REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26380 redis-sentinel-3:26381"
+  #   # Kubernetes:# TODO: uncomment when redis sentinel is ready in Kubernetes
+  #   #   config:
+  #   #     REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+  #   #     REDIS_SENTINEL_HOSTS: "redis-sentinel-0.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-1.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-2.svc-redis-sentinel-headless.redis.svc.cluster.local:26379"
+  #   integrations: # TODO: remove this when redis sentinel is ready in Kubernetes
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+  #   restart_stack: false
+
+  # api_sentinel:
+  #   type: status
+  #   url: "http://127.0.0.1:8888/bans"
+  #   status: 200
+  #   headers:
+  #     Authorization: "Bearer secret"
+  #   integrations: # TODO: remove this when redis sentinel is ready in Kubernetes
+  #     - "Linux"
+  #     - "Docker"
+  #     - "Autoconf"
+  #     - "All-in-one"
+
+  sentinel_password_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    db: 0
+    password: "secret"
+    sentinel: true
+    config:
+      REDIS_HOST: ""
+      REDIS_DATABASE: "0"
+      # REDIS_PASSWORD: "secret"
+      REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26379 redis-sentinel-3:26379"
+      REDIS_SENTINEL_PASSWORD: ""
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26380 redis-sentinel-3:26381"
+    Kubernetes:
+      config:
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-0.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-1.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-2.svc-redis-sentinel-headless.redis.svc.cluster.local:26379"
+    restart_stack: false
+
+  sentinel_password_master_check:
+    type: redis
+    query: "PING"
+    result: "True"
+    db: 0
+    password: "secret"
+    sentinel: true
+    sentinel_type: "master"
+    config:
+      REDIS_HOST: ""
+      REDIS_DATABASE: "0"
+      # REDIS_PASSWORD: "secret"
+      REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26379 redis-sentinel-3:26379"
+      REDIS_SENTINEL_PASSWORD: ""
+    Linux:
+      config:
+        REDIS_PORT: "6380"
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-1:26379 redis-sentinel-2:26380 redis-sentinel-3:26381"
+    Kubernetes:
+      config:
+        REDIS_SENTINEL_HOSTS: "redis-sentinel-0.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-1.svc-redis-sentinel-headless.redis.svc.cluster.local:26379 redis-sentinel-2.svc-redis-sentinel-headless.redis.svc.cluster.local:26379"
+    restart_stack: false
+
+  api_sentinel_password:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 200
+    headers:
+      Authorization: "Bearer secret"
+
+config:
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_DNSBL: "no"
+  BAD_BEHAVIOR_BAN_SCOPE: "service"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+  USE_REDIS: "yes"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "1"
+  REDIS_SSL: "no"
+  REDIS_SSL_VERIFY: "no"
+  REDIS_TIMEOUT: "1000"
+  REDIS_USERNAME: ""
+  REDIS_PASSWORD: ""
+  REDIS_SENTINEL_HOSTS: ""
+  REDIS_SENTINEL_USERNAME: ""
+  REDIS_SENTINEL_PASSWORD: ""
+  REDIS_SENTINEL_MASTER: "bw-master"
+  REDIS_KEEPALIVE_IDLE: "30000"
+  REDIS_KEEPALIVE_POOL: "10"
+
+All-in-one:
+  config:
+    REDIS_HOST: "127.0.0.1"
+    REDIS_DATABASE: "0"
+
+api:
+  API_TOKEN: "secret"

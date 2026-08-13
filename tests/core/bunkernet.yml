@@ -1,0 +1,108 @@
+integrations:
+  - "Linux"
+  - "Docker"
+  - "Autoconf"
+  - "Kubernetes"
+
+actions:
+  setup:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    restart_stack: false
+
+  check_registered:
+    type: status
+    url: "http://custom-api:8000/bunkernet/instance_id"
+    delay: 0.0
+    status: 200
+    Kubernetes:
+      url: "http://127.0.0.1:8000/bunkernet/instance_id"
+    restart_stack: false
+  check_report:
+    type: string
+    url: "http://custom-api:8000/bunkernet/report_num"
+    delay: 0.0
+    string: "0"
+    Kubernetes:
+      url: "http://127.0.0.1:8000/bunkernet/report_num"
+    restart_stack: false
+
+  global_403:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "random"
+    repeat: 199
+
+  check_report_second:
+    type: string
+    url: "http://custom-api:8000/bunkernet/report_num"
+    delay: 0.0
+    string: "100"
+    Kubernetes:
+      url: "http://127.0.0.1:8000/bunkernet/report_num"
+    restart_stack: false
+  plugin_stats_api:
+    type: string
+    url: "http://127.0.0.1:8888/bunkernet/stats"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"status":"success"'
+    restart_stack: false
+  reset_api:
+    type: status
+    url: "http://custom-api:8000/bunkernet/reset"
+    method: POST
+    delay: 0.0
+    status: 200
+    Kubernetes:
+      url: "http://127.0.0.1:8000/bunkernet/reset"
+
+  setup_deactivated:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      USE_BUNKERNET: "no"
+    restart_stack: false
+
+  check_registered_deactivated:
+    type: status
+    url: "http://custom-api:8000/bunkernet/instance_id"
+    delay: 0.0
+    status: 404
+    config:
+      USE_BUNKERNET: "no"
+    Kubernetes:
+      url: "http://127.0.0.1:8000/bunkernet/instance_id"
+    restart_stack: false
+  check_report_deactivated:
+    type: string
+    url: "http://custom-api:8000/bunkernet/report_num"
+    delay: 0.0
+    string: "0"
+    config:
+      USE_BUNKERNET: "no"
+    Kubernetes:
+      url: "http://127.0.0.1:8000/bunkernet/report_num"
+
+config:
+  USE_BUNKERNET: "yes"
+  BUNKERNET_SERVER: "http://custom-api:8000/bunkernet"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+
+Kubernetes:
+  config:
+    BUNKERNET_SERVER: "http://svc-custom-api.misc.svc.cluster.local:8000/bunkernet"
+
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"

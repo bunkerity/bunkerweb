@@ -1,0 +1,52 @@
+integrations: "all"
+
+actions:
+  sqlite:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    retries: 1
+    full_clean: true
+  mariadb:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    database: "mariadb"
+    retries: 1
+    full_clean: true
+  mysql:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    database: "mysql"
+    retries: 1
+    full_clean: true
+  postgresql:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    database: "postgresql"
+    retries: 1
+    full_clean: true
+  # oracle:
+  #   type: database
+  #   query: "SELECT 1"
+  #   result: null
+  #   not_log: "❌"
+  #   log_from: "scheduler"
+  #   database: "oracle"
+  #   retries: 1
+  #   full_clean: true

@@ -1,0 +1,545 @@
+integrations: "all"
+
+actions:
+  redirection:
+    type: status
+    url: "http://www.example.com"
+    status: 302
+    restart_stack: false
+  captcha:
+    type: xpath
+    url: "http://www.example.com"
+    xpath: "//input[@name='captcha']"
+    restart_stack: false
+
+  captcha_wrong_value:
+    type: string
+    url: "http://www.example.com/challenge"
+    method: "POST"
+    body: "captcha=wrong"
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+    string: 'name="captcha"'
+
+  unsupported_method:
+    type: status
+    url: "http://www.example.com/challenge"
+    method: "PUT"
+    status: 405
+
+  default_endpoint:
+    type: url
+    url: "http://www.example.com"
+    path: "/challenge"
+    follow_redirects: true
+
+  custom_endpoint:
+    type: url
+    url: "http://www.example.com"
+    path: "/custom"
+    follow_redirects: true
+    config:
+      ANTIBOT_URI: "/custom"
+
+  javascript:
+    type: string
+    url: "http://www.example.com"
+    string: "Please wait while we check if you are a Human"
+    follow_redirects: true
+    config:
+      USE_ANTIBOT: "javascript"
+
+  recaptcha:
+    type: string
+    url: "http://www.example.com"
+    string: "This site is protected by reCAPTCHA"
+    follow_redirects: true
+    config:
+      USE_ANTIBOT: "recaptcha"
+
+  hcaptcha:
+    type: string
+    url: "http://www.example.com"
+    string: "https://js.hcaptcha.com/1/api.js"
+    follow_redirects: true
+    config:
+      USE_ANTIBOT: "hcaptcha"
+
+  turnstile:
+    type: string
+    url: "http://www.example.com"
+    string: "https://challenges.cloudflare.com/turnstile"
+    follow_redirects: true
+    config:
+      USE_ANTIBOT: "turnstile"
+
+  mcaptcha:
+    type: string
+    url: "http://www.example.com"
+    string: "https://mcaptcha.org"
+    follow_redirects: true
+    config:
+      USE_ANTIBOT: "mcaptcha"
+
+  capjs:
+    type: xpath
+    integrations:
+      - "Docker"
+      - "Linux"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com/?capjs=ok"
+    xpath: "//h1[contains(text(),'Hello World!')]"
+    current_url_contains: "/?capjs=ok"
+    follow_redirects: true
+    full_clean: true
+    timeout: 180
+    services:
+      capjs-valkey:
+        image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+        container_name: capjs-valkey
+        restart: "unless-stopped"
+        healthcheck:
+          test:
+            - "CMD"
+            - "valkey-cli"
+            - "ping"
+          interval: 2s
+          timeout: 2s
+          retries: 30
+          start_period: 2s
+        networks:
+          bw-services:
+            ipv4_address: 192.168.0.252
+      capjs-seed:
+        image: tiago2/cap:latest@sha256:97455d85b5517172397c7053837d377c72ded6250777928d5435c3eab2f58779
+        container_name: capjs-seed
+        entrypoint:
+          - "bun"
+          - "-e"
+        command:
+          - |
+            import { RedisClient } from "bun";
+
+            const redis = new RedisClient("redis://capjs-valkey:6379");
+            const siteKey = "test-site";
+            const token = "test-site:fixture:token";
+            const secretHash = await Bun.password.hash("test-secret");
+            const widget = [
+              "(function () {",
+              "  class Cap extends EventTarget {",
+              "    solve() {",
+              "      this.dispatchEvent(new CustomEvent(\"progress\", { detail: { progress: 100 } }));",
+              "      return Promise.resolve({ token: \"test-site:fixture:token\" });",
+              "    }",
+              "  }",
+              "  window.Cap = Cap;",
+              "}());",
+            ].join("\n");
+            const keyConfig = JSON.stringify({
+              difficulty: 1,
+              challengeCount: 1,
+              saltSize: 8,
+              instrumentation: false,
+              obfuscationLevel: 0,
+              blockAutomatedBrowsers: false,
+              rsw: false,
+              rswT: 75000,
+            });
+
+            await redis.send("HSET", [
+              "key:" + siteKey,
+              "name",
+              "BunkerWeb test",
+              "secretHash",
+              secretHash,
+              "jwtSecret",
+              "capjs-test-jwt-secret",
+              "config",
+              keyConfig,
+              "created",
+              String(Date.now()),
+            ]);
+            await redis.send("SADD", ["keys", siteKey]);
+            await redis.send("SET", ["token:" + token, String(Date.now() + 600000), "EX", "600"]);
+            await redis.send("SET", ["asset:widget.js", widget]);
+            await redis.send("SET", [
+              "asset:cache-config",
+              JSON.stringify({ lastUpdate: Date.now(), versions: { widget: "test", wasm: "test" } }),
+            ]);
+            redis.close();
+        depends_on:
+          capjs-valkey:
+            condition: service_healthy
+        restart: "no"
+        networks:
+          bw-services:
+            ipv4_address: 192.168.0.251
+      capjs:
+        image: tiago2/cap:latest@sha256:97455d85b5517172397c7053837d377c72ded6250777928d5435c3eab2f58779
+        container_name: capjs
+        ports:
+          - "127.0.0.1:3000:3000"
+        environment:
+          ADMIN_KEY: "bunkerweb-test-admin-key"
+          REDIS_URL: "redis://capjs-valkey:6379"
+          ENABLE_ASSETS_SERVER: "true"
+          WIDGET_VERSION: "test"
+          WASM_VERSION: "test"
+          DISABLE_ERROR_LOGGING: "true"
+        depends_on:
+          capjs-valkey:
+            condition: service_healthy
+          capjs-seed:
+            condition: service_completed_successfully
+        restart: "unless-stopped"
+        networks:
+          bw-services:
+            ipv4_address: 192.168.0.250
+    config:
+      USE_ANTIBOT: "capjs"
+      ANTIBOT_CAPJS_FRONTEND_URL: "http://127.0.0.1:3000"
+      ANTIBOT_CAPJS_BACKEND_URL: "http://192.168.0.250:3000"
+      ANTIBOT_CAPJS_SITEKEY: "test-site"
+      ANTIBOT_CAPJS_SECRET: "test-secret"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+      REMOTE_PHP: null
+      REMOTE_PHP_PATH: null
+      LOCAL_PHP: "/run/php/php-fpm.sock"
+      LOCAL_PHP_PATH: "/var/www/html"
+
+  capjs_csp:
+    type: header
+    url: "http://www.example.com"
+    follow_redirects: true
+    response_headers:
+      Content-Security-Policy: "^(?=.*script-src 'nonce-[^']+' http://127[.]0[.]0[.]1:3000 'wasm-unsafe-eval';)(?=.*style-src 'self' 'nonce-[^']+';)(?=.*connect-src http://127[.]0[.]0[.]1:3000;)(?=.*frame-src http://127[.]0[.]0[.]1:3000;)(?=.*worker-src blob: http://127[.]0[.]0[.]1:3000;)(?!.*require-trusted-types-for).*$"
+    config:
+      USE_ANTIBOT: "capjs"
+      ANTIBOT_CAPJS_FRONTEND_URL: "http://127.0.0.1:3000"
+
+  validity_time_1:
+    type: xpath
+    url: "http://www.example.com"
+    xpath: "//h1[contains(text(),'Hello World!')]"
+    follow_redirects: true
+    restart_stack: false
+    config:
+      USE_ANTIBOT: "javascript"
+      ANTIBOT_TIME_VALID: "10"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      xpath: "//title[contains(text(),'Hello World')]"
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+  validity_time_2:
+    type: string
+    url: "http://www.example.com"
+    delay: 11.0
+    string: "Please wait while we check if you are a Human"
+    follow_redirects: true
+  javascript_query_original_uri:
+    type: xpath
+    url: "http://www.example.com/?a=b&c=d"
+    xpath: "//h1[contains(text(),'Hello World!')]"
+    current_url_contains: "/?a=b&c=d"
+    follow_redirects: true
+    config:
+      USE_ANTIBOT: "javascript"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      xpath: "//title[contains(text(),'Hello World')]"
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+  cookie:
+    type: xpath
+    url: "http://www.example.com"
+    xpath: "//h1[contains(text(),'Hello World!')]"
+    config:
+      USE_ANTIBOT: "cookie"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      xpath: "//title[contains(text(),'Hello World')]"
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+
+  ignored_ip:
+    type: string
+    url: "http://www.example.com"
+    string: "Hello World!"
+    follow_redirects: true
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      ANTIBOT_IGNORE_IP: "192.168.0.254"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+
+  ignored_ip_cidr:
+    type: string
+    url: "http://www.example.com"
+    string: "Hello World!"
+    follow_redirects: true
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      ANTIBOT_IGNORE_IP: "192.168.0.0/24"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+
+  ignored_rdns:
+    type: string
+    url: "http://www.example.com"
+    string: 'name="captcha"'
+    follow_redirects: true
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      ANTIBOT_IGNORE_RDNS: ".bw-services"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+
+  ignored_rdns_local:
+    type: string
+    url: "http://www.example.com"
+    string: "Hello World!"
+    follow_redirects: true
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      ANTIBOT_RDNS_GLOBAL: "no"
+      ANTIBOT_IGNORE_RDNS: ".bw-services"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+
+  ignored_asn:
+    type: string
+    url: "http://www.example.com"
+    string: "Hello World!"
+    follow_redirects: true
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      ANTIBOT_IGNORE_ASN: "3356"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+
+  ignored_user_agent:
+    type: string
+    url: "http://www.example.com"
+    string: "Hello World!"
+    follow_redirects: true
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      ANTIBOT_IGNORE_USER_AGENT: "BunkerBot"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+
+  ignored_uri:
+    type: status
+    url: "http://www.example.com/api"
+    status: 404
+    config:
+      ANTIBOT_IGNORE_URI: "^/api"
+    Kubernetes:
+      status: 200
+
+  ignored_uri_query:
+    type: status
+    url: "http://www.example.com/api?a=b&c=d"
+    status: 404
+    restart_stack: false
+    config:
+      ANTIBOT_IGNORE_URI: "^/api[?]a=b&c=d$"
+    Kubernetes:
+      status: 200
+
+  ignored_uri_query_cache_miss:
+    type: status
+    url: "http://www.example.com/api?a=b&c=other"
+    status: 302
+
+  ignored_uri_multivalue_query:
+    type: status
+    url: "http://www.example.com/api?token=ok"
+    status: 404
+    config:
+      ANTIBOT_IGNORE_URI: "^/admin$ ^/api[?]token=ok$"
+    Kubernetes:
+      status: 200
+
+  only_us:
+    type: string
+    url: "http://www.example.com"
+    string: 'name="captcha"'
+    follow_redirects: true
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      ANTIBOT_ONLY_COUNTRY: "US"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+    restart_stack: false
+  only_us_1:
+    type: string
+    url: "http://www.example.com"
+    string: "Hello World!"
+    follow_redirects: true
+    config:
+      ANTIBOT_ONLY_COUNTRY: "US"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+
+  ignore_us:
+    type: string
+    url: "http://www.example.com"
+    string: "Hello World!"
+    follow_redirects: true
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      ANTIBOT_IGNORE_COUNTRY: "US"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+    restart_stack: false
+  ignore_us_1:
+    type: string
+    url: "http://www.example.com"
+    string: 'name="captcha"'
+    follow_redirects: true
+
+config:
+  USE_ANTIBOT: "captcha"

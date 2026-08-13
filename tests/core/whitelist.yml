@@ -1,0 +1,133 @@
+integrations: "all"
+
+actions:
+  ip:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    config:
+      WHITELIST_IP: "0.0.0.0/0"
+  ip_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      WHITELIST_IP_URLS: "http://custom-api:8000/list/ip"
+    Kubernetes:
+      config:
+        WHITELIST_IP_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/ip"
+
+  rdns:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      WHITELIST_RDNS: ".bw-services"
+  rdns_local:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      WHITELIST_RDNS_GLOBAL: "no"
+      WHITELIST_RDNS: ".bw-services"
+  rdns_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      WHITELIST_RDNS_URLS: "http://custom-api:8000/list/rdns"
+    Kubernetes:
+      config:
+        WHITELIST_RDNS_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/rdns"
+  rdns_urls_local:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      WHITELIST_RDNS_GLOBAL: "no"
+      WHITELIST_RDNS_URLS: "http://custom-api:8000/list/rdns"
+    Kubernetes:
+      config:
+        WHITELIST_RDNS_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/rdns"
+
+  asn:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      WHITELIST_ASN: "3356"
+  asn_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      WHITELIST_ASN_URLS: "http://custom-api:8000/list/asn"
+    Kubernetes:
+      config:
+        WHITELIST_ASN_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/asn"
+
+  user_agent:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      WHITELIST_USER_AGENT: "BunkerBot"
+  user_agent_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      WHITELIST_USER_AGENT_URLS: "http://custom-api:8000/list/user_agent"
+    Kubernetes:
+      config:
+        WHITELIST_USER_AGENT_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/user_agent"
+
+  uri:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 404
+    config:
+      WHITELIST_URI: "/admin"
+    Kubernetes:
+      status: 200
+  uri_urls:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 404
+    config:
+      WHITELIST_URI_URLS: "http://custom-api:8000/list/uri"
+    Kubernetes:
+      status: 200
+      config:
+        WHITELIST_URI_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/uri"
+
+config:
+  USE_WHITELIST: "yes"
+  USE_BLACKLIST: "yes"
+  BLACKLIST_IP: "0.0.0.0/0"
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"

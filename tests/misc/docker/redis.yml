@@ -1,0 +1,28 @@
+services:
+  redis:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis
+    ports:
+      - "127.0.0.1:6379:6379"
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.50
+        aliases:
+          - redis
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

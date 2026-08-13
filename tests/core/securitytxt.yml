@@ -1,0 +1,80 @@
+integrations: "all"
+
+actions:
+  redirection:
+    type: status
+    url: "http://www.example.com/security.txt"
+    status: 301
+    restart_stack: false
+  default_endpoint:
+    type: url
+    url: "http://www.example.com/security.txt"
+    path: "/.well-known/security.txt"
+    follow_redirects: true
+  custom_endpoint:
+    type: url
+    url: "http://www.example.com/security.txt"
+    path: "/custom/security.txt"
+    follow_redirects: true
+    config:
+      SECURITYTXT_URI: "/custom/security.txt"
+  check_contact:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Contact: mailto:contact@bunkerity.com"
+    restart_stack: false
+  check_expires:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Expires: 2019-08-20T23:20:48+02:00"
+    restart_stack: false
+  check_encryption:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Encryption: https://www.example.com/pgp-key.txt"
+    restart_stack: false
+  check_acknowledgements:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Acknowledgments: https://www.example.com/hall-of-frame.html"
+    restart_stack: false
+  check_preferred_lang:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Preferred-Languages: en, fr"
+    restart_stack: false
+  check_canonical:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Canonical: https://www.example.com/.well-known/security.txt"
+    restart_stack: false
+  check_policy:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Policy: https://www.example.com/security-policy.html"
+    restart_stack: false
+  check_hiring:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "Hiring: https://www.example.com/jobs.html"
+    restart_stack: false
+  check_csaf:
+    type: string
+    url: "http://www.example.com/.well-known/security.txt"
+    string: "CSAF: https://www.example.com/.well-known/csaf/provider-metadata.json"
+
+config:
+  USE_SECURITYTXT: "yes"
+  SECURITYTXT_URI: "/.well-known/security.txt"
+  SECURITYTXT_CONTACT: "mailto:contact@bunkerity.com"
+  SECURITYTXT_EXPIRES: "2019-08-20T23:20:48+02:00"
+  SECURITYTXT_ENCRYPTION: "https://www.example.com/pgp-key.txt"
+  SECURITYTXT_ACKNOWLEDGEMENTS: "https://www.example.com/hall-of-frame.html"
+  SECURITYTXT_PREFERRED_LANG: "en, fr"
+  SECURITYTXT_CANONICAL: "https://www.example.com/.well-known/security.txt"
+  SECURITYTXT_POLICY: "https://www.example.com/security-policy.html"
+  SECURITYTXT_HIRING: "https://www.example.com/jobs.html"
+  SECURITYTXT_CSAF: "https://www.example.com/.well-known/csaf/provider-metadata.json"
+
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: ""

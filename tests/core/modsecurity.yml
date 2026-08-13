@@ -1,0 +1,63 @@
+integrations: "all"
+
+actions:
+  activated:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    log: '[ver "OWASP_CRS/4'
+  deactivated:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 200
+    config:
+      USE_MODSECURITY: "no"
+  deactivated_crs:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 200
+    config:
+      USE_MODSECURITY_CRS: "no"
+  detect_only:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 200
+    log: '[ver "OWASP_CRS/4'
+    config:
+      MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
+  security_detect_only:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 200
+    log: '[ver "OWASP_CRS/4'
+    config:
+      SECURITY_MODE: "detect"
+  crs_v3:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    log: '[ver "OWASP_CRS/3'
+    config:
+      MODSECURITY_CRS_VERSION: "3"
+  crs_plugins:
+    type: status
+    url: "http://www.example.com/post/wp-login.php?pass1=<script>"
+    method: POST
+    not_log: "❌"
+    status: 404
+    config:
+      MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
+    Kubernetes:
+      status: 405
+  crs_plugins_global:
+    type: status
+    url: "http://www.example.com/post/wp-login.php?pass1=<script>"
+    method: POST
+    not_log: "❌"
+    status: 403
+    config:
+      USE_MODSECURITY_GLOBAL_CRS: "yes"
+      MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
+
+config:
+  USE_MODSECURITY: "yes"

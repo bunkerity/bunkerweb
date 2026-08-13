@@ -1,0 +1,176 @@
+integrations: "all"
+
+actions:
+  mtls_requires_client_certificate:
+    type: status
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    status: 400
+    restart_stack: false
+  mtls_untrusted_cert_rejected:
+    type: status
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client-untrusted.crt"
+    client_cert_key: "/tmp/output/mtls/client-untrusted.key"
+    status: 400
+    restart_stack: false
+  mtls_allows_valid_client_certificate:
+    type: ssl
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    ssl_expiration: 3650
+    ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
+
+  mtls_optional_allows_anonymous_clients:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    string: '"x-ssl-client-verify":"NONE"'
+    config:
+      MTLS_VERIFY_CLIENT: "optional"
+    restart_stack: false
+  mtls_optional_allows_anonymous_clients_no_fingerprint:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    not_string: '"x-ssl-client-fingerprint":'
+
+  mtls_forward_headers_with_valid_client:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"x-ssl-client-verify":"SUCCESS"'
+    restart_stack: false
+  mtls_forward_headers_include_dn:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"x-ssl-client-dn":"CN=mtls-client"'
+    restart_stack: false
+  mtls_forward_headers_include_issuer:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"x-ssl-issuer":"CN=BunkerWeb mTLS Test CA"'
+    restart_stack: false
+  mtls_forward_headers_include_serial:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"x-ssl-client-serial":'
+    restart_stack: false
+  mtls_forward_headers_include_fingerprint:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"x-ssl-client-fingerprint":'
+
+  # Forwarding disabled: split into two actions because http_string_handler uses
+  # `if string ... elif not_string`, so a single action with both only checks `string`.
+  mtls_headers_forward_off_passes_request:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"host":"www.example.com"'
+    config:
+      MTLS_FORWARD_CLIENT_HEADERS: "no"
+      MTLS_VERIFY_CLIENT: "on"
+    restart_stack: false
+  mtls_headers_forward_off_omits_verify_header:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    not_string: '"x-ssl-client-verify"'
+
+  # Per-path enforcement (MTLS_URL). Needs MTLS_VERIFY_CLIENT=optional so the handshake
+  # completes for non-matching paths; mtls.lua enforces the cert on matching URIs.
+  mtls_url_protected_path_requires_cert:
+    type: status
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    status: 403
+    config:
+      MTLS_VERIFY_CLIENT: "optional"
+      MTLS_URL: "^/inspect/"
+    restart_stack: false
+  mtls_url_protected_path_allows_valid_cert:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"x-ssl-client-verify":"SUCCESS"'
+    restart_stack: false
+  mtls_url_outside_scope_allowed:
+    type: status
+    url: "https://www.example.com/accept_methods"
+    verify_ssl: false
+    status: 200
+
+  # Invalid MTLS_URL regex must fail closed (deny), not silently allow the matching path.
+  mtls_url_invalid_regex_denies:
+    type: status
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    status: 403
+    config:
+      MTLS_VERIFY_CLIENT: "optional"
+      MTLS_URL: "("
+
+  # optional_no_ca: handshake completes with or without a client cert and CA validation
+  # is skipped. The untrusted-cert action is the discriminating one: the same cert is
+  # rejected with 400 under MTLS_VERIFY_CLIENT=on (see mtls_untrusted_cert_rejected) but
+  # accepted here, proving CA validation is bypassed.
+  mtls_optional_no_ca_allows_valid_client:
+    type: string
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client.crt"
+    client_cert_key: "/tmp/output/mtls/client.key"
+    string: '"x-ssl-client-verify":'
+    config:
+      MTLS_VERIFY_CLIENT: "optional_no_ca"
+    restart_stack: false
+  mtls_optional_no_ca_allows_untrusted_cert:
+    type: status
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    client_cert: "/tmp/output/mtls/client-untrusted.crt"
+    client_cert_key: "/tmp/output/mtls/client-untrusted.key"
+    status: 200
+    restart_stack: false
+  mtls_optional_no_ca_allows_anonymous:
+    type: status
+    url: "https://www.example.com/inspect/headers"
+    verify_ssl: false
+    status: 200
+
+config:
+  USE_MTLS: "yes"
+  MTLS_CA_CERTIFICATE: "/tmp/output/mtls/ca.pem"
+  MTLS_VERIFY_CLIENT: "on"
+  MTLS_VERIFY_DEPTH: "2"
+  MTLS_FORWARD_CLIENT_HEADERS: "yes"
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://custom-api:8000"
+
+Kubernetes:
+  config:
+    REVERSE_PROXY_HOST: "http://svc-custom-api.misc.svc.cluster.local:8000"

@@ -1,3 +1,22 @@
-pyOpenSSL==24.2.1
-pyyaml==6.0.2
-requests==2.32.3
+Brotli==1.1.0
+cryptography==46.0.3
+dnspython==2.8.0
+docker==7.1.0
+fastapi==0.120.0
+httpx[http2, socks, brotli]==0.28.1
+kubernetes==33.1.0
+lxml==6.0.2
+maxminddb==3.0.0
+psycopg[binary,pool]==3.2.11
+pydantic==2.12.3
+PyMySQL==1.1.2
+pyotp==2.9.0
+pytest==8.4.2
+python-dotenv==1.1.1
+pyyaml==6.0.3
+redis[hiredis]==7.0.0
+selenium==4.37.0
+sqlalchemy==2.0.44
+tzlocal==5.3.1
+uvicorn[standard]==0.38.0
+valkey[libvalkey]==6.1.1

@@ -1,0 +1,25 @@
+services:
+  dnsmasq:
+    image: dockurr/dnsmasq:2.91@sha256:7873ce2dae1b0aa51d2c13dd4bd3aad47890c233088b3c7f6eb099a01e6e4307
+    container_name: dnsmasq
+    ports:
+      - "127.0.0.1:53:53/tcp"
+      - "127.0.0.1:53:53/udp"
+    command: --log-facility=/dev/stdout
+    volumes:
+      - ../conf/dnsmasq.conf:/etc/dnsmasq.conf
+      - ../conf/dnsmasq.hosts:/etc/dnsmasq.hosts
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.20
+    restart: "unless-stopped"
+    cap_add:
+      - NET_ADMIN
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

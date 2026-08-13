@@ -1,0 +1,393 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bunkerweb
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cr-bunkerweb
+  namespace: bunkerweb
+rules:
+  - apiGroups: [""]
+    resources: ["services", "pods", "configmaps", "secrets"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-bunkerweb
+  namespace: bunkerweb
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: crb-bunkerweb
+subjects:
+  - kind: ServiceAccount
+    name: sa-bunkerweb
+    namespace: bunkerweb
+    apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: cr-bunkerweb
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: bunkerweb
+spec:
+  controller: bunkerweb.io/ingress-controller
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+  namespace: bunkerweb
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+  template:
+    metadata:
+      labels:
+        app: bunkerweb
+      # mandatory annotation
+      annotations:
+        bunkerweb.io/INSTANCE: "yes"
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      serviceAccountName: sa-bunkerweb
+      containers:
+        # using bunkerweb as name is mandatory
+        - name: bunkerweb
+          image: localhost:5000/bunkerity/bunkerweb:tests
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+              hostPort: 80
+            - containerPort: 8443
+              hostPort: 443
+            - containerPort: 5000
+              hostPort: 5001
+            - containerPort: 5443
+              hostPort: 5443
+          envFrom:
+            - secretRef:
+                name: bw-secret
+          volumeMounts:
+            - name: pvc-www
+              mountPath: /var/www/html/
+            - name: pvc-output
+              mountPath: /tmp/output/
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck.sh
+            initialDelaySeconds: 30
+            periodSeconds: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+      volumes:
+        - name: pvc-www
+          hostPath:
+            path: /mnt/www/
+        - name: pvc-output
+          hostPath:
+            path: /mnt/output/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-controller
+  namespace: bunkerweb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-controller
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-controller
+      annotations:
+        bunkerweb.io/CONTROLLER: "yes"
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      serviceAccountName: sa-bunkerweb
+      containers:
+        - name: bunkerweb-controller
+          image: localhost:5000/bunkerity/bunkerweb-autoconf:tests
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: bw-secret
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+          readinessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-scheduler
+  namespace: bunkerweb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-scheduler
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-scheduler
+      annotations:
+        bunkerweb.io/SCHEDULER: "yes"
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      serviceAccountName: sa-bunkerweb
+      containers:
+        - name: bunkerweb-scheduler
+          image: localhost:5000/bunkerity/bunkerweb-scheduler:tests
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: bw-secret
+          volumeMounts:
+            - name: pvc-www
+              mountPath: /var/www/html/
+            - name: pvc-output
+              mountPath: /tmp/output/
+            - name: pvc-data
+              mountPath: "/data"
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-scheduler.sh
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+          readinessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-scheduler.sh
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+      volumes:
+        - name: pvc-www
+          hostPath:
+            path: /mnt/www/
+        - name: pvc-output
+          hostPath:
+            path: /mnt/output/
+        - name: pvc-data
+          persistentVolumeClaim:
+            claimName: pvc-bunkerweb
+---
+# Since 1.7 the scheduler only dispatches: jobs are queued on the broker and executed
+# here. Without this deployment the cluster boots and runs zero jobs.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-worker
+  namespace: bunkerweb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-worker
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-worker
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      serviceAccountName: sa-bunkerweb
+      containers:
+        - name: bunkerweb-worker
+          image: localhost:5000/bunkerity/bunkerweb-worker:tests
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: bw-secret
+          volumeMounts:
+            - name: pvc-www
+              mountPath: /var/www/html/
+            - name: pvc-output
+              mountPath: /tmp/output/
+            - name: pvc-data
+              mountPath: "/data"
+      volumes:
+        - name: pvc-www
+          hostPath:
+            path: /mnt/www/
+        - name: pvc-output
+          hostPath:
+            path: /mnt/output/
+        - name: pvc-data
+          persistentVolumeClaim:
+            claimName: pvc-bunkerweb
+---
+# Job broker, separate from bunkerweb-redis (the WAF datastore) on purpose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-jobs-broker
+  namespace: bunkerweb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-jobs-broker
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-jobs-broker
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: bunkerweb-jobs-broker
+          image: valkey/valkey:8-alpine
+          imagePullPolicy: Always
+          # AOF, not RDB: a broker restart must not vaporise queued jobs.
+          args:
+            - "valkey-server"
+            - "--save"
+            - ""
+            - "--appendonly"
+            - "yes"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-jobs-broker
+  namespace: bunkerweb
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-jobs-broker
+  ports:
+    - name: broker
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-redis
+  namespace: bunkerweb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-redis
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-redis
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: bunkerweb-redis
+          image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb
+  namespace: bunkerweb
+spec:
+  clusterIP: None
+  selector:
+    app: bunkerweb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-redis
+  namespace: bunkerweb
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-redis
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bunkerweb
+  namespace: bunkerweb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

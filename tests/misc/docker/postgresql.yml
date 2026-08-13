@@ -1,0 +1,30 @@
+services:
+  bw-db:
+    image: postgres:18-alpine@sha256:1b1689b20d16a014a3d195653381cf2caa75a41a92d93b255a9d6ea29fd353aa
+    container_name: bw-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_USER: "bunkerweb"
+      POSTGRES_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/postgresql
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        ipv4_address: 10.10.10.254
+
+volumes:
+  bw-data:
+    name: bw-data
+
+networks:
+  bw-db:
+    name: bw-db
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24

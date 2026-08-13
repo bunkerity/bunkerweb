@@ -1,0 +1,51 @@
+integrations: "all"
+
+actions:
+  home:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+      login:
+        type: login
+        username: "admin"
+        password: "P@ssw0rd"
+        sleep: 2.0
+      assert_2fa_warning:
+        type: find
+        selector: '//div[@class="toast-body" and contains(text(), "Please enable two-factor authentication")]'
+      assert_plan_card:
+        type: find
+        selector: '//span[contains(@data-i18n, "plan.free") and contains(text(), "FREE")]'
+        sleep: 0.0
+      assert_memory_card:
+        type: find
+        selector: '//span[contains(@data-i18n, "dashboard.card.ram.title") and contains(text(), "System RAM")]'
+        sleep: 0.0
+      assert_instances_number:
+        type: find
+        selector: '//a[@href="/instances"]//span[contains(@class, "don-jose") and contains(text(), "01")]'
+        sleep: 0.0
+      assert_services_number:
+        type: find
+        selector: '//a[@href="/services"]//span[contains(@class, "don-jose") and contains(text(), "01")]'
+        sleep: 0.0
+      assert_plugins_number:
+        type: find
+        selector: '//a[@href="/plugins"]//span[contains(@class, "don-jose") and contains(text(), "43")]'
+        sleep: 0.0
+      assert_map:
+        type: find
+        selector: '//div[@id="requests-map"]/div[contains(@class, "leaflet-pane")]'
+        sleep: 0.0
+      assert_news:
+        type: find
+        selector: '(//div[@data-news-row-home=""])[position() <= 4 and count(//div[contains(@class, "col-xl-12")]) = 4]'
+        sleep: 1.0
+      assert_news_offcanvas:
+        type: find
+        selector: '(//div[@data-news-row=""])[position() <= 4 and count(//div[contains(@class, "col-xl-11")]) = 4]'
+        sleep: 0.0

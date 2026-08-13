@@ -1,0 +1,49 @@
+integrations:
+  - "Docker"
+
+actions:
+  web_cache:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+      access_page:
+        type: access
+        url: "%BASE_URL%/web-cache"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "web-cache"
+        username: "admin"
+        password: "P@ssw0rd"
+      assert_status:
+        type: find
+        selector: '//h6[contains(text(), "Status (per instance)")]'
+      assert_metrics:
+        type: find
+        selector: '//h6[contains(text(), "Hit / miss metrics")]'
+      purge_all:
+        type: click
+        selector: '//button[normalize-space()="Purge all"]'
+      assert_all_success:
+        type: find
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "Web cache purge requested")]'
+      fill_url:
+        type: send_keys
+        selector: '//input[@name="url"]'
+        value: "http://www.example.com/"
+      purge_url:
+        type: click
+        selector: '//button[normalize-space()="Purge URL"]'
+      assert_url_success:
+        type: find
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "http://www.example.com/")]'
+
+config:
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://app1:8080"
+  USE_PROXY_CACHE: "yes"
+  PROXY_CACHE_MIN_USES: "1"

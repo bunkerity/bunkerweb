@@ -1,0 +1,52 @@
+integrations: "all"
+
+actions:
+  check_verification:
+    type: status
+    url: "https://www.example.com"
+    restart_stack: false
+  check_ssl:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_algorithm: "ec-prime256v1"
+    restart_stack: false
+  auto_redirect_https:
+    type: status
+    url: "http://www.example.com"
+    status: 301
+  tweaked_options:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_expiration: 30
+    ssl_subject: "/CN=www.example.com/"
+    ssl_algorithm: "ec-prime256v1"
+    config:
+      SELF_SIGNED_SSL_EXPIRY: "30"
+      SELF_SIGNED_SSL_SUBJ: "/CN=www.example.com/"
+  algorithm_ec_secp384r1:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_algorithm: "ec-secp384r1"
+    config:
+      SELF_SIGNED_SSL_ALGORITHM: "ec-secp384r1"
+  algorithm_rsa_2048:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_algorithm: "rsa-2048"
+    config:
+      SELF_SIGNED_SSL_ALGORITHM: "rsa-2048"
+  algorithm_rsa_4096:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_algorithm: "rsa-4096"
+    config:
+      SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
+
+config:
+  GENERATE_SELF_SIGNED_SSL: "yes"
+  SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"

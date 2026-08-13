@@ -1,0 +1,52 @@
+integrations: "all"
+
+actions:
+  check_status:
+    type: status
+    url: "http://www.example.com"
+    status: 301
+    config:
+      REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
+  check_status_tweaked:
+    type: status
+    url: "http://www.example.com"
+    status: 302
+    config:
+      REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
+      REDIRECT_TO_STATUS_CODE: "302"
+  check_redirection:
+    type: string
+    url: "http://www.example.com"
+    follow_redirects: true
+    string: "List of Chrome DevRel"
+    config:
+      REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
+  check_redirection_request_uri:
+    type: url
+    url: "http://www.example.com/test"
+    follow_redirects: true
+    raise_for_status: false
+    path: "/test"
+    config:
+      REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
+      REDIRECT_TO_REQUEST_URI: "yes"
+  check_custom_from:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    restart_stack: false
+    config:
+      REDIRECT_FROM: "/test"
+      REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
+  check_custom_from_1:
+    type: status
+    url: "http://www.example.com/test"
+    status: 301
+    restart_stack: false
+    config:
+      REDIRECT_FROM: "/test"
+      REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
+
+annotations:
+  REDIRECT_FROM: "/"
+  bunkerweb.io/REVERSE_PROXY_URL: ""

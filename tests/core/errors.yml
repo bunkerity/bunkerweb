@@ -1,0 +1,40 @@
+integrations: "all"
+
+actions:
+  default:
+    type: string
+    url: "http://www.example.com/?id=/etc/passwd"
+    string: "This website is protected with"
+    raise_for_status: false
+  custom_403:
+    type: string
+    url: "http://www.example.com/?id=/etc/passwd"
+    string: "It Works!"
+    raise_for_status: false
+    config:
+      ERRORS: "403=/errors/403.html"
+  403_not_intercepted:
+    type: string
+    url: "http://www.example.com/?id=/etc/passwd"
+    string: "nginx"
+    raise_for_status: false
+    config:
+      INTERCEPTED_ERROR_CODES: "400 401 404 405 413 429 500 501 502 503 504"
+
+config:
+  ERRORS: ""
+  INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
