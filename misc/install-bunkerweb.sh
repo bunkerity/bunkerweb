@@ -159,6 +159,8 @@ REDIS_PASSWORD_GENERATED=""   # set to the value only when auto-generated (contr
 REDIS_FLAVOR=""               # "redis" | "valkey" — wire-compatible
 REDIS_MAXMEMORY_MB=""         # 0 = unlimited; >0 = applied as <N>mb
 REDIS_MAXMEMORY_POLICY="volatile-lru" # TTL-only eviction: protects permanent bans, evicts transient counters first
+BROKER_INSTALL="yes"          # "no" skips the dedicated Celery broker (external broker managed elsewhere)
+BROKER_URL_INPUT=""           # explicit CELERY_BROKER_URL; set → provision nothing locally
 DB_INSTALL=""
 DB_NAME_INPUT="bw_db"
 DB_USER_INPUT="bunkerweb"
@@ -280,7 +282,8 @@ _BW_STATE_VARS=(
     REDIS_USERNAME_INPUT REDIS_PASSWORD_INPUT REDIS_SSL_INPUT
     REDIS_SSL_VERIFY_INPUT REDIS_BIND_INPUT REDIS_AUTOPASS
     REDIS_REQUIREPASS_LOCAL REDIS_PASSWORD_GENERATED REDIS_FLAVOR
-    REDIS_MAXMEMORY_MB REDIS_MAXMEMORY_POLICY DB_INSTALL DB_NAME_INPUT
+    REDIS_MAXMEMORY_MB REDIS_MAXMEMORY_POLICY BROKER_INSTALL BROKER_URL_INPUT
+    DB_INSTALL DB_NAME_INPUT
     DB_USER_INPUT DB_PASSWORD_INPUT DB_PASSWORD_GENERATED DB_DSN_GENERATED
     DB_EXTERNAL_ENGINE DB_HOST_INPUT DB_PORT_INPUT DB_SSL_INPUT
     DB_SSL_VERIFY_INPUT DB_SKIP_PROBE UI_ADMIN_USERNAME_INPUT
@@ -1470,7 +1473,7 @@ x-bw-env: &bw-env
   API_TOKEN: "${API_TOKEN}"
   DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
   API_URL: "http://bw-api:8888"
-  CELERY_BROKER_URL: "redis://redis:6379/1"
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
@@ -1575,11 +1578,30 @@ services:
     networks:
       - bw-universe
 
+  # Celery broker — deliberately a second instance, not another database on `redis`
+  # above. The broker holds TTL'd correctness leases (bw:job_attempt:*,
+  # bw:reload_pending, bw:push_configs_inflight) which volatile-lru is free to evict
+  # mid-flight, and maxmemory-policy is per-server, never per-database.
+  bw-jobs-broker:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+      --save ""
+      --appendonly yes
+    volumes:
+      - bw-jobs-broker-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
 volumes:
   bw-worker-storage:
   bw-data:
   bw-storage:
   redis-data:
+  bw-jobs-broker-data:
 
 # Networks are project-scoped (Compose prefixes them with COMPOSE_PROJECT_NAME)
 # and use Docker-assigned subnets, so several stacks co-exist on one host.
@@ -1603,7 +1625,7 @@ x-ui-env: &bw-ui-env
   DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
   API_URL: "http://bw-api:8888"
   API_TOKEN: "${API_TOKEN}"
-  CELERY_BROKER_URL: "redis://redis:6379/1"
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
@@ -1737,11 +1759,30 @@ services:
     networks:
       - bw-universe
 
+  # Celery broker — deliberately a second instance, not another database on `redis`
+  # above. The broker holds TTL'd correctness leases (bw:job_attempt:*,
+  # bw:reload_pending, bw:push_configs_inflight) which volatile-lru is free to evict
+  # mid-flight, and maxmemory-policy is per-server, never per-database.
+  bw-jobs-broker:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+      --save ""
+      --appendonly yes
+    volumes:
+      - bw-jobs-broker-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
 volumes:
   bw-worker-storage:
   bw-data:
   bw-storage:
   redis-data:
+  bw-jobs-broker-data:
 
 # Networks are project-scoped (Compose prefixes them with COMPOSE_PROJECT_NAME)
 # and use Docker-assigned subnets, so several stacks co-exist on one host.
@@ -1766,7 +1807,7 @@ x-bw-env: &bw-env
   API_TOKEN: "${API_TOKEN}"
   DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
   API_URL: "http://bw-api:8888"
-  CELERY_BROKER_URL: "redis://redis:6379/1"
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bw-scheduler:
@@ -1860,11 +1901,30 @@ services:
     networks:
       - bw-universe
 
+  # Celery broker — deliberately a second instance, not another database on `redis`
+  # above. The broker holds TTL'd correctness leases (bw:job_attempt:*,
+  # bw:reload_pending, bw:push_configs_inflight) which volatile-lru is free to evict
+  # mid-flight, and maxmemory-policy is per-server, never per-database.
+  bw-jobs-broker:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+      --save ""
+      --appendonly yes
+    volumes:
+      - bw-jobs-broker-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
 volumes:
   bw-worker-storage:
   bw-data:
   bw-storage:
   redis-data:
+  bw-jobs-broker-data:
 
 # Networks are project-scoped (Compose prefixes them with COMPOSE_PROJECT_NAME)
 # and use Docker-assigned subnets, so several stacks co-exist on one host.
@@ -1921,7 +1981,7 @@ services:
       API_WHITELIST_IP: "${API_WHITELIST_IP}"
       API_TOKEN: "${API_TOKEN}"
       API_URL: "http://bw-api:8888"
-      CELERY_BROKER_URL: "redis://redis:6379/1"
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
       SERVER_NAME: ""
       MULTISITE: "yes"
       USE_REDIS: "yes"
@@ -1937,7 +1997,7 @@ services:
     environment:
       DATABASE_URI: "${DATABASE_URI}"
       API_TOKEN: "${API_TOKEN}"
-      CELERY_BROKER_URL: "redis://redis:6379/1"
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -1951,7 +2011,7 @@ services:
       DATABASE_URI: "${DATABASE_URI}"
       API_TOKEN: "${API_TOKEN}"
       BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
-      CELERY_BROKER_URL: "redis://redis:6379/1"
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
     volumes:
       # Its own volume: DATABASE_URI points at a real server here, so this /data holds
       # nothing but a scratch tree the worker rebuilds from the database -- no reason to
@@ -1976,10 +2036,29 @@ services:
     networks:
       - bw-universe
 
+  # Celery broker — deliberately a second instance, not another database on `redis`
+  # above. The broker holds TTL'd correctness leases (bw:job_attempt:*,
+  # bw:reload_pending, bw:push_configs_inflight) which volatile-lru is free to evict
+  # mid-flight, and maxmemory-policy is per-server, never per-database.
+  bw-jobs-broker:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+      --save ""
+      --appendonly yes
+    volumes:
+      - bw-jobs-broker-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
 volumes:
   bw-storage:
   bw-worker-storage:
   redis-data:
+  bw-jobs-broker-data:
 
 # Network is project-scoped (Compose prefixes it with COMPOSE_PROJECT_NAME) and
 # uses a Docker-assigned subnet, so several stacks co-exist on one host.
@@ -2025,6 +2104,13 @@ render_docker_compose_api() {
 # BunkerWeb Docker stack (api) — generated by install-bunkerweb.sh.
 # Runs only the FastAPI control service; it connects to the shared database via
 # DATABASE_URI. Put it behind a BunkerWeb instance before exposing it publicly.
+#
+# No CELERY_BROKER_URL below, on purpose: in a split deployment the broker belongs to
+# the stack that runs the scheduler and worker, and this installer cannot know its
+# address. Until you set it, POST /jobs/dispatch answers 503 and NO background job runs
+# (no certificate renewal, no blocklist refresh, no backup). Point it at that stack's
+# broker to enable dispatching, e.g.:
+#     CELERY_BROKER_URL: "redis://:<password>@<broker-host>:6379/0"
 services:
   bw-api:
     image: bunkerity/bunkerweb-api:${BW_TAG}
@@ -5023,10 +5109,15 @@ configure_manager_api_defaults() {
     fi
     apply_optional_integrations "$config_file"
 
-    print_status "Enabling and starting BunkerWeb Scheduler with configured settings..."
+    print_status "Enabling and starting BunkerWeb Scheduler and Worker with configured settings..."
     run_cmd systemctl enable --now bunkerweb-scheduler
+    # Peer of the scheduler: it executes every job the scheduler dispatches. Manager installs
+    # always export SERVICE_SCHEDULER=no, so postinstall's enable leg is skipped and this is the
+    # only place the worker gets enabled.
+    run_cmd systemctl enable --now bunkerweb-worker
     sleep 2
     systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
+    systemctl status bunkerweb-worker --no-pager -l || print_warning "BunkerWeb Worker may not be running"
 }
 
 # Worker installations: whitelist manager/scheduler IPs.
@@ -5106,6 +5197,11 @@ configure_full_config() {
         print_status "Enabling and (re)starting services with configured settings..."
         # Order: scheduler before bunkerweb (scheduler renders templates first).
         svc_restart_or_start bunkerweb-scheduler
+        # Peer of the scheduler: it executes every job the scheduler dispatches. postinstall
+        # enables it only when SERVICE_SCHEDULER != no, and every leg that lands here exported
+        # SERVICE_SCHEDULER=no to defer the start — so without this call the worker stays
+        # disabled and no background job (certbot, blocklists, backups) ever runs.
+        svc_restart_or_start bunkerweb-worker
         svc_restart_or_start bunkerweb
         if [ "$FULL_API_DEFERRED" = "yes" ]; then
             svc_restart_or_start bunkerweb-api
@@ -5739,6 +5835,145 @@ install_redis() {
         fi
     fi
     echo -e "${BLUE}========================================${NC}"
+}
+
+# ---------------------------------------------------------------------------
+# Celery job broker — a dedicated Redis/Valkey instance, kept apart from the WAF
+# datastore that install_redis() configures.
+#
+# The two roles need contradictory settings and `maxmemory-policy` is per-server,
+# never per-database:
+#   • broker    — holds the correctness leases (bw:job_attempt:*, bw:reload_pending,
+#                 bw:push_configs_inflight). Those are TTL'd keys, so `volatile-lru`
+#                 is free to evict them mid-flight → the broker must be `noeviction`.
+#   • datastore — capped and evicting on purpose, so transient WAF counters make room
+#                 instead of writes being refused → `volatile-lru`.
+# Sharing one server also meant the datastore's `requirepass` silently broke Celery:
+# bunkerweb-worker.sh and bunkerweb-api.sh fall back to an unauthenticated
+# redis://127.0.0.1:6379/0, so a password-protected shared Redis answered NOAUTH and
+# every background job (certbot, blocklists, backups) stopped running.
+#
+# Same split every shipped compose stack already uses — a separate `bw-jobs-broker`
+# on database 0; see misc/integrations/docker.mariadb.yml.
+# ---------------------------------------------------------------------------
+BROKER_CONF="/etc/bunkerweb/broker.conf"
+BROKER_UNIT="/etc/systemd/system/bunkerweb-broker.service"
+BROKER_DEFAULT_PORT=6380
+
+# Topologies that run a local Celery worker. NOTE: INSTALL_TYPE=worker is a BunkerWeb
+# data-plane node (nginx only, no scheduler) — it is NOT a Celery worker.
+_broker_is_wanted() {
+    case "${INSTALL_TYPE:-full}" in
+        full|manager|scheduler) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# First free TCP port at or after $1. Without `ss` we keep the default and let a bind
+# clash surface loudly through _dump_service_diagnostics — a *silent* broker failure is
+# the exact mode this function exists to remove.
+_broker_free_port() {
+    local port="${1:-$BROKER_DEFAULT_PORT}"
+    local limit=$((port + 20))
+
+    command -v ss >/dev/null 2>&1 || { echo "$port"; return 0; }
+
+    while [ "$port" -lt "$limit" ]; do
+        if ! ss -lnt 2>/dev/null | grep -qE ":${port}([[:space:]]|\$)"; then
+            echo "$port"
+            return 0
+        fi
+        port=$((port + 1))
+    done
+
+    echo "$BROKER_DEFAULT_PORT"
+}
+
+ensure_job_broker() {
+    local port="" pw="" target=/etc/bunkerweb/variables.env
+
+    _broker_is_wanted || return 0
+    [ "$BROKER_INSTALL" = "no" ] && return 0
+
+    write_default_variables_env_template "$target"
+    ensure_config_file "$target"
+
+    # --broker-url: point the components at an existing broker, provision nothing.
+    if [ -n "$BROKER_URL_INPUT" ]; then
+        set_config_kv "$target" "CELERY_BROKER_URL" "$BROKER_URL_INPUT"
+        print_status "Job broker: using the supplied URL (no local broker provisioned)"
+        return 0
+    fi
+
+    # Idempotent: reuse the existing credential/port instead of rotating them, so a
+    # re-run or a resumed install never orphans an already-running broker.
+    if [ -f "$BROKER_CONF" ]; then
+        pw=$(awk '/^requirepass /{print $2; exit}' "$BROKER_CONF" 2>/dev/null || true)
+        port=$(awk '/^port /{print $2; exit}' "$BROKER_CONF" 2>/dev/null || true)
+    fi
+    # generate_secret is alnum-only, hence URL-safe by construction — that is why the
+    # URL below needs no encoder. An operator-supplied password would: validate_redis_password()
+    # rejects quotes/backslash/'#' but NOT the URL delimiters @ : / % ?
+    [ -n "$pw" ] || pw=$(generate_secret 32)
+    [ -n "$port" ] || port=$(_broker_free_port "$BROKER_DEFAULT_PORT")
+
+    ensure_config_file "$BROKER_CONF"
+    _redis_conf_set "$BROKER_CONF" "bind" "127.0.0.1"
+    _redis_conf_set "$BROKER_CONF" "port" "$port"
+    _redis_conf_set "$BROKER_CONF" "requirepass" "$pw"
+    # Queues live in memory only: no RDB, no AOF, nothing on disk to protect or restore.
+    _redis_conf_set "$BROKER_CONF" "save" '""'
+    _redis_conf_set "$BROKER_CONF" "appendonly" "no"
+    _redis_conf_set "$BROKER_CONF" "maxmemory" "256mb"
+    _redis_conf_set "$BROKER_CONF" "maxmemory-policy" "noeviction"
+    _redis_conf_set "$BROKER_CONF" "daemonize" "no"
+    _redis_conf_set "$BROKER_CONF" "dir" "/var/lib/bunkerweb"
+    _redis_conf_set "$BROKER_CONF" "logfile" '""'
+    chown root:nginx "$BROKER_CONF" 2>/dev/null || true
+    chmod 640 "$BROKER_CONF" 2>/dev/null || true
+
+    # The unit is world-readable (0644), so the password must live only in the conf —
+    # `--requirepass` on ExecStart would expose it via `ps` to every local user.
+    # The binary is resolved at start time, not now: on a REDIS_INSTALL=no install the
+    # redis-server/valkey package only arrives with the BunkerWeb package, one phase later.
+    cat > "$BROKER_UNIT" <<'EOF'
+[Unit]
+Description=BunkerWeb job broker (Celery)
+Documentation=https://docs.bunkerweb.io
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nginx
+Group=nginx
+ExecStart=/bin/sh -c 'exec "$(command -v redis-server || command -v valkey-server)" /etc/bunkerweb/broker.conf'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    chmod 644 "$BROKER_UNIT" 2>/dev/null || true
+    systemctl daemon-reload 2>/dev/null || true
+
+    # SELinux: redis execs into redis_t, which may bind only redis_port_t (6379).
+    if [ "$port" != "6379" ] && command -v semanage >/dev/null 2>&1; then
+        semanage port -a -t redis_port_t -p tcp "$port" >/dev/null 2>&1 || \
+            semanage port -m -t redis_port_t -p tcp "$port" >/dev/null 2>&1 || \
+            print_warning "Could not label TCP $port as redis_port_t; if SELinux is enforcing, run: semanage port -a -t redis_port_t -p tcp $port"
+    fi
+
+    # Never through run_cmd: it echoes the command, and this one carries the password.
+    set_config_kv "$target" "CELERY_BROKER_URL" "redis://:${pw}@127.0.0.1:${port}/0"
+
+    if command -v redis-server >/dev/null 2>&1 || command -v valkey-server >/dev/null 2>&1; then
+        start_optional_service bunkerweb-broker "Job broker" || true
+    else
+        print_status "Job broker unit written; it starts with the BunkerWeb package."
+    fi
+
+    print_status "Job broker: 127.0.0.1:${port} (dedicated, noeviction, password set)"
 }
 
 # Write DATABASE_URI once to variables.env — scheduler/UI/API all source it before their own env files.
@@ -6590,6 +6825,21 @@ show_final_info() {
         } >&"${_BW_OUT_FD:-1}"
     fi
 
+    # Deliberately no password here: unlike the datastore above, nothing external ever
+    # connects to the broker, so printing the secret would be pure exposure.
+    if _broker_is_wanted && [ "$BROKER_INSTALL" != "no" ] && [ -z "$BROKER_URL_INPUT" ]; then
+        {
+        echo "⚙️  Job broker (Celery):"
+        echo "  A dedicated loopback-only instance, separate from the datastore above: a job queue"
+        echo "  must never evict (noeviction) while the WAF datastore must (volatile-lru), and"
+        echo "  maxmemory-policy is per-server."
+        echo "  Config: ${BROKER_CONF}    Unit: bunkerweb-broker.service"
+        echo "  URL:    /etc/bunkerweb/variables.env → CELERY_BROKER_URL (password not printed)"
+        echo "  No firewall rule needed — it listens on 127.0.0.1 only."
+        echo
+        } >&"${_BW_OUT_FD:-1}"
+    fi
+
     echo "📚 Resources:"
     echo "  • Documentation: https://docs.bunkerweb.io"
     echo "  • Community support: https://discord.bunkerity.com"
@@ -6731,6 +6981,8 @@ usage() {
     echo "  --redis-no-ssl           Disable SSL/TLS for Redis connection"
     echo "  --redis-ssl-verify       Verify Redis SSL certificate"
     echo "  --redis-no-ssl-verify    Do not verify Redis SSL certificate"
+    echo "  --broker-url URL         Use an existing Celery broker (e.g. redis://:pass@host:6379/0) instead of provisioning one"
+    echo "  --no-broker              Do not provision the dedicated job broker (jobs need a broker reachable another way)"
     echo "  --epel                   Install epel-release on RHEL-family distros if missing"
     echo "  --no-epel                Do not install epel-release on RHEL-family distros"
     echo
@@ -7037,6 +7289,17 @@ while [[ $# -gt 0 ]]; do
                     ;;
             esac
             shift 2
+            ;;
+        --broker-url)
+            case "$2" in
+                redis://*|rediss://*) BROKER_URL_INPUT="$2" ;;
+                *) print_error "--broker-url must be a redis:// or rediss:// URL"; exit 1 ;;
+            esac
+            shift 2
+            ;;
+        --no-broker)
+            BROKER_INSTALL="no"
+            shift
             ;;
         --database)
             case "$2" in
@@ -7554,6 +7817,17 @@ if [ "$DRY_RUN" = "yes" ]; then
     if [ -n "$REDIS_HOST_INPUT" ]; then
         echo "Redis host: $REDIS_HOST_INPUT"
     fi
+    # Job broker: always separate from the Redis above — one server cannot hold both the
+    # broker's `noeviction` and the datastore's `volatile-lru`.
+    if ! _broker_is_wanted; then
+        echo "Job broker: n/a (this mode runs no Celery worker)"
+    elif [ "$BROKER_INSTALL" = "no" ]; then
+        echo "Job broker: none (--no-broker; jobs need a broker reachable another way)"
+    elif [ -n "$BROKER_URL_INPUT" ]; then
+        echo "Job broker: supplied URL (no local broker provisioned)"
+    else
+        echo "Job broker: 127.0.0.1:${BROKER_DEFAULT_PORT} (dedicated, noeviction)"
+    fi
     echo "Database: ${DB_INSTALL:-prompt}"
     if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ]; then
         echo "  db name: $DB_NAME_INPUT"
@@ -7916,12 +8190,13 @@ to /etc/bunkerweb and the database schema."
             fi
             ;;
     esac
-    # Stop bunkerweb (drain) → api/ui → scheduler LAST. Snapshot active units into
-    # _restart_after_upgrade in REVERSE order (scheduler restarts first to render templates).
+    # Stop bunkerweb (drain) → api/ui → worker → scheduler LAST. Snapshot active units into
+    # _restart_after_upgrade in REVERSE order (scheduler restarts first to render templates,
+    # then the worker that executes what it dispatches).
     # Skipping the snapshot would leave services down — package postinst only restarts if-active.
     print_step "Stopping services prior to upgrade"
     local _restart_after_upgrade=""
-    for svc in bunkerweb bunkerweb-api bunkerweb-ui bunkerweb-scheduler; do
+    for svc in bunkerweb bunkerweb-api bunkerweb-ui bunkerweb-worker bunkerweb-scheduler; do
         # is-active is safe for absent units; the old `list-units | grep "^name"` guard
         # never matched (list-units indents every line with spaces or a ● bullet), so the
         # whole drain/restart sequence was dead code.
@@ -7955,6 +8230,29 @@ to /etc/bunkerweb and the database schema."
             exit 1
             ;;
     esac
+    # Self-heal a broker that an earlier installer version broke: it reconfigured the
+    # shared Redis with a password and/or an evicting policy while the worker and API
+    # kept defaulting to an unauthenticated redis://127.0.0.1:6379/0. Deliberately
+    # narrow — an untouched distro Redis on 6379 (no requirepass, no maxmemory, so
+    # nothing ever evicts) is a perfectly good broker and is left exactly as it is.
+    if _broker_is_wanted && [ "$BROKER_INSTALL" != "no" ] && \
+       ! grep -q '^CELERY_BROKER_URL=' /etc/bunkerweb/variables.env 2>/dev/null; then
+        local _waf_conf _needs_broker="no"
+        _waf_conf=$(_locate_redis_conf 2>/dev/null || true)
+        if [ -n "$_waf_conf" ] && [ -f "$_waf_conf" ]; then
+            if grep -qiE '^[[:space:]]*requirepass[[:space:]]' "$_waf_conf"; then
+                _needs_broker="yes"
+            elif grep -qiE '^[[:space:]]*maxmemory[[:space:]]' "$_waf_conf" && \
+                 ! grep -qiE '^[[:space:]]*maxmemory-policy[[:space:]]+noeviction' "$_waf_conf"; then
+                _needs_broker="yes"
+            fi
+        fi
+        if [ "$_needs_broker" = "yes" ]; then
+            print_step "Provisioning the dedicated job broker (the shared Redis cannot serve both roles)"
+            ensure_job_broker
+        fi
+    fi
+
     # Restart every unit that was active before the upgrade. The package
     # postinst only auto-restarts CURRENTLY active services, and we stopped
     # them above — so without this loop the operator's services stay down
@@ -8161,6 +8459,11 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
         if [ "$REDIS_INSTALL" = "yes" ]; then
             install_redis
         fi
+        # Independent of the WAF datastore above: the Celery broker is provisioned on every
+        # topology that runs a local worker, so there is one broker layout to document and
+        # test rather than two. Must land before the package phase — postinstall starts the
+        # worker, which reads CELERY_BROKER_URL from variables.env.
+        ensure_job_broker
         _bw_phase_done redis
     fi
 

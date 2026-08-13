@@ -66,6 +66,11 @@ def dispatch_jobs(payload: DispatchJobsRequest) -> JSONResponse:
             return JSONResponse(status_code=502, content={"status": "error", "message": f"Failed to dispatch jobs: {exc}"})
         run_ids.append({"name": job.name, "run_id": run_id})
 
+    # `run_id` is a log-correlation token, not a pollable handle: it is the Celery task id and
+    # it prefixes every worker log line for that run (`[{run_id}] ...`), so an operator can grep
+    # one dispatch out of the journal. There is deliberately no endpoint to query it — the app
+    # runs with `result_backend=None`, and adding one would mean adding a result backend, which
+    # puts job results back on the broker and re-couples job durability to it.
     return JSONResponse(
         status_code=202,
         content={"status": "success", "message": "Jobs dispatched", "runs": run_ids},

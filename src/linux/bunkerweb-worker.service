@@ -6,7 +6,8 @@ After=network.target
 # (redis-server / valkey / redis). Wants= keeps it best-effort so a missing or
 # differently-named broker never blocks the worker — Celery retries the broker
 # connection on startup (broker_connection_retry_on_startup=True in worker/app.py).
-Wants=redis-server.service valkey.service redis.service
+Wants=bunkerweb-broker.service redis-server.service valkey.service redis.service
+After=bunkerweb-broker.service
 
 [Service]
 Restart=always

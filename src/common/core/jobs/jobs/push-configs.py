@@ -61,6 +61,12 @@ CUSTOM_CONFIGS_DIRS = (
     "crs-plugins-after",
 )
 
+# This lease lives on the Celery broker, and its correctness depends on the broker running
+# `maxmemory-policy noeviction`. It is a TTL'd key, so any `volatile-*` policy is free to evict
+# it while a push is still in flight — two workers would then push configs to the fleet at once.
+# That is why the broker is a dedicated instance everywhere (shipped compose stacks, k8s
+# manifests, and `ensure_job_broker` in misc/install-bunkerweb.sh) and never shares a server
+# with the WAF datastore, which evicts on purpose. Do not "optimize" the policy back.
 LOCK_KEY = "bw:push_configs_inflight"
 LOCK_TTL = 1800  # matches Celery task_time_limit
 FAILOVER_KEEP = 3

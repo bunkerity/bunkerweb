@@ -53,6 +53,24 @@ end
 -- model can use and only costs storage.
 local MAX_TEMPLATED_URI = 200
 
+-- Caps for the two client-controlled strings stored verbatim in every record. NGINX accepts an
+-- 8k request line and 8k header by default, so a client can put ~16k in each one; multiplied by
+-- METRICS_MAX_BLOCKED_REQUESTS (1000 by default) that is megabytes per worker in the LRU, again
+-- in the Redis list, and again in every scrape payload -- against a datastore whose maxmemory is
+-- 256mb in every shipped stack. Truncate at write, not at read: the tail of a hostile URL or
+-- user agent carries no forensic value its head does not.
+-- `data` is deliberately not bounded here: it is plugin-supplied (utils.get_reason returns
+-- ctx.bw.reason_data), never raw client input, and it is a table rather than a string.
+local MAX_STORED_URL = 2048
+local MAX_STORED_USER_AGENT = 512
+
+local function bound(value, limit)
+	if type(value) ~= "string" or #value <= limit then
+		return value
+	end
+	return value:sub(1, limit) .. "..."
+end
+
 -- Decide whether a request joins the sampled baseline. `hash` is a stable hash of the
 -- request id and `rate` a percentage.
 -- Deterministic on purpose: math.random() has no per-worker seeding here, and a stable
@@ -563,8 +581,8 @@ function metrics:log(bypass_checks)
 		}
 		if subsystem == "http" then
 			request.method = self.ctx.bw.request_method
-			request.url = self.ctx.bw.request_uri
-			request.user_agent = self.ctx.bw.http_user_agent or ""
+			request.url = bound(self.ctx.bw.request_uri, MAX_STORED_URL)
+			request.user_agent = bound(self.ctx.bw.http_user_agent or "", MAX_STORED_USER_AGENT)
 		else
 			-- L4 dimensions, every one of them a free log-phase variable. method/url/user_agent
 			-- are deliberately left unset: fill_ctx() still synthesizes them because plugins
@@ -648,7 +666,7 @@ function metrics:log(bypass_checks)
 				country = self.ctx.bw.country,
 				asn_number = self.ctx.bw.asn_number,
 				ip_version = self.ctx.bw.ip_version,
-				user_agent = self.ctx.bw.http_user_agent,
+				user_agent = bound(self.ctx.bw.http_user_agent, MAX_STORED_USER_AGENT),
 			})
 			-- Drop oldest first, like the blocked buffer. A burst silently biases the sample
 			-- rather than growing memory; lowering the rate is the fix, not a bigger cap.

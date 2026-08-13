@@ -36,35 +36,6 @@ function redis:init_worker()
 	return self:ret(true, "success")
 end
 
--- function redis:timer()
--- 	-- Check if metrics is used
--- 	local is_needed, err = has_variable("USE_REDIS", "yes")
--- 	if is_needed == nil then
--- 		return self:ret(false, "can't check USE_REDIS variable : " .. err)
--- 	end
--- 	if not is_needed then
--- 		return self:ret(true, "redis not used")
--- 	end
--- 	-- Return values
--- 	local ret = true
--- 	local ret_err = "redis is working"
--- 	-- Check redis connection
--- 	local ok, err = self.clusterstore:connect(true)
--- 	if not ok then
--- 		self.
--- 		return self:ret(false, "redis connect error : " .. err)
--- 	end
--- 	-- Send ping
--- 	local ok, err = self.clusterstore:call("ping")
--- 	self.clusterstore:close()
--- 	if err then
--- 		return self:ret(false, "error while sending ping command to redis server : " .. err)
--- 	end
--- 	if not ok then
--- 		return self:ret(false, "redis ping command failed")
--- 	end
--- end
-
 function redis:api()
 	if self.ctx.bw.uri == "/redis/ping" and self.ctx.bw.request_method == "POST" then
 		if self.variables["USE_REDIS"] ~= "yes" then
@@ -101,8 +72,8 @@ function redis:api()
 		end
 		-- Get number of keys
 		local nb_keys, err = self.clusterstore:call("dbsize")
-		self.clusterstore:close()
 		if err then
+			self.clusterstore:close()
 			return self:ret(
 				true,
 				"error while sending dbsize command to redis server : " .. err,
@@ -110,12 +81,30 @@ function redis:api()
 			)
 		end
 		if not ok then
+			self.clusterstore:close()
 			return self:ret(true, "redis dbsize command failed", HTTP_INTERNAL_SERVER_ERROR)
 		end
-		-- Return data
+		-- Memory posture, on the same checkout. A key count alone cannot tell an operator whether
+		-- the datastore is silently evicting: `evicted_keys` climbing means bans and rate-limit
+		-- counters are being dropped to make room, which is invisible everywhere else.
+		-- Best-effort — INFO must never turn a working stats call into a 500.
+		local info = self.clusterstore:call("info", "memory")
+		local stats_info = self.clusterstore:call("info", "stats")
+		self.clusterstore:close()
 		local data = {
 			redis_nb_keys = nb_keys,
 		}
+		local function info_field(payload, field)
+			if type(payload) ~= "string" then
+				return nil
+			end
+			-- INFO lines are CRLF-terminated `field:value`.
+			return payload:match("[\r\n]" .. field .. ":([^\r\n]*)") or payload:match("^" .. field .. ":([^\r\n]*)")
+		end
+		data.redis_used_memory = tonumber(info_field(info, "used_memory"))
+		data.redis_maxmemory = tonumber(info_field(info, "maxmemory"))
+		data.redis_maxmemory_policy = info_field(info, "maxmemory_policy")
+		data.redis_evicted_keys = tonumber(info_field(stats_info, "evicted_keys"))
 		return self:ret(true, data, HTTP_OK)
 	end
 	return self:ret(false, "success")

@@ -167,18 +167,23 @@ services:
 
   bw-jobs-broker:
     image: valkey/valkey:8-alpine
+    # appendonly on purpose: a broker restart must not vaporise queued jobs.
+    # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+    # means silently dropped work, which is what the at-least-once acks exist to stop.
     command:
       [
         "valkey-server",
         "--save",
         "",
         "--appendonly",
-        "no",
+        "yes",
         "--maxmemory",
         "256mb",
         "--maxmemory-policy",
         "noeviction",
       ]
+    volumes:
+      - bw-jobs-broker-data:/data
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 5s
@@ -234,6 +239,7 @@ services:
           - app1
 
 volumes:
+  bw-jobs-broker-data:
   bw-data:
   bw-storage:
   bw-worker-storage:

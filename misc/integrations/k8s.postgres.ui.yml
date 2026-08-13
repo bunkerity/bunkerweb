@@ -201,7 +201,7 @@ spec:
             - name: API_TOKEN
               value: "changeme"
             - name: CELERY_BROKER_URL
-              value: "redis://svc-bunkerweb-redis.default.svc.cluster.local:6379/1"
+              value: "redis://svc-bunkerweb-jobs-broker.default.svc.cluster.local:6379/0"
             - name: API_USERNAME
               value: "changeme"
             - name: API_PASSWORD
@@ -238,7 +238,7 @@ spec:
             - name: API_TOKEN
               value: "changeme"
             - name: CELERY_BROKER_URL
-              value: "redis://svc-bunkerweb-redis.default.svc.cluster.local:6379/1"
+              value: "redis://svc-bunkerweb-jobs-broker.default.svc.cluster.local:6379/0"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -260,6 +260,42 @@ spec:
         - name: bunkerweb-redis
           image: redis:7-alpine
           imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-jobs-broker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-jobs-broker
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-jobs-broker
+    spec:
+      containers:
+        - name: bunkerweb-jobs-broker
+          image: redis:7-alpine
+          imagePullPolicy: Always
+          # Dedicated to Celery, never shared with the WAF datastore above: the broker
+          # holds TTL'd correctness leases (bw:job_attempt:*, bw:reload_pending,
+          # bw:push_configs_inflight) that any evicting policy is free to drop mid-flight.
+          # maxmemory-policy is per-server, so the two roles cannot share one instance.
+          args:
+            - "--save"
+            - ""
+            - "--appendonly"
+            - "no"
+            - "--maxmemory"
+            - "256mb"
+            - "--maxmemory-policy"
+            - "noeviction"
+          # Quickstart manifest: no PersistentVolumeClaim, so a pod restart drops queued
+          # jobs. Add a PVC (and --appendonly yes) for production, as the compose stacks do.
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -376,6 +412,20 @@ spec:
   type: ClusterIP
   selector:
     app: bunkerweb-redis
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-jobs-broker
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-jobs-broker
   ports:
     - name: redis
       protocol: TCP

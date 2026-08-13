@@ -30,7 +30,10 @@ function do_and_check_cmd() {
 # first installed unit name, or nothing if none is present.
 function detect_broker_unit() {
     local unit
-    for unit in redis-server valkey redis; do
+    # bunkerweb-broker first: the installer provisions a dedicated broker instance, and the
+    # distro unit it would otherwise pick may be the WAF datastore — password-protected and
+    # evicting, i.e. wrong for a job queue.
+    for unit in bunkerweb-broker redis-server valkey redis; do
         if systemctl list-unit-files "${unit}.service" 2>/dev/null | grep -q "^${unit}.service"; then
             echo "$unit"
             return 0

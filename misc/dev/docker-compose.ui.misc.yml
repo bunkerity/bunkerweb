@@ -169,18 +169,23 @@ services:
 
   bw-jobs-broker:
     image: valkey/valkey:8-alpine
+    # appendonly on purpose: a broker restart must not vaporise queued jobs.
+    # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+    # means silently dropped work, which is what the at-least-once acks exist to stop.
     command:
       [
         "valkey-server",
         "--save",
         "",
         "--appendonly",
-        "no",
+        "yes",
         "--maxmemory",
         "256mb",
         "--maxmemory-policy",
         "noeviction",
       ]
+    volumes:
+      - bw-jobs-broker-data:/data
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 5s
@@ -229,10 +234,13 @@ services:
 
   redis: # Redis service for the persistence of reports/bans/stats
     image: redis:8-alpine
+    # volatile-lru, never allkeys-lru: permanent bans and sessions are stored WITHOUT a TTL,
+    # and allkeys-* evicts by recency regardless of TTL — it is free to drop them. Matches
+    # what misc/integrations and install-bunkerweb.sh use for the datastore role.
     command: >
       redis-server
       --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
+      --maxmemory-policy volatile-lru
       --save 60 1000
       --appendonly yes
     volumes:
@@ -250,6 +258,7 @@ services:
           - app1
 
 volumes:
+  bw-jobs-broker-data:
   bw-data:
   bw-storage:
   bw-worker-storage:

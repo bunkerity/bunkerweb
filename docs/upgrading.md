@@ -20,6 +20,66 @@
     REDIS_SSL_VERIFY: "no"
     ```
 
+!!! warning "The job broker is now a separate instance from the WAF datastore"
+
+    BunkerWeb uses Redis/Valkey for two unrelated jobs, and they need contradictory settings:
+
+    | Role | Setting | Why |
+    |------|---------|-----|
+    | **Job broker** (`CELERY_BROKER_URL`) | `maxmemory-policy noeviction` | It holds the correctness leases that stop two workers pushing configs at once. They are keys *with* a TTL, so any `volatile-*` policy is free to drop them mid-flight. |
+    | **WAF datastore** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru` | It is capped on purpose, so transient counters are evicted rather than writes refused. |
+
+    `maxmemory-policy` is a per-server setting, never per-database, so one instance cannot do
+    both — pointing the two roles at different database numbers on the same server does not
+    separate them. Every shipped stack now runs a dedicated `bw-jobs-broker`, and the Linux
+    installer provisions a `bunkerweb-broker` service on `127.0.0.1:6380`.
+
+    **If you upgrade with the installer, this is handled for you.** It provisions the broker,
+    writes `CELERY_BROKER_URL` into `/etc/bunkerweb/variables.env`, and leaves an untouched
+    distro Redis alone (with no `maxmemory` set, nothing ever evicts, so it was never broken).
+
+    **If you upgrade with plain `apt`/`dnf` and you set a Redis password by hand**, you are
+    affected and background jobs are already failing — silently. The worker and the API default
+    to an unauthenticated `redis://127.0.0.1:6379/0`, so a password-protected server answers
+    `NOAUTH`: `POST /jobs/dispatch` returns 502 and the worker stays `active` while consuming
+    nothing. There is no certificate renewal, no blocklist refresh and no backup in that state.
+    Check for it with:
+
+    ```bash
+    journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'
+    ```
+
+    Fix it by giving the broker its own credentials in `/etc/bunkerweb/variables.env` — one
+    write covers both components, because the worker and the API both read that file before
+    their own:
+
+    ```bash
+    CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0
+    ```
+
+    ```bash
+    systemctl restart bunkerweb-worker bunkerweb-api
+    ```
+
+    TLS is supported with the `rediss://` scheme. **Set `ssl_cert_reqs` explicitly** — a bare
+    `rediss://` URL negotiates TLS without verifying the server's certificate:
+
+    ```bash
+    CELERY_BROKER_URL=rediss://:<password>@broker.example.com:6379/0?ssl_cert_reqs=required
+    ```
+
+!!! warning "The Celery worker was not enabled on some installs"
+
+    `bunkerweb-worker` executes every job the scheduler dispatches. On installs where the
+    installer deferred service startup — `--redis`, an external database, CrowdSec, custom DNS
+    resolvers, and every `--manager` install — it was never enabled, so the stack came up
+    healthy and ran no background jobs at all. The installer now enables it alongside the
+    scheduler on those paths. Verify after upgrading:
+
+    ```bash
+    systemctl is-enabled bunkerweb-worker && systemctl is-active bunkerweb-worker
+    ```
+
 ### Procedure
 
 === "Docker"

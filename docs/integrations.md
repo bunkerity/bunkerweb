@@ -2347,6 +2347,34 @@ Depending on your installation type:
 !!! info "Database Configuration"
     Standalone Manager, Scheduler, UI, and API deployments need a shared database using the `DATABASE_URI` setting. When the easy install script installs or wires a database for Full Stack or Manager mode, it writes `DATABASE_URI` to `/etc/bunkerweb/variables.env`; otherwise set it manually in the service environment files. The format is: `mariadb+pymysql://user:password@host:port/database` (or `postgresql://`, `mysql+pymysql://`, `sqlite:////path/to/db.sqlite`).
 
+!!! info "Job broker configuration"
+    Since 1.7 the Scheduler only *dispatches* jobs — `bunkerweb-worker` (Celery) executes them, and
+    the two talk through a Redis/Valkey **broker**. Without a reachable broker the stack boots
+    clean, reports healthy and runs **no** background job: no certificate renewal, no blocklist or
+    GeoIP refresh, no backup.
+
+    The easy install script provisions a dedicated `bunkerweb-broker` service on `127.0.0.1:6380`
+    (config in `/etc/bunkerweb/broker.conf`) and writes `CELERY_BROKER_URL` into
+    `/etc/bunkerweb/variables.env`. Both the worker and the API read that file before their own,
+    so the single entry covers both. Skip it with `--no-broker`, or point at an existing broker
+    with `--broker-url redis://:password@host:6379/0`.
+
+    Installing from packages instead? The `redis-server`/`valkey` package is a hard dependency and
+    postinstall enables it, so an **unconfigured** distro Redis on `127.0.0.1:6379` works as-is —
+    the default `CELERY_BROKER_URL` points there. Two things break it, both silently:
+
+    - **A password.** The default URL is unauthenticated, so `requirepass` makes every dispatch
+      fail with `NOAUTH`. Set `CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0`.
+    - **Sharing it with the WAF datastore under a `maxmemory` cap.** The broker holds TTL'd
+      correctness leases that any `volatile-*`/`allkeys-*` policy may evict mid-flight, causing
+      duplicate config pushes. Give the broker its own instance with `maxmemory-policy
+      noeviction`, exactly as the shipped Docker stacks and the easy install script do. A distro
+      Redis with **no** `maxmemory` set never evicts, which is why the packaged default is safe.
+
+    For a broker reached over the network, use `rediss://` and set `ssl_cert_reqs` explicitly —
+    a bare `rediss://` URL negotiates TLS **without verifying the certificate**:
+    `rediss://:<password>@broker.example.com:6379/0?ssl_cert_reqs=required`.
+
 ### Installation using package manager
 
 Please ensure that you have **NGINX 1.30.4 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.

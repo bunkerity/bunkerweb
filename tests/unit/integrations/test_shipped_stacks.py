@@ -100,9 +100,55 @@ def test_installer_compose_template_is_valid(name):
 
 def test_installer_scheduler_stack_can_run_jobs():
     services = _compose_config(INSTALLER_COMPOSE["scheduler"])["services"]
-    assert {"bw-api", "bw-worker", "redis"} <= services.keys()
+    assert {"bw-api", "bw-worker", "redis", "bw-jobs-broker"} <= services.keys()
     for service in ("bw-scheduler", "bw-api", "bw-worker"):
-        assert services[service]["environment"]["CELERY_BROKER_URL"] == "redis://redis:6379/1"
+        assert services[service]["environment"]["CELERY_BROKER_URL"] == "redis://bw-jobs-broker:6379/0"
+
+
+def _eviction_policy(command):
+    """`--maxmemory-policy X` out of a compose command, whichever form it was written in."""
+    if command is None:
+        return None
+    argv = command if isinstance(command, list) else command.split()
+    for index, token in enumerate(argv):
+        if token == "--maxmemory-policy" and index + 1 < len(argv):
+            return argv[index + 1]
+    return None
+
+
+@pytest.mark.parametrize("name", INSTALLER_COMPOSE)
+def test_installer_broker_never_evicts(name):
+    """The broker holds the TTL'd correctness leases -- bw:job_attempt:*, bw:reload_pending,
+    bw:push_configs_inflight. Any `volatile-*` policy is free to drop them mid-flight, which
+    means duplicate config pushes and lost retry state with nothing logged. The installer used
+    to point CELERY_BROKER_URL at a `redis` service running volatile-lru, so this is a
+    regression guard, not a style rule."""
+    services = _compose_config(INSTALLER_COMPOSE[name])["services"]
+    urls = {service["environment"].get("CELERY_BROKER_URL") for service in services.values() if service.get("environment")}
+    urls.discard(None)
+    if not urls:
+        return
+
+    for url in urls:
+        host = url.split("//", 1)[1].split("@")[-1].split(":")[0]
+        assert host in services, f"{name}: CELERY_BROKER_URL points at {host}, which is not a service in this stack"
+        policy = _eviction_policy(services[host].get("command"))
+        assert policy in (None, "noeviction"), f"{name}: broker {host} runs maxmemory-policy {policy}"
+
+
+@pytest.mark.parametrize("manifest", COMPOSE, ids=lambda path: path.name)
+def test_shipped_broker_survives_a_restart(manifest):
+    """A broker restart must not vaporise the queue. Every one of these shipped with
+    `--save "" --appendonly no` and no volume, so a `docker compose restart` silently dropped
+    every queued job -- the one failure the at-least-once acks in the worker cannot cover."""
+    services = _compose_config(manifest.read_text(encoding="utf-8"))["services"]
+    broker = services.get("bw-jobs-broker")
+    if broker is None:
+        return
+
+    argv = broker["command"] if isinstance(broker["command"], list) else broker["command"].split()
+    assert argv[argv.index("--appendonly") + 1] == "yes", f"{manifest.name}: broker AOF is off"
+    assert any(volume["target"] == "/data" for volume in broker.get("volumes", [])), f"{manifest.name}: broker AOF has nowhere to live"
 
 
 def test_installer_autoconf_clients_receive_api_token():
