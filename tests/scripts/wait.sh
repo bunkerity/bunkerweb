@@ -22,7 +22,34 @@ fi
 
 log "WAIT" "ℹ️ " "⏳ Waiting for stack to be healthy ..."
 i=0
-if [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
+if [ -f /tmp/example_stack.txt ] ; then
+    # An example names its containers however its documentation reads best, so wait on
+    # what the compose project actually started rather than on a fixed list: every
+    # container running, and every container that declares a healthcheck healthy.
+    example_stack="$(cat /tmp/example_stack.txt)"
+    while [ $i -lt "$timeout" ] ; do
+        healthy="true"
+        for container in $(docker compose -f "$example_stack" ps -q 2>/dev/null) ; do
+            state="$(docker inspect --format '{{.State.Status}}' "$container" 2>/dev/null)"
+            health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container" 2>/dev/null)"
+            if [ "$state" != "running" ] || { [ "$health" != "none" ] && [ "$health" != "healthy" ] ; } ; then
+                healthy="false"
+                break
+            fi
+        done
+        if [ "$healthy" = "true" ] ; then
+            log "WAIT" "ℹ️ " "📕 Example stack is healthy ✅"
+            break
+        fi
+        sleep 1
+        i=$((i+1))
+    done
+    if [ $i -ge "$timeout" ] ; then
+        log "WAIT" "❌" "📕 Example stack is not healthy after $timeout seconds"
+        docker compose -f "$example_stack" ps
+        exit 1
+    fi
+elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
     while [ $i -lt "$timeout" ] ; do
         containers=("bunkerweb" "bw-scheduler")
         if [ "$integration" == "Autoconf" ] ; then

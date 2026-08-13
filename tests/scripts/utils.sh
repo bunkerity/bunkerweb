@@ -414,7 +414,16 @@ function cleanup_stack () {
         fi
     fi
 
-    if [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
+    if [ -f /tmp/example_stack.txt ] ; then
+        # Example-backed run: one compose project holds the whole stack.
+        example_stack="$(cat /tmp/example_stack.txt)"
+        docker compose -f "$example_stack" down -v
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "📕 Failed to stop the example stack"
+            return 1
+        fi
+    elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
         docker compose -f tests/docker/docker-compose.bunkerweb.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then

@@ -15,6 +15,7 @@ from yaml import safe_dump, safe_load
 from utils import resolve_env_placeholders
 import utils.logger  # noqa: F401
 from utils.action import parse_action
+from utils.example import clear as example_clear, materialise as example_materialise
 
 LOGGER = getLogger("GENERATE")
 
@@ -317,7 +318,14 @@ version_file_path.write_text(version)
 services_path = Path(sep, "tmp", "services.yml")
 services_path.unlink(missing_ok=True)
 
-if ARGS.integration != "Kubernetes":
+# An example-backed spec brings its own stack: the whole thing (BunkerWeb, scheduler,
+# API, worker, broker and the application) comes from examples/<name>, so the framework
+# deploys that instead of composing one from services.yml.
+example_name = data.get("example") or data.get(ARGS.integration, {}).get("example")
+example_clear()
+if example_name:
+    example_materialise(LOGGER, example_name, ARGS.integration, version)
+elif ARGS.integration != "Kubernetes":
     LOGGER.info("📝 Writing /tmp/services.yml")
     services_path.write_text(safe_dump(services, indent=2))
 elif "spec" in ingress:

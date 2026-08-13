@@ -286,7 +286,13 @@ if [ -n "$redis_type" ] ; then
 fi
 
 # Starting stack
-if [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
+if [ -f /tmp/example_stack.txt ] ; then
+    # The spec is example-backed: examples/<name> ships the whole stack, so the
+    # framework deploys that instead of composing one of its own.
+    example_stack="$(cat /tmp/example_stack.txt)"
+    log "START" "ℹ️ " "📕 Starting example stack from $example_stack ..."
+    compose_up "$example_stack" "example stack" "📕" || exit 1
+elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
     docker compose -f tests/docker/docker-compose.bunkerweb.yml up -d
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then

@@ -18,9 +18,7 @@ LOGGER = getLogger("PARSE")
 
 parser = ArgumentParser(prog="Tests parser", description="Parse test files and return them as a b64encoded json file.")
 parser.add_argument("type", type=str, help="Type of test to parse", choices=["core", "ui", "api"])
-parser.add_argument(
-    "--integration", type=str, help="Integration to parse tests for", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"]
-)
+parser.add_argument("--integration", type=str, help="Integration to parse tests for", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"])
 parser.add_argument("--category", type=str, help="Category of the test to parse actions from")
 parser.add_argument("--dev", action="store_true", help="Run in development mode")
 ARGS = parser.parse_args()
@@ -84,6 +82,24 @@ if not ARGS.category:
 
                     if run_on == "TODO":
                         LOGGER.debug(f"Skipping {integration} because it's TODO")
+                        continue
+
+                    # "Docker" on its own leaves every architecture (and, on Linux, every
+                    # distribution) unresolved. Expand them the way `integrations: "all"`
+                    # does instead of stringifying the dict into the matrix entry.
+                    if isinstance(run_on, dict):
+                        for suffix, value in run_on.items():
+                            if isinstance(value, dict):
+                                for spec, spec_value in value.items():
+                                    if spec_value == "TODO":
+                                        LOGGER.debug(f"Skipping {integration} / {suffix} / {spec} because it's TODO")
+                                        continue
+                                    tests.append(f"{integration};{suffix};{spec};{spec_value};{name}")
+                                continue
+                            if value == "TODO":
+                                LOGGER.debug(f"Skipping {integration} / {suffix} because it's TODO")
+                                continue
+                            tests.append(f"{integration};{suffix};{value};{name}")
                         continue
 
                     tests.append(f"{integration};{run_on};{name}")

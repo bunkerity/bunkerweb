@@ -41,6 +41,35 @@ Adding a core action type takes four edits: a model in `models/`, a handler in
 A UI step takes three: model in `models/ui/`, handler in `ui_handlers/`, dispatch in
 `ui.py`.
 
+### Testing an example
+
+A spec can put an `examples/` stack under test instead of one the framework composes.
+Add `example: <name>` at the top of a core spec and the runner deploys
+`examples/<name>/docker-compose.yml` as a user would, then asserts against it:
+
+```yaml
+example: php-singlesite
+
+integrations:
+  - "Docker"
+
+actions:
+  serves_the_php_app:
+    type: string
+    url: "https://www.example.com"
+    string: "Hello World"
+    tls: "www.example.com"
+```
+
+The example is copied to `/tmp/example-stack` before anything is rewritten, so the
+directory you ship stays untouched. The copy gets the images built from this commit and
+a scheduler forced onto Let's Encrypt staging with BunkerNet, DNSBL and the anonymous
+report off.
+
+One trap when you move a scenario over from `tests/examples/<name>.json`: the legacy
+harness casefolds both sides of a string assertion and the framework handler does not.
+Check the case against a real response rather than copying the descriptor across.
+
 ## Running locally
 
 You can run the whole thing on a workstation. No pipeline, no self-hosted runner.

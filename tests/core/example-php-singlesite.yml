@@ -1,0 +1,17 @@
+# Example-backed spec: the stack under test is examples/php-singlesite itself, deployed
+# as a user would deploy it. Keeping the assertions here rather than in the example keeps
+# that directory to what someone reading the documentation needs.
+example: php-singlesite
+
+integrations:
+  - Docker
+
+actions:
+  serves_the_php_app:
+    type: string
+    url: "https://www.example.com"
+    # Exact case on purpose: the legacy harness casefolded both sides, this handler does
+    # not, and the page says "Hello World !".
+    string: "Hello World"
+    tls: "www.example.com"
+    timeout: 120
