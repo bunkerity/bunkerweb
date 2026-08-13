@@ -78,7 +78,7 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl tzdata brotli lmdb libfuzzy2
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "python3>=3.14.7-r0" "pyc>=3.14.7-r0" # CVE-2026-7210
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -108,7 +108,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.14~rc2"
+LABEL version="1.6.14~rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"
