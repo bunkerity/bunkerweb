@@ -6,12 +6,14 @@ from typing import List, Literal, Optional, Tuple
 from docker import DockerClient
 from docker.models.containers import Container
 
-
 CONTAINER_TYPES = {
     "bunkerweb": {"label": "bunkerweb.INSTANCE"},
     "controller": {"label": "bunkerweb.type=autoconf"},
     "scheduler": {"label": "bunkerweb.type=scheduler"},
     "database": {"name": "bw-db"},
+    # 1.7 moved the database clients (sqlite3, mariadb, psql) to the API image, so
+    # queries run there rather than in the scheduler.
+    "api": {"name": "bw-api"},
 }
 
 
@@ -21,7 +23,7 @@ def get_docker_client() -> DockerClient:
 
 
 @cache
-def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database"]) -> Container:
+def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"]) -> Container:
     docker_client = get_docker_client()
 
     filters = CONTAINER_TYPES.get(_type)
@@ -39,7 +41,7 @@ def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "sch
     return containers[0]
 
 
-def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database"], since: Optional[float]) -> List[str]:
+def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"], since: Optional[float]) -> List[str]:
     return (
         get_container(logger, _type)
         .logs(
@@ -54,7 +56,7 @@ def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "schedule
     )
 
 
-def run_command(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database"], command: List[str]) -> Tuple[int, str]:
+def run_command(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"], command: List[str]) -> Tuple[int, str]:
     exit_code, output = get_container(logger, _type).exec_run(
         command,
         stdout=True,

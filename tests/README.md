@@ -64,7 +64,21 @@ actions:
 The example is copied to `/tmp/example-stack` before anything is rewritten, so the
 directory you ship stays untouched. The copy gets the images built from this commit and
 a scheduler forced onto Let's Encrypt staging with BunkerNet, DNSBL and the anonymous
-report off.
+report off. If the example ships a `setup-<integration>.sh`, the runner executes it from
+the copy first, and the matching `cleanup-` script at teardown — several examples fix a
+web root's ownership or install a Helm chart there, and skipping that step gets you a
+stack that boots and serves nothing.
+
+Which file gets deployed depends on the integration, and so does what it replaces:
+
+| Integration | File | Deployed |
+| --- | --- | --- |
+| Docker | `docker-compose.yml` | Replaces the framework's stack — the example ships BunkerWeb itself |
+| Autoconf | `autoconf.yml` | On top of the framework's stack — the example ships applications and their `bunkerweb.*` labels |
+| Kubernetes | `kubernetes.yml` | On top, same idea, through `kubectl apply` |
+
+Linux has no example mode: it installs a package into a systemd container rather than
+deploying a compose file.
 
 Two traps when you move a scenario over from `tests/examples/<name>.json`. The legacy
 harness casefolds both sides of a string assertion, and it used `requests`, which follows
@@ -123,6 +137,10 @@ still boots, runs zero jobs, and passes any test that never needed one.
 
 The job broker stays separate from the WAF datastore Redis. 1.7 split those two roles, and
 core specs assert on datastore keys.
+
+`database` actions run their SQL in the API container. The scheduler image lost `sqlite3`
+when 1.7 moved the database clients to the API, and both mount the same `bw-storage`
+volume, so the query reaches the same file.
 
 All-in-one is exempt: its entrypoint enables the worker and forces the API on by itself.
 

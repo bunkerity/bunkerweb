@@ -105,7 +105,7 @@ def execute_query(
                 text=True,
             )
             return result.returncode, (result.stdout + result.stderr).strip()
-        return run_docker_command(logger, "bunkerweb" if integration == "Linux" else "scheduler", f"sqlite3 /var/lib/bunkerweb/db.sqlite3 {query!r}")
+        return run_docker_command(logger, "bunkerweb" if integration == "Linux" else "api", f"sqlite3 /var/lib/bunkerweb/db.sqlite3 {query!r}")
 
     # Handle database URI depending on the integration
     if integration == "Kubernetes":

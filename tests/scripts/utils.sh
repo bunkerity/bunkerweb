@@ -64,6 +64,41 @@ function robust_docker_pull() {
     done
 }
 
+# Run an example's own setup-<integration>.sh or cleanup-<integration>.sh, the way a
+# reader of the documentation would: from inside the stack directory, as root. Examples
+# use them to fix web-root ownership or install a Helm chart, so skipping them deploys a
+# stack that boots and then serves nothing.
+function example_hook() {
+    local phase="${1:-}"
+    local integration="${2:-}"
+    local stack_dir
+    stack_dir="$(dirname "$(cat /tmp/example_stack.txt)")"
+
+    local script
+    script="${stack_dir}/${phase}-$(echo "$integration" | tr '[:upper:]' '[:lower:]').sh"
+    if [ ! -f "$script" ] ; then
+        return 0
+    fi
+
+    log "UTILS" "ℹ️ " "📕 Running $(basename "$script") ..."
+    chmod +x "$script"
+
+    # Several of these chown a web root, so they run through sudo where it needs no
+    # password. Where it does, run as the current user: a script that needs root says so
+    # and fails loudly, which beats hanging on a password prompt.
+    local runner=()
+    if sudo -n true 2>/dev/null ; then
+        runner=(sudo -E)
+    else
+        log "UTILS" "⚠️" "📕 sudo needs a password here, running $(basename "$script") as $(whoami)"
+    fi
+
+    if ! (cd "$stack_dir" && "${runner[@]}" "./$(basename "$script")") ; then
+        log "UTILS" "❌" "📕 $(basename "$script") failed"
+        return 1
+    fi
+}
+
 # Bring a compose file up, retrying once through a full "down -v" — the recovery the
 # stack-up steps have always open-coded.
 function compose_up() {
@@ -108,6 +143,17 @@ function cleanup_stack () {
     fi
 
     log "UTILS" "ℹ️ " "🧹 Cleaning up current stack ..."
+
+    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Kubernetes" ] ; then
+        example_stack="$(cat /tmp/example_stack.txt)"
+        example_hook cleanup "$integration"
+        kubectl delete -f "$example_stack" --ignore-not-found
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "📕 Failed to delete the example services"
+            return 1
+        fi
+    fi
 
     if [ -f /tmp/services.yml ] ; then
         if [ "$integration" == "Kubernetes" ] ; then
@@ -414,9 +460,10 @@ function cleanup_stack () {
         fi
     fi
 
-    if [ -f /tmp/example_stack.txt ] ; then
-        # Example-backed run: one compose project holds the whole stack.
+    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+        # Example-backed run on Docker: one compose project holds the whole stack.
         example_stack="$(cat /tmp/example_stack.txt)"
+        example_hook cleanup "$integration"
         docker compose -f "$example_stack" down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
@@ -424,6 +471,18 @@ function cleanup_stack () {
             return 1
         fi
     elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
+        if [ -f /tmp/example_stack.txt ] ; then
+            # The example only added its application layer on top of the stack below.
+            example_stack="$(cat /tmp/example_stack.txt)"
+            example_hook cleanup "$integration"
+            docker compose -f "$example_stack" down -v
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "📕 Failed to stop the example services"
+                return 1
+            fi
+        fi
+
         docker compose -f tests/docker/docker-compose.bunkerweb.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then

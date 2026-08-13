@@ -22,9 +22,9 @@ fi
 
 log "WAIT" "ℹ️ " "⏳ Waiting for stack to be healthy ..."
 i=0
-if [ -f /tmp/example_stack.txt ] ; then
-    # An example names its containers however its documentation reads best, so wait on
-    # what the compose project actually started rather than on a fixed list: every
+if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+    # A Docker example names its containers however its documentation reads best, so wait
+    # on what the compose project actually started rather than on a fixed list: every
     # container running, and every container that declares a healthcheck healthy.
     example_stack="$(cat /tmp/example_stack.txt)"
     while [ $i -lt "$timeout" ] ; do

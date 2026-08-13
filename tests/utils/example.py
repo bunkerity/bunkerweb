@@ -46,6 +46,11 @@ COMPOSE_FILES = {
     "Kubernetes": "kubernetes.yml",
 }
 
+# On Docker an example ships the whole stack, BunkerWeb included, and replaces the one
+# the framework composes. On Autoconf and Kubernetes it ships only its application layer
+# and the labels or annotations that configure it, so it is deployed on top of the
+# framework's stack instead. start.sh reads this from the integration name.
+
 
 def materialise(logger: Logger, name: str, integration: str, bw_version: str) -> Path:
     """Copy examples/<name> to /tmp and point it at the images under test.

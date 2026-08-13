@@ -286,10 +286,12 @@ if [ -n "$redis_type" ] ; then
 fi
 
 # Starting stack
-if [ -f /tmp/example_stack.txt ] ; then
-    # The spec is example-backed: examples/<name> ships the whole stack, so the
-    # framework deploys that instead of composing one of its own.
+if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+    # A Docker example ships the whole stack, BunkerWeb included, so the framework
+    # deploys that instead of composing one of its own. Autoconf and Kubernetes examples
+    # ship only their application layer and land further down, on top of this stack.
     example_stack="$(cat /tmp/example_stack.txt)"
+    example_hook setup "$integration" || exit 1
     log "START" "ℹ️ " "📕 Starting example stack from $example_stack ..."
     compose_up "$example_stack" "example stack" "📕" || exit 1
 elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
@@ -314,6 +316,15 @@ elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
     # Since 1.7 the scheduler only dispatches: it posts jobs to the API, which queues
     # them on the broker for bw-worker to execute. All three belong to every stack,
     # whatever the test type — without them the stack boots and runs zero jobs.
+    # The scheduler compose owns bw-storage and the API and worker attach to it as
+    # external, so create it here: they come up first and a clean host has no volume.
+    docker volume create bw-storage > /dev/null
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] ; then
+        log "START" "❌" "🐳 Failed to create the bw-storage volume"
+        exit 1
+    fi
+
     compose_up "tests/docker/docker-compose.api.yml" "API" || exit 1
     compose_up "tests/docker/docker-compose.worker.yml" "worker" || exit 1
 
@@ -643,7 +654,26 @@ if [ "$integration" != "All-in-one" ] && [ "$restart_crowdsec" == "1" ] ; then
     fi
 fi
 
-if [ -f /tmp/services.yml ] ; then
+if [ -f /tmp/example_stack.txt ] && [ "$integration" != "Docker" ] ; then
+    # Autoconf and Kubernetes examples carry only their application layer: their services
+    # configure BunkerWeb through container labels or ingress annotations, and the stack
+    # they attach to is the one started above. They take the slot the generated
+    # services.yml would have used.
+    example_stack="$(cat /tmp/example_stack.txt)"
+    example_hook setup "$integration" || exit 1
+    log "START" "ℹ️ " "📕 Deploying example services from $example_stack ..."
+
+    if [ "$integration" == "Kubernetes" ] ; then
+        kubectl apply -f "$example_stack"
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "START" "❌" "📕 Apply failed for the example services"
+            exit 1
+        fi
+    else
+        compose_up "$example_stack" "example services" "📕" || exit 1
+    fi
+elif [ -f /tmp/services.yml ] ; then
     if [ "$integration" == "Kubernetes" ] ; then
         kubectl apply -f /tmp/services.yml
         # shellcheck disable=SC2181
