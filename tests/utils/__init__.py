@@ -17,6 +17,9 @@ from .k8s import get_logs as get_k8s_logs, run_command as run_k8s_command
 
 ERROR_LOG_FILE = Path(sep, "var", "log", "bunkerweb", "error.log")
 
+# Same override generate.py honours, so a local run reads back the env files it wrote
+BW_TESTS_ETC = Path(getenv("BW_TESTS_ETC", Path(sep, "etc", "bunkerweb").as_posix()))
+
 # Regular expression to find ${VAR} patterns
 ENV_VAR_PATTERN = re_compile(r"\$\{([^}^{]+)\}", MULTILINE)
 IS_FREEBSD = platform.system() == "FreeBSD"
@@ -71,9 +74,7 @@ def get_logs(
         return file.readlines()
 
 
-def run_command(
-    logger: Logger, integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"], command: str
-) -> Tuple[int, str]:  # noqa: F811
+def run_command(logger: Logger, integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"], command: str) -> Tuple[int, str]:  # noqa: F811
     command = command.split(" ")
     if command[0] != "bwcli":
         command.insert(0, "bwcli")
@@ -110,7 +111,7 @@ def execute_query(
     if integration == "Kubernetes":
         database_uri = b64decode(safe_load(Path(sep, "tmp", "secrets.yml").read_text())["data"]["DATABASE_URI"].encode("utf-8")).decode("utf-8")
     else:
-        database_uri = dotenv_values(Path(sep, "etc", "bunkerweb", "variables.env").as_posix())["DATABASE_URI"]
+        database_uri = dotenv_values(BW_TESTS_ETC.joinpath("variables.env").as_posix())["DATABASE_URI"]
 
     db_host = database_uri.rsplit("@", 1)[1].split("/")[0].split(":")
     db_port = None
@@ -157,9 +158,7 @@ if __name__ == "__main__":
     LOGGER = getLogger("UTILS")
 
     parser = ArgumentParser(prog="Runner utils", description="Utils for the test runner (will show logs of the Integration)")
-    parser.add_argument(
-        "integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"]
-    )
+    parser.add_argument("integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"])
     ARGS = parser.parse_args()
 
     LOGGER.info(get_logs(LOGGER, ARGS.integration))

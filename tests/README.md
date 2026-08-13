@@ -92,7 +92,9 @@ export BW_TESTS_ETC=/tmp/bunkerweb-tests/etc
 `BW_TESTS_ETC` roots the generated `variables.env`, `api.env`, `worker.env` and `ui.env`.
 It defaults to `/etc/bunkerweb`, which suits a throwaway CI host. On a machine that has
 BunkerWeb installed, that default overwrites your real config, so export the variable
-before you run. The compose fragments read the same variable and follow.
+before you run. The compose fragments read the same variable and follow, and the Linux
+container bind-mounts it onto its own `/etc/bunkerweb`, so the packaged BunkerWeb reads
+the files the runner writes.
 
 Outside CI (`IN_CICD` unset), `build.sh` builds any missing `bunkerity/<image>:tests` from
 the Dockerfiles in this checkout. It reuses an image that already exists, so the second run
@@ -154,8 +156,14 @@ directory, and the `name` field points back at the directory to deploy. They use
 inside the example folder, which put test assertions in documentation that users copy.
 Adding a scenario means adding a file here, not editing the example.
 
-The harness goes away once those scenarios run on the framework. That needs an example
-mode (deploy the example's own compose rather than a generated stack) and it needs the
-example stacks to work on 1.7 first: 24 of the 25 ship no `bw-api` and no `bw-worker`, so
-they run zero jobs, and 19 of those ask for `AUTO_LETS_ENCRYPT` certificates that can never
-be issued.
+Every scenario now has a spec in `core/example-*.yml`, and the 51 example stacks carry the
+1.7 topology, so the framework covers what the harness covers on Docker, Autoconf and
+Kubernetes. Two gaps keep the harness alive:
+
+- **Swarm**, which the framework does not run at all.
+- **Linux examples**. Example mode deploys a compose file; the Linux integration installs a
+  package into a systemd container instead, so `behind-reverse-proxy`, `nextcloud`,
+  `php-multisite` and `wordpress` still get their Linux pass from the harness. Their specs
+  cover the container integrations and mark the Linux row `not converted`.
+
+Delete `tests/main.py`, the `*Test.py` classes and `tests/examples/` once both close.

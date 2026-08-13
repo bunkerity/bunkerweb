@@ -15,11 +15,13 @@ services:
       - /run/lock
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
-      #      - /run/php:/run/php
-      #      - /etc/bunkerweb:/etc/bunkerweb
-      #      - /var/www/html:/var/www/html
-      #      - /var/log/bunkerweb:/var/log/bunkerweb
-      #      - /var/lib/bunkerweb:/var/lib/bunkerweb
+      - /run/php:/run/php
+      # generate.py writes the env files on the host, the packaged BunkerWeb reads them
+      # in here — the two have to be the same directory or the tests configure nothing.
+      - ${BW_TESTS_ETC:-/etc/bunkerweb}:/etc/bunkerweb
+      - /var/www/html:/var/www/html
+      - /var/log/bunkerweb:/var/log/bunkerweb
+      - /var/lib/bunkerweb:/var/lib/bunkerweb
       - /tmp/output:/tmp/output
     labels:
       - bunkerweb.INSTANCE=yes
