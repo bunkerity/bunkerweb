@@ -1,3 +1,13 @@
+x-env: &env
+  # Spelled out even though it is the default everywhere else: the worker is the one component
+  # that reads an unset DATABASE_URI as "no database at all" (worker/app.py::init_worker_db)
+  # rather than falling back to this path.
+  DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
@@ -7,7 +17,7 @@ services:
       - "443:8443/tcp"
       - "443:8443/udp" # for QUIC
     environment:
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      <<: *env
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -21,9 +31,9 @@ services:
     volumes:
       - bw-storage:/data
     environment:
+      <<: *env
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "www.example.com" # replace with your domain
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       SERVE_FILES: "no"
       DISABLE_DEFAULT_SERVER: "yes"
       AUTO_LETS_ENCRYPT: "yes"
@@ -36,6 +46,63 @@ services:
         proxy_busy_buffers_size 512k;
         proxy_buffers 4 512k;
         proxy_buffer_size 256k;
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
+    volumes:
+      # The scheduler, the API and the worker share this volume because the SQLite database
+      # is a file inside it. Point DATABASE_URI at a real server before putting this under load.
+      - bw-storage:/data
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
+    networks:
+      - bw-universe
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
+    depends_on:
+      - bw-api
+      - bw-jobs-broker
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+    networks:
+      - bw-universe
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # noeviction on purpose: a broker that evicts under memory pressure drops queued
+    # jobs on the floor, and nothing upstream would notice.
+    # appendonly on purpose: a broker restart must not vaporise queued jobs.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    volumes:
+      - bw-jobs-broker-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -82,6 +149,7 @@ services:
       - magento-net
 
 volumes:
+  bw-jobs-broker-data:
   bw-storage:
   db-data:
   magento-data:
