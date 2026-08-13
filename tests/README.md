@@ -107,6 +107,11 @@ You need Docker, `redis-cli` (`apt install redis-tools`) and Python 3.13.
 python3 -m venv .venv-tests
 .venv-tests/bin/pip install --require-hashes -r tests/requirements.txt
 
+# The shell scripts call bare `python3`, so activate the venv rather than
+# calling its interpreter by path — otherwise parse.py runs against the system
+# interpreter and dies on `cannot import name 'DockerClient' from 'docker'`.
+source .venv-tests/bin/activate
+
 # Keep generated env files away from a real installation (see below)
 export BW_TESTS_ETC=/tmp/bunkerweb-tests/etc
 

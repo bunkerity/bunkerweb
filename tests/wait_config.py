@@ -8,8 +8,9 @@ healthy can therefore still be serving the previous action's configuration, whic
 any assertion that follows a race.
 
 The worker records every run in bw_jobs_runs. `--mark` stores how many push-configs runs
-exist just before the stack is restarted, and the default mode waits for one more than
-that. Counting without the mark would be satisfied by a run the previous action triggered.
+exist just before the stack is restarted, and the default mode waits for one more than that,
+with no change left pending. Counting alone would be satisfied by a run the previous action
+triggered, or by the push a restart does on boot before it has read the new environment.
 """
 
 from argparse import ArgumentParser
@@ -34,14 +35,25 @@ QUIET.setLevel(CRITICAL)
 
 REDIS_KEY = "push_configs_runs"
 QUERY = "SELECT COUNT(*) FROM bw_jobs_runs WHERE job_name = 'push-configs'"
+# What autoconf's own readiness gate reads: a change is pending until the run that applied
+# it acknowledges it. Bare column names rather than `= 1`, which PostgreSQL rejects on a
+# boolean.
+# Any job, not just push-configs: a spec can be about what a job produced (a downloaded
+# blocklist, a generated certificate), and the worker runs those asynchronously too.
+ALL_RUNS_QUERY = "SELECT COUNT(*) FROM bw_jobs_runs"
+PENDING_QUERY = (
+    "SELECT (SELECT COUNT(*) FROM bw_plugins WHERE config_changed) + "
+    "(SELECT COUNT(*) FROM bw_metadata WHERE custom_configs_changed OR external_plugins_changed "
+    "OR pro_plugins_changed OR instances_changed)"
+)
 
 
-def current_runs(integration: str, database: str) -> int:
+def query_count(integration: str, database: str, query: str) -> int:
     try:
         # get_container() exits the process when the stack is down, which is a normal
         # state here: the mark is taken before the restart, and the first polls can land
         # before the database is back.
-        exit_code, output = execute_query(QUIET, integration, database, QUERY)
+        exit_code, output = execute_query(QUIET, integration, database, query)
     except SystemExit:
         return -1
 
@@ -58,7 +70,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(prog="Wait for config", description="Wait for the dispatched configuration to reach the instances")
     parser.add_argument("integration", type=str, choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"])
     parser.add_argument("--mark", action="store_true", help="Record the current number of runs instead of waiting for a new one")
-    parser.add_argument("--settle", type=int, default=5, help="Seconds without a new run before the configuration counts as settled")
+    parser.add_argument("--settle", type=int, default=5, help="Seconds the pushed and no-pending state must hold before it counts as settled")
     parser.add_argument("--timeout", type=int, default=120)
     ARGS = parser.parse_args()
 
@@ -68,7 +80,7 @@ if __name__ == "__main__":
     if ARGS.mark:
         # A stack that is down, or a database that was just dropped, marks zero: the next
         # push then satisfies the wait, which is what a fresh stack should do anyway.
-        runs = current_runs(ARGS.integration, database)
+        runs = query_count(ARGS.integration, database, QUERY)
         redis_client.set(REDIS_KEY, max(runs, 0))
         LOGGER.info(f"📤 {max(runs, 0)} push-configs runs before the restart")
         sys_exit(0)
@@ -78,27 +90,31 @@ if __name__ == "__main__":
     settled = 0
 
     for _ in range(ARGS.timeout):
-        runs = current_runs(ARGS.integration, database)
+        runs = query_count(ARGS.integration, database, QUERY)
+        pending = query_count(ARGS.integration, database, PENDING_QUERY)
+        all_runs = query_count(ARGS.integration, database, ALL_RUNS_QUERY)
 
         # A full clean drops the database, so fewer runs than the mark means a fresh one
         # rather than a job running backwards.
         if 0 <= runs < previous:
             previous = 0
 
-        if runs > previous:
-            # A restart pushes twice: once on boot, from the configuration already in the
-            # database, and once more after the scheduler reads the new variables.env and
-            # notices it changed. Returning on the first would hand the test the
-            # configuration it is supposed to be replacing, so wait for the pushes to stop.
-            if runs != seen:
-                seen = runs
+        # A restart pushes twice: once on boot, from the configuration already in the
+        # database, and once more after the scheduler reads the new variables.env and
+        # notices it changed. Releasing on the first hands the test the configuration it is
+        # supposed to be replacing, so require a push of this restart, no change still
+        # waiting to be applied, and both holding still for a moment -- the flags are set
+        # after the boot push, so a single clear reading proves nothing.
+        if runs > previous and pending == 0:
+            if all_runs != seen:
+                seen = all_runs
                 settled = 0
             else:
                 settled += 1
 
             if settled >= ARGS.settle:
                 redis_client.set(REDIS_KEY, runs)
-                LOGGER.info(f"📤 Configuration pushed to the instances ✅ ({runs} push-configs runs)")
+                LOGGER.info(f"📤 Configuration pushed and jobs quiet ✅ ({runs} push-configs runs, {all_runs} job runs)")
                 sys_exit(0)
 
         sleep(1)

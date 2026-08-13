@@ -49,6 +49,22 @@ if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
         docker compose -f "$example_stack" ps
         exit 1
     fi
+
+    # Healthy containers are not a configured BunkerWeb: the scheduler still has to push,
+    # and an example brings its own database, so the push-configs count is out of reach
+    # here. Wait for the instance to say it is serving instead.
+    while [ $i -lt "$timeout" ] ; do
+        if docker compose -f "$example_stack" logs bunkerweb 2>/dev/null | grep -q "BunkerWeb is ready" ; then
+            log "WAIT" "ℹ️ " "📕 Example stack is serving its configuration ✅"
+            break
+        fi
+        sleep 1
+        i=$((i+1))
+    done
+    if [ $i -ge "$timeout" ] ; then
+        log "WAIT" "❌" "📕 Example stack never reported BunkerWeb ready after $timeout seconds"
+        exit 1
+    fi
 elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
     while [ $i -lt "$timeout" ] ; do
         containers=("bunkerweb" "bw-scheduler")

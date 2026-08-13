@@ -1,6 +1,7 @@
 import os
 from contextlib import suppress
 from datetime import datetime
+from typing import Optional
 
 from worker.app import app, get_worker_db
 from worker.executor import JobExecutor
@@ -27,16 +28,36 @@ LEASE_JOBS = frozenset(("push-configs",))
 _BOOTSTRAP_ENV_KEYS = ("DATABASE_URI", "DATABASE_URI_READONLY", "PYTHONPATH", "PATH")
 
 
-def _get_apis():
+def _api_token(db, logger=None) -> Optional[str]:
+    """The token the instances expect, from the worker env or, failing that, the stored config.
+
+    API_TOKEN is a BunkerWeb setting, so a split deployment normally sets it on the instances and
+    the API, not on the worker container. Reading only `os.environ` therefore built every caller
+    tokenless and the instances answered 444 "missing API token" -- silently, because the caller
+    logs that failure inside the worker child, whose output does not reach the container log.
+    Jobs never hit this: `_load_job_config_env` overlays the stored config before they run, which
+    is exactly why push-configs pushed fine while every other job's cache was refused.
+    """
+    token = os.getenv("API_TOKEN") or None
+    if token or db is None:
+        return token
+    try:
+        return db.get_config(global_only=True, methods=False, with_drafts=False).get("API_TOKEN") or None
+    except Exception as exc:
+        if logger is not None:
+            logger.warning(f"Could not read API_TOKEN from the database: {exc}")
+        return None
+
+
+def _get_apis(logger=None):
     from API import API  # type: ignore
     from ApiCaller import ApiCaller  # type: ignore
-
-    token = os.getenv("API_TOKEN") or None
 
     # Primary source: registered instances in the DB (filters out hosts marked
     # "down"). Falls back to BUNKERWEB_INSTANCES env for the standalone /
     # diagnostic mode documented in src/worker/CLAUDE.md.
     db = get_worker_db()
+    token = _api_token(db, logger)
     if db is not None:
         try:
             db_instances = [inst for inst in db.get_instances(with_credential=True) if inst.get("status") != "down"]
@@ -145,20 +166,74 @@ def _delivery_attempt(task_id: str, broker_url: str, logger) -> int:
         return 0
 
 
+RELOAD_LOCK_KEY = "bw:reload_pending"
+RELOAD_DIRTY_KEY = "bw:reload_dirty"
+# Long enough to cover a push plus a reload with configuration testing on a slow instance. The
+# holder deletes the key when it is done, so this only matters when a worker dies mid-reload.
+RELOAD_LOCK_TTL = 60
+# A job that finishes while the holder is pushing gets picked up by the next round. Bounded so a
+# steady stream of jobs cannot pin one worker child in here forever -- whatever is left dirty is
+# carried by the next job's reload.
+MAX_RELOAD_ROUNDS = 5
+# Releasing the lock and checking the dirty flag has to be one step. Do it in two and a job that
+# raises the flag in between finds the holder already gone and the lock already free, having
+# failed its own acquisition a moment earlier -- its files then wait for whatever reloads next.
+RELEASE_IF_CLEAN = """
+if redis.call('exists', KEYS[2]) == 1 then return 0 end
+redis.call('del', KEYS[1])
+return 1
+"""
+
+
 def _request_reload_debounced(apis, broker_url: str, logger) -> None:
+    """Push the cache tree to every instance and reload them, one reload at a time.
+
+    `send_files` ships the whole /var/cache/bunkerweb tree, so one push carries every job's
+    output -- but only the output that existed when the tar was built. The debounce therefore
+    guards the reload alone: a job that loses the lock flags the run dirty, and the holder goes
+    round again, so the last writer's files always leave with a push. Skipping the push for the
+    losers instead (which is what this did) silently dropped the output of every job that landed
+    inside the window -- a downloaded blocklist or a fresh certificate that never reached the
+    instances, with the job recorded as a success.
+    """
     client = _broker_client(broker_url)
-    if not client.set("bw:reload_pending", "1", nx=True, ex=10):
-        logger.info("Reload already pending, skipping duplicate request")
+    test = "no" if os.getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
+
+    # Announce the files BEFORE bidding for the lock. The holder cannot release while this flag
+    # stands, so whoever ends up holding it either claims the flag and pushes after we set it, or
+    # cannot release and goes round again. Flagging after a failed acquisition instead leaves the
+    # window where the holder checked, found nothing, and released.
+    client.set(RELOAD_DIRTY_KEY, "1", ex=RELOAD_LOCK_TTL)
+
+    if not client.set(RELOAD_LOCK_KEY, "1", nx=True, ex=RELOAD_LOCK_TTL):
+        logger.info("Reload already running, flagged the run as dirty for the holder to pick up")
         return
 
-    cache_sent = apis.send_files("/var/cache/bunkerweb", "/cache")
-    if not cache_sent:
-        raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
+    released = False
+    try:
+        for _ in range(MAX_RELOAD_ROUNDS):
+            # Claim every flag raised so far: those jobs wrote their files before flagging, so
+            # this push carries them. Anything raised from here on earns another round.
+            client.delete(RELOAD_DIRTY_KEY)
 
-    test = "no" if os.getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
-    reload_sent = apis.send_to_apis("POST", f"/reload?test={test}")[0]
-    if not reload_sent:
-        raise RuntimeError("Failed to request BunkerWeb reload")
+            if not apis.send_files("/var/cache/bunkerweb", "/cache"):
+                raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
+
+            if not apis.send_to_apis("POST", f"/reload?test={test}")[0]:
+                raise RuntimeError("Failed to request BunkerWeb reload")
+
+            released = bool(client.eval(RELEASE_IF_CLEAN, 2, RELOAD_LOCK_KEY, RELOAD_DIRTY_KEY))
+            if released:
+                return
+            logger.info("Another job finished during the reload, pushing and reloading again")
+            client.expire(RELOAD_LOCK_KEY, RELOAD_LOCK_TTL)
+
+        logger.warning(f"Still dirty after {MAX_RELOAD_ROUNDS} reload rounds, leaving it to the next job")
+    finally:
+        # The bound was hit, or the push raised. Either way the flag stays up, and the next job to
+        # finish takes the lock and carries whatever is still waiting.
+        if not released:
+            client.delete(RELOAD_LOCK_KEY)
 
 
 @app.task(
@@ -207,7 +282,7 @@ def execute_job(self, job_data: dict) -> dict:
         }
 
     executor = JobExecutor(logger)
-    apis = _get_apis()
+    apis = _get_apis(logger)
 
     logger.info(f"[{run_id}] Starting job {plugin}/{name}" + (f" (delivery {attempt})" if attempt > 1 else ""))
 

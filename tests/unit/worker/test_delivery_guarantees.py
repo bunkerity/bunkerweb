@@ -260,7 +260,7 @@ def stub_runtime(monkeypatch):
     logger_module = ModuleType("logger")
     logger_module.setup_logger = Mock(return_value=LOGGER)
     monkeypatch.setitem(sys.modules, "logger", logger_module)
-    monkeypatch.setattr(TASKS, "_get_apis", lambda: None)
+    monkeypatch.setattr(TASKS, "_get_apis", lambda *_args: None)
     monkeypatch.setattr(TASKS, "_load_job_config_env", lambda db, logger: {})
     monkeypatch.setenv("CELERY_BROKER_URL", BROKER)
     executor = Mock()

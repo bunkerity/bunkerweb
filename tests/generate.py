@@ -410,9 +410,11 @@ if ARGS.integration not in ("Linux", "All-in-one"):
         # The worker deployment reads bw-secret (built from `variables`), so the broker
         # URL has to travel there too. BunkerWeb itself ignores the extra key.
         config["variables"]["CELERY_BROKER_URL"] = jobs_broker_url
-    # The worker runs the jobs the API queues: it needs the same database and the
-    # same broker, nothing else.
+    # The worker runs the jobs the API queues: same database, same broker, and the same API
+    # token — it pushes each job's cache to the instances itself, and a tokenless push is
+    # refused with a 444 the worker only reports in a log that never leaves the child process.
     config["worker"] = {
+        "API_TOKEN": config["api"]["API_TOKEN"],
         "CELERY_BROKER_URL": jobs_broker_url,
         "CUSTOM_LOG_LEVEL": config["api"].get("CUSTOM_LOG_LEVEL", "debug"),
         "DATABASE_URI": config["api"]["DATABASE_URI"],
