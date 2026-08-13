@@ -13,4 +13,5 @@ actions:
     url: "http://www.example.com"
     string: "hello"
     ignore_case: true
+    follow_redirects: true
     timeout: 210

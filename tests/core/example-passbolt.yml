@@ -13,5 +13,6 @@ actions:
     url: "https://www.example.com"
     string: "passbolt"
     ignore_case: true
+    follow_redirects: true
     tls: "www.example.com"
     timeout: 120

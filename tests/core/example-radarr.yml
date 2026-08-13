@@ -13,6 +13,7 @@ actions:
     url: "https://www.example.com"
     string: "radarr"
     ignore_case: true
+    follow_redirects: true
     tls: "www.example.com"
     timeout: 120
     delay: 180

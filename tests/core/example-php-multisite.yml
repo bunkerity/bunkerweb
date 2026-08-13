@@ -14,6 +14,7 @@ actions:
     url: "https://app1.example.com"
     string: "app1"
     ignore_case: true
+    follow_redirects: true
     tls: "app1.example.com"
     timeout: 120
   string_app2_example_com:
@@ -21,5 +22,6 @@ actions:
     url: "https://app2.example.com"
     string: "app2"
     ignore_case: true
+    follow_redirects: true
     tls: "app2.example.com"
     timeout: 120

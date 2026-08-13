@@ -12,6 +12,7 @@ actions:
     url: "https://app1.example.com/hello"
     string: "app1"
     ignore_case: true
+    follow_redirects: true
     tls: "app1.example.com"
     timeout: 120
     delay: 180
@@ -20,6 +21,7 @@ actions:
     url: "https://app2.example.com/hello"
     string: "app2"
     ignore_case: true
+    follow_redirects: true
     tls: "app2.example.com"
     timeout: 120
     delay: 180
@@ -28,6 +30,7 @@ actions:
     url: "https://app3.example.com/hello"
     string: "app3"
     ignore_case: true
+    follow_redirects: true
     tls: "app3.example.com"
     timeout: 120
     delay: 180

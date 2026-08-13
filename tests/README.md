@@ -66,9 +66,11 @@ directory you ship stays untouched. The copy gets the images built from this com
 a scheduler forced onto Let's Encrypt staging with BunkerNet, DNSBL and the anonymous
 report off.
 
-One trap when you move a scenario over from `tests/examples/<name>.json`: the legacy
-harness casefolds both sides of a string assertion and the framework handler does not.
-Check the case against a real response rather than copying the descriptor across.
+Two traps when you move a scenario over from `tests/examples/<name>.json`. The legacy
+harness casefolds both sides of a string assertion, and it used `requests`, which follows
+redirects; this framework does neither by default. Migrated assertions therefore carry
+`ignore_case: true` and `follow_redirects: true`. Write new specs without them: assert the
+case a page actually returns, and let a redirect be a redirect.
 
 ## Running locally
 
