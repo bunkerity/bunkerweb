@@ -58,6 +58,7 @@ from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
+    IntegrityError,
     OperationalError,
     ProgrammingError,
     SAWarning,
@@ -1676,6 +1677,7 @@ class Database:
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
+        retry_on_conflict: bool = True,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1698,10 +1700,15 @@ class Database:
                            set. None or empty means the scheduler never touches
                            ui/api-owned rows (the incoming config is treated as
                            default-filled, not user-declared).
+            retry_on_conflict: Recompute and save once more when the flush hits a unique
+                               violation because another writer inserted the same rows
+                               between our read and our flush. Set False on the retry
+                               itself so a genuine conflict cannot loop.
         """
         to_put = []
         to_update = []
         to_delete = []
+        conflict = None
         changed_plugins = set()
         changed_services = False
         service_template_change = False
@@ -2606,9 +2613,34 @@ class Database:
                     session.delete(service_setting)
 
                 session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                if not retry_on_conflict:
+                    return str(e)
+                conflict = str(e)
             except BaseException as e:
                 session.rollback()
                 return str(e)
+
+        if conflict is not None:
+            # Another writer inserted rows we had read as missing, between our read and our flush —
+            # the scheduler's first-run save against autoconf applying its initial configuration on
+            # a fresh database is the common one. Dropping the batch loses every setting the other
+            # writer does not send: they stay at their defaults, and the per-service rows a later
+            # save materialises from them then shadow the globals. Recompute against the committed
+            # state instead. Outside the session block: retrying inside it would nest one scoped
+            # session in another.
+            self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
+            return self.save_config(
+                config,
+                method,
+                changed,
+                file_names,
+                skip_service_management=skip_service_management,
+                disable_cleanup=disable_cleanup,
+                explicit_keys=explicit_keys,
+                retry_on_conflict=False,
+            )
 
         return changed_plugins
 
