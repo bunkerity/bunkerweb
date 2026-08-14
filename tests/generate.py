@@ -483,6 +483,12 @@ timeout = action.timeout
 if ARGS.integration == "Kubernetes" and action.timeout < 420:
     LOGGER.warning("🔍 We need at least a 7 minutes timeout for Kubernetes tests")
     timeout = 420
+elif crowdsec_config and timeout < 300:
+    # CrowdSec downloads its whole hub on first start -- collections plus several hundred
+    # appsec CVE rules -- and only reports healthy afterwards. On a cold cache that outruns
+    # the 120s default and the stack is declared unhealthy while it is still working.
+    LOGGER.warning("🔍 We need at least a 5 minutes timeout while CrowdSec downloads its hub")
+    timeout = 300
 
 redis_acl_path = Path(sep, "tmp", "redis-acl")
 redis_acl_path.mkdir(parents=True, exist_ok=True)

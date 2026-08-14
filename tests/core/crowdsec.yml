@@ -31,7 +31,8 @@ actions:
     type: status
     url: "http://www.example.com"
     status: 403
-    delay: 10
+    # Longer than CROWDSEC_UPDATE_FREQUENCY so the bouncer has pulled the decision by now.
+    delay: 70
 
 config:
   USE_MODSECURITY: "no"
@@ -46,7 +47,10 @@ config:
   CROWDSEC_REQUEST_TIMEOUT: "1000"
   CROWDSEC_EXCLUDE_LOCATION: ""
   CROWDSEC_CACHE_EXPIRATION: "1"
-  CROWDSEC_UPDATE_FREQUENCY: "10"
+  # not_yet_blocked_stream asserts the bouncer has NOT pulled the ban yet, so this window has to
+  # outlast the dirb run that triggers it -- at 10s the assertion raced dirb's own duration and
+  # failed on any host where the scan takes longer than the interval.
+  CROWDSEC_UPDATE_FREQUENCY: "60"
   CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
   CROWDSEC_APPSEC_FAILURE_ACTION: "passthrough"
   CROWDSEC_APPSEC_CONNECT_TIMEOUT: "100"
@@ -70,4 +74,5 @@ crowdsec_config:
 
 Linux:
   config:
-    CROWDSEC_API: "http://crowdsec:8888"
+    # Follows the host port published in tests/misc/docker/crowdsec.yml.
+    CROWDSEC_API: "http://crowdsec:8889"

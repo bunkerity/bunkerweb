@@ -3,7 +3,9 @@ services:
     image: crowdsecurity/crowdsec:v1.7.7@sha256:6ca53ad26196ca59ddd4fa692a586b73d8fcde085046163b9ca2f04887dca563
     container_name: crowdsec
     ports:
-      - "8888:8080"
+      # Not 8888: since 1.7 every stack carries bw-api, which publishes 127.0.0.1:8888 for the
+      # api specs, and docker refuses to start CrowdSec with "port is already allocated".
+      - "8889:8080"
       - "7422:7422"
     volumes:
       - /var/log/bunkerweb:/var/log/bunkerweb:ro
