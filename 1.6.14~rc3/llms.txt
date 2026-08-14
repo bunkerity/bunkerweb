@@ -1,0 +1,35 @@
+# BunkerWeb documentation
+
+> BunkerWeb is a next-generation, open-source Web Application Firewall (WAF). Based on NGINX under the hood, it protects web services to make them secure by default. It integrates seamlessly into existing environments (Linux, Docker, Swarm, Kubernetes) as a reverse proxy and is fully configurable via environment variables or an awesome web UI. Source: https://github.com/bunkerity/bunkerweb
+
+## Getting Started
+
+- [Introduction](https://docs.bunkerweb.io/latest/index.md): Introduction and overview of BunkerWeb
+- [Concepts](https://docs.bunkerweb.io/latest/concepts/index.md): Core concepts — multisite, settings contexts, security modes
+- [Quickstart guide](https://docs.bunkerweb.io/latest/quickstart-guide/index.md): Quick start guide for first-time setup
+
+## Integration Guides
+
+- [Integrations](https://docs.bunkerweb.io/latest/integrations/index.md): Docker, Kubernetes, Swarm, Linux, and Ansible setup
+
+## Configuration Reference
+
+- [Features](https://docs.bunkerweb.io/latest/features/index.md): Complete settings reference — all plugins, all options
+
+## Advanced Usage
+
+- [Advanced usages](https://docs.bunkerweb.io/latest/advanced/index.md): Custom configs, headers, ModSecurity, PHP, streaming, and more
+
+## Web UI & API
+
+- [Web UI](https://docs.bunkerweb.io/latest/web-ui/index.md): Web UI usage guide
+- [API](https://docs.bunkerweb.io/latest/api/index.md): REST API documentation
+
+## Plugin System
+
+- [Plugins](https://docs.bunkerweb.io/latest/plugins/index.md): Writing and using external plugins
+
+## Operations
+
+- [Upgrading](https://docs.bunkerweb.io/latest/upgrading/index.md): Version migration and upgrade guides
+- [Troubleshooting](https://docs.bunkerweb.io/latest/troubleshooting/index.md): Common issues and solutions
