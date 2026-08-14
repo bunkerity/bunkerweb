@@ -164,7 +164,6 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `AUTOCONF_MODE`          | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                                                                       |
     | `SWARM_MODE`             | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                                                             |
     | `KUBERNETES_MODE`        | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                                                          |
-    | `KEEP_CONFIG_ON_RESTART` | `no`              | global    | No       | **Mantener Configuración al Reiniciar:** Mantener la configuración al reiniciar. Establecer a 'yes' para evitar el restablecimiento de la configuración al reiniciar. |
     | `USE_TEMPLATE`           |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos.                                           |
 
 === "Ajustes de Nginx"
@@ -1868,7 +1867,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.14-rc2
+        image: bunkerity/bunkerweb:1.6.14-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1885,7 +1884,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -4326,7 +4325,7 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
 | `MTLS_VERIFY_CLIENT`           | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`).                                                                                                                                         |
 | `MTLS_URL`                     |                      | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio.                |
 | `MTLS_VERIFY_DEPTH`            | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                                                                                                                                                                       |
-| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`                | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez).                                                                                                                                      |
+| `MTLS_FORWARD_CLIENT_HEADERS`    | `yes`                 | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez). Las cabeceras `X-SSL-*` enviadas por el cliente siempre se eliminan en la entrada, de modo que estos valores no se pueden falsificar. |
 | `MTLS_CRL_PRIORITY`            | `file`               | multisite | no       | **Prioridad de la CRL de clientes:** origen de la CRL: `file` (ruta) o `data` (base64/PEM).                                                                                                                                                                                                       |
 | `MTLS_CRL`                     |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM, legible por el Scheduler. Solo se aplica cuando el paquete de CA se carga correctamente. NGINX requiere que el archivo de CRL contenga una CRL para cada CA de la cadena de verificación. |
 | `MTLS_CRL_DATA`                |                      | multisite | no       | **Datos de la CRL de clientes:** lista de revocación aportada directamente como base64 o PEM.                                                                                                                                                                                                     |
@@ -4339,6 +4338,17 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
 
 !!! info "Certificado confiable y verificación"
     BunkerWeb reutiliza el mismo paquete de CA tanto para comprobar clientes como para construir la cadena de confianza, manteniendo coherentes las verificaciones de revocación y el handshake.
+
+!!! info "Las cabeceras `X-SSL-*` entrantes siempre se eliminan"
+    BunkerWeb elimina toda cabecera de petición `X-SSL-*` enviada por el cliente antes de que la petición llegue a su aplicación: en todos los sitios, esté o no habilitado mTLS, y por igual en HTTP/1.1, HTTP/2 y HTTP/3. Solo se reenvían los valores que BunkerWeb obtiene del handshake TLS verificado, y únicamente cuando `MTLS_FORWARD_CLIENT_HEADERS` es `yes`, así que un cliente no puede falsificar `X-SSL-Client-Verify: SUCCESS`.
+
+    Si BunkerWeb está detrás de otro proxy que termina mTLS e inyecta estas cabeceras por su cuenta, capture el valor antes de la eliminación y vuelva a publicarlo. Añada una configuración personalizada `server-http`:
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    y luego reenvíelo con `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"`. `REVERSE_PROXY_HEADERS` por sí solo no funciona: `$http_x_ssl_client_verify` ya está vacío cuando `proxy_set_header` lo evalúa, mientras que `set` se ejecuta en la fase server-rewrite, antes de la eliminación.
 
 !!! warning "El mTLS por ruta requiere el modo opcional"
     La directiva `ssl_verify_client` de NGINX solo es válida en el contexto `server`: no puede colocarse dentro de un bloque `location`. Para exigir un certificado únicamente en algunas rutas, ponga `MTLS_VERIFY_CLIENT` en `optional` (u `optional_no_ca`) para que el handshake se complete en todas las rutas, y luego liste las rutas protegidas en `MTLS_URL_n`. BunkerWeb aplica entonces el certificado por solicitud, en Lua, sobre las URL coincidentes. Si deja `MTLS_VERIFY_CLIENT` en `on` mientras define `MTLS_URL_n`, NGINX rechaza a los clientes sin certificado durante el handshake, antes de que se aplique la lógica por ruta, por lo que la exigencia sigue siendo para todo el sitio.

@@ -36,7 +36,7 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
 | --------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                              |
 | `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                |
-| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend.                                                                                                                                                                               |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular.                                                                              |
 | `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                 |
 | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                               |
 | `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |
@@ -187,7 +187,7 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
     !!! tip "Integración de Autenticación"
         - La función de solicitud de autenticación permite la implementación de microservicios de autenticación centralizados
         - Su servicio de autenticación debe devolver un código de estado 200 para una autenticación exitosa o 401/403 para fallas
-        - Use la directiva `auth_request_set` para extraer y reenviar información del servicio de autenticación
+        - Use la directiva auth_request_set para extraer y reenviar información del servicio de autenticación
 
 === "Configuración Avanzada"
 

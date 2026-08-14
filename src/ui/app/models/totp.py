@@ -67,7 +67,7 @@ class Totp:
             totp_secret = user.totp_secret
 
         try:
-            tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user))
+            tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user) if user else None)
             if user:
                 self.set_last_counter(user, tmatch)
             return True
@@ -95,9 +95,9 @@ class Totp:
     def set_last_counter(self, user: UiUsers, tmatch: TotpMatch) -> None:
         """Cache last_counter."""
         DATA.load_from_file()
-        if "totp_last_counter" not in DATA:
-            DATA["totp_last_counter"] = {}
-        DATA["totp_last_counter"][user.get_id()] = tmatch.counter
+        # set_nested persists to disk; a plain nested assignment would only touch this
+        # worker's in-memory copy and be dropped by the next load_from_file().
+        DATA.set_nested(["totp_last_counter", user.get_id()], tmatch.counter)
 
 
 totp = Totp()

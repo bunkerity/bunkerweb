@@ -58,6 +58,7 @@ from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
+    IntegrityError,
     OperationalError,
     ProgrammingError,
     SAWarning,
@@ -93,6 +94,14 @@ DEFAULT_POOL_TIMEOUT = 5
 DEFAULT_POOL_RECYCLE = 1800
 DEFAULT_POOL_PRE_PING = True
 
+# Methods that mean "a human edited this through a first-class interface". They overwrite
+# one another freely. "wizard" belongs here: the setup wizard creates its service with that
+# method and then writes the service's settings as "ui", so the two must be interchangeable
+# or every later edit of that service is silently dropped. What makes the wizard service
+# special is that it cannot be deleted, which is enforced separately and deliberately not
+# by this set.
+EDITABLE_METHODS = frozenset({"ui", "api", "wizard"})
+
 
 def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
     @wraps(func)
@@ -114,6 +123,28 @@ def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
         raise RuntimeError("retry_on_transient_db_errors: unreachable code")
 
     return wrapper
+
+
+# Greedy to the last "@" of the authority so an unencoded "@" inside the password is
+# covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
+# drag the host into the mask.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/?#\[\]@]*:)[^\s/?#]*@")
+
+
+def mask_db_uri(db_string: str) -> str:
+    """Return a database URI with its password replaced, safe to log.
+
+    Callers reach this on malformed input, which make_url() either rejects outright
+    or, worse, parses wrongly, so the regex has to be able to stand on its own.
+    """
+    if not db_string:
+        return db_string
+    masked = db_string
+    with suppress(BaseException):
+        masked = make_url(db_string).render_as_string(hide_password=True)
+    # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
+    # the part before it for the password and hides that, leaving the rest to reach the log.
+    return DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
 
 
 class Database:
@@ -187,7 +218,7 @@ class Database:
 
             match = self.DB_STRING_RX.search(db_string)
             if not match:
-                self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                 _exit(1)
 
             db_type = match.group("database")
@@ -216,7 +247,7 @@ class Database:
                 try:
                     url = make_url(db_string)
                 except ArgumentError:
-                    self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                    self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                     _exit(1)
                 if "+" not in url.drivername:
                     url = url.set(drivername=f"{url.drivername}+{recommended_driver}")
@@ -307,7 +338,7 @@ class Database:
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
         except ArgumentError:
-            self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
+            self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
             error = True
         except SQLAlchemyError as e:
             self.logger.error(f"Error when trying to create the engine: {e}")
@@ -332,6 +363,10 @@ class Database:
         current_time = datetime.now().astimezone()
         not_connected = True
         fallback = False
+        # The retry line named neither the target nor the reason, so nothing actionable was
+        # logged until DATABASE_RETRY_TIMEOUT expired, 60 seconds later by default.
+        connection_target = mask_db_uri(sqlalchemy_string)
+        reason_logged = False
 
         while not_connected:
             try:
@@ -348,13 +383,18 @@ class Database:
             except (OperationalError, DatabaseError) as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
-                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
+                        self.logger.error(
+                            f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds. "
+                            "Falling back to read-only database connection"
+                        )
                         self.sql_engine.dispose(close=True)
                         self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
                         self.readonly = True
                         fallback = True
+                        connection_target = mask_db_uri(self.database_uri_readonly)
+                        reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
@@ -367,7 +407,11 @@ class Database:
                     not_connected = False
                     continue
                 elif log:
-                    self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
+                    # Reason once, then the terse line: repeating the exception every 5 seconds is
+                    # noise, but withholding it for the whole window leaves nothing to act on.
+                    detail = "" if reason_logged else f" : {e}"
+                    reason_logged = True
+                    self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
                 self.logger.error(f"Error when trying to connect to the database: {e}")
@@ -443,8 +487,8 @@ class Database:
         """
         Compatibility rules for overwriting a setting's existing method:
         - autoconf wins over everything (and only autoconf overwrites autoconf).
-        - ui and api are interchangeable.
-        - scheduler (env-var origin) overwrites ui/api only when the caller asserts the
+        - ui, api and wizard are interchangeable (see EDITABLE_METHODS).
+        - scheduler (env-var origin) overwrites those only when the caller asserts the
           setting was explicitly declared in the environment (allow_scheduler_override),
           so config-as-code stays authoritative without default-filled scheduler passes
           wiping UI/API customizations; the reverse stays blocked to protect in-session
@@ -458,9 +502,9 @@ class Database:
             return True
         if current_method == "autoconf":
             return new_method == "autoconf"
-        if {new_method, current_method} <= {"ui", "api"}:
+        if {new_method, current_method} <= EDITABLE_METHODS:
             return True
-        if new_method == "scheduler" and current_method in ("ui", "api"):
+        if new_method == "scheduler" and current_method in EDITABLE_METHODS:
             return allow_scheduler_override
         return new_method == current_method
 
@@ -663,7 +707,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.14~rc2"
+                return "1.6.14~rc3"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -697,7 +741,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.14~rc2",
+            "version": "1.6.14~rc3",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1633,6 +1677,7 @@ class Database:
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
+        retry_on_conflict: bool = True,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1655,10 +1700,15 @@ class Database:
                            set. None or empty means the scheduler never touches
                            ui/api-owned rows (the incoming config is treated as
                            default-filled, not user-declared).
+            retry_on_conflict: Recompute and save once more when the flush hits a unique
+                               violation because another writer inserted the same rows
+                               between our read and our flush. Set False on the retry
+                               itself so a genuine conflict cannot loop.
         """
         to_put = []
         to_update = []
         to_delete = []
+        conflict = None
         changed_plugins = set()
         changed_services = False
         service_template_change = False
@@ -2563,9 +2613,34 @@ class Database:
                     session.delete(service_setting)
 
                 session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                if not retry_on_conflict:
+                    return str(e)
+                conflict = str(e)
             except BaseException as e:
                 session.rollback()
                 return str(e)
+
+        if conflict is not None:
+            # Another writer inserted rows we had read as missing, between our read and our flush —
+            # the scheduler's first-run save against autoconf applying its initial configuration on
+            # a fresh database is the common one. Dropping the batch loses every setting the other
+            # writer does not send: they stay at their defaults, and the per-service rows a later
+            # save materialises from them then shadow the globals. Recompute against the committed
+            # state instead. Outside the session block: retrying inside it would nest one scoped
+            # session in another.
+            self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
+            return self.save_config(
+                config,
+                method,
+                changed,
+                file_names,
+                skip_service_management=skip_service_management,
+                disable_cleanup=disable_cleanup,
+                explicit_keys=explicit_keys,
+                retry_on_conflict=False,
+            )
 
         return changed_plugins
 
@@ -4024,7 +4099,6 @@ class Database:
 
                             if updates:
                                 changes = True
-                                updates[Jobs.last_run] = None
                                 session.query(Jobs_runs).filter(Jobs_runs.job_name == job["name"]).delete()
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)

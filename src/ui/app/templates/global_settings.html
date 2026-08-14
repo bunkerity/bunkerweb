@@ -5,6 +5,9 @@
            id="selected-mode"
            name="selected_mode"
            value="{{ mode }}">
+    <input type="hidden"
+           id="validate-certificate-url"
+           value="{{ url_for("services") }}/validate-certificate">
     {% set blacklisted_settings = get_blacklisted_settings(true) %}
     {% set service_method = "ui" %}
     <div class="tab-content p-0 position-relative">

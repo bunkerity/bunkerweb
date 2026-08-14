@@ -183,7 +183,13 @@ class Job:
                 ret = False
 
         with LOCK:
-            if not manual and self.job_path.is_dir():
+            # An empty row set means the plugin's cache is unknown, not that everything on disk is
+            # unused: `startswith(())` is always False, so the sweep below would delete every file
+            # under job_path while ret stays True. For Let's Encrypt that is the accounts, archives
+            # and live symlinks, destroyed by deleting one cache row from the web UI.
+            if not job_cache_files and self.job_path.is_dir() and any(self.job_path.iterdir()):
+                self.logger.warning(f"No cache row for plugin '{self.job_path.name}'; keeping the files already in {self.job_path} instead of clearing them.")
+            elif not manual and self.job_path.is_dir():
                 # Deepest first: unlink stale non-cached files, then drop only now-empty dirs —
                 # never rmtree the job_path root (its children are freshly restored cache dirs).
                 for file in sorted(self.job_path.rglob("*"), key=lambda p: len(p.parts), reverse=True):

@@ -14,7 +14,7 @@ local unescape_uri = ngx.unescape_uri
 
 -- Default cap for the per-worker LRU: governs both the slot count (distinct
 -- counter/table keys held) and the per-key event-history array length. Overridden
--- per-worker from the MAX_LRU_HISTORY global setting once init_worker() runs and
+-- per-worker from the MAX_LRU_HISTORY global setting once init_workers() runs and
 -- self.variables is populated.
 local DEFAULT_MAX_LRU_HISTORY = 1000
 
@@ -22,6 +22,10 @@ local lru, err_lru = lrucache.new(DEFAULT_MAX_LRU_HISTORY)
 if not lru then
 	require "bunkerweb.logger":new("METRICS"):log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
+
+-- Keys this worker wrote to Redis on the previous sync, so the next one can tell which
+-- ones the LRU has since evicted. Nothing else ever deletes their Redis counterpart.
+local synced_redis_keys = {}
 
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
@@ -210,6 +214,21 @@ end
 -- EXPIRE is denyoom-safe, so it must run under OOM to make these pinning keys
 -- and this worker's metrics keys evictable; it bypasses the redis_ok breaker
 -- (dead socket returns an ignored error).
+-- An evicted key keeps its last value in Redis forever, so it goes on being served by
+-- the plugin pages and counts against maxmemory. A TTL only bounds that to its own
+-- expiry, and only for keys that were still in the LRU when one was last applied.
+local function reap_evicted_redis_keys(self, wid, live_keys)
+	for key in pairs(synced_redis_keys) do
+		if not live_keys[key] then
+			local ok, err = self:redis_call("del", "metrics:" .. key .. ":" .. wid)
+			if not ok then
+				self:log_throttled(ERR, "reap_evicted", "Can't delete evicted metric " .. key .. " from Redis: " .. err)
+			end
+		end
+	end
+	synced_redis_keys = live_keys
+end
+
 local function refresh_request_ttls(self, ttl, wid)
 	if not ttl or ttl <= 0 then
 		return
@@ -240,11 +259,14 @@ function metrics:initialize(ctx)
 	self.metrics_datastore = datastore:new(dict)
 end
 
-function metrics:init_worker()
+-- init_workers(), not init_worker(): the latter is gated behind a shared "misc_ready" flag
+-- and runs once per instance, so it would resize a single worker's LRU and leave every other
+-- one on the default. This is per-worker VM state, so it needs the per-worker phase.
+function metrics:init_workers()
 	-- Resize the per-worker LRU using the configured MAX_LRU_HISTORY (global setting).
 	-- Until this runs, the module-level default LRU sized at DEFAULT_MAX_LRU_HISTORY is
 	-- used. The resize is skipped when the configured value matches the default to avoid
-	-- dropping any entries collected between module load and init_worker.
+	-- dropping any entries collected between module load and here.
 	local max_lru_history = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
 	if max_lru_history < 1 then
 		max_lru_history = DEFAULT_MAX_LRU_HISTORY
@@ -461,8 +483,22 @@ function metrics:timer()
 		end
 	end
 
-	-- Loop on all keys
-	for _, key in ipairs(lru:get_keys()) do
+	local lru_keys = lru:get_keys()
+	-- Built from the snapshot rather than from the writes below, so a key skipped because
+	-- the OOM breaker tripped or because it was raced out mid-loop is not taken for evicted.
+	local live_keys = {}
+	for _, key in ipairs(lru_keys) do
+		if key ~= "setup" and key ~= "requests" then
+			live_keys[key] = true
+		end
+	end
+
+	-- Loop on all keys, coldest first. get_keys() hands them back hottest first and lru:get()
+	-- promotes what it reads, so walking forward reverses the whole queue on every cycle and
+	-- the next insertion evicts the hottest key instead of the coldest. Walking backwards
+	-- promotes them in the order they already had, leaving it unchanged.
+	for idx = #lru_keys, 1, -1 do
+		local key = lru_keys[idx]
 		-- Get LRU data
 		local value = lru:get(key)
 		-- get_keys() returns a snapshot and every redis_call below yields, so a
@@ -605,6 +641,9 @@ function metrics:timer()
 
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
+		if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+			reap_evicted_redis_keys(self, wid, live_keys)
+		end
 	end
 	if redis_connected and ttl > 0 then
 		refresh_request_ttls(self, ttl, wid)

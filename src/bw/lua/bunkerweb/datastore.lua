@@ -118,8 +118,13 @@ function datastore:get(key, worker)
 		if not lru then
 			return nil, "lru is not instantiated"
 		end
-		value, err = lru:get(key)
-		return value, err or "not found"
+		-- lru:get returns value, stale_value, flags : an expired entry is a miss, and its
+		-- stale value must not be returned as the error (callers concatenate it).
+		value = lru:get(key)
+		if value == nil then
+			return nil, "not found"
+		end
+		return value, "success"
 	end
 	value, err = self.dict:get(key)
 	if not value and not err then
@@ -133,6 +138,10 @@ function datastore:set(key, value, exptime, worker)
 		ensure_lru_sized()
 		if not lru then
 			return false, "lru is not instantiated"
+		end
+		-- Same convention as the shared dict below : no exptime or a negative one means no expiry
+		if exptime and exptime < 0 then
+			exptime = nil
 		end
 		lru:set(key, value, exptime)
 		return true, "success"
@@ -215,7 +224,11 @@ function datastore:delete_all(pattern, worker)
 	end
 	for _, key in ipairs(keys) do
 		if key:match(pattern) then
-			self.dict:delete(key)
+			if worker then
+				lru:delete(key)
+			else
+				self.dict:delete(key)
+			end
 		end
 	end
 	return true, "success"
@@ -227,24 +240,22 @@ function datastore:flush_lru()
 		return false, "lru is not instantiated"
 	end
 	lru:flush_all()
+	return true, "success"
 end
 
 function datastore:safe_rpush(key, value)
 	local length, err = self.dict:rpush(key, value)
-	if not length and err == "no memory" then
-		local i = 0
-		while i < 5 do
-			local val
-			val, err = self.dict:lpop(key)
-			if not val then
-				return val, err
-			end
-			length, err = self.dict:rpush(key, value)
-			if not length and err ~= "no memory" then
-				return length, err
-			end
-			i = i + 1
+	-- Dict is full : evict this key's oldest entries one by one and retry, up to 5 times.
+	local i = 0
+	while not length and err == "no memory" and i < 5 do
+		local val
+		val, err = self.dict:lpop(key)
+		if not val then
+			-- lpop returns nil, nil on an empty or absent list
+			return nil, err or "no memory (dict is full and key has nothing to evict)"
 		end
+		length, err = self.dict:rpush(key, value)
+		i = i + 1
 	end
 	return length, err
 end

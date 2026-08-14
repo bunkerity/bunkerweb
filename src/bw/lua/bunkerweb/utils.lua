@@ -410,8 +410,10 @@ utils.get_reason = function(ctx)
 		end
 		return banned, {}, security_mode
 	end
-	-- unknown
-	if ngx.status == utils.get_deny_status() then
+	-- unknown BunkerWeb denial
+	local upstream_status = var.upstream_status
+	local upstream_denied = upstream_status and tonumber(upstream_status:match("(%d%d%d)%s*$")) == ngx.status
+	if ngx.status == utils.get_deny_status() and not upstream_denied then
 		return "unknown", {}
 	end
 	return nil
