@@ -158,6 +158,10 @@ try:
 
     if not any(url for urls in services_blacklist_urls.values() for url in urls.values()):
         LOGGER.warning("No blacklist URL is configured, nothing to do...")
+        # Exit 1 when something was actually removed: the instances keep serving whatever
+        # their own cache holds, so a deletion that never asks for a push leaves the
+        # withdrawn list live on the fleet.
+        removed_any = False
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
@@ -168,7 +172,9 @@ try:
 
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
-        sys_exit(0)
+            else:
+                removed_any = True
+        sys_exit(1 if removed_any else 0)
 
     urls = set()
     failed_urls = set()
@@ -193,6 +199,10 @@ try:
                 if JOB.job_path.joinpath(service, f"{kind}.list").is_file():
                     LOGGER.warning(f"{service} blacklist for {kind} is cached but no URL is configured, removing from cache...")
                     deleted, err = JOB.del_cache(f"{kind}.list", service_id=service)
+                    if deleted:
+                        # Same reason as above: the removal only reaches the instances if
+                        # this run asks for a push.
+                        status = 1 if status != 2 else 2
                     if not deleted:
                         LOGGER.warning(f"Couldn't delete {service} {kind}.list from cache : {err}")
                 continue
