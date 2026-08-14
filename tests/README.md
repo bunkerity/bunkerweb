@@ -140,9 +140,17 @@ Once a stack is up, you can drive narrower loops:
 HEADLESS=1 .venv-tests/bin/python tests/ui.py "panel;login" Docker
 ```
 
-`parse.py` emits one matrix entry per spec file. For Docker that is **37 core, 9 api and 7
-ui** entries. The migration conception recorded 37/8/7; api gained `instances-validation`,
-which arrived with the source working tree.
+`parse.py` emits one matrix entry per spec file. For Docker that is **58 core, 9 api and 7
+ui** entries. The migration conception recorded 37/8/7, and that 37 is still the plain-spec
+count: core reaches 58 because of the 21 `example-*` specs that replaced
+`tests/examples/<name>.json` (the Kubernetes-only ones do not appear in the Docker matrix). api
+gained `instances-validation`, which arrived with the source working tree.
+
+An `xpath` or `ui` action drives Firefox through Selenium, and `core_handlers/selenium_common.py`
+looks for the driver at `./geckodriver` or `/usr/local/bin/geckodriver` — nowhere else. CI installs
+Firefox and geckodriver explicitly; a workstation whose only Firefox is the snap fails with
+`NoSuchDriverException`, so symlink your driver into the repo root (it is gitignored, as is the
+`geckodriver.log` the framework writes there on every browser action).
 
 ## Stack shape since 1.7
 
@@ -164,6 +172,13 @@ That split also means a healthy stack is not a configured one. The scheduler que
 `push-configs` and returns, so `wait.sh` waits for the worker to report that job done
 before any action runs. Without it a spec asserts against the previous action's
 configuration and fails for reasons that have nothing to do with what it tests.
+
+`bw-api` publishes `127.0.0.1:8888`, which the nine `api/*.yml` specs address directly. Anything
+else that wants a host port has to avoid it — CrowdSec used to take 8888 and now publishes 8889
+(`misc/docker/crowdsec.yml`, with the Linux `CROWDSEC_API` override following it), because docker
+refuses to start the container with "port is already allocated". CrowdSec also downloads its whole
+hub before reporting healthy, so `generate.py` raises the health timeout to 300s for any spec that
+carries `crowdsec_config`.
 
 ## Integrations
 
