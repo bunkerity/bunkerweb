@@ -52,6 +52,14 @@ app.conf.update(
     worker_prefetch_multiplier=1,
     worker_soft_shutdown_timeout=900.0,
     worker_hijack_root_logger=False,
+    # Celery redirects sys.stdout/sys.stderr in every prefork child to a LoggingProxy, which
+    # deliberately drops writes coming from a logging handler so a handler cannot recurse into
+    # itself. `logger.py` binds its StreamHandler to sys.stderr, so that dropped EVERY line a job
+    # or tasks.py logged inside the child: `docker logs bw-worker` showed Celery's own
+    # "task received/succeeded" lines and nothing else, while output from a subprocess a job
+    # spawns (the generator) came through because it writes to the fd directly. Every job failure
+    # was therefore invisible from outside and had to be reconstructed from bw_jobs_runs.
+    worker_redirect_stdouts=False,
     worker_send_task_events=True,
     task_send_sent_event=True,
     task_queues=[

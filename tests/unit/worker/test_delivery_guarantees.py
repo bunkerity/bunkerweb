@@ -156,6 +156,15 @@ class TestAckSettings:
         assert APP.app.conf["task_reject_on_worker_lost"] is True
         assert TASKS.MAX_DELIVERY_ATTEMPTS >= 1
 
+    def test_the_worker_does_not_swallow_what_its_children_log(self):
+        """Celery's stdout redirect hands each child a LoggingProxy that drops writes coming
+        from a logging handler. `logger.py` binds its StreamHandler to sys.stderr, so leaving the
+        redirect on erases every line a job logs -- the container log keeps Celery's own
+        task-received lines and nothing about the job, which is how a broken cache push stayed
+        invisible for a week. A regression here is silent by definition, hence this test.
+        """
+        assert APP.app.conf["worker_redirect_stdouts"] is False
+
     def test_the_visibility_timeout_covers_a_task_plus_the_time_it_waits_reserved(self):
         """Redelivery is driven by the visibility timeout; a task still pending when it expires
         is handed to a SECOND worker while the first is mid-write.
