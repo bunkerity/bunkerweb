@@ -1325,7 +1325,7 @@
 <li>Default listener: <code>0.0.0.0:7000</code> in containers, <code>127.0.0.1:7000</code> in packages (change with <code>UI_LISTEN_ADDR</code>/<code>UI_LISTEN_PORT</code>)</li>
 <li>Reverse-proxy aware: honors <code>X-Forwarded-*</code> via <code>UI_FORWARDED_ALLOW_IPS</code>; set <code>PROXY_NUMBERS</code> when multiple proxies add headers</li>
 <li>Auth: local admin account (password policy enforced), optional roles, TOTP 2FA backed by <code>TOTP_ENCRYPTION_KEYS</code></li>
-<li>Sessions: signed with <code>FLASK_SECRET</code>, default lifetime 12h, pinned to IP and User-Agent; <code>ALWAYS_REMEMBER</code> controls persistent cookies</li>
+<li>Sessions: server-side, default idle lifetime 12h with a 7-day hard cap, pinned to IP and User-Agent; <code>ALWAYS_REMEMBER</code> keeps the session cookie across browser restarts without extending those limits</li>
 <li>Logs: <code>/var/log/bunkerweb/ui.log</code> (+ access log when captured), UID/GID 101 inside the container</li>
 <li>Health: optional <code>GET /healthcheck</code> when <code>ENABLE_HEALTHCHECK=yes</code></li>
 <li>Dependencies: shares the BunkerWeb database and talks to the API to reload, ban, or query instances</li>
@@ -1338,7 +1338,7 @@
 <li>Provide <code>TOTP_ENCRYPTION_KEYS</code> and enable TOTP on admin accounts; keep recovery codes safe.</li>
 <li>Use TLS (terminate at BunkerWeb or set <code>UI_SSL_ENABLED=yes</code> with cert/key paths); set <code>UI_FORWARDED_ALLOW_IPS</code> to trusted proxies.</li>
 <li>Persist secrets: mount <code>/var/lib/bunkerweb</code> so <code>FLASK_SECRET</code>, Biscuit keys, and TOTP material survive restarts.</li>
-<li>Keep <code>CHECK_PRIVATE_IP=yes</code> (default) to bind sessions to the client IP and <code>ALWAYS_REMEMBER=no</code> unless you explicitly want long-lived cookies.</li>
+<li>Keep <code>CHECK_PRIVATE_IP=yes</code> (default) to bind sessions to the client IP. <code>ALWAYS_REMEMBER=yes</code> only makes the session cookie survive a browser restart; it never extends <code>SESSION_LIFETIME_HOURS</code> or <code>SESSION_ABSOLUTE_HOURS</code>.</li>
 <li>Ensure <code>/var/log/bunkerweb</code> is writable by UID/GID 101 (or the mapped ID when running rootless) so the UI can read logs.</li>
 </ul>
 <h2 id="run-it">Run it</h2>
@@ -1491,7 +1491,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(totp.generate_secret())&quot;</span>
 </code></pre></div>
 <p>Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
-- Sessions: default idling lifetime is 12h (<code>SESSION_LIFETIME_HOURS</code>), refreshed on every request. A hard absolute cap is enforced by <code>SESSION_ABSOLUTE_HOURS</code> (default <code>168</code> = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (<code>SESSION_ROLLING_HOURS</code>, default <code>0</code> = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; <code>CHECK_PRIVATE_IP=no</code> relaxes the IP check for private ranges only. <code>ALWAYS_REMEMBER=yes</code> always sets persistent cookies.
+- Sessions: default idling lifetime is 12h (<code>SESSION_LIFETIME_HOURS</code>), refreshed on every request. A hard absolute cap is enforced by <code>SESSION_ABSOLUTE_HOURS</code> (default <code>168</code> = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (<code>SESSION_ROLLING_HOURS</code>, default <code>0</code> = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; <code>CHECK_PRIVATE_IP=no</code> relaxes the IP check for private ranges only. <code>ALWAYS_REMEMBER=yes</code> (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or <em>Wipe other sessions</em>. To stay logged in longer, raise <strong>both</strong> <code>SESSION_LIFETIME_HOURS</code> and <code>SESSION_ABSOLUTE_HOURS</code>: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
 - Remember to set <code>PROXY_NUMBERS</code> if multiple proxies append <code>X-Forwarded-*</code> headers.</p>
 </li>
 </ul>
@@ -1655,7 +1655,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 <tr>
 <td><code>ALWAYS_REMEMBER</code></td>
-<td>Always enable "remember me" cookies</td>
+<td>Always keep the session cookie across browser restarts (does not extend session lifetimes)</td>
 <td><code>yes</code> or <code>no</code></td>
 <td><code>no</code></td>
 </tr>

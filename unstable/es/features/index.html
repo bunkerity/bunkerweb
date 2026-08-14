@@ -4077,13 +4077,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Modo Kubernetes:</strong> Habilita la integración con Kubernetes.</td>
 </tr>
 <tr>
-<td><code>KEEP_CONFIG_ON_RESTART</code></td>
-<td><code>no</code></td>
-<td>global</td>
-<td>No</td>
-<td><strong>Mantener Configuración al Reiniciar:</strong> Mantener la configuración al reiniciar. Establecer a 'yes' para evitar el restablecimiento de la configuración al reiniciar.</td>
-</tr>
-<tr>
 <td><code>USE_TEMPLATE</code></td>
 <td></td>
 <td>multisite</td>
@@ -11237,7 +11230,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Reenviar cabeceras del cliente:</strong> propaga los resultados de la verificación (<code>X-SSL-Client-*</code> con estado, DN, emisor, serie, huella y ventana de validez).</td>
+<td><strong>Reenviar cabeceras del cliente:</strong> propaga los resultados de la verificación (<code>X-SSL-Client-*</code> con estado, DN, emisor, serie, huella y ventana de validez). Las cabeceras <code>X-SSL-*</code> enviadas por el cliente siempre se eliminan en la entrada, de modo que estos valores no se pueden falsificar.</td>
 </tr>
 <tr>
 <td><code>MTLS_CRL_PRIORITY</code></td>
@@ -11273,6 +11266,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="admonition info">
 <p class="admonition-title">Certificado confiable y verificación</p>
 <p>BunkerWeb reutiliza el mismo paquete de CA tanto para comprobar clientes como para construir la cadena de confianza, manteniendo coherentes las verificaciones de revocación y el handshake.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Las cabeceras <code>X-SSL-*</code> entrantes siempre se eliminan</p>
+<p>BunkerWeb elimina toda cabecera de petición <code>X-SSL-*</code> enviada por el cliente antes de que la petición llegue a su aplicación: en todos los sitios, esté o no habilitado mTLS, y por igual en HTTP/1.1, HTTP/2 y HTTP/3. Solo se reenvían los valores que BunkerWeb obtiene del handshake TLS verificado, y únicamente cuando <code>MTLS_FORWARD_CLIENT_HEADERS</code> es <code>yes</code>, así que un cliente no puede falsificar <code>X-SSL-Client-Verify: SUCCESS</code>.</p>
+<p>Si BunkerWeb está detrás de otro proxy que termina mTLS e inyecta estas cabeceras por su cuenta, capture el valor antes de la eliminación y vuelva a publicarlo. Añada una configuración personalizada <code>server-http</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nv">$trusted_ssl_verify</span><span class="w"> </span><span class="nv">$http_x_ssl_client_verify</span><span class="p">;</span>
+</code></pre></div>
+<p>y luego reenvíelo con <code>REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"</code>. <code>REVERSE_PROXY_HEADERS</code> por sí solo no funciona: <code>$http_x_ssl_client_verify</code> ya está vacío cuando <code>proxy_set_header</code> lo evalúa, mientras que <code>set</code> se ejecuta en la fase server-rewrite, antes de la eliminación.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">El mTLS por ruta requiere el modo opcional</p>
