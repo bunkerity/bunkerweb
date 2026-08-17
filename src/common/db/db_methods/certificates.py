@@ -36,6 +36,19 @@ def _load_json(value: Optional[str], fallback):
     return parsed
 
 
+def _next_renewal(valid_from: datetime, valid_to: datetime) -> datetime:
+    """When a certificate this long-lived should be renewed.
+
+    A flat "30 days before expiry" is wrong for anything that does not live much longer than
+    that: `SELF_SIGNED_SSL_EXPIRY=30` puts the renewal date at issuance, so the certificate is
+    due the moment it exists and every run of deploy-certificates renews it again, each one
+    re-issuing material and pushing it to the whole fleet. Renew at a third of the remaining
+    lifetime instead, capped at the usual 30 days for ordinary year-long certificates.
+    """
+    lifetime = valid_to - valid_from
+    return valid_to - min(timedelta(days=30), max(lifetime / 3, timedelta(minutes=1)))
+
+
 class DatabaseCertificatesMixin(DatabaseMixinBase):
     """Certificate CRUD, assignment and self-signed renewal."""
 
@@ -166,6 +179,12 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
         """
         deployable: Dict[str, Dict[str, Any]] = {}
         undecryptable: List[tuple] = []
+        # Resolve the keyring BEFORE opening the session, the way import_certificate does.
+        # `_db_session` is not reentrant: it yields the shared scoped session and its `finally`
+        # calls `session.remove()`, so a nested `with` -- which is what `_keyring_values` opens
+        # the first time it has to read the keyring out of the metadata row -- closes the
+        # session this block is holding and detaches everything it loaded.
+        keyring = self._keyring_values()
         with self._db_session() as session:
             rows = session.execute(
                 select(ResourceAttachments.service_id, Resources.id, Resources.name, Certificates)
@@ -189,7 +208,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                         certificate.private_key_nonce,
                         certificate.private_key_key_id,
                         resource_id,
-                        self._keyring_values(),
+                        keyring,
                     )
                 except (InvalidTag, TypeError, ValueError) as exc:
                     message = str(exc) or exc.__class__.__name__
@@ -314,7 +333,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 valid_from=parsed["valid_from"],
                 valid_to=parsed["valid_to"],
                 renewal_metadata=_json_object(stored_metadata),
-                next_renewal=parsed["valid_to"] - timedelta(days=30),
+                next_renewal=_next_renewal(parsed["valid_from"], parsed["valid_to"]),
                 revoked=False,
             )
             session.add(resource)
@@ -434,7 +453,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 certificate.valid_from = parsed["valid_from"]
                 certificate.valid_to = parsed["valid_to"]
                 certificate.last_renewal = now
-                certificate.next_renewal = parsed["valid_to"] - timedelta(days=30)
+                certificate.next_renewal = _next_renewal(parsed["valid_from"], parsed["valid_to"])
                 certificate.last_error = ""
                 certificate.revoked = False
                 certificate.revoked_at = None
@@ -675,6 +694,11 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
         return parsed["leaf_pem"] if part == "leaf" else certificate_pem.encode()
 
     def renew_self_signed_certificate(self, resource_id: str, *, valid_days: int = 365) -> str:
+        # Outside the session on purpose -- see get_deployable_certificates: `_keyring_values`
+        # can open a session of its own, and `_db_session` is not reentrant. Nested here it
+        # detached `certificate`, and the `certificate.resource` lazy load below then raised
+        # DetachedInstanceError, failing the job that clears `certificates_changed`.
+        keyring = self._keyring_values()
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -689,7 +713,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                     certificate.private_key_nonce,
                     certificate.private_key_key_id,
                     resource_id,
-                    self._keyring_values(),
+                    keyring,
                 )
                 renewed_pem = renew_self_signed(certificate.certificate_pem.encode(), private_key, valid_days=valid_days)
                 parsed = parse_certificate(renewed_pem, private_key)
@@ -704,7 +728,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
             certificate.valid_from = parsed["valid_from"]
             certificate.valid_to = parsed["valid_to"]
             certificate.last_renewal = now
-            certificate.next_renewal = parsed["valid_to"] - timedelta(days=30)
+            certificate.next_renewal = _next_renewal(parsed["valid_from"], parsed["valid_to"])
             certificate.last_error = ""
             certificate.revoked = False
             certificate.revoked_at = None

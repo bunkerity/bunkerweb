@@ -240,6 +240,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         if method == "autoconf":
             db_config = self.get_non_default_settings(with_drafts=True)
 
+        # Read here, not from inside the session below: `get_non_default_settings` opens a
+        # session of its own and `_db_session` is not reentrant -- its `finally` calls
+        # `session.remove()`, which closes the session the save is holding and discards
+        # whatever is pending in it. Nothing is pending at that point today, which is the only
+        # reason this has not bitten yet.
+        stored_values = db_config or self.get_non_default_settings(with_drafts=True)
+
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
 
         ctx = _SaveConfigContext(
@@ -265,7 +272,6 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             # global_settings.py): never validate the merged snapshot. Comparing against what is
             # actually stored still closes the PUT /global_settings/config bypass, and costs one
             # config read instead of one validation round trip per key.
-            stored_values = db_config or self.get_non_default_settings(with_drafts=True)
             for key, value in config.items():
                 if key == "DATABASE_URI":
                     continue

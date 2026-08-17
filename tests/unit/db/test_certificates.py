@@ -107,6 +107,54 @@ def test_renew_selfsigned_and_revoke(db, monkeypatch):
     assert db.get_certificate_details(resource_id)["status"] == "revoked"
 
 
+def test_renew_works_without_an_environment_keyring(db, monkeypatch):
+    """A stock install has no CERTIFICATE_ENCRYPTION_* env, so the keyring comes from the
+    metadata row -- and reading it opens a database session. `_db_session` is not reentrant
+    (its `finally` calls `session.remove()`), so resolving the keyring from inside the renewal
+    session used to close that session and the next attribute load raised DetachedInstanceError.
+    Every other test here configures the env keyring, which is why none of them caught it."""
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_KEYS", raising=False)
+    monkeypatch.delenv("CERTIFICATE_ENCRYPTION_ACTIVE_KEY", raising=False)
+    seed_minimal(db)  # the fallback keyring lives in the Metadata row, so one has to exist
+    certificate, private_key = generate_self_signed("db-keyring.example.com", [])
+    error, resource_id = db.create_certificate(
+        name="db-keyring",
+        source="selfsigned",
+        certificate_pem=certificate,
+        private_key_pem=private_key,
+        service_ids=[],
+    )
+    assert error == ""
+    # The worker recycles its process after every job, so the renewal is the first thing to
+    # touch the keyring in a fresh process -- with the cache warm, nothing nests and the bug
+    # hides. deploy-certificates renews before it deploys, which is exactly this order.
+    db._db_keyring = None
+    assert db.renew_self_signed_certificate(resource_id) == ""
+
+
+def test_a_short_lived_certificate_is_not_due_the_moment_it_exists(db, monkeypatch):
+    """`next_renewal` used to be a flat 30 days before expiry, so anything living 30 days or
+    less was due at issuance: deploy-certificates renewed it on every run, re-issuing material
+    and pushing it to the whole fleet each time (SELF_SIGNED_SSL_EXPIRY=30 does exactly that)."""
+    _configure_keyring(monkeypatch)
+    certificate, private_key = generate_self_signed("short.example.com", [], valid_days=30)
+    error, resource_id = db.create_certificate(
+        name="short",
+        source="selfsigned",
+        certificate_pem=certificate,
+        private_key_pem=private_key,
+        service_ids=[],
+    )
+    assert error == ""
+    assert resource_id not in db.get_self_signed_certificates_due_for_renewal()
+
+    details = db.get_certificate_details(resource_id)
+    valid_from = datetime.fromisoformat(details["valid_from"])
+    next_renewal = datetime.fromisoformat(details["next_renewal"])
+    valid_to = datetime.fromisoformat(details["valid_to"])
+    assert valid_from < next_renewal < valid_to
+
+
 def test_renew_tampered_ciphertext_fails_closed(db, monkeypatch):
     resource_id, _, _ = _create(db, monkeypatch)
     with session(db) as db_session:

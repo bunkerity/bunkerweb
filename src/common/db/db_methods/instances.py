@@ -39,6 +39,10 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
         if not is_valid_host(hostname):
             return f"Invalid instance hostname: {hostname}"
 
+        # Resolve the keyring before the session: reading the metadata-backed keyring opens
+        # one of its own and `_db_session` is not reentrant (see _decrypt_instance_credential).
+        keyring = self._keyring_values()
+
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -50,7 +54,7 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
 
             credential_columns: Dict[str, Any] = {}
             if credential:
-                encrypted = self._encrypt_instance_credential(hostname, credential)
+                encrypted = self._encrypt_instance_credential(hostname, credential, keyring)
                 if encrypted is not None:
                     ciphertext, nonce, key_id = encrypted
                     credential_columns = {
@@ -156,6 +160,9 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                 return f"Invalid instance hostname: {hostname}"
 
         to_put = []
+        # Resolve the keyring before the session: reading the metadata-backed keyring opens
+        # one of its own and `_db_session` is not reentrant (see _decrypt_instance_credential).
+        keyring = self._keyring_values()
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -190,7 +197,7 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                     db_instance.status = instance.get("status", "up" if instance.get("health", True) else "down")
                     db_instance.method = instance.get("method", method)
                     db_instance.last_seen = instance.get("last_seen", current_time)
-                    for column, value in self._reconcile_credential_columns(instance["hostname"], instance.get("env"), global_token).items():
+                    for column, value in self._reconcile_credential_columns(instance["hostname"], instance.get("env"), global_token, keyring).items():
                         setattr(db_instance, column, value)
                     to_put.append(db_instance)
                     continue
@@ -208,7 +215,7 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                         method=instance.get("method", method),
                         creation_date=instance.get("creation_date", current_time),
                         last_seen=instance.get("last_seen", current_time),
-                        **self._reconcile_credential_columns(instance["hostname"], instance.get("env"), global_token),
+                        **self._reconcile_credential_columns(instance["hostname"], instance.get("env"), global_token, keyring),
                     )
                 )
 
@@ -309,22 +316,32 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
 
         return ""
 
-    def _encrypt_instance_credential(self, hostname: str, token: str) -> Optional[tuple]:
+    def _encrypt_instance_credential(self, hostname: str, token: str, keyring=None) -> Optional[tuple]:
         """Encrypt a per-instance credential with the shared AES-256-GCM keyring.
 
         Best-effort: returns None (and logs) when no keyring is available so an
         optional per-instance token never breaks instance persistence — the dial
         simply falls back to the global API_TOKEN. With the metadata-backed keyring
         this now only happens on a read-only database or before metadata exists.
+
+        Callers inside a session must resolve `keyring` first and pass it: reading the
+        metadata-backed keyring opens a session, `_db_session` is not reentrant, and the
+        removal would detach the very rows the caller is iterating.
         """
         try:
-            return encrypt_private_key(token.encode("utf-8"), hostname, self._keyring_values())
+            return encrypt_private_key(token.encode("utf-8"), hostname, self._keyring_values() if keyring is None else keyring)
         except Exception as e:  # keyring absent/misconfigured must never break persistence
             self.logger.warning(f"Could not encrypt the credential for instance {hostname}; it will fall back to the global API token: {e}")
             return None
 
-    def _decrypt_instance_credential(self, instance: Instances) -> Optional[str]:
-        """Decrypt a stored per-instance credential; None when unset or unreadable."""
+    def _decrypt_instance_credential(self, instance: Instances, keyring=None) -> Optional[str]:
+        """Decrypt a stored per-instance credential; None when unset or unreadable.
+
+        `keyring` is not optional for a caller inside a session — see
+        `_encrypt_instance_credential`. Reading it from here detached the instance rows
+        `get_instances` was iterating, which only stayed invisible because a one-instance
+        stack has already read everything it needs by the time the first decrypt runs.
+        """
         if not instance.credential_ciphertext or not instance.credential_nonce or not instance.credential_key_id:
             return None
         try:
@@ -333,13 +350,13 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                 instance.credential_nonce,
                 instance.credential_key_id,
                 instance.hostname,
-                self._keyring_values(),
+                self._keyring_values() if keyring is None else keyring,
             ).decode("utf-8")
         except (InvalidTag, ValueError) as e:
             self.logger.error(f"Could not decrypt the credential for instance {instance.hostname}: {e}")
             return None
 
-    def _reconcile_credential_columns(self, hostname: str, env: Optional[Dict[str, Any]], global_token: Optional[str]) -> Dict[str, Any]:
+    def _reconcile_credential_columns(self, hostname: str, env: Optional[Dict[str, Any]], global_token: Optional[str], keyring=None) -> Dict[str, Any]:
         """Credential columns for an autoconf reconcile insert/update.
 
         Encrypt the instance's own API_TOKEN only when it is present and distinct
@@ -351,7 +368,7 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
         env_token = (env or {}).get("API_TOKEN")
         if not env_token or env_token == global_token:
             return cleared
-        encrypted = self._encrypt_instance_credential(hostname, env_token)
+        encrypted = self._encrypt_instance_credential(hostname, env_token, keyring)
         if encrypted is None:
             return cleared
         ciphertext, nonce, key_id = encrypted
@@ -364,12 +381,15 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
 
     def set_instance_credential(self, hostname: str, token: Optional[str], *, changed: Optional[bool] = True) -> str:
         """Set (or clear, when token is falsy) the per-instance control-plane credential."""
+        # Resolve the keyring before the session: reading the metadata-backed keyring opens
+        # one of its own and `_db_session` is not reentrant (see _decrypt_instance_credential).
+        keyring = self._keyring_values()
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             if token:
-                encrypted = self._encrypt_instance_credential(hostname, token)
+                encrypted = self._encrypt_instance_credential(hostname, token, keyring)
                 if encrypted is None:
                     return "No certificate encryption keyring is configured; cannot store a per-instance credential"
                 ciphertext, nonce, key_id = encrypted
@@ -401,15 +421,21 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
 
     def get_instance_credential(self, hostname: str) -> Optional[str]:
         """Return the decrypted per-instance credential, or None when unset/unreadable."""
+        # Resolve the keyring before the session: reading the metadata-backed keyring opens
+        # one of its own and `_db_session` is not reentrant (see _decrypt_instance_credential).
+        keyring = self._keyring_values()
         with self._db_session() as session:
             instance = session.scalars(select(Instances).filter_by(hostname=hostname).limit(1)).first()
             if not instance:
                 return None
-            return self._decrypt_instance_credential(instance)
+            return self._decrypt_instance_credential(instance, keyring)
 
     def get_instances(self, *, method: Optional[str] = None, autoconf: bool = False, with_credential: bool = False) -> List[Dict[str, Any]]:
         """Get instances. Set with_credential=True (internal dial callers only) to
         include the decrypted per-instance token; never expose it to API clients."""
+        # Resolve the keyring before the session: reading the metadata-backed keyring opens
+        # one of its own and `_db_session` is not reentrant (see _decrypt_instance_credential).
+        keyring = self._keyring_values()
         with self._db_session() as session:
             query = select(Instances)
             if method:
@@ -434,13 +460,16 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                     "credential_updated_at": instance.credential_updated_at.astimezone().isoformat() if instance.credential_updated_at else None,
                 }
                 | ({"health": instance.status == "up", "env": {}} if autoconf else {})
-                | ({"credential": self._decrypt_instance_credential(instance)} if with_credential else {})
+                | ({"credential": self._decrypt_instance_credential(instance, keyring)} if with_credential else {})
                 for instance in session.scalars(query)
             ]
 
     def get_instance(self, hostname: str, *, method: Optional[str] = None, with_credential: bool = False) -> Dict[str, Any]:
         """Get instance. Set with_credential=True (internal dial callers only) to
         include the decrypted per-instance token; never expose it to API clients."""
+        # Resolve the keyring before the session: reading the metadata-backed keyring opens
+        # one of its own and `_db_session` is not reentrant (see _decrypt_instance_credential).
+        keyring = self._keyring_values()
         with self._db_session() as session:
             query = select(Instances).filter_by(hostname=hostname)
             if method:
@@ -467,4 +496,4 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                 "tls_fingerprint": instance.tls_fingerprint,
                 "credential_set": instance.credential_ciphertext is not None,
                 "credential_updated_at": instance.credential_updated_at.astimezone().isoformat() if instance.credential_updated_at else None,
-            } | ({"credential": self._decrypt_instance_credential(instance)} if with_credential else {})
+            } | ({"credential": self._decrypt_instance_credential(instance, keyring)} if with_credential else {})
