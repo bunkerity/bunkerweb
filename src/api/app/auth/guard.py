@@ -1,4 +1,3 @@
-from hmac import compare_digest
 from time import time
 from fastapi import HTTPException, Request, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -6,7 +5,7 @@ from ..utils import LOGGER
 from ..config import api_config
 from .biscuit import guard as biscuit_guard
 from ..utils import check_password, get_api_db
-from .common import get_auth_header, parse_bearer_token
+from .common import get_auth_header, parse_bearer_token, tokens_equal
 
 security = HTTPBasic(auto_error=False)
 
@@ -91,7 +90,7 @@ class BiscuitWithAdminBearer:
         api_token = api_config.API_TOKEN
         if authz.lower().startswith("bearer "):
             provided = parse_bearer_token(authz) or ""
-            if api_token and compare_digest(provided, api_token):
+            if tokens_equal(provided, api_token):
                 self._logger.debug("Auth success via admin Bearer token (API_TOKEN)")
                 return  # Full access via admin Bearer
             # Not the admin token (or no API_TOKEN set): try Biscuit ACL

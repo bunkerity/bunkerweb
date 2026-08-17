@@ -1,6 +1,5 @@
 from contextlib import suppress
 from datetime import datetime, timezone
-from hmac import compare_digest
 from typing import Optional, Tuple
 
 from fastapi import APIRouter, HTTPException, Request, Depends
@@ -13,7 +12,7 @@ from ..utils import LOGGER
 
 from ..utils import BISCUIT_PRIVATE_KEY_FILE, check_password, get_api_db
 from ..config import api_config
-from ..auth.common import get_auth_header
+from ..auth.common import get_auth_header, parse_bearer_token, tokens_equal
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBasic(auto_error=False)
@@ -56,10 +55,8 @@ async def login(request: Request, credentials: HTTPBasicCredentials | None = Dep
         # Use FastAPI's HTTPBasic to get username/password
         creds = (credentials.username or "", credentials.password or "")
     is_admin_override = False
-    if not creds and authz.lower().startswith("bearer ") and api_config.API_TOKEN:
-        token_val = authz.split(" ", 1)[1].strip()
-        if token_val and compare_digest(token_val, api_config.API_TOKEN):
-            is_admin_override = True
+    if not creds and tokens_equal(parse_bearer_token(authz), api_config.API_TOKEN):
+        is_admin_override = True
 
     if not creds and not is_admin_override:
         creds = await _from_form() or await _from_json()
@@ -99,9 +96,17 @@ async def login(request: Request, credentials: HTTPBasicCredentials | None = Dep
         for row in rows or []:
             name = getattr(row, "permission", "") or ""
             lname = name.lower()
-            if "read" in lname:
+            # The coarse read/write role is inferred from the permission NAME, so every verb a
+            # permission is named after has to appear in one of these two lists: a user holding
+            # only permissions that match neither ends up with an empty `perms` and is refused at
+            # login with "No permissions assigned to user" -- which is what a purge-only web-cache
+            # user hit, and what an assign/renew/revoke/clone/download-only user would hit too.
+            # Deliberately not "anything that is not read means write": an unmapped route falls
+            # back to coarse role authorization (see biscuit.py), so a wrong guess here grants
+            # more than the permission names.
+            if any(x in lname for x in ("read", "download")):
                 perms.add("read")
-            if any(x in lname for x in ("create", "update", "delete", "execute", "run", "convert", "export")):
+            if any(x in lname for x in ("create", "update", "delete", "execute", "run", "convert", "export", "purge", "assign", "renew", "revoke", "clone")):
                 perms.add("write")
             rtype = getattr(row, "resource_type", "") or ""
             rid = getattr(row, "resource_id", None) or "*"
@@ -142,12 +147,15 @@ async def login(request: Request, credentials: HTTPBasicCredentials | None = Dep
 
     # API has no role logic; encode read/write under a fixed role name.
     role_name = "api_user"
-    if "read" in perms and "write" in perms:
-        builder.add_code('role({role}, ["read", "write"]);', {"role": role_name})
-    elif "read" in perms:
-        builder.add_code('role({role}, ["read"]);', {"role": role_name})
-    else:
+    if not perms:
         raise HTTPException(status_code=403, detail="No permissions assigned to user")
+    # A write-only user is a legitimate case (a purge-only or ban-only account) and used to fall
+    # into the "no permissions" branch below, so it could not even log in. The coarse role only
+    # decides routes that have no fine-grained mapping (see biscuit.py), so granting write alone
+    # gives strictly less than the read+write role a mixed account already gets.
+    # Interpolated, not parameterized: both values come from this fixed tuple, never from input.
+    role_perms = ", ".join(f'"{perm}"' for perm in ("read", "write") if perm in perms)
+    builder.add_code(f"role({{role}}, [{role_perms}]);", {"role": role_name})
 
     # Embed fine-grained permissions as facts (DB-sourced values, bound as parameters)
     if is_admin:

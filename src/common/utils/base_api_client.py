@@ -41,8 +41,14 @@ class BaseApiClient:
         self.session.headers["Authorization"] = f"Bearer {api_token}"
         self.session.headers["Content-Type"] = "application/json"
 
-        # Connection pooling with 1 retry on 5xx/connection errors
-        retry = Retry(total=1, backoff_factor=0.5, status_forcelist=[502, 503, 504])
+        # Connection pooling with 1 retry on 5xx/connection errors.
+        # respect_retry_after_header is OFF on purpose: urllib3 retries 429 whenever the response
+        # carries a Retry-After (429 is in Retry.RETRY_AFTER_STATUS_CODES), and it *sleeps* for the
+        # value the server sent. The API's rate limiter answers with the remaining window, so a
+        # single 429 blocked the calling thread for up to a minute inside a request handler --
+        # long enough for BunkerWeb's own 60s proxy read timeout to kill the browser connection.
+        # Surfacing the 429 immediately as ApiClientError is the honest failure.
+        retry = Retry(total=1, backoff_factor=0.5, status_forcelist=[502, 503, 504], respect_retry_after_header=False)
         adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)

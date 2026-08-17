@@ -14,6 +14,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from yaml import safe_load
 
+from .auth.common import parse_bearer_token, tokens_equal
 from .config import api_config
 from os import getenv
 from .utils import LOGGER, get_db
@@ -373,7 +374,22 @@ def is_enabled() -> bool:
     return _enabled
 
 
+def _carries_admin_token(request: Request) -> bool:
+    """Is this request authenticated with the admin API_TOKEN?
+
+    Every BunkerWeb component talks to the API with that token: the UI on each page render, the
+    Scheduler on each dispatch, the Worker on each job. They share the container network, so the
+    limiter saw one IP making the traffic of the whole control plane and answered 429 well inside
+    normal use -- a UI login alone spends several calls per request. Rate limiting the holder of a
+    token that already grants full admin protects nothing, so it is skipped. A *wrong* bearer never
+    matches, and so stays limited.
+    """
+    return tokens_equal(parse_bearer_token(request.headers.get("authorization") or ""), api_config.API_TOKEN)
+
+
 def _is_exempt(request: Request) -> bool:
+    if _carries_admin_token(request):
+        return True
     with suppress(Exception):
         cip = _client_identifier(request)
         ipobj = ip_address(cip)
@@ -421,6 +437,13 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         storage_options.setdefault("socket_connect_timeout", timeout_ms / 1000.0)
         storage_options.setdefault("socket_keepalive", True)
         storage_options.setdefault("max_connections", keepalive_pool)
+
+        # REDIS_SSL_VERIFY was read from the configuration and then ignored, so `rediss://`
+        # always verified: an operator who turned verification off still could not reach a
+        # Redis serving its own certificate, and every request paid a failed TLS handshake.
+        # `clusterstore.lua` honours the same setting on the request path.
+        if redis_ssl and str(_env_or_cfg("REDIS_SSL_VERIFY", "yes") or "yes").lower() != "yes":
+            storage_options.setdefault("ssl_cert_reqs", None)
 
         if sentinels and sentinel_master:
             # redis sentinel URI must not embed master auth, otherwise limits applies
@@ -605,6 +628,13 @@ def setup_rate_limiter(app) -> None:
         strategy=strategy,
         headers_enabled=api_config.rate_limit_headers_enabled,
         key_prefix="bwapi-rl-",
+        # Without this, a storage error propagates out of `_check_request_limit` and every
+        # endpoint answers 500 -- including /ping and /health, which is how the scheduler
+        # decides the API is reachable. An unreachable Redis would therefore stop config
+        # pushes to the whole fleet, on a service nginx does not even need to serve traffic.
+        # slowapi instead logs "Rate limit storage unreachable", keeps enforcing the same
+        # limits in process memory, and re-checks the backend until it comes back.
+        in_memory_fallback_enabled=True,
     )
     app.state.limiter = _limiter
 
