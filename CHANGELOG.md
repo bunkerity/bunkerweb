@@ -10,6 +10,7 @@
 - [BUGFIX] `core`: an expiry of `0` in the datastore worker cache means no expiry, matching the shared dictionary, instead of expiring the entry at once.
 - [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart emptied the shared dictionary and the next sync wrote that zero over the value Redis had kept. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
 - [BUGFIX] `ui`: mark Total Requests, Blocked Requests, Blocked Unique IPs and the Request status chart as all time; they never honored the *Last 7 days* window the dashboard announces. (Refs #3775)
+- [MISC] Remove the four ad auction features Chromium dropped (`join-ad-interest-group`, `private-aggregation`, `record-ad-auction-events` and `run-ad-auction`) from the default value for the Permissions-Policy header, now sorted alphabetically.
 
 ## v1.6.14~rc3 - 2026/08/14
 
