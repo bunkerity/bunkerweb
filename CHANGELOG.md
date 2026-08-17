@@ -5,13 +5,13 @@
 - [SECURITY] `api`, `ui`: reject a configuration or plugin name ending in a newline, which passed validation and became a filename that aborted every configuration push.
 - [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service.
 - [BUGFIX] `core`: an instance no longer stays on its loading configuration after a restart, where a surviving `.bw-applied` marker made the Scheduler skip the next push.
-- [BUGFIX] `docker`: `KEEP_CONFIG_ON_RESTART` defaults to `no` as documented. Unset, it was read as empty and every restart preserved the configuration instead of regenerating it.
+- [BUGFIX] `docker`: `KEEP_CONFIG_ON_RESTART` defaults to `no` as documented, where unset was read as empty and preserved the configuration on every restart. A container that never set it now restarts through the loading configuration, as on Linux; set it to `yes` for the old behaviour.
 - [BUGFIX] `cli`: read `API_TOKEN` from the configuration, not the environment only, where every `bwcli` command on Linux was refused by the API. (Fixes #3810)
 - [BUGFIX] `ui`: treat `/favicon.ico` as a static asset, instead of attaching a cookie deletion to a response cached for a day.
-- [BUGFIX] `letsencrypt`: close certbot's stderr, which leaked a descriptor per invocation.
+- [BUGFIX] `letsencrypt`: close certbot's stderr once its reader finishes, which leaked a descriptor per invocation.
 - [BUGFIX] `core`: an expiry of `0` in the datastore worker cache means no expiry, as in the shared dictionary, instead of expiring at once.
-- [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart zeroed them and the next sync overwrote the values Redis had kept. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
-- [BUGFIX] `ui`: mark Total Requests, Blocked Requests, Blocked Unique IPs and the Request status chart as all time; they never honored the *Last 7 days* window. (Refs #3775)
+- [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart zeroed them and the next sync overwrote the stored values. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
+- [BUGFIX] `ui`: Total Requests, Blocked Requests and the Request status chart say which window they show, instead of being read as *Last 7 days* while holding cumulative counters. (Refs #3775)
 - [MISC] Remove the four ad auction features Chromium dropped (`join-ad-interest-group`, `private-aggregation`, `record-ad-auction-events` and `run-ad-auction`) from the default value for the Permissions-Policy header, now sorted alphabetically.
 
 ## v1.6.14~rc3 - 2026/08/14

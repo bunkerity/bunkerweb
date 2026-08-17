@@ -537,11 +537,14 @@ def stream_certbot(process, logger_certbot, timeout: float, on_line: Optional[Ca
         # killed certbot keeps the pipe open and the reader would never see EOF.
         if reader is not None:
             reader.join(timeout=5)
-        # Only once the reader is actually done: close() takes the same buffer lock the blocked
-        # read holds, so closing under it hangs here forever rather than raising, which would
-        # defeat the bounded join above and take the whole job with it. Leaking the descriptor
-        # in that case is the lesser evil.
-        if process.stderr is not None and (reader is None or not reader.is_alive()):
+        # Only once the reader has actually finished: close() takes the same buffer lock the
+        # blocked read holds, so closing under it hangs here forever rather than raising, which
+        # would defeat the bounded join above and take the whole job with it.
+        # When it is still blocked we deliberately leak the descriptor and the daemon thread
+        # holding it, for the lifetime of this process. That is the lesser evil against hanging,
+        # but it is a leak, not a fix: a hook that keeps stderr open past every certbot run will
+        # accumulate one of each per invocation.
+        if reader is not None and not reader.is_alive():
             with suppress(OSError):
                 process.stderr.close()
 

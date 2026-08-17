@@ -279,32 +279,45 @@ local function seed_counters_from_redis(self, wid, budget)
 			local values
 			values, err = self:redis_call("mget", unpack(keys))
 			if type(values) ~= "table" then
+				-- Keep going rather than return: seeding only ever runs on a cold start, so
+				-- abandoning it here leaves every remaining counter unseeded, and the sync later
+				-- in this same cycle then writes the cold values over the Redis ones this exists
+				-- to protect. One bad batch should cost that batch, not the rest.
 				self:log_throttled(
 					ERR,
 					"seed_get",
-					"Can't read metric counters from Redis: " .. (err or "unexpected reply")
+					"Can't read a batch of metric counters from Redis: " .. (err or "unexpected reply")
 				)
-				return
-			end
-			for i, key in ipairs(wanted) do
-				local value = values[i]
-				local number = value ~= nil and value ~= null and tonumber(value) or nil
-				if number then
-					lru:set(key, number)
-					seeded = seeded + 1
+			else
+				for i, key in ipairs(wanted) do
+					local value = values[i]
+					local number = value ~= nil and value ~= null and tonumber(value) or nil
+					if number then
+						lru:set(key, number)
+						seeded = seeded + 1
+					end
 				end
 			end
+		end
+
+		-- Nothing left to place, so stop walking: the rest of the scan could only keep counting
+		-- skips, and at the cardinalities this guards against that is thousands of round trips.
+		if seeded >= budget then
+			break
 		end
 	until cursor == "0"
 
 	if skipped > 0 then
 		self.logger:log(
 			WARN,
+			-- Not merely "not restored": seeding is a one-shot cold start, so the next time one of
+			-- these metrics fires it enters the cache at its fresh value and the sync writes that
+			-- over the Redis total. Say so, or the operator reads this as harmless.
 			"restored "
 				.. seeded
-				.. " metric counter(s) from Redis and left "
+				.. " metric counter(s) from Redis but had no room for "
 				.. skipped
-				.. " behind for lack of room, raise MAX_LRU_HISTORY to keep them all"
+				.. " more, whose totals will be overwritten the next time they are incremented, raise MAX_LRU_HISTORY"
 		)
 	end
 end
@@ -562,7 +575,13 @@ function metrics:timer()
 			redis_connected = true
 			self_heal_request_facets(self)
 			if cold_start and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				local max_slots = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
+				-- The cache's own capacity, not the MAX_LRU_HISTORY setting it was meant to be
+				-- built from: when init_workers() failed to resize, the two disagree and a budget
+				-- computed from the setting would overfill the very cache it is protecting.
+				local max_slots = lru.num_items
+				if type(max_slots) ~= "number" or max_slots < 1 then
+					max_slots = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
+				end
 				if max_slots < 1 then
 					max_slots = DEFAULT_MAX_LRU_HISTORY
 				end

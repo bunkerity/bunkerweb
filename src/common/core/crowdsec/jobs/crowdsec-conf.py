@@ -49,7 +49,11 @@ try:
     # `disabled` only names services SERVER_NAME still lists, but Job() restores a cached file for
     # every service_id the database holds, so one dropped from SERVER_NAME entirely would be put
     # back on every run and never swept. Sweep by what is actually on disk instead.
-    if JOB.job_path.is_dir():
+    # Both lists empty means the job environment named no service at all, which happens on a
+    # partial or racing environment as readily as on a real "nothing configured". There is no
+    # evidence of what is stale then, so sweeping the disk would delete every service's
+    # configuration on the strength of a missing variable.
+    if (services or disabled) and JOB.job_path.is_dir():
         for entry in JOB.job_path.iterdir():
             if entry.is_dir() and entry.name not in services:
                 stale.add(entry.name)
