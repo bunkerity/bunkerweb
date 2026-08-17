@@ -148,11 +148,15 @@ end
 
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
-local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
-local HTTP_OK = ngx.HTTP_OK
-local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
-local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
-local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
+-- ngx.HTTP_* only exists in the http subsystem, and this module is loaded in both. The literal
+-- fallbacks matter: push_stream_reports() runs in a stream timer and compared the API's numeric
+-- 200 against a nil HTTP_OK, so every successful push was reported as "API refused stream reports
+-- with status 200" and the batch was queued again forever.
+local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR or 500
+local HTTP_OK = ngx.HTTP_OK or 200
+local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST or 400
+local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN or 403
+local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE or 503
 local worker = ngx.worker
 local worker_id = worker.id
 local worker_pid = worker.pid
@@ -550,12 +554,14 @@ function metrics:log(bypass_checks)
 		-- Geo data is resolved once per request by fill_ctx()
 		local country = self.ctx.bw.country or "local"
 		local asn_number, asn_org = self.ctx.bw.asn_number, self.ctx.bw.asn_org
-		-- ngx.status is HTTP-only; stream carries the session status in $status (200/400/403/
-		-- 500/502/503). Both are stored raw and read against `protocol`, which says which
-		-- vocabulary the number belongs to. Stream denies used to be pinned to 403 so that the
-		-- 4xx-or-detect report filter would keep them -- an HTTP code invented for a session
-		-- that never had one. The filter carries a protocol arm now instead, here and in the
-		-- two query paths below, so the real session status survives.
+		-- ngx.status is HTTP-only; stream carries the session status in $status -- 200 for a
+		-- session nginx let through, and for a denied one whatever we passed to ngx.exit(),
+		-- which is utils.get_deny_status() = ngx.HTTP_CLOSE (444) in this subsystem. Both are
+		-- stored raw and read against `protocol`, which says which vocabulary the number
+		-- belongs to. Stream denies used to be pinned to 403 so that the 4xx-or-detect report
+		-- filter would keep them -- an HTTP code invented for a session that never had one. The
+		-- filter carries a protocol arm now instead, here and in the two query paths below, so
+		-- the real session status survives.
 		local status
 		if subsystem == "http" then
 			status = ngx.status
@@ -1165,16 +1171,22 @@ function metrics:api_ingest_stream_reports()
 
 	-- Validate the complete dense array before touching either LRU or shared memory. The query
 	-- path compares status numerically and may sort every report-facing scalar directly.
+	-- Carried by every report, whatever its protocol.
 	local string_fields = {
 		"ip",
 		"country",
-		"method",
-		"url",
-		"user_agent",
 		"reason",
 		"server_name",
 		"security_mode",
 	}
+	-- HTTP-only dimensions. log() stopped fabricating a method/url/user_agent for a session that
+	-- never had one, so a stream report simply does not carry them -- and requiring them here
+	-- rejected every single one with 400, five seconds apart, for as long as the instance ran.
+	-- No stream report ever reached the query path, the UI, or scrape-persist-reports.
+	local http_string_fields = { "method", "url", "user_agent" }
+	-- The L4 dimensions a stream report carries instead. Optional: an older instance, or a UDP
+	-- session NGINX gives no session_time for, may leave any of them unset.
+	local stream_number_fields = { "listen_port", "client_port", "bytes_sent", "bytes_received", "session_time" }
 	local function is_finite_number(value)
 		return type(value) == "number" and value == value and value ~= math.huge and value ~= -math.huge
 	end
@@ -1194,9 +1206,36 @@ function metrics:api_ingest_stream_reports()
 			or (request.asn_number ~= nil and not is_finite_number(request.asn_number))
 			or (request.asn_org ~= nil and type(request.asn_org) ~= "string")
 		)
+		-- A record written before `protocol` existed is HTTP, same convention as is_report().
+		-- Only read after the type checks above, since `request` is not known to be a table until
+		-- then and indexing a number would raise rather than fail the payload.
+		local is_http = true
+		if valid then
+			is_http = request.protocol == nil or request.protocol == "http"
+			if request.protocol ~= nil and type(request.protocol) ~= "string" then
+				valid = false
+			end
+		end
 		if valid then
 			for _, field in ipairs(string_fields) do
 				if type(request[field]) ~= "string" then
+					valid = false
+					break
+				end
+			end
+		end
+		if valid and is_http then
+			for _, field in ipairs(http_string_fields) do
+				if type(request[field]) ~= "string" then
+					valid = false
+					break
+				end
+			end
+		end
+		if valid and not is_http then
+			for _, field in ipairs(stream_number_fields) do
+				local value = request[field]
+				if value ~= nil and not is_finite_number(value) then
 					valid = false
 					break
 				end

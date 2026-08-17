@@ -6,11 +6,17 @@ local utils = require "bunkerweb.utils"
 
 local limit = class("limit", plugin)
 
+-- What a client is allowed on the antibot endpoint, whatever the service's own rule says.
+-- Four requests solve a challenge and a reload costs three more, so this leaves room for a
+-- couple of attempts per second and no more.
+local CHALLENGE_RATE = "10r/s"
+
 local ngx = ngx
 local ERR = ngx.ERR
 local HTTP_TOO_MANY_REQUESTS = ngx.HTTP_TOO_MANY_REQUESTS
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
+local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local is_whitelisted = utils.is_whitelisted
 local regex_match = utils.regex_match
@@ -113,6 +119,26 @@ function limit:is_needed()
 	return is_needed
 end
 
+-- The URI antibot challenges on, or nil when the service does not challenge at all. Read from
+-- the datastore rather than from self.variables : the settings belong to the antibot plugin.
+function limit:antibot_uri()
+	local use_antibot, err = get_variable("USE_ANTIBOT", true, self.ctx)
+	if not use_antibot then
+		if err then
+			self.logger:log(ERR, "can't check USE_ANTIBOT variable : " .. err)
+		end
+		return nil
+	end
+	if use_antibot == "no" then
+		return nil
+	end
+	local antibot_uri, uri_err = get_variable("ANTIBOT_URI", true, self.ctx)
+	if not antibot_uri and uri_err then
+		self.logger:log(ERR, "can't check ANTIBOT_URI variable : " .. uri_err)
+	end
+	return antibot_uri
+end
+
 function limit:init()
 	-- Check if init is needed
 	if not self:is_needed() then
@@ -133,6 +159,7 @@ function limit:init()
 	local data = {}
 	local global_data = {}
 	local i = 0
+	local g = 0
 	for srv, vars in pairs(variables) do
 		if vars["USE_LIMIT_REQ"] == "yes" then
 			for var, value in pairs(vars) do
@@ -148,7 +175,19 @@ function limit:init()
 			end
 		end
 		if vars["USE_LIMIT_REQ_GLOBAL"] == "yes" then
-			global_data[srv] = vars["LIMIT_REQ_GLOBAL_RATE"]
+			-- A missing rate here would store nothing at all for the service and the aggregate
+			-- limit would silently never apply, so say so instead of failing open in silence.
+			if not vars["LIMIT_REQ_GLOBAL_RATE"] then
+				self.logger:log(
+					ERR,
+					"USE_LIMIT_REQ_GLOBAL is yes for "
+						.. srv
+						.. " but LIMIT_REQ_GLOBAL_RATE is missing, no aggregate limit will apply"
+				)
+			else
+				global_data[srv] = vars["LIMIT_REQ_GLOBAL_RATE"]
+				g = g + 1
+			end
 		end
 	end
 	local ok, err = self.internalstore:set("plugin_limit_rules", data, nil, true)
@@ -159,7 +198,10 @@ function limit:init()
 	if not ok_global then
 		return self:ret(false, err_global)
 	end
-	return self:ret(true, "successfully loaded " .. tostring(i) .. " limit rules for requests")
+	return self:ret(
+		true,
+		"successfully loaded " .. tostring(i) .. " limit rules and " .. tostring(g) .. " aggregate rates for requests"
+	)
 end
 
 function limit:access()
@@ -221,6 +263,18 @@ function limit:access()
 			rate = r
 			break
 		end
+	end
+
+	-- The antibot endpoint runs on a fixed allowance instead of the service's rule. Solving a
+	-- challenge costs several requests inside the second the client needs to solve it -- the
+	-- redirect, the challenge page, cap.js's isolated widget iframe, then the POST carrying the
+	-- token -- against a default LIMIT_REQ_RATE of 2r/s. The client we just redirected here was
+	-- therefore limited on the very page that would let it through, with no way out: a reload
+	-- costs two more requests. Deliberately an allowance and not an exemption -- a bot POSTing
+	-- junk tokens still makes us call the captcha provider once per request.
+	-- Only where a rule already applies: an endpoint the operator left unlimited stays that way.
+	if rate and uri == self:antibot_uri() then
+		rate = CHALLENGE_RATE
 	end
 	if not rate then
 		return self:ret(true, "no rule for " .. uri)

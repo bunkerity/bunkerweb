@@ -38,6 +38,15 @@ local HTTP_OK = ngx.HTTP_OK
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
 local HTTP_NOT_FOUND = ngx.HTTP_NOT_FOUND
+-- Literal: lua-nginx-module has no ngx.HTTP_PRECONDITION_FAILED constant.
+local HTTP_PRECONDITION_FAILED = 412
+local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
+-- Held while POST /confs replaces a destination tree, waited on by POST /reload : the swap is a
+-- `rm -rf dest/* && cp -R staging/. dest/`, so a reload landing in the middle of it makes NGINX
+-- read a half-written tree.
+local SWAP_LOCK_KEY = "api_swap_in_progress"
+local SWAP_LOCK_TTL = 120
+local SWAP_WAIT_TIMEOUT = 30
 local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
@@ -196,6 +205,24 @@ api.global.GET["^/health$"] = function(self)
 end
 
 api.global.POST["^/reload"] = function(self)
+	-- Never reload on top of a half-replaced configuration. A push writes the tree file by file,
+	-- so a reload that overlaps it either fails its own `nginx -t` or, worse, succeeds and runs
+	-- init_by_lua against a truncated variables.env : the plugins then keep whatever rules they
+	-- could build from that partial read until something reloads them again, which is how a
+	-- service kept serving traffic with its rate limit silently absent. Waiting is deliberate --
+	-- answering 503 instead would make the caller treat the push as failed and roll it back.
+	local swap_deadline = ngx.now() + SWAP_WAIT_TIMEOUT
+	while internalstore:get(SWAP_LOCK_KEY) do
+		if ngx.now() >= swap_deadline then
+			logger:log(
+				ERR,
+				"a configuration swap is still in progress after " .. SWAP_WAIT_TIMEOUT .. "s, refusing to reload"
+			)
+			return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "a configuration swap is still in progress")
+		end
+		ngx.sleep(0.1)
+	end
+
 	-- Get test argument
 	local args = ngx.req.get_uri_args()
 	local test_arg = args.test or "yes"
@@ -330,12 +357,18 @@ api.global.POST["^/confs$"] = function(self)
 		"rm -rf " .. staging,
 		"rm -f " .. tmp,
 	}
+	-- Hold the swap lock for the destructive part only : the upload above never touches the
+	-- destination. The TTL is the backstop for a worker that dies mid-swap -- without it a lost
+	-- unlock would block every reload for good.
+	internalstore:set(SWAP_LOCK_KEY, tostring(ngx.now()), SWAP_LOCK_TTL)
 	for _, cmd in ipairs(cmds) do
 		local status = execute(cmd)
 		if status ~= 0 then
+			internalstore:delete(SWAP_LOCK_KEY)
 			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
 		end
 	end
+	internalstore:delete(SWAP_LOCK_KEY)
 	return self:response(HTTP_OK, "success", "saved data at " .. destination)
 end
 
@@ -778,7 +811,13 @@ api.global.POST["^/proxy%-cache/purge$"] = function(self)
 				local res = ngx.location.capture("/_proxy-cache/purge")
 				if res and res.status == HTTP_OK then
 					purged = purged + 1
-				elseif res and res.status == HTTP_NOT_FOUND then
+				elseif res and (res.status == HTTP_NOT_FOUND or res.status == HTTP_PRECONDITION_FAILED) then
+					-- 412 is how ngx_cache_purge says "key not in cache" by default
+					-- (`cache_purge_legacy_status` is on unless turned off); 404 is the same answer
+					-- with it off. Accept both: purging an entry that is not cached -- which is every
+					-- purge issued right after a purge-all -- is a no-op, not a failure. Counting it
+					-- as an error failed the whole call with 500, which the API turned into 503 and
+					-- the UI into "Error purging web cache".
 					not_found = not_found + 1
 				else
 					errors[#errors + 1] = "purge failed for "
@@ -792,6 +831,9 @@ api.global.POST["^/proxy%-cache/purge$"] = function(self)
 	end
 
 	if #errors > 0 then
+		-- Also to the instance log: the caller (API -> UI) only surfaces "error", so a purge that
+		-- fails on this side left nothing to debug with anywhere.
+		logger:log(ERR, "proxy cache purge failed : " .. table.concat(errors, ", "))
 		return self:response(
 			HTTP_INTERNAL_SERVER_ERROR,
 			"error",

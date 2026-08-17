@@ -87,7 +87,15 @@ function certificates:init()
 		if not server_name then
 			return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 		end
-		servers[server_name:match("%S+")] = server_name
+		-- An instance that has not received its first configuration yet has SERVER_NAME set to
+		-- the empty string, which `not server_name` does not catch: the match then yields nil
+		-- and indexing the table with it aborts init with "table index is nil" on every cold
+		-- boot. Nothing is attached to a service that does not exist yet, so stop here.
+		local first_server = server_name:match("%S+")
+		if not first_server then
+			return self:ret(true, "no server name configured yet")
+		end
+		servers[first_server] = server_name
 	end
 
 	local loaded = 0
