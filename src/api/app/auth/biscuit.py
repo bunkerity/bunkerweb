@@ -76,6 +76,7 @@ def _resolve_instances(path_normalized: str, method_u: str) -> tuple[Optional[st
 
     Supported endpoints:
     - GET    /instances/health | /instances/ping -> instances_read
+    - GET    /instances/{hostname}/ping|health   -> instances_read
     - POST   /instances/reload | legacy /reload  -> instances_execute
     - POST   /instances/stop   | legacy /stop    -> instances_execute
     Fallback: instances_<verb> based on method.
@@ -87,8 +88,8 @@ def _resolve_instances(path_normalized: str, method_u: str) -> tuple[Optional[st
     if method_u in {"GET", "OPTIONS"}:
         if p in {"/instances/health", "/instances/ping"}:
             return rtype, "instances_read"
-        # Support per-instance ping: /instances/{hostname}/ping
-        if len(parts) == 3 and parts[0] == "instances" and parts[2] == "ping":
+        # Support per-instance ping/health: /instances/{hostname}/ping|health
+        if len(parts) == 3 and parts[0] == "instances" and parts[2] in {"ping", "health"}:
             return rtype, "instances_read"
     # Execute actions
     if method_u == "POST":

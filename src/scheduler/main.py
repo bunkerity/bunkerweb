@@ -108,6 +108,9 @@ HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 APPLY_RETRY_INTERVAL = int(getenv("APPLY_RETRY_INTERVAL", "300") or 300)
 HEALTHCHECK_EVENT = Event()
 HEALTHCHECK_LOGGER = getLogger("SCHEDULER.HEALTHCHECK")
+# Instances currently reporting the loading state, so the healthcheck re-pushes a configuration
+# once per episode instead of on every pass.
+LOADING_INSTANCES = set()
 
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
@@ -124,6 +127,23 @@ DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lo
 
 if DISABLE_CONFIGURATION_TESTING:
     LOGGER.warning("Configuration testing is disabled, changes will be applied without testing (we hope you know what you're doing) ...")
+
+
+def changes_from_metadata(db_metadata: dict) -> dict:
+    """The change flags the polling loop compares from one iteration to the next."""
+    return {
+        "pro_plugins_changed": db_metadata["pro_plugins_changed"],
+        "last_pro_plugins_change": db_metadata["last_pro_plugins_change"],
+        "external_plugins_changed": db_metadata["external_plugins_changed"],
+        "last_external_plugins_change": db_metadata["last_external_plugins_change"],
+        "custom_configs_changed": db_metadata["custom_configs_changed"],
+        "last_custom_configs_change": db_metadata["last_custom_configs_change"],
+        "plugins_config_changed": db_metadata["plugins_config_changed"],
+        "instances_changed": db_metadata["instances_changed"],
+        "last_instances_change": db_metadata["last_instances_change"],
+        "certificates_changed": db_metadata.get("certificates_changed", False),
+        "last_certificates_change": db_metadata.get("last_certificates_change"),
+    }
 
 
 def handle_stop(signum, frame):
@@ -440,17 +460,18 @@ def healthcheck_job():
         return
 
     recovered = False
+    still_loading = set()
     try:
         for db_instance in API_CLIENT.get_instances():
             hostname = db_instance["hostname"]
             previous_status = db_instance.get("status")
-            reachable = False
+            health = None
             try:
-                reachable = API_CLIENT.ping_instance(hostname)
+                health = API_CLIENT.get_instance_health(hostname)
             except BaseException as e:
-                HEALTHCHECK_LOGGER.error(f"Exception while pinging instance {hostname}: {e}")
+                HEALTHCHECK_LOGGER.error(f"Exception while checking instance {hostname}: {e}")
 
-            if not reachable:
+            if health is None:
                 HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is not reachable, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ...")
                 ret = API_CLIENT.update_instance(hostname, "down")
                 if ret:
@@ -466,6 +487,20 @@ def healthcheck_job():
                 HEALTHCHECK_LOGGER.info(f"Instance {hostname} recovered from {previous_status} → up; will trigger push-configs to re-sync it")
                 recovered = True
 
+            # An instance that restarted comes back reachable but keeps IS_LOADING=yes until
+            # something pushes it a configuration -- and in that state both timer loops return
+            # early, so bad-behavior counting, the metrics flush and the sessions cleanup are all
+            # silently dead while the instance serves traffic normally. The down → up transition
+            # above misses it whenever the restart fits between two healthchecks, which a ~15s
+            # container restart regularly does. Once per episode only: push-configs is what clears
+            # the state, so an instance still loading after a push is broken for another reason and
+            # does not deserve a dispatch every HEALTHCHECK_INTERVAL seconds forever.
+            if health == "loading":
+                still_loading.add(hostname)
+                if hostname not in LOADING_INSTANCES:
+                    HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is up but still reports the loading state; will trigger push-configs to re-sync it")
+                    recovered = True
+
         if recovered and SCHEDULER is not None:
             try:
                 if not SCHEDULER.run_single("push-configs"):
@@ -473,6 +508,10 @@ def healthcheck_job():
             except BaseException as e:
                 HEALTHCHECK_LOGGER.error(f"Exception dispatching push-configs after recovery: {e}")
     finally:
+        # Rebuilt from this pass rather than discarded per instance, so an unreachable or deleted
+        # instance drops out on its own and gets a fresh push if it ever comes back loading.
+        LOADING_INSTANCES.clear()
+        LOADING_INSTANCES.update(still_loading)
         HEALTHCHECK_EVENT.clear()
 
 
@@ -825,10 +864,20 @@ if __name__ == "__main__":
                 # Dispatch all `once` jobs to workers (includes the
                 # push-configs job, which renders + ships the NGINX config
                 # tree to every BW instance and triggers a reload).
+                skipped_plugins = ["misc", "pro"] if FIRST_START else []
+                if scheduler_first_start:
+                    # backup-data skips itself on the very first start of a fresh install: there
+                    # is nothing worth archiving yet, and a backup of the pristine database would
+                    # stamp its "already done for this period" cache and suppress the first real
+                    # one for a whole day. That guard reads `scheduler_first_start` from the
+                    # database -- the flag we clear a few lines below -- and dispatch is
+                    # fire-and-forget, so the worker usually reads it already cleared and backs
+                    # up anyway. Hold the job back here instead of racing its own guard.
+                    skipped_plugins.append("backup")
                 if not SCHEDULER.reload(
                     env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
-                    ignore_plugins=["misc", "pro"] if FIRST_START else None,
+                    ignore_plugins=skipped_plugins or None,
                 ):
                     LOGGER.error("At least one job in run_once() failed")
                 else:
@@ -895,6 +944,34 @@ if __name__ == "__main__":
 
             last_dispatch = datetime.now().astimezone()
 
+            # Adopt what this pass just acted on as the polling baseline. Saving the
+            # configuration raises every change flag, and since 1.7 those flags are cleared by
+            # the job that applies them rather than by us on dispatch -- push-configs is
+            # asynchronous, so a poll one second later still sees them set. With `old_changes`
+            # empty, `not old_changes` reads that as brand new and runs the whole pass again:
+            # every once-job dispatched twice on every cold boot, which is how `backup-data`
+            # produced a backup the "first start of the scheduler" guard exists to prevent.
+            # Nothing this pass applied is lost by adopting it -- it regenerated the
+            # configuration and dispatched the jobs.
+            # Only when the fleet answered. A pass that ran against an unreachable instance
+            # applied nothing -- push-configs had nowhere to push -- so adopting its flags
+            # parks the change until the APPLY_RETRY_INTERVAL re-arm, 300s later. Leaving the
+            # baseline empty is what the loop did before this seed existed: the next poll reads
+            # the still-set flags as new and dispatches again, which is the right thing while
+            # an instance is coming back.
+            # ponytail: a change landing between the generation and this read is still adopted
+            # without having been applied, and only the re-arm below picks it up. Narrow the
+            # window with a per-change watermark if that ever shows up in practice -- autoconf,
+            # the one writer fast enough to hit it, gates its first write on first_config_saved,
+            # which this pass has already latched.
+            if not old_changes and success:
+                try:
+                    dispatched_metadata = API_CLIENT.get_metadata()
+                    if not isinstance(dispatched_metadata, str):
+                        old_changes = changes_from_metadata(dispatched_metadata)
+                except BaseException as e:
+                    LOGGER.error(f"Error while reading the change baseline after the first dispatch: {e}")
+
             FIRST_START = False
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
@@ -953,19 +1030,7 @@ if __name__ == "__main__":
                     if isinstance(db_metadata, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")
 
-                    changes = {
-                        "pro_plugins_changed": db_metadata["pro_plugins_changed"],
-                        "last_pro_plugins_change": db_metadata["last_pro_plugins_change"],
-                        "external_plugins_changed": db_metadata["external_plugins_changed"],
-                        "last_external_plugins_change": db_metadata["last_external_plugins_change"],
-                        "custom_configs_changed": db_metadata["custom_configs_changed"],
-                        "last_custom_configs_change": db_metadata["last_custom_configs_change"],
-                        "plugins_config_changed": db_metadata["plugins_config_changed"],
-                        "instances_changed": db_metadata["instances_changed"],
-                        "last_instances_change": db_metadata["last_instances_change"],
-                        "certificates_changed": db_metadata.get("certificates_changed", False),
-                        "last_certificates_change": db_metadata.get("last_certificates_change"),
-                    }
+                    changes = changes_from_metadata(db_metadata)
 
                     if API_CLIENT.readonly and changes == old_changes:
                         # Reset here too: `continue` leaves the try statement, so the `else`

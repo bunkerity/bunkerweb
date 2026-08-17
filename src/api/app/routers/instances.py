@@ -71,6 +71,24 @@ def ping_one(hostname: str, api=Depends(get_api_for_hostname)) -> JSONResponse:
     return JSONResponse(status_code=200, content=resp if isinstance(resp, dict) else {"status": "ok"})
 
 
+@router.get("/{hostname}/health", dependencies=[Depends(guard)])
+def health_one(hostname: str, api=Depends(get_api_for_hostname)) -> JSONResponse:
+    """Report a specific BunkerWeb instance's own state.
+
+    Where /ping only answers "reachable", this forwards what the instance says about itself:
+    "ok", "loading" or "reloading". The scheduler needs the difference — an instance that
+    restarted comes back reachable while still stuck in its loading state, where every
+    timer-driven plugin is disabled, and no ping can tell that apart from a healthy one.
+
+    Args:
+        hostname: The hostname of the instance to query
+    """
+    sent, err, status, resp = api.request("GET", "/health")
+    if not sent or status != 200:
+        return JSONResponse(status_code=502, content={"status": "error", "msg": (err or getattr(resp, "get", lambda _k: None)("msg")) or "internal error"})
+    return JSONResponse(status_code=200, content=resp if isinstance(resp, dict) else {"status": "ok"})
+
+
 @router.post("/{hostname}/reload", dependencies=[Depends(guard)])
 def reload_one(hostname: str, test: bool = True, api=Depends(get_api_for_hostname)) -> JSONResponse:
     """Reload configuration on a specific BunkerWeb instance.

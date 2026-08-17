@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 from base_api_client import BaseApiClient, ApiClientError, ApiUnavailableError  # type: ignore  # noqa: F401
 
@@ -46,6 +46,18 @@ class SchedulerApiClient(BaseApiClient):
             return True
         except (ApiClientError, ApiUnavailableError):
             return False
+
+    def get_instance_health(self, hostname: str) -> Optional[str]:
+        """Ask a specific instance what state it is in: "ok", "loading" or "reloading".
+
+        Returns None when the instance could not be reached, which is the same signal
+        ping_instance gives with False -- the instance answers /health with 200 in every
+        state, so a failure here really means unreachable.
+        """
+        try:
+            return self._get(f"/instances/{hostname}/health").get("msg") or "ok"
+        except (ApiClientError, ApiUnavailableError):
+            return None
 
     def reload_instances(self, test: bool = True) -> bool:
         """Reload all instances. Returns True on success."""
