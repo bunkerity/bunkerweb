@@ -18,6 +18,10 @@ actions:
         next_page: "global-config"
         username: "admin"
         password: "P@ssw0rd"
+      # Every value here has to differ from the setting's default: the raw pane renders only
+      # what is not left at its default, so a stored value that happens to equal it would be
+      # read back as absent. COOKIE_FLAGS_1 uses SameSite=Strict for that reason -- the
+      # default for that setting is exactly `* HttpOnly SameSite=Lax`.
       update_global-config:
         type: update
         item: "global_config"
@@ -27,7 +31,7 @@ actions:
           USE_GZIP: "yes"
           GZIP_COMP_LEVEL: "1"
           COOKIE_FLAGS: "bw_cookie SameSite=Strict"
-          COOKIE_FLAGS_1: "* HttpOnly SameSite=Lax"
+          COOKIE_FLAGS_1: "* HttpOnly SameSite=Strict"
       check_global-config:
         type: read
         item: "global_config"
@@ -37,7 +41,7 @@ actions:
           USE_GZIP: "yes"
           GZIP_COMP_LEVEL: "1"
           COOKIE_FLAGS: "bw_cookie SameSite=Strict"
-          COOKIE_FLAGS_1: "* HttpOnly SameSite=Lax"
+          COOKIE_FLAGS_1: "* HttpOnly SameSite=Strict"
       update_global-config-1:
         type: update
         item: "global_config"

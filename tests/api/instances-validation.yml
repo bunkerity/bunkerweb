@@ -114,3 +114,8 @@ actions:
     auth: ["admin", "P@ssw0rd"]
     string: '"hostname":"xn--mnich-kva.example"'
     full_clean: true
+
+api:
+  # Basic auth on every action here, so the stack has to create the user it authenticates as.
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"

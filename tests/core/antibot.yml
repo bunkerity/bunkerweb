@@ -211,12 +211,27 @@ actions:
       LOCAL_PHP: "/run/php/php-fpm.sock"
       LOCAL_PHP_PATH: "/var/www/html"
 
+  # The relaxed CSP belongs to the isolated widget document (`?capjs_frame=1`), not to the
+  # challenge page: the parent stays eval-free and only embeds this same-origin iframe. Asked
+  # of the parent, this assertion could never pass — see antibot.lua header().
   capjs_csp:
+    type: header
+    url: "http://www.example.com/challenge?capjs_frame=1"
+    follow_redirects: true
+    response_headers:
+      Content-Security-Policy: "^(?=.*script-src 'nonce-[^']+' http://127[.]0[.]0[.]1:3000 'wasm-unsafe-eval' 'unsafe-eval';)(?=.*style-src 'self' 'nonce-[^']+';)(?=.*connect-src http://127[.]0[.]0[.]1:3000;)(?=.*frame-src http://127[.]0[.]0[.]1:3000;)(?=.*worker-src blob: http://127[.]0[.]0[.]1:3000;)(?!.*require-trusted-types-for).*$"
+    config:
+      USE_ANTIBOT: "capjs"
+      ANTIBOT_CAPJS_FRONTEND_URL: "http://127.0.0.1:3000"
+
+  # The other half of the split: the page that embeds the widget must stay strict, or the
+  # isolation the frame buys is worth nothing.
+  capjs_csp_parent:
     type: header
     url: "http://www.example.com"
     follow_redirects: true
     response_headers:
-      Content-Security-Policy: "^(?=.*script-src 'nonce-[^']+' http://127[.]0[.]0[.]1:3000 'wasm-unsafe-eval';)(?=.*style-src 'self' 'nonce-[^']+';)(?=.*connect-src http://127[.]0[.]0[.]1:3000;)(?=.*frame-src http://127[.]0[.]0[.]1:3000;)(?=.*worker-src blob: http://127[.]0[.]0[.]1:3000;)(?!.*require-trusted-types-for).*$"
+      Content-Security-Policy: "^(?=.*script-src 'nonce-[^']+';)(?=.*frame-src 'self';)(?=.*require-trusted-types-for 'script';)(?!.*unsafe-eval).*$"
     config:
       USE_ANTIBOT: "capjs"
       ANTIBOT_CAPJS_FRONTEND_URL: "http://127.0.0.1:3000"

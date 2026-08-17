@@ -17,3 +17,7 @@ api:
   API_USERNAME: "admin"
   API_PASSWORD: "P@ssw0rd"
   API_RATE_LIMIT_ENABLED: "yes"
+  # Without a Redis the limiter counts in process memory, so each gunicorn worker enforces
+  # the limit on its own and a burst spread over N workers needs N times the configured
+  # rate to trip. One worker is the only way to assert the configured number here.
+  MAX_WORKERS: "1"

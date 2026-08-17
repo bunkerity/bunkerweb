@@ -11,6 +11,14 @@ if [ "$HOST_OS" == "FreeBSD" ] ; then
     IS_FREEBSD=true
 fi
 
+# start.sh sets this for itself and two functions below re-export it, but wait.sh only sources
+# this file: without it here, stack_has_worker sees no version, assumes the current stack, and
+# the upgrade spec waits 300s for a push-configs row a 1.6 stack never writes.
+if [ -f /tmp/bw_version.txt ] ; then
+    BW_VERSION="$(cat /tmp/bw_version.txt)"
+    export BW_VERSION
+fi
+
 function log() {
 	log_when="$(date '+[%Y-%m-%d %H:%M:%S %z]')"
 	log_category="${1:-}"
@@ -83,14 +91,24 @@ function example_hook() {
     log "UTILS" "ℹ️ " "📕 Running $(basename "$script") ..."
     chmod +x "$script"
 
-    # Several of these chown a web root, so they run through sudo where it needs no
-    # password. Where it does, run as the current user: a script that needs root says so
-    # and fails loudly, which beats hanging on a password prompt.
+    # Several of these chown a web root, so they need root. CI has passwordless sudo; a
+    # workstation usually does not, and the scripts refuse to run as anyone else ("Run me as
+    # root"), which would fail every example locally. Fall back to a throwaway container that
+    # runs the script as root against the bind-mounted stack directory -- the ownership it
+    # sets lands on the host files just the same. `bash`, not `sh`: one of these scripts uses
+    # brace expansion.
     local runner=()
-    if sudo -n true 2>/dev/null ; then
+    if [ "$(id -u)" -eq 0 ] ; then
+        runner=()
+    elif sudo -n true 2>/dev/null ; then
         runner=(sudo -E)
     else
-        log "UTILS" "⚠️" "📕 sudo needs a password here, running $(basename "$script") as $(whoami)"
+        log "UTILS" "⚠️" "📕 sudo needs a password here, running $(basename "$script") as root in a container"
+        if ! docker run --rm -v "$(realpath "$stack_dir")":/stack -w /stack bash:5 bash "./$(basename "$script")" ; then
+            log "UTILS" "❌" "📕 $(basename "$script") failed"
+            return 1
+        fi
+        return 0
     fi
 
     if ! (cd "$stack_dir" && "${runner[@]}" "./$(basename "$script")") ; then
@@ -102,11 +120,44 @@ function example_hook() {
 # Whether the push-configs wait applies to this stack. Linux has no worker container to
 # query, and a Docker example brings its own database on its own terms rather than the one
 # the framework generated; both fall back to the action's own delay.
+# The standalone API, the worker and the job broker arrived in 1.7. The upgrade spec boots a
+# previous release first, and those images simply do not exist for it: docker fails the pull with
+# "repository does not exist". Anything that assumes the 1.7 topology has to ask this first.
+function stack_has_worker() {
+    local version major minor
+    version="${BW_VERSION:-tests}"
+    if [ "$version" == "tests" ] ; then
+        return 0
+    fi
+    major="$(echo "$version" | cut -d. -f1 | tr -cd '0-9')"
+    minor="$(echo "$version" | cut -d. -f2 | tr -cd '0-9')"
+    # An unparseable version is treated as current rather than ancient: a stack missing its
+    # worker fails loudly, while one that starts an extra container does not.
+    [ -z "$major" ] && return 0
+    [ -z "$minor" ] && minor=0
+    if [ "$major" -gt 1 ] || { [ "$major" -eq 1 ] && [ "$minor" -ge 7 ] ; } ; then
+        return 0
+    fi
+    return 1
+}
+
 function config_wait_applies() {
     if [ "$integration" == "Linux" ] ; then
         return 1
     fi
     if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+        return 1
+    fi
+    # A pre-1.7 stack has no worker to record a push-configs run, so the wait could only ever
+    # time out.
+    if ! stack_has_worker ; then
+        return 1
+    fi
+    # generate.py clears this for an action that shuts the instance's API listener: the worker
+    # then has no way to push at all, which is the very thing the action asserts.
+    local wait_flag
+    wait_flag="$(redis-cli get config_wait 2>/dev/null)"
+    if [ "$wait_flag" == "0" ] ; then
         return 1
     fi
     return 0
@@ -800,6 +851,21 @@ function cleanup_stack () {
         if [ -d /tmp/kustomize-bunkerweb ] ; then
             rm -rf /tmp/kustomize-bunkerweb
         fi
+
+        # bw-storage is created by start.sh outside any compose project, so `down -v` never
+        # touches it and `docker volume prune` skips it (named, not anonymous). It holds the
+        # SQLite database, so leaving it makes a full clean a lie: the next spec starts on the
+        # previous one's global settings. That is how a `valkey` run left REDIS_HOST=valkey
+        # behind and the following stack's API answered 500 to every /ping, waiting on a host
+        # that no longer existed. CI never saw it -- one runner per spec.
+        if [ "$integration" != "Kubernetes" ] && docker volume inspect bw-storage > /dev/null 2>&1 ; then
+            docker volume rm -f bw-storage > /dev/null
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "🐳 Failed to remove the bw-storage volume"
+                return 1
+            fi
+        fi
     fi
 
     if [ "$integration" != "Kubernetes" ] ; then
@@ -827,6 +893,30 @@ function cleanup_stack () {
 }
 
 function restart_stack () {
+    # A Docker example ships the whole stack, so the containers to restart are its own --
+    # and they carry the same names (bunkerweb, bw-scheduler) in a different compose project.
+    # Restarting the framework's composes here made docker refuse with "container name
+    # /bw-scheduler is already in use", which is how the second action of every Docker
+    # example spec failed.
+    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+        local example_stack
+        example_stack="$(cat /tmp/example_stack.txt)"
+        log "UTILS" "ℹ️ " "📕 Restarting the example stack from $example_stack ..."
+        docker compose -f "$example_stack" down
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "📕 Down failed for the example stack"
+            return 1
+        fi
+        example_hook setup "$integration" || return 1
+        compose_up "$example_stack" "example stack" "📕" || return 1
+        # The framework path clears these on its way out; an example restart is always a whole
+        # one, but leave the flags as the next action expects to find them.
+        redis-cli set restart_whole_stack 0 > /dev/null
+        redis-cli set restart_services 0 > /dev/null
+        return 0
+    fi
+
     restart_whole_stack=$(redis-cli get restart_whole_stack)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$restart_whole_stack" ] ; then
@@ -868,7 +958,7 @@ function restart_stack () {
             case "$database" in
                 mariadb) expected_image="mariadb:11" ;;
                 mysql) expected_image="mysql:9" ;;
-                postgresql) expected_image="postgres:18-alpine" ;;
+                postgresql) expected_image="postgres:17-alpine" ;;
                 oracle) expected_image="gvenzl/oracle-free:23-slim-faststart" ;;
             esac
 
@@ -1353,6 +1443,21 @@ function log_stack () {
         log "UTILS" "ℹ️ " "🔍 Following logs ..."
     fi
 
+    # A Docker example ships its own compose project, so the framework's compose files hold no
+    # container and every "Showing ... logs" heading printed an empty section -- which is how a
+    # failed example run reached CI with no diagnosis at all.
+    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+        local example_stack
+        example_stack="$(cat /tmp/example_stack.txt)"
+        command="logs"
+        if ! $trapped && [ "$FOLLOW" == "yes" ] ; then
+            command="$command -f"
+        fi
+        # shellcheck disable=SC2086
+        docker compose -f "$example_stack" $command
+        return 0
+    fi
+
     if [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] || [ "$integration" == "All-in-one" ] ; then
         command="logs"
         if ! $trapped && [ "$FOLLOW" == "yes" ] ; then
@@ -1658,7 +1763,12 @@ function exit_wrapper() {
         ./tests/scripts/after/"$category".sh "$integration" "$release" "$category"
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
-            exit 1
+            # Exiting here skipped cleanup_stack, so a broken after script left the whole stack
+            # running and the next spec inherited its containers and networks. Keep the failure,
+            # tear the stack down anyway.
+            log "UTILS" "❌" "🔧 After script for \"$category\" failed"
+            exit_code=1
+            after_failed=true
         fi
     fi
 
@@ -1666,6 +1776,10 @@ function exit_wrapper() {
         log_stack
     fi
     cleanup_stack "$exit_code"
+
+    if ${after_failed:-false} ; then
+        exit 1
+    fi
 }
 
 if [ "$(basename "$0")" != "stop.sh" ] && [ "$(basename "$0")" != "log.sh" ] && [ "$(basename "$0")" != "test.sh" ] ; then

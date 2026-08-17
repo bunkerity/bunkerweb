@@ -18,10 +18,12 @@ def handle_config_flow(LOGGER: Logger, ctx, step_data: Any) -> None:
         driver.get(f"{ctx.base_url}/configs")
 
     if step_data.type == "create":
+        # The create action is a link in the page-head band since the 1.7 reskin, not the green
+        # button the DataTable toolbar used to carry.
         access_page(
             LOGGER,
             driver,
-            "//button[@aria-controls='configs' and contains(@class, 'btn-bw-green')]",
+            '//a[@role="button" and @href="/configs/new"]',
             "new",
         )
     elif step_data.type in ("read", "update"):

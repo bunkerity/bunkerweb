@@ -180,13 +180,17 @@ def test_staging_builds_and_loads_every_job_component():
         assert f"local/{image}-tests:latest" in runner
 
 
-def test_core_workflow_retags_every_job_component():
-    workflow = (ROOT / ".github" / "workflows" / "test-core.yml").read_text(encoding="utf-8")
+def test_integration_workflow_retags_every_job_component():
+    # `test-core.yml` and `tests-ui.yml` drove the pre-migration harness and were replaced by the
+    # single reusable `integration-tests.yml`; the guarantee they carried did not change. A stack
+    # whose api or worker image is missing still boots, and then no job ever runs -- which reads
+    # as a spec failure somewhere far from the cause.
+    workflow = (ROOT / ".github" / "workflows" / "integration-tests.yml").read_text(encoding="utf-8")
     branch_workflow = (ROOT / ".github" / "workflows" / "1.7-dev.yml").read_text(encoding="utf-8")
     assert "image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]" in branch_workflow
     for component, image in (("api", "bunkerweb-api"), ("worker", "bunkerweb-worker")):
-        assert f"ghcr.io/bunkerity/{component}-tests:${{{{ inputs.RELEASE }}}}" in workflow
-        assert f"s@bunkerity/{image}:.*@{component}-tests@" in workflow
+        assert f"docker pull ghcr.io/bunkerity/{component}-tests:${{{{ inputs.RELEASE }}}}" in workflow
+        assert f"docker tag ghcr.io/bunkerity/{component}-tests:${{{{ inputs.RELEASE }}}} bunkerity/{image}:tests" in workflow
 
 
 @pytest.mark.parametrize("manifest", CONTROL_PLANE, ids=lambda path: path.name)

@@ -13,6 +13,7 @@ from os import sep
 from pathlib import Path
 from re import MULTILINE, sub
 from shutil import copytree, rmtree
+from subprocess import run
 
 # Where the materialised stack lands, and the file start.sh reads to find it.
 STACK_DIR = Path(sep, "tmp", "example-stack")
@@ -68,7 +69,15 @@ def materialise(logger: Logger, name: str, integration: str, bw_version: str) ->
         exit(1)
 
     if STACK_DIR.exists():
-        rmtree(STACK_DIR)
+        try:
+            rmtree(STACK_DIR)
+        except PermissionError:
+            # An example that ships a database leaves its data directory behind owned by the
+            # container's user (mattermost's `pgdata` is postgres:70), and the runner is not
+            # root. Every later example then died here, at generation, nowhere near the spec
+            # that actually created the directory. Delete it as root in a throwaway container.
+            logger.warning(f"🧹 {STACK_DIR} holds root-owned files, removing it in a container")
+            run(["docker", "run", "--rm", "-v", f"{STACK_DIR.parent}:/host", "bash:5", "rm", "-rf", f"/host/{STACK_DIR.name}"], check=True)
     copytree(source, STACK_DIR)
 
     compose = STACK_DIR.joinpath(compose_name)

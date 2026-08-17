@@ -131,18 +131,18 @@ actions:
         item: "service"
         name: "app2.example.com"
 
-      clone_service_draft_easy:
+      clone_service_draft_2:
         type: create
         item: "service"
         name: "app2.example.com"
-        mode: "easy"
+        mode: "raw"
         draft: true
         clone: "app1.example.com"
-      verify_clone_service_easy:
+      verify_clone_service_2:
         type: read
         item: "service"
         name: "app2.example.com"
-        mode: "easy"
+        mode: "raw"
         draft: true
         config:
           USE_REVERSE_PROXY: "yes"
@@ -161,13 +161,22 @@ actions:
 
       select_services:
         type: click
-        selector: "//thead/tr/th[2]/input"
+        sleep: 1.0
+        # DataTables 2 wraps every header cell in <div class="dt-column-header">, so the
+        # select-all checkbox is no longer a direct child of its <th>.
+        selector: '//thead//input[@type="checkbox"]'
       multiple_convert:
         type: click
+        sleep: 1.0
         selector: "//button[contains(@class, 'action-button')]"
       multiple_convert_1:
         type: click
-        selector: '//a[contains(@class, "dt-button") and .//span[contains(text(), "draft")]]'
+        sleep: 1.0
+        # The clickable node is the <a class="dropdown-item"> INSIDE <li class="dt-button">, and
+        # `contains(@class, "dt-button")` also matches the toolbar's own div.dt-buttons -- which is
+        # what a looser selector clicks, silently doing nothing. The label is split too:
+        # `Convert to<span class="d-none d-md-inline"> draft</span>`.
+        selector: '//div[contains(@class, "dt-button-collection")]//a[contains(@class, "dropdown-item")][.//span[contains(text(), "draft")]]'
       multiple_convert_2:
         type: click
         selector: '//div[@id="modal-convert-services"]//button[@type="submit"]'
@@ -181,13 +190,19 @@ actions:
 
       select_services_1:
         type: click
-        selector: "//thead/tr/th[2]/input"
+        sleep: 1.0
+        # DataTables 2 wraps every header cell in <div class="dt-column-header">, so the
+        # select-all checkbox is no longer a direct child of its <th>.
+        selector: '//thead//input[@type="checkbox"]'
       multiple_delete:
         type: click
+        sleep: 1.0
         selector: "//button[contains(@class, 'action-button')]"
       multiple_delete_1:
         type: click
-        selector: '//a[contains(@class, "dt-button") and .//span[contains(text(), "Delete")]]'
+        sleep: 1.0
+        # Same entry shape as above; "Delete" is the link's own text, only the icon is wrapped.
+        selector: '//div[contains(@class, "dt-button-collection")]//a[contains(@class, "dropdown-item") and contains(normalize-space(), "Delete")]'
       multiple_delete_2:
         type: click
         selector: '//div[@id="modal-delete-services"]//button[@type="submit"]'
@@ -203,7 +218,6 @@ actions:
 
 annotations:
   bunkerweb.io/SERVER_NAME: "test.example.com"
-# TODO: Also test the "fetch from global config" button in easy mode
 # TODO: Also test the templates custom configurations
 # TODO: Add tests when we update the global configuration
 # TODO: Add tests non template settings when we update a service using a template

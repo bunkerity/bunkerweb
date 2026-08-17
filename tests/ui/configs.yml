@@ -63,7 +63,7 @@ actions:
         type: create
         item: "service"
         name: "app1.example.com"
-        mode: "easy"
+        mode: "raw"
         config:
           USE_REVERSE_PROXY: "yes"
           REVERSE_PROXY_HOST: "http://192.168.0.254:8080"

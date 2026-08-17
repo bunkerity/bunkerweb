@@ -19,18 +19,27 @@ actions:
         next_page: "web-cache"
         username: "admin"
         password: "P@ssw0rd"
+      # Panels are components/card.html, whose title is an <h5 class="card-title">.
       assert_status:
         type: find
-        selector: '//h6[contains(text(), "Status (per instance)")]'
+        selector: '//h5[contains(text(), "Instance storage")]'
       assert_metrics:
         type: find
-        selector: '//h6[contains(text(), "Hit / miss metrics")]'
+        selector: '//h5[contains(text(), "Aggregate hit / miss distribution")]'
+      # "Purge all" is destructive, so the danger-zone button only opens a confirmation modal --
+      # the POST is the modal's own submit.
       purge_all:
         type: click
-        selector: '//button[normalize-space()="Purge all"]'
+        selector: '//div[contains(@class, "web-cache-danger")]//button[normalize-space()="Purge all"]'
+      purge_all_confirm:
+        type: click
+        selector: '//div[@id="purge-all"]//button[@type="submit"]'
+        sleep: 0.5
+      # Exact wording from routes/web_cache.py: "Web cache purged (all entries)" on success, or a
+      # "Web cache purged on N instance(s)" warning when some instance was unreachable.
       assert_all_success:
         type: find
-        selector: '//div[contains(@class, "toast-body") and contains(text(), "Web cache purge requested")]'
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "Web cache purged")]'
       fill_url:
         type: send_keys
         selector: '//input[@name="url"]'
@@ -44,6 +53,8 @@ actions:
 
 config:
   USE_REVERSE_PROXY: "yes"
-  REVERSE_PROXY_HOST: "http://app1:8080"
+  # Network-qualified: the framework's dnsmasq answers NXDOMAIN for a bare container name and
+  # NGINX does not fall through to the docker resolver.
+  REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
   USE_PROXY_CACHE: "yes"
   PROXY_CACHE_MIN_USES: "1"

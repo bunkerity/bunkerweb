@@ -43,8 +43,11 @@ if [ "$database" != "sqlite" ] ; then
             fi
         fi
     else
-        containers=$(docker ps -a --format "{{.Names}}" | grep "bw-db")
-        if echo "$containers" | grep -vq "bw-db" ; then
+        # Exact name, not a substring: any other container on the daemon carrying "bw-db" in
+        # its name -- a compose project from another checkout, `ci-autoconf-race-bw-db-1` here --
+        # made this read "the database is already up" and the whole stack then boiled down to
+        # "No route to host" on a database nothing had started.
+        if ! docker ps -a --format "{{.Names}}" | grep -qx "bw-db" ; then
             robust_docker_pull "tests/misc/docker/$database.yml" "$database"
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -72,7 +75,14 @@ if [ "$database" != "sqlite" ] ; then
         fi
     fi
 elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] || [ "$integration" == "All-in-one" ] ; then
-    network=$(docker network ls --format "{{.Name}}" | grep "bw-db")
+    network=$(docker network ls --format "{{.Name}}" | grep -x "bw-db")
+    # A Docker example brings its own database, and several examples claim 10.10.10.0/24 for a
+    # network of their own (proxy-protocol's net-proxy, for one). Creating bw-db here would take
+    # that range first and docker then refuses the example's network with "Pool overlaps with
+    # other one on this address space".
+    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+        network="skipped"
+    fi
     if [ -z "$network" ] ; then
         docker network create --driver bridge --subnet 10.10.10.0/24 bw-db --label "com.docker.compose.network=bw-db" > /dev/null
         # shellcheck disable=SC2181
@@ -93,8 +103,7 @@ fi
 if [ -n "$redis_type" ] ; then
     if [ "$integration" != "Kubernetes" ] ; then
         if [ "$redis_type" != "valkey" ] ; then
-            containers=$(docker ps -a --format "{{.Names}}" | grep "redis-master")
-            if echo "$containers" | grep -vq "redis-master" ; then
+            if ! docker ps -a --format "{{.Names}}" | grep -qx "redis-master" ; then
                 robust_docker_pull "tests/misc/docker/redis-master.yml" "redis-master"
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
@@ -122,8 +131,7 @@ if [ -n "$redis_type" ] ; then
             fi
 
             if [ "$redis_type" == "sentinel" ] ; then
-                containers=$(docker ps -a --format "{{.Names}}" | grep "redis-sentinel-1")
-                if echo "$containers" | grep -vq "redis-sentinel-1" ; then
+                if ! docker ps -a --format "{{.Names}}" | grep -qx "redis-sentinel-1" ; then
                     robust_docker_pull "tests/misc/docker/sentinel.yml" "sentinel stack"
                     # shellcheck disable=SC2181
                     if [ $? -ne 0 ] ; then
@@ -152,8 +160,7 @@ if [ -n "$redis_type" ] ; then
             fi
 
             if [ "$redis_type" == "valkey-sentinel" ] ; then
-                containers=$(docker ps -a --format "{{.Names}}" | grep "valkey-sentinel-1")
-                if echo "$containers" | grep -vq "valkey-sentinel-1" ; then
+                if ! docker ps -a --format "{{.Names}}" | grep -qx "valkey-sentinel-1" ; then
                     robust_docker_pull "tests/misc/docker/valkey-sentinel.yml" "valkey-sentinel stack"
                     # shellcheck disable=SC2181
                     if [ $? -ne 0 ] ; then
@@ -181,8 +188,7 @@ if [ -n "$redis_type" ] ; then
                 fi
             fi
         else
-            containers=$(docker ps -a --format "{{.Names}}" | grep "valkey")
-            if echo "$containers" | grep -vq "valkey" ; then
+            if ! docker ps -a --format "{{.Names}}" | grep -qx "valkey" ; then
                 robust_docker_pull "tests/misc/docker/valkey.yml" "valkey"
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
@@ -318,15 +324,33 @@ elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
     # whatever the test type — without them the stack boots and runs zero jobs.
     # The scheduler compose owns bw-storage and the API and worker attach to it as
     # external, so create it here: they come up first and a clean host has no volume.
-    docker volume create bw-storage > /dev/null
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-        log "START" "❌" "🐳 Failed to create the bw-storage volume"
-        exit 1
-    fi
+    if stack_has_worker ; then
+        docker volume create bw-storage > /dev/null
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "START" "❌" "🐳 Failed to create the bw-storage volume"
+            exit 1
+        fi
 
-    compose_up "tests/docker/docker-compose.api.yml" "API" || exit 1
-    compose_up "tests/docker/docker-compose.worker.yml" "worker" || exit 1
+        # bw-db is owned by whichever database compose the spec picked, and on SQLite there is
+        # none -- yet the API, worker and scheduler all declare it external, so they refuse to
+        # start with "network bw-db declared as external, but could not be found". It only ever
+        # worked because a previous run had left the network behind. Same subnet as the database
+        # composes, which pin static addresses in it.
+        if ! docker network inspect bw-db > /dev/null 2>&1 ; then
+            docker network create --subnet 10.10.10.0/24 bw-db > /dev/null
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "START" "❌" "🐳 Failed to create the bw-db network"
+                exit 1
+            fi
+        fi
+
+        compose_up "tests/docker/docker-compose.api.yml" "API" || exit 1
+        compose_up "tests/docker/docker-compose.worker.yml" "worker" || exit 1
+    else
+        log "START" "ℹ️ " "🐳 BunkerWeb $BW_VERSION predates the worker and the API, starting neither"
+    fi
 
     docker compose -f tests/docker/docker-compose.scheduler.yml up -d
     # shellcheck disable=SC2181

@@ -1,13 +1,14 @@
 integrations: "all"
 
 actions:
+  # 1.7 mounts /auth unconditionally and answers 401 itself; it used to 404 when the API had
+  # no user to authenticate. Sending the spec's own API_TOKEN here asserted nothing about
+  # authentication anyway -- a valid bearer is the admin override, so it now answers 200.
   no_auth:
     type: status
     url: "http://127.0.0.1:8888/auth"
-    headers:
-      Authorization: "Bearer secret"
     method: POST
-    status: 404
+    status: 401
     restart_stack: false
 
   docs_url:
@@ -56,7 +57,11 @@ actions:
     url: "http://127.0.0.1:8888/ping"
     status: 403
     api:
-      API_WHITELIST_IPS: "127.1.1.1"
+      # The scheduler and the worker keep their access, the runner does not: its request comes
+      # through the published port and reaches the API from the bw-universe gateway
+      # (10.20.30.1). A whitelist that locks the scheduler out too leaves the stack unable to
+      # ever report healthy, and the run dies waiting instead of asserting the 403.
+      API_WHITELIST_IPS: "10.20.30.24 10.10.10.24 10.20.30.27"
   deactivated_whitelist:
     type: status
     url: "http://127.0.0.1:8888/ping"

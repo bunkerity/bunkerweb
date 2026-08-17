@@ -3,12 +3,19 @@ from datetime import datetime, timedelta
 from logging import Logger
 from time import sleep
 from typing import List, Optional, Union
+from urllib.parse import urlparse
 from requests import RequestException, get
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    ElementNotInteractableException,
+    StaleElementReferenceException,
+    TimeoutException,
+    WebDriverException,
+)
 
 
 def safe_get_element(
@@ -72,7 +79,10 @@ def safe_get_element(
         exit(1)
 
 
-def assert_button_click(logger: Logger, driver, button: Union[str, WebElement], by: Optional[str] = None):
+def assert_button_click(logger: Logger, driver, button: Union[str, WebElement], by: Optional[str] = None, *, error: bool = False):
+    """Click `button`, retrying for 10s. `error=True` re-raises instead of ending the run, for the
+    call sites where the target is optional (the wizard's confirm-DNS step only exists sometimes)
+    and the caller suppresses the failure itself."""
     # Get all toast dismiss buttons and click them
     dismissed_toasts = False
     try:
@@ -87,33 +97,79 @@ def assert_button_click(logger: Logger, driver, button: Union[str, WebElement], 
         if dismissed_toasts:
             sleep(0.5)
 
-    clicked = False
-    current_date = datetime.now()
-    if isinstance(button, str):
-        button: Union[WebElement, List[WebElement]] = safe_get_element(logger, driver, by or By.XPATH, button)
-    assert isinstance(button, WebElement), "Button is not a WebElement"
-    while not clicked:
-        with suppress(ElementClickInterceptedException):
-            # Scroll to element and wait until it's in view
+    # A selector is re-resolved on every attempt. The DataTables pages redraw themselves (the
+    # responsive plugin recomputes on every resize and tab switch), so a node found once can be
+    # detached, replaced or momentarily unclickable by the time the click lands -- which is what
+    # "could not be scrolled into view" and StaleElementReference mean here. Only a target that
+    # stays unusable for the whole budget is a real failure.
+    selector: Optional[str] = button if isinstance(button, str) else None
+    deadline = datetime.now() + timedelta(seconds=10)
+    reason = "button click failed"
+    last_error: BaseException = TimeoutException(reason)
+
+    while True:
+        try:
+            if selector is not None:
+                # All matches, then the first DISPLAYED one. A DataTable renders more than one
+                # node for the same cell (hidden columns keep their markup, and the scrolling
+                # variants duplicate rows), so taking the first match in document order can hand
+                # back a `display: none` twin. Firefox then answers "could not be scrolled into
+                # view" -- and the in-view wait below does not catch it either, since a hidden
+                # element's rect is all zeroes and passes `top >= 0 and bottom <= innerHeight`.
+                # error=True: a missing element is retried here rather than ending the run, since
+                # the redraw that makes a node stale also removes it for a frame or two.
+                candidates: List[WebElement] = safe_get_element(logger, driver, by or By.XPATH, selector, multiple=True, error=True)  # type: ignore[assignment]
+                if not isinstance(candidates, list):
+                    candidates = [candidates]
+                visible = [candidate for candidate in candidates if candidate.is_displayed()]
+                if not visible:
+                    # DataTables Responsive collapses the right-hand columns of a narrow table:
+                    # the cell keeps its markup but is hidden until the row is expanded, and only
+                    # then does Responsive move it into the visible child row. Expand the parent
+                    # row of the first match and let the next attempt re-resolve it.
+                    if not isinstance(driver, WebElement):
+                        driver.execute_script(
+                            "const tr = arguments[0].closest && arguments[0].closest('tr');"
+                            "if (tr && !tr.classList.contains('parent')) {"
+                            "  const control = tr.querySelector('td.dtr-control');"
+                            "  if (control) control.click();"
+                            "}",
+                            candidates[0],
+                        )
+                    raise ElementNotInteractableException(f"matched {len(candidates)} node(s), none of them displayed")
+                button = visible[0]
+
+            assert isinstance(button, WebElement), "Button is not a WebElement"
+
+            # Scroll to element and wait until it's in view.
+            # `inline: 'center'` matters as much as `block`: the row-action icons live at the
+            # right edge of a wide `table-responsive` table, and Firefox refuses to click an
+            # element it cannot bring into the viewport horizontally ("could not be scrolled into
+            # view") however well centred it is vertically. `instant` rather than `smooth` so the
+            # click below does not race an animation that is still running.
             if not isinstance(driver, WebElement):
-                driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", button)
-                WebDriverWait(driver, 10).until(
+                driver.execute_script("arguments[0].scrollIntoView({ behavior: 'instant', block: 'center', inline: 'center' });", button)
+                WebDriverWait(driver, 5).until(
                     lambda d: d.execute_script(
                         "const rect = arguments[0].getBoundingClientRect();" "return rect.top >= 0 && rect.bottom <= window.innerHeight;", button
                     )
                 )
 
             button.click()
+            return True
+        except (ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException, TimeoutException) as e:
+            reason = (getattr(e, "msg", None) or str(e) or e.__class__.__name__).strip().splitlines()[0]
+            last_error = e
 
-            clicked = True
-
-        if (datetime.now() - current_date).seconds > 10:
-            logger.error("🦊 Button click failed, exiting ...")
+        if datetime.now() > deadline:
+            if error:
+                raise last_error
+            logger.error(f'🦊 Could not click "{selector or "element"}" : {reason}, exiting ...')
             if not isinstance(driver, WebElement):
                 driver.save_screenshot("error.png")
             exit(1)
 
-    return clicked
+        sleep(0.5)
 
 
 def assert_alert_message(logger: Logger, driver, message: str):
@@ -162,6 +218,27 @@ def assert_alert_message(logger: Logger, driver, message: str):
     assert_button_click(logger, driver, "//button[@data-flash-sidebar-close='']/*[local-name() = 'svg']")
 
 
+# How long a navigation may take before we call it a failure. Generous on purpose: a page reached
+# through the loading interstitial waits on the scheduler clearing the *_changed metadata flags,
+# and the scheduler polls for changes once a minute -- so a wizard that saves at T+0 is only
+# noticed at T+60, then has to render and push the configuration, and on SQLite it may sit behind
+# a "Database is locked, waiting for it to be unlocked (timeout: 30s)" on top. The old 45s budget
+# expired mid-cycle and reported "didn't get redirected" for a UI that was working correctly.
+# This is a wait-until, so a fast environment still returns as soon as the page is there.
+PAGE_LOAD_TIMEOUT_SECONDS = 180
+
+
+def on_page(driver, name: str) -> bool:
+    """Is the browser on the `name` page?
+
+    Matches the URL *path* only. Matching the whole URL made
+    `/loading?next=/home` count as the home page, so every login step declared success one
+    second in, while still on the interstitial -- and the assertions that followed ran against
+    the loading screen and failed on things that were simply not rendered there yet.
+    """
+    return f"/{name}" in urlparse(driver.current_url).path
+
+
 def access_page(logger: Logger, driver, button: Union[bool, str, WebElement], name: str, message: bool = True, *, retries: int = 0, clicked: bool = False):
     if retries > 5:
         logger.error("🦊 Too many retries...")
@@ -177,10 +254,10 @@ def access_page(logger: Logger, driver, button: Union[bool, str, WebElement], na
 
         current_time = datetime.now()
 
-        while current_time + timedelta(seconds=45) > datetime.now() and f"/{name}" not in driver.current_url:
+        while current_time + timedelta(seconds=PAGE_LOAD_TIMEOUT_SECONDS) > datetime.now() and not on_page(driver, name):
             sleep(1)
 
-        if f"/{name}" not in driver.current_url:
+        if not on_page(driver, name):
             logger.error(f"🦊 Didn't get redirected to {name} page: {driver.current_url}, exiting ...")
             if not isinstance(driver, WebElement):
                 driver.save_screenshot("error.png")

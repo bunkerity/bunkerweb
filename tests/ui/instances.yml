@@ -20,7 +20,7 @@ actions:
         password: "P@ssw0rd"
       open_invalid_port_modal:
         type: click
-        selector: "//button[@aria-controls='instances' and contains(@class, 'btn-bw-green')]"
+        selector: "//button[@id='instances-create-btn']"
       fill_invalid_port_hostname:
         type: send_keys
         by: "id"
@@ -50,9 +50,14 @@ actions:
       add_method_column:
         type: click
         selector: '//button[@aria-controls="instances" and contains(@class, "buttons-colvis")]'
+      # By label, not by column index: `data-cv-idx` counts every column including the
+      # selection checkbox, so inserting one anywhere to its left silently toggles a different
+      # column and the assertion below fails somewhere else entirely. The entry's own text is
+      # `"4. Method"` -- pages/instances.js numbers each colvis entry -- so match the inner
+      # <span>, which carries the column title alone.
       add_method_column_1:
         type: click
-        selector: '//a[@data-cv-idx="4" and contains(@class, "buttons-columnVisibility")]'
+        selector: '//*[contains(@class, "buttons-columnVisibility")][.//span[normalize-space()="Method"]]'
       add_method_column_2:
         type: click
         selector: '//div[contains(@class, "dt-button-background")]'

@@ -22,7 +22,7 @@ actions:
         password: "P@ssw0rd"
       access_security_tab:
         type: click
-        selector: '//button[@aria-controls="navs-pills-security"]'
+        selector: '//button[@aria-controls="navs-pills-pane-security"]'
         sleep: 2.0
       fill_new_password:
         type: send_keys
@@ -36,11 +36,11 @@ actions:
         value: "P@ssw0rd1"
       fill_current_password:
         type: send_keys
-        selector: '//form[@autocomplete="off" and @action="/profile/edit"]//input[contains(@aria-describedby, "Current password")]'
+        selector: '//input[@id="password-change-current"]'
         value: "P@ssw0rd"
       confirm_change:
         type: access_page
-        selector: '//form[@autocomplete="off" and @action="/profile/edit"]//button[@type="submit" and contains(text(), "Save Changes")]'
+        selector: '//form[@autocomplete="off" and @action="/profile/edit"]//button[@type="submit" and normalize-space()="Save Changes"]'
         page: "login"
       access_profile_1:
         type: access
@@ -55,7 +55,7 @@ actions:
         sleep: 2.0
       access_security_tab_1:
         type: click
-        selector: '//button[@aria-controls="navs-pills-security"]'
+        selector: '//button[@aria-controls="navs-pills-pane-security"]'
         sleep: 2.0
       save_totp:
         type: save_data
@@ -68,11 +68,11 @@ actions:
         value: "%TOTP_TOKEN%"
       fill_current_password_1:
         type: send_keys
-        selector: '//form[@action="/profile/totp-enable"]//input[contains(@aria-describedby, "Current password")]'
+        selector: '//input[@id="totp-enable-password"]'
         value: "P@ssw0rd1"
       enable_totp:
         type: click
-        selector: '//form[@action="/profile/totp-enable"]//button[@type="submit" and contains(text(), "Enable TOTP")]'
+        selector: '//form[@action="/profile/totp-enable"]//button[@type="submit" and normalize-space()="Enable TOTP"]'
       confirm_totp:
         type: find
         selector: '//form[@action="/profile/totp-disable"]'
@@ -122,7 +122,7 @@ actions:
         page: "profile"
       access_sessions_tab:
         type: click
-        selector: '//button[@aria-controls="navs-pills-sessions"]'
+        selector: '//button[@aria-controls="navs-pills-pane-sessions"]'
         sleep: 2.0
       assert_three_sessions:
         type: find
@@ -148,7 +148,7 @@ actions:
         page: "profile"
       access_security_tab_2:
         type: click
-        selector: '//button[@aria-controls="navs-pills-security"]'
+        selector: '//button[@aria-controls="navs-pills-pane-security"]'
         sleep: 2.0
       fill_totp_token_1:
         type: send_keys
@@ -156,11 +156,11 @@ actions:
         value: "%TOTP_TOKEN%"
       fill_current_password_2:
         type: send_keys
-        selector: '//form[@action="/profile/totp-disable"]//input[contains(@aria-describedby, "Current password")]'
+        selector: '//input[@id="totp-disable-password"]'
         value: "P@ssw0rd1"
       disable_totp:
         type: click
-        selector: '//form[@action="/profile/totp-disable"]//button[@type="submit" and contains(text(), "Disable TOTP")]'
+        selector: '//form[@action="/profile/totp-disable"]//button[@type="submit" and normalize-space()="Disable TOTP"]'
       confirm_disable_totp:
         type: find
         selector: '//form[@action="/profile/totp-enable"]'

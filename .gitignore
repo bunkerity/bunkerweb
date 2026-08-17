@@ -40,3 +40,5 @@ docs/superpowers/
 # and geckodriver.log is written into the repo root on every run)
 geckodriver
 geckodriver.log
+# Screenshot the ui runner drops in the repo root when an action fails (tests/ui.py)
+error.png

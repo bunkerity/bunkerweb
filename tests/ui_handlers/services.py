@@ -5,19 +5,22 @@ from contextlib import suppress
 from logging import Logger
 from time import sleep
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-from utils.ui import access_page, assert_button_click, safe_get_element
+from utils.ui import access_page, assert_button_click, on_page, safe_get_element
 
 
 def handle_service_flow(LOGGER: Logger, ctx, step_data: Any) -> None:
     driver = ctx.driver
 
     items_str = step_data.item.replace("_", "-")
-    if f"/{items_str}{'' if items_str == 'global-config' else 's'}" not in driver.current_url:
+    # Path-only match: `/loading?next=/services` is not the services page, and taking it for one
+    # skips the navigation below and runs the whole flow against the interstitial.
+    if not on_page(driver, f"{items_str}{'' if items_str == 'global-config' else 's'}"):
         driver.get(f"{ctx.base_url}/{items_str}{'' if items_str == 'global-config' else 's'}")
         sleep(2)
 
@@ -27,7 +30,9 @@ def handle_service_flow(LOGGER: Logger, ctx, step_data: Any) -> None:
         access_page(
             LOGGER,
             driver,
-            '//div[@id="modal-delete-services"]//button[@type="submit" and @data-i18n="button.delete"]',
+            # The label span carries data-i18n, never the <button> -- components/button.html puts
+            # it there on purpose so translating the label cannot wipe the button's own markup.
+            '//div[@id="modal-delete-services"]//button[@type="submit"][.//span[@data-i18n="button.delete"]]',
             "services",
         )
         element = None
@@ -55,16 +60,24 @@ def handle_service_flow(LOGGER: Logger, ctx, step_data: Any) -> None:
                         LOGGER,
                         driver,
                         f'//a[@data-i18n="tooltip.link.clone_service" and contains(@data-i18n-options, "{step_data.clone}")]',
-                        f"new?clone={step_data.clone}",
+                        # Path only: `on_page` matches the URL path, so a `?clone=` query here never
+                        # matched and the clone step timed out on the page it was already on. Which
+                        # service was cloned is proven by the settings read that follows.
+                        "new",
                     )
                 else:
+                    # The create action is a link in the page-head band since the 1.7 reskin, not
+                    # the green button the DataTable toolbar used to carry.
                     access_page(
                         LOGGER,
                         driver,
-                        "//button[@aria-controls='services' and contains(@class, 'btn-bw-green')]",
+                        "//*[@id='services-create-btn']",
                         "new",
                     )
-            elif step_data.type == "update" and step_data.name not in driver.current_url:
+            # `read` navigates too: saving leaves the browser on /loading, the check above then
+            # lands it on the services list, and a read that assumed it was still on the service
+            # page would look for the settings editor on a DataTable.
+            elif step_data.type in ("update", "read") and step_data.name not in driver.current_url:
                 access_page(
                     LOGGER,
                     driver,
@@ -72,360 +85,109 @@ def handle_service_flow(LOGGER: Logger, ctx, step_data: Any) -> None:
                     step_data.name,
                 )
 
-        assert_button_click(
-            LOGGER,
-            driver,
-            f"//button[@data-bs-target='#navs-modes-{step_data.mode}' and not(ancestor::div[@id='floating-modes-menu'])]",
-        )
-        sleep(1)
+        # Compose and Raw are the only panes left: the settings monolith was split, per-plugin
+        # editing moved to /<page>/plugins/<plugin>, and #navs-modes-easy / #navs-modes-advanced
+        # were deleted with it. On /services and /global-settings the switch is a LINK rather
+        # than a Bootstrap tab -- both panes are re-rendered from the database on navigation, so
+        # an unsaved twin cannot exist -- which is why the pane is selected by URL here.
+        #
+        # Value round-trips go through the raw editor: it posts the same keys through the same
+        # route as compose, and a `KEY=value` document is a far steadier target than walking one
+        # widget per setting. The compose shelf itself (the plugin on/off toggles) has no
+        # coverage in this handler yet.
+        if step_data.mode != "raw":
+            LOGGER.warning(f"🦊 Mode '{step_data.mode}' no longer exists in the UI, reading and writing through raw")
+
+        current = urlsplit(driver.current_url)
+        query = dict(parse_qsl(current.query, keep_blank_values=True))
+        if query.get("mode") != "raw":
+            query["mode"] = "raw"
+            driver.get(urlunsplit(current._replace(query=urlencode(query))))
+            sleep(2)
 
         LOGGER.info("🦊 Filling settings ...")
         LOGGER.debug(step_data.config)
 
-        if step_data.item == "service" and step_data.mode in ("easy", "advanced"):
-            draft_button = safe_get_element(
-                LOGGER,
-                driver,
-                By.XPATH,
-                f'//div[@id="navs-modes-{step_data.mode}"]//button[contains(@class, "toggle-draft")]',
-            )
-            draft_button_text = draft_button.text.lower()
-            if ("draft" in draft_button_text) != step_data.draft:
-                if step_data.type == "read":
-                    LOGGER.info(
-                        f"🦊 Service is {'draft' if 'draft' in draft_button_text else 'online'}, but it should be {'draft' if step_data.draft else 'online'}, exiting ..."
-                    )
-                    driver.save_screenshot("error.png")
-                    exit(1)
-                LOGGER.info("🦊 Toggling draft status ...")
-                assert_button_click(LOGGER, driver, draft_button)
-            elif step_data.type == "read":
-                LOGGER.info(f"🦊 Service is {'draft' if 'draft' in draft_button_text else 'online'}, as expected ✅")
+        # The <textarea id="raw-config"> still backs the editor, but it is `d-none` and only
+        # carries the value the server rendered: ACE owns what is on screen and what the form
+        # posts, so both directions go through ace.edit() -- clear()/send_keys() on the hidden
+        # textarea raises "element not interactable".
+        raw_config = driver.execute_script("return ace.edit('raw-config-editor').getValue();")
+        raw_config_dict: dict[str, str | None] = {}
+        for line in raw_config.splitlines():
+            # One line per key. A multiline value (a PEM block in a `file` setting) is folded
+            # away by this parse and would be rewritten as its first line alone, so a spec that
+            # needs one has to go through compose, not here.
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            raw_config_dict[key.strip()] = value.strip().strip('"')
+        LOGGER.debug(f"Raw config dict: {raw_config_dict}")
 
-        if step_data.mode == "easy":
-            if step_data.type == "read":
-                selected_option = safe_get_element(LOGGER, driver, By.XPATH, "//ul[@id='templates-dropdown-menu']//button[@aria-selected='true']")
-                expected_target = f"#navs-templates-{step_data.template}"
-                if selected_option.get_attribute("data-bs-target") != expected_target:
-                    LOGGER.error(f"Template shown is not '{step_data.template}': got '{selected_option.get_attribute('data-bs-target')}' instead.")
-                    driver.save_screenshot("error.png")
-                    exit(1)
-            else:
-                assert_button_click(LOGGER, driver, "select-template", By.ID)
-                assert_button_click(
-                    LOGGER,
-                    driver,
-                    f"//ul[@id='templates-dropdown-menu']//button[@data-bs-target='#navs-templates-{step_data.template}']",
+        if step_data.item == "service" and step_data.type == "read":
+            if raw_config_dict.get("IS_DRAFT", "no") != ("yes" if step_data.draft else "no"):
+                LOGGER.info(
+                    f"🦊 Service is {'draft' if raw_config_dict.get('IS_DRAFT', 'no') == 'yes' else 'online'}, but it should be {'draft' if step_data.draft else 'online'}, exiting ..."
                 )
-                sleep(1)
+                driver.save_screenshot("error.png")
+                exit(1)
+            LOGGER.info(f"🦊 Service is {'draft' if raw_config_dict.get('IS_DRAFT', 'no') == 'yes' else 'online'}, as expected ✅")
 
-            config = dict(step_data.config)
+        config = dict(step_data.config)
 
-            if step_data.item == "service":
-                server_val = config.pop("SERVER_NAME", step_data.name)
-                # ensure SERVER_NAME is always the first key
-                config = {"SERVER_NAME": server_val} | config
+        if step_data.item == "service":
+            server_val = config.pop("SERVER_NAME", step_data.name)
+            # ensure SERVER_NAME is always the first key
+            config = {"SERVER_NAME": server_val, "IS_DRAFT": "yes" if step_data.draft else "no"} | config
 
-            not_saved_settings = set(config.keys())
-            template_steps = safe_get_element(
-                LOGGER,
-                driver,
-                By.XPATH,
-                f"//div[starts-with(@id, 'navs-steps-{step_data.template}-')]",
-                multiple=True,
-            )
-            for template_step, step_nav in enumerate(template_steps, start=1):
-                LOGGER.info(f"🦊 Filling step {template_step} ...")
+        for key, expected in config.items():
+            actual = raw_config_dict.get(key)
 
-                for step_setting in safe_get_element(
-                    LOGGER,
-                    driver,
-                    By.XPATH,
-                    f"//div[@id='navs-steps-{step_data.template}-{template_step}']//*[contains(@class, 'plugin-setting') or contains(@class, 'form-select') or contains(@class, 'form-check-input')]",
-                    multiple=True,
-                ):
-                    setting_name = step_setting.get_attribute("name")
-                    if setting_name in config:
-                        value = config[setting_name]
-                        not_saved_settings.remove(setting_name)
-
-                        if step_setting.get_attribute("type") == "checkbox":
-                            if ("yes" if step_setting.get_attribute("checked") else "no") != value:
-                                if step_data.type == "read":
-                                    LOGGER.info(
-                                        f"🦊 Element '{setting_name}' in template {step_data.template}'s step {template_step} was found, but the value is wrong, exiting ..."
-                                    )
-                                    driver.save_screenshot("error.png")
-                                    exit(1)
-                                assert_button_click(LOGGER, driver, step_setting)
-                        elif step_setting.tag_name == "select":
-                            selected_option = step_setting.find_element(By.XPATH, "./option[@selected]")
-                            if selected_option.get_attribute("value") != value:
-                                if step_data.type == "read":
-                                    LOGGER.info(
-                                        f"🦊 Element '{setting_name}' in template {step_data.template}'s step {template_step} was found, but the value is wrong, exiting ..."
-                                    )
-                                    driver.save_screenshot("error.png")
-                                    exit(1)
-                                assert_button_click(LOGGER, driver, step_setting)
-                                assert_button_click(LOGGER, step_setting, f'./option[@value="{value}"]')
-                        else:
-                            if step_setting.get_attribute("value") != value:
-                                if step_data.type == "read":
-                                    LOGGER.info(
-                                        f"🦊 Element '{setting_name}' in template {step_data.template}'s step {template_step} was found, but the value is wrong, exiting ..."
-                                    )
-                                    driver.save_screenshot("error.png")
-                                    exit(1)
-                                step_setting.clear()
-                                step_setting.send_keys(value)
-
-                        if step_data.type == "read":
-                            LOGGER.info(
-                                f"🦊 Element '{setting_name}' in template {step_data.template}'s step {template_step} was found and the value is correct ✅"
-                            )
-
-                if template_step < len(template_steps):
-                    assert_button_click(LOGGER, driver, f'//div[@id="navs-templates-{step_data.template}"]//button[contains(@class, "next-step")]')
-                    sleep(1)
-
-                if not not_saved_settings:
-                    break
-
-            if not_saved_settings:
-                LOGGER.warning(f"🦊 The following settings were not found in template {step_data.template}: {not_saved_settings}")
-        if step_data.mode == "advanced":
-            keyword_search_input = safe_get_element(LOGGER, driver, By.ID, "plugin-keyword-search-top")
-
-            config = dict(step_data.config)
-
-            if step_data.item == "service":
-                server_val = config.pop("SERVER_NAME", step_data.name)
-                # ensure SERVER_NAME is always the first key
-                config = {"SERVER_NAME": server_val} | config
-
-            for key, value in config.items():
-                sleep(0.3)
-
-                custom_driver_wait = WebDriverWait(driver, 1)
-                keyword_search_input.clear()
-                for c in key:
-                    keyword_search_input.send_keys(c)
-                    sleep(0.05)
-                sleep(0.5)
-
-                setting_element = None
-                suffix = None
-                import re
-
-                match = re.search(r"^(?P<setting>.+)_(?P<suffix>\d+)$", key)
-                if match:
-                    setting, suffix = match.group("setting"), match.group("suffix")
-
-                if value is None and not suffix:
-                    LOGGER.error(f"🦊 Element '{key}' is not a multiple setting, therefore it should have a value")
-                    driver.save_screenshot("error.png")
-                    exit(1)
-
-                with suppress(TimeoutException):
-                    setting_element = safe_get_element(
-                        LOGGER,
-                        driver,
-                        By.XPATH,
-                        f"//div[@id='navs-modes-advanced']//*[@name='{key}']",
-                        error=True,
-                    )
-
-                if not setting_element:
-                    if step_data.type == "read":
-                        LOGGER.info(f"🦊 Element '{key}' was not found, as expected ✅")
-                        continue
-
-                    if not match:
-                        LOGGER.error(f"🦊 Element '{key}' is not a valid multiple setting")
+            if step_data.type == "read":
+                if actual is None:
+                    if expected is not None:
+                        LOGGER.info(f"🦊 Element '{key}' was not found, but it should be there, exiting ...")
                         driver.save_screenshot("error.png")
                         exit(1)
-
-                    keyword_search_input.clear()
-                    for c in setting:
-                        keyword_search_input.send_keys(c)
-                        sleep(0.05)
-                    sleep(0.5)
-
-                    setting_element = None
-                    with suppress(TimeoutException):
-                        setting_element = safe_get_element(
-                            LOGGER,
-                            driver,
-                            By.XPATH,
-                            f"//div[@id='navs-modes-advanced']//*[@name='{setting}']",
-                            driver_wait=custom_driver_wait,
-                            error=True,
-                        )
-
-                    if not setting_element:
-                        LOGGER.error(f"🦊 Element '{setting}' is not found in global config settings")
-                        driver.save_screenshot("error.png")
-                        exit(1)
-
-                with suppress((NoSuchElementException, TimeoutException)):
-                    multiple_collapse_parent = setting_element.find_element(By.XPATH, "ancestor::*[contains(@class, 'multiple-collapse')]")
-                    parent_id = multiple_collapse_parent.get_attribute("id")
-                    LOGGER.debug(f"Element '{key}' is inside a 'multiple-collapse' container with ID '{parent_id}'.")
-
-                    parent_classes = multiple_collapse_parent.get_attribute("class")
-                    parent_shown = "show" in parent_classes
-
-                    if suffix:
-                        delete_button = None
-                        with suppress(TimeoutException):
-                            delete_button = safe_get_element(LOGGER, driver, By.ID, f"remove-{parent_id}", error=True)
-
-                        if value is None:
-                            if delete_button:
-                                if step_data.type == "read":
-                                    LOGGER.info(f"🦊 Element '{key}' was found, but it should not be there, exiting ...")
-                                    driver.save_screenshot("error.png")
-                                    exit(1)
-                                assert_button_click(LOGGER, driver, delete_button)
-                                sleep(1)
-                            continue
-
-                        add_button = None
-                        with suppress(TimeoutException):
-                            add_button = safe_get_element(LOGGER, driver, By.ID, f"add-{parent_id.rsplit('-', 1)[0]}", error=True)
-
-                        if not add_button:
-                            if step_data.type == "read":
-                                LOGGER.info(f"🦊 Element '{key}' was not found, but it should be there, exiting ...")
-                                driver.save_screenshot("error.png")
-                                exit(1)
-                            LOGGER.error(f"🦊 Element '{key}' is not a valid multiple setting")
-                            driver.save_screenshot("error.png")
-                            exit(1)
-                        elif step_data.type in ("create", "update"):
-                            assert_button_click(LOGGER, driver, add_button)
-                            sleep(1)
-
-                        setting_element = safe_get_element(
-                            LOGGER,
-                            driver,
-                            By.XPATH,
-                            f"//div[@id='navs-modes-advanced']//*[@name='{key}']",
-                            driver_wait=custom_driver_wait,
-                        )
-                    elif not parent_shown:
-                        assert_button_click(LOGGER, driver, f"show-{parent_id}", By.ID)
-                        sleep(1)
-
-                if suffix and "multiple_collapse_parent" not in locals():
-                    LOGGER.error(f"🦊 Element '{key}' is not a valid multiple setting")
+                    LOGGER.info(f"🦊 Element '{key}' was not found, as expected ✅")
+                elif expected is None:
+                    LOGGER.info(f"🦊 Element '{key}' was found, but it should not be there, exiting ...")
                     driver.save_screenshot("error.png")
                     exit(1)
-
-                if setting_element.get_attribute("type") == "checkbox":
-                    if ("yes" if setting_element.get_attribute("checked") else "no") != value:
-                        if step_data.type == "read":
-                            LOGGER.info(f"🦊 Element '{key}' was found, but the value is wrong, exiting ...")
-                            driver.save_screenshot("error.png")
-                            exit(1)
-                        assert_button_click(LOGGER, driver, setting_element)
-                elif setting_element.tag_name == "select":
-                    selected_option = setting_element.find_element(By.XPATH, "./option[@selected]")
-                    if selected_option.get_attribute("value") != value:
-                        if step_data.type == "read":
-                            LOGGER.info(f"🦊 Element '{key}' was found, but the value is wrong, exiting ...")
-                            driver.save_screenshot("error.png")
-                            exit(1)
-                        assert_button_click(LOGGER, driver, setting_element)
-                        assert_button_click(LOGGER, setting_element, f'./option[@value="{value}"]')
-                elif "multivalue-hidden-input" in setting_element.get_attribute("class"):
-                    if setting_element.get_attribute("value") != value:
-                        if step_data.type == "read":
-                            LOGGER.info(f"🦊 Element '{key}' was found, but the value is wrong, exiting ...")
-                            driver.save_screenshot("error.png")
-                            exit(1)
-                        container = setting_element.find_element(By.XPATH, "ancestor::div[contains(@class, 'multivalue-container')]")
-                        separator = container.get_attribute("data-separator") or " "
-                        remove_multivalue_buttons = container.find_elements(By.XPATH, ".//button[contains(@class, 'remove-multivalue-item')]")
-                        for remove_button in reversed(remove_multivalue_buttons):
-                            remove_button.click()
-
-                        x = 0
-                        split_values = value.split(separator)
-                        for val in split_values:
-                            multivalue_inputs = container.find_elements(By.XPATH, ".//input[contains(@class, 'multivalue-input')]")
-                            multivalue_inputs[-1].send_keys(val)
-                            if x < len(split_values) - 1:
-                                add_buttons = container.find_elements(By.XPATH, ".//button[contains(@class, 'add-multivalue-item')]")
-                                add_buttons[-1].click()
-                            x += 1
-                else:
-                    if setting_element.get_attribute("value") != value:
-                        if step_data.type == "read":
-                            LOGGER.info(f"🦊 Element '{key}' was found, but the value is wrong, exiting ...")
-                            driver.save_screenshot("error.png")
-                            exit(1)
-                        setting_element.clear()
-                        setting_element.send_keys(value)
-
-                if step_data.type == "read":
+                elif actual != expected:
+                    LOGGER.info(f"🦊 Element '{key}' was found, but the value is wrong (actual {actual}, expected {expected}), exiting ...")
+                    driver.save_screenshot("error.png")
+                    exit(1)
+                elif key != "IS_DRAFT":
                     LOGGER.info(f"🦊 Element '{key}' was found and the value is correct ✅")
-        elif step_data.mode == "raw":
-            raw_config_textarea = safe_get_element(LOGGER, driver, By.ID, "raw-config")
-            raw_config = raw_config_textarea.get_attribute("value")
-            raw_config_dict: dict[str, str | None] = {}
-            for line in raw_config.splitlines():
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                key, value = line.split("=", 1)
-                raw_config_dict[key.strip()] = value.strip().strip('"')
-            LOGGER.debug(f"Raw config dict: {raw_config_dict}")
-
-            if step_data.item == "service" and step_data.type == "read":
-                if raw_config_dict.get("IS_DRAFT", "no") != ("yes" if step_data.draft else "no"):
-                    LOGGER.info(
-                        f"🦊 Service is {'draft' if raw_config_dict.get('IS_DRAFT', 'no') == 'yes' else 'online'}, but it should be {'draft' if step_data.draft else 'online'}, exiting ..."
-                    )
-                    driver.save_screenshot("error.png")
-                    exit(1)
-                LOGGER.info(f"🦊 Service is {'draft' if raw_config_dict.get('IS_DRAFT', 'no') == 'yes' else 'online'}, as expected ✅")
-
-            config = dict(step_data.config)
-
-            if step_data.item == "service":
-                server_val = config.pop("SERVER_NAME", step_data.name)
-                # ensure SERVER_NAME is always the first key
-                config = {"SERVER_NAME": server_val, "IS_DRAFT": "yes" if step_data.draft else "no"} | config
-
-            for key, expected in config.items():
-                actual = raw_config_dict.get(key)
-
-                if step_data.type == "read":
-                    if actual is None:
-                        if expected is not None:
-                            LOGGER.info(f"🦊 Element '{key}' was not found, but it should be there, exiting ...")
-                            driver.save_screenshot("error.png")
-                            exit(1)
-                        LOGGER.info(f"🦊 Element '{key}' was not found, as expected ✅")
-                    elif actual != expected:
-                        LOGGER.info(f"🦊 Element '{key}' was found, but the value is wrong (actual {actual}, expected {expected}), exiting ...")
-                        driver.save_screenshot("error.png")
-                        exit(1)
-                    elif key != "IS_DRAFT":
-                        LOGGER.info(f"🦊 Element '{key}' was found and the value is correct ✅")
-                else:
-                    if actual != expected:
-                        raw_config_dict[key] = expected
-
-            if step_data.type in ("create", "update"):
-                raw_config_textarea.clear()
-                raw_config_textarea.send_keys("\n".join(f"{key}={value}" for key, value in raw_config_dict.items()))
+            elif expected is None:
+                # A null in the spec means "this key must go away", which in a KEY=value document
+                # is the line being absent, not an empty value.
+                raw_config_dict.pop(key, None)
+            elif actual != expected:
+                raw_config_dict[key] = expected
 
         if step_data.type in ("create", "update"):
+            document = "\n".join(f"{key}={value}" for key, value in raw_config_dict.items())
+            driver.execute_script("ace.edit('raw-config-editor').setValue(arguments[0], -1);", document)
+            sleep(0.5)
             assert_button_click(
                 LOGGER,
                 driver,
-                f"//div[@id='navs-modes-{step_data.mode}']//button[contains(@class, 'save-settings')]",
+                "//div[@id='navs-modes-raw']//button[contains(@class, 'save-settings')]",
             )
+
+            # Saving goes through /loading while the scheduler applies the change, and the page
+            # redirects itself when it is done. Returning here without waiting handed the next
+            # step a browser sitting on the interstitial: it navigated away on its own, killing
+            # the redirect, and then looked for a service the list had not picked up yet.
+            waited = 0
+            while on_page(driver, "loading") and waited < 120:
+                sleep(1)
+                waited += 1
+            if on_page(driver, "loading"):
+                LOGGER.error("🦊 Settings save never left the loading page, exiting ...")
+                driver.save_screenshot("error.png")
+                exit(1)
+            sleep(2)

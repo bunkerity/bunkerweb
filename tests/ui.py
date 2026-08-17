@@ -121,7 +121,12 @@ LOGGER.info(f"📡 Starting {action.type} test...")
 with build_driver(LOGGER, accept_insecure_certs=True) as driver:
     try:
         driver.delete_all_cookies()
-        driver.maximize_window()
+        # Explicit size, not maximize(): headless Firefox maximizes to the virtual screen
+        # (1366x768 here), silently undoing the --width/--height given to the binary. At that width
+        # DataTables Responsive collapses the tables' right-hand columns into child rows -- the
+        # row-action buttons are then in the DOM but `display: none`, so every click on
+        # ping/reload/stop/delete fails with "none of them displayed".
+        driver.set_window_size(1920, 1080)
         driver_wait = WebDriverWait(driver, 30)
         ctx = UiContext(LOGGER, driver, driver_wait)
 

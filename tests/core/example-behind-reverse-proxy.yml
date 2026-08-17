@@ -13,5 +13,8 @@ actions:
     url: "http://www.example.com"
     string: "hello"
     ignore_case: true
+    # Same as every other example stack: the redirect lands on HTTPS and the certificate is
+    # the self-signed fallback, since the test domains never leave the framework's dnsmasq.
     follow_redirects: true
+    verify_ssl: false
     timeout: 210

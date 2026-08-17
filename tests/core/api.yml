@@ -7,6 +7,15 @@ actions:
     status: 200
     headers:
       Host: "bwapi"
+      # Since 1.7 the stack always sets API_TOKEN (the worker needs it to push each job's
+      # cache), so the instance answers an unauthenticated call with HTTP_CLOSE.
+      Authorization: "Bearer tests-secret-token"
+    restart_stack: false
+  no_token:
+    type: status
+    url: "http://127.0.0.1:5001/ping"
+    headers:
+      Host: "bwapi"
     restart_stack: false
   wrong_host:
     type: status
@@ -22,6 +31,7 @@ actions:
     verify_ssl: false
     headers:
       Host: "bwapi"
+      Authorization: "Bearer tests-secret-token"
     config:
       API_LISTEN_HTTPS: "yes"
     restart_stack: false
@@ -31,6 +41,7 @@ actions:
     status: 200
     headers:
       Host: "bwapi"
+      Authorization: "Bearer tests-secret-token"
     full_clean: true
 
   http_deactivated:

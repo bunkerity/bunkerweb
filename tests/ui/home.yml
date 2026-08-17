@@ -1,5 +1,9 @@
 integrations: "all"
 
+# Selectors follow the 1.7 home page (status band + KPI tiles + mini-tiles + news carousel).
+# The pre-1.7 dashboard put the plan, the counters and the news in a flat card grid; a spec
+# written against that markup still logs in fine and then fails on the first `find`, which reads
+# like a broken page rather than a moved one.
 actions:
   home:
     type: ui
@@ -17,9 +21,14 @@ actions:
       assert_2fa_warning:
         type: find
         selector: '//div[@class="toast-body" and contains(text(), "Please enable two-factor authentication")]'
+      # Status band, first column: the plan name, with the "Free plan" chip next to it.
       assert_plan_card:
         type: find
-        selector: '//span[contains(@data-i18n, "plan.free") and contains(text(), "FREE")]'
+        selector: '//span[contains(@class, "sb-plan-name") and normalize-space(text()) = "FREE"]'
+        sleep: 0.0
+      assert_free_plan_chip:
+        type: find
+        selector: '//span[@data-i18n="dashboard.status.free_plan"]'
         sleep: 0.0
       assert_memory_card:
         type: find
@@ -33,19 +42,37 @@ actions:
         type: find
         selector: '//a[@href="/services"]//span[contains(@class, "don-jose") and contains(text(), "01")]'
         sleep: 0.0
-      assert_plugins_number:
+      # The plugin count left the dashboard with the reskin; Upstreams and Certificates took the
+      # two remaining tiles. A fresh stack declares no upstream, so that tile reads exactly 0.
+      assert_upstreams_number:
         type: find
-        selector: '//a[@href="/plugins"]//span[contains(@class, "don-jose") and contains(text(), "43")]'
+        selector: '//a[@href="/upstreams"]//span[contains(@class, "bw-kpi-value") and normalize-space(text()) = "0"]'
         sleep: 0.0
+      assert_certificates_tile:
+        type: find
+        selector: '//a[@href="/certificates"]//span[contains(@class, "bw-kpi-value")]'
+        sleep: 0.0
+      # Mini-tile row below the KPI tiles.
+      assert_bans_tile:
+        type: find
+        selector: '//div[contains(@class, "mini-tile")]//span[@data-i18n="dashboard.tile.bans_active"]'
+        sleep: 0.0
+      # Map, blocked-IP donut and top-reasons table are filled from /home/metrics after the page
+      # paints, so give the fetch a moment before asking for the rendered Leaflet panes.
       assert_map:
         type: find
-        selector: '//div[@id="requests-map"]/div[contains(@class, "leaflet-pane")]'
-        sleep: 0.0
+        selector: '//div[@id="requests-map"]//div[contains(@class, "leaflet-pane")]'
+        sleep: 3.0
+      # Only the carousel itself. Its cards are injected client-side from
+      # www.bunkerweb.io/wp-json (utils.js: the BROWSER fetches it, cross-origin, not the UI
+      # container), so asserting on them makes this spec fail whenever that site is slow,
+      # unreachable from the runner, or changes its REST shape -- which says nothing about
+      # BunkerWeb. Covering the cards needs a stubbed feed, not a live one.
       assert_news:
         type: find
-        selector: '(//div[@data-news-row-home=""])[position() <= 4 and count(//div[contains(@class, "col-xl-12")]) = 4]'
+        selector: '//div[contains(@class, "news-carousel")]//div[@id="data-news-container-home"]'
         sleep: 1.0
-      assert_news_offcanvas:
+      assert_news_sidebar:
         type: find
-        selector: '(//div[@data-news-row=""])[position() <= 4 and count(//div[contains(@class, "col-xl-11")]) = 4]'
+        selector: '//div[@id="data-news-container"]'
         sleep: 0.0

@@ -13,8 +13,17 @@ services:
       - 10.20.30.20
     restart: "unless-stopped"
     networks:
-      - bw-universe
-      - bw-db
+      # Fixed, like the API, the worker and the broker: a spec that narrows API_WHITELIST_IPS
+      # has to keep the scheduler inside it, or the stack never reports healthy and the
+      # assertion never runs. 10.20.30.1 stays out of any such list -- that is the gateway the
+      # runner's own requests come from.
+      bw-universe:
+        ipv4_address: 10.20.30.24
+      # Both networks, because the scheduler reaches the API over whichever one routing picks
+      # and bw-api sits on both: its requests arrive from 10.10.10.x, not from the bw-universe
+      # address above, which is how a whitelist naming only the latter still locked it out.
+      bw-db:
+        ipv4_address: 10.10.10.24
 
 volumes:
   bw-storage:

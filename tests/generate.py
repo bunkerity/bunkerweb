@@ -385,6 +385,14 @@ if database != "sqlite":
         "DATABASE_URI"
     ] = f"{database}+{DATABASE_SPECS[database]['extension']}://bunkerweb:secret@{DATABASE_HOST}:{DATABASE_SPECS[database]['port']}/db"
 
+# The API reads the WAF datastore too (bans, metrics), so a spec that moves that Redis or turns
+# on TLS has to move the API with it -- otherwise the API keeps dialling the old endpoint and
+# floods its log with connection resets while the spec looks like a datastore failure. Copied
+# before the api block is applied, so an explicit api: entry still wins.
+for key, value in config["variables"].items():
+    if key == "USE_REDIS" or key.startswith("REDIS_"):
+        config["api"][key] = value
+
 for key, value in (api_config | action.api).items():
     if value is None:
         config["api"].pop(key.upper(), None)
@@ -400,6 +408,16 @@ if ARGS.integration not in ("Linux", "All-in-one"):
     # an override — and the scheduler follows it, or it stops being able to dispatch.
     config["api"].setdefault("API_TOKEN", API_TEST_TOKEN)
     config["variables"]["API_TOKEN"] = config["api"]["API_TOKEN"]
+
+    # A spec that puts the API behind TLS moves the endpoint the scheduler and the worker
+    # dial with it. They keep speaking http otherwise and the stack never becomes ready --
+    # "API unreachable (GET /ping)" until the healthcheck gives up. The API's client trusts
+    # the standard bundle, so `before/customcert.sh` writes one that also contains the
+    # self-signed certificate the API serves (and issues it for `bw-api`, not only
+    # `www.example.com`).
+    if str(config["api"].get("API_SSL_ENABLED", "no")).lower() in ("yes", "true", "1", "on"):
+        config["variables"]["API_URL"] = config["variables"]["API_URL"].replace("http://", "https://", 1)
+        config["variables"]["REQUESTS_CA_BUNDLE"] = "/tmp/output/ca-bundle.pem"
     config["api"]["CELERY_BROKER_URL"] = jobs_broker_url
     # Pin the database explicitly rather than letting the images fall back to their own
     # default: on SQLite a mismatch here means the API and the worker quietly read a
@@ -419,6 +437,19 @@ if ARGS.integration not in ("Linux", "All-in-one"):
         "CUSTOM_LOG_LEVEL": config["api"].get("CUSTOM_LOG_LEVEL", "debug"),
         "DATABASE_URI": config["api"]["DATABASE_URI"],
     }
+    if "REQUESTS_CA_BUNDLE" in config["variables"]:
+        config["worker"]["REQUESTS_CA_BUNDLE"] = config["variables"]["REQUESTS_CA_BUNDLE"]
+
+    # Since 1.7 the UI reads everything through the API and refuses to start without it, but
+    # nothing told it where the API lives: it fell back to its built-in http://bw-api:5000,
+    # gave up after 30 attempts ("Could not connect to API"), and the container never turned
+    # healthy -- which is every ui spec timing out at the 300s stack wait, whatever the spec
+    # was actually testing. Defaults, so a spec can still point the UI somewhere else.
+    if ARGS.type == "ui":
+        config["ui"].setdefault("API_URL", config["variables"]["API_URL"])
+        config["ui"].setdefault("API_TOKEN", config["api"]["API_TOKEN"])
+        if "REQUESTS_CA_BUNDLE" in config["variables"]:
+            config["ui"].setdefault("REQUESTS_CA_BUNDLE", config["variables"]["REQUESTS_CA_BUNDLE"])
 
 crowdsec_config_path = Path(sep, "tmp", "crowdsec.env")
 crowdsec_config_path.unlink(missing_ok=True)
@@ -660,7 +691,11 @@ if action.type == "redis" and (
         redis_env.update(
             {
                 "REDIS_REPLICATION_MODE": "slave",
-                "REDIS_MASTER_HOST": "redis-master" if "REDIS_HOST" not in config["variables"] else config["variables"]["REDIS_HOST"],
+                # A sentinel spec sets REDIS_HOST to "" on purpose -- the instance is meant to
+                # discover the master through the sentinels. Only the key was tested here, so the
+                # empty value reached the sentinels' entrypoint, which refuses to start without a
+                # master host ("Missing REDIS_MASTER_SET or REDIS_MASTER_HOST").
+                "REDIS_MASTER_HOST": config["variables"].get("REDIS_HOST") or "redis-master",
                 "REDIS_MASTER_PORT_NUMBER": redis_env["REDIS_PORT_NUMBER"] if not action.tls else redis_env["REDIS_TLS_PORT_NUMBER"],
             }
         )
@@ -759,3 +794,14 @@ redis_client.set("log_from", log_from)
 redis_client.set("timeout", timeout)
 redis_client.set("retries", action.retries)
 redis_client.set("need_socket", 1 if need_socket else 0)
+# An action that closes the instance's API listener also closes the only door the worker has for
+# pushing the configuration, so waiting for a push-configs run could only ever time out. The
+# action is testing exactly that the port is shut, so tell the runner not to wait.
+instance_api_reachable = config["variables"].get("USE_API", "yes") != "no" and config["variables"].get("API_LISTEN_HTTP", "yes") != "no"
+# Same for a token the running instance has never seen: the worker signs its pushes with the new
+# one while the instance still enforces the old, so every push is refused until something
+# restarts the instance. `restart_stack: false` means nothing will, within this action.
+if config["api"]["API_TOKEN"] != API_TEST_TOKEN and not action.restart_stack:
+    LOGGER.warning("🔑 The API token changed without a restart, the instance still holds the previous one — not waiting for a config push")
+    instance_api_reachable = False
+redis_client.set("config_wait", 1 if instance_api_reachable else 0)

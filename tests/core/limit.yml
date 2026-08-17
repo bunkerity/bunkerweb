@@ -65,17 +65,20 @@ actions:
   global_limit_triggered:
     # X-Forwarded-For: random gives every request in the burst a distinct source IP,
     # so only the aggregate/global counter (not the per-IP one) can explain a 429 here.
+    # The rate has to sit below what the runner can actually produce: the handler sends the
+    # burst sequentially and each request costs ~370ms, so eight of them span three seconds
+    # -- under 5r/s, which is why this asserted a limit that could never fire.
     type: limit
     url: "http://www.example.com/global-test"
     headers:
       X-Forwarded-For: "random"
-    rate_limit: "5r/s"
+    rate_limit: "1r/s"
     expect_limited: true
     rate_exceeded_count: 8
     config:
       USE_LIMIT_REQ: "no" # isolate: per-IP/per-URL limiting must not be the cause
       USE_LIMIT_REQ_GLOBAL: "yes"
-      LIMIT_REQ_GLOBAL_RATE: "5r/s"
+      LIMIT_REQ_GLOBAL_RATE: "1r/s"
       USE_REAL_IP: "yes"
       REAL_IP_FROM: "0.0.0.0/0"
 
@@ -107,6 +110,12 @@ actions:
       LIMIT_REQ_GLOBAL_RATE: "1r/s"
 
 config:
+  # Every 429 this spec provokes is bad behavior by default (429 is in
+  # BAD_BEHAVIOR_STATUS_CODES), so the runner earns a ban a few actions in -- and since 1.7
+  # stores bans in the database and restores them with sync-bans, that ban outlives the stack
+  # restart between actions. The later actions then get 403 from the ban instead of 429 from the
+  # limit, and a spec about rate limiting fails on the ban subsystem doing its job.
+  USE_BAD_BEHAVIOR: "no"
   USE_LIMIT_REQ: "yes"
   LIMIT_REQ_URL: "/"
   LIMIT_REQ_RATE: "2r/s"

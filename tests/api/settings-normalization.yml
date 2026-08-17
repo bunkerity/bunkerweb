@@ -9,7 +9,11 @@ actions:
     auth: ["admin", "P@ssw0rd"]
     headers:
       Content-Type: "application/json"
-    body: '{"IS_LOADING":"disabled","WORKER_SHUTDOWN_TIMEOUT":"30 sec","WORKERLOCK_MEMORY_SIZE":"64 M","DNS_RESOLVERS":" 1.1.1.1   8.8.8.8 "}'
+    # Not DNS_RESOLVERS: every Docker stack sets it in the environment, so the row belongs to
+    # the scheduler and the API refuses to take it over -- a 409 by design, and it rejects the
+    # whole payload. PLUGINS_ORDER_TIMER is left at its default here, so no owner disputes it,
+    # and the value below is that same default with the whitespace beaten out of shape.
+    body: '{"IS_LOADING":"disabled","WORKER_SHUTDOWN_TIMEOUT":"30 sec","WORKERLOCK_MEMORY_SIZE":"64 M","PLUGINS_ORDER_TIMER":" metrics   badbehavior  sessions "}'
     status: 200
     restart_stack: false
   check_boolean:
@@ -32,7 +36,12 @@ actions:
     restart_stack: false
   check_list:
     type: string
-    url: "http://127.0.0.1:8888/global_settings?full=true&filtered_settings=DNS_RESOLVERS"
+    url: "http://127.0.0.1:8888/global_settings?full=true&filtered_settings=PLUGINS_ORDER_TIMER"
     auth: ["admin", "P@ssw0rd"]
-    string: '"DNS_RESOLVERS":"1.1.1.1 8.8.8.8"'
+    string: '"PLUGINS_ORDER_TIMER":"metrics badbehavior sessions"'
     full_clean: true
+
+api:
+  # Basic auth on every action here, so the stack has to create the user it authenticates as.
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"

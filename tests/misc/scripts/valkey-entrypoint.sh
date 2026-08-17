@@ -21,8 +21,16 @@ USER_ARGS="$*"
 
 set -- valkey-server \
   --port "${PORT}" \
-  --aclfile "${ACL_FILE}" \
   --dir "${DATA_DIR}"
+
+# generate.py empties /tmp/valkey-acl before every action and only writes the ACL file for an
+# action that declares a user, yet it always exports VALKEY_ACL_FILE. Any action that recreates
+# the container without a user (a full clean followed by, say, tls_check) then started
+# valkey-server against a file that does not exist, and it aborts: "Error loading ACLs, opening
+# file '/acl/valkey.acl'". Nothing listened on either port and the action failed on connect.
+if [ -f "${ACL_FILE}" ]; then
+  set -- "$@" --aclfile "${ACL_FILE}"
+fi
 
 if [ "${TLS_ENABLED}" = "yes" ]; then
   set -- "$@" \

@@ -1,6 +1,9 @@
 127.0.0.1 localhost
 
 192.168.0.254 app1.bw-services
+# A second upstream for the specs that need one NGINX will actually cache: the demo app above
+# answers `Cache-Control: no-cache`, which no proxy_cache setting can override.
+192.168.0.253 cacheable-app.bw-services
 
 10.20.30.20 dnsmasq
 10.20.30.30 custom-api

@@ -84,18 +84,45 @@ if [ -z "${IN_CICD:-}" ] ; then
     local_images["bunkerity/bunkerweb-ui"]="src/ui/Dockerfile"
   fi
 
+  # The :tests tag is global to the daemon, so another checkout's build answers to it. A
+  # bunkerweb-ui:tests left by a 1.6 tree ran under a 1.7 stack here and every ui spec failed
+  # somewhere far away from the cause. Reuse only what carries this checkout's version label.
+  checkout_version="$(cat src/VERSION)"
+  build_ref="$(mktemp)"
   for image in "${!local_images[@]}" ; do
     if [ -n "$(docker images -q "${image}:tests" 2> /dev/null)" ] ; then
-      log "BUILD" "ℹ️ " "🐳 Reusing local image ${image}:tests (delete it to force a rebuild)"
-      continue
+      image_version="$(docker inspect --format '{{index .Config.Labels "version"}}' "${image}:tests" 2> /dev/null)"
+      if [ "$image_version" != "$checkout_version" ] ; then
+        log "BUILD" "⚠️" "🐳 ${image}:tests is version '${image_version:-unknown}', this checkout is ${checkout_version} — rebuilding"
+      else
+        # Same version is not the same content. Every image copies part of src/, so an edit
+        # made after the last build is invisible to the tag: a fix to src/common/confs sat in
+        # bunkerweb:tests and bunkerweb-scheduler:tests while bunkerweb-worker:tests -- which
+        # ships the same confs and is what pushes them to the instances -- kept the broken
+        # copy, and the spec failed as if nothing had been fixed.
+        image_created="$(docker inspect --format '{{.Created}}' "${image}:tests" 2> /dev/null)"
+        if [ -n "$image_created" ] && touch -d "$image_created" "$build_ref" 2> /dev/null ; then
+          newer="$(find src -type f -newer "$build_ref" -print -quit 2> /dev/null)"
+          if [ -z "$newer" ] ; then
+            log "BUILD" "ℹ️ " "🐳 Reusing local image ${image}:tests (delete it to force a rebuild)"
+            continue
+          fi
+          log "BUILD" "⚠️" "🐳 ${image}:tests predates $newer — rebuilding"
+        else
+          log "BUILD" "ℹ️ " "🐳 Reusing local image ${image}:tests (delete it to force a rebuild)"
+          continue
+        fi
+      fi
     fi
 
     log "BUILD" "ℹ️ " "🐳 Building ${image}:tests from ${local_images[$image]} ..."
     if ! docker build -t "${image}:tests" -f "${local_images[$image]}" . ; then
       log "BUILD" "❌" "🐳 Failed to build ${image}:tests"
+      rm -f "$build_ref"
       exit 1
     fi
   done
+  rm -f "$build_ref"
 fi
 
 if [[ "$category" =~ ";" ]] ; then

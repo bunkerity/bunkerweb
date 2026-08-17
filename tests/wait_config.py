@@ -41,10 +41,17 @@ QUERY = "SELECT COUNT(*) FROM bw_jobs_runs WHERE job_name = 'push-configs'"
 # Any job, not just push-configs: a spec can be about what a job produced (a downloaded
 # blocklist, a generated certificate), and the worker runs those asynchronously too.
 ALL_RUNS_QUERY = "SELECT COUNT(*) FROM bw_jobs_runs"
+# `certificates_changed` belongs here for a reason the others do not have: the provider jobs
+# (self-signed, custom-cert, letsencrypt) and the job that materializes what they decided
+# (deploy-certificates) are dispatched in the same batch and run in parallel, so the deploy
+# routinely runs first and ships material the provider is about to detach. The provider raises
+# this flag, the scheduler re-dispatches the deploy, and only then does the instance stop
+# serving the old certificate. Ignore it and a spec that turns GENERATE_SELF_SIGNED_SSL off
+# asserts against a service that is still on HTTPS.
 PENDING_QUERY = (
     "SELECT (SELECT COUNT(*) FROM bw_plugins WHERE config_changed) + "
     "(SELECT COUNT(*) FROM bw_metadata WHERE custom_configs_changed OR external_plugins_changed "
-    "OR pro_plugins_changed OR instances_changed)"
+    "OR pro_plugins_changed OR instances_changed OR certificates_changed)"
 )
 
 
@@ -99,12 +106,12 @@ if __name__ == "__main__":
         if 0 <= runs < previous:
             previous = 0
 
-        # A restart pushes twice: once on boot, from the configuration already in the
-        # database, and once more after the scheduler reads the new variables.env and
-        # notices it changed. Releasing on the first hands the test the configuration it is
-        # supposed to be replacing, so require a push of this restart, no change still
-        # waiting to be applied, and both holding still for a moment -- the flags are set
-        # after the boot push, so a single clear reading proves nothing.
+        # A restart used to push twice, and releasing on the first handed the test the
+        # configuration it was supposed to be replacing. The scheduler no longer re-dispatches
+        # its own boot save (main.py seeds the polling baseline), so it is one push per restart
+        # now -- but the wait still requires a push of *this* restart, no change waiting to be
+        # applied, and both holding still for a moment: the flags are set after the push, so a
+        # single clear reading proves nothing, and a job that lands late moves the run count.
         if runs > previous and pending == 0:
             if all_runs != seen:
                 seen = all_runs

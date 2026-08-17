@@ -50,7 +50,7 @@ def handle_instance_delete(LOGGER: Logger, ctx, step_data: Any) -> None:
 
 def handle_instance_create(LOGGER: Logger, ctx, step_data: Any) -> None:
     driver = ctx.driver
-    assert_button_click(LOGGER, driver, "//button[@aria-controls='instances' and contains(@class, 'btn-bw-green')]")
+    assert_button_click(LOGGER, driver, "//button[@id='instances-create-btn']")
     sleep(1)
 
     hostname_field = safe_get_element(LOGGER, driver, By.ID, "hostname")

@@ -7,7 +7,20 @@ actions:
     url: "http://www.example.com/"
     response_headers:
       X-Proxy-Cache: "^MISS$"
-    restart_stack: false
+    # The suite's usual upstream (nginxdemos/nginx-hello) answers `Expires: <now>` and
+    # `Cache-Control: no-cache`, and NGINX honours that: nothing is ever stored, so every
+    # assertion below this one asked for a HIT that could not happen. BunkerWeb exposes no
+    # proxy_ignore_headers knob to override an upstream, so the spec brings an upstream that
+    # allows caching instead -- stock nginx, which answers Last-Modified and ETag and no
+    # cache-control at all.
+    services:
+      cacheable-app:
+        image: nginx@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de
+        container_name: cacheable-app
+        restart: "unless-stopped"
+        networks:
+          bw-services:
+            ipv4_address: 192.168.0.253
   cached_request:
     type: header
     url: "http://www.example.com/"
@@ -115,7 +128,10 @@ actions:
 
 config:
   USE_REVERSE_PROXY: "yes"
-  REVERSE_PROXY_HOST: "http://app1:8080"
+  # A bare container name answers NXDOMAIN from the framework's dnsmasq and NGINX does not fall
+  # through to the docker resolver, so the proxy would answer 502. Every spec uses the
+  # network-qualified name.
+  REVERSE_PROXY_HOST: "http://cacheable-app.bw-services:80"
   USE_PROXY_CACHE: "yes"
   PROXY_CACHE_MIN_USES: "1"
 

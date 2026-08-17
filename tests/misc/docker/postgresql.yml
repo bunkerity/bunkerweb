@@ -1,6 +1,11 @@
 services:
   bw-db:
-    image: postgres:18-alpine@sha256:1b1689b20d16a014a3d195653381cf2caa75a41a92d93b255a9d6ea29fd353aa
+    # Pinned to 17, not the latest major: every 1.7 image is Debian trixie based and its
+    # postgresql-client is v17, and pg_dump refuses a server newer than itself ("aborting
+    # because of server version mismatch"). BunkerWeb runs against an 18 server, but the
+    # backup plugin cannot dump it, so the suite tests the combination the images support.
+    # Bump this only together with the client in src/*/Dockerfile.
+    image: postgres:17-alpine@sha256:d4bb0a8c1b7bb2e29f976d099e7bfb9a5d8858cffe9e46b35cd302cd1f1f8168
     container_name: bw-db
     ports:
       - "5432:5432"

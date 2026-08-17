@@ -12,6 +12,9 @@ actions:
     url: "http://www.example.com"
     string: "hello"
     ignore_case: true
+    # The example redirects to HTTPS and serves the self-signed fallback -- the test domains
+    # resolve only through the framework's dnsmasq, so Let's Encrypt can never issue for them.
     follow_redirects: true
+    verify_ssl: false
     timeout: 120
     delay: 30

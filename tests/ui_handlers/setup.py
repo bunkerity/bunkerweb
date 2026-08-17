@@ -289,7 +289,7 @@ def handle(LOGGER: Logger, ctx, step_data: Any) -> str:
     with suppress((TimeoutException, ElementNotInteractableException)):  # type: ignore
         confirm_dns_button = safe_get_element(LOGGER, driver, By.ID, "confirm-dns", error=True)
         assert isinstance(confirm_dns_button, WebElement), "confirm-dns button not found"
-        assert_button_click(LOGGER, driver, confirm_dns_button)
+        assert_button_click(LOGGER, driver, confirm_dns_button, error=True)
 
     LOGGER.info("🦊 Navigating to the next step (ignoring PRO step)")
     assert_button_click(LOGGER, driver, "next-step", By.ID)

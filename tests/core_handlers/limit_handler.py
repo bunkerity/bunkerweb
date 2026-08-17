@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from logging import Logger
+from socket import create_connection
+from ssl import CERT_NONE, create_default_context
 from time import sleep, time
 from typing import Any, List
+from urllib.parse import urlsplit
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Event
 
 from httpx import Response
-import httpx
 
 from .http_common import perform_request
 
@@ -104,14 +106,68 @@ def _test_rate_limiting(LOGGER: Logger, action: Any) -> None:
         LOGGER.info("✅ No rate limiting applied as expected")
 
 
+def _occupy_slot(LOGGER: Logger, action: Any, idx: int, hold: float) -> int:
+    """Hold a `limit_conn` slot for `hold` seconds, then return the status code.
+
+    Keeping the *response* open does not hold one. NGINX releases the slot when the request
+    finishes, and a small response finishes as soon as it is written, whatever the client does
+    with it afterwards -- so a burst of `stream=True` requests never overlapped inside the zone
+    and `connection_limit_blocked` could only ever see zero 429s. A request whose body has not
+    arrived yet is still in flight, so announce a Content-Length and dribble it out.
+
+    The response code is whatever the upstream makes of the POST; only a 429 means the limit
+    fired, and that one comes from NGINX before the body is even read.
+    """
+    url = urlsplit(str(action.url))
+    host = url.hostname or ""
+    port = url.port or (443 if url.scheme == "https" else 80)
+    path = url.path or "/"
+    if url.query:
+        path += f"?{url.query}"
+
+    chunks, chunk = 8, b"x" * 32
+    headers = {
+        "Host": url.netloc,
+        # Without one, CRS 920340 answers 403 before the body is read, which releases the slot.
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": str(chunks * len(chunk)),
+        "Connection": "close",
+    }
+    # The action's own headers win -- a spec that sets Host must not end up sending two of them.
+    headers.update(action.headers or {})
+    request = [f"POST {path} HTTP/1.1"] + [f"{name}: {value}" for name, value in headers.items()]
+
+    try:
+        sock = create_connection((host, port), timeout=hold + 15)
+        if url.scheme == "https":
+            # Same reason every https action in the suite sets verify_ssl: false -- the test
+            # domains resolve only through the framework's dnsmasq, so the stack always serves
+            # its self-signed fallback.
+            context = create_default_context()
+            context.check_hostname = False
+            context.verify_mode = CERT_NONE
+            sock = context.wrap_socket(sock, server_hostname=host)
+        with sock:
+            sock.sendall(("\r\n".join(request) + "\r\n\r\n").encode())
+            for _ in range(chunks):
+                sock.sendall(chunk)
+                sleep(hold / chunks)
+            status = int(sock.recv(64).split()[1])
+        LOGGER.debug(f"Connection burst request {idx + 1} (held {hold}s): status {status}")
+        return status
+    except Exception as e:  # noqa: BLE001
+        LOGGER.debug(f"Connection burst request {idx + 1} failed: {e}")
+        return -1
+
+
 def _test_connection_limiting(LOGGER: Logger, action: Any) -> None:
     """Test connection limiting functionality with concurrent burst.
 
     We simulate concurrent connections using a thread pool so that multiple
     requests overlap in time. Sequential requests were not triggering the
     limit because connections closed too quickly before the next one opened.
-    If action.connection_hold > 0 we keep the TCP connection open by streaming
-    the response and sleeping before reading/closing.
+    If action.connection_hold > 0 we keep the request in flight for that long,
+    which is what actually occupies a slot in the limit_conn zone.
     """
 
     LOGGER.info(f"🔗 Testing connection limiting with configured max: {action.max_connections}")
@@ -125,24 +181,7 @@ def _test_connection_limiting(LOGGER: Logger, action: Any) -> None:
         start_event.wait()
         hold = getattr(action, "connection_hold", 0.0) or 0.0
         if hold > 0:
-            # manual streaming request to keep connection open
-            try:
-                with httpx.Client(http2=action.http2, timeout=10.0) as client:
-                    req = client.build_request(action.method, action.url, headers=action.headers or None)
-                    resp = client.send(req, stream=True)
-                    if resp.status_code == 429:
-                        code = 429
-                    else:
-                        # keep connection open
-                        sleep(hold)
-                        code = resp.status_code
-                    # ensure response closed
-                    resp.close()
-                    LOGGER.debug(f"Connection burst request {idx + 1} (hold={hold}s): status {code}")
-                    return code
-            except Exception as e:  # noqa: BLE001
-                LOGGER.debug(f"Connection burst request {idx + 1} failed: {e}")
-                return -1
+            return _occupy_slot(LOGGER, action, idx, hold)
         else:
             ctx = perform_request(LOGGER, action)
             resp = ctx.response

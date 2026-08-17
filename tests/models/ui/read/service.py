@@ -8,7 +8,9 @@ from models.ui.read import ReadBase
 class ReadService(ReadBase):
     item: Literal["service"] = "service"
     name: str
-    mode: Literal["easy", "advanced", "raw"] = "advanced"
+    # "compose" and "raw" are the two panes the settings page still has; easy and advanced
+    # went away with the settings monolith (per-plugin editing moved to its own pages).
+    mode: Literal["compose", "raw"] = "raw"
     template: Literal["low", "medium", "high"] = "low"
     draft: bool = False
     config: Dict[str, Optional[str]]

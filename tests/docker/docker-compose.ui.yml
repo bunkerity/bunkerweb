@@ -3,7 +3,11 @@ services:
     image: bunkerity/bunkerweb-ui:${BW_VERSION}
     container_name: bw-ui
     ports:
-      - "127.0.0.1:7000:7000"
+      # Convenience only -- every spec reaches the UI through BunkerWeb (UI_HOST is
+      # http://bw-ui:7000 on the internal network), nothing drives this publish. It is
+      # overridable because any host process already holding 7000 (AirPlay receivers use it,
+      # for one) makes the whole ui suite fail at boot with "address already in use".
+      - "127.0.0.1:${UI_HOST_PORT:-7000}:7000"
     volumes:
       - /var/log/bunkerweb:/var/log/bunkerweb:ro
     env_file:

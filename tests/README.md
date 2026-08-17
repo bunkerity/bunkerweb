@@ -80,6 +80,14 @@ Which file gets deployed depends on the integration, and so does what it replace
 Linux has no example mode: it installs a package into a systemd container rather than
 deploying a compose file.
 
+On Docker the example owns the stack, so anything the runner does to "the stack" has to
+be routed to its compose project (`example-stack`) instead of the framework's files —
+restarts, teardown, log dumps. Miss one and the symptom lands somewhere else entirely: a
+restart against the framework's composes fails with `container name "/bw-scheduler" is
+already in use`, and a log dump against them prints empty sections under every heading.
+The framework's own `bw-db` network is skipped for the same reason — it claims
+10.10.10.0/24, which `examples/proxy-protocol` wants for its `net-proxy`.
+
 Three traps when you move a scenario over from `tests/examples/<name>.json`. The legacy
 harness casefolds both sides of a string assertion, it used `requests` and followed
 redirects, and it never verified TLS; this framework does none of that by default.
@@ -119,6 +127,19 @@ export BW_TESTS_ETC=/tmp/bunkerweb-tests/etc
 ./tests/scripts/test.sh docker core dev headers
 ```
 
+Some actions address a container by name from the runner rather than through BunkerWeb —
+`bunkernet` talks straight to `http://custom-api:8000`. CI resolves those by appending
+`misc/conf/dnsmasq.hosts` to `/etc/hosts`; do the same locally, or that spec fails with a
+connection error while everything else passes:
+
+```bash
+sudo tee -a /etc/hosts < tests/misc/conf/dnsmasq.hosts
+```
+
+Read the file first. It maps bare names — `redis`, `valkey`, `crowdsec`, `php-fpm` — to
+10.20.30.x, system-wide, which is fine on a throwaway CI host and less fine on a workstation
+that uses those names for something else.
+
 `BW_TESTS_ETC` roots the generated `variables.env`, `api.env`, `worker.env` and `ui.env`.
 It defaults to `/etc/bunkerweb`, which suits a throwaway CI host. On a machine that has
 BunkerWeb installed, that default overwrites your real config, so export the variable
@@ -126,10 +147,25 @@ before you run. The compose fragments read the same variable and follow, and the
 container bind-mounts it onto its own `/etc/bunkerweb`, so the packaged BunkerWeb reads
 the files the runner writes.
 
+`UI_HOST_PORT` (default `7000`) is the host port the `ui` stacks publish the web UI on. Nothing
+in the suite drives it — every spec reaches the UI through BunkerWeb, and `UI_HOST` stays
+`http://bw-ui:7000` on the internal network — but any host process already holding 7000 makes
+the whole `ui` type fail at boot with `address already in use`. Export `UI_HOST_PORT=7001` (or
+anything free) on such a machine.
+
 Outside CI (`IN_CICD` unset), `build.sh` builds any missing `bunkerity/<image>:tests` from
 the Dockerfiles in this checkout. It reuses an image that already exists, so the second run
 starts in seconds. Delete an image when you want it rebuilt. The framework starts its own
 state Redis from `misc/docker/redis.yml`.
+
+Running specs back to back locally is where CI and a workstation diverge. CI gives every spec
+a fresh runner; here they share one Docker daemon, and the SQLite database lives in the
+`bw-storage` volume, which `start.sh` creates outside any compose project — so `down -v`
+never touches it. `cleanup_stack` removes it on a full clean for that reason. If you drive the
+scripts by hand rather than through `test.sh`, remove it yourself between specs
+(`docker volume rm -f bw-storage`), or the next stack boots on the previous spec's global
+settings: a run that set `REDIS_HOST=valkey` leaves the following API answering 500 to every
+`/ping` while it waits on a container that is gone.
 
 Once a stack is up, you can drive narrower loops:
 
@@ -173,12 +209,79 @@ That split also means a healthy stack is not a configured one. The scheduler que
 before any action runs. Without it a spec asserts against the previous action's
 configuration and fails for reasons that have nothing to do with what it tests.
 
+Job runs going quiet is not the whole signal either, which is why `wait_config.py` also
+requires the scheduler's change flags to be clear. `certificates_changed` is in that list for
+a specific race: a certificate provider (`self-signed`, `custom-cert`, `letsencrypt`) and the
+`deploy-certificates` job that materializes its decisions are dispatched in the same batch and
+run in parallel, so the deploy usually wins and ships material the provider is about to
+detach. The provider raises the flag, the scheduler re-dispatches the deploy alone, and only
+then does the service stop serving the old certificate — a spec that turns
+`GENERATE_SELF_SIGNED_SSL` off and asserts on plain HTTP gets a 301 to HTTPS until that
+second pass lands.
+
+Every compose file under `tests/docker/` and `tests/misc/docker/` runs in the same implicit
+compose project (`docker`, from the directory name), so `docker compose -f <one>.yml down` targets
+the project rather than that file — and the end-of-run cleanup adds `--remove-orphans`, which
+takes down everything else in it, including the framework's own state Redis on 127.0.0.1:6379.
+That is where the `Could not connect to Redis` lines at the end of a run come from. Give a new
+compose file an explicit top-level `name:` if you need it to be torn down on its own.
+
+The Redis and Valkey containers are started once and reused: `start.sh` runs `docker compose up`
+only when no such container exists, so an action that changes `/tmp/valkey.env` (a password, a
+user, TLS) reaches a server still running the previous action's configuration unless the action
+before it asked for a `full_clean`. `generate.py` also empties `/tmp/valkey-acl` on every action
+and writes the ACL file only for an action that declares a `user:`, so the entrypoint passes
+`--aclfile` only when the file is actually there — without that guard, the first action to
+recreate the container without a user aborts valkey at startup and nothing listens on either
+port.
+
 `bw-api` publishes `127.0.0.1:8888`, which the nine `api/*.yml` specs address directly. Anything
 else that wants a host port has to avoid it — CrowdSec used to take 8888 and now publishes 8889
 (`misc/docker/crowdsec.yml`, with the Linux `CROWDSEC_API` override following it), because docker
 refuses to start the container with "port is already allocated". CrowdSec also downloads its whole
 hub before reporting healthy, so `generate.py` raises the health timeout to 300s for any spec that
 carries `crowdsec_config`.
+
+## The ui specs and the settings panes
+
+A service or the global configuration has two panes since the settings monolith was split:
+**compose** (a shelf of plugin on/off toggles) and **raw** (an ACE editor holding the whole
+`KEY=value` document). The easy and advanced panes are gone, and per-plugin editing moved to
+`/services/<service>/plugins/<plugin>` and `/global-settings/plugins/<plugin>`.
+
+`ui_handlers/services.py` drives **raw** for every value round-trip: it posts the same keys
+through the same route as compose, and a text document is a steadier target than one widget per
+setting. Two consequences worth knowing before writing a `ui` spec:
+
+- The compose shelf and the per-plugin pages have **no coverage**. Settings are verified end to
+  end, the compose UI itself is not.
+- The pane is selected by URL (`?mode=raw`), not by clicking a tab. On `/services` and
+  `/global-settings` those pills are links on purpose — both panes re-render from the database on
+  navigation, so an unsaved twin cannot exist.
+- A multiline value (a PEM block in a `file` setting) cannot go through raw here: the handler
+  parses one key per line and would rewrite such a value as its first line alone.
+
+Three more traps a `ui` spec hits sooner or later, all handled in `utils/ui.py` and `ui.py`:
+
+- **The window is sized explicitly (1920x1080), never maximized.** Headless Firefox maximizes to
+  the virtual screen (1366x768), which undoes the `--width/--height` given to the binary. At that
+  width DataTables Responsive folds the right-hand columns into child rows, so every row-action
+  button is in the DOM but `display: none` and no click can reach it. `assert_button_click`
+  expands the collapsed parent row (`td.dtr-control`) before retrying, so a narrow viewport is
+  recoverable rather than fatal.
+- **`assert_button_click` re-resolves its selector on every attempt for 10 seconds.** These pages
+  redraw themselves (Responsive recomputes on resize and on tab switch), so a node found once is
+  regularly detached or momentarily unclickable by the time the click lands. It ends the run when
+  the budget expires; the one call site that wants the exception instead — the wizard's optional
+  confirm-DNS step — passes `error=True`.
+- **`data-i18n` lives on a button's inner `<span>`, never on the `<button>`** (see
+  `components/button.html`), and a DataTables colvis entry renders as `"4. <span>Method</span>"`.
+  Match the span, not the button's own attributes or its whole text.
+- **A toolbar collection entry is the `<a class="dropdown-item">` inside `<li class="dt-button">`**,
+  and `contains(@class, "dt-button")` also matches the toolbar's own `div.dt-buttons` — which sits
+  earlier in the document, so a loose selector clicks *that*, the click does nothing, and the step
+  still reports success. Anchor these on
+  `//div[contains(@class, "dt-button-collection")]//a[contains(@class, "dropdown-item")]`.
 
 ## Integrations
 

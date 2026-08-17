@@ -7,7 +7,9 @@ from models.ui.update import UpdateBase
 
 class UpdateGlobal_Config(UpdateBase):
     item: Literal["global_config"] = "global_config"
-    mode: Literal["advanced", "raw"] = "advanced"
+    # "compose" and "raw" are the two panes the settings page still has; easy and advanced
+    # went away with the settings monolith (per-plugin editing moved to its own pages).
+    mode: Literal["compose", "raw"] = "raw"
     config: Dict[str, Optional[str]]
 
     @field_validator("config")
