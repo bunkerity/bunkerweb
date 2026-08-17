@@ -74,12 +74,22 @@ def setup_page():
         admin_user = None
     pro_license_key = db_config.get("PRO_LICENSE_KEY", getenv("PRO_LICENSE_KEY", ""))
 
+    # Separate call, and a full one: USE_UI is inherited from the service's template rather than
+    # stored, so it only appears in the effective configuration (see setup_loading()). Kept apart
+    # from db_config above, which stays partial on purpose so the getenv() fallbacks below still
+    # prefill the form.
+    try:
+        ui_config = BW_CONFIG.get_config(methods=False, full=True, filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))
+    except Exception:
+        LOGGER.warning("Could not fetch the effective config for setup page.")
+        ui_config = db_config
+
     ui_reverse_proxy = None
     ui_reverse_proxy_url = None
-    for server_name in db_config["SERVER_NAME"].split():
-        if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
+    for server_name in ui_config.get("SERVER_NAME", "").split():
+        if server_name and ui_config.get(f"{server_name}_USE_UI", ui_config.get("USE_UI", "no")) == "yes":
             ui_reverse_proxy = server_name
-            ui_reverse_proxy_url = db_config.get(f"{server_name}_REVERSE_PROXY_URL", db_config.get("REVERSE_PROXY_URL", "/"))
+            ui_reverse_proxy_url = ui_config.get(f"{server_name}_REVERSE_PROXY_URL", ui_config.get("REVERSE_PROXY_URL", "/"))
             break
 
     # Setup fully complete (admin + service exist)
@@ -354,7 +364,10 @@ def setup_loading():
     DATA.load_from_file()
 
     try:
-        db_config = BW_CONFIG.get_config(methods=False, filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))
+        # full=True: the wizard's own service carries USE_TEMPLATE=ui and takes USE_UI from that
+        # template, which is never stored as a setting of its own. Reading the stored config here
+        # therefore never sees a UI service and this page redirects to itself forever.
+        db_config = BW_CONFIG.get_config(methods=False, full=True, filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))
     except Exception:
         LOGGER.warning("Could not fetch config for setup loading page.")
         db_config = {"SERVER_NAME": ""}

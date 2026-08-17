@@ -103,15 +103,23 @@ class Config:
         methods: bool = True,
         with_drafts: bool = False,
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+        full: bool = False,
     ) -> dict:
         """Get the nginx variables env file and returns it as a dict
+
+        `full` asks the API for the *effective* configuration instead of the stored one: defaults
+        and, above all, the values a service inherits from its template. A setting left at its
+        template's value is not written to the database, so without it a caller reading such a
+        setting back sees nothing at all.
 
         Returns
         -------
         dict
             The nginx variables env file as a dict
         """
-        return self.__api_client.get_global_settings(methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings, global_only=global_only)
+        return self.__api_client.get_global_settings(
+            full=full, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings, global_only=global_only
+        )
 
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services

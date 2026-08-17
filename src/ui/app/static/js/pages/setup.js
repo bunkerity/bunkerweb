@@ -802,6 +802,25 @@ $(document).ready(() => {
       var redirect = window.location.href.replace("setup", "login");
     }
 
+    const setupFailed = () => {
+      $("#loadingModal").modal("hide");
+      setTimeout(() => {
+        const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
+        feedbackToast.addClass("border-danger");
+        feedbackToast.find(".toast-header").addClass("text-danger");
+        feedbackToast.find("span").text("Error");
+        feedbackToast
+          .find("div.toast-body")
+          .text("Error while setting up web UI. Please try again.");
+        feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
+        feedbackToast.toast("show");
+      }, 400);
+      setTimeout(() => {
+        location.reload();
+      }, 2500);
+    };
+
     // Submit the form
     fetch(window.location.href, {
       method: "POST",
@@ -809,29 +828,23 @@ $(document).ready(() => {
       redirect: "error",
     })
       .then((res) => {
-        if (res.status === 200) {
+        // This POST waits for the scheduler to finish applying, which can take longer than the
+        // reverse proxy's own read timeout (REVERSE_PROXY_READ_TIMEOUT, 60s by default) — and
+        // BunkerWeb is proxying this very request. A gateway error therefore does not mean the
+        // setup failed, only that we stopped listening: the work carries on server-side and
+        // /setup/loading polls until the service is there. Anything else non-2xx is a real
+        // refusal and must say so, instead of leaving the spinner up for good, which is what
+        // "only act on 200" used to do.
+        if (res.ok || res.status >= 500) {
           setTimeout(() => {
             window.location.href = redirect;
           }, 1000);
+          return;
         }
+        setupFailed();
       })
       .catch((err) => {
-        $("#loadingModal").modal("hide");
-        setTimeout(() => {
-          const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
-          feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-          feedbackToast.addClass("border-danger");
-          feedbackToast.find(".toast-header").addClass("text-danger");
-          feedbackToast.find("span").text("Error");
-          feedbackToast
-            .find("div.toast-body")
-            .text("Error while setting up web UI. Please try again.");
-          feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
-          feedbackToast.toast("show");
-        }, 400);
-        setTimeout(() => {
-          location.reload();
-        }, 2500);
+        setupFailed();
       });
   });
 
