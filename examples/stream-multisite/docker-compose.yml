@@ -2,7 +2,11 @@ x-bw-env: &bw-env
   DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
   API_LISTEN_HTTP: "yes"
   API_LISTEN_HTTPS: "yes"
-  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  # 172.16.0.0/12 is Docker's default address pool: the instance API ports published
+  # below are reached from the host through a bridge gateway of that pool, never from
+  # 127.0.0.1, so leaving it out makes every host-side call answer with a closed
+  # connection. Narrow it to the actual gateway if you run a custom address pool.
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 172.16.0.0/12"
   API_URL: "http://bw-api:8888"
   API_TOKEN: "stream-integration-token"
   CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"

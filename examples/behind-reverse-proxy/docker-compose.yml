@@ -124,13 +124,16 @@ volumes:
 
 networks:
   bw-universe:
+    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   net-proxy:
+    name: net-proxy
     ipam:
       driver: default
       config:
         - subnet: 10.10.10.0/24
   bw-services:
+    name: bw-services

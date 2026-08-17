@@ -5,6 +5,7 @@ import socket
 import subprocess
 import sys
 import time
+from contextlib import suppress
 from pathlib import Path
 
 
@@ -26,7 +27,7 @@ HERE = Path(__file__).resolve().parent
 CENTRAL_API = "http://127.0.0.1:8888"
 API_TOKEN = "stream-integration-token"
 AUTH = {"Authorization": f"Bearer {API_TOKEN}"}
-CORE_HEADERS = {**AUTH, "Host": "bwapi"}
+CORE_HEADERS = AUTH | {"Host": "bwapi"}
 CORE_PORTS = {"http": 5000, "https": 5443}
 
 TCP_DETECT = ("app1.example.com", 10000)
@@ -37,6 +38,12 @@ BAN = ("ban.example.com", 10012)
 PEER = ("peer.example.com", 10013)
 AUTO_BAN = ("auto.example.com", 10014)
 WEB_SERVICE = "web.example.com"
+
+
+# Host-vs-container clock skew tolerance for "is this report fresh?", and the quiet gap that
+# keeps the previous phase's reports outside the window that margin opens.
+CLOCK_SKEW_MARGIN_SECONDS = 1
+REPORT_WINDOW_GAP_SECONDS = 3
 
 
 def eventually(label, check, timeout=90, interval=1):
@@ -123,8 +130,13 @@ def tcp_exchange(port, marker=None):
     marker = marker or f"tcp-{time.time_ns()}".encode()
     with socket.create_connection(("127.0.0.1", port), timeout=4) as client:
         client.settimeout(4)
+        # Deliberately no shutdown(SHUT_WR) here: nginx's stream proxy defaults to
+        # `proxy_half_close off`, so a client that closes its write side has the whole
+        # connection torn down -- including the reply already on its way back. The echo
+        # server answers on the newline, so half-closing buys nothing and this probe
+        # would only ever read b''. A service that genuinely needs half-close can enable
+        # it with a `proxy_half_close on;` custom stream configuration.
         client.sendall(marker + b"\n")
-        client.shutdown(socket.SHUT_WR)
         response = client.recv(4096)
     if marker not in response:
         raise AssertionError(f"TCP {port} did not echo the marker: {response!r}")
@@ -214,7 +226,15 @@ def observe_detect_phase(scheme, redis_enabled):
 
     eventually("TCP detect listener readiness", lambda: tcp_exchange(TCP_DETECT[1]))
     eventually("UDP detect listener readiness", lambda: udp_exchange(UDP_DETECT[1]))
-    started = time.time()
+    # `started` is read off the HOST clock and compared against a `date` stamped inside the
+    # instance container, so a few milliseconds of skew between the two decides whether the
+    # session we are about to make counts as fresh. The readiness probes above landed 2 ms before
+    # this line in one run and the measured ones 4 ms after it, and every report was filtered out
+    # as stale: the phase timed out on reports that existed. Put a real gap between the two pairs
+    # (so the readiness reports stay outside the window and the "exactly one report" assertions
+    # below still mean something), then take the margin.
+    time.sleep(REPORT_WINDOW_GAP_SECONDS)
+    started = time.time() - CLOCK_SKEW_MARGIN_SECONDS
     tcp_exchange(TCP_DETECT[1])
     udp_exchange(UDP_DETECT[1])
 
@@ -294,7 +314,7 @@ def observe_detect_phase(scheme, redis_enabled):
 
 
 def exercise_block_and_whitelist(scheme):
-    started = time.time() - 1
+    started = time.time() - CLOCK_SKEW_MARGIN_SECONDS
     if not tcp_is_blocked(BLOCK[1]):
         raise AssertionError("blacklisted Stream TCP client was not blocked")
     eventually(
@@ -304,12 +324,18 @@ def exercise_block_and_whitelist(scheme):
             BLOCK[0],
             started,
             security_mode="block",
-            status=403,
+            # 444, not 403. A denied stream session exits with `utils.get_deny_status()`, which is
+            # `ngx.HTTP_CLOSE` in the stream subsystem, and nginx records that as the session
+            # status -- the 403 this used to assert was invented by the pre-split reporter so the
+            # 4xx report filter would keep the row. Observed on a live stack, not deduced: a
+            # blocked session on block.example.com stores
+            # {"protocol": "tcp", "status": 444, "reason": "blacklist", "listen_port": 10010}.
+            status=444,
             reason="blacklist",
         ),
     )
 
-    started = time.time() - 1
+    started = time.time() - CLOCK_SKEW_MARGIN_SECONDS
     tcp_exchange(ALLOW[1])
     time.sleep(7)
     if fresh_report(scheme, ALLOW[0], started):
@@ -318,12 +344,13 @@ def exercise_block_and_whitelist(scheme):
 
 
 def listed_ban(scope, ip, service=None):
-    for response in central("GET", "/bans").values():
-        if not isinstance(response, dict):
-            continue
-        for ban in response.get("data", []):
-            if ban.get("ip") == ip and ban.get("ban_scope") == scope and (service is None or ban.get("service") == service):
-                return ban
+    # `GET /bans` is the durable view since bans moved into the database: one flat
+    # {"status": ..., "data": [ban, ...]} document. The per-instance fan-out this used to walk
+    # ({"<instance>": {"data": [...]}}) now lives at `GET /bans/instances` -- and enforcement is
+    # what the tcp_is_blocked() probes below cover, so the durable list is the right assertion here.
+    for ban in central("GET", "/bans").get("data", []):
+        if ban.get("ip") == ip and ban.get("ban_scope") == scope and (service is None or ban.get("service") == service):
+            return ban
     return None
 
 
@@ -423,7 +450,7 @@ def exercise_redis_fault_recovery(scheme):
     if valkey("bw-redis", "FLUSHDB") != "OK":
         raise AssertionError("failed to flush the test data-plane Redis")
 
-    started = time.time() - 1
+    started = time.time() - CLOCK_SKEW_MARGIN_SECONDS
     recovered_report = None
     compose("stop", "bw-redis")
     try:
@@ -467,10 +494,8 @@ def best_effort_cleanup(client_ip):
     if not client_ip:
         return
     for service in (BAN[0], AUTO_BAN[0], None):
-        try:
+        with suppress(Exception):
             unban(client_ip, service)
-        except Exception:
-            pass
 
 
 def main():
