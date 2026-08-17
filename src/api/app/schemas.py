@@ -4,7 +4,9 @@ from typing import Optional, List, Dict, Union, Literal, Annotated
 from re import compile as re_compile
 
 # Shared helpers for Configs
-NAME_RX = re_compile(r"^[\w_-]{1,255}$")
+# \Z, not $: Python's $ also matches before a trailing newline, so "name\n" passed and
+# became a filename that breaks the line-based directory listing used when pushing configs.
+NAME_RX = re_compile(r"^[\w_-]{1,255}\Z")
 
 
 def normalize_config_type(t: str) -> str:

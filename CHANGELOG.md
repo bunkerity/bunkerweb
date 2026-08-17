@@ -2,14 +2,15 @@
 
 ## v1.6.14 - 2026/08/??
 
-- [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service. The cleanup sat below an early exit taken in exactly that case.
-- [BUGFIX] `core`: an instance no longer stays on its loading configuration after a restart, where the `.bw-applied` marker survived the regeneration and made the Scheduler's next push match a digest that no longer described the directory and be skipped.
-- [BUGFIX] `cli`: read `API_TOKEN` from the configuration, not from the environment only, where every `bwcli` command on Linux reached the API with no `Authorization` header and was refused. (Fixes #3810)
-- [BUGFIX] `ui`: treat `/favicon.ico` as a static asset, instead of running the session pipeline and attaching a cookie deletion to a response cached for a day.
-- [BUGFIX] `letsencrypt`: close certbot's stderr after the reader, which leaked a descriptor per invocation when a hook held the pipe open past certbot's exit.
-- [BUGFIX] `core`: an expiry of `0` in the datastore worker cache means no expiry, matching the shared dictionary, instead of expiring the entry at once.
-- [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart emptied the shared dictionary and the next sync wrote that zero over the value Redis had kept. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
-- [BUGFIX] `ui`: mark Total Requests, Blocked Requests, Blocked Unique IPs and the Request status chart as all time; they never honored the *Last 7 days* window the dashboard announces. (Refs #3775)
+- [SECURITY] `api`, `ui`: reject a configuration or plugin name ending in a newline, which passed validation and became a filename that aborted every configuration push.
+- [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service.
+- [BUGFIX] `core`: an instance no longer stays on its loading configuration after a restart, where a surviving `.bw-applied` marker made the Scheduler skip the next push.
+- [BUGFIX] `cli`: read `API_TOKEN` from the configuration, not the environment only, where every `bwcli` command on Linux was refused by the API. (Fixes #3810)
+- [BUGFIX] `ui`: treat `/favicon.ico` as a static asset, instead of attaching a cookie deletion to a response cached for a day.
+- [BUGFIX] `letsencrypt`: close certbot's stderr, which leaked a descriptor per invocation.
+- [BUGFIX] `core`: an expiry of `0` in the datastore worker cache means no expiry, as in the shared dictionary, instead of expiring at once.
+- [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart zeroed them and the next sync overwrote the values Redis had kept. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
+- [BUGFIX] `ui`: mark Total Requests, Blocked Requests, Blocked Unique IPs and the Request status chart as all time; they never honored the *Last 7 days* window. (Refs #3775)
 - [MISC] Remove the four ad auction features Chromium dropped (`join-ad-interest-group`, `private-aggregation`, `record-ad-auction-events` and `run-ad-auction`) from the default value for the Permissions-Policy header, now sorted alphabetically.
 
 ## v1.6.14~rc3 - 2026/08/14

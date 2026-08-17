@@ -40,7 +40,8 @@ BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
 RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
 MAX_PASSWORD_BYTES = 72  # bcrypt only consumes the first 72 bytes of a secret; 5.x raises ValueError on more
-PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
+# \Z, not $: a trailing newline would otherwise pass and become a directory name.
+PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}\Z")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".biscuit_public_key")
 BISCUIT_PRIVATE_KEY_FILE = LIB_DIR.joinpath(".biscuit_private_key")
