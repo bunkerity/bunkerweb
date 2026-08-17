@@ -15,7 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
-from backup import backup_database, update_cache_file, acquire_db_lock, DB_LOCK_FILE
+from backup import backup_database, update_cache_file, acquire_db_lock, sorted_backups, DB_LOCK_FILE
 
 LOGGER = getLogger("BACKUP")
 status = 0
@@ -61,12 +61,9 @@ try:
 
         sorted_files = []
         if already_done:
-
-            # Get all backup files in the directory
-            backup_files = backup_dir.glob("backup-*.zip")
-
-            # Sort the backup files by name
-            sorted_files = sorted(backup_files)
+            # Oldest first: the engine name precedes the timestamp, so plain name order is
+            # per-engine order (see backup.sorted_backups).
+            sorted_files = sorted_backups(backup_dir)
 
         if len(sorted_files) <= backup_rotation and already_done:
             LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
@@ -89,11 +86,7 @@ try:
         backed_up = True
 
         if not force_backup:
-            # Get all backup files in the directory
-            backup_files = backup_dir.glob("backup-*.zip")
-
-            # Sort the backup files by name
-            sorted_files = sorted(backup_files)
+            sorted_files = sorted_backups(backup_dir)
 
     if not force_backup:
         # Check if the number of backup files exceeds the rotation limit

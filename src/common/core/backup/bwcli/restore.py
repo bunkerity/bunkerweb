@@ -10,7 +10,7 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, restore_database
+from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, restore_database, sorted_backups
 
 status = 0
 
@@ -20,8 +20,8 @@ try:
     # Global parser
     parser = ArgumentParser(description="BunkerWeb's backup plugin restore command line interface")
 
-    backups = sorted(BACKUP_DIR.glob("*.zip"), reverse=True)
-    backup_file = backups[0] if backups else None
+    backups = sorted_backups()
+    backup_file = backups[-1] if backups else None
 
     # Optional backup file argument
     parser.add_argument("backup_file", nargs="?", const="default_value", default=backup_file, type=str, help="backup file to restore (default : latest backup)")

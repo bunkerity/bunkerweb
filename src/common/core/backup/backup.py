@@ -40,6 +40,26 @@ def acquire_db_lock():
     DB_LOCK_FILE.touch()
 
 
+def sorted_backups(backup_dir: Path = BACKUP_DIR) -> list:
+    """Backup archives, oldest first.
+
+    Sorting by name looks like sorting by date because the timestamp is in the name, but the
+    engine comes first: `backup-sqlite-2026-01-01_00-00-00.zip` sorts after every
+    `backup-mariadb-*` whatever the dates are. A directory that saw more than one engine --
+    a SQLite install migrated to MariaDB, or the backup test suite -- therefore had
+    `bwcli plugin backup restore` pick the newest SQLite dump instead of the newest backup,
+    and rotation delete the newest MariaDB one as if it were the oldest file.
+    """
+
+    def _key(path: Path):
+        stamp = re.search(r"(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})", path.name)
+        # A name without a timestamp is not ours; mtime keeps it in a sane place instead of
+        # sorting every one of them together at one end.
+        return stamp.group(1) if stamp else datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d_%H-%M-%S")
+
+    return sorted(backup_dir.glob("backup-*.zip"), key=_key)
+
+
 def update_cache_file(db: Database, backup_dir: Path) -> str:
     """Update the cache file in the database."""
     backup_data = loads(db.get_job_cache_file("backup-data", "backup.json") or "{}")
@@ -226,20 +246,63 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
 def restore_database(backup_file: Path, db: Database = None) -> Database:
     """Restore the database from a backup."""
     db = db or Database(LOGGER)
-    Base.metadata.drop_all(db.sql_engine)
     database_url = make_url(db.database_uri)
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
+
+    # Each dump speaks its own engine's dialect, and the restore clears the database first, so
+    # feeding it the wrong one empties the database and then dies partway through the import
+    # ("PRAGMA foreign_keys=OFF" is a syntax error to mysql). Backups of several engines share
+    # one directory as soon as an install is migrated, so refuse before anything is destroyed.
+    archived = backup_file.name.split("-")
+    if len(archived) > 2 and archived[0] == "backup" and archived[1] != database:
+        LOGGER.error(f"Backup {backup_file.name} was taken from a {archived[1]} database, but this instance runs {database}, aborting restore")
+        sys_exit(1)
+
+    Base.metadata.drop_all(db.sql_engine)
 
     if database == "sqlite":
         db_path = Path(database_url.database)
 
-        # Clear the database
+        # Clear the database. This used to be `.read /dev/null`, which reads an empty file and
+        # clears nothing, so the only clearing was the drop_all above -- and that knows only the
+        # tables declared in `model.py`, not the ones a plugin extension creates
+        # (`bw_bunkernet_stats` and its indexes). `sqlite3 .dump` writes plain CREATE TABLE with
+        # no DROP, unlike the MySQL (--add-drop-table) and PostgreSQL (--clean) dumps, so every
+        # leftover object failed the restore with "table already exists" followed by UNIQUE
+        # constraint errors on every row. Dropping the schema wholesale is what the other two
+        # engines get from their dump.
+        # Objects are dropped one by one rather than through `DELETE FROM sqlite_master`: the
+        # sqlite3 shell runs with SQLITE_DBCONFIG_DEFENSIVE on, which refuses to modify the
+        # schema table even after `PRAGMA writable_schema = 1`. Indexes and triggers go with
+        # their table, and foreign keys are off in the shell, so the order does not matter.
+        sqlite_env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
         proc = run(
-            ["sqlite3", db_path.as_posix(), ".read", "/dev/null"],
+            [
+                "sqlite3",
+                db_path.as_posix(),
+                "SELECT 'DROP ' || type || ' IF EXISTS \"' || name || '\";' FROM sqlite_master "
+                "WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%';",
+            ],
             stdout=PIPE,
             stderr=PIPE,
-            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+            env=sqlite_env,
         )
+        if proc.returncode != 0:
+            LOGGER.error(f"Failed to list the database objects before restoring it: {proc.stderr.decode(errors='replace')}")
+            sys_exit(1)
+
+        drops = proc.stdout.decode(errors="replace").strip()
+        if drops:
+            proc = run(
+                ["sqlite3", db_path.as_posix()],
+                input=f"{drops}\nVACUUM;\n".encode(),
+                stdout=PIPE,
+                stderr=PIPE,
+                env=sqlite_env,
+            )
+            if proc.returncode != 0:
+                LOGGER.error(f"Failed to clear the database before restoring it: {proc.stderr.decode(errors='replace')}")
+                sys_exit(1)
 
         LOGGER.info("Restoring the SQLite database ...")
 

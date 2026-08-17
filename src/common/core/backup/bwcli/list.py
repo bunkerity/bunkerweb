@@ -8,10 +8,10 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from backup import BACKUP_DIR, LOGGER
+from backup import BACKUP_DIR, LOGGER, sorted_backups
 
 try:
-    backups = sorted(BACKUP_DIR.glob("*.zip"), reverse=True)
+    backups = sorted_backups()[::-1]
     message = ""
     if backups:
         message = f"Found {len(backups)} backup{'s' if len(backups) > 1 else ''} in {BACKUP_DIR} :"

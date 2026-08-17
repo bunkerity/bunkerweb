@@ -59,7 +59,7 @@ FROM python:3.14-slim@sha256:cea0e6040540fb2b965b6e7fb5ffa00871e632eef63719f0ea5
 RUN umask 027
 
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 tzdata && \
+  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 sqlite3 mariadb-client postgresql-client tzdata && \
   rm -rf /var/lib/apt/lists/* && \
   groupadd -g 101 worker && \
   useradd -u 101 -g worker -d /usr/share/bunkerweb/worker -s /usr/sbin/nologin -M worker

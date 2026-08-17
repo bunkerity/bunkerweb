@@ -37,10 +37,12 @@ try:
     LOGGER.debug(f"Backup directory: {directory}")
 
     if not directory.is_dir():
-        if directory == BACKUP_DIR:
-            LOGGER.error(f"Backup directory {directory} does not exist")
-            sys_exit(1)
-
+        # Create it whichever directory it is. Refusing to create the configured one only
+        # worked because `backup-data` happened to have created it at boot: on a fresh install
+        # -- or one where that job is held back until the scheduler's first start is over --
+        # a manual `bwcli plugin backup save` failed with "does not exist" and nothing told
+        # the operator that waiting for the daily job would fix it. The job itself creates the
+        # directory unconditionally, so this only aligns the CLI with it.
         LOGGER.info(f"Creating directory {directory} as it does not exist")
         directory.mkdir(parents=True, exist_ok=True)
 

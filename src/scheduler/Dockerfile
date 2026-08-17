@@ -48,7 +48,7 @@ RUN umask 027
 # Install runtime dependencies and add scheduler user
 # TODO(Phase 3): Remove libpq5 and libmariadb3 once gen/db subprocess calls move to workers
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 tzdata && \
+  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 sqlite3 mariadb-client postgresql-client tzdata && \
   rm -rf /var/lib/apt/lists/* && \
   groupadd -g 101 scheduler && \
   useradd -u 101 -g scheduler -d /usr/share/bunkerweb/scheduler -s /usr/sbin/nologin -M scheduler
