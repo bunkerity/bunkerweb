@@ -44,7 +44,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite post
   adduser -h /usr/share/bunkerweb/api -g api -s /sbin/nologin -G api -D -H -u 101 --disabled-password api
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libpq>=18.5-r0" "postgresql18-client>=18.5-r0" # CVE-2026-6464 CVE-2026-6469 CVE-2026-6470 CVE-2026-6471 CVE-2026-14662 CVE-2026-14663 CVE-2026-14664 CVE-2026-14666 CVE-2026-14668 CVE-2026-14669 CVE-2026-14670 CVE-2026-14671 CVE-2026-14672 CVE-2026-14673 CVE-2026-14676 CVE-2026-14677 CVE-2026-14678 CVE-2026-14679 CVE-2026-14680 CVE-2026-15741 CVE-2026-15742 CVE-2026-16238 CVE-2026-16239 CVE-2026-16241 CVE-2026-18024 CVE-2026-18408 CVE-2026-19385
 
 # Copy deps and app
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
