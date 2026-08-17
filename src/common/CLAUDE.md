@@ -113,6 +113,7 @@ The `stream` field in `plugin.json` (`yes`/`no`/`partial`) controls whether a pl
 
 ## Key Patterns to Know
 
+- **`_db_session` is NOT reentrant.** It yields the shared scoped session and its `finally` calls `session.remove()`, so a nested `with self._db_session()` closes the session the outer block is holding: everything it loaded becomes detached (the next lazy load raises `DetachedInstanceError`) and anything pending is discarded. Never call another session-opening method from inside a session — resolve it first and pass the value in, or pass `session=` where the callee accepts one. This bit `renew_self_signed_certificate`, which resolved the encryption keyring inside its own session; on a stock install (no `CERTIFICATE_ENCRYPTION_*` env) that read opens a session, and `deploy-certificates` died on every run, leaving `certificates_changed` set forever. Unit tests missed it because they all configure the env keyring; `tests/unit/db/test_certificates.py::test_renew_works_without_an_environment_keyring` covers the fallback path now.
 - **Job names are global across all plugins** — no namespace isolation, collisions are possible
 - **Lua and Python are fully decoupled** — Lua uses NGINX shared dicts synchronized by the Scheduler; it never calls Python directly
 - **`settings.json` is loaded once at startup** — runtime changes require database updates + reload signal

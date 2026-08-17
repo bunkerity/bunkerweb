@@ -66,8 +66,9 @@ Startup → save_config → wait for DB init → restore caches → check custom
 ### Healthcheck System
 
 - Runs every `HEALTHCHECK_INTERVAL` seconds (default 30)
-- Checks each instance via `GET /health`
-- If an instance is "loading", sends full config (custom configs, plugins, pro plugins, NGINX confs, cache) and reloads it
+- Checks each instance via `GET /instances/{hostname}/health`, which forwards the instance's own state: `ok`, `loading` or `reloading`. A failure there means unreachable — the instance answers 200 in every state
+- Dispatches `push-configs` when an instance transitions `down`/`failover` → `up`, **or** when a reachable instance reports `loading`. The second case is the one a short container restart needs: the instance comes back reachable but keeps `IS_LOADING=yes` until something pushes it a configuration, and until then both Lua timer loops return early — no bad-behavior counting, no metrics flush, no sessions cleanup — while it serves traffic normally
+- Re-pushes **once per loading episode** (`LOADING_INSTANCES`): `push-configs` is what clears the state, so an instance still loading after a push is broken for another reason and must not earn a dispatch every interval forever
 - Updates instance status in DB (`up`, `down`, `failover`). The scheduler no longer maintains an in-memory `SCHEDULER.apis` list — it talks to instances via the injected API client
 
 ### Failover Mechanism
@@ -128,3 +129,6 @@ The scheduler imports from several shared packages via `sys.path` manipulation (
 - `os.environ` is mutated globally by `JobScheduler.env` setter — this affects all threads
 - Dynamic job module loading (and any reload-on-replace behavior) now lives in `src/worker/executor.py`; the scheduler keeps no module cache and no job-execution thread pool
 - The polling loop catches all `BaseException` with a 5-error threshold before calling `stop(1)`
+- **A once-batch has no execution order.** `run_once()` dispatches every `once` job in one go and the workers run them in parallel, so a job that reads what another job writes cannot rely on plugin order the way it could when the scheduler ran jobs in-process. Two consequences are live today:
+  - **A job must not read a database flag the scheduler clears around the dispatch.** `backup-data` skips itself when `scheduler_first_start` is set, and `main.py` clears that flag right after dispatching — fire-and-forget, so the worker normally reads it already cleared and backs up a pristine database, which also stamps the plugin's "already done for this period" cache and suppresses the first real backup for a day. The job stays out of the first batch instead (`skipped_plugins`), and its own guard remains for the other dispatch paths.
+  - **Certificate providers and `deploy-certificates` race.** `self-signed`/`custom-cert`/`letsencrypt` decide the attachments; `deploy-certificates` materializes them. Dispatched together, the deploy usually wins and ships material the provider is about to detach. It self-corrects: the provider raises `certificates_changed`, the polling loop sees it and re-dispatches the deploy alone (`CERTIFICATES_NEED_DEPLOYMENT`). Anything asserting on TLS right after a provider setting changes has to wait for that flag to clear, not merely for the jobs to fall quiet.

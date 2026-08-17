@@ -884,6 +884,8 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 !!! warning "Database Compatibility"
     The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations.
 
+    A backup can only be restored into the same database engine it was taken from — the engine is part of the file name (`backup-mariadb-…`), and a restore into a different one is refused before anything is touched. If you migrated between engines, both sets of backups stay in the directory: `restore` without an argument takes the most recent file of any engine, so pass the path explicitly to restore an older backup of your current one.
+
 ### Example Configurations
 
 === "Daily Backups with 7-Day Retention"

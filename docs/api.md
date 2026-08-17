@@ -245,6 +245,8 @@ Enabled by default with two strings: `API_RATE_LIMIT` (global, default `100r/m`)
 - `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`, `API_RATE_LIMIT_EXEMPT_IPS`
 - Storage is in-memory or Redis/Valkey when `USE_REDIS=yes` plus `REDIS_*` settings (Sentinel supported).
 
+Requests authenticated with the admin `API_TOKEN` are exempt, whatever the limits say. That token already grants full admin access, so limiting it protects nothing — and it is what BunkerWeb's own components (web UI, Scheduler, Worker) use, all from the same network, so a per-IP limit otherwise counts the whole control plane as a single client. A bearer token that does not match stays limited like any other caller.
+
 Limiter strategies (powered by `limits`):
 
 - `fixed-window` (default): bucket resets at each interval boundary; cheapest and fine for coarse limits.
@@ -328,7 +330,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 | `API_RATE_LIMIT_RULES`           | Per-path rules (CSV/JSON/YAML or file path) | String or path                                            | unset          |
 | `API_RATE_LIMIT_STRATEGY`        | Algorithm                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
 | `API_RATE_LIMIT_KEY`             | Key selector                                | `ip`, `header:<Name>`                                     | `ip`           |
-| `API_RATE_LIMIT_EXEMPT_IPS`      | Skip limits for these IPs/CIDRs             | Space/comma-separated                                     | unset          |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | Skip limits for these IPs/CIDRs (on top of the always-exempt admin `API_TOKEN`) | Space/comma-separated                                     | unset          |
 | `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON merged into storage config             | JSON string                                               | unset          |
 
 #### Redis/Valkey (for rate limits)
@@ -347,6 +349,9 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 
 !!! info "DB-provided Redis"
     If Redis/Valkey settings are present in the BunkerWeb database configuration, the API will automatically reuse them for rate limiting even without `USE_REDIS` set in the environment. Override via environment variables when you need a different backend.
+
+!!! warning "Without Redis the limit is per worker"
+    The fallback storage lives in the process memory of each Gunicorn worker, so every worker enforces the configured rate on its own: with `MAX_WORKERS=4` and `API_RATE_LIMIT_AUTH=10r/m`, a client spread across the workers gets up to 40 attempts a minute. Point the API at Redis/Valkey — or run a single worker — wherever the limit is a security control rather than a courtesy.
 
 #### Listener & TLS
 
@@ -381,7 +386,8 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `POST /instances`: register an instance (hostname/port/server_name/method).
   - `GET/PATCH/DELETE /instances/{hostname}`: inspect, update mutable fields, or delete API-managed instances.
   - `DELETE /instances`: bulk delete API-managed instances; non-API entries are skipped.
-  - Health/actions: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
+  - Health/actions: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
+  - `GET /instances/{hostname}/health` forwards what the instance says about itself — `ok`, `loading` or `reloading` — where `ping` only answers "reachable". An instance that restarted stays in `loading` until it receives a configuration, and in that state its timer-driven plugins are disabled, so the scheduler uses this to decide whether to re-push. Both routes need the `instances_read` permission.
 - **Global settings**
   - `GET /global_settings`: non-defaults by default; add `full=true` for all settings, `methods=true` to include provenance.
   - `PATCH /global_settings`: upsert API-owned globals; read-only keys are rejected. A setting owned by another source (`scheduler`, i.e. an environment variable, plus `autoconf`, `manual`, `wizard`) cannot be taken over: the whole payload is rejected with `409` naming each key and its owner, and nothing is written. Re-sending a value a foreign-owned key already holds is not a conflict.

@@ -163,15 +163,15 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 ### Database compatibility matrix
 
-| Integration        | PostgreSQL                                | MariaDB             | MySQL              | SQLite      |
-| :----------------- | :---------------------------------------- | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v18` and earlier                       | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Linux packages** | See notes below                           | See notes below     | See notes below    | ✅ Supported |
+| Integration        | PostgreSQL          | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :------------------ | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v17` and earlier | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v17` and earlier | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v17` and earlier | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below     | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
-    - **PostgreSQL**: Alpine packages now ship with the `v18` client, so `v18` and earlier are supported out of the box; the all-in-one image still embeds `v17`, so `v18` is unsupported there.
+    - **PostgreSQL**: the images ship the `v17` client (Debian 13), and `pg_dump` refuses a server newer than itself. BunkerWeb itself connects to a `v18` server without trouble — it is the backup plugin that cannot dump or restore it, so keep the server at `v17` or earlier if you rely on backups.
     - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
     - **SQLite**: Ships with the packages and is ready to use.
 
