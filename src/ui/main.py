@@ -42,7 +42,7 @@ from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
-    STATIC_PATH_PREFIXES,
+    is_static_path,
     _sanitize_internal_next,
     flash,
     get_blacklisted_settings,
@@ -1135,7 +1135,7 @@ def _host_allowed(host: str, allowed: list) -> bool:
 def before_request():
     # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
     # returning None lets the static view still serve the file (after_request supplies the nonce).
-    if request.path.startswith(STATIC_PATH_PREFIXES):
+    if is_static_path(request.path):
         return
 
     # Defense-in-depth: reject unexpected Host headers when an allowlist is configured.
@@ -1168,7 +1168,7 @@ def before_request():
                     app.config["SESSION_COOKIE_DOMAIN"] = None
                 _cookie_config_detected = True
 
-    if not request.path.startswith(STATIC_PATH_PREFIXES):
+    if not is_static_path(request.path):
         metadata = DB.get_metadata()
 
         # Plugin reload trigger
@@ -1429,7 +1429,7 @@ def set_security_headers(response):
     # delete_cookie defaults it to False and a __Host- deletion without Secure is rejected by
     # the UA. Skipped on static paths so no Set-Cookie lands on a cacheable response.
     # ponytail: hard-coded name list; drop this block once no issued token can still be live.
-    if not request.path.startswith(STATIC_PATH_PREFIXES):
+    if not is_static_path(request.path):
         for legacy_cookie in ("__Host-bw_ui_remember_token", "bw_ui_remember_token"):
             if legacy_cookie in request.cookies:
                 response.delete_cookie(legacy_cookie, path="/", secure=legacy_cookie.startswith("__Host-"))
@@ -1440,7 +1440,7 @@ def set_security_headers(response):
 @app.teardown_request
 def teardown_request(teardown):
     with suppress(AssertionError, RuntimeError):
-        if not request.path.startswith(STATIC_PATH_PREFIXES) and current_user.is_authenticated and "session_id" in session:
+        if not is_static_path(request.path) and current_user.is_authenticated and "session_id" in session:
             _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:

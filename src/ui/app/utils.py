@@ -29,7 +29,17 @@ RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default serve
 # Static-asset URL prefixes served by Flask that never carry privilege (no auth/authz needed).
 # Single source of truth shared by main.py (before_request fast-paths) and the Biscuit
 # authorization middleware, so the two never drift.
-STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/", "/favicon.ico")
+STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
+# Matched whole, never as a prefix: every consumer below uses startswith, so listing a bare file
+# name among the prefixes would also exempt /favicon.icoX and /favicon.ico/anything from the
+# host, authorization and revocation checks.
+STATIC_EXACT_PATHS = ("/favicon.ico",)
+
+
+def is_static_path(path: str, *extra_prefixes: str) -> bool:
+    """True for the unprivileged static assets that skip the request pipeline."""
+    return path.startswith(STATIC_PATH_PREFIXES + extra_prefixes) or path in STATIC_EXACT_PATHS
+
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 # Characters that could break out of a quoted string when a username is embedded in

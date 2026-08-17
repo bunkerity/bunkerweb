@@ -48,6 +48,9 @@ local tonumber = tonumber
 local tostring = tostring
 local table_insert = table.insert
 local table_remove = table.remove
+-- Bound here rather than read as a global at call time, where a missing one would only surface
+-- when the branch first runs (the .luacheckrc whitelist hides bare global reads).
+local unpack = unpack
 
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 
@@ -237,34 +240,73 @@ end
 -- read straight from Redis instead of being held here.
 -- Keys are per worker id, so lowering WORKER_PROCESSES strands the counters of the workers
 -- that no longer exist; METRICS_REDIS_TTL expires them.
-local function seed_counters_from_redis(self, wid)
+-- budget caps how many entries may be seeded. Redis can hold far more keys than the LRU has
+-- slots (one per client IP for some plugins), and seeding past the cap would evict the counters
+-- the shared dict just restored, which is the very loss this is here to prevent.
+local function seed_counters_from_redis(self, wid, budget)
 	local prefix = "metrics:"
 	local suffix = ":" .. wid
 	local cursor = "0"
+	local seeded = 0
+	local skipped = 0
 	repeat
 		local res, err = self:redis_call("scan", cursor, "MATCH", prefix .. "*" .. suffix, "COUNT", 100)
-		if not res or type(res) ~= "table" then
-			self:log_throttled(ERR, "seed_scan", "Can't list metric counters in Redis: " .. (err or "unknown error"))
+		-- The cursor is checked too: a reply without one leaves it nil, which is neither "0" nor
+		-- a usable argument for the next round, so the loop would never end.
+		if type(res) ~= "table" or type(res[1]) ~= "string" then
+			self:log_throttled(ERR, "seed_scan", "Can't list metric counters in Redis: " .. (err or "unexpected reply"))
 			return
 		end
 		cursor = res[1]
+
+		-- Only what the shared dict could not provide, in one MGET rather than a GET per key:
+		-- each round trip is a yield, and MGET answers a list-typed key (a table metric, which
+		-- shares this key shape) with nil instead of an error, so non-counters cost nothing.
+		local wanted, keys = {}, {}
 		for _, redis_key in ipairs(res[2] or {}) do
 			local key = redis_key:sub(#prefix + 1, -(#suffix + 1))
-			-- Never overwrite what the shared dict already restored: it is at least as fresh.
 			if key ~= "" and lru:get(key) == nil then
-				local value
-				value, err = self:redis_call("get", redis_key)
+				if seeded + #wanted >= budget then
+					skipped = skipped + 1
+				else
+					wanted[#wanted + 1] = key
+					keys[#keys + 1] = redis_key
+				end
+			end
+		end
+
+		if #keys > 0 then
+			local values
+			values, err = self:redis_call("mget", unpack(keys))
+			if type(values) ~= "table" then
+				self:log_throttled(
+					ERR,
+					"seed_get",
+					"Can't read metric counters from Redis: " .. (err or "unexpected reply")
+				)
+				return
+			end
+			for i, key in ipairs(wanted) do
+				local value = values[i]
 				local number = value ~= nil and value ~= null and tonumber(value) or nil
 				if number then
 					lru:set(key, number)
-				elseif not value and err and not err:find("WRONGTYPE", 1, true) then
-					-- Table metrics are stored as lists under the same key shape, so WRONGTYPE just
-					-- means this key is not a counter. Nothing to seed, and nothing to report.
-					self:log_throttled(ERR, "seed_get", "Can't read metric counter " .. key .. " from Redis: " .. err)
+					seeded = seeded + 1
 				end
 			end
 		end
 	until cursor == "0"
+
+	if skipped > 0 then
+		self.logger:log(
+			WARN,
+			"restored "
+				.. seeded
+				.. " metric counter(s) from Redis and left "
+				.. skipped
+				.. " behind for lack of room, raise MAX_LRU_HISTORY to keep them all"
+		)
+	end
 end
 
 local function refresh_request_ttls(self, ttl, wid)
@@ -520,7 +562,16 @@ function metrics:timer()
 			redis_connected = true
 			self_heal_request_facets(self)
 			if cold_start and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				seed_counters_from_redis(self, wid)
+				local max_slots = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
+				if max_slots < 1 then
+					max_slots = DEFAULT_MAX_LRU_HISTORY
+				end
+				-- Seed only into the slots the shared-dict restore left free, so nothing it
+				-- recovered is evicted to make room for a Redis copy.
+				local budget = max_slots - #lru:get_keys()
+				if budget > 0 then
+					seed_counters_from_redis(self, wid, budget)
+				end
 			end
 		end
 	end

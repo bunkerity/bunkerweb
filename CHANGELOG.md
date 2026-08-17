@@ -5,6 +5,7 @@
 - [SECURITY] `api`, `ui`: reject a configuration or plugin name ending in a newline, which passed validation and became a filename that aborted every configuration push.
 - [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service.
 - [BUGFIX] `core`: an instance no longer stays on its loading configuration after a restart, where a surviving `.bw-applied` marker made the Scheduler skip the next push.
+- [BUGFIX] `docker`: `KEEP_CONFIG_ON_RESTART` defaults to `no` as documented. Unset, it was read as empty and every restart preserved the configuration instead of regenerating it.
 - [BUGFIX] `cli`: read `API_TOKEN` from the configuration, not the environment only, where every `bwcli` command on Linux was refused by the API. (Fixes #3810)
 - [BUGFIX] `ui`: treat `/favicon.ico` as a static asset, instead of attaching a cookie deletion to a response cached for a day.
 - [BUGFIX] `letsencrypt`: close certbot's stderr, which leaked a descriptor per invocation.

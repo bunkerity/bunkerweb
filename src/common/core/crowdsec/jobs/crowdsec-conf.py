@@ -43,10 +43,18 @@ try:
 
     # Drop configurations left behind by services that no longer use CrowdSec, and the
     # instance-wide one written by older versions in multisite. They hold the API key.
-    stale = list(disabled)
+    stale = set(disabled)
     if services != [""]:
-        stale.append("")
-    for service in stale:
+        stale.add("")
+    # `disabled` only names services SERVER_NAME still lists, but Job() restores a cached file for
+    # every service_id the database holds, so one dropped from SERVER_NAME entirely would be put
+    # back on every run and never swept. Sweep by what is actually on disk instead.
+    if JOB.job_path.is_dir():
+        for entry in JOB.job_path.iterdir():
+            if entry.is_dir() and entry.name not in services:
+                stale.add(entry.name)
+
+    for service in sorted(stale):
         if JOB.job_path.joinpath(service, CONF_NAME).is_file():
             deleted, err = JOB.del_cache(CONF_NAME, service_id=service)
             if not deleted:

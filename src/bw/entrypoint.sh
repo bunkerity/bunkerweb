@@ -105,6 +105,11 @@ tmp_env_path="/tmp/variables.env"
 tmp_env_content="$(generate_tmp_env_content)"
 regenerate_temp_config=false
 
+# The occurrence above is heredoc content, so it only reaches the generated file and never sets
+# the shell variable the test below reads. Unset therefore behaved as "yes" on every restart that
+# kept the writable layer, which is the opposite of the documented default.
+KEEP_CONFIG_ON_RESTART="${KEEP_CONFIG_ON_RESTART:-no}"
+
 if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
 	regenerate_temp_config=true
 else

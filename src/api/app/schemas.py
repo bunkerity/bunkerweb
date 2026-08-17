@@ -15,7 +15,7 @@ def normalize_config_type(t: str) -> str:
 
 def validate_config_name(name: str) -> Optional[str]:
     if not name or not NAME_RX.match(name):
-        return "Invalid name: must match ^[\\w_-]{1,255}$"
+        return "Invalid name: must match ^[\\w_-]{1,255}\\Z (letters, digits, underscore and hyphen only, no newline)"
     return None
 
 
@@ -156,7 +156,7 @@ class ServiceUpdateRequest(BaseModel):
 class ConfigCreateRequest(BaseModel):
     service: Optional[str] = Field(None, description='Service id; use "global" or leave empty for global')
     type: ConfigType = Field(..., description="Config type")
-    name: str = Field(..., description=r"Config name (^[\\w_-]{1,255}$)")
+    name: str = Field(..., description=r"Config name (^[\\w_-]{1,255}\\Z)")
     data: str = Field(..., description="Config content as UTF-8 string")
     is_draft: bool = Field(False, description="Mark custom config as draft")
 

@@ -177,9 +177,10 @@
                     <br />
                     <span class="fs-3 don-jose">{{ human_readable_number(request_errors.values() |sum) }}</span>
                 </p>
-                <small class="ps-4 text-white-80 mt-0">
+                {% if statuses_all_time %}<small class="ps-4 text-white-80 mt-0">
                     <i class='bx bx-infinite'></i> <span data-i18n="dashboard.window.all_time">All time</span>
                 </small>
+                {% endif %}
             </div>
         </div>
         <div class="col-md-3 mb-2">
@@ -200,9 +201,10 @@
                         {{ human_readable_number(ns.blocked_requests) }}
                     </span>
                 </p>
-                <small class="ps-4 text-muted mt-0">
+                {% if statuses_all_time %}<small class="ps-4 text-muted mt-0">
                     <i class='bx bx-infinite'></i> <span data-i18n="dashboard.window.all_time">All time</span>
                 </small>
+                {% endif %}
             </a>
         </div>
         <div class="col-md-3 mb-2">
@@ -213,9 +215,6 @@
                     <br />
                     <span class="fs-3 don-jose">{{ human_readable_number(blocked_unique_ips) }}</span>
                 </p>
-                <small class="ps-4 text-muted mt-0">
-                    <i class='bx bx-infinite'></i> <span data-i18n="dashboard.window.all_time">All time</span>
-                </small>
             </div>
         </div>
         <div class="col-md-7 row g-4 m-0 p-0">
@@ -225,9 +224,10 @@
                         <div class="card-title mb-0">
                             <h5 class="mb-1 me-2 don-jose"
                                 data-i18n="dashboard.chart.request_status.title">Request status</h5>
-                            <small class="text-muted">
+                            {% if statuses_all_time %}<small class="text-muted">
                                 <i class='bx bx-infinite'></i> <span data-i18n="dashboard.window.all_time">All time</span>
                             </small>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="card-body d-flex align-items-center justify-content-center">
