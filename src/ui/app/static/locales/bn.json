@@ -487,6 +487,7 @@
       "no_data": "কোনো ডেটা নেই"
     },
     "window": {
+      "all_time": "সর্বকালীন",
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
     }

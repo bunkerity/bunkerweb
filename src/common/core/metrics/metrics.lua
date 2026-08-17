@@ -229,6 +229,42 @@ local function reap_evicted_redis_keys(self, wid, live_keys)
 	synced_redis_keys = live_keys
 end
 
+-- A reload keeps the shared dict the LRU is rebuilt from, a restart does not: the counter
+-- would start again at zero and the next sync would SET that zero over the value Redis had
+-- kept, so the number is destroyed rather than merely missing. Seed the cold LRU from Redis
+-- for whatever the shared dict could not provide.
+-- Numeric counters only: tables are rebuilt from their own sources, and the requests list is
+-- read straight from Redis instead of being held here.
+-- Keys are per worker id, so lowering WORKER_PROCESSES strands the counters of the workers
+-- that no longer exist; METRICS_REDIS_TTL expires them.
+local function seed_counters_from_redis(self, wid)
+	local prefix = "metrics:"
+	local suffix = ":" .. wid
+	local cursor = "0"
+	repeat
+		local res, err = self:redis_call("scan", cursor, "MATCH", prefix .. "*" .. suffix, "COUNT", 100)
+		if not res or type(res) ~= "table" then
+			self:log_throttled(ERR, "seed_scan", "Can't list metric counters in Redis: " .. (err or "unknown error"))
+			return
+		end
+		cursor = res[1]
+		for _, redis_key in ipairs(res[2] or {}) do
+			local key = redis_key:sub(#prefix + 1, -(#suffix + 1))
+			-- Never overwrite what the shared dict already restored: it is at least as fresh.
+			if key ~= "" and lru:get(key) == nil then
+				local value
+				value, err = self:redis_call("get", redis_key)
+				local number = value ~= nil and value ~= null and tonumber(value) or nil
+				if number then
+					lru:set(key, number)
+				elseif not value and err then
+					self:log_throttled(ERR, "seed_get", "Can't read metric counter " .. key .. " from Redis: " .. err)
+				end
+			end
+		end
+	until cursor == "0"
+end
+
 local function refresh_request_ttls(self, ttl, wid)
 	if not ttl or ttl <= 0 then
 		return
@@ -441,6 +477,7 @@ function metrics:timer()
 	-- In case of a reload, everything in LRU cache is removed
 	-- so we need to copy it from SHM cache if it exists.
 	local setup = lru:get("setup")
+	local cold_start = not setup
 	if not setup then
 		for _, key in ipairs(self.metrics_datastore:keys()) do
 			if key:match("_" .. wid .. "$") then
@@ -480,6 +517,9 @@ function metrics:timer()
 		else
 			redis_connected = true
 			self_heal_request_facets(self)
+			if cold_start and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+				seed_counters_from_redis(self, wid)
+			end
 		end
 	end
 

@@ -487,6 +487,7 @@
       "no_data": "Keine Daten"
     },
     "window": {
+      "all_time": "Insgesamt",
       "last_days": "Letzte {{days}} Tage",
       "title": "Dashboard-Fenster"
     }

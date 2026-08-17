@@ -487,6 +487,7 @@
       "no_data": "데이터 없음"
     },
     "window": {
+      "all_time": "전체 기간",
       "last_days": "지난 {{days}}일",
       "title": "대시보드 창"
     }

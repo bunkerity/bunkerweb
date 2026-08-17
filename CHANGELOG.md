@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.6.14~rc3 - 2026/07/??
+## v1.6.14 - 2026/08/??
+
+- [BUGFIX] `cli`: read `API_TOKEN` from the configuration, not from the environment only, where every `bwcli` command on Linux reached the API with no `Authorization` header and was refused. (Fixes #3810)
+- [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart emptied the shared dictionary and the next sync wrote that zero over the value Redis had kept. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
+- [BUGFIX] `ui`: mark Total Requests, Blocked Requests, Blocked Unique IPs and the Request status chart as all time; they never honored the *Last 7 days* window the dashboard announces. (Refs #3775)
+
+## v1.6.14~rc3 - 2026/08/14
 
 - [SECURITY] `db`: the database password is no longer written to the logs, where a malformed `DATABASE_URI` was logged in full before exiting. Connection failures now name the masked target and the reason. (Refs #3361)
 - [SECURITY] `api`: a configuration or plugin push no longer empties the target directory on a live instance while it copies the new content in, which made every request to every service fail for the duration of the copy. Entries are now swapped one at a time with a rename, and a push whose content is unchanged is skipped instead of rewriting an identical tree on every Scheduler start.
@@ -38,7 +44,6 @@
 - [BUGFIX] `ui`: stopping the temporary setup web UI no longer raises a `TypeError` in the signal handler. (Fixes #3345)
 - [BUGFIX] `autoconf`: write IPv6 load balancer addresses to the Ingress and Gateway status as addresses, not hostnames, which Kubernetes rejected with a 422 on dual-stack clusters. (Fixes #3771)
 - [BUGFIX] `cli`: `bwcli ban` and `bwcli unban` reported success even when every instance refused the request, so a ban that was never lifted looked lifted. (Fixes #3759)
-- [BUGFIX] `cli`: read `API_TOKEN` from the configuration, not from the environment only, where every `bwcli` command on Linux reached the API with no `Authorization` header and was refused. (Fixes #3810)
 - [BUGFIX] `db`: a configuration save that loses a race with another writer is recomputed and retried instead of being dropped, which left every setting it carried at its default. The config saver now exits non-zero when a save is dropped.
 - [BUGFIX] `db`: stop writing `Jobs.last_run`, dropped from the model in 1.6.0, during a plugin synchronization: a plugin whose job metadata changed aborted the sync with an `AttributeError` and never updated. (Fixes #3795)
 - [BUGFIX] `linux`: commands dropped to the nginx user get a writable `HOME` instead of root's, which made SSL PostgreSQL connections fail on an unreadable `/root/.postgresql/postgresql.crt`. (Fixes #3354)

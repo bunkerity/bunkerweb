@@ -488,6 +488,7 @@
       "no_data": "Aucune donnée"
     },
     "window": {
+      "all_time": "Total cumulé",
       "last_days": "Les {{days}} derniers jours",
       "title": "Fenêtre du tableau de bord"
     }

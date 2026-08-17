@@ -487,6 +487,7 @@
       "no_data": "Sin datos"
     },
     "window": {
+      "all_time": "Total histórico",
       "last_days": "Últimos {{days}} días",
       "title": "Ventana del panel"
     }
