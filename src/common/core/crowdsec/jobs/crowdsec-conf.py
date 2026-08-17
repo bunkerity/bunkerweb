@@ -43,20 +43,26 @@ try:
 
     # Drop configurations left behind by services that no longer use CrowdSec, and the
     # instance-wide one written by older versions in multisite. They hold the API key.
+    #
+    # In multisite the service lists are built from SERVER_NAME, so empty on both sides means the
+    # environment named nothing at all: a partial or racing job environment produces that exactly
+    # like a real "nothing configured" does, and there is no evidence of what is stale. Sweeping
+    # then would delete every service's configuration on the strength of a missing variable.
+    # Outside multisite the instance is the single service and ([], []) is determinate: CrowdSec
+    # is off, and the rendered configuration with its API key is precisely what must go.
+    multisite = getenv("MULTISITE", "no") == "yes"
     stale = set(disabled)
-    if services != [""]:
-        stale.add("")
-    # `disabled` only names services SERVER_NAME still lists, but Job() restores a cached file for
-    # every service_id the database holds, so one dropped from SERVER_NAME entirely would be put
-    # back on every run and never swept. Sweep by what is actually on disk instead.
-    # Both lists empty means the job environment named no service at all, which happens on a
-    # partial or racing environment as readily as on a real "nothing configured". There is no
-    # evidence of what is stale then, so sweeping the disk would delete every service's
-    # configuration on the strength of a missing variable.
-    if (services or disabled) and JOB.job_path.is_dir():
-        for entry in JOB.job_path.iterdir():
-            if entry.is_dir() and entry.name not in services:
-                stale.add(entry.name)
+
+    if services or disabled or not multisite:
+        if services != [""]:
+            stale.add("")
+        # `disabled` only names services SERVER_NAME still lists, but Job() restores a cached file
+        # for every service_id the database holds, so one dropped from SERVER_NAME entirely would
+        # be put back on every run and never swept. Sweep by what is on disk instead.
+        if JOB.job_path.is_dir():
+            for entry in JOB.job_path.iterdir():
+                if entry.is_dir() and entry.name not in services:
+                    stale.add(entry.name)
 
     for service in sorted(stale):
         if JOB.job_path.joinpath(service, CONF_NAME).is_file():

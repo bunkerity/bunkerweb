@@ -254,6 +254,11 @@ local function seed_counters_from_redis(self, wid, budget)
 		-- The cursor is checked too: a reply without one leaves it nil, which is neither "0" nor
 		-- a usable argument for the next round, so the loop would never end.
 		if type(res) ~= "table" or type(res[1]) ~= "string" then
+			-- A broken cursor cannot be continued, so this one has to return. Trip the breaker on
+			-- the way out: leaving redis_ok true lets the sync later in this same cycle SET the
+			-- cold counters over their Redis totals, which is the loss the seeding exists to
+			-- prevent. Skipping one cycle's sync is cheaper than destroying the history.
+			self.redis_ok = false
 			self:log_throttled(ERR, "seed_scan", "Can't list metric counters in Redis: " .. (err or "unexpected reply"))
 			return
 		end
@@ -302,6 +307,7 @@ local function seed_counters_from_redis(self, wid, budget)
 
 		-- Nothing left to place, so stop walking: the rest of the scan could only keep counting
 		-- skips, and at the cardinalities this guards against that is thousands of round trips.
+		-- It does mean `skipped` stops short of the real shortfall, hence "at least" below.
 		if seeded >= budget then
 			break
 		end
@@ -315,7 +321,7 @@ local function seed_counters_from_redis(self, wid, budget)
 			-- over the Redis total. Say so, or the operator reads this as harmless.
 			"restored "
 				.. seeded
-				.. " metric counter(s) from Redis but had no room for "
+				.. " metric counter(s) from Redis but had no room for at least "
 				.. skipped
 				.. " more, whose totals will be overwritten the next time they are incremented, raise MAX_LRU_HISTORY"
 		)
@@ -575,19 +581,12 @@ function metrics:timer()
 			redis_connected = true
 			self_heal_request_facets(self)
 			if cold_start and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				-- The cache's own capacity, not the MAX_LRU_HISTORY setting it was meant to be
-				-- built from: when init_workers() failed to resize, the two disagree and a budget
-				-- computed from the setting would overfill the very cache it is protecting.
-				local max_slots = lru.num_items
-				if type(max_slots) ~= "number" or max_slots < 1 then
-					max_slots = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
-				end
-				if max_slots < 1 then
-					max_slots = DEFAULT_MAX_LRU_HISTORY
-				end
 				-- Seed only into the slots the shared-dict restore left free, so nothing it
 				-- recovered is evicted to make room for a Redis copy.
-				local budget = max_slots - #lru:get_keys()
+				-- capacity(), not count(): num_items is how many entries are held right now,
+				-- which is exactly what get_keys() returns, so subtracting the two gave a budget
+				-- of zero on every cold start and the seeding below never ran at all.
+				local budget = lru:capacity() - #lru:get_keys()
 				if budget > 0 then
 					seed_counters_from_redis(self, wid, budget)
 				end
