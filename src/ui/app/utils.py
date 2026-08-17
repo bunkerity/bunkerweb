@@ -29,7 +29,7 @@ RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default serve
 # Static-asset URL prefixes served by Flask that never carry privilege (no auth/authz needed).
 # Single source of truth shared by main.py (before_request fast-paths) and the Biscuit
 # authorization middleware, so the two never drift.
-STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
+STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/", "/favicon.ico")
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 # Characters that could break out of a quoted string when a username is embedded in

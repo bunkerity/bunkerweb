@@ -537,6 +537,11 @@ def stream_certbot(process, logger_certbot, timeout: float, on_line: Optional[Ca
         # killed certbot keeps the pipe open and the reader would never see EOF.
         if reader is not None:
             reader.join(timeout=5)
+        # Close it whether or not the reader returned: when it did not, the descriptor would
+        # otherwise stay open for the life of the scheduler, once per invocation.
+        if process.stderr is not None:
+            with suppress(OSError):
+                process.stderr.close()
 
     return not timed_out
 

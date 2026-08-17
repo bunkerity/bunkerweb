@@ -257,7 +257,9 @@ local function seed_counters_from_redis(self, wid)
 				local number = value ~= nil and value ~= null and tonumber(value) or nil
 				if number then
 					lru:set(key, number)
-				elseif not value and err then
+				elseif not value and err and not err:find("WRONGTYPE", 1, true) then
+					-- Table metrics are stored as lists under the same key shape, so WRONGTYPE just
+					-- means this key is not a counter. Nothing to seed, and nothing to report.
 					self:log_throttled(ERR, "seed_get", "Can't read metric counter " .. key .. " from Redis: " .. err)
 				end
 			end

@@ -26,20 +26,20 @@ try:
     # rendered configuration under its own job cache service_id.
     services, disabled = get_services(getenv)
 
-    if not services:
-        LOGGER.info("CrowdSec is not activated, skipping job...")
-        sys_exit(status)
-
+    # Built before the no-service exit: disabling CrowdSec on the last service is exactly when
+    # the stale cleanup below has to run, and exiting first left every rendered configuration,
+    # API key included, on disk forever.
     JOB = Job(LOGGER, __file__)
 
-    template = Environment(loader=FileSystemLoader(PLUGIN_PATH.joinpath("misc"))).get_template(CONF_NAME)
+    if services:
+        template = Environment(loader=FileSystemLoader(PLUGIN_PATH.joinpath("misc"))).get_template(CONF_NAME)
 
-    for service in services:
-        content = template.render(**render_variables(getenv, service)).encode()
-        cached, err = JOB.cache_file(CONF_NAME, content, service_id=service)
-        if not cached:
-            status = 2
-            LOGGER.error(f"Error while caching {CONF_NAME} file for {service or 'the whole instance'} : {err}")
+        for service in services:
+            content = template.render(**render_variables(getenv, service)).encode()
+            cached, err = JOB.cache_file(CONF_NAME, content, service_id=service)
+            if not cached:
+                status = 2
+                LOGGER.error(f"Error while caching {CONF_NAME} file for {service or 'the whole instance'} : {err}")
 
     # Drop configurations left behind by services that no longer use CrowdSec, and the
     # instance-wide one written by older versions in multisite. They hold the API key.
@@ -52,7 +52,10 @@ try:
             if not deleted:
                 LOGGER.warning(f"Couldn't remove stale {CONF_NAME} for {service or 'the whole instance'} : {err}")
 
-    LOGGER.info(f"CrowdSec configuration successfully generated for {len(services)} service(s)")
+    if not services:
+        LOGGER.info("CrowdSec is not activated, skipping generation...")
+    else:
+        LOGGER.info(f"CrowdSec configuration successfully generated for {len(services)} service(s)")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
