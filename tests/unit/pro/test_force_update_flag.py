@@ -89,3 +89,27 @@ def test_the_flag_is_not_cleared_before_the_download():
 
     cleared_early = [ln for ln in reads_and_writes if ln < first_download and "set_metadata" in source.splitlines()[ln - 1]]
     assert not cleared_early, f"force_pro_update is cleared before the download at line(s) {cleared_early}"
+
+
+def test_both_success_paths_mark_the_request_consumed_after_their_write_not_before():
+    """The two exits differed, and only one of them was safe.
+
+    "All Pro plugins are up to date" used to set `force_consumed` before writing `last_pro_check`,
+    so a run whose own bookkeeping failed still cleared the operator's explicit update request. The
+    install path always ordered it the other way. The asymmetry is not neutral: leaving the flag set
+    costs one repeated forced check on a daily job, while clearing it wrongly drops the request with
+    nothing to retry it.
+    """
+    source = JOB_PATH.read_text(encoding="utf-8")
+
+    # The "up to date" branch, bounded by its own exit so the install path's ordering cannot stand
+    # in for it.
+    branch_start = source.index('LOGGER.info("All Pro plugins are up to date")')
+    branch_end = source.index("sys_exit(0)", branch_start)
+    branch = source[branch_start:branch_end]
+
+    assert 'db.set_metadata({"last_pro_check": current_date})' in branch
+    assert "force_consumed = True" in branch, "the branch stopped marking the forced update consumed at all"
+    consumed_at = branch.index("force_consumed = True")
+    write_at = branch.index("db.set_metadata")
+    assert consumed_at > write_at, "the up-to-date branch marks the request consumed before the write that can fail"

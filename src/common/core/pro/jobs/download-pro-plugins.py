@@ -479,12 +479,15 @@ try:
 
     if not plugin_nbr:
         LOGGER.info("All Pro plugins are up to date")
-        force_consumed = True
         err = db.set_metadata({"last_pro_check": current_date})
         if err:
             LOGGER.error(f"Failed to update last_pro_check after successful Pro plugins check: {err}")
             status = 2
             sys_exit(status)
+        # Only after the write landed. Marking the forced update consumed before it means a run
+        # that failed its own bookkeeping still clears the operator's request, and the sibling path
+        # below (the install branch) already gets this order right.
+        force_consumed = True
         sys_exit(0)
 
     pro_plugins = []
