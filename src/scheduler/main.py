@@ -108,9 +108,13 @@ HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 APPLY_RETRY_INTERVAL = int(getenv("APPLY_RETRY_INTERVAL", "300") or 300)
 HEALTHCHECK_EVENT = Event()
 HEALTHCHECK_LOGGER = getLogger("SCHEDULER.HEALTHCHECK")
-# Instances currently reporting the loading state, so the healthcheck re-pushes a configuration
-# once per episode instead of on every pass.
-LOADING_INSTANCES = set()
+# Instances currently reporting the loading state, mapped to how many consecutive healthchecks
+# have seen them that way. Drives both the retry cadence and the log level: see healthcheck_job.
+LOADING_INSTANCES: Dict[str, int] = {}
+# Re-push on each of the first few passes (the restart case clears within one), then back off to
+# one attempt every N passes. Retrying is not free -- see the comment in healthcheck_job.
+LOADING_FAST_RETRIES = 3
+LOADING_SLOW_RETRY_EVERY = 20
 
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
@@ -460,7 +464,7 @@ def healthcheck_job():
         return
 
     recovered = False
-    still_loading = set()
+    still_loading: Dict[str, int] = {}
     try:
         for db_instance in API_CLIENT.get_instances():
             hostname = db_instance["hostname"]
@@ -492,14 +496,38 @@ def healthcheck_job():
             # early, so bad-behavior counting, the metrics flush and the sessions cleanup are all
             # silently dead while the instance serves traffic normally. The down → up transition
             # above misses it whenever the restart fits between two healthchecks, which a ~15s
-            # container restart regularly does. Once per episode only: push-configs is what clears
-            # the state, so an instance still loading after a push is broken for another reason and
-            # does not deserve a dispatch every HEALTHCHECK_INTERVAL seconds forever.
+            # container restart regularly does.
+            #
+            # Worth more than one attempt, because the loading state is not only a telemetry
+            # outage: nine core plugins gate their `is_needed()` on it (mtls, authbasic, blacklist,
+            # greylist, whitelist, limit, dnsbl, bunkernet, robotstxt), so an instance holding it
+            # answers healthchecks as up while enforcing no client certificates, no basic auth, no
+            # blacklist and no rate limit. ModSecurity/CRS, antibot and country filtering are
+            # unaffected -- they do not read this flag. A dispatch can also report success without
+            # landing (a read-only database makes `run_single` return True without queueing
+            # anything), so a single attempt is not a guarantee that anything was tried.
+            #
+            # Bounded, though, because retrying is not cheap: the instance was marked up above, so
+            # each dispatch is a full push-configs -- config render, per-instance upload and a
+            # reload of the whole fleet. `/health` also fails toward "loading"
+            # (`bw/lua/bunkerweb/api.lua`), so a datastore hiccup alone can land here. A few quick
+            # attempts cover the restart case; after that one attempt every LOADING_SLOW_RETRY_EVERY
+            # passes keeps a genuinely stuck instance from reloading the fleet every 30s forever.
             if health == "loading":
-                still_loading.add(hostname)
-                if hostname not in LOADING_INSTANCES:
-                    HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is up but still reports the loading state; will trigger push-configs to re-sync it")
+                attempts = LOADING_INSTANCES.get(hostname, 0) + 1
+                still_loading[hostname] = attempts
+                if attempts <= LOADING_FAST_RETRIES or attempts % LOADING_SLOW_RETRY_EVERY == 0:
                     recovered = True
+                    if attempts == 1:
+                        HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is up but still reports the loading state; will trigger push-configs to re-sync it")
+                    elif attempts <= LOADING_FAST_RETRIES:
+                        HEALTHCHECK_LOGGER.warning(f"Instance {hostname} still reports the loading state after {attempts} healthchecks; re-pushing")
+                    else:
+                        HEALTHCHECK_LOGGER.error(
+                            f"Instance {hostname} has reported the loading state for {attempts} consecutive healthchecks. "
+                            "It is serving traffic with mTLS, basic auth, blacklist, greylist and rate limiting inactive; "
+                            "re-pushing, but this needs an operator."
+                        )
 
         if recovered and SCHEDULER is not None:
             try:

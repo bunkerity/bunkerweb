@@ -157,6 +157,28 @@ def acknowledge_changes(db: Database, metadata_snapshot, reason: str) -> None:
         LOGGER.info(f"Acknowledged the configuration changes applied by this run ({reason})")
 
 
+def may_acknowledge_without_pushing(registered_instances) -> bool:
+    """Whether a run that pushed to nobody may still clear the change flags.
+
+    Only when nothing is registered at all, and that case is load-bearing rather than a
+    convenience: autoconf refuses to register anything while a change flag is set
+    (`autoconf/Config.py:have_to_wait`, which `wait_applying` spins on for 240s inside
+    `expect_errors`, so it does it silently). Nothing but a push clears those flags, and a push
+    needs an instance. Acknowledge here and the bootstrap proceeds; hold the flags and the two
+    sides wait on each other until autoconf times out -- verified on an Autoconf stack, where the
+    stack came up with zero instances and stayed that way, and no configuration was ever pushed.
+    Registering an instance raises `instances_changed` (db_methods/instances.py:86), so a real
+    push follows as soon as there is somewhere to push to.
+
+    When instances ARE registered but every one of them is currently down, the change is still
+    pending, not inapplicable. Acknowledging there clears the flags with nothing else to re-raise
+    them, so the fleet keeps serving its previous configuration until an unrelated change happens
+    along -- which is exactly what a container restart produced: the database held
+    `USE_MODSECURITY=no` while the instance went on enforcing `yes`.
+    """
+    return not registered_instances
+
+
 def _materialize_custom_configs(db: Database) -> None:
     LOGGER.info("Materializing custom configs from DB ...")
     CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
@@ -518,18 +540,21 @@ try:
 
     _purge_retired_caches(db)
 
-    instances = [inst for inst in db.get_instances(with_credential=True) if inst.get("status") != "down"]
+    registered_instances = db.get_instances(with_credential=True)
+    instances = [inst for inst in registered_instances if inst.get("status") != "down"]
     if not instances:
-        LOGGER.warning("No live BunkerWeb instances registered; nothing to push")
-        # Acknowledge anyway. With no instance registered there is nothing this change could be
-        # applied to, and holding the flags set would leave the UI waiting on a push that can
-        # never happen -- the state a fresh install sits in throughout the setup wizard.
-        # Registering an instance raises `instances_changed` (db_methods/instances.py:86), so a
-        # real push follows as soon as there is somewhere to push to.
-        # ponytail: known ceiling -- if the whole fleet is momentarily marked down during a
-        # change, this acknowledges without pushing and the fleet stays stale until the next
-        # change, because update_instance() does not re-raise instances_changed.
-        acknowledge_changes(db, metadata_snapshot, "no live instances")
+        # "Nothing registered" and "everything registered is down" look the same here and are
+        # opposites -- see may_acknowledge_without_pushing().
+        if not may_acknowledge_without_pushing(registered_instances):
+            # A restart is the ordinary way to land here: the instances exist but the scheduler
+            # has them marked down, so this run has nowhere to push *yet*. Leave the flags set
+            # and let a later run apply them -- the scheduler re-dispatches when an instance
+            # comes back up (healthcheck_job) and again on the APPLY_RETRY_INTERVAL re-arm.
+            LOGGER.warning(f"All {len(registered_instances)} registered BunkerWeb instance(s) are down; leaving the changes pending for a later run")
+            sys_exit(0)
+
+        LOGGER.warning("No BunkerWeb instances registered; nothing to push")
+        acknowledge_changes(db, metadata_snapshot, "no instances registered")
         sys_exit(0)
 
     if target_hostnames:
