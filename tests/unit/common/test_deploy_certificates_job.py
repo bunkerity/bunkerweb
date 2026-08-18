@@ -66,11 +66,16 @@ def _certificate(name="app", fingerprint="aa", source="selfsigned"):
     }
 
 
-def _db(deployable=None, due=()):
+def _db(deployable=None, due=(), certificates_changed=False):
     db = Mock()
     db.get_deployable_certificates.return_value = deployable or {}
     db.get_self_signed_certificates_due_for_renewal.return_value = list(due)
     db.renew_self_signed_certificate.return_value = ""
+    # A real snapshot, not a Mock: the job reads `certificates_changed` to decide whether a run
+    # that wrote nothing still owes the instances a push, and a bare Mock attribute is truthy —
+    # which would make every test here take that branch by accident.
+    db.get_metadata.return_value = {"certificates_changed": certificates_changed, "last_certificates_change": None}
+    db.clear_applied_changes.return_value = ""
     return db
 
 
@@ -140,3 +145,20 @@ def test_a_cache_write_failure_reports_an_error(monkeypatch, tmp_path):
     job.cache_file = lambda *args, **kwargs: (False, "disk full")
 
     assert _run(monkeypatch, job) == 2
+
+
+def test_a_pending_change_with_nothing_to_write_still_asks_for_a_push(monkeypatch, tmp_path):
+    """The retry case, through the real control flow.
+
+    An earlier run wrote this material and exited 1; its push failed, so the change flag is still
+    raised and the scheduler re-dispatched the job. The fingerprint now matches, so nothing is
+    written — and exiting 0 here would clear the flag for material the instances never received,
+    with no periodic re-push to recover it. Ask for the push instead.
+    """
+    cached = {("app.example.com", "fingerprint"): b"aa"}
+    db = _db({"app.example.com": _certificate(fingerprint="aa")}, certificates_changed=True)
+    job = _FakeJob(db, tmp_path, cached=cached)
+
+    assert _run(monkeypatch, job) == 1
+    assert job.written == [], "the material was already on disk; this run only owes a push"
+    db.clear_applied_changes.assert_not_called()

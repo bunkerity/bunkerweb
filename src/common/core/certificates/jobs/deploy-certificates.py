@@ -72,6 +72,19 @@ def attached_services() -> set:
             return services
 
 
+def must_push_instead_of_acknowledging(status: int, snapshot: dict) -> bool:
+    """Whether a run that wrote nothing still owes the instances a push.
+
+    `status == 0` means this run wrote no material, which is the same as "the instances have it"
+    only when the change flag is already down. When it is still raised, an earlier run wrote the
+    material to this worker's cache and its push never landed: the fingerprint check then
+    short-circuits every service, nothing is written, and acknowledging here would record a
+    delivery the instances never received -- with no periodic re-push to save it, since
+    `push-configs` runs `once`.
+    """
+    return status == 0 and bool(snapshot.get("certificates_changed"))
+
+
 try:
     renew_due_self_signed()
 
@@ -136,8 +149,19 @@ except BaseException as e:
 # THERE was recorded as a success and every instance kept serving the previous certificate.
 #
 # status 1 means material was written and a reload will follow, so the acknowledgement travels with
-# that push and lands only if it succeeds. status 0 means nothing was written, so there is nothing
-# to wait for and the flag can be released here.
+# that push and lands only if it succeeds. status 0 means nothing was written -- which is only the
+# same as "delivered" when the flag is already down.
+#
+# It is not when the flag is still raised: an earlier run wrote the material to this worker's cache
+# and its push never landed, so the fingerprint check above short-circuits every service, `changed`
+# stays False, and releasing the flag here would record a delivery the instances never received --
+# with no periodic re-push to save it, since `push-configs` runs `once`. Ask for the push instead,
+# and let the acknowledgement travel with it. A redundant push is the cost of being wrong the other
+# way, and the reload path is idempotent.
+if must_push_instead_of_acknowledging(status, METADATA_SNAPSHOT):
+    LOGGER.info("Certificate material is already cached but the change is still pending, requesting a push")
+    status = 1
+
 if status == 1:
     error = defer_change_acknowledgement(("certificates",), METADATA_SNAPSHOT, LOGGER)
     if error:
