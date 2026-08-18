@@ -1,0 +1,52 @@
+# `bwcli ban`, `unban` and `bans` had no coverage anywhere once the retired per-feature stacks
+# stopped running: the `bwcli` action type is used only for `plugin backup save/list/restore`, and
+# the `/bans` API specs exercise the HTTP path rather than the CLI.
+#
+# The CLI is not a thin wrapper over that path. `bans` reads the database first and treats it as the
+# source of truth, precisely because it is the only source that still answers when an instance has
+# just restarted with an empty shared dict or is unreachable, and `ban` persists there before it
+# fans out. So this covers the durable path, which is the one a restart depends on.
+#
+# Assertions sit on contiguous plain text: the CLI interleaves ANSI colour codes, so "IP <addr> has
+# been banned" never appears as one string, while "has been banned" and the bare address do.
+integrations:
+  - "Docker"
+
+actions:
+  ban_an_ip_globally:
+    type: bwcli
+    command: "ban 10.99.0.1 -exp 3600 -reason spec"
+    result: "has been banned"
+    restart_stack: false
+
+  the_ban_is_listed:
+    type: bwcli
+    command: "bans"
+    result: "10.99.0.1"
+    restart_stack: false
+
+  ban_an_ip_for_one_service:
+    # -service scopes the ban instead of applying it globally; an unknown name falls back to a
+    # global ban with a warning, so the service has to be one the stack actually serves.
+    type: bwcli
+    command: "ban 10.99.0.2 -exp 3600 -reason spec -service www.example.com"
+    result: "has been banned"
+    restart_stack: false
+
+  the_service_ban_is_listed:
+    type: bwcli
+    command: "bans"
+    result: "10.99.0.2"
+    restart_stack: false
+
+  unban_the_global_ip:
+    type: bwcli
+    command: "unban 10.99.0.1"
+    result: "has been unbanned"
+    restart_stack: false
+
+  unban_the_service_ip:
+    type: bwcli
+    command: "unban 10.99.0.2 -service www.example.com"
+    result: "has been unbanned"
+    restart_stack: false

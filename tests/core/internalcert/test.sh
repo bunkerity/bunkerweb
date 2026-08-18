@@ -7,7 +7,9 @@ if [ "${1:-}" != "docker" ]; then
 	exit 1
 fi
 
-image="${BW_TEST_IMAGE:-bunkerweb-tests}"
+# The monorepo harness builds this tag (tests/scripts/build.sh); the standalone default the
+# external repo used does not exist here.
+image="${BW_TEST_IMAGE:-bunkerity/bunkerweb:tests}"
 suffix="$$-${RANDOM}"
 container="internalcert-${suffix}"
 volume="internalcert-${suffix}"

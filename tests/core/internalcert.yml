@@ -1,0 +1,19 @@
+# The instance generates its own internal certificates at startup (default server and API
+# listener) instead of receiving them from a job, so what has to hold is a property of the
+# container's own lifecycle rather than of a configured stack: the material must be created
+# on first boot, served by the listener that owns it, and survive a restart byte for byte.
+#
+# That is a protocol-level, multi-step check on a container this framework does not manage,
+# so it stays a script and this spec is what schedules it. Docker only -- the Linux packaging
+# provisions the same material from start.sh, which needs a different probe.
+integrations:
+  - "Docker"
+
+actions:
+  internal_certificates_are_self_provisioned_and_survive_a_restart:
+    type: script
+    script: ["./tests/core/internalcert/test.sh", "docker"]
+    result: "internalcert: all checks passed"
+    # The script builds and tears down its own container; the framework stack is untouched.
+    restart_stack: false
+    timeout: 480

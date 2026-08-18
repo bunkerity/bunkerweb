@@ -324,3 +324,30 @@ Kubernetes. Two gaps keep the harness alive:
   cover the container integrations and mark the Linux row `not converted`.
 
 Delete `tests/main.py`, the `*Test.py` classes and `tests/examples/` once both close.
+
+### Retired per-feature stacks
+
+`core/` used to hold one directory per feature — its own `docker-compose.yml`, its own
+`test.sh`, sometimes its own driver and fixture app — beside the `*.yml` specs that replaced
+them. All thirty pinned `bunkerity/bunkerweb:1.6.0-beta` and declared no `bw-api` and no
+`bw-worker`, so on 1.7 they could not start at all: the scheduler dispatches through the API
+and the Celery broker, and neither was in those stacks. Nothing referenced them either — the
+harness drives `tests/examples/*.json` now, not `core/<name>/`. Removed, along with
+`tests/linux.sh`, which nothing had called for some time.
+
+`core/internalcert/` stayed. It is not a stack: it runs one container with its own volume and
+checks a property of the container lifecycle rather than of a configured deployment — the
+internal certificates are generated on first boot, served by the listener that owns them, and
+survive a restart byte for byte. `core/internalcert.yml` schedules it as a `script` action.
+
+One thing went with the deleted directories and had no replacement: `bwcli ban`, `unban` and
+`bans`. The `bwcli` action type was used only for `plugin backup save/list/restore`, and the
+`/bans` API specs exercise the HTTP path rather than the CLI — which is not the same path,
+since `bans` reads the database first and treats it as the source of truth. `core/bwcli.yml`
+covers it now: a global ban and a service-scoped one, each listed back, then both lifted.
+
+It asserts the unban's own success message rather than the address being absent from a later
+listing, because the `bwcli` action carries a positive `result` substring and nothing else.
+A `not_result` would be a stronger check and a change to every spec's model, so it is not
+worth it for this one.
+
