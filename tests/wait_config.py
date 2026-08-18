@@ -41,6 +41,14 @@ QUERY = "SELECT COUNT(*) FROM bw_jobs_runs WHERE job_name = 'push-configs'"
 # Any job, not just push-configs: a spec can be about what a job produced (a downloaded
 # blocklist, a generated certificate), and the worker runs those asynchronously too.
 ALL_RUNS_QUERY = "SELECT COUNT(*) FROM bw_jobs_runs"
+# A push-configs run proves a job ran, NOT that a configuration reached anything. The job
+# exits early and still records a run when no instance is registered, and on that path it
+# also acknowledges, clearing the pending flags -- so both conditions below were satisfied
+# by a push that went nowhere, and the spec then asserted against the instance's previous
+# configuration. That is how a harness bug that wiped the database on every restart stayed
+# invisible for as long as it did. Mirror push-configs' own filter: it skips instances the
+# scheduler has marked down, so those cannot have received anything either.
+LIVE_INSTANCES_QUERY = "SELECT COUNT(*) FROM bw_instances WHERE status != 'down'"
 # `certificates_changed` belongs here for a reason the others do not have: the provider jobs
 # (self-signed, custom-cert, letsencrypt) and the job that materializes what they decided
 # (deploy-certificates) are dispatched in the same batch and run in parallel, so the deploy
@@ -95,11 +103,13 @@ if __name__ == "__main__":
     previous = int(redis_client.get(REDIS_KEY) or 0)
     seen = -1
     settled = 0
+    live_instances = -1
 
     for _ in range(ARGS.timeout):
         runs = query_count(ARGS.integration, database, QUERY)
         pending = query_count(ARGS.integration, database, PENDING_QUERY)
         all_runs = query_count(ARGS.integration, database, ALL_RUNS_QUERY)
+        live_instances = query_count(ARGS.integration, database, LIVE_INSTANCES_QUERY)
 
         # A full clean drops the database, so fewer runs than the mark means a fresh one
         # rather than a job running backwards.
@@ -112,7 +122,7 @@ if __name__ == "__main__":
         # now -- but the wait still requires a push of *this* restart, no change waiting to be
         # applied, and both holding still for a moment: the flags are set after the push, so a
         # single clear reading proves nothing, and a job that lands late moves the run count.
-        if runs > previous and pending == 0:
+        if runs > previous and pending == 0 and live_instances > 0:
             if all_runs != seen:
                 seen = all_runs
                 settled = 0
@@ -121,10 +131,16 @@ if __name__ == "__main__":
 
             if settled >= ARGS.settle:
                 redis_client.set(REDIS_KEY, runs)
-                LOGGER.info(f"📤 Configuration pushed and jobs quiet ✅ ({runs} push-configs runs, {all_runs} job runs)")
+                LOGGER.info(f"📤 Configuration pushed and jobs quiet ✅ ({runs} push-configs runs, {all_runs} job runs, {live_instances} live instance(s))")
                 sys_exit(0)
 
         sleep(1)
 
-    LOGGER.error(f"📤 No settled push-configs run in the {ARGS.timeout} seconds after the restart")
+    if live_instances == 0:
+        LOGGER.error(
+            f"📤 No BunkerWeb instance was registered and up in the {ARGS.timeout} seconds after the restart, "
+            "so nothing could receive a configuration. The stack is desynchronized rather than slow."
+        )
+    else:
+        LOGGER.error(f"📤 No settled push-configs run in the {ARGS.timeout} seconds after the restart")
     sys_exit(1)

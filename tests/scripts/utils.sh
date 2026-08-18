@@ -963,6 +963,15 @@ function restart_stack () {
             esac
 
             existing_image=$(docker inspect -f '{{.Config.Image}}' bw-db 2>/dev/null || true)
+            # The compose files pin the engine by digest, so this reports `mariadb:11@sha256:...`
+            # while expected_image is the bare tag above. Comparing them raw never matched, and
+            # the mismatch branch below destroys the database VOLUME -- so every single restart
+            # silently wiped the database. The stack then desynchronized: bw-autoconf is only
+            # restarted when restart_whole_stack is set, so on an ordinary action it kept its
+            # in-memory "already applied" state, never re-registered the instance into the fresh
+            # database, and push-configs had nobody to push to while the instance went on serving
+            # its pre-restart configuration. Compare on the tag, which is what this check means.
+            existing_image="${existing_image%%@*}"
             if [ -n "$existing_image" ] && [ -n "$expected_image" ] && [ "$existing_image" != "$expected_image" ] ; then
                 log "UTILS" "⚠️" "💽 bw-db image is $existing_image, expected $expected_image. Recreating database container ..."
                 docker compose -f tests/misc/docker/"$database".yml down -v

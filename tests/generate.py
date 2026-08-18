@@ -23,6 +23,10 @@ LOGGER = getLogger("GENERATE")
 # API accepts it as an admin override (src/api/app/auth/guard.py), which keeps the
 # stack from needing a Biscuit exchange before the first job can be dispatched.
 API_TEST_TOKEN = "tests-secret-token"  # noqa: S105
+# Isolates the Autoconf stack from any other BunkerWeb container on the same daemon. Must match
+# NAMESPACES in tests/docker/docker-compose.autoconf.yml and the bunkerweb.NAMESPACE label in
+# tests/docker/docker-compose.bunkerweb.yml.
+AUTOCONF_NAMESPACE = "bw-tests"
 
 # Root the generated env files live under. Overridable so a local run writes to a
 # scratch directory instead of the host's real /etc/bunkerweb — the compose fragments
@@ -270,6 +274,14 @@ if ARGS.integration in ("Autoconf", "Kubernetes"):
             if "labels" not in services["services"]["app1"]:
                 services["services"]["app1"]["labels"] = {}
             services["services"]["app1"]["labels"][f"bunkerweb.{key.replace('bunkerweb.', '', 1)}"] = value
+
+        # Scope the stack to its own namespace, matching NAMESPACES on bw-autoconf. The BunkerWeb
+        # image bakes `LABEL bunkerweb.INSTANCE` (src/bw/Dockerfile), and the controller queries
+        # the whole daemon for it, so without this an unrelated BunkerWeb container on the same
+        # host is adopted as an instance of this test stack -- it lands in bw_instances, every
+        # push to it fails, and the run hangs waiting for a configuration that can never settle.
+        # The filter applies to service discovery too, so app1 has to carry the label as well.
+        services["services"]["app1"].setdefault("labels", {})["bunkerweb.NAMESPACE"] = AUTOCONF_NAMESPACE
 
         LOGGER.debug(f"Final labels: {services}")
 elif log_from == "controller":

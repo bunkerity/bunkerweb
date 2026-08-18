@@ -7,6 +7,13 @@ services:
         required: true
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
+      # Only manage containers labelled bunkerweb.NAMESPACE=bw-tests. The controller otherwise
+      # queries the whole daemon for bunkerweb.INSTANCE, which the BunkerWeb image itself carries
+      # (src/bw/Dockerfile), so any other BunkerWeb container on the host -- a developer's own
+      # stack, a second CI job on a shared runner -- is adopted as an instance of this test stack.
+      # It then sits in bw_instances unreachable, every push to it fails, and the run waits on a
+      # configuration that can never settle.
+      NAMESPACES: "bw-tests"
     dns:
       - 10.20.30.20
     restart: "unless-stopped"

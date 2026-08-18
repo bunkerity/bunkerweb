@@ -14,6 +14,12 @@ services:
     env_file:
       - path: ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
         required: true
+    labels:
+      # Claims this instance for the test stack's autoconf (NAMESPACES in
+      # docker-compose.autoconf.yml). The bunkerweb.INSTANCE label the controller matches on is
+      # baked into the image, so without a namespace on both sides the test autoconf and any other
+      # BunkerWeb container on the daemon end up in each other's inventory.
+      - "bunkerweb.NAMESPACE=bw-tests"
     dns:
       - 10.20.30.20
     restart: "unless-stopped"
