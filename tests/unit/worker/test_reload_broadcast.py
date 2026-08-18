@@ -15,12 +15,37 @@ from test_delivery_guarantees import BROKER, LOGGER, TASKS
 
 
 class _LockRedis:
-    """Enough Redis for the debounce: SETNX semantics, DEL returning how many keys went."""
+    """Enough Redis for the debounce: SETNX semantics, DEL returning how many keys went.
 
-    def __init__(self, held=None):
+    Plus the set operations the deferred-acknowledgement queue uses: a job that writes files and
+    asks for a reload leaves its change acknowledgement here, and the reload applies it only once
+    the push has actually landed.
+    """
+
+    def __init__(self, held=None, pending_acks=None):
         self.keys = dict(held or {})
+        self.sets = {"bw:reload_pending_acks": set(pending_acks or ())}
         self.expirations = []
         self.ops = []
+
+    def smembers(self, key):
+        self.ops.append(("smembers", key))
+        return set(self.sets.get(key, ()))
+
+    def srem(self, key, *members):
+        self.ops.append(("srem", key))
+        target = self.sets.setdefault(key, set())
+        removed = 0
+        for member in members:
+            if member in target:
+                target.discard(member)
+                removed += 1
+        return removed
+
+    def sadd(self, key, *members):
+        self.ops.append(("sadd", key))
+        self.sets.setdefault(key, set()).update(members)
+        return len(members)
 
     def set(self, key, value, nx=False, ex=None):
         self.ops.append(("set", key))

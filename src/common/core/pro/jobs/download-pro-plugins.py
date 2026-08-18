@@ -39,6 +39,27 @@ LOGGER = getLogger("PRO.DOWNLOAD-PLUGINS")
 status = 0
 existing_pro_plugin_ids = set()
 cleaned_up_plugins = False
+# `force_pro_update` is the operator pressing "update now". It used to be cleared the moment it
+# was read, so a download that then failed -- no network, refused licence, API down -- consumed
+# the request and nothing retried it. Clear it only once the remote has actually answered with
+# plugin content, tracked here because the paths that reach that point are several and the ones
+# that bail out early (429, access denied) explicitly keep the current state.
+force_update = False
+force_consumed = False
+db = None
+
+
+def may_clear_forced_update(force_update: bool, force_consumed: bool) -> bool:
+    """Whether the operator's "update now" request has been served and can be released.
+
+    Only once the remote actually answered with plugin content -- installed, or checked and already
+    current. The flag used to be cleared the moment it was read, so a download that then failed
+    (no network, refused licence, API down) consumed the request and nothing retried it: the
+    operator's explicit force was silently dropped. The paths that bail out before the download
+    (429, access denied in force mode) say they keep the current state, so they must keep the
+    request too.
+    """
+    return force_update and force_consumed
 
 
 def _set_plugin_permissions(plugin_path: Path) -> None:
@@ -209,9 +230,6 @@ try:
     current_date = datetime.now().astimezone()
     pro_license_key = getenv("PRO_LICENSE_KEY", "").strip()
     force_update = bool(db_metadata.get("force_pro_update", False))
-    if force_update:
-        with suppress(BaseException):
-            db.set_metadata({"force_pro_update": False})
 
     LOGGER.info("Checking BunkerWeb Pro status..." if not force_update else "Force update requested: skipping status check and metadata update")
 
@@ -461,6 +479,7 @@ try:
 
     if not plugin_nbr:
         LOGGER.info("All Pro plugins are up to date")
+        force_consumed = True
         err = db.set_metadata({"last_pro_check": current_date})
         if err:
             LOGGER.error(f"Failed to update last_pro_check after successful Pro plugins check: {err}")
@@ -524,6 +543,7 @@ try:
         sys_exit(status)
 
     status = 1
+    force_consumed = True
     LOGGER.info("🚀 Pro plugins downloaded and installed successfully!")
 except SystemExit as e:
     status = e.code
@@ -534,5 +554,14 @@ except BaseException as e:
 
 for plugin_tmp in TMP_DIR.glob("*"):
     rmtree(plugin_tmp, ignore_errors=True)
+
+if force_update:
+    if may_clear_forced_update(force_update, force_consumed) and db is not None:
+        with suppress(BaseException):
+            err = db.set_metadata({"force_pro_update": False})
+            if err:
+                LOGGER.error(f"Could not clear the forced Pro update flag: {err}")
+    else:
+        LOGGER.warning("The forced Pro update did not complete; leaving the request set so the next run retries it")
 
 sys_exit(status)

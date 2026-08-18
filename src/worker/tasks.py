@@ -1,3 +1,4 @@
+import json
 import os
 from contextlib import suppress
 from datetime import datetime
@@ -166,6 +167,14 @@ def _delivery_attempt(task_id: str, broker_url: str, logger) -> int:
         return 0
 
 
+# Acknowledgements a job deferred until its material actually reached the instances. A job that
+# writes files and exits 1 cannot clear its own change flag honestly: the push and the reload happen
+# here, afterwards, so clearing inside the job records a delivery that may still fail, and nothing
+# re-dispatches it. Each entry is a JSON `{"keys": [...], "snapshot": {...}}` claimed alongside
+# RELOAD_DIRTY_KEY and applied only once the push and the reload have both succeeded. The job side
+# writes this key by literal, the way push-configs owns its own lease key -- the worker cannot
+# import the jobs' shared utils at module load.
+ACK_PENDING_KEY = "bw:reload_pending_acks"
 RELOAD_LOCK_KEY = "bw:reload_pending"
 RELOAD_DIRTY_KEY = "bw:reload_dirty"
 # Long enough to cover a push plus a reload with configuration testing on a slow instance. The
@@ -183,6 +192,41 @@ if redis.call('exists', KEYS[2]) == 1 then return 0 end
 redis.call('del', KEYS[1])
 return 1
 """
+
+
+def _apply_deferred_acks(client, claimed, logger) -> None:
+    """Clear the change flags whose material the push that just succeeded carried.
+
+    An entry that cannot be applied stays in the set: the flag it belongs to remains raised, the
+    scheduler re-dispatches the job, and the next successful reload tries again. Dropping it here
+    would reproduce the bug this exists to close.
+    """
+    if not claimed:
+        return
+
+    db = get_worker_db()
+    if db is None:
+        logger.error("No database handle in the worker; leaving the delivered changes to acknowledge later")
+        return
+
+    for raw in claimed:
+        try:
+            entry = json.loads(raw)
+            snapshot = dict(entry.get("snapshot") or {})
+            # get_metadata() hands back datetimes; JSON gave them back as strings.
+            for key, value in tuple(snapshot.items()):
+                if key.startswith("last_") and isinstance(value, str):
+                    snapshot[key] = datetime.fromisoformat(value)
+
+            error = db.clear_applied_changes(snapshot, tuple(entry.get("keys") or ()))
+            if error:
+                logger.error(f"Could not acknowledge delivered changes {entry.get('keys')}: {error}")
+                continue
+        except BaseException as e:
+            logger.error(f"Could not apply a deferred acknowledgement: {e}")
+            continue
+
+        client.srem(ACK_PENDING_KEY, raw)
 
 
 def _request_reload_debounced(apis, broker_url: str, logger) -> None:
@@ -215,12 +259,17 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             # Claim every flag raised so far: those jobs wrote their files before flagging, so
             # this push carries them. Anything raised from here on earns another round.
             client.delete(RELOAD_DIRTY_KEY)
+            claimed_acks = client.smembers(ACK_PENDING_KEY)
 
             if not apis.send_files("/var/cache/bunkerweb", "/cache"):
                 raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
 
             if not apis.send_to_apis("POST", f"/reload?test={test}")[0]:
                 raise RuntimeError("Failed to request BunkerWeb reload")
+
+            # The material is on the instances and they have reloaded: now, and only now, is a
+            # change that shipped with it genuinely applied.
+            _apply_deferred_acks(client, claimed_acks, logger)
 
             released = bool(client.eval(RELEASE_IF_CLEAN, 2, RELOAD_LOCK_KEY, RELOAD_DIRTY_KEY))
             if released:

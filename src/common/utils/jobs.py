@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, timedelta
+from json import dumps as json_dumps
 from inspect import currentframe, getframeinfo
 from io import BytesIO
 from logging import Logger
@@ -14,6 +15,7 @@ from threading import Lock
 from traceback import format_exc
 from typing import Any, Dict, Literal, Optional, Tuple, Union
 from tempfile import NamedTemporaryFile
+from time import time
 from stat import S_IMODE
 
 from common_utils import bytes_hash, file_hash, safe_tar_extractall
@@ -25,6 +27,53 @@ EXPIRE_TIME = {
     "week": timedelta(weeks=1).total_seconds(),
     "month": timedelta(days=30).total_seconds(),
 }
+
+
+# `_write_atomic` drops its scratch file next to the target, where `Job.restore_cache`'s stale-file
+# sweep also runs. The sweep deletes anything it does not recognise, so the temporary needs a marker
+# it can match on: a leading dot is not enough, because `.key` files are genuine cache entries that
+# get pushed to instances.
+ATOMIC_TMP_SUFFIX = ".bw-tmp"
+# How long a temporary may exist before the sweep treats it as an orphan of a killed process rather
+# than someone else's write in progress. A leaked temporary is not harmless: the cache is shipped to
+# instances as a tar of this directory, so it would travel with it.
+ATOMIC_TMP_GRACE_SECONDS = 300
+
+
+# Mirror of ACK_PENDING_KEY in src/worker/tasks.py, which owns the draining side. Duplicated as a
+# literal on purpose: the worker cannot import this module at load time, and the same split already
+# exists for push-configs' lease key.
+RELOAD_ACK_PENDING_KEY = "bw:reload_pending_acks"
+
+
+def defer_change_acknowledgement(keys: Tuple[str, ...], snapshot: Dict[str, Any], logger: Logger) -> str:
+    """Hand a change acknowledgement to whoever performs the next successful push and reload.
+
+    A job that writes files and requests a reload (exit 1) has not delivered anything yet: the push
+    to the instances happens later, in the worker. Clearing its change flag on the way out records a
+    delivery that may still fail, and nothing re-dispatches it -- the instances then keep serving the
+    previous material with only a successful job run as evidence. Enqueue it instead; the worker
+    applies it once the instances have the files and have reloaded, and leaves it queued otherwise.
+
+    Returns an error string, empty when the acknowledgement was queued.
+    """
+    broker_url = getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    try:
+        from redis import Redis  # noqa: PLC0415 -- optional at import time for non-worker callers
+
+        client = Redis.from_url(broker_url)
+        payload = {
+            "keys": list(keys),
+            # get_metadata() hands back datetimes, which JSON cannot carry; only the watermarks the
+            # compare-and-clear actually reads need to survive the trip.
+            "snapshot": {k: (v.isoformat() if isinstance(v, datetime) else v) for k, v in snapshot.items() if isinstance(v, (bool, str, datetime, type(None)))},
+        }
+        client.sadd(RELOAD_ACK_PENDING_KEY, json_dumps(payload))
+    except BaseException as e:
+        logger.debug(format_exc())
+        return str(e)
+
+    return ""
 
 
 def _write_atomic(target: Path, data: bytes) -> None:
@@ -40,7 +89,7 @@ def _write_atomic(target: Path, data: bytes) -> None:
     last_exc: Optional[BaseException] = None
     while attempt < 3:
         attempt += 1
-        with NamedTemporaryFile(dir=target.parent, prefix=f".{target.name}.", delete=False) as tmp:
+        with NamedTemporaryFile(dir=target.parent, prefix=f".{target.name}.", suffix=ATOMIC_TMP_SUFFIX, delete=False) as tmp:
             tmp.write(data)
             tmp.flush()
             tmp_path = Path(tmp.name)
@@ -188,6 +237,22 @@ class Job:
                 # never rmtree the job_path root (its children are freshly restored cache dirs).
                 for file in sorted(self.job_path.rglob("*"), key=lambda p: len(p.parts), reverse=True):
                     if file.as_posix().startswith(tuple(ignored_dirs)):
+                        continue
+
+                    # Another job's in-flight atomic write lives here and is not in
+                    # plugin_cache_files, so this sweep used to delete it out from under the writer.
+                    # `_write_atomic` retries three times, which is exactly how many times the
+                    # temporary vanished, so the write failed and the instance silently lost the
+                    # file -- seen live as "Failed to materialize cache 'asn.mmdb'" while geoip-asn
+                    # was restoring into the same directory a second earlier.
+                    if file.is_file() and file.name.endswith(ATOMIC_TMP_SUFFIX):
+                        try:
+                            orphaned = time() - file.stat().st_mtime >= ATOMIC_TMP_GRACE_SECONDS
+                        except OSError:
+                            continue
+                        if orphaned:
+                            self.logger.debug(f"Removing orphaned temporary file {file}")
+                            file.unlink(missing_ok=True)
                         continue
 
                     self.logger.debug(f"Checking if {file} should be removed")

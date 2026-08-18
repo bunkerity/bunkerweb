@@ -19,6 +19,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from logger import getLogger  # type: ignore
+from jobs import defer_change_acknowledgement  # type: ignore
 from jobs import Job  # type: ignore
 
 LOGGER = getLogger("CERTIFICATES")
@@ -127,16 +128,23 @@ except BaseException as e:
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running deploy-certificates.py :\n{e}")
 
-# Acknowledge the certificate change this run applied. The scheduler used to clear this flag in
-# the same iteration that dispatched this job, so a run that never happened left nothing to
-# re-dispatch; clearing it here at least means the job ran.
+# Acknowledge the certificate change this run applied -- but only once it has actually reached the
+# instances. The scheduler used to clear this flag in the same iteration that *dispatched* the job,
+# so a run that never happened left nothing to re-dispatch. Clearing it here instead meant "the job
+# ran", which is still not "the instances have it": this job writes the material and exits 1, and
+# the /cache push and reload happen afterwards in the worker's debounced reload path, so a failure
+# THERE was recorded as a success and every instance kept serving the previous certificate.
 #
-# Known ceiling, and it is why this is not the whole fix: "ran" is not "reached the instances".
-# This job writes the material and exits 1; the actual /cache push and reload happen afterwards
-# in the worker's debounced reload path, so a failure THERE is acknowledged as success. Closing
-# that needs the certificates flag to travel with the push, which belongs to the certificates
-# chantier rather than here. Still strictly better than clearing before the job even started.
-if status in (0, 1):
+# status 1 means material was written and a reload will follow, so the acknowledgement travels with
+# that push and lands only if it succeeds. status 0 means nothing was written, so there is nothing
+# to wait for and the flag can be released here.
+if status == 1:
+    error = defer_change_acknowledgement(("certificates",), METADATA_SNAPSHOT, LOGGER)
+    if error:
+        # Falling back to clearing now would re-introduce the bug; leaving the flag set costs a
+        # redundant redeploy, which the scheduler already knows how to do.
+        LOGGER.error(f"Could not defer the certificate acknowledgement, leaving the change pending: {error}")
+elif status == 0:
     error = JOB.db.clear_applied_changes(METADATA_SNAPSHOT, ("certificates",))
     if error:
         LOGGER.error(f"Could not acknowledge the applied certificate changes: {error}")
