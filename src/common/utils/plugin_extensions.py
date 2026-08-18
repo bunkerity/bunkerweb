@@ -467,6 +467,20 @@ def run_config_extensions(db, config: dict, full_config: dict, logger: Logger, *
         # stored document to compile yet. The real artefact arrives with the first push.
         return config, full_config
 
+    # A generation can also start against a database that exists but has no schema yet: on
+    # Linux `bunkerweb.service` and `bunkerweb-scheduler.service` start together, and
+    # generating the configuration is the first thing the former does, while creating the
+    # tables is one of the first things the latter does. Every extension then queries tables
+    # that are not there, and a deliberately fail-closed compiler (workflows) turns that into
+    # `bunkerweb.service` exiting 1 — with nothing to retry the generation, so the instance
+    # never serves anything. Nothing can be stored in a database that has not been set up, so
+    # there is nothing to compile; `default` is only true while the metadata row is
+    # unreadable, which no longer holds once the scheduler has created the schema. A table
+    # that disappears from a live database still reaches the compilers, and still fails.
+    if db.get_metadata().get("default"):
+        logger.warning("Database has no schema yet, skipping config extensions for this generation")
+        return config, full_config
+
     servers = [server for server in str(full_config.get("SERVER_NAME", "") or "").split() if server]
     compiled: List[Tuple[str, Dict[str, str], object]] = []
 

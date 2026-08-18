@@ -20,7 +20,17 @@ def compile_config(db, config, logger):
 
 
 class FakeDB:
-    """Only has to be non-None: a ``core`` plugin skips the checksum verification."""
+    """Only has to answer `get_metadata`: a ``core`` plugin skips the checksum verification.
+
+    ``default`` is what `get_metadata` returns when it cannot read the metadata row at all,
+    which is how the generator recognises a database whose schema does not exist yet.
+    """
+
+    def __init__(self, *, schema=True):
+        self.schema = schema
+
+    def get_metadata(self):
+        return {"default": not self.schema}
 
 
 def _plugin(root: Path, plugin_id: str, *, body: str, settings=None) -> Path:
@@ -41,11 +51,11 @@ def _plugin(root: Path, plugin_id: str, *, body: str, settings=None) -> Path:
     return directory
 
 
-def _run(root: Path, config=None, full_config=None, cache=None):
+def _run(root: Path, config=None, full_config=None, cache=None, db=None):
     config = {"SERVER_NAME": "app.example.com"} if config is None else config
     full_config = dict(config) if full_config is None else full_config
     return run_config_extensions(
-        FakeDB(),
+        db or FakeDB(),
         config,
         full_config,
         _Logger(),
@@ -151,3 +161,33 @@ def test_the_bootstrap_render_without_a_database_is_a_no_op(tmp_path):
 def test_the_namespace_is_derived_from_the_plugin_id():
     assert enforced_variable_namespace("web-cache") == "WEB_CACHE"
     assert enforced_variable_namespace("workflows") == "WORKFLOWS"
+
+
+def test_a_database_without_a_schema_is_a_no_op(tmp_path):
+    """The generator can run before the scheduler has created the tables.
+
+    On Linux both units start together and generating the configuration is the first thing
+    `bunkerweb.service` does. Every compiler then queries tables that do not exist, and the
+    fail-closed one (workflows) raised — which exits `bunkerweb.service`, and nothing retries
+    the generation, so the instance served nothing at all until something restarted it.
+    """
+    _plugin(tmp_path, "demol", body=COMPILER % ('{"DEMOL_FLAG": "yes"}', '{"a": 1}'), settings={"DEMOL_FLAG": {"default": "no"}})
+    cache = tmp_path / "cache"
+
+    config, _ = _run(tmp_path, cache=cache, db=FakeDB(schema=False))
+
+    assert "DEMOL_FLAG" not in config
+    assert not (cache / "demol" / "config.json").exists()
+
+
+def test_a_schema_less_database_does_not_hide_a_failing_compiler_on_a_live_one(tmp_path):
+    """The guard reads the metadata row, not the compiler's own errors.
+
+    A table dropped under a database that is set up still reaches the compilers, and a
+    fail-closed one still aborts the push — losing that would turn a missing security rule
+    into a silent one.
+    """
+    _plugin(tmp_path, "demom", body="def compile_config(db, config, logger):\n    raise RuntimeError('no such table: bw_resource_attachments')\n")
+
+    with pytest.raises(ConfigExtensionError):
+        _run(tmp_path, db=FakeDB(schema=True))
