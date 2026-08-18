@@ -15,7 +15,7 @@ from yaml import safe_dump, safe_load
 from utils import resolve_env_placeholders
 import utils.logger  # noqa: F401
 from utils.action import parse_action
-from utils.example import clear as example_clear, materialise as example_materialise
+from utils.example import AUTOCONF_NAMESPACE, clear as example_clear, materialise as example_materialise
 
 LOGGER = getLogger("GENERATE")
 
@@ -23,10 +23,6 @@ LOGGER = getLogger("GENERATE")
 # API accepts it as an admin override (src/api/app/auth/guard.py), which keeps the
 # stack from needing a Biscuit exchange before the first job can be dispatched.
 API_TEST_TOKEN = "tests-secret-token"  # noqa: S105
-# Isolates the Autoconf stack from any other BunkerWeb container on the same daemon. Must match
-# NAMESPACES in tests/docker/docker-compose.autoconf.yml and the bunkerweb.NAMESPACE label in
-# tests/docker/docker-compose.bunkerweb.yml.
-AUTOCONF_NAMESPACE = "bw-tests"
 
 # Root the generated env files live under. Overridable so a local run writes to a
 # scratch directory instead of the host's real /etc/bunkerweb — the compose fragments
@@ -54,7 +50,7 @@ if ARGS.integration.replace("-", "_") not in integrations:
     LOGGER.error(f"Integration {ARGS.integration} not found in integrations.yml")
     exit(1)
 
-redis_client = Redis(host="localhost", port=6379, db=0)
+redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0)
 
 resp = redis_client.ping()
 if not resp:
@@ -147,7 +143,16 @@ if ARGS.integration == "All-in-one":
     config["variables"]["DNS_RESOLVERS"] = "10.20.30.20 127.0.0.11"
     config["variables"]["SERVICE_UI"] = "yes" if ARGS.type == "ui" else "no"
     config["variables"]["SERVICE_API"] = "yes" if ARGS.type == "api" else "no"
-elif ARGS.integration != "Linux":
+elif ARGS.integration == "Linux":
+    # The package provisions one shared API_TOKEN into variables.env (postinstall.sh) and both
+    # the scheduler and the API read it from there — there is no second env file for it. This
+    # file is rewritten from scratch on every action, so leaving the key out drops the token:
+    # the scheduler's first authenticated call is `/system/readonly`, a 401 there is reported as
+    # "the database is read-only", and the scheduler then skips saving the configuration
+    # entirely. It loops on "Database is not initialized" until the stack wait times out, with
+    # nothing in any log naming authentication.
+    config["variables"]["API_TOKEN"] = API_TEST_TOKEN
+else:
     config["variables"]["BUNKERWEB_INSTANCES"] = "bunkerweb"
     config["variables"]["DNS_RESOLVERS"] = "10.20.30.20 127.0.0.11"
     config["variables"]["API_LISTEN_IP"] = "0.0.0.0"
@@ -813,7 +818,10 @@ instance_api_reachable = config["variables"].get("USE_API", "yes") != "no" and c
 # Same for a token the running instance has never seen: the worker signs its pushes with the new
 # one while the instance still enforces the old, so every push is refused until something
 # restarts the instance. `restart_stack: false` means nothing will, within this action.
-if config["api"]["API_TOKEN"] != API_TEST_TOKEN and not action.restart_stack:
+# Linux and All-in-one have no separate API container to configure: the packaged API reads
+# variables.env like every other component, and neither key is set unless a spec sets one.
+api_token = config["api"].get("API_TOKEN", config["variables"].get("API_TOKEN", API_TEST_TOKEN))
+if api_token != API_TEST_TOKEN and not action.restart_stack:
     LOGGER.warning("🔑 The API token changed without a restart, the instance still holds the previous one — not waiting for a config push")
     instance_api_reachable = False
 redis_client.set("config_wait", 1 if instance_api_reachable else 0)

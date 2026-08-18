@@ -6,7 +6,11 @@ example: wordpress
 integrations:
   - "Docker"
   - "Autoconf"
-  # not converted: linux
+  # Not Linux: the framework's PHP for that integration is the `php:fpm-alpine` helper
+  # (tests/misc/docker/php.yml), which ships no mysqli and has no database next to it, so
+  # WordPress answers 500 on every request. A reader on Linux installs php-fpm and php-mysql
+  # from their distribution; giving the helper the same would be a change to every integration
+  # for one example. Same reason keeps `nextcloud` off Linux.
 
 actions:
   string_check:

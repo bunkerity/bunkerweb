@@ -5,7 +5,7 @@ example: behind-reverse-proxy
 
 integrations:
   - "Docker"
-  # not converted: linux
+  - "Linux"
 
 actions:
   string_check:

@@ -6,14 +6,14 @@ source tests/scripts/utils.sh
 integration="${1^}"
 type="${2:-}"
 
-if redis-cli ping | grep -q "PONG" ; then
+if redis_cli ping | grep -q "PONG" ; then
     log "WAIT" "ℹ️ " "💽 Redis server is healthy ✅"
 else
     log "WAIT" "❌" "💽 Redis server is not healthy"
     exit 1
 fi
 
-timeout=$(redis-cli get timeout)
+timeout=$(redis_cli get timeout)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] || [ -z "$timeout" ] ; then
     log "WAIT" "❌" "💽 Failed to get timeout from redis server"

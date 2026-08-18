@@ -5,6 +5,7 @@ example: proxy-protocol
 
 integrations:
   - "Docker"
+  - "Linux"
 
 actions:
   string_check:

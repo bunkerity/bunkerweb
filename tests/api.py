@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from os import getenv
 from argparse import ArgumentParser
 from logging import getLogger
 from math import ceil
@@ -69,7 +70,7 @@ if ARGS.integration not in action.integrations:
     LOGGER.error(f"Action {action_str} is not compatible with integration {ARGS.integration}")
     exit(1)
 
-redis_client = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0, decode_responses=True)
 
 resp = redis_client.ping()
 if not resp:

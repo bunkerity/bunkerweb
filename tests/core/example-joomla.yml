@@ -6,6 +6,9 @@ example: joomla
 integrations:
   - "Docker"
   - "Autoconf"
+  # Not Linux, though the example ships a setup-linux.sh: same blocker as `wordpress` and
+  # `nextcloud` — the framework's PHP for that integration is the `php:fpm-alpine` helper, with
+  # neither the extensions Joomla requires nor a database beside it.
 
 actions:
   string_check:

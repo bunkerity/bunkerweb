@@ -13,6 +13,7 @@ with no change left pending. Counting alone would be satisfied by a run the prev
 triggered, or by the push a restart does on boot before it has read the new environment.
 """
 
+from os import getenv
 from argparse import ArgumentParser
 from logging import CRITICAL, getLogger
 from re import search
@@ -68,7 +69,7 @@ def query_count(integration: str, database: str, query: str) -> int:
         # get_container() exits the process when the stack is down, which is a normal
         # state here: the mark is taken before the restart, and the first polls can land
         # before the database is back.
-        exit_code, output = execute_query(QUIET, integration, database, query)
+        exit_code, output = execute_query(QUIET, integration, database, query, readonly=True)
     except SystemExit:
         return -1
 
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument("--timeout", type=int, default=120)
     ARGS = parser.parse_args()
 
-    redis_client = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+    redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0, decode_responses=True)
     database = redis_client.get("database") or "sqlite"
 
     if ARGS.mark:

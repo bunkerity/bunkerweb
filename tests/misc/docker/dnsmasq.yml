@@ -12,6 +12,13 @@ services:
     networks:
       bw-universe:
         ipv4_address: 10.20.30.20
+      # Also on bw-services, for what it forwards rather than what it answers: unknown names go
+      # to Docker's own resolver (server=127.0.0.11 in dnsmasq.conf), which only knows the
+      # containers sharing a network with dnsmasq itself. An example brings its application
+      # containers up there under their own aliases (`myapp1`), and without this BunkerWeb got
+      # NXDOMAIN for its own upstream -- a 502 that reads like the application being down.
+      bw-services:
+        ipv4_address: 192.168.0.20
     restart: "unless-stopped"
     cap_add:
       - NET_ADMIN
@@ -23,3 +30,9 @@ networks:
       driver: default
       config:
         - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24

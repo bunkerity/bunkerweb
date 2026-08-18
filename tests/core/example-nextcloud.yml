@@ -7,7 +7,8 @@ integrations:
   - "Docker"
   - "Autoconf"
   - "Kubernetes"
-  # not converted: linux
+  # Not Linux: same blocker as `wordpress` — the framework's PHP there is the
+  # `php:fpm-alpine` helper, with no database extensions and no database beside it.
 
 actions:
   string_check:

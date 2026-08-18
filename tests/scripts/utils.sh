@@ -76,9 +76,97 @@ function robust_docker_pull() {
 # reader of the documentation would: from inside the stack directory, as root. Examples
 # use them to fix web-root ownership or install a Helm chart, so skipping them deploys a
 # stack that boots and then serves nothing.
+# The framework's state store. It does NOT live on 6379: the Linux package owns that port on
+# the host for the Celery broker (see tests/misc/docker/redis.yml). Every script talks to it
+# through this wrapper so the port is stated once.
+export TESTS_REDIS_PORT="${TESTS_REDIS_PORT:-6390}"
+
+function redis_cli() {
+    redis-cli -p "$TESTS_REDIS_PORT" "$@"
+}
+
+function apply_example_variables_env() {
+    # A Linux example configures the packaged instance through its own variables.env, and that
+    # has to be in place before anything starts: the services read /etc/bunkerweb once at boot,
+    # and this same directory is what the container mounts there. Applied after generate.py so
+    # the example wins, and on every restart too -- generate.py rewrites the file from scratch
+    # for each action, so an example that is only applied at the first start silently stops
+    # being the configuration under test from the second action on.
+    [ -f /tmp/example_stack.txt ] || return 0
+
+    local etc="${BW_TESTS_ETC:-/etc/bunkerweb}"
+    local example_env
+    example_env="$(dirname "$(cat /tmp/example_stack.txt)")/variables.env"
+    if [ ! -f "$example_env" ] ; then
+        log "UTILS" "❌" "📕 $example_env is missing; a Linux example needs one"
+        return 1
+    fi
+
+    # The example is the configuration, with one exception: the API_TOKEN the framework
+    # generated. It is not part of what a reader copies -- the package generates its own at
+    # install time -- and both the scheduler and the API read it from this file. Dropping it
+    # leaves the scheduler unauthenticated: its `/system/readonly` call 401s, the client reports
+    # a read-only database, and the stack loops on "Database is not initialized" until the wait
+    # times out, with nothing naming authentication anywhere.
+    local api_token
+    api_token="$(grep "^API_TOKEN=" "$etc/variables.env" 2>/dev/null | head -n1)"
+
+    log "UTILS" "ℹ️ " "📕 Applying the example's variables.env ..."
+    if ! cp "$example_env" "$etc/variables.env" ; then
+        log "UTILS" "❌" "📕 Could not install the example's variables.env"
+        return 1
+    fi
+
+    if [ -n "$api_token" ] && ! grep -q "^API_TOKEN=" "$etc/variables.env" ; then
+        echo "$api_token" >> "$etc/variables.env"
+    fi
+}
+
+
+function provision_www_root() {
+    # Same fixture CI copies in, for the hosts dnsmasq answers for. Additive: it never deletes
+    # what is already there, so a stack left behind by an example keeps its own web root.
+    local www="/var/www/html"
+    local hosts
+    hosts="$(awk '/^127\.0\.0\.1 .*\.example\.com/ {print $2}' tests/misc/conf/dnsmasq.hosts | sort -u | tr '\n' ' ')"
+
+    local script="set -e
+mkdir -p '$www'
+cp tests/misc/index.php tests/misc/logo.png '$www/'
+for host in $hosts ; do
+    mkdir -p '$www'/\$host
+    cp tests/misc/index.php tests/misc/logo.png '$www'/\$host/
+done
+chown -R 33:101 '$www'
+chmod 755 '$www'
+find '$www' -type d -exec chmod 755 {} +
+find '$www' -type f -exec chmod 644 {} +"
+
+    log "UTILS" "ℹ️ " "🐘 Provisioning $www for php-fpm ..."
+    if [ "$(id -u)" -eq 0 ] ; then
+        bash -c "$script"
+    elif sudo -n true 2>/dev/null ; then
+        sudo -E bash -c "$script"
+    else
+        # No passwordless sudo on a workstation: do it as root in a throwaway container, with
+        # the repository and the web root both mounted at the paths the script expects.
+        docker run --rm -v "$(pwd)":/repo -v "$www":"$www" -w /repo bash:5 bash -c "$script"
+    fi
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] ; then
+        log "UTILS" "❌" "🐘 Failed to provision $www"
+        return 1
+    fi
+}
+
+
 function example_hook() {
     local phase="${1:-}"
     local integration="${2:-}"
+
+    # Called from the teardown too, where the spec that just ran may not have been an example.
+    [ -f /tmp/example_stack.txt ] || return 0
+
     local stack_dir
     stack_dir="$(dirname "$(cat /tmp/example_stack.txt)")"
 
@@ -90,6 +178,29 @@ function example_hook() {
 
     log "UTILS" "ℹ️ " "📕 Running $(basename "$script") ..."
     chmod +x "$script"
+
+    # Linux runs the packaged BunkerWeb inside a systemd container, and these scripts belong in
+    # there: they call systemctl, install packages, and resolve the PHP user (www-data vs apache)
+    # against the distro they are provisioning. Running them on the runner would configure the
+    # runner. /var/www/html is bind-mounted either way, so only the web-root half would have
+    # appeared to work -- the half that is silent when it fails.
+    if [ "$integration" == "Linux" ] ; then
+        # Not /tmp: the compose file mounts a tmpfs there, and `docker cp` writes to the image
+        # layer underneath it, so the copy lands somewhere the running container cannot see.
+        # The script then dies on "No such file or directory" with the copy reported as fine.
+        # Removed first: `docker cp` into an existing directory nests the copy inside it, so the
+        # second spec of a run would look for the script one level down.
+        docker exec -u 0 bunkerweb-linux rm -rf /opt/example > /dev/null 2>&1
+        if ! docker cp "$(realpath "$stack_dir")" bunkerweb-linux:/opt/example ; then
+            log "UTILS" "❌" "📕 Could not copy the example into the Linux container"
+            return 1
+        fi
+        if ! docker exec -u 0 -w /opt/example bunkerweb-linux bash "./$(basename "$script")" ; then
+            log "UTILS" "❌" "📕 $(basename "$script") failed"
+            return 1
+        fi
+        return 0
+    fi
 
     # Several of these chown a web root, so they need root. CI has passwordless sudo; a
     # workstation usually does not, and the scripts refuse to run as anyone else ("Run me as
@@ -142,9 +253,9 @@ function stack_has_worker() {
 }
 
 function config_wait_applies() {
-    if [ "$integration" == "Linux" ] ; then
-        return 1
-    fi
+    # Linux used to sit out this wait because its stack ran no worker. It does now — the units
+    # are started for every type — so it races the same way: the instance reports ready while
+    # the push that carries the new configuration is still queued.
     if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
         return 1
     fi
@@ -156,7 +267,7 @@ function config_wait_applies() {
     # generate.py clears this for an action that shuts the instance's API listener: the worker
     # then has no way to push at all, which is the very thing the action asserts.
     local wait_flag
-    wait_flag="$(redis-cli get config_wait 2>/dev/null)"
+    wait_flag="$(redis_cli get config_wait 2>/dev/null)"
     if [ "$wait_flag" == "0" ] ; then
         return 1
     fi
@@ -245,14 +356,14 @@ function cleanup_stack () {
         rm -f geckodriver.log
     fi
 
-    database=$(redis-cli get database)
+    database=$(redis_cli get database)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$database" ] ; then
         log "START" "⚠️" "💽 Failed to get database from redis server, clearing all database just in case"
         database="error"
     fi
 
-    need_socket=$(redis-cli get need_socket)
+    need_socket=$(redis_cli get need_socket)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         need_socket=0
@@ -407,7 +518,7 @@ function cleanup_stack () {
                 fi
             fi
 
-            minikube_cmd_pids=$(redis-cli lrange minikube_cmd_pids 0 -1)
+            minikube_cmd_pids=$(redis_cli lrange minikube_cmd_pids 0 -1)
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "💽 Failed to get Minikube command pids from redis server"
@@ -421,7 +532,7 @@ function cleanup_stack () {
                         log "UTILS" "❌" "🛑 Failed to kill Minikube command with pid: $pid"
                     fi
                 done
-                redis-cli del minikube_cmd_pids > /dev/null
+                redis_cli del minikube_cmd_pids > /dev/null
             fi
 
             minikube_mount_logs=$(ls /tmp/minikube_mount_*.log)
@@ -500,6 +611,11 @@ function cleanup_stack () {
 
             sed_in_place 's@/run/php/php-fpm.sock@9000@g' tests/misc/conf/php-fpm.conf
             sed_in_place 's/^listen.group =.*$/listen.group = nginx/g' tests/misc/conf/php-fpm.conf
+            # Undo the numeric ids the Linux run substitutes: every other integration talks to
+            # this helper over TCP and lets it keep its own www-data.
+            sed_in_place 's/^user =.*$/user = www-data/g' tests/misc/conf/php-fpm.conf
+            sed_in_place 's/^group =.*$/group = www-data/g' tests/misc/conf/php-fpm.conf
+            sed_in_place 's/^listen.owner =.*$/listen.owner = www-data/g' tests/misc/conf/php-fpm.conf
         fi
 
         docker compose -f tests/misc/docker/redis.yml down -v --remove-orphans
@@ -615,7 +731,7 @@ function cleanup_stack () {
                 return 1
             fi
 
-            redis-cli set restart_crowdsec 1
+            redis_cli set restart_crowdsec 1
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "💽 Failed to set restart_crowdsec key in redis server"
@@ -689,6 +805,12 @@ function cleanup_stack () {
             fi
         fi
     elif [ "$integration" == "Linux" ] && ! $IS_FREEBSD ; then
+        # An example that put something in front of BunkerWeb has to take it away again: the
+        # container is reused by every spec of the run, so an haproxy still listening on :80
+        # answers for the next one, which then tests haproxy. Only two examples ship a
+        # cleanup-linux.sh; the hook is a no-op for the rest.
+        example_hook cleanup "$integration" || return 1
+
         docker exec -u 0 bunkerweb-linux systemctl stop bunkerweb
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
@@ -703,18 +825,23 @@ function cleanup_stack () {
             return 1
         fi
 
+        # The API and the worker belong to every 1.7 stack, so they are stopped for every type:
+        # a survivor keeps serving the previous action's configuration, and the API keeps the
+        # token it read at startup — which the next action's variables.env has replaced.
+        for unit in bunkerweb-api bunkerweb-worker ; do
+            docker exec -u 0 bunkerweb-linux systemctl stop "$unit"
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "🐧 Failed to stop $unit service"
+                return 1
+            fi
+        done
+
         if [ "$type" == "ui" ] ; then
             docker exec -u 0 bunkerweb-linux systemctl stop bunkerweb-ui
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐧 Failed to stop BunkerWeb UI service"
-                return 1
-            fi
-        elif [ "$type" == "api" ] ; then
-            docker exec -u 0 bunkerweb-linux systemctl stop bunkerweb-api
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "UTILS" "❌" "🐧 Failed to stop BunkerWeb API service"
                 return 1
             fi
         fi
@@ -912,19 +1039,19 @@ function restart_stack () {
         compose_up "$example_stack" "example stack" "📕" || return 1
         # The framework path clears these on its way out; an example restart is always a whole
         # one, but leave the flags as the next action expects to find them.
-        redis-cli set restart_whole_stack 0 > /dev/null
-        redis-cli set restart_services 0 > /dev/null
+        redis_cli set restart_whole_stack 0 > /dev/null
+        redis_cli set restart_services 0 > /dev/null
         return 0
     fi
 
-    restart_whole_stack=$(redis-cli get restart_whole_stack)
+    restart_whole_stack=$(redis_cli get restart_whole_stack)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$restart_whole_stack" ] ; then
         log "UTILS" "❌" "💽 Failed to get restart_whole_stack from redis server"
         return 1
     fi
 
-    restart_services=$(redis-cli get restart_services)
+    restart_services=$(redis_cli get restart_services)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$restart_services" ] ; then
         log "UTILS" "❌" "💽 Failed to get restart_services from redis server"
@@ -937,7 +1064,7 @@ function restart_stack () {
         log "UTILS" "ℹ️ " "🔄 Restarting current stack ..."
     fi
 
-    database=$(redis-cli get database)
+    database=$(redis_cli get database)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$database" ] ; then
         log "UTILS" "⚠️" "💽 Failed to get database from redis server, defaulting to sqlite"
@@ -1366,6 +1493,22 @@ function restart_stack () {
             #     # TODO
             # fi
 
+            apply_example_variables_env || return 1
+
+            # API and worker first: they read the shared API_TOKEN out of variables.env at
+            # startup, and the scheduler's first authenticated call happens as soon as it comes
+            # up. Restarting them after it would leave the scheduler talking to a process still
+            # holding the previous action's token, which the client reports as a read-only
+            # database rather than as an authentication failure.
+            for unit in bunkerweb-api bunkerweb-worker ; do
+                docker exec -u 0 bunkerweb-linux systemctl restart "$unit"
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    log "UTILS" "❌" "🐧 Failed to restart $unit service"
+                    return 1
+                fi
+            done
+
             docker exec -u 0 bunkerweb-linux systemctl restart bunkerweb-scheduler
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -1378,13 +1521,6 @@ function restart_stack () {
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "🐧 Failed to restart BunkerWeb UI service"
-                    return 1
-                fi
-            elif [ "$type" == "api" ] ; then
-                docker exec -u 0 bunkerweb-linux systemctl restart bunkerweb-api
-                # shellcheck disable=SC2181
-                if [ $? -ne 0 ] ; then
-                    log "UTILS" "❌" "🐧 Failed to restart BunkerWeb API service"
                     return 1
                 fi
             fi
@@ -1414,6 +1550,26 @@ function restart_stack () {
         fi
     fi
 
+    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Autoconf" ] ; then
+        # generate.py re-materialises the example for every action, which deletes and recreates
+        # /tmp/example-stack. Containers that keep running hold the old, now-unlinked directory:
+        # their bind mount stays valid and stays empty, so php-fpm answers "Primary script
+        # unknown" and BunkerWeb returns 404 for an application that is plainly there on disk.
+        # Recreate them against the directory that exists now. Docker examples get the same
+        # treatment at the top of this function; Kubernetes copies the files into the cluster.
+        local example_stack
+        example_stack="$(cat /tmp/example_stack.txt)"
+        log "UTILS" "ℹ️ " "📕 Restarting the example services from $example_stack ..."
+        docker compose -f "$example_stack" down
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "📕 Down failed for the example services"
+            return 1
+        fi
+        example_hook setup "$integration" || return 1
+        compose_up "$example_stack" "example services" "📕" || return 1
+    fi
+
     if [ -f geckodriver.log ] ; then
         rm -f geckodriver.log
     fi
@@ -1424,14 +1580,14 @@ function restart_stack () {
         log "UTILS" "ℹ️ " "🔄 Restarted current stack ✅"
     fi
 
-    redis-cli set restart_whole_stack 0 > /dev/null
+    redis_cli set restart_whole_stack 0 > /dev/null
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "UTILS" "❌" "💽 Failed to reset restart_whole_stack in redis server"
         return 1
     fi
 
-    redis-cli set restart_services 0 > /dev/null
+    redis_cli set restart_services 0 > /dev/null
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "UTILS" "❌" "💽 Failed to reset restart_services in redis server"
@@ -1756,7 +1912,7 @@ function exit_wrapper() {
     fi
     trapped=true
 
-    end=$(redis-cli get end)
+    end=$(redis_cli get end)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$end" ] ; then
         log "UTILS" "❌" "💽 Failed to get end flag from redis server, setting it to 0"

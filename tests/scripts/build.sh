@@ -45,7 +45,7 @@ fi
 log "BUILD" "ℹ️ " "💽 Waiting for redis server to be healthy ..."
 i=0
 while [ $i -lt 30 ] ; do
-  if redis-cli ping | grep -q "PONG" ; then
+  if redis_cli ping | grep -q "PONG" ; then
     log "BUILD" "ℹ️ " "💽 Redis server is healthy ✅"
     break
   fi
@@ -57,7 +57,7 @@ if [ $i -ge 30 ] ; then
   exit 1
 fi
 
-redis-cli set end 0 > /dev/null
+redis_cli set end 0 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
   log "BUILD" "❌" "💽 Failed to set end flag in redis server"
@@ -126,7 +126,7 @@ if [ -z "${IN_CICD:-}" ] ; then
 fi
 
 if [[ "$category" =~ ";" ]] ; then
-  redis-cli lpush tests "$category" > /dev/null
+  redis_cli lpush tests "$category" > /dev/null
   category=$(echo "$category" | cut -d ";" -f 1)
 else
   if [ "$release" == "dev" ] ; then
@@ -156,10 +156,30 @@ if [ "$integration" == "Linux" ] ; then
   if ! $IS_FREEBSD ; then
     nginx_gid="$(docker exec -u 0 bunkerweb-linux id -g nginx)"
     sed_in_place "s/^listen.group =.*$/listen.group = $nginx_gid/g" tests/misc/conf/php-fpm.conf
+
+    # On Linux the helper stands in for a php-fpm installed on the machine, so it has to run as
+    # the same user the packaged BunkerWeb serves files as. Its own image numbers www-data
+    # differently (82 on Alpine, 33 on Debian), and an example hardens its web root to 0640/0750
+    # -- so a mismatch here means php-fpm cannot read a file that is plainly there, and answers
+    # "Primary script unknown", which nginx returns as a 404.
+    www_uid="$(docker exec -u 0 bunkerweb-linux id -u www-data)"
+    sed_in_place "s/^user =.*$/user = $www_uid/g" tests/misc/conf/php-fpm.conf
+    sed_in_place "s/^group =.*$/group = $nginx_gid/g" tests/misc/conf/php-fpm.conf
+    sed_in_place "s/^listen.owner =.*$/listen.owner = $www_uid/g" tests/misc/conf/php-fpm.conf
   fi
 fi
 
 mkdir -p /tmp/output
+
+# Every integration serves /var/www/html off this machine: the containers bind-mount it (in the
+# images /var/www/html is a symlink to /data/www, which the entrypoint refuses to start without
+# read and execute for nginx), minikube mounts it, and the php-fpm helper reads it. CI provisions
+# it in the workflow itself, unconditionally ("Setup configuration files" in
+# .github/workflows/integration-tests.yml) — a workstation has nothing that does, and it is where
+# integrations collide: a Linux example hardens the web root to 0750 for the nginx group as ITS
+# container numbers it, which locks out the Docker stack's nginx on the next run. Normalising
+# here, before anything starts, is what keeps runs of different integrations independent.
+provision_www_root || exit 1
 
 if [ "$integration" != "Kubernetes" ] ; then
   if [ "$integration" != "Linux" ] ; then
@@ -197,7 +217,17 @@ if [ "$integration" != "Kubernetes" ] ; then
   fi
 
   if [ "$type" == "core" ] ; then
-    if grep -q "php-fpm" tests/core/"$category".yml ; then
+    # An example-backed spec carries no settings of its own: the example directory holds them,
+    # so the helper services a spec needs have to be looked for there too. Without this the
+    # php-fpm helper never starts for `example-php-multisite` and every request 502s on a socket
+    # nothing is listening on.
+    php_sources=("tests/core/$category.yml")
+    example_name="$(awk '/^example:[[:space:]]/ {print $2; exit}' "tests/core/$category.yml")"
+    if [ -n "$example_name" ] && [ -d "examples/$example_name" ] ; then
+      php_sources+=("examples/$example_name")
+    fi
+
+    if grep -qr "php-fpm" "${php_sources[@]}" ; then
       robust_docker_pull "tests/misc/docker/php.yml" "php-fpm"
       # shellcheck disable=SC2181
       if [ $? -ne 0 ] ; then
@@ -369,7 +399,7 @@ else
       exit 1
     fi
 
-    redis-cli lpush minikube_cmd_pids "$mount_pid"
+    redis_cli lpush minikube_cmd_pids "$mount_pid"
     # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
       log "BUILD" "❌" "💽 Failed to push mount pid to redis server"
@@ -475,7 +505,7 @@ else
 fi
 
 log "BUILD" "ℹ️ " "🧑‍🔧 Build done ✅"
-redis-cli set end 1 > /dev/null
+redis_cli set end 1 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
   log "BUILD" "❌" "💽 Failed to set end flag in redis server"

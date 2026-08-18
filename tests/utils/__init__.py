@@ -94,18 +94,26 @@ def execute_query(
     integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"],
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"],
     query: str,
+    *,
+    readonly: bool = False,
 ) -> Tuple[int, str]:  # Returning exit_code, output
+    """Run one query against the stack's database.
+
+    `readonly` is for callers that only count rows. It matters on SQLite: `sqlite3 <path>`
+    CREATES the file when it is missing, and on Linux this runs as root inside the container,
+    so polling a database that a cleanup has just dropped leaves an empty root-owned file
+    behind. The scheduler runs as nginx, cannot write it, and dies sixty seconds later on
+    "Failed to retrieve database version" — nowhere near the query that caused it. A spec's
+    own `database` action stays writable: `backup` updates rows on purpose.
+    """
     if database == "sqlite":
         if integration in ("Autoconf", "Kubernetes"):
             raise NotImplementedError("SQLite is not supported in Autoconf and Kubernetes")
+        sqlite_command = ["sqlite3"] + (["-readonly"] if readonly else []) + ["/var/lib/bunkerweb/db.sqlite3"]
         if integration == "Linux" and IS_FREEBSD:
-            result = subprocess.run(
-                ["sqlite3", "/var/lib/bunkerweb/db.sqlite3", query],
-                capture_output=True,
-                text=True,
-            )
+            result = subprocess.run(sqlite_command + [query], capture_output=True, text=True)
             return result.returncode, (result.stdout + result.stderr).strip()
-        return run_docker_command(logger, "bunkerweb" if integration == "Linux" else "api", f"sqlite3 /var/lib/bunkerweb/db.sqlite3 {query!r}")
+        return run_docker_command(logger, "bunkerweb" if integration == "Linux" else "api", f"{' '.join(sqlite_command)} {query!r}")
 
     # Handle database URI depending on the integration
     if integration == "Kubernetes":

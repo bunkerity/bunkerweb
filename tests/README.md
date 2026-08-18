@@ -156,7 +156,11 @@ anything free) on such a machine.
 Outside CI (`IN_CICD` unset), `build.sh` builds any missing `bunkerity/<image>:tests` from
 the Dockerfiles in this checkout. It reuses an image that already exists, so the second run
 starts in seconds. Delete an image when you want it rebuilt. The framework starts its own
-state Redis from `misc/docker/redis.yml`.
+state Redis from `misc/docker/redis.yml`, on **127.0.0.1:6390** rather than the default 6379:
+the Linux integration runs `network_mode: host` and BunkerWeb itself now pulls in `redis-server`
+as a package dependency, so a state Redis on 6379 collides with the product's own broker and the
+Linux stack refuses to start. `TESTS_REDIS_PORT` overrides it; the scripts go through the
+`redis_cli` wrapper in `scripts/utils.sh` and the Python entry points read the same variable.
 
 Running specs back to back locally is where CI and a workstation diverge. CI gives every spec
 a fresh runner; here they share one Docker daemon, and the SQLite database lives in the
@@ -222,7 +226,7 @@ second pass lands.
 Every compose file under `tests/docker/` and `tests/misc/docker/` runs in the same implicit
 compose project (`docker`, from the directory name), so `docker compose -f <one>.yml down` targets
 the project rather than that file — and the end-of-run cleanup adds `--remove-orphans`, which
-takes down everything else in it, including the framework's own state Redis on 127.0.0.1:6379.
+takes down everything else in it, including the framework's own state Redis on 127.0.0.1:6390.
 That is where the `Could not connect to Redis` lines at the end of a run come from. Give a new
 compose file an explicit top-level `name:` if you need it to be torn down on its own.
 

@@ -3,7 +3,12 @@ services:
     image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
     container_name: redis
     ports:
-      - "127.0.0.1:6379:6379"
+      # NOT 6379. Since 38dee1277 the Linux package depends on redis-server for the Celery
+      # broker (bunkerweb-worker.sh defaults to redis://127.0.0.1:6379/0), and the Linux test
+      # container runs with network_mode: host -- so the packaged broker owns the host's 6379
+      # and publishing here too made whichever started second fail to bind. The framework's
+      # own state store is what moves: the product's port is the product's.
+      - "127.0.0.1:${TESTS_REDIS_PORT:-6390}:6379"
     dns:
       - 10.20.30.20
     restart: "unless-stopped"

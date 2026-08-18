@@ -5,6 +5,7 @@ example: php-singlesite
 
 integrations:
   - Docker
+  - Linux
 
 actions:
   serves_the_php_app:

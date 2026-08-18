@@ -11,14 +11,14 @@ log "START" "ℹ️ " "Building BunkerWeb stack for integration \"$integration\"
 BW_VERSION="$(cat /tmp/bw_version.txt)"
 export BW_VERSION
 
-if redis-cli ping | grep -q "PONG" ; then
+if redis_cli ping | grep -q "PONG" ; then
     log "START" "ℹ️ " "💽 Redis server is healthy ✅"
 else
     log "START" "❌" "💽 Redis server is not healthy"
     exit 1
 fi
 
-database=$(redis-cli get database)
+database=$(redis_cli get database)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] || [ -z "$database" ] ; then
     log "START" "⚠️" "💽 Failed to get database from redis server"
@@ -93,7 +93,7 @@ elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] || [ "$i
     fi
 fi
 
-redis_type=$(redis-cli get redis_type)
+redis_type=$(redis_cli get redis_type)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to get redis_type from redis server"
@@ -453,7 +453,7 @@ elif [ "$integration" == "All-in-one" ] ; then
         fi
     fi
 
-    need_socket=$(redis-cli get need_socket)
+    need_socket=$(redis_cli get need_socket)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         need_socket=0
@@ -578,6 +578,16 @@ elif [ "$integration" == "Kubernetes" ] ; then
         exit 1
     fi
 else
+    apply_example_variables_env || exit 1
+
+    if [ -f /tmp/example_stack.txt ] ; then
+        # Provision before the units start, which is also the order a reader follows: install the
+        # package, write variables.env, run the setup script, start. Two of these scripts install
+        # haproxy in front of BunkerWeb and stop the service to do it — run after the start, they
+        # would simply leave it stopped.
+        example_hook setup "$integration" || exit 1
+    fi
+
     if $IS_FREEBSD ; then
         service bunkerweb start
         # shellcheck disable=SC2181
@@ -616,6 +626,20 @@ else
             exit 1
         fi
 
+        # Since 1.7 the API and the worker are part of every stack, not only a `type: api` run:
+        # the scheduler owns no database access of its own, it reaches the API, which queues each
+        # job on the broker for the worker. Started before the scheduler, which waits for the API
+        # to answer; the API in turn waits for the database the scheduler pre-initialises, so
+        # neither order deadlocks.
+        for unit in bunkerweb-api bunkerweb-worker ; do
+            docker exec -u 0 bunkerweb-linux systemctl start "$unit"
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "START" "❌" "🐧 Start failed for $unit"
+                exit 1
+            fi
+        done
+
         docker exec -u 0 bunkerweb-linux systemctl start bunkerweb-scheduler
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
@@ -630,18 +654,11 @@ else
                 log "START" "❌" "🐧 Start failed for BunkerWeb UI"
                 exit 1
             fi
-        elif [ "$type" == "api" ] ; then
-            docker exec -u 0 bunkerweb-linux systemctl start bunkerweb-api
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "START" "❌" "🐧 Start failed for BunkerWeb API"
-                exit 1
-            fi
         fi
     fi
 fi
 
-restart_crowdsec=$(redis-cli get restart_crowdsec)
+restart_crowdsec=$(redis_cli get restart_crowdsec)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "START" "❌" "💽 Failed to get restart_crowdsec from redis server"
@@ -670,7 +687,7 @@ if [ "$integration" != "All-in-one" ] && [ "$restart_crowdsec" == "1" ] ; then
         return 1
     fi
 
-    redis-cli set restart_crowdsec 0 > /dev/null
+    redis_cli set restart_crowdsec 0 > /dev/null
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "UTILS" "❌" "🦙 Failed to set restart_crowdsec flag in redis server"
@@ -684,7 +701,10 @@ if [ -f /tmp/example_stack.txt ] && [ "$integration" != "Docker" ] ; then
     # they attach to is the one started above. They take the slot the generated
     # services.yml would have used.
     example_stack="$(cat /tmp/example_stack.txt)"
-    example_hook setup "$integration" || exit 1
+    # Linux ran its hook before the units started, further up.
+    if [ "$integration" != "Linux" ] ; then
+        example_hook setup "$integration" || exit 1
+    fi
     log "START" "ℹ️ " "📕 Deploying example services from $example_stack ..."
 
     if [ "$integration" == "Kubernetes" ] ; then
@@ -694,6 +714,16 @@ if [ -f /tmp/example_stack.txt ] && [ "$integration" != "Docker" ] ; then
             log "START" "❌" "📕 Apply failed for the example services"
             exit 1
         fi
+    elif [ "$integration" == "Linux" ] ; then
+        # A Linux example has no application layer to compose: the app is files under
+        # /var/www/html served by php-fpm, and BunkerWeb is the package already installed in
+        # the systemd container. Its docker-compose.yml is the Docker recipe and declares
+        # BunkerWeb itself -- bringing it up here would start a second instance fighting the
+        # packaged one for :80 and :443. The example's own variables.env is the configuration,
+        # which is the whole point of running the example the way a reader would.
+        # The configuration and the web root were both installed before the services started,
+        # further up. Nothing to deploy here.
+        :
     else
         compose_up "$example_stack" "example services" "📕" || exit 1
     fi

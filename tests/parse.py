@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 from glob import glob
 from json import dumps
 from logging import getLogger
-from os import sep
+from os import getenv, sep
 from os.path import basename, join
 from pathlib import Path
 from typing import List
@@ -138,7 +138,7 @@ if tests:
     else:
         from redis import Redis
 
-        redis_client = Redis(host="localhost", port=6379, db=0)
+        redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0)
 
         resp = redis_client.ping()
         if not resp:

@@ -6,7 +6,7 @@ example: php-multisite
 integrations:
   - "Docker"
   - "Autoconf"
-  # not converted: linux
+  - "Linux"
 
 actions:
   string_app1_example_com:

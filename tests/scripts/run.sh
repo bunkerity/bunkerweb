@@ -16,49 +16,49 @@ elif [ -z "$category" ] ; then
     exit 1
 fi
 
-if redis-cli ping | grep -q "PONG" ; then
+if redis_cli ping | grep -q "PONG" ; then
     log "RUN" "ℹ️ " "💽 Redis server is healthy ✅"
 else
     log "RUN" "❌" "💽 Redis server is not healthy"
     exit 1
 fi
 
-redis-cli set end 0 > /dev/null
+redis_cli set end 0 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to set end flag in redis server"
     exit 1
 fi
 
-redis-cli set full_clean 0 > /dev/null
+redis_cli set full_clean 0 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to set full_clean flag in redis server"
     exit 1
 fi
 
-redis-cli set restart_stack 1 > /dev/null
+redis_cli set restart_stack 1 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to set restart_stack flag in redis server"
     exit 1
 fi
 
-redis-cli set restart_whole_stack 0 > /dev/null
+redis_cli set restart_whole_stack 0 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to set restart_whole_stack flag in redis server"
     exit 1
 fi
 
-redis-cli set restart_services 0 > /dev/null
+redis_cli set restart_services 0 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to set restart_services flag in redis server"
     exit 1
 fi
 
-redis-cli set need_socket 0 > /dev/null
+redis_cli set need_socket 0 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to set need_socket flag in redis server"
@@ -66,7 +66,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Clear previous version tracking to start fresh
-redis-cli del previous_bw_version > /dev/null
+redis_cli del previous_bw_version > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to clear previous_bw_version in redis server"
@@ -89,7 +89,7 @@ if [ "$integration" == "Linux" ] ; then
     fi
 fi
 
-tests=$(redis-cli lrange tests 0 -1)
+tests=$(redis_cli lrange tests 0 -1)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to get tests from redis server"
@@ -136,7 +136,7 @@ for test in $tests ; do
     fi
 
     first_try=true
-    retries=$(redis-cli get retries)
+    retries=$(redis_cli get retries)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$retries" ] ; then
         log "RUN" "❌" "💽 Failed to get retries from redis server"
@@ -193,14 +193,14 @@ for test in $tests ; do
             log_stack
         fi
 
-        restart_stack=$(redis-cli get restart_stack)
+        restart_stack=$(redis_cli get restart_stack)
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] || [ -z "$restart_stack" ] ; then
             log "RUN" "❌" "💽 Failed to get restart_stack from redis server"
             exit 1
         fi
 
-        full_clean=$(redis-cli get full_clean)
+        full_clean=$(redis_cli get full_clean)
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] || [ -z "$full_clean" ] ; then
             log "RUN" "❌" "💽 Failed to get full_clean from redis server"
@@ -219,7 +219,7 @@ for test in $tests ; do
                 fi
             fi
 
-            redis-cli set last_test "$(date '+%Y-%m-%dT%H:%M:%S%z')" > /dev/null
+            redis_cli set last_test "$(date '+%Y-%m-%dT%H:%M:%S%z')" > /dev/null
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "💽 Failed to set last test date to redis server"
@@ -234,7 +234,7 @@ done
 
 log "RUN" "ℹ️ " "All tests passed ✅"
 
-redis-cli set end 1 > /dev/null
+redis_cli set end 1 > /dev/null
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     log "RUN" "❌" "💽 Failed to set end flag in redis server"
