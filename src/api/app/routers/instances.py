@@ -76,7 +76,7 @@ def health_one(hostname: str, api=Depends(get_api_for_hostname)) -> JSONResponse
     """Report a specific BunkerWeb instance's own state.
 
     Where /ping only answers "reachable", this forwards what the instance says about itself:
-    "ok", "loading" or "reloading". The scheduler needs the difference — an instance that
+    "ok", "loading", "reloading" or "needs_config". The scheduler needs the difference — an instance that
     restarted comes back reachable while still stuck in its loading state, where every
     timer-driven plugin is disabled, and no ping can tell that apart from a healthy one.
 

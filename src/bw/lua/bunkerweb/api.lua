@@ -389,7 +389,13 @@ api.global.POST["^/confs$"] = function(self)
 	-- something else, and clearing on those would stop the scheduler re-pushing the configuration
 	-- this instance is actually missing.
 	if self.ctx.bw.uri == "/confs" then
-		remove(NEEDS_CONFIG_PATH)
+		-- Check the result: nginx can only unlink this if it owns it, and /var/tmp is sticky. A
+		-- silent failure here means the instance keeps asking for a configuration it already has,
+		-- and the scheduler keeps pushing the whole fleet, forever.
+		local ok, err = remove(NEEDS_CONFIG_PATH)
+		if not ok and err and not err:find("No such file") then
+			logger:log(ERR, "can't remove " .. NEEDS_CONFIG_PATH .. " : " .. err)
+		end
 	end
 
 	return self:response(HTTP_OK, "success", "saved data at " .. destination)

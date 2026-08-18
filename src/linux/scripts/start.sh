@@ -57,20 +57,6 @@ function write_tmp_env_file() {
     chmod 660 "$tmp_env_path"
 }
 
-function set_loading_state() {
-    local nginx_variables_path="$1"
-    if [ ! -f "$nginx_variables_path" ] ; then
-        return 1
-    fi
-
-    if grep -q "^IS_LOADING=" "$nginx_variables_path" ; then
-        sed -i "s/^IS_LOADING=.*/IS_LOADING=yes/" "$nginx_variables_path"
-    else
-        echo "IS_LOADING=yes" >> "$nginx_variables_path"
-    fi
-
-    return 0
-}
 
 # Start the bunkerweb service
 function start() {
@@ -188,7 +174,12 @@ function start() {
         # IS_LOADING=yes gates nine core plugins' is_needed(), so it left a restarted instance
         # serving traffic with its access controls off. Keep enforcing the configuration that is
         # already there and ask for a fresh one instead.
-        touch /var/tmp/bunkerweb_needs_config
+        # Created AS NGINX on purpose: nginx is what deletes it (POST /confs in api.lua), the
+        # service runs as root with UMask=027, and /var/tmp is sticky -- so a root-owned marker
+        # here can never be unlinked by nginx, and the instance would ask for a configuration it
+        # has already received, forever. The sibling /var/tmp/bunkerweb_reloading marker gets away
+        # with the opposite ownership only because root can unlink anything.
+        run_as_nginx touch /var/tmp/bunkerweb_needs_config
     fi
 
     write_tmp_env_file "$tmp_env_path" "$tmp_env_content"

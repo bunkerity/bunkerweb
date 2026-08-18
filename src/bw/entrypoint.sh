@@ -85,20 +85,6 @@ KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-yes}
 EOF
 }
 
-function set_loading_state() {
-	local nginx_variables_path="$1"
-	if [ ! -f "$nginx_variables_path" ] ; then
-		return 1
-	fi
-
-	if grep -q "^IS_LOADING=" "$nginx_variables_path" ; then
-		sed -i "s/^IS_LOADING=.*/IS_LOADING=yes/" "$nginx_variables_path"
-	else
-		echo "IS_LOADING=yes" >> "$nginx_variables_path"
-	fi
-
-	return 0
-}
 
 # ensure the internal default-server certificate exists before any render/start
 if ! generate_default_server_cert; then
