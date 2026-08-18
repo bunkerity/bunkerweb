@@ -4006,7 +4006,7 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :
 
 - **`3`** : Stable [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
-- **`4`** : Stable [v4.28.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.28.0) (**par défaut**).
+- **`4`** : Stable [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**par défaut**).
 
 !!! warning "Version de nuit obsolète"
     L'option `nightly` pour `MODSECURITY_CRS_VERSION` est obsolète car le projet OWASP Core Rule Set a arrêté les versions de nuit. Si votre configuration utilise encore `nightly`, CRS v4 sera utilisé à la place. Veuillez mettre à jour votre configuration pour utiliser `MODSECURITY_CRS_VERSION=4`.

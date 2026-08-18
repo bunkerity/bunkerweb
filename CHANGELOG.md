@@ -13,6 +13,8 @@
 - [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart zeroed them and the next sync overwrote the stored values. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
 - [BUGFIX] `ui`: Total Requests, Blocked Requests and the Request status chart say which window they show, instead of being read as *Last 7 days* while holding cumulative counters. (Refs #3775)
 - [MISC] Remove the four ad auction features Chromium dropped (`join-ad-interest-group`, `private-aggregation`, `record-ad-auction-events` and `run-ad-auction`) from the default value for the Permissions-Policy header, now sorted alphabetically.
+- [DEPS] Updated Coreruleset version to v4.29.0 (v4)
+- [DEPS] Updated lua-resty-openssl version to v1.9.0
 
 ## v1.6.14~rc3 - 2026/08/14
 
