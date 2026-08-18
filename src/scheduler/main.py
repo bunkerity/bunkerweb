@@ -513,20 +513,39 @@ def healthcheck_job():
             # (`bw/lua/bunkerweb/api.lua`), so a datastore hiccup alone can land here. A few quick
             # attempts cover the restart case; after that one attempt every LOADING_SLOW_RETRY_EVERY
             # passes keeps a genuinely stuck instance from reloading the fleet every 30s forever.
-            if health == "loading":
+            # Two different states earn a re-push, and they are not equally urgent.
+            #   loading      -- the instance has no configuration to enforce, so the nine plugins
+            #                   that gate is_needed() on it are inactive. A real exposure.
+            #   needs_config -- a restart kept its configuration and is enforcing all of it; it
+            #                   just wants a fresh one. Nothing is bypassed, so this is routine.
+            if health in ("loading", "needs_config"):
                 attempts = LOADING_INSTANCES.get(hostname, 0) + 1
                 still_loading[hostname] = attempts
                 if attempts <= LOADING_FAST_RETRIES or attempts % LOADING_SLOW_RETRY_EVERY == 0:
                     recovered = True
+                    unprotected = health == "loading"
                     if attempts == 1:
-                        HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is up but still reports the loading state; will trigger push-configs to re-sync it")
+                        if unprotected:
+                            HEALTHCHECK_LOGGER.warning(
+                                f"Instance {hostname} is up but still reports the loading state; will trigger push-configs to re-sync it"
+                            )
+                        else:
+                            HEALTHCHECK_LOGGER.info(
+                                f"Instance {hostname} restarted with its configuration preserved and is asking for a fresh one; triggering push-configs"
+                            )
                     elif attempts <= LOADING_FAST_RETRIES:
-                        HEALTHCHECK_LOGGER.warning(f"Instance {hostname} still reports the loading state after {attempts} healthchecks; re-pushing")
-                    else:
+                        HEALTHCHECK_LOGGER.warning(f"Instance {hostname} still reports the {health} state after {attempts} healthchecks; re-pushing")
+                    elif unprotected:
                         HEALTHCHECK_LOGGER.error(
                             f"Instance {hostname} has reported the loading state for {attempts} consecutive healthchecks. "
                             "It is serving traffic with mTLS, basic auth, blacklist, greylist and rate limiting inactive; "
                             "re-pushing, but this needs an operator."
+                        )
+                    else:
+                        HEALTHCHECK_LOGGER.error(
+                            f"Instance {hostname} has asked for a configuration for {attempts} consecutive healthchecks. "
+                            "It is still enforcing the configuration it restarted with, so traffic is protected, but that "
+                            "configuration is now stale -- re-pushing, and this needs an operator."
                         )
 
         if recovered and SCHEDULER is not None:

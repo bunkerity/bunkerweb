@@ -81,7 +81,7 @@ REAL_IP_FROM=${REAL_IP_FROM:-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}
 REAL_IP_HEADER=${REAL_IP_HEADER:-X-Forwarded-For}
 HTTP_PORT=${HTTP_PORT:-8080}
 HTTPS_PORT=${HTTPS_PORT:-8443}
-KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-no}
+KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-yes}
 EOF
 }
 
@@ -113,6 +113,11 @@ if ! generate_api_server_cert; then
 	exit 1
 fi
 
+# The assignment inside generate_tmp_env_content() is part of its heredoc: it lands in the generated
+# env file and never in this shell, so the test below used to compare against an empty value and
+# every restart took the "keep the config" branch regardless of the setting. Apply it here for real.
+KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-yes}
+
 # generate "temp" config
 tmp_env_path="/tmp/variables.env"
 tmp_env_content="$(generate_tmp_env_content)"
@@ -121,16 +126,25 @@ regenerate_temp_config=false
 if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
 	regenerate_temp_config=true
 else
-	log "ENTRYPOINT" "ℹ️" "Preserving current config on restart, forcing loading state to receive latest config ..."
-	if ! set_loading_state "/etc/nginx/variables.env" ; then
-		log "ENTRYPOINT" "⚠️" "Couldn't set IS_LOADING=yes because /etc/nginx/variables.env is missing"
-	fi
+	log "ENTRYPOINT" "ℹ️" "Preserving current config on restart, asking the scheduler for the latest one ..."
+	# Deliberately NOT set_loading_state: `IS_LOADING=yes` is what gates nine core plugins'
+	# is_needed(), so forcing it here left a restarted instance serving traffic with no client
+	# certificate check, no basic auth, no blacklist and no rate limit until a push arrived. The
+	# configuration is right there and valid -- keep enforcing it. This marker asks the scheduler
+	# for a fresh one without disabling anything; /health reports it and POST /confs clears it.
+	touch "/var/tmp/bunkerweb_needs_config"
 fi
 
 printf "%s\n" "$tmp_env_content" > "$tmp_env_path"
 
 if [[ "$regenerate_temp_config" == "true" ]] ; then
   python3 /usr/share/bunkerweb/gen/main.py --variables "$tmp_env_path"
+fi
+
+if [[ "$regenerate_temp_config" == "true" ]] ; then
+	# Regenerating means this really is a startup: IS_LOADING already covers it, and a marker left
+	# by a previous run would keep asking for a push that startup handles anyway.
+	rm -f "/var/tmp/bunkerweb_needs_config"
 fi
 
 if [ -f /var/tmp/bunkerweb_reloading ] ; then

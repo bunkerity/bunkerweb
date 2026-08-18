@@ -137,6 +137,48 @@ def test_the_loading_streak_escalates_to_an_error(harness, scheduler_main):
     assert "needs an operator" in logger.error.call_args[0][0]
 
 
+def test_a_restart_that_kept_its_config_still_earns_a_push(harness, scheduler_main):
+    """`needs_config` is the safe half of the old behaviour.
+
+    A restart used to force `IS_LOADING=yes`, which disabled nine plugins for a configuration the
+    instance already had. It now keeps enforcing and reports this state instead — but it still owes
+    the scheduler a fresh configuration, so it must still earn a push.
+    """
+    _api, scheduler = harness([{"hostname": "bw", "status": "up"}], {"bw": "needs_config"})
+
+    scheduler_main.healthcheck_job()
+
+    assert scheduler.dispatched == ["push-configs"]
+    assert scheduler_main.LOADING_INSTANCES == {"bw": 1}
+
+
+def test_the_two_waiting_states_are_logged_differently(harness, scheduler_main):
+    """One is an exposure, the other is routine — the log must not conflate them.
+
+    Claiming access controls are inactive when they are enforcing would send an operator chasing a
+    bypass that does not exist.
+    """
+    _api, _scheduler = harness([{"hostname": "bw", "status": "up"}], {"bw": "needs_config"})
+    logger = Mock()
+    with patch.object(scheduler_main, "HEALTHCHECK_LOGGER", logger):
+        scheduler_main.healthcheck_job()
+
+    assert logger.warning.call_count == 0, "a preserved configuration is not a warning"
+    assert "configuration preserved" in logger.info.call_args[0][0]
+
+
+def test_a_stuck_needs_config_escalates_without_claiming_a_bypass(harness, scheduler_main):
+    _api, _scheduler = harness([{"hostname": "bw", "status": "up"}], {"bw": "needs_config"})
+    logger = Mock()
+    with patch.object(scheduler_main, "HEALTHCHECK_LOGGER", logger):
+        _run_passes(scheduler_main, scheduler_main.LOADING_SLOW_RETRY_EVERY)
+
+    assert logger.error.call_count == 1
+    message = logger.error.call_args[0][0]
+    assert "traffic is protected" in message
+    assert "inactive" not in message, "this state does not disable anything"
+
+
 def test_a_healthy_instance_pushes_nothing(harness, scheduler_main):
     api, scheduler = harness([{"hostname": "bw", "status": "up"}], {"bw": "ok"})
 

@@ -188,7 +188,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
     | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
     | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `KEEP_CONFIG_ON_RESTART` | `no`    | global    | No       | **Keep Config on Restart:** Keep the configuration on restart. Set to 'yes' to prevent config reset on restart. |
+    | `KEEP_CONFIG_ON_RESTART` | `yes`   | global    | No       | **Keep Config on Restart:** Keep the current configuration when the instance restarts, instead of falling back to the temporary startup configuration until the Scheduler sends a new one. The instance keeps enforcing while it waits. Set to `no` to regenerate the temporary configuration on every restart. |
     | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
 
 === "Nginx Settings"

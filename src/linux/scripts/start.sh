@@ -98,7 +98,7 @@ function start() {
             echo "HTTPS_PORT=443"
             echo "API_LISTEN_IP=127.0.0.1"
             echo "API_TOKEN="
-            echo "KEEP_CONFIG_ON_RESTART=no"
+            echo "KEEP_CONFIG_ON_RESTART=yes"
         } > /etc/bunkerweb/variables.env
         chown root:nginx /etc/bunkerweb/variables.env
         chmod 660 /etc/bunkerweb/variables.env
@@ -145,7 +145,7 @@ function start() {
         [REAL_IP_HEADER]="X-Forwarded-For"
         [HTTP_PORT]="80"
         [HTTPS_PORT]="443"
-        [KEEP_CONFIG_ON_RESTART]="no"
+        [KEEP_CONFIG_ON_RESTART]="yes"
     )
 
     # File containing the environment variables
@@ -183,10 +183,12 @@ function start() {
     if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
         regenerate_temp_config=true
     else
-        log "SYSTEMCTL" "ℹ️" "Preserving current config on restart, forcing loading state to receive latest config ..."
-        if ! set_loading_state "/etc/nginx/variables.env" ; then
-            log "SYSTEMCTL" "⚠️" "Couldn't set IS_LOADING=yes because /etc/nginx/variables.env is missing"
-        fi
+        log "SYSTEMCTL" "ℹ️" "Preserving current config on restart, asking the scheduler for the latest one ..."
+        # Deliberately NOT set_loading_state -- see the same branch in src/bw/entrypoint.sh:
+        # IS_LOADING=yes gates nine core plugins' is_needed(), so it left a restarted instance
+        # serving traffic with its access controls off. Keep enforcing the configuration that is
+        # already there and ask for a fresh one instead.
+        touch /var/tmp/bunkerweb_needs_config
     fi
 
     write_tmp_env_file "$tmp_env_path" "$tmp_env_content"
@@ -199,6 +201,7 @@ function start() {
     fi
 
     if [[ "$regenerate_temp_config" == "true" ]] ; then
+        rm -f /var/tmp/bunkerweb_needs_config
         if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
             --variables "$tmp_env_path"; then
             log "SYSTEMCTL" "❌" "Error while generating config from $tmp_env_path"

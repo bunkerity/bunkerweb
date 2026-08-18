@@ -51,6 +51,10 @@ local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
 local open = io.open
+local remove = os.remove
+-- Set by the entrypoint when a restart kept its configuration: the instance serves and enforces
+-- normally but still owes the scheduler a fresh push. Cleared by POST /confs.
+local NEEDS_CONFIG_PATH = "/var/tmp/bunkerweb_needs_config"
 local read_body = ngx_req.read_body
 local get_body_data = ngx_req.get_body_data
 local get_body_file = ngx_req.get_body_file
@@ -199,6 +203,16 @@ api.global.GET["^/health$"] = function(self)
 	if f then
 		f:close()
 		return self:response(HTTP_OK, "success", "reloading")
+	end
+
+	-- A restart that kept its configuration is serving it, and still enforcing every plugin --
+	-- `is_loading` is what gates those, and it is deliberately not set here. It does still want a
+	-- fresh configuration from the scheduler, which is what this state asks for. Reported after
+	-- `reloading` so a push already landing does not earn a second one.
+	f = open(NEEDS_CONFIG_PATH, "r")
+	if f then
+		f:close()
+		return self:response(HTTP_OK, "success", "needs_config")
 	end
 
 	return self:response(HTTP_OK, "success", "ok")
@@ -369,6 +383,15 @@ api.global.POST["^/confs$"] = function(self)
 		end
 	end
 	internalstore:delete(SWAP_LOCK_KEY)
+
+	-- The configuration tree itself has landed, so a restart that was waiting for one is served.
+	-- Only /confs clears it: /cache, /data, /plugins and friends reuse this handler but carry
+	-- something else, and clearing on those would stop the scheduler re-pushing the configuration
+	-- this instance is actually missing.
+	if self.ctx.bw.uri == "/confs" then
+		remove(NEEDS_CONFIG_PATH)
+	end
+
 	return self:response(HTTP_OK, "success", "saved data at " .. destination)
 end
 
