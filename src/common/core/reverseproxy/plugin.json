@@ -288,6 +288,15 @@
       "select": ["auto", "yes", "no"],
       "type": "select"
     },
+    "REVERSE_PROXY_STREAM_HALF_CLOSE": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Keep a TCP stream connection open toward the backend after the client has closed its write side. Needed by protocols where the client half-closes and then waits for the response; nginx tears the connection down by default.",
+      "id": "reverse-proxy-stream-half-close",
+      "label": "Reverse proxy stream half close",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
       "context": "multisite",
       "default": "1",

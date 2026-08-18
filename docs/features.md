@@ -5307,6 +5307,7 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | Setting                         | Default | Context   | Multiple | Description                                                                                             |
     | ------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`   | multisite | yes      | **Connect Timeout:** Maximum time to establish a connection to the backend server.                      |
+    | `REVERSE_PROXY_STREAM_HALF_CLOSE` | `no` | multisite | yes | **Stream Half Close:** when set to `yes`, keep the connection to the backend open after the client closes its write side. Required by TCP protocols where the client half-closes and then waits for the response; nginx closes both directions by default. Stream (TCP/UDP) services only. |
     | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`   | multisite | yes      | **Read Timeout:** Maximum time between transmissions of two successive packets from the backend server. |
     | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`   | multisite | yes      | **Send Timeout:** Maximum time between transmissions of two successive packets to the backend server.   |
     | `PROXY_BUFFERS`                 |         | multisite | no       | **Buffers:** Number and size of buffers for reading the response from the backend server.               |
