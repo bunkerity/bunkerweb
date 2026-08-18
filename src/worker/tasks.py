@@ -171,10 +171,13 @@ def _delivery_attempt(task_id: str, broker_url: str, logger) -> int:
 # writes files and exits 1 cannot clear its own change flag honestly: the push and the reload happen
 # here, afterwards, so clearing inside the job records a delivery that may still fail, and nothing
 # re-dispatches it. Each entry is a JSON `{"keys": [...], "snapshot": {...}}` claimed alongside
-# RELOAD_DIRTY_KEY and applied only once the push and the reload have both succeeded. The job side
-# writes this key by literal, the way push-configs owns its own lease key -- the worker cannot
-# import the jobs' shared utils at module load.
-ACK_PENDING_KEY = "bw:reload_pending_acks"
+# RELOAD_DIRTY_KEY and applied only once the push and the reload have both succeeded.
+#
+# Imported rather than duplicated: if the two sides ever named different keys nothing would error --
+# the job would write one key, the worker drain another, and the change flag would stay pinned while
+# the set grew. /usr/share/bunkerweb/utils is on PYTHONPATH in all three worker targets.
+from jobs import RELOAD_ACK_PENDING_KEY as ACK_PENDING_KEY, drain_pending_acks  # type: ignore # noqa: E402
+
 RELOAD_LOCK_KEY = "bw:reload_pending"
 RELOAD_DIRTY_KEY = "bw:reload_dirty"
 # Long enough to cover a push plus a reload with configuration testing on a slow instance. The
@@ -192,6 +195,27 @@ if redis.call('exists', KEYS[2]) == 1 then return 0 end
 redis.call('del', KEYS[1])
 return 1
 """
+
+
+def _publish_deferred_acks(broker_url: str, logger) -> None:
+    """Queue what the job that just ran deferred, from the side that holds the broker credentials.
+
+    The job cannot do this itself -- CELERY_BROKER_URL is stripped from its environment -- so it
+    leaves the payload in the jobs module and this ships it. Queue it before requesting the reload:
+    the holder claims the set at the top of each round, so publishing afterwards would miss the very
+    push this job asked for and leave the change waiting for the next one.
+
+    A publish that fails drops the entry and leaves the change flag raised, which the scheduler
+    already handles by re-dispatching the job.
+    """
+    pending = drain_pending_acks()
+    if not pending:
+        return
+
+    try:
+        _broker_client(broker_url).sadd(ACK_PENDING_KEY, *pending)
+    except BaseException as exc:
+        logger.error(f"Could not queue the deferred acknowledgements, leaving those changes pending: {exc}")
 
 
 def _apply_deferred_acks(client, claimed, logger) -> None:
@@ -227,6 +251,7 @@ def _apply_deferred_acks(client, claimed, logger) -> None:
             continue
 
         client.srem(ACK_PENDING_KEY, raw)
+        logger.info(f"Acknowledged {entry.get('keys')} now that the push reached the instances")
 
 
 def _request_reload_debounced(apis, broker_url: str, logger) -> None:
@@ -381,6 +406,9 @@ def execute_job(self, job_data: dict) -> dict:
     finally:
         os.environ.clear()
         os.environ.update(saved_env)
+        # After the restore: the job ran without CELERY_BROKER_URL in its environment, and this
+        # needs it back.
+        _publish_deferred_acks(broker_url, logger)
 
     end = datetime.now().astimezone()
     duration = (end - start).total_seconds()

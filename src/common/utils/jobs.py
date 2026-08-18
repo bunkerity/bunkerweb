@@ -13,7 +13,7 @@ from shutil import rmtree
 from tarfile import TarFile, open as tar_open
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Dict, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from tempfile import NamedTemporaryFile
 from time import time
 from stat import S_IMODE
@@ -40,10 +40,26 @@ ATOMIC_TMP_SUFFIX = ".bw-tmp"
 ATOMIC_TMP_GRACE_SECONDS = 300
 
 
-# Mirror of ACK_PENDING_KEY in src/worker/tasks.py, which owns the draining side. Duplicated as a
-# literal on purpose: the worker cannot import this module at load time, and the same split already
-# exists for push-configs' lease key.
+# The Redis set the worker drains. Defined here and imported by src/worker/tasks.py rather than
+# duplicated: two literals that drifted apart would not error anywhere -- one side would write a key
+# the other never reads, and the change flag would stay pinned while the set grew.
 RELOAD_ACK_PENDING_KEY = "bw:reload_pending_acks"
+
+# What the job just deferred, waiting for the worker to publish it.
+#
+# A job cannot reach the broker itself: the worker strips CELERY_BROKER_URL from every job env
+# (jobs include third-party plugin code, and the URL carries credentials), so a job's own client
+# falls back to redis://localhost, which a split-container worker refuses -- the deferral then
+# failed on every run and the feature was inert. Jobs run in-process in the worker, so hand the
+# payload over through this module and let `_publish_deferred_acks` ship it.
+_PENDING_ACKS: List[str] = []
+
+
+def drain_pending_acks() -> List[str]:
+    """Take what the job that just ran deferred. Worker side."""
+    drained = list(_PENDING_ACKS)
+    _PENDING_ACKS.clear()
+    return drained
 
 
 def defer_change_acknowledgement(keys: Tuple[str, ...], snapshot: Dict[str, Any], logger: Logger) -> str:
@@ -57,18 +73,25 @@ def defer_change_acknowledgement(keys: Tuple[str, ...], snapshot: Dict[str, Any]
 
     Returns an error string, empty when the acknowledgement was queued.
     """
-    broker_url = getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    # Everything below stays inside the try: this runs on a job's way out, and a caller that hands
+    # in something unexpected must get an error string back, not an exception that replaces the
+    # job's own exit status.
     try:
-        from redis import Redis  # noqa: PLC0415 -- optional at import time for non-worker callers
+        # Only scalars survive JSON. That is fine for the watermarks clear_applied_changes
+        # compares -- until a caller defers a key whose watermark is not one: `plugins_config`
+        # carries {plugin_id: last_config_change}, and silently dropping it would make the clear
+        # match nothing, report success, and lose the flag forever. Refuse instead of degrading.
+        serializable: Dict[str, Any] = {}
+        for key, value in snapshot.items():
+            if isinstance(value, datetime):
+                serializable[key] = value.isoformat()
+            elif isinstance(value, (bool, str, int, float, type(None))):
+                serializable[key] = value
+            elif any(key == f"{k}_changed" or key == f"last_{k}_change" for k in keys):
+                return f"cannot defer {key}: {type(value).__name__} does not survive the broker, and dropping it would silently no-op the acknowledgement"
 
-        client = Redis.from_url(broker_url)
-        payload = {
-            "keys": list(keys),
-            # get_metadata() hands back datetimes, which JSON cannot carry; only the watermarks the
-            # compare-and-clear actually reads need to survive the trip.
-            "snapshot": {k: (v.isoformat() if isinstance(v, datetime) else v) for k, v in snapshot.items() if isinstance(v, (bool, str, datetime, type(None)))},
-        }
-        client.sadd(RELOAD_ACK_PENDING_KEY, json_dumps(payload))
+        _PENDING_ACKS.append(json_dumps({"keys": list(keys), "snapshot": serializable}))
+        logger.info(f"Deferred the {list(keys)} acknowledgement until the configuration reaches the instances")
     except BaseException as e:
         logger.debug(format_exc())
         return str(e)
@@ -241,6 +264,12 @@ class Job:
 
                     # Another job's in-flight atomic write lives here and is not in
                     # plugin_cache_files, so this sweep used to delete it out from under the writer.
+                    # This guard covers the sweep only. `_materialize_caches` in push-configs still
+                    # rmtree()s the directory of every `folder:`/`.tgz` row, and only the Let's
+                    # Encrypt tree takes a cross-process lock for it (letsencrypt_consistency.py),
+                    # so a job writing into another such tree can still lose its work. A marker
+                    # cannot defend against rmtree; closing that needs the same flock extended to
+                    # every folder row.
                     # `_write_atomic` retries three times, which is exactly how many times the
                     # temporary vanished, so the write failed and the instance silently lost the
                     # file -- seen live as "Failed to materialize cache 'asn.mmdb'" while geoip-asn
