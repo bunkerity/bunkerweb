@@ -445,6 +445,9 @@ puedes forzar una actualización del “marcador de cambios”:
 
 En caso de que hayas olvidado tus credenciales de la interfaz de usuario o estés experimentando problemas con la 2FA, puedes conectarte a la base de datos para recuperar el acceso.
 
+!!! warning "La 2FA dejó de funcionar tras recrear el contenedor"
+    Las claves que descifran los secretos TOTP se guardan en el contenedor de la UI, en `/var/lib/bunkerweb/.totp_encryption_keys.json`, es decir `/data/lib` dentro de la imagen. Recrear el contenedor `bw-ui` sin un volumen persistente en `/data` genera un juego nuevo de claves: los secretos guardados en la base de datos ya no se pueden descifrar, la inscripción del admin se elimina y las demás cuentas deben reiniciarse con el SQL de abajo. Monta un volumen en `/data` (consulta la [documentación de la interfaz web](web-ui.md)) para conservar las claves, o aporta tus propias `TOTP_ENCRYPTION_KEYS`.
+
 ### Acceder a la base de datos {#access-database}
 
 === "SQLite"

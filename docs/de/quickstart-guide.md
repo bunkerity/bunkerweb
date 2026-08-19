@@ -126,6 +126,8 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/exam
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # Dient dazu, die Geheimnisse der Weboberfläche zu erhalten (Flask-Secret, TOTP-Verschlüsselungsschlüssel, Biscuit-Schlüssel)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -164,6 +166,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/exam
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -250,7 +253,9 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/exam
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Denken Sie daran, einen stärkeren geheimen Schlüssel festzulegen (siehe Abschnitt Voraussetzungen)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: wird ohne Angabe im Volume bw-ui-data erzeugt; ein Schlüssel hat 43 Zeichen
+        volumes:
+          - bw-ui-data:/data # Dient dazu, die Geheimnisse der Weboberfläche zu erhalten (Flask-Secret, TOTP-Verschlüsselungsschlüssel, Biscuit-Schlüssel)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -289,6 +294,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/exam
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -422,7 +428,9 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/exam
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Denken Sie daran, einen stärkeren geheimen Schlüssel festzulegen (siehe Abschnitt Voraussetzungen)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: wird ohne Angabe im Volume bw-ui-data erzeugt; ein Schlüssel hat 43 Zeichen
+        volumes:
+          - bw-ui-data:/data # Dient dazu, die Geheimnisse der Weboberfläche zu erhalten (Flask-Secret, TOTP-Verschlüsselungsschlüssel, Biscuit-Schlüssel)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -451,6 +459,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/exam
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:

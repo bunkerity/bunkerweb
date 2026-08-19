@@ -48,6 +48,8 @@ services:
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.6.14-rc3
+    volumes:
+      - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
     networks:
       - bw-universe
       - bw-db
@@ -88,6 +90,7 @@ services:
 volumes:
   bw-data:
   bw-storage:
+  bw-ui-data:
 
 networks:
   bw-universe:

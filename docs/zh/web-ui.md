@@ -20,9 +20,9 @@ Web 界面是 BunkerWeb 的可视化控制平面。它无需 CLI 即可管理服
 
 - 在内部网络通过 BunkerWeb 暴露 UI；选择难猜的 `REVERSE_PROXY_URL` 并限制来源 IP。
 - 设置强 `ADMIN_USERNAME` / `ADMIN_PASSWORD`；仅在需要时开启 `OVERRIDE_ADMIN_CREDS=yes` 来重置。
-- 提供 `TOTP_ENCRYPTION_KEYS` 并为管理员启用 TOTP；妥善保存恢复码。
+- 为管理员启用 TOTP 并妥善保存恢复码。加密密钥会在首次启动时生成，因此只有在无法持久化 UI 卷时才需要设置 `TOTP_ENCRYPTION_KEYS`。
 - 使用 TLS（在 BunkerWeb 终止或 `UI_SSL_ENABLED=yes` 并提供证书/密钥路径）；将 `UI_FORWARDED_ALLOW_IPS` 设为可信代理。
-- 持久化秘密：挂载 `/var/lib/bunkerweb` 以保留 `FLASK_SECRET`、Biscuit 密钥与 TOTP 数据。
+- 持久化秘密：容器中请挂载卷到 `/data`（镜像里 `/var/lib/bunkerweb` 是指向 `/data/lib` 的软链接），以保留 `FLASK_SECRET`、Biscuit 密钥与 TOTP 加密密钥。没有该卷时，重建 UI 容器会清除所有 2FA 绑定。
 - 保持 `CHECK_PRIVATE_IP=yes`（默认）以绑定会话到客户端 IP；若无长期会话需求，将 `ALWAYS_REMEMBER` 维持为 `no`。
 - 确保 `/var/log/bunkerweb` 对 UID/GID 101（或 rootless 映射 UID）可读，便于 UI 读取日志。
 
@@ -88,10 +88,11 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
           <<: *service-env
           ADMIN_USERNAME: "admin"
           ADMIN_PASSWORD: "Str0ng&P@ss!"
-          TOTP_ENCRYPTION_KEYS: "set-me"
+          # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符
           UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
           - bw-logs:/var/log/bunkerweb
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks: [bw-universe, bw-db]
 
@@ -121,6 +122,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
       bw-storage:
       bw-logs:
       bw-lib:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -149,7 +151,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 - 监听默认值：Docker 镜像在 `0.0.0.0:7000`，Linux 包在 `127.0.0.1:7000`。可用 `UI_LISTEN_ADDR` / `UI_LISTEN_PORT` 覆盖。
 - 代理头：`UI_FORWARDED_ALLOW_IPS` 默认 `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`；`UI_PROXY_ALLOW_IPS` 默认取 `FORWARDED_ALLOW_IPS` 的值。在 Linux 安装中将其设为反代 IP 以更严格。
-- 秘密与状态：`/var/lib/bunkerweb` 保存 `FLASK_SECRET`、Biscuit 密钥和 TOTP 数据。Docker 需挂载；Linux 由包脚本创建管理。
+- 秘密与状态：`/var/lib/bunkerweb` 保存 `FLASK_SECRET`、Biscuit 密钥和 TOTP 加密密钥。容器中该路径是指向 `/data/lib` 的软链接，因此请挂载卷到 `/data`；Linux 由包脚本创建管理。
 - 日志：`/var/log/bunkerweb` 需对 UID/GID 101（或 rootless 映射 UID）可读。包会创建路径；容器需挂载权限正确的卷。
 - 向导行为：Linux easy-install 自动启动 UI 和向导；Docker 需通过反代 URL 访问向导，除非预置环境变量。
 
@@ -159,7 +161,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 - 密码长度限制：bcrypt 只使用秘密的前 **72 字节**，因此所有设置密码的位置（设置向导、个人资料页面、`ADMIN_PASSWORD` / `API_PASSWORD`）都会将密码限制为 72 字节。更长的值会被拒绝，并给出明确的错误或日志，而不是静默截断。请注意，非 ASCII 字符（重音字符、emoji）每个都会占用多个字节；由这些字符组成的“72 字符”口令可能超过该限制。预哈希的 bcrypt 值不受影响（哈希本身已经编码了该限制）。
 - 角色：`admin`、`writer`、`reader` 会自动创建；账户存储在数据库。
 - 秘密：`FLASK_SECRET` 存于 `/var/lib/bunkerweb/.flask_secret`；Biscuit 密钥位于同目录，可用 `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY` 提供。
-- 2FA：用 `TOTP_ENCRYPTION_KEYS`（空格分隔或 JSON）开启 TOTP。生成密钥：
+- 2FA：TOTP 秘钥加密后存放在数据库，解密用的密钥保存在 `/var/lib/bunkerweb/.totp_encryption_keys.json`。UI 会在首次启动时生成它们，只要该文件被持久化就无需额外配置。若要提供自己的密钥，可设置 `TOTP_ENCRYPTION_KEYS`（空格分隔或 JSON 映射）；此时每个密钥必须正好 **43 个字符**，其他长度会被丢弃并记录 `Invalid TOTP secret for key` 警告，然后用随机密钥替代。生成密钥：
 
     ```bash
     python3 -c "from passlib import totp; print(totp.generate_secret())"
@@ -168,6 +170,13 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
 - 会话：默认空闲时长 12 小时（`SESSION_LIFETIME_HOURS`），每次请求刷新。`SESSION_ABSOLUTE_HOURS`（默认 `168` = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（`SESSION_ROLLING_HOURS`，默认 `0` = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
 - 若多级代理附加 `X-Forwarded-*`，请设置 `PROXY_NUMBERS`。
+
+!!! warning "重建容器后 2FA 消失"
+    TOTP 秘钥以加密形式存放在数据库，而解密它们的密钥存放在**磁盘上**，不在数据库里。每次启动时 UI 按顺序取第一个可用来源：`/var/lib/bunkerweb/.totp_encryption_keys.json`，然后是 `TOTP_ENCRYPTION_KEYS`（别名 `TOTP_SECRETS`）。若两者都不可用，它会生成一组全新的随机密钥：已存储的秘钥再也无法解密，管理员的绑定会从数据库中删除，所有用户都必须重新绑定。
+
+    重启容器不会有问题。真正丢失密钥的是丢失容器文件系统：先 `docker compose down` 再 `up`、修改镜像或环境变量后重建、`docker rm`，或新建 Pod。在 `bw-ui` 容器上挂载持久卷到 `/data` 即可，本页所有示例都这么做：密钥在首次启动时生成并保存在 `/data/lib`，因此 `TOTP_ENCRYPTION_KEYS` 是可选的。
+
+    仅当该卷无法持久化，或你想自行控制轮换时，才需要设置该变量。此时注意长度：像 `changeme` 这样的占位值**不是**有效密钥——密钥为 43 个字符，与 `passlib` 的 `generate_secret()` 生成的一致。无效值会被丢弃并替换为随机密钥；与未设置该变量不同，它还会阻止管理员绑定被重置，2FA 将一直不可用，直到[手动清除](troubleshooting.md#web-ui)。可以用 JSON 映射做轮换：把旧密钥与新密钥一起保留，已有绑定仍然有效。
 
 !!! tip "预哈希管理员密码"
     `ADMIN_PASSWORD` 接受 **bcrypt 哈希**（`$2a$`/`$2b$`/`$2y$`）并按原样存储，明文不再留在环境文件或密钥中。跳过强度策略（源密码由你负责）；成本因子低于 `10` 会被拒绝，`10`–`11` 会记录警告（推荐 `12`+）。仅限环境创建和 `OVERRIDE_ADMIN_CREDS`；向导和个人资料页面仍需明文。

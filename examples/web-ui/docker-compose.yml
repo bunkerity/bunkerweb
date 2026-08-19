@@ -49,6 +49,8 @@ services:
       <<: *env
       ADMIN_USERNAME: "changeme"
       ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
+    volumes:
+      - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -71,6 +73,7 @@ services:
 volumes:
   bw-data:
   bw-storage:
+  bw-ui-data:
 
 networks:
   bw-universe:

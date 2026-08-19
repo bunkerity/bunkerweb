@@ -444,6 +444,9 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
 
 如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。
 
+!!! warning "重建容器后 2FA 失效"
+    解密 TOTP 秘钥的密钥保存在 UI 容器的 `/var/lib/bunkerweb/.totp_encryption_keys.json`，也就是镜像中的 `/data/lib`。若重建 `bw-ui` 容器时没有挂载 `/data` 持久卷，就会生成一组新密钥：数据库中保存的秘钥再也无法解密，管理员绑定会被删除，其他账户需要用下面的 SQL 重置。请挂载卷到 `/data`（参见 [Web UI 文档](web-ui.md)）以保留密钥，或自行提供 `TOTP_ENCRYPTION_KEYS`。
+
 ### 访问数据库 {#access-database}
 
 === "SQLite"

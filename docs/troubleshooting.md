@@ -445,6 +445,9 @@ you can force a “change marker” update:
 
 In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
 
+!!! warning "2FA stopped working after recreating the container"
+    The keys that decrypt the TOTP secrets are stored in the UI container at `/var/lib/bunkerweb/.totp_encryption_keys.json`, which is `/data/lib` inside the image. Recreating the `bw-ui` container without a persistent volume on `/data` generates a new set of keys, so the secrets kept in the database can no longer be decrypted: the admin enrollment is dropped and the other accounts have to be reset with the SQL below. Mount a volume on `/data` (see the [Web UI documentation](web-ui.md)) so the keys survive, or provide your own `TOTP_ENCRYPTION_KEYS`.
+
 ### Access database
 
 === "SQLite"

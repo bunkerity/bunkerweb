@@ -126,6 +126,8 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # Sert à conserver les secrets de l'interface web (secret Flask, clés de chiffrement TOTP, clés Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -164,6 +166,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -250,7 +253,9 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optionnel : générée dans le volume bw-ui-data si absente ; une clé fait 43 caractères
+        volumes:
+          - bw-ui-data:/data # Sert à conserver les secrets de l'interface web (secret Flask, clés de chiffrement TOTP, clés Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -289,6 +294,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -422,7 +428,9 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optionnel : générée dans le volume bw-ui-data si absente ; une clé fait 43 caractères
+        volumes:
+          - bw-ui-data:/data # Sert à conserver les secrets de l'interface web (secret Flask, clés de chiffrement TOTP, clés Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -451,6 +459,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:

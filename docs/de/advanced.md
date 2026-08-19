@@ -614,7 +614,9 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Bitte stärkeres Passwort setzen
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Stärkeren Schlüssel setzen (siehe Voraussetzungen)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: wird ohne Angabe im Volume bw-ui-data erzeugt; ein Schlüssel hat 43 Zeichen
+        volumes:
+          - bw-ui-data:/data # Dient dazu, die Geheimnisse der Weboberfläche zu erhalten (Flask-Secret, TOTP-Verschlüsselungsschlüssel, Biscuit-Schlüssel)
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -653,6 +655,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -2718,6 +2721,7 @@ LOG_LEVEL_1=error
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # Wird verwendet, um die Syslog-Protokolle in der Web-UI zu lesen
+          - bw-ui-data:/data # Dient dazu, die Geheimnisse der Weboberfläche zu erhalten (Flask-Secret, TOTP-Verschlüsselungsschlüssel, Biscuit-Schlüssel)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2774,6 +2778,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:

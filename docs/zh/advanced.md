@@ -614,7 +614,9 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # 请使用更强密码
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 请使用更强密钥（见前提条件）
+          # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符
+        volumes:
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -653,6 +655,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -2715,6 +2718,7 @@ LOG_LEVEL_1=error
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # 用于 Web UI 读取 syslog 日志
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2771,6 +2775,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:

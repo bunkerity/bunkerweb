@@ -20,9 +20,9 @@ L’interface Web est le plan de contrôle visuel de BunkerWeb. Elle gère servi
 
 - Placez l’UI derrière BunkerWeb sur un réseau interne ; choisissez un `REVERSE_PROXY_URL` difficile à deviner et limitez les IP sources.
 - Définissez des `ADMIN_USERNAME` / `ADMIN_PASSWORD` solides ; activez `OVERRIDE_ADMIN_CREDS=yes` uniquement si vous voulez vraiment les réinitialiser.
-- Fournissez `TOTP_ENCRYPTION_KEYS` et activez le TOTP pour les comptes admin ; gardez les codes de récupération en sécurité.
+- Activez le TOTP sur les comptes admin et gardez les codes de récupération en sécurité. Les clés de chiffrement sont générées au premier démarrage : `TOTP_ENCRYPTION_KEYS` ne sert que si vous ne pouvez pas persister le volume de l’UI.
 - Utilisez le TLS (terminé sur BunkerWeb ou via `UI_SSL_ENABLED=yes` avec chemins cert/clé) ; définissez `UI_FORWARDED_ALLOW_IPS` sur vos proxies de confiance.
-- Persistez les secrets : montez `/var/lib/bunkerweb` pour conserver `FLASK_SECRET`, les clés Biscuit et le matériel TOTP après redémarrage.
+- Persistez les secrets : en conteneur, montez un volume sur `/data` (`/var/lib/bunkerweb` est un lien symbolique vers `/data/lib` dans les images) pour conserver `FLASK_SECRET`, les clés Biscuit et les clés de chiffrement TOTP. Sans ce volume, recréer le conteneur de l’UI efface toutes les inscriptions 2FA.
 - Gardez `CHECK_PRIVATE_IP=yes` (par défaut) pour lier les sessions à l’IP ; laissez `ALWAYS_REMEMBER=no` sauf besoin explicite de cookies longue durée.
 - Assurez-vous que `/var/log/bunkerweb` est lisible par l’UID/GID 101 (ou l’UID mappé en rootless) pour que l’UI puisse lire les journaux.
 
@@ -88,10 +88,11 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
           <<: *service-env
           ADMIN_USERNAME: "admin"
           ADMIN_PASSWORD: "Str0ng&P@ss!"
-          TOTP_ENCRYPTION_KEYS: "set-me"
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optionnel : générée dans le volume bw-ui-data si absente ; une clé fait 43 caractères
           UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
           - bw-logs:/var/log/bunkerweb
+          - bw-ui-data:/data # Sert à conserver les secrets de l'interface web (secret Flask, clés de chiffrement TOTP, clés Biscuit)
         restart: "unless-stopped"
         networks: [bw-universe, bw-db]
 
@@ -121,6 +122,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
       bw-storage:
       bw-logs:
       bw-lib:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -149,7 +151,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 - Liens par défaut : images Docker sur `0.0.0.0:7000` ; paquets Linux sur `127.0.0.1:7000`. Changez via `UI_LISTEN_ADDR` / `UI_LISTEN_PORT`.
 - En-têtes proxy : `UI_FORWARDED_ALLOW_IPS` vaut `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` par défaut ; `UI_PROXY_ALLOW_IPS` reprend par défaut la valeur de `FORWARDED_ALLOW_IPS`. En Linux, réglez-les sur vos IP de proxy pour un durcissement immédiat.
-- Secrets et état : `/var/lib/bunkerweb` contient `FLASK_SECRET`, clés Biscuit et données TOTP. Montez-le en Docker ; sur Linux, il est géré par les scripts du paquet.
+- Secrets et état : `/var/lib/bunkerweb` contient `FLASK_SECRET`, les clés Biscuit et les clés de chiffrement TOTP. En conteneur, ce chemin est un lien symbolique vers `/data/lib` : montez donc un volume sur `/data` ; sur Linux, le répertoire est géré par les scripts du paquet.
 - Journaux : `/var/log/bunkerweb` doit être lisible par l’UID/GID 101 (ou l’UID mappé en rootless). Les paquets créent le chemin ; les conteneurs requièrent un volume avec les bons droits.
 - Comportement de l’assistant : l’easy-install Linux démarre automatiquement l’UI et l’assistant ; en Docker, on accède à l’assistant via l’URL reverse-proxifiée sauf si vous pré-semez les variables d’environnement.
 
@@ -159,7 +161,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 - Limite de longueur du mot de passe : bcrypt n'utilise que les **72 premiers octets** d'un secret ; les mots de passe sont donc limités à 72 octets partout où ils sont définis (assistant de configuration, page de profil, `ADMIN_PASSWORD` / `API_PASSWORD`). Une valeur plus longue est rejetée avec une erreur ou un journal explicite au lieu d'être tronquée silencieusement. Notez que les caractères non ASCII (accents, emoji) consomment plusieurs octets chacun ; une phrase secrète de "72 caractères" composée de tels caractères peut donc dépasser la limite. Les valeurs bcrypt pré-hachées sont exemptées (le hash encode déjà cette limite).
 - Rôles : `admin`, `writer` et `reader` sont créés automatiquement ; les comptes sont stockés en base.
 - Secrets : `FLASK_SECRET` est enregistré dans `/var/lib/bunkerweb/.flask_secret` ; les clés Biscuit sont à côté et peuvent être fournies via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
-- 2FA : activez le TOTP avec `TOTP_ENCRYPTION_KEYS` (séparées par des espaces ou map JSON). Générer une clé :
+- 2FA : les secrets TOTP sont stockés en base, chiffrés avec des clés conservées dans `/var/lib/bunkerweb/.totp_encryption_keys.json`. L’UI les génère au premier démarrage : rien n’est requis tant que ce fichier est persisté. Définissez `TOTP_ENCRYPTION_KEYS` (clés séparées par des espaces ou map JSON) pour fournir les vôtres ; chaque clé doit alors faire exactement **43 caractères**, toute autre valeur est écartée avec un avertissement `Invalid TOTP secret for key` et remplacée par une clé aléatoire. Générer une clé :
 
     ```bash
     python3 -c "from passlib import totp; print(totp.generate_secret())"
@@ -168,6 +170,13 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
     Les codes de récupération sont affichés une seule fois dans l’UI ; perdre les clés de chiffrement supprime les secrets TOTP stockés.
 - Sessions : durée d’inactivité par défaut 12 h (`SESSION_LIFETIME_HOURS`), rafraîchie à chaque requête. Un plafond absolu est imposé par `SESSION_ABSOLUTE_HOURS` (par défaut `168` = 7 jours) — au-delà, les utilisateurs sont déconnectés quelle que soit leur activité. Rotation optionnelle de l’identifiant de session (`SESSION_ROLLING_HOURS`, par défaut `0` = désactivée) régénère le SID à cet intervalle. Sessions liées à l’IP et au User-Agent ; `CHECK_PRIVATE_IP=no` relâche le contrôle d’IP pour les plages privées uniquement. `ALWAYS_REMEMBER=yes` force les cookies persistants.
 - Pensez à régler `PROXY_NUMBERS` si plusieurs proxies ajoutent des `X-Forwarded-*`.
+
+!!! warning "Le 2FA disparaît après une recréation du conteneur"
+    Les secrets TOTP sont stockés chiffrés en base, et les clés qui permettent de les déchiffrer vivent **sur le disque**, pas en base. À chaque démarrage, l’UI prend la première source disponible : `/var/lib/bunkerweb/.totp_encryption_keys.json`, puis `TOTP_ENCRYPTION_KEYS` (alias `TOTP_SECRETS`). Si aucune n’est exploitable, elle génère un nouveau jeu aléatoire : les secrets stockés ne sont plus déchiffrables, l’inscription de l’admin est supprimée de la base et chaque utilisateur doit se réinscrire.
+
+    Redémarrer un conteneur est sans risque. Ce qui perd les clés, c’est la perte du système de fichiers du conteneur : `docker compose down` puis `up`, une recréation après un changement d’image ou d’environnement, `docker rm`, ou un nouveau pod. Monter un volume persistant sur `/data` dans le conteneur `bw-ui` suffit, et tous les exemples de cette page le font : les clés sont générées au premier démarrage et conservées dans `/data/lib`, ce qui rend `TOTP_ENCRYPTION_KEYS` optionnel.
+
+    Ne définissez la variable vous-même que si ce volume ne peut pas être persisté, ou pour maîtriser la rotation. Dans ce cas, attention à la longueur : un espace réservé comme `changeme` n’est **pas** une clé valide — les clés font 43 caractères, comme celles produites par `generate_secret()` de `passlib`. Une valeur invalide est écartée et remplacée par une clé aléatoire ; contrairement à une variable absente, elle empêche aussi la réinitialisation de l’inscription de l’admin, et le 2FA reste inutilisable jusqu’à ce qu’il soit [effacé manuellement](troubleshooting.md#web-ui). La rotation est possible via une map JSON : gardez les anciennes clés à côté de la nouvelle et les inscriptions existantes restent valides.
 
 !!! tip "Mot de passe administrateur pré-haché"
     `ADMIN_PASSWORD` accepte un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) et le stocke tel quel : le texte en clair ne reste pas dans vos fichiers d’environnement ni secrets. La politique de robustesse est ignorée (vous êtes responsable du mot de passe source), mais un facteur de coût inférieur à `10` est **rejeté** ; `10`–`11` émet un avertissement (`12`+ recommandé). Uniquement en création par environnement et `OVERRIDE_ADMIN_CREDS` ; l’assistant et le profil exigent toujours du texte en clair.

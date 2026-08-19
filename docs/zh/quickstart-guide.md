@@ -126,6 +126,8 @@
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -164,6 +166,7 @@
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -250,7 +253,9 @@
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
+          # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符
+        volumes:
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -289,6 +294,7 @@
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -422,7 +428,9 @@
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
+          # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符
+        volumes:
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -451,6 +459,7 @@
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:

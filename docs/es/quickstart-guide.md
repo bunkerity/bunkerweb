@@ -50,13 +50,14 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     Usa el script de instalación fácil para configurar BunkerWeb en las distribuciones de Linux compatibles. Instala y configura automáticamente NGINX, añade el repositorio de BunkerWeb y configura los servicios necesarios.
 
     ```bash
-    ```bash
     # Download the script and its checksum
     curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14-rc3/install-bunkerweb.sh
     curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14-rc3/install-bunkerweb.sh.sha256
 
     # Verify the checksum
-    sha256sum -c install-bunkerweb.sh.sha256    # Si la comprobación es exitosa, ejecuta el script
+    sha256sum -c install-bunkerweb.sh.sha256
+
+    # Si la comprobación es exitosa, ejecuta el script
     chmod +x install-bunkerweb.sh
     sudo ./install-bunkerweb.sh
     ```
@@ -125,6 +126,8 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # Se usa para conservar los secretos de la interfaz web (secreto Flask, claves de cifrado TOTP, claves Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -163,6 +166,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -249,7 +253,9 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
+        volumes:
+          - bw-ui-data:/data # Se usa para conservar los secretos de la interfaz web (secreto Flask, claves de cifrado TOTP, claves Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -288,6 +294,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -421,7 +428,9 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         image: bunkerity/bunkerweb-ui:1.6.14-rc3
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
+        volumes:
+          - bw-ui-data:/data # Se usa para conservar los secretos de la interfaz web (secreto Flask, claves de cifrado TOTP, claves Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -450,6 +459,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:

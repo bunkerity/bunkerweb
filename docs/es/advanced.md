@@ -614,7 +614,9 @@ El Manager es el cerebro del clúster. Ejecuta el Scheduler, la base de datos y,
           <<: *bw-ui-env
           ADMIN_USERNAME: \"changeme\"
           ADMIN_PASSWORD: \"changeme\" # Usa una contraseña más fuerte
-          TOTP_ENCRYPTION_KEYS: \"mysecret\" # Usa una clave más fuerte (ver requisitos previos)
+          # TOTP_ENCRYPTION_KEYS: \"changeme\" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
+        volumes:
+          - bw-ui-data:/data # Se usa para conservar los secretos de la interfaz web (secreto Flask, claves de cifrado TOTP, claves Biscuit)
         restart: \"unless-stopped\"
         networks:
           - bw-db
@@ -653,6 +655,7 @@ El Manager es el cerebro del clúster. Ejecuta el Scheduler, la base de datos y,
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -2718,6 +2721,7 @@ LOG_LEVEL_1=error
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # Esto se usa para leer los registros syslog desde la interfaz web
+          - bw-ui-data:/data # Se usa para conservar los secretos de la interfaz web (secreto Flask, claves de cifrado TOTP, claves Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2774,6 +2778,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
