@@ -1279,12 +1279,12 @@ function restart_stack () {
             return 1
         fi
 
-        docker compose -f tests/docker/docker-compose.all-in-one.yml up -d
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "UTILS" "❌" "🍱 Failed to start BunkerWeb All-in-one"
-            return 1
-        fi
+        # Through compose_up rather than a bare `up -d`: the `down` above tears the stack's
+        # networks down asynchronously while other containers (dnsmasq, php-fpm, the services)
+        # still hold them, and the removal can land *after* `up` has recreated them -- the
+        # container then fails to start with "could not find a network matching network mode
+        # bw-db". One retry through a full `down -v` clears it.
+        compose_up "tests/docker/docker-compose.all-in-one.yml" "BunkerWeb All-in-one" "🍱" || return 1
     elif [ "$integration" == "Kubernetes" ] ; then
         secrets=$(kubectl get secrets -n bunkerweb -o jsonpath='{.items[*].metadata.name}')
         if echo "$secrets" | grep -q "bw-secret" ; then
