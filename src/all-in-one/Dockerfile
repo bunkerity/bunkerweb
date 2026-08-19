@@ -115,6 +115,7 @@ COPY src/api api
 COPY src/worker worker
 COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
+COPY CHANGELOG.md CHANGELOG.md
 COPY misc/*.ascii misc/
 
 WORKDIR /tmp

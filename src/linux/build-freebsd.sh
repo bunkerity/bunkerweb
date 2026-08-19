@@ -248,6 +248,7 @@ cp -r "$REPO_ROOT/src/scheduler" "$BW_DIR/"
 cp -r "$REPO_ROOT/src/ui" "$BW_DIR/"
 cp -r "$REPO_ROOT/src/api" "$BW_DIR/"
 cp "$REPO_ROOT/src/VERSION" "$BW_DIR/"
+cp "$REPO_ROOT/CHANGELOG.md" "$BW_DIR/"
 
 # rc.d scripts
 if [ -d "$REPO_ROOT/src/linux/rc.d" ]; then

@@ -69,6 +69,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/worker worker
 COPY src/VERSION VERSION
+COPY CHANGELOG.md CHANGELOG.md
 COPY src/ui ui
 COPY src/api api
 
