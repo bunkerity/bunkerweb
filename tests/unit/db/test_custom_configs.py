@@ -184,6 +184,31 @@ class TestGetCustomConfigsTemplateMerge:
         assert matching[0]["template"] is None  # the real row wins
         assert matching[0]["data"] == b"# real"
 
+    def test_only_the_use_template_key_names_a_template(self, db):
+        """The merge used to match *any* setting key starting with `<service>_` and take its
+        value as a template id. Every service carries `IS_DRAFT`, so a template whose id happens
+        to equal another setting's value was applied to services that never asked for it — and
+        on a 500-service install the lookup alone cost 287 ms to return nothing."""
+        seed_multisite(db)
+        # `IS_DRAFT` is "no" on every service; name the template after that value.
+        assert _template_with_server_http_config(db, template_id="no", name="No", cfg_name="ghost") == ""
+
+        inherited = [config for config in db.get_custom_configs() if config.get("template")]
+
+        assert inherited == [], f"a service with no USE_TEMPLATE inherited: {inherited}"
+
+    def test_services_sharing_a_template_each_get_its_configs(self, db):
+        """The template is read once and applied to every service that declares it; reading it
+        once must not mean applying it once."""
+        seed_multisite(db)
+        _template_with_server_http_config(db)
+        for service in ("app1.example.com", "app2.example.com"):
+            add_service_setting(db, service_id=service, setting_id="USE_TEMPLATE", value="low")
+
+        inherited = {config["service_id"] for config in db.get_custom_configs() if config.get("template") == "low"}
+
+        assert inherited == {"app1.example.com", "app2.example.com"}
+
 
 class TestGetCustomConfigTemplateFallback:
     """get_custom_config (single) falls back to the service's template when no real row exists."""

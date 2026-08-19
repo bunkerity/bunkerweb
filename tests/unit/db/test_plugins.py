@@ -38,6 +38,23 @@ class TestGetPlugins:
         add_plugin(db, "iconplug", type="external", method="ui", icon="plugin-iconplug.svg")
         assert next(p for p in db.get_plugins() if p["id"] == "iconplug")["icon"] == "plugin-iconplug.svg"
 
+    def test_identities_only_drops_the_schema_and_keeps_everything_else(self, db):
+        """The settings schema is 95% of this payload and a menu has no use for it."""
+        seed_minimal(db)
+        add_plugin(db, "extplug", type="external", method="ui", icon="plugin-extplug.svg")
+
+        full = {p["id"]: p for p in db.get_plugins()}
+        slim = {p["id"]: p for p in db.get_plugins(with_settings=False)}
+
+        assert set(slim) == set(full)
+        assert full["general"]["settings"], "the fixture has to seed settings or this proves nothing"
+        assert all(p["settings"] == {} for p in slim.values())
+        # Identity is what the slim shape is for; losing any of it would break the sidebar.
+        for plugin_id, plugin in slim.items():
+            assert {key: value for key, value in plugin.items() if key != "settings"} == {
+                key: value for key, value in full[plugin_id].items() if key != "settings"
+            }
+
     def test_only_enabled_filters_disabled(self, db):
         seed_minimal(db)  # core 'general' (always enabled)
         add_plugin(db, "extplug", type="external", method="ui")

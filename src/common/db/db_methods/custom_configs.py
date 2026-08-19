@@ -215,32 +215,49 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
             if with_data:
                 template_entities.append(Template_custom_configs.data)
 
+            # A real row shadows the one its template would provide. Indexed once instead of
+            # rescanning the accumulating list for every template config.
+            provided = {(config["service_id"], config["type"].replace("-", "_"), config["name"]) for config in custom_configs}
+            # Services share templates; read each one once.
+            template_configs: Dict[str, List[Any]] = {}
+
             for service_id in allowed_services:
-                for key, value in db_config.items():
-                    if key.startswith(f"{service_id}_"):
-                        for template_config in session.execute(select(*template_entities).filter_by(template_id=value).order_by(Template_custom_configs.order)):
-                            config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
-                            # Real custom_configs rows use the underscore enum form while config_type is hyphenated here;
-                            # normalize both sides so an overriding row correctly suppresses the template-provided config.
-                            normalized_config_type = config_type.replace("-", "_")
-                            if not any(
-                                custom_config["service_id"] == service_id
-                                and custom_config["type"].replace("-", "_") == normalized_config_type
-                                and custom_config["name"] == template_config.name
-                                for custom_config in custom_configs
-                            ):
-                                custom_config = {
-                                    "service_id": service_id,
-                                    "type": config_type,
-                                    "name": template_config.name,
-                                    "checksum": template_config.checksum,
-                                    "method": "default",
-                                    "template": value,
-                                    "is_draft": False,
-                                }
-                                if with_data:
-                                    custom_config["data"] = template_config.data
-                                custom_configs.append(custom_config)
+                # `db_config` is NOT limited to USE_TEMPLATE — `get_non_default_settings` adds
+                # SERVER_NAME and MULTISITE, and every service carries an IS_DRAFT. Matching on
+                # the `{service_id}_` prefix therefore took each of those values for a template
+                # id and looked it up: 500 services meant 500 queries for a template named "no",
+                # half a million prefix tests, and 287 ms to return nothing. Ask for the one key
+                # that holds a template id — which is what `get_custom_config` already does.
+                template = db_config.get(f"{service_id}_USE_TEMPLATE")
+                if not template:
+                    continue
+
+                if template not in template_configs:
+                    template_configs[template] = session.execute(
+                        select(*template_entities).filter_by(template_id=template).order_by(Template_custom_configs.order)
+                    ).all()
+
+                for template_config in template_configs[template]:
+                    config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
+                    # Real custom_configs rows use the underscore enum form while config_type is hyphenated here;
+                    # normalize both sides so an overriding row correctly suppresses the template-provided config.
+                    key = (service_id, config_type.replace("-", "_"), template_config.name)
+                    if key in provided:
+                        continue
+
+                    custom_config = {
+                        "service_id": service_id,
+                        "type": config_type,
+                        "name": template_config.name,
+                        "checksum": template_config.checksum,
+                        "method": "default",
+                        "template": template,
+                        "is_draft": False,
+                    }
+                    if with_data:
+                        custom_config["data"] = template_config.data
+                    custom_configs.append(custom_config)
+                    provided.add(key)
 
             if as_dict:
                 dict_custom_configs = {}

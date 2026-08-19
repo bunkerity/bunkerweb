@@ -805,31 +805,31 @@ THEMES_ENUM = Enum("light", "dark", name="themes_enum")
 
 class JSONText(TypeDecorator):
     """
-    Custom JSON type to serialize/deserialize dictionaries as strings.
+    Custom JSON type to serialize/deserialize JSON values as strings.
     Compatible with all databases (MariaDB, MySQL, PostgreSQL, SQLite).
-    Ensures JSON strings are sorted by keys for consistent storage.
+    Ensures object keys are sorted for consistent storage.
     """
 
     impl = Text  # Stores JSON as a TEXT field in the database
     cache_ok = True  # stateless/deterministic type: safe for SQLAlchemy's compiled-statement cache
 
-    def process_bind_param(self, value: Optional[dict], dialect: Any) -> Optional[str]:
+    def process_bind_param(self, value: Optional[Any], dialect: Any) -> Optional[str]:
         """
-        Convert a dictionary to a JSON string before saving to the database.
-        Sorts dictionary keys for consistent serialization.
+        Convert a JSON value to a string before saving to the database.
+        Sorts object keys at every level for consistent serialization -- on the flat
+        `{column: bool}` maps this started out holding, that is byte-identical to the
+        top-level-only sort it replaces.
         """
         if value is None:
             return None
-        # Serialize dictionary to a sorted JSON string
-        return dumps(dict(sorted(value.items())))
+        return dumps(value, sort_keys=True)
 
-    def process_result_value(self, value: Optional[str], dialect: Any) -> Optional[dict]:
+    def process_result_value(self, value: Optional[str], dialect: Any) -> Optional[Any]:
         """
-        Convert a JSON string back to a dictionary after retrieving from the database.
+        Convert a JSON string back to its value after retrieving from the database.
         """
         if value is None:
             return None
-        # Deserialize JSON string to dictionary
         return loads(value)
 
 
@@ -853,7 +853,7 @@ class Users(Base):
     roles: Mapped[List["RolesUsers"]] = relationship("RolesUsers", back_populates="user", cascade="all")
     recovery_codes: Mapped[List["UserRecoveryCodes"]] = relationship("UserRecoveryCodes", back_populates="user", cascade="all")
     sessions: Mapped[List["UserSessions"]] = relationship("UserSessions", back_populates="user", cascade="all")
-    columns_preferences: Mapped[List["UserColumnsPreferences"]] = relationship("UserColumnsPreferences", back_populates="user", cascade="all")
+    preferences: Mapped[List["UserPreferences"]] = relationship("UserPreferences", back_populates="user", cascade="all")
     webauthn_credentials: Mapped[List["UserWebauthnCredentials"]] = relationship("UserWebauthnCredentials", back_populates="user", cascade="all")
     # plain (non-ORM) class attributes filled in by the UI layer; ClassVar keeps
     # DeclarativeBase from rejecting them as unmapped annotations
@@ -916,7 +916,7 @@ class UserWebauthnCredentials(Base):
     public_key: Mapped[str] = mapped_column(Text, nullable=False)  # base64url COSE key
     sign_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     # comma-separated hints from the browser ("usb,nfc"). A plain string, not JSONText: the
-    # vocabulary is 7 fixed tokens and JSONText only round-trips dicts.
+    # vocabulary is 7 fixed tokens, so a list buys nothing over a joined string.
     transports: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     device_type: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)  # single_device / multi_device
     backed_up: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -960,16 +960,23 @@ class UserSessions(Base):
     user: Mapped["Users"] = relationship("Users", back_populates="sessions")
 
 
-class UserColumnsPreferences(Base):
-    __tablename__ = "bw_ui_user_columns_preferences"
-    __table_args__ = (UniqueConstraint("user_name", "table_name"),)
+class UserPreferences(Base):
+    """Per-user key/value store for the web UI.
+
+    Started life as DataTables column visibility only, hence the historical row shape.
+    `key` is now a shared namespace: DataTables ids (`bans`, `services`, ...) sit next to
+    feature keys, so a new feature must pick a key that cannot collide with a table id.
+    """
+
+    __tablename__ = "bw_ui_user_preferences"
+    __table_args__ = (UniqueConstraint("user_name", "key"),)
 
     id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     user_name: Mapped[str] = mapped_column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
-    table_name: Mapped[str] = mapped_column(String(256), nullable=False)
-    columns: Mapped[dict] = mapped_column(JSONText, nullable=False)
+    key: Mapped[str] = mapped_column(String(256), nullable=False)
+    value: Mapped[dict] = mapped_column(JSONText, nullable=False)
 
-    user: Mapped["Users"] = relationship("Users", back_populates="columns_preferences")
+    user: Mapped["Users"] = relationship("Users", back_populates="preferences")
 
 
 ## API Models

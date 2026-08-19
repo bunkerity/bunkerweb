@@ -166,21 +166,33 @@ class TestBaseSessions:
         assert db.mark_ui_user_access(999999, DT) == "Session 999999 doesn't exist"
 
 
-class TestBaseColumnsPreferences:
+class TestBaseUserPreferences:
     def test_empty_returns_dict(self, db):
         db.create_ui_user("bob", b"h", [])
-        assert db.get_ui_user_columns_preferences("bob", "services") == {}
+        assert db.get_ui_user_preference("bob", "services") == {}
 
     def test_set_and_read_back(self, db):
         db.create_ui_user("bob", b"h", [])
-        assert db.update_ui_user_columns_preferences("bob", "services", {"name": True}) == ""
-        assert db.get_ui_user_columns_preferences("bob", "services") == {"name": True}
-        # second update mutates the existing row.
-        assert db.update_ui_user_columns_preferences("bob", "services", {"name": False}) == ""
-        assert db.get_ui_user_columns_preferences("bob", "services") == {"name": False}
+        assert db.set_ui_user_preference("bob", "services", {"name": True}) == ""
+        assert db.get_ui_user_preference("bob", "services") == {"name": True}
+        # second set mutates the existing row.
+        assert db.set_ui_user_preference("bob", "services", {"name": False}) == ""
+        assert db.get_ui_user_preference("bob", "services") == {"name": False}
 
-    def test_update_missing_user(self, db):
-        assert db.update_ui_user_columns_preferences("ghost", "services", {}) == "User ghost doesn't exist"
+    def test_set_missing_user(self, db):
+        assert db.set_ui_user_preference("ghost", "services", {}) == "User ghost doesn't exist"
+
+    def test_explicit_default_is_returned_without_being_stored(self, db):
+        """This mixin does not seed on read -- unlike the UI-side one, which owns that
+        behaviour for DataTables. A caller that wants a default must keep passing it."""
+        db.create_ui_user("bob", b"h", [])
+        assert db.get_ui_user_preference("bob", "onboarding", default={"opened_at": 1}) == {"opened_at": 1}
+        assert db.get_ui_user_preference("bob", "onboarding") == {}
+
+    def test_a_key_holds_any_json_shape(self, db):
+        db.create_ui_user("bob", b"h", [])
+        assert db.set_ui_user_preference("bob", "onboarding", {"acked_hints": ["home"], "completed_at": None}) == ""
+        assert db.get_ui_user_preference("bob", "onboarding") == {"acked_hints": ["home"], "completed_at": None}
 
 
 class TestBaseRolePermissions:

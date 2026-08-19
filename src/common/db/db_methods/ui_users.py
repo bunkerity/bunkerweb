@@ -6,7 +6,7 @@ from model import (  # type: ignore
     Roles,
     RolesPermissions,
     RolesUsers,
-    UserColumnsPreferences,
+    UserPreferences,
     UserRecoveryCodes,
     UserSessions,
     Users,
@@ -44,7 +44,7 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
         with self._db_session() as session:
             try:
                 users = (
-                    session.scalars(select(Users).options(joinedload(Users.roles), joinedload(Users.recovery_codes), joinedload(Users.columns_preferences)))
+                    session.scalars(select(Users).options(joinedload(Users.roles), joinedload(Users.recovery_codes), joinedload(Users.preferences)))
                     .unique()
                     .all()
                 )
@@ -240,7 +240,7 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
                 session.execute(update(RolesUsers).filter_by(user_name=old_username).values({"user_name": username}))
                 session.execute(update(UserRecoveryCodes).filter_by(user_name=old_username).values({"user_name": username}))
                 session.execute(update(UserSessions).filter_by(user_name=old_username).values({"user_name": username}))
-                session.execute(update(UserColumnsPreferences).filter_by(user_name=old_username).values({"user_name": username}))
+                session.execute(update(UserPreferences).filter_by(user_name=old_username).values({"user_name": username}))
                 session.execute(update(UserWebauthnCredentials).filter_by(user_name=old_username).values({"user_name": username}))
 
             totp_changed = user.totp_secret != totp_secret
@@ -394,27 +394,27 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
                 return str(e)
         return ""
 
-    def get_ui_user_columns_preferences(self, username, table_name):
-        """Get ui user columns preferences."""
+    def get_ui_user_preference(self, username, key, default=None):
+        """Get one of a ui user's preferences."""
         with self._db_session() as session:
-            columns_preferences = session.scalars(select(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).limit(1)).first()
-            if not columns_preferences:
-                return {}
-            return columns_preferences.columns
+            preference = session.scalars(select(UserPreferences).filter_by(user_name=username, key=key).limit(1)).first()
+            if not preference:
+                return {} if default is None else default
+            return preference.value
 
-    def update_ui_user_columns_preferences(self, username, table_name, columns):
-        """Update ui user columns preferences."""
+    def set_ui_user_preference(self, username, key, value):
+        """Set one of a ui user's preferences, creating it if it does not exist yet."""
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
             user = session.scalars(select(Users).filter_by(username=username).limit(1)).first()
             if not user:
                 return f"User {username} doesn't exist"
-            columns_preferences = session.scalars(select(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).limit(1)).first()
-            if not columns_preferences:
-                session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=columns))
+            preference = session.scalars(select(UserPreferences).filter_by(user_name=username, key=key).limit(1)).first()
+            if not preference:
+                session.add(UserPreferences(user_name=username, key=key, value=value))
             else:
-                columns_preferences.columns = columns
+                preference.value = value
             try:
                 session.commit()
             except BaseException as e:
