@@ -25,7 +25,13 @@ def handle_instance_delete(LOGGER: Logger, ctx, step_data: Any) -> None:
     access_page(
         LOGGER,
         driver,
-        '//button[@type="submit" and contains(@data-i18n, "button.delete_instance")]',
+        # Scoped to the modal instead of the label: server-rendered labels go through gettext
+        # now, so `data-i18n` is gone from everything the templates emit (it survives only in
+        # JS-built markup). Both instance modals are in the DOM at once, so the id scope is what
+        # keeps this unambiguous; inside one modal the submit button is unique. The dot-free
+        # predicate is the raw-key guard -- see the long note in ui_handlers/services.py; a red here
+        # is either the button moving or its label rendering as `button.delete_instance`.
+        '//div[@id="modal-delete-instances"]//button[@type="submit"][not(contains(normalize-space(.), "."))]',
         "instances",
     )
 
@@ -62,7 +68,13 @@ def handle_instance_create(LOGGER: Logger, ctx, step_data: Any) -> None:
     access_page(
         LOGGER,
         driver,
-        '//button[@type="submit" and contains(@data-i18n, "button.create_instance")]',
+        # Scoped to the modal instead of the label: server-rendered labels go through gettext
+        # now, so `data-i18n` is gone from everything the templates emit (it survives only in
+        # JS-built markup). Both instance modals are in the DOM at once, so the id scope is what
+        # keeps this unambiguous; inside one modal the submit button is unique. The dot-free
+        # predicate is the raw-key guard -- see the long note in ui_handlers/services.py; a red here
+        # is either the button moving or its label rendering as `button.delete_instance`.
+        '//div[@id="modal-create-instance"]//button[@type="submit"][not(contains(normalize-space(.), "."))]',
         "instances",
     )
 

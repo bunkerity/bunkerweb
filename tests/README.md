@@ -153,6 +153,14 @@ in the suite drives it — every spec reaches the UI through BunkerWeb, and `UI_
 the whole `ui` type fail at boot with `address already in use`. Export `UI_HOST_PORT=7001` (or
 anything free) on such a machine.
 
+On the Kubernetes arm the same variable moves the `127.0.0.1:<port>:30070` publish the cluster is
+created with, so a machine running an AirPlay receiver (uxplay and friends listen on 7000) can still
+create a cluster. It has to be set for the whole run, not just the `ui` type: the port list is
+applied once, when `minikube start` creates the node, and port publishes cannot be added to a
+running cluster afterwards. `build.sh` checks every host port in that list before starting and names
+the process holding any of them, rather than letting docker fail on the first conflict 45 seconds in
+and leave a half-created node behind.
+
 Outside CI (`IN_CICD` unset), `build.sh` builds any missing `bunkerity/<image>:tests` from
 the Dockerfiles in this checkout. It reuses an image that already exists, so the second run
 starts in seconds. Delete an image when you want it rebuilt. The framework starts its own

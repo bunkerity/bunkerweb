@@ -486,6 +486,12 @@ elif [ "$integration" == "All-in-one" ] ; then
         fi
     fi
 elif [ "$integration" == "Kubernetes" ] ; then
+    # Re-deliver the hostPath fixtures before every apply. The build phase syncs them once, but the
+    # before-script for a category (customcert, for one) runs afterwards and writes certificates
+    # into /tmp/output -- with the old 9p mount those appeared on the node for free, and with a copy
+    # they only arrive if something copies them. Cheap and idempotent, so it runs on every action.
+    sync_minikube_fixtures || exit 1
+
     # Apply manifests via Kustomize for dynamic image tags
     KZ_DIR="/tmp/kustomize-bunkerweb"
     rm -rf "$KZ_DIR"

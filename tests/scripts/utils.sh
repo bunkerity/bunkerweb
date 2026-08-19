@@ -123,6 +123,91 @@ function apply_example_variables_env() {
 }
 
 
+# Kubernetes: materialise the host fixtures inside the minikube node.
+#
+# This replaces `minikube mount` (9p over TCP), which the arm used to depend on, for two independent
+# reasons:
+#
+#   - The node dials the host's 9p server across the docker bridge, so any host firewall drops it by
+#     default. That is a known upstream problem with no fix (kubernetes/minikube#8054, #4726,
+#     #18128); the accepted workaround is a per-run inbound rule naming a port minikube picks at
+#     random. A test arm that cannot run without the operator editing their firewall is not a test
+#     arm anyone will run.
+#   - minikube's own handbook calls 9p unreliable above ~600 files. `/var/www/html` carries ~4000
+#     once an example has left WordPress there, so the mount was already on the wrong side of
+#     upstream's guidance even where the firewall allows it.
+#
+# A copy is sufficient because the traffic is one-way: every one of these directories is written by
+# the host (fixtures, before-scripts, generated certificates) and only read by the pods, and
+# `hostPath` asks for nothing more than the files existing on the node.
+#
+# Transport is `minikube cp` of a tarball, NOT a tar stream piped into `minikube ssh`: ssh allocates
+# a TTY, which mangles binary on stdin -- verified, the stream comes back echoed and corrupted, and
+# tar exits 130. `minikube cp` is binary-safe (md5 verified) and driver-agnostic.
+function sync_to_minikube() {
+    local host_dir="${1:-}"
+    local node_dir="${2:-}"
+    local owner="${3:-}"
+    shift 3
+    local members=("$@")
+    if [ "${#members[@]}" -eq 0 ] ; then
+        members=(".")
+    fi
+
+    local archive="/tmp/bw-minikube-sync${node_dir//\//_}.tgz"
+    rm -f "$archive"
+
+    if ! tar -C "$host_dir" -czf "$archive" "${members[@]}" 2> /dev/null ; then
+        log "UTILS" "❌" "📂 Failed to archive $host_dir for Minikube"
+        return 1
+    fi
+
+    if ! minikube cp "$archive" "minikube:$archive" > /dev/null 2>&1 ; then
+        log "UTILS" "❌" "📂 Failed to copy the $host_dir archive into the Minikube node"
+        rm -f "$archive"
+        return 1
+    fi
+
+    local remote="sudo rm -rf '$node_dir' && sudo mkdir -p '$node_dir' && sudo tar -C '$node_dir' -xzf '$archive' && sudo rm -f '$archive'"
+    if [ -n "$owner" ] ; then
+        remote="$remote && sudo chown -R $owner '$node_dir'"
+    fi
+
+    if ! minikube ssh -- "$remote" > /dev/null 2>&1 ; then
+        log "UTILS" "❌" "📂 Failed to unpack $node_dir inside the Minikube node"
+        rm -f "$archive"
+        return 1
+    fi
+
+    rm -f "$archive"
+    log "UTILS" "ℹ️ " "📂 $host_dir synced into the Minikube node at $node_dir ✅"
+}
+
+# Every fixture the Kubernetes manifests mount as a hostPath. Called from build.sh once the stack is
+# up, and again from start.sh before each apply -- a before-script runs after the build phase and
+# writes certificates into /tmp/output, which a build-time-only sync would miss. Idempotent.
+#
+# The optional directories are keyed on existence rather than on the spec's category: build.sh
+# creates them only for the specs that need them, so presence is the condition, and start.sh does
+# not have to be told which category is running.
+function sync_minikube_fixtures() {
+    local hosts
+    hosts="$(awk '/^127\.0\.0\.1 .*\.example\.com/ {print $2}' tests/misc/conf/dnsmasq.hosts | sort -u | tr '\n' ' ')"
+
+    # Named members, never the whole tree: an example leaves its own application (WordPress and
+    # friends, ~94 MB) in /var/www/html, and no Kubernetes spec serves any of it.
+    # shellcheck disable=SC2086
+    sync_to_minikube "/var/www/html" "/mnt/www" "33:101" index.php logo.png $hosts || return 1
+    sync_to_minikube "/tmp/output" "/mnt/output" "" || return 1
+
+    local optional
+    for optional in redis-acl redis-tls redis-scripts valkey-acl valkey-tls valkey-sentinel ; do
+        if [ -d "/tmp/$optional" ] ; then
+            sync_to_minikube "/tmp/$optional" "/mnt/$optional" "" || return 1
+        fi
+    done
+}
+
 function provision_www_root() {
     # Same fixture CI copies in, for the hosts dnsmasq answers for. Additive: it never deletes
     # what is already there, so a stack left behind by an example keeps its own web root.

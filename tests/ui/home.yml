@@ -28,11 +28,21 @@ actions:
         sleep: 0.0
       assert_free_plan_chip:
         type: find
-        selector: '//span[@data-i18n="dashboard.status.free_plan"]'
+      # A red here means one of two things, and they look identical in the log: the element moved,
+      # or its label rendered as a raw catalog key. The dot-free predicate is the second check --
+      # with i18next gone there is no browser-side English fallback, so a key missing from the
+      # catalog paints `dashboard.tile.bans_active` into the page and a structural-only selector
+      # would happily match it. Check the rendered text before re-anchoring the selector.
+        selector: '//div[contains(@class, "sb-plan")]//span[contains(@class, "sb-chip-muted") and not(contains(normalize-space(text()), "."))]'
         sleep: 0.0
       assert_memory_card:
         type: find
-        selector: '//span[contains(@data-i18n, "dashboard.card.ram.title") and contains(text(), "System RAM")]'
+      # A red here means one of two things, and they look identical in the log: the element moved,
+      # or its label rendered as a raw catalog key. The dot-free predicate is the second check --
+      # with i18next gone there is no browser-side English fallback, so a key missing from the
+      # catalog paints `dashboard.tile.bans_active` into the page and a structural-only selector
+      # would happily match it. Check the rendered text before re-anchoring the selector.
+        selector: '//div[contains(@class, "sb-ram")]//span[contains(@class, "sb-eyebrow") and not(contains(normalize-space(text()), "."))]'
         sleep: 0.0
       assert_instances_number:
         type: find
@@ -55,7 +65,12 @@ actions:
       # Mini-tile row below the KPI tiles.
       assert_bans_tile:
         type: find
-        selector: '//div[contains(@class, "mini-tile")]//span[@data-i18n="dashboard.tile.bans_active"]'
+      # A red here means one of two things, and they look identical in the log: the element moved,
+      # or its label rendered as a raw catalog key. The dot-free predicate is the second check --
+      # with i18next gone there is no browser-side English fallback, so a key missing from the
+      # catalog paints `dashboard.tile.bans_active` into the page and a structural-only selector
+      # would happily match it. Check the rendered text before re-anchoring the selector.
+        selector: '//div[contains(@class, "mini-tile") and contains(@class, "bad")]//div[contains(@class, "lbl")]/span[not(contains(normalize-space(text()), "."))]'
         sleep: 0.0
       # Map, blocked-IP donut and top-reasons table are filled from /home/metrics after the page
       # paints, so give the fetch a moment before asking for the rendered Leaflet panes.

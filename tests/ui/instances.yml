@@ -33,7 +33,10 @@ actions:
         value: "Invalid port"
       submit_invalid_port:
         type: click
-        selector: '//button[@type="submit" and contains(@data-i18n, "button.create_instance")]'
+      # Same dot-free raw-key guard as home.yml: a red here is either the button moving or its
+      # label rendering as `button.create_instance`, and the log cannot tell them apart. Read the
+      # page before deciding this selector rotted.
+        selector: '//div[@id="modal-create-instance"]//button[@type="submit"][not(contains(normalize-space(.), "."))]'
         sleep: 2.0
       check_invalid_port:
         type: find

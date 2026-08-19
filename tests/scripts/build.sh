@@ -173,8 +173,8 @@ mkdir -p /tmp/output
 
 # Every integration serves /var/www/html off this machine: the containers bind-mount it (in the
 # images /var/www/html is a symlink to /data/www, which the entrypoint refuses to start without
-# read and execute for nginx), minikube mounts it, and the php-fpm helper reads it. CI provisions
-# it in the workflow itself, unconditionally ("Setup configuration files" in
+# read and execute for nginx), Kubernetes copies it into the node, and the php-fpm helper reads it.
+# CI provisions it in the workflow itself, unconditionally ("Setup configuration files" in
 # .github/workflows/integration-tests.yml) — a workstation has nothing that does, and it is where
 # integrations collide: a Linux example hardens the web root to 0750 for the nginx group as ITS
 # container numbers it, which locks out the Docker stack's nginx on the next run. Normalising
@@ -265,23 +265,50 @@ if [ "$integration" != "Kubernetes" ] ; then
 else
   log "BUILD" "ℹ️ " "🚀 Prepping Kubernetes integration ..."
   if ! minikube status >/dev/null 2>&1; then
-    sudo echo "🔑 Sudo privileges granted ✅"
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-      log "BUILD" "❌" "🔑 Sudo privileges not granted"
-      exit 1
-    fi
-
-    mount_pids=$(pgrep -f "minikube mount")
-    if [ -n "$mount_pids" ]; then
-      for pid in $mount_pids ; do
-      sudo kill -9 "$pid"
-      done
-    fi
-
+    # No sudo gate here any more. It existed only to `kill -9` leftover `minikube mount` processes
+    # before starting the cluster, and there are no mounts to leak now -- the fixtures are copied
+    # into the node instead. The docker driver itself needs no root, so a cold workstation no longer
+    # blocks on a password prompt in the middle of an automated run.
     log "BUILD" "ℹ️ " "☸️ Starting Minikube ..."
     total_memory=$(free -m | awk '/^Mem:/{print $2}')
     memory_limit=$((total_memory * 80 / 100))
+
+    # host:container, single source of truth -- the pre-flight below and the --ports flags are
+    # generated from the same list, so they cannot drift apart.
+    minikube_ports=(
+      "80:80" "443:443" "5000:5000" "5001:5001" "5443:5443"
+      "${UI_HOST_PORT:-7000}:30070" "8000:30080" "8888:30088"
+      "3306:30306" "5432:30432"
+      "6380:30379" "6381:30380" "6382:30381" "6479:30479"
+      "26379:32379" "26380:32380" "26381:32381"
+      "26479:32479" "26480:32480" "26481:32481"
+    )
+
+    # Pre-flight, because docker reports only the FIRST conflict and minikube then leaves a
+    # half-created node behind: "failed to bind host port 127.0.0.1:7000/tcp: address already in
+    # use" after 45 seconds, with no hint about what holds it. A desktop can easily be sitting on
+    # one of these (an AirPlay receiver owns :7000, a local MySQL owns :3306). Name every conflict
+    # up front, with the process where the kernel will tell us. `UI_HOST_PORT` moves the one that
+    # collides most often, the same variable the Docker `ui` stack already honours.
+    port_conflicts=()
+    for mapping in "${minikube_ports[@]}" ; do
+      host_port="${mapping%%:*}"
+      if ss -ltn "sport = :${host_port}" 2>/dev/null | tail -n +2 | grep -q . ; then
+        owner="$(ss -ltnp "sport = :${host_port}" 2>/dev/null | tail -n +2 | grep -o 'users:(("[^"]*"' | head -1 | cut -d'"' -f2)"
+        port_conflicts+=("${host_port}${owner:+ (held by ${owner})}")
+      fi
+    done
+    if [ "${#port_conflicts[@]}" -ne 0 ] ; then
+      log "BUILD" "❌" "☸️ Minikube publishes these host ports and they are already taken: ${port_conflicts[*]}"
+      log "BUILD" "ℹ️ " "   Free them and start this arm again -- the cluster cannot be created without them, and a partial start leaves a node that has to be deleted by hand."
+      exit 1
+    fi
+
+    minikube_port_args=()
+    for mapping in "${minikube_ports[@]}" ; do
+      minikube_port_args+=(--ports "127.0.0.1:${mapping}")
+    done
+
     minikube start \
               --driver docker \
               --cpus max \
@@ -293,39 +320,26 @@ else
               --embed-certs \
               --disable-metrics \
               --disable-optimizations \
-              --ports 127.0.0.1:80:80 \
-              --ports 127.0.0.1:443:443 \
-              --ports 127.0.0.1:5000:5000 \
-              --ports 127.0.0.1:5001:5001 \
-              --ports 127.0.0.1:5443:5443 \
-              --ports 127.0.0.1:7000:30070 \
-              --ports 127.0.0.1:8000:30080 \
-              --ports 127.0.0.1:8888:30088 \
-              --ports 127.0.0.1:3306:30306 \
-              --ports 127.0.0.1:5432:30432 \
-              --ports 127.0.0.1:6380:30379 \
-              --ports 127.0.0.1:6381:30380 \
-              --ports 127.0.0.1:6382:30381 \
-              --ports 127.0.0.1:6479:30479 \
-              --ports 127.0.0.1:26379:32379 \
-              --ports 127.0.0.1:26380:32380 \
-              --ports 127.0.0.1:26381:32381 \
-              --ports 127.0.0.1:26479:32479 \
-              --ports 127.0.0.1:26480:32480 \
-              --ports 127.0.0.1:26481:32481
+              "${minikube_port_args[@]}"
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
       log "BUILD" "❌" "☸️ Failed to start Minikube"
       exit 1
     fi
     log "BUILD" "ℹ️ " "☸️ Minikube started successfully ✅"
+  fi
 
-    minikube_mount_logs=$(ls /tmp/minikube_mount_*.log)
-    if [ -n "$minikube_mount_logs" ] ; then
-      for log_file in $minikube_mount_logs ; do
-        rm -f "$log_file"
-      done
-    fi
+  # A cluster that was already up is NOT necessarily one this harness can use. `minikube start`
+  # above is skipped entirely when `minikube status` succeeds, so a cluster someone started by hand
+  # has none of the flags below it -- no `--addons registry`, and none of the `--ports` publishes
+  # that put the registry, the ingress and every database on 127.0.0.1. The symptom is
+  # "Registry is not healthy after 60 tries" a minute later, which points nowhere near the cause.
+  # Enabling the addon here would only half-repair it (the port publishes cannot be added to a
+  # running cluster at all), so this refuses instead of pretending.
+  if ! docker port minikube 2>/dev/null | grep -q "5000/tcp -> 127.0.0.1:5000" ; then
+    log "BUILD" "❌" "☸️ This Minikube cluster was not started by the harness: 127.0.0.1:5000 is not published, so no image can reach the in-cluster registry."
+    log "BUILD" "ℹ️ " "   Run 'minikube delete' and start this arm again -- build.sh starts the cluster with the addons and port publishes the tests need."
+    exit 1
   fi
 
   log "BUILD" "ℹ️ " "🗺️ Editing coredns configmap ..."
@@ -358,77 +372,24 @@ else
   fi
   log "BUILD" "ℹ️ " "🗺️ Coredns configmap edited successfully ✅"
 
-  function mount_and_log() {
-    local host_dir="${1:-}"
-    local minikube_dir="${2:-}"
-    local log_file="/tmp/minikube_mount_${minikube_dir//\//_}.log"
-
-    # Kill any stale minikube mount for the same target left over from a previous run.
-    # A leaked mount holds the 9p bind and prevents a fresh mount from ever reaching "Successfully mounted".
-    pkill -f "minikube mount ${host_dir}:${minikube_dir}" 2>/dev/null || true
-    rm -f "$log_file"
-
-    log "BUILD" "ℹ️ " "📂 Mounting $host_dir to Minikube ..."
-    minikube mount "$host_dir:$minikube_dir" --log_file="$log_file" &
-    local mount_pid="$!"
-    local ret="$?"
-
-    if [ "$ret" -ne 0 ]; then
-      log "BUILD" "❌" "📂 Failed to launch minikube mount for $host_dir"
-      exit 1
-    fi
-
-    # Poll up to ~30s for "Successfully mounted", and fail fast if the background mount dies.
-    local waited=0
-    local max_wait=30
-    while [ "$waited" -lt "$max_wait" ]; do
-      if grep -q "Successfully mounted" "$log_file" 2>/dev/null ; then
-        break
-      fi
-      if ! kill -0 "$mount_pid" 2>/dev/null ; then
-        log "BUILD" "❌" "📂 minikube mount for $host_dir exited before completing"
-        exit 1
-      fi
-      sleep 1
-      waited=$((waited + 1))
-    done
-
-    if ! grep -q "Successfully mounted" "$log_file" 2>/dev/null ; then
-      log "BUILD" "❌" "📂 Failed to mount $host_dir to Minikube (timeout after ${max_wait}s)"
-      kill "$mount_pid" 2>/dev/null || true
-      exit 1
-    fi
-
-    redis_cli lpush minikube_cmd_pids "$mount_pid"
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ]; then
-      log "BUILD" "❌" "💽 Failed to push mount pid to redis server"
-      exit 1
-    fi
-
-    log "BUILD" "ℹ️ " "📂 $host_dir mounted to Minikube successfully ✅"
-  }
-
-  mount_and_log "/var/www/html" "/mnt/www"
-  mount_and_log "/tmp/output" "/mnt/output"
 
   if [ "$type" == "core" ] ; then
     if grep -q "type: redis" tests/core/"$category".yml ; then
       mkdir -p /tmp/redis-acl /tmp/redis-tls /tmp/redis-scripts
       cp tests/misc/scripts/redis-entrypoint.sh tests/misc/scripts/redis-sentinel-entrypoint.sh /tmp/redis-scripts/
       chmod 0755 /tmp/redis-scripts/redis-entrypoint.sh /tmp/redis-scripts/redis-sentinel-entrypoint.sh
-      mount_and_log "/tmp/redis-acl" "/mnt/redis-acl"
-      mount_and_log "/tmp/redis-tls" "/mnt/redis-tls"
-      mount_and_log "/tmp/redis-scripts" "/mnt/redis-scripts"
     fi
 
     if grep -q "valkey: true" tests/core/"$category".yml ; then
       mkdir -p /tmp/valkey-acl /tmp/valkey-tls /tmp/valkey-sentinel
-      mount_and_log "/tmp/valkey-acl" "/mnt/valkey-acl"
-      mount_and_log "/tmp/valkey-tls" "/mnt/valkey-tls"
-      mount_and_log "/tmp/valkey-sentinel" "/mnt/valkey-sentinel"
     fi
   fi
+
+  # The fixtures are copied INTO the node instead of 9p-mounted from the host -- see
+  # sync_to_minikube in utils.sh for why (host firewalls, and 9p's ~600-file reliability ceiling).
+  # start.sh syncs again before each apply: a before-script runs after this point and writes
+  # certificates into /tmp/output that a build-time-only sync would never deliver.
+  sync_minikube_fixtures || exit 1
 
   log "BUILD" "ℹ️ " "🧊 Waiting for registry to be healthy ..."
   i=0

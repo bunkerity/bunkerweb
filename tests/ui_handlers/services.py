@@ -9,6 +9,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.ui import access_page, assert_button_click, on_page, safe_get_element
@@ -30,18 +31,46 @@ def handle_service_flow(LOGGER: Logger, ctx, step_data: Any) -> None:
         access_page(
             LOGGER,
             driver,
-            # The label span carries data-i18n, never the <button> -- components/button.html puts
-            # it there on purpose so translating the label cannot wipe the button's own markup.
-            '//div[@id="modal-delete-services"]//button[@type="submit"][.//span[@data-i18n="button.delete"]]',
+            # Structural, not text and not `data-i18n`: server-rendered labels are translated by
+            # gettext at render time now, so the attribute this used to match no longer exists on
+            # anything components/button.html emits (it survives only in JS-built markup, where
+            # `t()` supplies the text). Matching the translated label instead would pin the spec to
+            # one locale and to a translator's wording. `type="submit"` is unique inside this modal
+            # -- its only sibling button is the `type="reset"` cancel. The dot-free predicate is
+            # the raw-key guard: with i18next gone there is no English fallback in the browser, so a
+            # key missing from a catalog renders as `button.delete` IN THE PAGE and a purely
+            # structural selector would match it and pass. Every label these specs assert on is a
+            # short noun phrase with no period, while a raw key always has one. Cost of the choice:
+            # a translator writing a label that ends in a period reds the spec. Specs run in English.
+            '//div[@id="modal-delete-services"]//button[@type="submit"][not(contains(normalize-space(.), "."))]',
             "services",
         )
+        # This assertion was vacuous until 2026-08-19. It matched `//td[@id="method-<name>"]` with
+        # the name verbatim, but that id has always had its dots stripped (`services.html` at HEAD
+        # renders `method-{{ service['id'].replace('.', '-') }}`, and the serverSide column renderer
+        # keeps the convention through `idFor`). `app2.example.com` therefore never matched anything
+        # -- and because this is a NEGATIVE assertion, "no match" reads as success: the step printed
+        # "Service ... deleted ✅" whether or not the service was still there. Found by the UI
+        # session while it was flipping the page, in a file it does not own.
+        #
+        # Two changes. The anchor is now the row's delete button, which carries the **unsanitized**
+        # name in `data-service-id` and lives in the always-visible actions column -- an id-based
+        # anchor would go blind again if the Method column is toggled off, since DataTables drops
+        # invisible columns' cells from the DOM entirely. And the search box is driven first: with
+        # `/services` serverSide, only the drawn page exists in the DOM, so "element absent" means
+        # "absent from the current page" until the table is filtered to the one name.
+        search = safe_get_element(LOGGER, driver, By.XPATH, '//div[@id="services_wrapper"]//input[@type="search"]')
+        search.send_keys(Keys.CONTROL, "a")
+        search.send_keys(step_data.name)
+        sleep(2)
+
         element = None
         with suppress(TimeoutException):
             element = safe_get_element(
                 LOGGER,
                 driver,
                 By.XPATH,
-                f'//td[@id="method-{step_data.name}" and contains(text(), "ui")]',
+                f'//button[contains(@class, "delete-service") and @data-service-id="{step_data.name}"]',
                 error=True,
                 driver_wait=WebDriverWait(driver, 6),
             )
@@ -49,6 +78,19 @@ def handle_service_flow(LOGGER: Logger, ctx, step_data: Any) -> None:
             LOGGER.error(f"🦊 Service {step_data.name} was not deleted, exiting ...")
             driver.save_screenshot("error.png")
             exit(1)
+        # Clear the filter before handing the page back. The search survives the step otherwise, and
+        # the next one looks for a row the table is no longer drawing -- which is how this showed
+        # up: `clone_service_draft_2` could not find app1's clone link because the table was still
+        # filtered to the service this step had just deleted. Ctrl-A + Backspace rather than
+        # `.clear()`, which does not reliably fire the `input` event DataTables redraws on.
+        # If this ever flakes: on `/services`, `/bans` and `/reports` the input's event chain now
+        # ends in an ajax round trip rather than a client-side redraw, so the deterministic form is
+        # `driver.execute_script("$('#services').DataTable().search('').draw();")` plus a wait for
+        # the row you expect -- the redraw is no longer synchronous with the call.
+        search.send_keys(Keys.CONTROL, "a")
+        search.send_keys(Keys.BACKSPACE)
+        sleep(2)
+
         LOGGER.info(f"🦊 Service {step_data.name} deleted ✅")
         return
 
