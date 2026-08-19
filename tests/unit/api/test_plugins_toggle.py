@@ -142,10 +142,26 @@ def test_list_threads_only_enabled(db):
     db.get_plugins.return_value = [{"id": "p1", "enabled": True}]
     resp = ROUTER.list_plugins(type="external", with_data=False, only_enabled=True)
     assert resp.status_code == 200
-    db.get_plugins.assert_called_once_with(_type="external", with_data=False, only_enabled=True)
+    db.get_plugins.assert_called_once_with(_type="external", with_data=False, only_enabled=True, with_settings=True)
 
 
 def test_list_default_only_enabled_false(db):
     db.get_plugins.return_value = []
     ROUTER.list_plugins(type="all")
-    db.get_plugins.assert_called_once_with(_type="all", with_data=False, only_enabled=False)
+    db.get_plugins.assert_called_once_with(_type="all", with_data=False, only_enabled=False, with_settings=True)
+
+
+def test_list_threads_with_settings_off(db):
+    """The settings schema is 95% of this response; a caller that only lists plugins says so."""
+    db.get_plugins.return_value = [{"id": "p1", "settings": {}}]
+    resp = ROUTER.list_plugins(type="all", with_settings=False)
+    assert resp.status_code == 200
+    db.get_plugins.assert_called_once_with(_type="all", with_data=False, only_enabled=False, with_settings=False)
+
+
+def test_list_keeps_the_schema_unless_asked_otherwise(db):
+    """Default-on: every existing caller — the scheduler, the CLI, the UI's settings pages —
+    reads the schema off this endpoint and must keep getting it."""
+    db.get_plugins.return_value = []
+    ROUTER.list_plugins()
+    assert db.get_plugins.call_args.kwargs["with_settings"] is True

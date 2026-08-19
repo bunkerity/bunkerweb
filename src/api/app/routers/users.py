@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
@@ -52,7 +52,9 @@ class RecoveryCodesRefreshRequest(BaseModel):
 
 
 class UpdatePreferencesRequest(BaseModel):
-    columns: Dict[str, bool]
+    # Deliberately not Dict[str, bool]: the store is a generic per-user KV, and a feature
+    # key holds whatever shape that feature needs. DataTables ids still send a bool map.
+    value: Any
 
 
 class AccessRequest(BaseModel):
@@ -317,17 +319,17 @@ def delete_user_webauthn_credential(username: str, credential_id: str) -> JSONRe
 # ── Preferences ────────────────────────────────────────────────────
 
 
-@router.get("/{username}/preferences/{table_name}", dependencies=[Depends(guard)])
-def get_user_preferences(username: str, table_name: str) -> JSONResponse:
-    """Get column visibility preferences for a table."""
-    prefs = get_db().get_ui_user_columns_preferences(username, table_name)
+@router.get("/{username}/preferences/{key}", dependencies=[Depends(guard)])
+def get_user_preferences(username: str, key: str) -> JSONResponse:
+    """Get one of a user's stored preferences."""
+    prefs = get_db().get_ui_user_preference(username, key)
     return JSONResponse(status_code=200, content={"status": "success", "preferences": prefs})
 
 
-@router.patch("/{username}/preferences/{table_name}", dependencies=[Depends(guard)])
-def update_user_preferences(username: str, table_name: str, req: UpdatePreferencesRequest) -> JSONResponse:
-    """Update column visibility preferences for a table."""
-    ret = get_db().update_ui_user_columns_preferences(username, table_name, req.columns)
+@router.patch("/{username}/preferences/{key}", dependencies=[Depends(guard)])
+def update_user_preferences(username: str, key: str, req: UpdatePreferencesRequest) -> JSONResponse:
+    """Set one of a user's stored preferences."""
+    ret = get_db().set_ui_user_preference(username, key, req.value)
     if ret:
         return JSONResponse(status_code=400, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})

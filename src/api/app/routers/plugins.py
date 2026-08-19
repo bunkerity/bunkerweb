@@ -146,17 +146,19 @@ def update_external_plugins(payload: UpdateExternalPluginsRequest) -> JSONRespon
 
 
 @router.get("", dependencies=[Depends(guard)])
-def list_plugins(type: str = "all", with_data: bool = False, only_enabled: bool = False) -> JSONResponse:  # noqa: A002
+def list_plugins(type: str = "all", with_data: bool = False, only_enabled: bool = False, with_settings: bool = True) -> JSONResponse:  # noqa: A002
     """List plugins of specified type.
 
     Args:
         type: Plugin type filter ("all", "external", "ui", "pro")
         with_data: Include plugin data/content
         only_enabled: Exclude disabled external/ui/pro plugins (scheduler materialization)
+        with_settings: Include each plugin's declared settings schema — 95% of this response.
+            Callers that only list plugins (menus, pickers) should turn it off.
     """
     if type not in _RECOGNIZED_TYPES:
         return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid type"})
-    plugins = get_db().get_plugins(_type=type, with_data=with_data, only_enabled=only_enabled)
+    plugins = get_db().get_plugins(_type=type, with_data=with_data, only_enabled=only_enabled, with_settings=with_settings)
     if with_data:
         for plugin in plugins:
             if isinstance(plugin.get("data"), bytes):

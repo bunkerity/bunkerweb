@@ -3,7 +3,7 @@ from functools import lru_cache
 from io import StringIO
 from os import sep
 from os.path import join
-from re import split
+from re import fullmatch, split
 from sys import path as sys_path
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -133,6 +133,21 @@ def create_app() -> FastAPI:
             except Exception:
                 LOGGER.error(f"Invalid API_ALLOWED_HOSTS {allowed_hosts!r}, host allowlist NOT enabled: {format_exc()}")
 
+    # Correlation: the UI stamps every call it makes with the id of the page render it belongs
+    # to. Echoing it back is what lets one slow page be followed across both services' logs
+    # without correlating by timestamp.
+    @app.middleware("http")
+    async def request_id_middleware(request: Request, call_next):  # pragma: no cover
+        inbound = request.headers.get("X-Request-ID", "")
+        # Caller-controlled, and it goes into a response header and the logs: accepted only in
+        # this shape, dropped otherwise rather than sanitised into something misleading.
+        request_id = inbound if fullmatch(r"[A-Za-z0-9._-]{1,64}", inbound) else ""
+        request.state.request_id = request_id
+        response = await call_next(request)
+        if request_id:
+            response.headers["X-Request-ID"] = request_id
+        return response
+
     # Rate limiter (optional, safe if disabled)
     setup_rate_limiter(app)
 
@@ -173,7 +188,9 @@ def create_app() -> FastAPI:
     async def unhandled_exception_handler(_request: Request, exc: Exception):
         # Emit full traceback at debug level to aid diagnostics
         with suppress(Exception):
-            LOGGER.debug(f"Unhandled exception: {exc}\n{format_exc()}")
+            # The correlation id turns "the UI was slow at 14:03" into one grep.
+            request_id = getattr(getattr(_request, "state", None), "request_id", "")
+            LOGGER.debug(f"Unhandled exception{f' (rid={request_id})' if request_id else ''}: {exc}\n{format_exc()}")
         return JSONResponse(status_code=500, content={"status": "error", "message": "internal error"})
 
     @app.get("/openapi.yaml", include_in_schema=False)
